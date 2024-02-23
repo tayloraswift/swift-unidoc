@@ -539,9 +539,13 @@ extension SSGC.Linker
 
 extension SSGC.Linker
 {
+    /// Links declarations that have already been assigned addresses.
+    ///
+    /// This throws an error if and only if a file system error occurs. This is fatal because
+    /// there is already logic in the linker to handle the case where files are missing.
     public mutating
     func link(namespaces sources:[[SSGC.Namespace]],
-        at destinations:[[SymbolGraph.Namespace]])
+        at destinations:[[SymbolGraph.Namespace]]) throws
     {
         precondition(self.symbolizer.graph.cultures.count == destinations.count)
         precondition(self.symbolizer.graph.cultures.count == sources.count)
@@ -587,7 +591,7 @@ extension SSGC.Linker
             for (source, destination):
                 (SSGC.Namespace, SymbolGraph.Namespace) in zip(sources[c], destinations[c])
             {
-                self.link(decls: source.decls,
+                try self.link(decls: source.decls,
                     at: destination.range,
                     of: culture,
                     in: self.symbolizer.graph.namespaces[destination.index])
@@ -599,11 +603,11 @@ extension SSGC.Linker
     func link(decls:[SSGC.Decl],
         at addresses:ClosedRange<Int32>,
         of culture:Culture,
-        in namespace:Symbol.Module)
+        in namespace:Symbol.Module) throws
     {
         for (address, decl):(Int32, SSGC.Decl) in zip(addresses, decls)
         {
-            self.link(decl: decl, at: address, of: culture, in: namespace)
+            try self.link(decl: decl, at: address, of: culture, in: namespace)
         }
     }
 
@@ -611,7 +615,7 @@ extension SSGC.Linker
     func link(decl:SSGC.Decl,
         at address:Int32,
         of culture:Culture,
-        in namespace:Symbol.Module)
+        in namespace:Symbol.Module) throws
     {
         let signature:Signature<Int32> = decl.signature.map { self.symbolizer.intern($0) }
 
@@ -683,6 +687,12 @@ extension SSGC.Linker
         let linked:(article:SymbolGraph.Article, topics:[SymbolGraph.Topic])?
         let rename:Int32?
 
+        if  let sections:Markdown.SemanticSections = markdown?.parsed.details
+        {
+            try self.tables.inline(resources: culture.resources,
+                into: sections,
+                with: self.swiftParser)
+        }
         if  markdown != nil || renamed != nil
         {
             (linked, rename) = self.tables.resolving(with: .init(
@@ -723,9 +733,12 @@ extension SSGC.Linker
 }
 extension SSGC.Linker
 {
+    /// Links extensions that have already been assigned addresses.
+    ///
+    /// This throws an error if and only if a file system error occurs. This is fatal because
+    /// there is already logic in the linker to handle the case where files are missing.
     public mutating
-    func link(extensions:[SSGC.Extension],
-        at addresses:[(Int32, Int)])
+    func link(extensions:[SSGC.Extension], at addresses:[(Int32, Int)]) throws
     {
         for ((scalar, index), `extension`):((Int32, Int), SSGC.Extension) in zip(
             addresses,
@@ -737,10 +750,9 @@ extension SSGC.Linker
             //  like DocC does. (Except DocC does this across all extensions with the
             //  same extended type.)
             //  https://github.com/apple/swift-docc/pull/369
-            var longest:Int = 0
-
+            var location:SourceLocation<Symbol.File>? = nil
             var comment:SSGC.DocumentationComment? = nil
-            var file:Symbol.File? = nil
+            var longest:Int = 0
 
             for block:SSGC.Extension.Block in `extension`.blocks
             {
@@ -752,107 +764,62 @@ extension SSGC.Linker
                     let length:Int = current.text.count
                     if (longest, comment?.text ?? "") < (length, current.text)
                     {
-                        longest = length
+                        location = block.location
                         comment = current
-                        file = block.location?.file
+                        longest = length
                     }
                 }
             }
-            if  let comment:SSGC.DocumentationComment
+
+            guard
+            let comment:SSGC.DocumentationComment
+            else
             {
-                //  Only intern the file path for the extension block with the longest comment
-                let comment:Markdown.Source = .init(comment: comment,
-                    in: file.map { self.symbolizer.intern($0) })
-
-                let parsed:Markdown.SemanticDocument = comment.parse(
-                    markdownParser: self.doccommentParser,
-                    snippetsTable: self.snippets,
-                    diagnostics: &self.tables.diagnostics)
-
-                //  Need to load these before mutating the symbol graph to avoid
-                //  overlapping access
-                let imports:[Symbol.Module] = self.symbolizer.importAll
-                ;
-                {
-                    let scopes:SSGC.OutlineResolutionScopes = .init(
-                        namespace: self.symbolizer.graph.namespaces[$0.namespace],
-                        culture: .init(
-                            resources: self.resources[$0.culture],
-                            imports: imports,
-                            module: self.symbolizer.graph.namespaces[$0.culture]),
-                        scope: [String].init(`extension`.path))
-
-                    $0.article = self.tables.resolving(with: scopes)
-                    {
-                        $0.link(article: parsed, file: comment.origin?.file)
-                    }
-
-                } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])
+                continue
             }
+
+            //  Only intern the file path for the extension block with the longest comment
+            let file:Int32? = location.map { self.symbolizer.intern($0.file) }
+            let markdown:Markdown.Source = .init(comment: comment, in: file)
+
+            //  Need to load these before mutating the symbol graph to avoid
+            //  overlapping access
+            let imports:[Symbol.Module] = self.symbolizer.importAll
+            let parsed:Markdown.SemanticDocument = markdown.parse(
+                markdownParser: self.doccommentParser,
+                snippetsTable: self.snippets,
+                diagnostics: &self.tables.diagnostics)
+
+            try
+            {
+                let culture:Culture = .init(resources: self.resources[$0.culture],
+                    imports: imports,
+                    module: self.symbolizer.graph.namespaces[$0.culture])
+
+                try self.tables.inline(resources: culture.resources,
+                    into: parsed.details,
+                    with: self.swiftParser)
+
+                let scopes:SSGC.OutlineResolutionScopes = .init(
+                    namespace: self.symbolizer.graph.namespaces[$0.namespace],
+                    culture: culture,
+                    scope: [String].init(`extension`.path))
+
+                $0.article = self.tables.resolving(with: scopes)
+                {
+                    $0.link(article: parsed, file: file)
+                }
+
+            } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])
         }
     }
 }
 extension SSGC.Linker
 {
-    private mutating
-    func inline(resources:[String: SSGC.Resource],
-        into sections:Markdown.SemanticSections) throws
-    {
-        var last:[String?: SSGC.ResourceText] = [:]
-        try sections.traverse
-        {
-            guard
-            case let block as Markdown.BlockCodeReference = $0
-            else
-            {
-                return
-            }
-
-            guard
-            let file:String = block.file
-            else
-            {
-                self.tables.diagnostics[block.source] = SSGC.ResourceError.fileRequired(
-                    argument: "file")
-                return
-            }
-            guard
-            let file:SSGC.Resource = resources[file]
-            else
-            {
-                self.tables.diagnostics[block.source] = SSGC.ResourceError.fileNotFound(file)
-                return
-            }
-
-            let code:SSGC.ResourceText = try file.text()
-            defer
-            {
-                last[block.title] = code
-            }
-
-            let base:SSGC.ResourceText?
-            switch block.base
-            {
-            case .file(let file)?:
-                if  let file:SSGC.Resource = resources[file]
-                {
-                    base = try file.text()
-                    break
-                }
-
-                self.tables.diagnostics[block.source] = SSGC.ResourceError.fileNotFound(file)
-                base = nil
-
-            case .auto?:
-                base = last[block.title]
-
-            case nil:
-                base = nil
-            }
-
-            block.inline(code: code, base: base, with: self.swiftParser)
-        }
-    }
+    /// Links articles that have already been assigned addresses.
+    ///
+    /// This throws an error if and only if a file system error occurs. This is fatal because
+    /// there is already logic in the linker to handle the case where files are missing.
     public mutating
     func link(articles:[[SSGC.Article]]) throws
     {
@@ -864,11 +831,12 @@ extension SSGC.Linker
 
             for article:SSGC.Article in articles[c]
             {
-                try self.inline(resources: culture.resources, into: article.body.details)
+                try self.tables.inline(resources: culture.resources,
+                    into: article.body.details,
+                    with: self.swiftParser)
 
                 self.tables.resolving(with: .init(culture: culture))
                 {
-
                     let documentation:(SymbolGraph.Article, [SymbolGraph.Topic]) = $0.link(
                         attached: article.body,
                         file: article.file)

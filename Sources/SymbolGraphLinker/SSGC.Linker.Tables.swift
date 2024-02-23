@@ -1,5 +1,6 @@
 import CodelinkResolution
 import DoclinkResolution
+import MarkdownSemantics
 import SourceDiagnostics
 
 extension SSGC.Linker
@@ -22,6 +23,69 @@ extension SSGC.Linker
             self.diagnostics = diagnostics
             self.codelinks = codelinks
             self.doclinks = doclinks
+        }
+    }
+}
+extension SSGC.Linker.Tables
+{
+    mutating
+    func inline(resources:[String: SSGC.Resource],
+        into sections:Markdown.SemanticSections,
+        with parser:Markdown.SwiftLanguage?) throws
+    {
+        var last:[String?: SSGC.ResourceText] = [:]
+        try sections.traverse
+        {
+            guard
+            case let block as Markdown.BlockCodeReference = $0
+            else
+            {
+                return
+            }
+
+            guard
+            let file:String = block.file
+            else
+            {
+                self.diagnostics[block.source] = SSGC.ResourceError.fileRequired(
+                    argument: "file")
+                return
+            }
+            guard
+            let file:SSGC.Resource = resources[file]
+            else
+            {
+                self.diagnostics[block.source] = SSGC.ResourceError.fileNotFound(file)
+                return
+            }
+
+            let code:SSGC.ResourceText = try file.text()
+            defer
+            {
+                last[block.title] = code
+            }
+
+            let base:SSGC.ResourceText?
+            switch block.base
+            {
+            case .file(let file)?:
+                if  let file:SSGC.Resource = resources[file]
+                {
+                    base = try file.text()
+                    break
+                }
+
+                self.diagnostics[block.source] = SSGC.ResourceError.fileNotFound(file)
+                base = nil
+
+            case .auto?:
+                base = last[block.title]
+
+            case nil:
+                base = nil
+            }
+
+            block.inline(code: code, base: base, with: parser)
         }
     }
 }
