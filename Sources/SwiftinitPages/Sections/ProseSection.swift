@@ -101,9 +101,8 @@ extension ProseSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[reference]
         {
-        case .link:
-            //  No reason this should ever appear here.
-            return
+        case .link(https: let url, safe: let safe):
+            html[.a] { $0.href = "https://\(url)"; $0.rel = safe ? nil : .nofollow } = url
 
         case .text(let text):
             html[.code] = text
