@@ -90,23 +90,36 @@ extension Unidoc.Resolver
 
         switch outline
         {
-        case    .vertex(let id, text: let text):
-            if      let _:Int = id / .decl,
-                    let id:Unidoc.Scalar = self.current.scalars.decls[id]
+        case .location(let location):
+            let line:Int? = location.position == .zero ? nil : location.position.line
+            return .file(line: line, self.current.id + location.file)
+
+        case .vertex(let id, text: let text):
+            if  case SymbolGraph.Plane.decl? = .of(id),
+                let id:Unidoc.Scalar = self.current.scalars.decls[id]
             {
                 return .path(text, self.context.expand(id, to: words(in: text)))
             }
-            else if let namespace:Int = id / .module,
-                    let id:Unidoc.Scalar = self.current.scalars.modules[namespace]
+            else if
+                let namespace:Int = id / .module,
+                let id:Unidoc.Scalar = self.current.scalars.modules[namespace]
             {
                 return .path(text, [id])
+            }
+            else if
+                case SymbolGraph.Plane.file? = .of(id)
+            {
+                //  Prior to v0.8.21 of the symbol graph compiler, we encoded references to
+                //  files as vertex outlines. Eventually, the renderer will begin expecting
+                //  file references to appear as file outlines, so we need to prepare for that.
+                return .file(line: nil, self.current.id + id)
             }
             else
             {
                 return .path(text, [self.current.id + id])
             }
 
-        case    .vector(let feature, self: let heir, text: let text):
+        case .vector(let feature, self: let heir, text: let text):
             //  Only references to declarations can generate vectors. So we can assume
             //  both components are declaration scalars.
             if  let feature:Unidoc.Scalar = self.current.scalars.decls[feature],
@@ -115,7 +128,7 @@ extension Unidoc.Resolver
                 return .path(text, self.context.expand((heir, feature), to: words(in: text)))
             }
 
-        case    .unresolved(let unresolved):
+        case .unresolved(let unresolved):
             let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
             let codelink:Codelink
 
@@ -217,24 +230,30 @@ extension Unidoc.Resolver
     {
         switch outline
         {
-        case   .vertex(let scalar, text: _):
-            if      let _:Int = scalar / .decl,
-                    let scalar:Unidoc.Scalar = self.current.scalars.decls[scalar]
+        case .location:
+            //  This doesn’t make sense in the context of a topic.
+            break
+
+        case .vertex(let scalar, text: _):
+            if  let _:Int = scalar / .decl,
+                let scalar:Unidoc.Scalar = self.current.scalars.decls[scalar]
             {
                 return .scalar(scalar)
             }
-            else if let namespace:Int = scalar / .module,
-                    let scalar:Unidoc.Scalar = self.current.scalars.modules[namespace]
+            else if
+                let namespace:Int = scalar / .module,
+                let scalar:Unidoc.Scalar = self.current.scalars.modules[namespace]
             {
                 return .scalar(scalar)
             }
             else
             {
+                //  TODO: there should be more sanity checks here.
                 //  The rest of the planes don’t cross packages... yet...
                 return .scalar(self.current.id + scalar)
             }
 
-        case    .vector(let feature, self: _, text: _):
+        case .vector(let feature, self: _, text: _):
             //  Only references to declarations can generate vectors. So we can assume
             //  both components are declaration scalars.
             if  let feature:Unidoc.Scalar = self.current.scalars.decls[feature]
@@ -242,7 +261,7 @@ extension Unidoc.Resolver
                 return .scalar(feature)
             }
 
-        case    .unresolved(let unresolved):
+        case .unresolved(let unresolved):
             switch self.resolve(unresolved)
             {
             case  nil:
