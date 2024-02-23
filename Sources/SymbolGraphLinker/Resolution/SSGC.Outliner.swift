@@ -164,7 +164,7 @@ extension SSGC.Outliner
 
         if  let resource:SSGC.Resource = self.locate(resource: name.string)
         {
-            return self.cache.append(outline: .vertex(resource.id, text: name.string))
+            return self.cache.add(outline: .vertex(resource.id, text: name.string))
         }
 
         self.resolver.diagnostics[name.source] = SSGC.ResourceError.fileNotFound(name.string)
@@ -174,7 +174,7 @@ extension SSGC.Outliner
     private mutating
     func outline(translating link:Markdown.SourceString, to url:Substring) -> Int?
     {
-        self.cache.append(outline: .unresolved(web: String.init(url),
+        self.cache.add(outline: .unresolved(web: String.init(url),
             location: link.source.start))
     }
 
