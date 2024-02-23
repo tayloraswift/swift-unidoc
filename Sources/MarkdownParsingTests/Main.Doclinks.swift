@@ -20,17 +20,17 @@ extension Main.Doclinks:TestBattery
             (
                 "Basic",
                 "<doc:GettingStarted>",
-                "GettingStarted"
+                "doc:GettingStarted"
             ),
             (
                 "PercentEncoded",
                 "<doc:Getting%20Started>",
-                "Getting%20Started"
+                "doc:Getting%20Started"
             ),
             (
                 "Qualified",
                 "<doc:BarbieCore/Getting%20Started>",
-                "BarbieCore/Getting%20Started"
+                "doc:BarbieCore/Getting%20Started"
             ),
         ]
         {
