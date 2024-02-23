@@ -243,7 +243,10 @@ extension Markdown.BlockInterpreter
 
             switch block
             {
+            //  If you change this logic, please check if the more-general
+            //  ``Markdown.SwiftFlavor.rewrite(child:into:)`` also needs to be updated.
             case let list as Markdown.BlockListUnordered:
+                var terms:[Markdown.BlockTerm] = []
                 var items:[Markdown.BlockItem] = []
                 for item:Markdown.BlockItem in list.elements
                 {
@@ -257,8 +260,14 @@ extension Markdown.BlockInterpreter
                     switch prefix
                     {
                     case .parameter(let parameter):
-                        parameters.list.append(.init(elements: item.elements,
+                        parameters.list.append(.init(
+                            elements: item.elements,
                             name: parameter.name))
+
+                    case .term(let term):
+                        terms.append(.init(
+                            elements: item.elements,
+                            name: term.name))
 
                     case .keywords(.parameters):
                         for block:Markdown.BlockElement in item.elements
@@ -289,6 +298,10 @@ extension Markdown.BlockInterpreter
                         self.append(aside(item.elements))
                     }
                 }
+                if !terms.isEmpty
+                {
+                    self.append(Markdown.BlockTerms.init(terms))
+                }
                 if !items.isEmpty
                 {
                     list.elements = items
@@ -296,30 +309,37 @@ extension Markdown.BlockInterpreter
                 }
 
             case let quote as Markdown.BlockQuote:
-                guard
-                let prefix:Markdown.BlockPrefix = .extract(from: &quote.elements)
+                //  Parsing the prefixes this way is a little less efficient than using
+                //  the `Markdown.BlockPrefix` type, but it means we don’t have to repair
+                //  markup if we encounter a prefix that is not allowed to appear here.
+                if  let parameter:Markdown.ParameterPrefix = .extract(
+                        from: &quote.elements)
+                {
+                    parameters.list.append(.init(elements: quote.elements,
+                        name: parameter.name))
+                }
+                else if
+                    let keywords:Markdown.KeywordPrefix = .extract(
+                        from: &quote.elements)
+                {
+                    switch keywords
+                    {
+                    case .parameters:
+                        parameters.discussion += quote.elements
+
+                    case .returns:
+                        returns += quote.elements
+
+                    case .throws:
+                        `throws` += quote.elements
+
+                    case let aside:
+                        self.append(aside(quote.elements))
+                    }
+                }
                 else
                 {
                     self.append(quote)
-                    continue
-                }
-                switch prefix
-                {
-                case .parameter(let parameter):
-                    parameters.list.append(.init(elements: quote.elements,
-                        name: parameter.name))
-
-                case .keywords(.parameters):
-                    parameters.discussion += quote.elements
-
-                case .keywords(.returns):
-                    returns += quote.elements
-
-                case .keywords(.throws):
-                    `throws` += quote.elements
-
-                case .keywords(let aside):
-                    self.append(aside(quote.elements))
                 }
 
             case let block as Markdown.BlockMetadata:
