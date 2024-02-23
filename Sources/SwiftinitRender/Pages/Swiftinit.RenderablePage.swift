@@ -83,6 +83,11 @@ extension Swiftinit.RenderablePage
                         $0.href = "https://swiftinit.org\(canonical)"
                         $0.rel = .canonical
                     }
+                    $0[.meta]
+                    {
+                        $0.property = .og_url
+                        $0.content = "https://swiftinit.org\(canonical)"
+                    }
                 }
                 //  Inlining this saves the client a round-trip to the google fonts API.
                 //  It is only about 1.87 KB, which is less than 5 percent of the total
@@ -117,6 +122,8 @@ extension Swiftinit.RenderablePage
 
                 $0[.meta] { $0.property = .og_title ; $0.content = self.title }
                 $0[.meta] { $0.property = .og_image ; $0.content = favicon }
+                $0[.meta] { $0.property = .og_type ; $0.content = "website" }
+                $0[.meta] { $0.property = .og_site_name ; $0.content = "Swiftinit" }
 
                 self.head(augmenting: &$0, format: format)
             }
