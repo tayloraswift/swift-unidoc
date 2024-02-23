@@ -195,7 +195,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     tests.expect(tree.rows ..?
                         [
                             .init(
-                                shoot: .init(stem: "BarbieCore Getting-Started"),
+                                shoot: .init(stem: "BarbieCore External-links"),
+                                type: .text("External links")),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Getting-started"),
                                 type: .text("Getting started")),
                             .init(
                                 shoot: .init(stem: "BarbieCore Barbie"),
@@ -231,7 +234,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         for case (let tests?, let path, let expected) in
         [
             (
-                tests / "Barbie" / "Dreamhouse",
+                tests / "Barbie" / "Dreamhouse" as TestGroup?,
                 ["barbiecore", "barbie", "dreamhouse"][...],
                 [
                     "Int": [1],
@@ -243,7 +246,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 ] as [String: [Int]]
             ),
             (
-                tests / "Barbie" / "Dreamhouse" / "Keys",
+                tests / "Barbie" / "Dreamhouse" / "Keys" as TestGroup?,
                 ["barbiecore", "barbie", "dreamhouse", "keys"][...],
                 [
                     "Int": [1],
@@ -331,7 +334,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 }
             }
         }
-        /// The symbol graph linker should have mangled the space in `Getting Started.md`
+        /// The symbol graph linker should have mangled the space in `Getting started.md`
         /// into a hyphen.
         if  let tests:TestGroup = tests / "Barbie" / "GettingStarted"
         {
@@ -339,12 +342,49 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 "swift-malibu", ["barbiecore", "getting-started"])
             await tests.do
             {
-
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query)),
                     let _:Unidoc.AnyVertex = tests.expect(
                         value: output.principal?.vertex)
                 {
+                }
+            }
+        }
+
+        if  let tests:TestGroup = tests / "Barbie" / "ExternalLinks"
+        {
+            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
+                "swift-malibu", ["barbiecore", "external-links"])
+            await tests.do
+            {
+                if  let output:Unidoc.VertexOutput = tests.expect(
+                        value: try await session.query(database: unidoc.id, with: query)),
+                    let vertex:Unidoc.AnyVertex = tests.expect(
+                        value: output.principal?.vertex),
+                    let prose:Unidoc.Passage = tests.expect(
+                            value: vertex.overview)
+                {
+                    //  TODO: We should be optimizing away duplicate outlines.
+                    tests.expect(prose.outlines.count ==? 4)
+                    tests.expect(prose.outlines[..<3] ..? [
+                            .link(https: "en.wikipedia.org/wiki/Main_Page", safe: true),
+                            .link(https: "en.wikipedia.org/wiki/Main_Page", safe: true),
+                            .link(https: "liberationnews.org", safe: false),
+                        ])
+
+                    guard
+                    case .path(let text, let path) = prose.outlines[3]
+                    else
+                    {
+                        tests.expect(value: nil as [Unidoc.Scalar]?)
+                        return
+                    }
+
+                    //  TODO: This is not a bug, but it is a missed optimization opportunity.
+                    //  We do not need to resolve the two leading path components, as they will
+                    //  never be shown to the user.
+                    tests.expect(text ==? "swift string index")
+                    tests.expect(path.count ==? 3)
                 }
             }
         }
