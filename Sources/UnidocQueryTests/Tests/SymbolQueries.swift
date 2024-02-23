@@ -237,23 +237,23 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 tests / "Barbie" / "Dreamhouse" as TestGroup?,
                 ["barbiecore", "barbie", "dreamhouse"][...],
                 [
-                    "Int": [1],
-                    "Int max": [2],
-                    "ID": [1],
-                    "Barbie": [1],
-                    "Barbie ID": [2],
-                    "BarbieCore Barbie ID": [3],
-                ] as [String: [Int]]
+                    "Int": 1,
+                    "Int max": 2,
+                    "ID": 1,
+                    "Barbie": 1,
+                    "Barbie ID": 2,
+                    "BarbieCore Barbie ID": 3,
+                ] as [String: Int]
             ),
             (
                 tests / "Barbie" / "Dreamhouse" / "Keys" as TestGroup?,
                 ["barbiecore", "barbie", "dreamhouse", "keys"][...],
                 [
-                    "Int": [1],
-                    "max": [2], // expands to two components because it is a vector symbol
-                    "ID": [1, 1, 1],
-                    "Barbie": [1],
-                ] as [String: [Int]]
+                    "Int": 1,
+                    "max": 2, // expands to two components because it is a vector symbol
+                    "ID": 1,
+                    "Barbie": 1,
+                ] as [String: Int]
             ),
         ]
         {
@@ -269,8 +269,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     let overview:Unidoc.Passage = tests.expect(
                         value: vertex.overview)
                 {
-                    //  This checks that we cached the two instances of `Barbie.ID`
-                    tests.expect(overview.outlines.count ==? 6)
+                    //  This checks that we cached the two instances of `Barbie.ID`, and
+                    //  additionally that we optimized away a third reference to it.
+                    tests.expect(overview.outlines.count ==? expected.count)
                     tests.expect(tree.rows ..?
                         [
                             .init(
@@ -311,7 +312,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         ])
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))
-                    let lengths:[String: [Int]] = overview.outlines.reduce(into: [:])
+                    let lengths:[String: Int] = overview.outlines.reduce(into: [:])
                     {
                         guard
                         case .path(let words, let path) = $1
@@ -325,7 +326,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                             tests.expect(true: secondaries.contains(id))
                         }
 
-                        $0[words, default: []].append(path.count)
+                        {
+                            tests.expect(nil: $0)
+                            $0 = path.count
+                        } (&$0[words])
                     }
                     //  The ``Int.max`` test case is especially valuable because not only is it
                     //  a multi-component cross-package reference, but the `max` member is also
@@ -364,7 +368,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     let prose:Unidoc.Passage = tests.expect(
                             value: vertex.overview)
                 {
-                    //  TODO: We should be optimizing away duplicate outlines.
+                    //  Note: the duplicate outline was not optimized away because external
+                    //  links are resolved dynamically, and this means their representation
+                    //  within symbol graphs encodes their source locations, for diagnostics.
                     tests.expect(prose.outlines.count ==? 4)
                     tests.expect(prose.outlines[..<3] ..? [
                             .link(https: "en.wikipedia.org/wiki/Main_Page", safe: true),

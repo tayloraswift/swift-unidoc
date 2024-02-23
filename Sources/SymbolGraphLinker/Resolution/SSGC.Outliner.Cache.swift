@@ -1,4 +1,3 @@
-import MarkdownAST
 import SymbolGraphs
 
 extension SSGC.Outliner
@@ -10,33 +9,32 @@ extension SSGC.Outliner
     struct Cache
     {
         private
-        var references:[String: Int]
+        var outlined:Outputs
         private
-        var outlines:[SymbolGraph.Outline]
+        var entries:[String: Int]
 
         init()
         {
-            self.references = [:]
-            self.outlines = []
+            self.outlined = .init()
+            self.entries = [:]
         }
     }
 }
 extension SSGC.Outliner.Cache
 {
-    var fold:Int { self.outlines.endIndex }
+    var fold:Int { self.outlined.outlines.endIndex }
 
     mutating
-    func append(outline:SymbolGraph.Outline) -> Int
+    func add(outline:SymbolGraph.Outline) -> Int
     {
-        defer { self.outlines.append(outline) }
-        return self.outlines.endIndex
+        self.outlined.add(outline: outline)
     }
 
     mutating
     func clear() -> [SymbolGraph.Outline]
     {
         defer { self = .init() }
-        return self.outlines
+        return self.outlined.outlines
     }
 
     mutating
@@ -49,17 +47,19 @@ extension SSGC.Outliner.Cache
             {
                 return reference
             }
-            else if let outline:SymbolGraph.Outline = try populate()
+            else if
+                let outline:SymbolGraph.Outline = try populate()
             {
-                let next:Int = self.outlines.endIndex
-                self.outlines.append(outline)
-                $0 = next
-                return next
+                //  Sometimes we get the same outline from different keys. As an optimization,
+                //  we can reuse an existing outline.
+                let outline:Int = self.outlined.add(outline: outline)
+                $0 = outline
+                return outline
             }
             else
             {
                 return nil
             }
-        } (&self.references[key])
+        } (&self.entries[key])
     }
 }
