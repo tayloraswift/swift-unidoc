@@ -76,11 +76,16 @@ extension Markdown.SwiftFlavor
         switch block
         {
         case let list as Markdown.BlockListUnordered:
+            var terms:[Markdown.BlockTerm] = []
             var items:[Markdown.BlockItem] = []
             for item:Markdown.BlockItem in list.elements
             {
-                if  let prefix:Markdown.BlockPrefix = .extract(from: &item.elements),
-                    case .keywords(let aside) = prefix
+                if  let term:Markdown.TermPrefix = .extract(from: &item.elements)
+                {
+                    terms.append(.init(elements: item.elements, name: term.name))
+                }
+                else if
+                    let aside:Markdown.KeywordPrefix = .extract(from: &item.elements)
                 {
                     blocks.append(aside(item.elements))
                 }
@@ -89,6 +94,10 @@ extension Markdown.SwiftFlavor
                     items.append(item)
                 }
             }
+            if !terms.isEmpty
+            {
+                blocks.append(Markdown.BlockTerms.init(terms))
+            }
             if !items.isEmpty
             {
                 list.elements = items
@@ -96,7 +105,7 @@ extension Markdown.SwiftFlavor
             }
 
         case let quote as Markdown.BlockQuote:
-            if  case .keywords(let aside) = Markdown.BlockPrefix.extract(
+            if  let aside:Markdown.KeywordPrefix = .extract(
                     from: &quote.elements)
             {
                 blocks.append(aside(quote.elements))
