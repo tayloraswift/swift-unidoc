@@ -2,6 +2,10 @@
 
 This article demonstrates how to link to documentation in other modules.
 
+Here is an external link to wikipedia: [Wikipedia](https://en.wikipedia.org/wiki/Main_Page)
+
+Here is an external link in autolink form: <https://en.wikipedia.org/wiki/Main_Page>
+
 ## Codelinks
 
 You can link to a module with a codelink: ``BarbieCore``.
