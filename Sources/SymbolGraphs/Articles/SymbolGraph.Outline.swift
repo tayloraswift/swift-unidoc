@@ -9,6 +9,7 @@ extension SymbolGraph
     {
         case vertex(Int32, text:String)
         case vector(Int32, self:Int32, text:String)
+        case location(SourceLocation<Int32>)
         case unresolved(Unresolved)
     }
 }
@@ -65,6 +66,9 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
             bson[.vector_self] = heir
             bson[.text] = text
 
+        case .location(let self):
+            bson[.location] = self
+
         case .unresolved(let self):
             bson[.location] = self.location
 
@@ -120,10 +124,16 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
             type = .web
             link = text
         }
-        else
+        else if
+            let text:String = try bson[.unresolved_unidocV3]?.decode()
         {
             type = .unidocV3
-            link = try bson[.unresolved_unidocV3].decode()
+            link = text
+        }
+        else
+        {
+            self = .location(try bson[.location].decode())
+            return
         }
 
         self = .unresolved(.init(

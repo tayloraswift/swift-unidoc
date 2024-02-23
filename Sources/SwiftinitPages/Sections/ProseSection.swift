@@ -42,8 +42,25 @@ extension ProseSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[reference]
         {
-        case .text(let text):
-            return text
+        case .file(line: let line, let id):
+            switch attribute
+            {
+            case .href:
+                return self.context.link(source: id, line: line)?.target
+
+            case .src:
+                guard
+                let vertex:Unidoc.FileVertex = self.context[file: id]
+                else
+                {
+                    return nil
+                }
+
+                return self.context.link(media: vertex)
+
+            default:
+                return nil
+            }
 
         case .link(https: let url, safe: let safe):
             switch attribute
@@ -63,6 +80,7 @@ extension ProseSection:HTML.OutputStreamableMarkdown
             }
 
         case .path(_, let scalars):
+            //  We would never have a use for the display text when loading an attribute.
             guard
             let target:Unidoc.Scalar = scalars.last
             else
@@ -75,9 +93,10 @@ extension ProseSection:HTML.OutputStreamableMarkdown
             case .href:
                 return self.context[vertex: target]?.url
 
+            //  This needs to be here for backwards compatibility with older symbol graphs.
             case .src:
                 guard
-                case (.file(let vertex), nil)? = self.context[vertex: target]
+                let vertex:Unidoc.FileVertex = self.context[file: target]
                 else
                 {
                     return nil
@@ -88,6 +107,9 @@ extension ProseSection:HTML.OutputStreamableMarkdown
             default:
                 return nil
             }
+
+        case .text(let text):
+            return text
         }
     }
 
@@ -101,6 +123,9 @@ extension ProseSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[reference]
         {
+        case .file(line: let line, let id):
+            html ?= self.context.link(source: id, line: line)
+
         case .link(https: let url, safe: let safe):
             html[.a] { $0.href = "https://\(url)"; $0.rel = safe ? nil : .nofollow } = url
 
@@ -108,6 +133,8 @@ extension ProseSection:HTML.OutputStreamableMarkdown
             html[.code] = text
 
         case .path(let stem, let scalars):
+            //  We never started using path outlines for inline file elements, so we don’t need
+            //  any backwards compatibility adaptors here.
             if  let scalar:Unidoc.Scalar = scalars.first,
                 SymbolGraph.Plane.article.contains(scalar.citizen)
             {
@@ -134,8 +161,26 @@ extension ProseSection:TextOutputStreamableMarkdown
         }
         switch self.outlines[reference]
         {
-        case .link:
-            //  No reason this should ever appear here.
+        case .file(line: let line, let id):
+            guard
+            let file:Unidoc.FileVertex = self.context[file: id]
+            else
+            {
+                break
+            }
+
+            utf8 += file.symbol.last.utf8
+
+            if  let line:Int = line
+            {
+                utf8 += ":\(line + 1)".utf8
+            }
+
+        case .link(https: let url, safe: true):
+            utf8 += "https://\(url)".utf8
+
+        case .link(https: _, safe: false):
+            //  We are probably better off not printing the URL at all.
             return
 
         case .text(let text):

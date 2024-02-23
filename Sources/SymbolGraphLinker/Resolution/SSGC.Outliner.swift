@@ -164,7 +164,9 @@ extension SSGC.Outliner
 
         if  let resource:SSGC.Resource = self.locate(resource: name.string)
         {
-            return self.cache.add(outline: .vertex(resource.id, text: name.string))
+            //  Historical note: we used to encode this as a vertex outline.
+            return self.cache.add(
+                outline: .location(.init(position: .zero, file: resource.id)))
         }
 
         self.resolver.diagnostics[name.source] = SSGC.ResourceError.fileNotFound(name.string)
