@@ -440,7 +440,7 @@ enum Main:TestMain, TestBattery
                     }
                 }
 
-                func load(_ reference:Int, for _:Markdown.Bytecode.Attribute) -> String?
+                func load(_ reference:Int, for _:inout Markdown.Bytecode.Attribute) -> String?
                 {
                     reference & 1 == 0 ? nil : "https://swiftinit.org"
                 }
