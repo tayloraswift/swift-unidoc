@@ -314,7 +314,8 @@ extension HTTP.ServerLoop
         switch h1.method
         {
         case .HEAD:
-            return .resource("Method not allowed", status: 405)
+            // return .resource("Method not allowed", status: 405)
+            fallthrough
 
         case .GET:
             if  let request:IntegralRequest = .init(get: h1.uri,
@@ -460,7 +461,8 @@ extension HTTP.ServerLoop
         switch method
         {
         case "HEAD":
-            return .resource("Method not allowed", status: 405)
+            // return .resource("Method not allowed", status: 405)
+            fallthrough
 
         case "GET":
             if  let request:IntegralRequest = .init(get: path,

@@ -71,8 +71,7 @@ extension Swiftinit.ClientAnnotation
             return .robot(.tool)
         }
 
-        if  case "*"? = headers.acceptLanguage,
-            agent.starts(with: "Discourse Forum Onebox")
+        if  agent.starts(with: "Discourse Forum Onebox")
         {
             // This is *probably* the Swift Forums bot.
             return .robot(.discoursebot)
