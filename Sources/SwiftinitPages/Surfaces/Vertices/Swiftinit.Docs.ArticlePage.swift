@@ -82,7 +82,7 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.VertexPage
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
-        main[.section, { $0.class = "details" }] =
+        main[.section, { $0.class = "details literature" }] =
             (self.vertex.details?.markdown).map(self.context.prose(_:))
 
         main += self.groups

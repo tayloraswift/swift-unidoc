@@ -60,7 +60,7 @@ extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
                     $0[.h1] = self.vertex.headline.safe
 
                 }
-                $0[.section, { $0.class = "details" }]
+                $0[.section, { $0.class = "details literature" }]
                 {
                     $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
                     $0 ?= (self.vertex.details?.markdown).map(self.context.prose(_:))

@@ -106,22 +106,43 @@ extension SSGC.Outliner
             return self.outline(link: link, code: true)
 
         case .link(let link):
-            if  let colon:String.Index = link.string.firstIndex(of: ":"),
+            guard
+            let colon:String.Index = link.string.firstIndex(of: ":")
+            else
+            {
+                return self.outline(link: link, code: false)
+            }
+
+            switch link.string[..<colon]
+            {
+            case "doc":
+                let trimmed:String = .init(link.string[link.string.index(after: colon)...])
+                let link:Markdown.SourceString = .init(
+                    source: link.source,
+                    string: trimmed)
+
+                return self.outline(link: link, code: false)
+
+            case "http", "https":
+                guard
                 let start:String.Index = link.string.index(colon,
                     offsetBy: 3,
                     limitedBy: link.string.endIndex)
-            {
-                var url:Substring { link.string[start...] }
-
-                switch link.string[..<start]
+                else
                 {
-                case "https://":    return self.outline(translating: link, to: url)
-                case "http://":     return self.outline(translating: link, to: url)
-                default:            break
+                    break
                 }
+
+                return self.outline(translating: link, to: link.string[start...])
+
+            default:
+                break
             }
 
-            return self.outline(link: link, code: false)
+            self.resolver.diagnostics[link.source] =
+                InvalidAutolinkError<SSGC.Symbolicator>.init(link)
+
+            return nil
 
         case .file(let link):
             name = link
@@ -303,7 +324,7 @@ extension SSGC.Outliner
 
             for link:Markdown.InlineAutolink in topic.members
             {
-                let _:Int? = self.outline(link: link.text, code: link.code)
+                let _:Int? = self.outline(reference: .init(link))
             }
 
             let members:[SymbolGraph.Outline] = self.cache.clear()
