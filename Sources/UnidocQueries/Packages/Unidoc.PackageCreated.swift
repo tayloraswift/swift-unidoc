@@ -19,7 +19,7 @@ extension Unidoc
         @usableFromInline
         let limit:Int
 
-        @inlinable internal
+        @inlinable
         init(during timeframe:Range<UnixDate>, limit:Int)
         {
             self.timeframe = timeframe
@@ -29,6 +29,9 @@ extension Unidoc
 }
 extension Unidoc.PackageCreated:Unidoc.PackagePredicate
 {
+    @inlinable public
+    var hint:Mongo.CollectionIndex? { Unidoc.DB.Packages.indexRepoCreated }
+
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {

@@ -35,8 +35,8 @@ extension Unidoc.PackagesQuery:Mongo.PipelineQuery
     public
     typealias Iteration = Mongo.SingleBatch<Unidoc.PackageOutput>
 
-    public
-    var hint:Mongo.CollectionIndex? { Unidoc.DB.Packages.indexRepoCreated }
+    @inlinable public
+    var hint:Mongo.CollectionIndex? { self.package.hint }
 
     public
     func build(pipeline:inout Mongo.PipelineEncoder)

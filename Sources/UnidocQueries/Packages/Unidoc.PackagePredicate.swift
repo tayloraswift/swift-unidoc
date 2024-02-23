@@ -1,4 +1,5 @@
 import MongoQL
+import UnidocDB
 
 extension Unidoc
 {
@@ -11,4 +12,6 @@ public
 protocol _UnidocPackagePredicate:Equatable, Hashable, Sendable
 {
     func extend(pipeline:inout Mongo.PipelineEncoder)
+
+    var hint:Mongo.CollectionIndex? { get }
 }
