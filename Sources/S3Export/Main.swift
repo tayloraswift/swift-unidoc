@@ -9,11 +9,56 @@ import SwiftinitAssets
 import SwiftinitPages
 import System
 
+struct Main
+{
+    private
+    var match:String?
+
+    private
+    init()
+    {
+        self.match = nil
+    }
+
+    private mutating
+    func parse() throws
+    {
+        var arguments:IndexingIterator<[String]> = Swift.CommandLine.arguments.makeIterator()
+        //  Consume name of the executable itself.
+        let _:String? = arguments.next()
+
+        while let argument:String = arguments.next()
+        {
+            if  case nil = self.match
+            {
+                self.match = argument
+            }
+            else
+            {
+                throw OptionsError.unexpected(argument)
+            }
+        }
+    }
+}
+
 @main
-enum Main
+extension Main
 {
     static
-    func main() async throws
+    func main() async
+    {
+        await SystemProcess.do
+        {
+            @Sendable in
+
+            var main:Self = .init()
+            try main.parse()
+            try await main.launch()
+        }
+    }
+
+    private
+    func launch() async throws
     {
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
         let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
@@ -41,6 +86,11 @@ enum Main
 
             for asset:Swiftinit.Asset in Swiftinit.Asset.allCases
             {
+                if  let match:String = self.match, match != "\(asset)"
+                {
+                    continue
+                }
+
                 let content:[UInt8] = try assets.appending(asset.source).read()
                 let path:String = asset.path(prepending: Swiftinit.RenderFormat.Assets.version)
 
