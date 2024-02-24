@@ -108,8 +108,8 @@ extension SymbolGraph
             {
                 try linker.link(articles: articles)
 
-                linker.link(namespaces: namespaces, at: scalarPositions)
-                linker.link(extensions: extensions, at: extensionPositions)
+                try linker.link(namespaces: namespaces, at: scalarPositions)
+                try linker.link(extensions: extensions, at: extensionPositions)
 
                 return try linker.load()
             }
