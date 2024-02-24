@@ -6,9 +6,9 @@ import UnidocAPI
 extension Unidoc.Stem
 {
     @inlinable internal static
-    func product(_ name:Symbol.Module) -> Self
+    func product(_ name:String) -> Self
     {
-        "\(name)-product"
+        "\(Symbol.Module.init(mangling: name))-product"
     }
 
     @inlinable internal static
@@ -18,9 +18,9 @@ extension Unidoc.Stem
     }
 
     @inlinable public static
-    func article(_ namespace:Symbol.Module, _ name:Substring) -> Self
+    func article(_ namespace:Symbol.Module, path:Substring) -> Self
     {
-        "\(namespace) \(name)"
+        "\(namespace) \(path)"
     }
 
     public static

@@ -2,8 +2,6 @@ import MarkdownABI
 
 extension Markdown.TreeContext
 {
-    //  TODO: investigate if it is worthwhile to track `href` and `id` as separate instance
-    //  properties.
     struct AttributeContext
     {
         private

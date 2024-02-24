@@ -361,6 +361,29 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             }
         }
 
+        let extensionsEmpty:Bool = self.extensions.allSatisfy(\.isEmpty)
+
+        if  let other:Unidoc.TopicGroup
+        {
+            html[.section, { $0.class = "group topic" }]
+            {
+                AutomaticHeading.seeAlso.window(&$0,
+                    listing: other.members,
+                    limit: 12,
+                    open: self.peerList.isEmpty && extensionsEmpty)
+                {
+                    switch $1
+                    {
+                    case .scalar(let scalar):
+                        $0[.li] = self.context.card(scalar)
+
+                    case .text(let text):
+                        $0[.li] { $0[.span] { $0[.code] = text } }
+                    }
+                }
+            }
+        }
+
         if  !self.peerList.isEmpty
         {
             html[.section, { $0.class = "group sisters" }]
@@ -383,29 +406,9 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 heading.window(&$0,
                     listing: self.peerList,
                     limit: 12,
-                    open: self.extensions.allSatisfy(\.isEmpty))
+                    open: extensionsEmpty)
                 {
                     $0[.li] = self.context.card($1)
-                }
-            }
-        }
-
-        if  let other:Unidoc.TopicGroup
-        {
-            html[.section, { $0.class = "group topic" }]
-            {
-                AutomaticHeading.seeAlso.window(&$0,
-                    listing: other.members,
-                    limit: 12)
-                {
-                    switch $1
-                    {
-                    case .scalar(let scalar):
-                        $0[.li] = self.context.card(scalar)
-
-                    case .text(let text):
-                        $0[.li] { $0[.span] { $0[.code] = text } }
-                    }
                 }
             }
         }

@@ -1,3 +1,5 @@
+import MarkdownABI
+
 extension Markdown
 {
     public
@@ -13,6 +15,11 @@ protocol _MarkdownTextElement:Markdown.TreeElement
 
     /// Returns the plain text content of this element.
     var text:String { get }
+
+    /// Replaces symbolic codelinks in this element’s inline content
+    /// with references.
+    mutating
+    func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
 }
 extension Markdown.TextElement
 {
@@ -22,5 +29,11 @@ extension Markdown.TextElement
         var text:String = ""
         text += self
         return text
+    }
+
+    /// Does nothing.
+    @inlinable public mutating
+    func outline(by _:(Markdown.AnyReference) throws -> Int?)
+    {
     }
 }

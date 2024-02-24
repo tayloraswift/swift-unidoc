@@ -311,23 +311,27 @@ extension HTTP.ServerLoop
     {
         cop.reset()
 
-        guard
-        case .GET = h1.method
-        else
+        switch h1.method
         {
-            return .resource("Method requires HTTP/2", status: 505)
-        }
+        case .HEAD:
+            // return .resource("Method not allowed", status: 405)
+            fallthrough
 
-        if  let request:IntegralRequest = .init(get: h1.uri,
-                headers: h1.headers,
-                address: address,
-                service: service)
-        {
-            return try await cop.pause { try await self.response(for: request) }
-        }
-        else
-        {
-            return .resource("Malformed request", status: 400)
+        case .GET:
+            if  let request:IntegralRequest = .init(get: h1.uri,
+                    headers: h1.headers,
+                    address: address,
+                    service: service)
+            {
+                return try await cop.pause { try await self.response(for: request) }
+            }
+            else
+            {
+                return .resource("Malformed request", status: 400)
+            }
+
+        default:
+            return .resource("Method requires HTTP/2", status: 505)
         }
     }
 }
@@ -456,6 +460,10 @@ extension HTTP.ServerLoop
 
         switch method
         {
+        case "HEAD":
+            // return .resource("Method not allowed", status: 405)
+            fallthrough
+
         case "GET":
             if  let request:IntegralRequest = .init(get: path,
                     headers: headers,
@@ -567,7 +575,7 @@ extension HTTP.ServerLoop
                     headers: headers,
                     address: address,
                     service: service,
-                    body: consume body)
+                    body: /* consume */ body) // https://github.com/apple/swift/issues/71605
             {
                 return try await cop.pause { try await self.response(for: request) }
             }

@@ -62,6 +62,7 @@ extension Swiftinit.SitemapEndpoint:HTTP.ServerEndpoint
 
         return .ok(.init(content: .string(string),
             type: .text(.plain, charset: .utf8),
+            gzip: false,
             hash: output.sitemap.hash))
     }
 }

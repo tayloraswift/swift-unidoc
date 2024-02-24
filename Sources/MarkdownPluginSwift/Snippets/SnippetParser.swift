@@ -13,7 +13,7 @@ struct SnippetParser
         self.sourcemap = sourcemap
 
         self.complete = []
-        self.current = .init(id: "", position: position)
+        self.current = .anonymous(start: position)
     }
 }
 extension SnippetParser
@@ -95,7 +95,7 @@ extension SnippetParser
                     indent: indent,
                     before: before,
                     after: range.upperBound.advanced(by: 1),
-                    line: location.line))
+                    line: location.line - 1))
             }
             else
             {
@@ -127,7 +127,7 @@ extension SnippetParser
             }
 
         case .show:
-            if  case nil = self.current?.show(at: marker.after)
+            if  case nil = self.current?.show(with: marker)
             {
                 //  TODO: Emit a warning.
             }
@@ -149,9 +149,7 @@ extension SnippetParser
                 self.complete.append(slice)
             }
 
-            self.current = .init(id: id,
-                position: marker.after,
-                marker: (line: marker.line, indent: marker.indent))
+            self.current = .named(id: id, marker: marker)
         }
     }
 }

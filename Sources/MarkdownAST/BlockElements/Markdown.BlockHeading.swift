@@ -1,18 +1,26 @@
 import MarkdownABI
+import Sources
 
 extension Markdown
 {
     public final
-    class BlockHeading:BlockContainer<Markdown.InlineElement>
+    class BlockHeading:BlockProse
     {
+        public
+        let source:SourceReference<Source>?
+
         public
         var level:Int
         public
         var id:String?
 
         @inlinable public
-        init(level:Int, id:String? = nil, elements:[Markdown.InlineElement])
+        init(source:SourceReference<Source>?,
+            level:Int,
+            id:String? = nil,
+            elements:[InlineElement])
         {
+            self.source = source
             self.level = level
             self.id = id
 
@@ -25,6 +33,15 @@ extension Markdown
         {
             binary[.h(self.level), { $0[.id] = self.id }] { super.emit(into: &$0) }
         }
+    }
+}
+extension Markdown.BlockHeading
+{
+    /// A convenience initializer for creating a heading containing plain text.
+    @inlinable public static
+    func h(_ level:Int, text:String) -> Markdown.BlockHeading
+    {
+        .init(source: nil, level: level, elements: [.text(text)])
     }
 }
 extension Markdown.BlockHeading

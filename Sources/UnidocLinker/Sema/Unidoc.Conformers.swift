@@ -43,14 +43,17 @@ extension Unidoc.Conformers:Unidoc.LinkerIndexable
         self.unconditional.isEmpty && self.conditional.isEmpty
     }
 
-    __consuming
+    consuming
     func assemble(signature:Unidoc.ConformanceSignature,
         with linker:borrowing Unidoc.Linker) -> Unidoc.ConformerGroup
     {
-        .init(id: self.id.in(linker.current.id),
+        //  5.9 compiler bug :(
+        .init(id: (copy self).id.in(linker.current.id),
             culture: linker.current.id + signature.culture,
             scope: signature.conformance,
-            unconditional: linker.sort(self.unconditional, by: Unidoc.LexicalPriority.self),
-            conditional: linker.sort(self.conditional, by: Unidoc.LexicalPriority.self))
+            unconditional: linker.sort((copy self).unconditional,
+                by: Unidoc.LexicalPriority.self),
+            conditional: linker.sort((copy self).conditional,
+                by: Unidoc.LexicalPriority.self))
     }
 }

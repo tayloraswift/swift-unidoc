@@ -22,32 +22,6 @@ extension Markdown
 }
 extension Markdown.InlineElement:Markdown.TreeElement
 {
-    @inlinable public mutating
-    func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
-    {
-        switch self
-        {
-        case .autolink(let autolink):
-            if  let reference:Int = try register(autolink)
-            {
-                self = .reference(reference)
-            }
-
-        case .container(var container):
-            self = .text("")
-            defer { self = .container(container) }
-            try container.outline(by: register)
-
-        case .link(var link):
-            self = .text("")
-            defer { self = .link(link) }
-            try link.outline(by: register)
-
-        case .code, .html, .image, .reference, .text:
-            return
-        }
-    }
-
     @inlinable public
     func emit(into binary:inout Markdown.BinaryEncoder)
     {
@@ -86,7 +60,7 @@ extension Markdown.InlineElement:Markdown.TextElement
     {
         switch self
         {
-        case .autolink(let autolink):   text += autolink.text
+        case .autolink(let autolink):   text += autolink.text.string
         case .container(let container): text += container
         case .code(let code):           text += code
         case .html:                     return
@@ -94,6 +68,48 @@ extension Markdown.InlineElement:Markdown.TextElement
         case .link(let link):           text += link
         case .reference:                return
         case .text(let part):           text += part
+        }
+    }
+
+    @inlinable public mutating
+    func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
+    {
+        switch /* consume */ self
+        {
+        case .autolink(let autolink):
+            guard
+            let reference:Int = try register(.init(autolink))
+            else
+            {
+                self = .autolink(autolink)
+                return
+            }
+
+            self = .reference(reference)
+
+        case .container(var container):
+            defer { self = .container(container) }
+            try container.outline(by: register)
+
+        case .code(let code):
+            self = .code(code)
+
+        case .html(let html):
+            self = .html(html)
+
+        case .image(var image):
+            defer { self = .image(image) }
+            try image.outline(by: register)
+
+        case .link(var link):
+            defer { self = .link(link) }
+            try link.outline(by: register)
+
+        case .reference(let reference):
+            self = .reference(reference)
+
+        case .text(let text):
+            self = .text(text)
         }
     }
 }

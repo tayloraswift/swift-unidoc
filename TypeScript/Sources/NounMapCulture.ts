@@ -1,4 +1,4 @@
 export interface NounMapCulture {
     c: string;
-    n: { s: string, h: number }[];
+    n: { s: string, h: number, f?: number }[];
 }

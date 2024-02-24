@@ -8,6 +8,14 @@ import Testing
 extension SymbolGraphObject<Void>
 {
     public static
+    func load(swift:SwiftVersion,
+        in directory:FilePath) throws -> Self
+    {
+        let filename:String = "swift@\(swift.version).bson"
+        return try .init(buffer: try (directory / filename).read())
+    }
+
+    public static
     func load(package:Symbol.Package,
         at version:AnyVersion? = nil,
         in directory:FilePath) throws -> Self

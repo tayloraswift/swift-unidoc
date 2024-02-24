@@ -1,0 +1,18 @@
+@import 'Colors';
+@import 'Mixins/InlineImage';
+
+blockquote
+{
+    margin: 2rem 0;
+    font-style: italic;
+    color: $light-foreground-fade;
+
+    em
+    {
+        font-style: normal;
+    }
+    img
+    {
+        @include inline-image;
+    }
+}

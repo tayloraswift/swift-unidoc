@@ -52,8 +52,9 @@ extension Markdown.SemanticPrefix
     private static
     func extract(from elements:inout [Markdown.InlineElement]) rethrows -> Self?
     {
-        for (index, span):(Int, Markdown.InlineElement)
-            in zip(elements.indices, elements.prefix(Self.radius))
+        for (index, span):(Int, Markdown.InlineElement) in zip(
+            elements.indices,
+            elements.prefix(Self.radius))
         {
             if  case .text(let text) = span,
                 let colon:String.Index = text.firstIndex(of: ":")

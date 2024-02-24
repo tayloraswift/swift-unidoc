@@ -118,32 +118,12 @@ extension Unidoc.Stats.Decl:ExpressibleByDictionaryLiteral
             attachedMacros: 0)
     }
 }
-extension Unidoc.Stats.Decl
-{
-    @inlinable public
-    var total:Int
-    {
-        self.typealiases
-        + self.structures
-        + self.protocols
-        + self.classes
-        + self.actors
-        + self.requirements
-        + self.witnesses
-        + self.constructors
-        + self.subscripts
-        + self.functors
-        + self.methods
-        + self.operators
-        + self.functions
-        + self.freestandingMacros
-        + self.attachedMacros
-    }
-}
-extension Unidoc.Stats.Decl
+extension Unidoc.Stats.Decl:Unidoc.StatsCounters,
+    BSONDocumentEncodable,
+    BSONDocumentDecodable
 {
     @frozen public
-    enum CodingKey:String, Sendable
+    enum CodingKey:String, Sendable, CaseIterable
     {
         case typealiases = "T"
         case structures = "V"
@@ -161,52 +141,27 @@ extension Unidoc.Stats.Decl
         case freestandingMacros = "Y"
         case attachedMacros = "Z"
     }
-}
-extension Unidoc.Stats.Decl:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
-        bson[.typealiases]  = self.typealiases  != 0 ? self.typealiases : nil
-        bson[.structures]   = self.structures   != 0 ? self.structures : nil
-        bson[.protocols]    = self.protocols    != 0 ? self.protocols : nil
-        bson[.classes]      = self.classes      != 0 ? self.classes : nil
-        bson[.actors]       = self.actors       != 0 ? self.actors : nil
-        bson[.requirements] = self.requirements != 0 ? self.requirements : nil
-        bson[.witnesses]    = self.witnesses    != 0 ? self.witnesses : nil
-        bson[.constructors] = self.constructors != 0 ? self.constructors : nil
-        bson[.subscripts]   = self.subscripts   != 0 ? self.subscripts : nil
-        bson[.functors]     = self.functors     != 0 ? self.functors : nil
-        bson[.methods]      = self.methods      != 0 ? self.methods : nil
-        bson[.operators]    = self.operators    != 0 ? self.operators : nil
-        bson[.functions]    = self.functions    != 0 ? self.functions : nil
 
-        bson[.freestandingMacros] =
-            self.freestandingMacros != 0 ? self.freestandingMacros : nil
-        bson[.attachedMacros] =
-            self.attachedMacros != 0 ? self.attachedMacros : nil
-    }
-}
-extension Unidoc.Stats.Decl:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
+    @inlinable public static
+    subscript(key:CodingKey) -> WritableKeyPath<Self, Int>
     {
-        self.init(
-            typealiases: try bson[.typealiases]?.decode() ?? 0,
-            structures: try bson[.structures]?.decode() ?? 0,
-            protocols: try bson[.protocols]?.decode() ?? 0,
-            classes: try bson[.classes]?.decode() ?? 0,
-            actors: try bson[.actors]?.decode() ?? 0,
-            requirements: try bson[.requirements]?.decode() ?? 0,
-            witnesses: try bson[.witnesses]?.decode() ?? 0,
-            constructors: try bson[.constructors]?.decode() ?? 0,
-            subscripts: try bson[.subscripts]?.decode() ?? 0,
-            functors: try bson[.functors]?.decode() ?? 0,
-            methods: try bson[.methods]?.decode() ?? 0,
-            operators: try bson[.operators]?.decode() ?? 0,
-            functions: try bson[.functions]?.decode() ?? 0,
-            freestandingMacros: try bson[.freestandingMacros]?.decode() ?? 0,
-            attachedMacros: try bson[.attachedMacros]?.decode() ?? 0)
+        switch key
+        {
+        case .typealiases:          \.typealiases
+        case .structures:           \.structures
+        case .protocols:            \.protocols
+        case .classes:              \.classes
+        case .actors:               \.actors
+        case .requirements:         \.requirements
+        case .witnesses:            \.witnesses
+        case .constructors:         \.constructors
+        case .subscripts:           \.subscripts
+        case .functors:             \.functors
+        case .methods:              \.methods
+        case .operators:            \.operators
+        case .functions:            \.functions
+        case .freestandingMacros:   \.freestandingMacros
+        case .attachedMacros:       \.attachedMacros
+        }
     }
 }

@@ -22,6 +22,8 @@ extension Swiftinit.DynamicPage
     {
         let html:HTML = self.rendered(format: format)
 
-        return .init(content: .binary(html.utf8), type: .text(.html, charset: .utf8))
+        return .init(content: .binary(html.utf8),
+            type: .text(.html, charset: .utf8),
+            gzip: false)
     }
 }

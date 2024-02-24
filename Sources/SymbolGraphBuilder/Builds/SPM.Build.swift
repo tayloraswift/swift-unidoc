@@ -14,15 +14,16 @@ extension SPM
         /// What is being built.
         let id:ID
         /// Where to emit documentation artifacts to.
-        let output:ArtifactsDirectory
+        let artifacts:ArtifactsDirectory
+
         /// Where the package root directory is. There should be a `Package.swift`
         /// manifest at the top level of this directory.
         var root:FilePath
 
-        init(id:ID, output:ArtifactsDirectory, root:FilePath)
+        init(id:ID, artifacts:ArtifactsDirectory, root:FilePath)
         {
             self.id = id
-            self.output = output
+            self.artifacts = artifacts
             self.root = root
         }
     }
@@ -82,7 +83,8 @@ extension SPM.Build
         let container:SPM.Workspace = try await shared.create("\(package)", clean: clean)
 
         return .init(id: .unversioned(package),
-            output: try await container.create("artifacts"),
+            // https://github.com/apple/swift/issues/71602
+            artifacts: try await container.create("artifacts", as: ArtifactsDirectory.self),
             root: packages / "\(package)")
     }
 
@@ -127,9 +129,11 @@ extension SPM.Build
 
         let container:SPM.Workspace = try await shared.create("\(package)")
         let checkouts:SPM.CheckoutDirectory = try await container.create("checkouts",
-            clean: clean.contains(.checkouts))
+            clean: clean.contains(.checkouts),
+            as: SPM.CheckoutDirectory.self) // https://github.com/apple/swift/issues/71602
         let artifacts:ArtifactsDirectory = try await container.create("artifacts@\(refname)",
-            clean: clean.contains(.artifacts))
+            clean: clean.contains(.artifacts),
+            as: ArtifactsDirectory.self)    // ditto
 
         let cloned:FilePath = checkouts.path / "\(package)"
 
@@ -176,7 +180,7 @@ extension SPM.Build
                 revision: revision,
                 version: version)
             return .init(id: .versioned(pin, refname: refname),
-                output: artifacts,
+                artifacts: artifacts,
                 root: cloned)
         }
         else
@@ -188,8 +192,7 @@ extension SPM.Build
 extension SPM.Build:DocumentationBuild
 {
     mutating
-    func compile(with swift:Toolchain,
-        pretty:Bool) async throws -> (SymbolGraphMetadata, Artifacts)
+    func compile(with swift:Toolchain) async throws -> (SymbolGraphMetadata, SPM.PackageSources)
     {
         switch self.id
         {
@@ -203,7 +206,7 @@ extension SPM.Build:DocumentationBuild
 
         let manifestVersions:[MinorVersion] = try self.listExtraManifests()
         let manifest:SPM.Manifest = try await swift.manifest(package: self.root,
-            json: self.output.path / "\(self.id.package).package.json")
+            json: self.artifacts.path / "\(self.id.package).package.json")
 
         print("""
             Resolving dependencies for '\(self.id.package)' \
@@ -215,8 +218,8 @@ extension SPM.Build:DocumentationBuild
 
         let log:(resolution:FilePath, build:FilePath) =
         (
-            self.output.path / "resolution.log",
-            self.output.path / "build.log"
+            self.artifacts.path / "resolution.log",
+            self.artifacts.path / "build.log"
         )
 
         let pins:[SPM.DependencyPin] = try await swift.resolve(package: self.root,
@@ -229,21 +232,22 @@ extension SPM.Build:DocumentationBuild
 
         var dependencies:[PackageNode] = []
         var include:[FilePath] = [ scratch.path / "\(self.configuration)" ]
+
         for pin:SPM.DependencyPin in pins
         {
             let checkout:FilePath = scratch.path / "checkouts" / "\(pin.location.name)"
 
             let manifest:SPM.Manifest = try await swift.manifest(package: checkout,
-                json: self.output.path / "\(pin.identity).package.json")
+                json: self.artifacts.path / "\(pin.identity).package.json")
 
             let dependency:PackageNode = try .all(flattening: manifest,
                 on: platform,
                 as: pin.identity)
 
             let sources:SPM.PackageSources = try .init(scanning: dependency)
-                sources.yield(include: &include)
 
             dependencies.append(dependency)
+            include += sources.include
         }
 
         let sinkNode:PackageNode = try .all(flattening: manifest,
@@ -294,13 +298,6 @@ extension SPM.Build:DocumentationBuild
             display: manifest.name,
             root: manifest.root)
 
-        let artifacts:Artifacts = try await swift.dump(from: flatNode,
-            snippetsDirectory: manifest.snippets,
-            include: &include,
-            output: self.output,
-            triple: swift.triple,
-            pretty: pretty)
-
-        return (metadata, artifacts)
+        return (metadata, try .init(scanning: flatNode, include: include))
     }
 }

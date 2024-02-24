@@ -12,7 +12,7 @@ extension SymbolGraph.Outline
         public
         let location:SourceLocation<Int32>?
 
-        @inlinable public
+        @inlinable
         init(link:String, type:LinkType, location:SourceLocation<Int32>?)
         {
             self.link = link

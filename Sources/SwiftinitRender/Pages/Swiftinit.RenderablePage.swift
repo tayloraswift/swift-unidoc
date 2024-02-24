@@ -56,6 +56,8 @@ extension Swiftinit.RenderablePage
         {
             $0[.head]
             {
+                let favicon:String = "\(format.assets[.favicon_png])"
+
                 $0[.title] = self.title
                 $0[.meta] { $0.charset = "UTF-8" }
                 $0[.meta]
@@ -65,7 +67,7 @@ extension Swiftinit.RenderablePage
                 }
                 $0[.link]
                 {
-                    $0.href = "\(format.assets[.favicon_png])"
+                    $0.href = favicon
                     $0.type = "\(MediaType.image(.png))"
                     $0.rel = .icon
                 }
@@ -80,6 +82,11 @@ extension Swiftinit.RenderablePage
                     {
                         $0.href = "https://swiftinit.org\(canonical)"
                         $0.rel = .canonical
+                    }
+                    $0[.meta]
+                    {
+                        $0.property = .og_url
+                        $0.content = "https://swiftinit.org\(canonical)"
                     }
                 }
                 //  Inlining this saves the client a round-trip to the google fonts API.
@@ -98,8 +105,25 @@ extension Swiftinit.RenderablePage
 
                 if  let description:String = self.description
                 {
+                    //  It is regrettable that we need to duplicate the description text here,
+                    //  particularly because we do not compress dynamic content. However, it is
+                    //  necessary for Onebox to render link previews correctly.
                     $0[.meta] { $0.name = "description" ; $0.content  = description }
+                    $0[.meta] { $0.property = .og_description ; $0.content = description }
                 }
+                else
+                {
+                    $0[.meta]
+                    {
+                        $0.property = .og_description
+                        $0.content = "No overview available"
+                    }
+                }
+
+                $0[.meta] { $0.property = .og_title ; $0.content = self.title }
+                $0[.meta] { $0.property = .og_image ; $0.content = favicon }
+                $0[.meta] { $0.property = .og_type ; $0.content = "website" }
+                $0[.meta] { $0.property = .og_site_name ; $0.content = "Swiftinit" }
 
                 self.head(augmenting: &$0, format: format)
             }

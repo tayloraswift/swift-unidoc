@@ -1,5 +1,5 @@
 import Symbols
-import UnidocDiagnostics
+import SourceDiagnostics
 
 struct DroppedExtensionsError:Equatable, Error
 {

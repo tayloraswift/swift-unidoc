@@ -48,7 +48,8 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
         {
             return .notFound(.init(
                 content: .string("Snapshot not found."),
-                type: .text(.plain, charset: .utf8)))
+                type: .text(.plain, charset: .utf8),
+                gzip: false))
         }
 
         guard
@@ -100,7 +101,7 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
         let groups:[Unidoc.AnyGroup] = principal.groups
         let tree:Unidoc.TypeTree? = principal.tree
 
-        let canonical:CanonicalVersion? = .init(principal: consume principal,
+        let canonical:CanonicalVersion? = .init(principal: /* consume */ principal,
             layer: VertexLayer.self)
 
         //  Note: noun tree won’t exist if the module contains no declarations.

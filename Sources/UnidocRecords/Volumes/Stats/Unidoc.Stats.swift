@@ -1,4 +1,6 @@
 import BSON
+import BSON_OrderedCollections
+import OrderedCollections
 
 extension Unidoc
 {
@@ -41,8 +43,6 @@ extension Unidoc.Stats:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(
-            coverage: try bson[.coverage].decode(),
-            decls: try bson[.decls].decode())
+        self.init(coverage: try bson[.coverage].decode(), decls: try bson[.decls].decode())
     }
 }

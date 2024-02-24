@@ -18,6 +18,7 @@ class IdentifiablePageContext<Vertices> where Vertices:Swiftinit.VertexCache
     private
     var cache:Cache
 
+    @usableFromInline
     let repo:Unidoc.PackageRepo?
 
     init(cache:Cache, repo:Unidoc.PackageRepo?)
@@ -183,12 +184,8 @@ extension IdentifiablePageContext:Swiftinit.VertexPageContext
     }
 
     @usableFromInline
-    subscript(file id:Unidoc.Scalar) ->
-    (
-        vertex:Unidoc.FileVertex,
-        origin:Unidoc.PackageOrigin?
-    )?
+    subscript(file id:Unidoc.Scalar) -> Unidoc.FileVertex?
     {
-        self.cache.vertices[id]?.vertex.file.map { (vertex: $0, origin: self.repo?.origin) }
+        self.cache.vertices[id]?.vertex.file
     }
 }

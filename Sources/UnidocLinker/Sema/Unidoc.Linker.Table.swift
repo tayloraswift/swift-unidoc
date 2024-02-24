@@ -3,7 +3,7 @@ import Signatures
 import SymbolGraphs
 import Symbols
 import Unidoc
-import UnidocDiagnostics
+import SourceDiagnostics
 import UnidocRecords
 
 extension Unidoc.Linker

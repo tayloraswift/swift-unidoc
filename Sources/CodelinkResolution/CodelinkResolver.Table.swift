@@ -23,6 +23,23 @@ extension CodelinkResolver.Table:Sendable where Scalar:Sendable
 }
 extension CodelinkResolver.Table
 {
+    public
+    func caseless() -> Self
+    {
+        var copy:Self = self
+            copy.entries.removeAll(keepingCapacity: true)
+
+        for (path, overloads) in self.entries
+        {
+            copy.entries[.init(string: path.string.lowercased()), default: .some([])].overload(
+                with: overloads)
+        }
+
+        return copy
+    }
+}
+extension CodelinkResolver.Table
+{
     @inlinable public
     subscript(namespace:Symbol.Module) -> CodelinkResolver<Scalar>.Overloads
     {

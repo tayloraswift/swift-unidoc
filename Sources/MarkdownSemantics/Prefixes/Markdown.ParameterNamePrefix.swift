@@ -3,6 +3,11 @@ import MarkdownAST
 
 extension Markdown
 {
+    /// A `ParameterNamePrefix` appears in a list item that begins with `- name:`, where *name*
+    /// is the name of a parameter.
+    ///
+    /// This prefix should only appear inside a ``KeywordPrefix/parameters`` block. Its
+    /// top-level analogue is ``ParameterPrefix``.
     struct ParameterNamePrefix
     {
         let name:String

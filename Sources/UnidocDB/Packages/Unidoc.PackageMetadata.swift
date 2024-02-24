@@ -29,8 +29,8 @@ extension Unidoc
         /// Indicates whether this package is hidden from the public.
         public
         var hidden:Bool
-
-        /// The current realm this package belongs to. A package can change realms.
+        /// The current realm this package belongs to. A package can change realms, or lack one
+        /// entirely.
         public
         var realm:Realm?
         /// Indicates if this package is currently undergoing realm alignment.

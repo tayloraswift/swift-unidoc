@@ -24,14 +24,46 @@ extension SnippetParser.SliceBounds
     {
         //  We need to do two passes over the source ranges, as indentation is computed across
         //  the entire slice, and not just one subslice.
+        var trimEmptyLines:Bool = true
         let ranges:[Range<Int>] = self.ranges.compactMap
         {
-            let start:Int = $0.lowerBound.utf8Offset
+            var start:Int = $0.lowerBound.utf8Offset
             if  start >= utf8.endIndex
             {
                 //  This could happen if the file ends with a control comment and no
                 //  final newline.
                 return nil
+            }
+
+            //  We need to roll forward through any whitespace-only lines. This is difficult
+            //  to do at the syntax level, because we traditionally associate trailing trivia
+            //  with the token that comes after the slice markers. So we do it here.
+            //
+            //  This should only be done for the first range, to preserve the ability to insert
+            //  empty lines between subslices.
+            if  trimEmptyLines
+            {
+                trimming:
+                while true
+                {
+                    for (i, byte):(Int, UInt8) in zip(start..., utf8[start...])
+                    {
+                        switch byte
+                        {
+                        //  '\r', '\t', ' '
+                        case 0x0D, 0x09, 0x20:
+                            continue
+
+                        //  '\n'
+                        case 0x0A:
+                            start = utf8.index(after: i)
+                            continue trimming
+
+                        default:
+                            break trimming
+                        }
+                    }
+                }
             }
 
             let end:Int = min($0.upperBound.utf8Offset, utf8.endIndex)
@@ -42,6 +74,7 @@ extension SnippetParser.SliceBounds
             }
             else
             {
+                trimEmptyLines = false
                 return start ..< end
             }
         }

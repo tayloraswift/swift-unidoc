@@ -1,4 +1,5 @@
 import HTTP
+import HTTPServer
 import IP
 import UA
 import UnidocProfiling
@@ -36,6 +37,7 @@ extension Swiftinit.ClientAnnotation
         case .robot(.bingbot):          \.verifiedBingbot
         case .robot(.cloudfront):       \.tooling
         case .robot(.bytespider):       \.otherRobot
+        case .robot(.discoursebot):     \.likelyDiscoursebot
         case .robot(.duckduckbot):      \.likelyMinorSearchEngine
         case .robot(.google):           \.otherRobot
         case .robot(.googlebot):        \.verifiedGooglebot
@@ -63,7 +65,19 @@ extension Swiftinit.ClientAnnotation
         }
 
         guard
-        let agent:String = headers.userAgent,
+        let agent:String = headers.userAgent
+        else
+        {
+            return .robot(.tool)
+        }
+
+        if  agent.starts(with: "Discourse Forum Onebox")
+        {
+            // This is *probably* the Swift Forums bot.
+            return .robot(.discoursebot)
+        }
+
+        guard
         let agent:UA = .init(agent)
         else
         {

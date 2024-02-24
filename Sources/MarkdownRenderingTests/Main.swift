@@ -405,7 +405,7 @@ enum Main:TestMain, TestBattery
 
                 func load(_ reference:Int, into html:inout HTML.ContentEncoder)
                 {
-                    html[.a, { $0.href = "swiftinit.org" }] = String.init(reference,
+                    html[.a, { $0.href = "https://swiftinit.org" }] = String.init(reference,
                         radix: 16)
                 }
             }
@@ -414,7 +414,7 @@ enum Main:TestMain, TestBattery
             let html:HTML = .init { $0 += renderable }
 
             tests.expect(html.description ==?
-                "<p>before<a href='swiftinit.org'>aabbccdd</a>after</p>")
+                "<p>before<a href='https://swiftinit.org'>aabbccdd</a>after</p>")
         }
         if  let tests:TestGroup = tests / "ReferenceAttributes"
         {
@@ -440,9 +440,9 @@ enum Main:TestMain, TestBattery
                     }
                 }
 
-                func load(_ reference:Int, for _:Markdown.Bytecode.Attribute) -> String?
+                func load(_ reference:Int, for _:inout Markdown.Bytecode.Attribute) -> String?
                 {
-                    reference & 1 == 0 ? nil : "swiftinit.org"
+                    reference & 1 == 0 ? nil : "https://swiftinit.org"
                 }
             }
 
@@ -467,7 +467,7 @@ enum Main:TestMain, TestBattery
                     <pre><code>\
                     <span class='xk'>let</span> \
                     <span class='xv'>x</span>:\
-                    <a class='xt' href='swiftinit.org'>Int</a>\
+                    <a class='xt' href='https://swiftinit.org'>Int</a>\
                     </code></pre>
                     """)
             }

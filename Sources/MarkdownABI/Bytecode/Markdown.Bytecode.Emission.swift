@@ -9,5 +9,15 @@ extension Markdown.Bytecode
         case img
         case input
         case wbr
+
+        //  New in 0.8.18.
+        case area = 0x05
+        case base
+        case col
+        case link
+        case meta
+        case param
+        case source
+        case track
     }
 }

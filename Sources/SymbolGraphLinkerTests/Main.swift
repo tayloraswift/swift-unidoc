@@ -8,10 +8,10 @@ enum Main:TestMain
     [
         Bindings.self,
         Blockquotes.self,
+        LinkResolution.self,
         Lists.self,
         ListsWithMultipleItems.self,
         Parameters.self,
-        Snippets.self,
         Topics.self,
     ]
 }

@@ -17,16 +17,7 @@ extension Markdown
             self.head = .init(alignments: columns, cells: head)
             self.body = body
         }
-        /// Recursively calls ``Block/outline(by:)`` for each cell in this table.
-        public override
-        func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
-        {
-            try self.head.outline(by: register)
-            for row:Row<BodyCell> in self
-            {
-                try row.outline(by: register)
-            }
-        }
+
         /// Emits a `table` element.
         public override
         func emit(into binary:inout Markdown.BinaryEncoder)
@@ -41,6 +32,21 @@ extension Markdown
                         row.emit(into: &$0)
                     }
                 }
+            }
+        }
+
+        /// Visits this table, and then each of its cells.
+        public override
+        func traverse(with visit:(Markdown.BlockElement) throws -> ()) rethrows
+        {
+            try super.traverse(with: visit)
+            for cell:HeaderCell in self.head.cells
+            {
+                try cell.traverse(with: visit)
+            }
+            for cell:BodyCell in self.body.joined()
+            {
+                try cell.traverse(with: visit)
             }
         }
     }

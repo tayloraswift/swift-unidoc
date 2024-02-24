@@ -3,7 +3,7 @@ import MarkdownABI
 extension Markdown
 {
     public final
-    class BlockParagraph:BlockContainer<Markdown.InlineElement>
+    class BlockParagraph:BlockProse
     {
         /// Emits a `p` element.
         public override

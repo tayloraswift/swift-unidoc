@@ -10,7 +10,7 @@ extension Main
         var port:Int
 
         var pretty:Bool
-        var force:Bool
+        var force:Force?
         var input:String?
 
         var tool:Tool
@@ -24,7 +24,7 @@ extension Main
             self.port = 8443
 
             self.pretty = false
-            self.force = false
+            self.force = nil
             self.input = nil
 
             self.tool = .build
@@ -100,7 +100,10 @@ extension Main.Options
                 options.input = input
 
             case "--force", "-f":
-                options.force = true
+                options.force = .release
+
+            case "--force-prerelease", "-e":
+                options.force = .prerelease
 
             case "--uplink-only", "-u":
                 options.tool = .uplink

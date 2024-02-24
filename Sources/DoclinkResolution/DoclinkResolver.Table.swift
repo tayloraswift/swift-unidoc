@@ -16,15 +16,15 @@ extension DoclinkResolver
 extension DoclinkResolver.Table
 {
     @inlinable public
-    subscript(scope:DoclinkResolver.Scope, name:String) -> Int32?
+    subscript(prefix:DoclinkResolver.Prefix, name:String) -> Int32?
     {
         _read
         {
-            yield  self.entries[.join(scope + [name])]
+            yield  self.entries[.join(prefix + [name])]
         }
         _modify
         {
-            yield &self.entries[.join(scope + [name])]
+            yield &self.entries[.join(prefix + [name])]
         }
     }
 }

@@ -100,10 +100,20 @@ export class Searchbar {
                                     .replaceAll(' ', '/')
                                     .toLowerCase();
 
+                                var weight: number = 10;
+                                if (noun.f == 0) {
+                                    //  Symbol is deprecated.
+                                    weight = 5;
+                                } else if (noun.f == 1) {
+                                    //  Symbol is @_spi.
+                                    weight = 1;
+                                }
+
                                 const stem: string[] = noun.s.split(/\s+/);
 
                                 symbols.push({
                                     module: module,
+                                    weight: weight,
                                     keywords: stem,
                                     display: stem.slice(1).join('.'),
                                     uri: uri

@@ -2,7 +2,7 @@ import MarkdownAST
 
 extension Markdown.InlineSpan:ParsableAsInlineMarkup
 {
-    init(from markup:/* borrowing */ any _InlineMarkup, in source:borrowing MarkdownSource)
+    init(from markup:/* borrowing */ any _InlineMarkup, in source:borrowing Markdown.Source)
     {
         switch /* copy */ markup
         {

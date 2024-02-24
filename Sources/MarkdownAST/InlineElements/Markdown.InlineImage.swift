@@ -8,12 +8,14 @@ extension Markdown
         public
         var elements:[InlineSpan]
         public
-        var target:String?
+        var target:Outlinable<Markdown.SourceString>?
         public
         var title:String?
 
         @inlinable public
-        init(target:String?, title:String? = nil, elements:[InlineSpan] = [])
+        init(elements:[InlineSpan] = [],
+            target:Outlinable<Markdown.SourceString>?,
+            title:String? = nil)
         {
             self.elements = elements
             self.target = target
@@ -31,6 +33,16 @@ extension Markdown.InlineImage:Markdown.TreeElement
             $0[.alt] = self.alt
             $0[.src] = self.target
             $0[.title] = self.title
+        }
+    }
+
+    @inlinable public mutating
+    func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
+    {
+        if  case .inline(let expression) = self.target,
+            case let reference? = try register(.filePath(expression))
+        {
+            self.target = .outlined(reference)
         }
     }
 }

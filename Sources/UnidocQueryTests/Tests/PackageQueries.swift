@@ -38,7 +38,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                     package: .init(name: .swift),
                     commit: .init(name: "swift-5.8.1-RELEASE"),
                     triple: toolchain.triple,
-                    swift: .stable(.release(.v(5, 8, 1))),
+                    swift: .init(version: .v(5, 8, 1)),
                     products: []),
                 graph: empty)
 
@@ -91,7 +91,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
 
         if  let tests:TestGroup = tests / "AllPackages"
         {
-            let query:SearchIndexQuery<Unidoc.DB.Metadata> = .init(
+            let query:Unidoc.TextResourceQuery<Unidoc.DB.Metadata> = .init(
                 tag: nil,
                 id: .packages_json)
 
@@ -101,12 +101,9 @@ struct PackageQueries:UnidocDatabaseTestBattery
                         value: try await session.query(database: unidoc.id, with: query)),
                     let _:MD5 = tests.expect(value: index.hash)
                 {
-                    switch index.utf8
+                    switch index.text
                     {
-                    case .length:
-                        tests.expect(value: nil as [UInt8]?)
-
-                    case .binary(let utf8):
+                    case .inline(.utf8(let utf8)):
                         let json:JSON = .init(utf8: utf8)
                         tests.expect(try json.decode([String].self) **?
                         [
@@ -116,6 +113,9 @@ struct PackageQueries:UnidocDatabaseTestBattery
                             "swift-red",
                             "swift-speak-now",
                         ])
+
+                    default:
+                        tests.expect(value: nil as [UInt8]?)
                     }
                 }
             }

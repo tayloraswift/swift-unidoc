@@ -1,5 +1,6 @@
 import MarkdownAST
 import MarkdownParsing
+import MarkdownSemantics
 import Testing
 
 extension Main
@@ -13,23 +14,23 @@ extension Main.Doclinks:TestBattery
     static
     func run(tests:TestGroup)
     {
-        let parser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown> = .init()
-        for (name, source, expected):(String, MarkdownSource, String) in
+        let parser:Markdown.Parser<Markdown.SwiftFlavor> = .init()
+        for (name, source, expected):(String, Markdown.Source, String) in
         [
             (
                 "Basic",
                 "<doc:GettingStarted>",
-                "GettingStarted"
+                "doc:GettingStarted"
             ),
             (
                 "PercentEncoded",
                 "<doc:Getting%20Started>",
-                "Getting%20Started"
+                "doc:Getting%20Started"
             ),
             (
                 "Qualified",
                 "<doc:BarbieCore/Getting%20Started>",
-                "BarbieCore/Getting%20Started"
+                "doc:BarbieCore/Getting%20Started"
             ),
         ]
         {
@@ -48,7 +49,7 @@ extension Main.Doclinks:TestBattery
                     } (paragraph.elements.first))
             {
                 tests.expect(false: autolink.code)
-                tests.expect(autolink.text ==? expected)
+                tests.expect(autolink.text.string ==? expected)
             }
         }
     }

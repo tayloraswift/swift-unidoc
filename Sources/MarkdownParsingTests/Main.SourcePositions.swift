@@ -1,5 +1,6 @@
 import MarkdownAST
 import MarkdownParsing
+import MarkdownSemantics
 import Sources
 import Testing
 
@@ -14,8 +15,8 @@ extension Main.SourcePositions:TestBattery
     static
     func run(tests:TestGroup)
     {
-        let parser:SwiftFlavoredMarkdownParser<SwiftFlavoredMarkdown> = .init()
-        for (name, source, expected):(String, MarkdownSource, (line:Int, column:Int)) in
+        let parser:Markdown.Parser<Markdown.SwiftFlavor> = .init()
+        for (name, source, expected):(String, Markdown.Source, (line:Int, column:Int)) in
         [
             (
                 "ZeroZero",

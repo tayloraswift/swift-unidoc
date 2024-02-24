@@ -1,3 +1,4 @@
+import BSON
 import JSON
 import SymbolGraphs
 import Symbols
@@ -86,15 +87,18 @@ extension Unidoc.Linker.Mesh
             {
                 if  let decl:SymbolGraph.Decl = linker.current.decls.nodes[d].decl
                 {
+                    let interface:BSON.Key = decl.signature.spis == nil ? "" : "__unknown__"
                     let coverage:WritableKeyPath<Unidoc.Stats.Coverage, Int> = .classify(decl,
-                        from: linker.current,
-                        at: d)
+                        _from: linker.current,
+                        _at: d)
 
                     let decl:WritableKeyPath<Unidoc.Stats.Decl, Int> = .classify(decl)
 
+                    cultures[c].census.interfaces[interface, default: 0] += 1
                     cultures[c].census.unweighted.coverage[keyPath: coverage] += 1
                     cultures[c].census.unweighted.decls[keyPath: decl] += 1
 
+                    snapshot.census.interfaces[interface, default: 0] += 1
                     snapshot.census.unweighted.coverage[keyPath: coverage] += 1
                     snapshot.census.unweighted.decls[keyPath: decl] += 1
                 }

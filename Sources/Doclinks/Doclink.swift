@@ -22,14 +22,17 @@ extension Doclink
     {
         self.absolute ? self.path.first : nil
     }
+    /// Returns the string value of the doclink, without the `doc:` prefix.
+    @inlinable public
+    var text:String
+    {
+        "\(self.absolute ? "//" : "")\(self.path.joined(separator: "/"))"
+    }
 }
 extension Doclink:CustomStringConvertible
 {
     @inlinable public
-    var description:String
-    {
-        "doc:\(self.absolute ? "//" : "")\(self.path.joined(separator: "/"))"
-    }
+    var description:String { "doc:\(self.text)" }
 }
 extension Doclink:LosslessStringConvertible
 {
@@ -51,6 +54,7 @@ extension Doclink:LosslessStringConvertible
 }
 extension Doclink
 {
+    /// Parses a doclink from a string that does not include the `doc:` prefix.
     public
     init?(doc uri:Substring)
     {

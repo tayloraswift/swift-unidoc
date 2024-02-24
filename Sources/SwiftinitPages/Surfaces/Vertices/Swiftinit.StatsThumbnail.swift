@@ -36,6 +36,25 @@ extension Swiftinit.StatsThumbnail:HTML.OutputStreamable
             {
                 $0[.p]
                 {
+                    let target:Swiftinit.StatsHeading = .documentationCoverage
+                    $0[.a] { $0.href = "\(url)#\(target.id)" } = "Coverage"
+                }
+
+                $0[.figure]
+                {
+                    $0.class = "chart coverage"
+                } = self.census.unweighted.coverage.pie
+                {
+                    """
+                    \($1) percent of the declarations in \(self.domain) are \($0.name)
+                    """
+                }
+            }
+
+            $0[.div]
+            {
+                $0[.p]
+                {
                     let target:Swiftinit.StatsHeading = .interfaceBreakdown
                     $0[.a] { $0.href = "\(url)#\(target.id)" } = "Declarations"
                 }
@@ -53,16 +72,17 @@ extension Swiftinit.StatsThumbnail:HTML.OutputStreamable
 
             $0[.div]
             {
+                let interfaces:Unidoc.Stats.SPIs = .init(interfaces: self.census.interfaces)
                 $0[.p]
                 {
-                    let target:Swiftinit.StatsHeading = .documentationCoverage
-                    $0[.a] { $0.href = "\(url)#\(target.id)" } = "Coverage"
+                    let target:Swiftinit.StatsHeading = .interfaceLayers
+                    $0[.a] { $0.href = "\(url)#\(target.id)" } = "Interfaces"
                 }
 
                 $0[.figure]
                 {
-                    $0.class = "chart coverage"
-                } = self.census.unweighted.coverage.pie
+                    $0.class = "chart spis"
+                } = interfaces.pie
                 {
                     """
                     \($1) percent of the declarations in \(self.domain) are \($0.name)

@@ -30,7 +30,7 @@ nav.admin
     }
 }
 
-figure.client div.pie-color > svg g
+figure.client svg > g
 {
     > *.googlebot
     {
@@ -51,6 +51,10 @@ figure.client div.pie-color > svg g
     > *.minor-search-engine
     {
         fill: #ae6aff;
+    }
+    > *.discoursebot
+    {
+        fill: #ff1e69;
     }
     > *.barbie
     {

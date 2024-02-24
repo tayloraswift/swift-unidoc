@@ -32,28 +32,84 @@ extension ProseSection
 }
 extension ProseSection:HTML.OutputStreamableMarkdown
 {
-    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
     {
-        guard case .href = attribute,
-        self.outlines.indices.contains(reference)
+        guard self.outlines.indices.contains(reference)
         else
         {
             return nil
         }
+
         switch self.outlines[reference]
         {
-        case .text(let text):
-            return text
+        case .file(line: let line, let id):
+            switch attribute
+            {
+            case .href:
+                return self.context.link(source: id, line: line)?.target
+
+            case .src:
+                guard
+                let vertex:Unidoc.FileVertex = self.context[file: id]
+                else
+                {
+                    return nil
+                }
+
+                return self.context.link(media: vertex)
+
+            default:
+                return nil
+            }
+
+        case .link(https: let url, safe: let safe):
+            switch attribute
+            {
+            case .href:
+                if !safe
+                {
+                    attribute = .external
+                }
+                fallthrough
+
+            case .external:
+                return "https://\(url)"
+
+            default:
+                return nil
+            }
 
         case .path(_, let scalars):
-            if  let target:Unidoc.Scalar = scalars.last
-            {
-                return self.context[vertex: target]?.url
-            }
+            //  We would never have a use for the display text when loading an attribute.
+            guard
+            let target:Unidoc.Scalar = scalars.last
             else
             {
                 return nil
             }
+
+            switch attribute
+            {
+            case .href:
+                return self.context[vertex: target]?.url
+
+            //  This needs to be here for backwards compatibility with older symbol graphs.
+            case .src:
+                guard
+                let vertex:Unidoc.FileVertex = self.context[file: target]
+                else
+                {
+                    return nil
+                }
+
+                return self.context.link(media: vertex)
+
+            default:
+                return nil
+            }
+
+        case .text(let text):
+            return text
         }
     }
 
@@ -67,10 +123,18 @@ extension ProseSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[reference]
         {
+        case .file(line: let line, let id):
+            html ?= self.context.link(source: id, line: line)
+
+        case .link(https: let url, safe: let safe):
+            html[.a] { $0.href = "https://\(url)"; $0.rel = safe ? nil : .nofollow } = url
+
         case .text(let text):
             html[.code] = text
 
         case .path(let stem, let scalars):
+            //  We never started using path outlines for inline file elements, so we don’t need
+            //  any backwards compatibility adaptors here.
             if  let scalar:Unidoc.Scalar = scalars.first,
                 SymbolGraph.Plane.article.contains(scalar.citizen)
             {
@@ -97,6 +161,28 @@ extension ProseSection:TextOutputStreamableMarkdown
         }
         switch self.outlines[reference]
         {
+        case .file(line: let line, let id):
+            guard
+            let file:Unidoc.FileVertex = self.context[file: id]
+            else
+            {
+                break
+            }
+
+            utf8 += file.symbol.last.utf8
+
+            if  let line:Int = line
+            {
+                utf8 += ":\(line + 1)".utf8
+            }
+
+        case .link(https: let url, safe: true):
+            utf8 += "https://\(url)".utf8
+
+        case .link(https: _, safe: false):
+            //  We are probably better off not printing the URL at all.
+            return
+
         case .text(let text):
             utf8 += text.utf8
 

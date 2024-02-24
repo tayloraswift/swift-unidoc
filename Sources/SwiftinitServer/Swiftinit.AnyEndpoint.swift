@@ -145,12 +145,13 @@ extension Swiftinit.AnyEndpoint
     }
 
     static
-    func get(articles trunk:String,
+    func get(blog:String,
+        _ trunk:String,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
         .explainable(Swiftinit.BlogEndpoint.init(query: .init(
                 volume: .init(package: "__swiftinit", version: "__max"),
-                vertex: .init(path: ["Articles", trunk], hash: nil))),
+                vertex: .init(path: [blog, trunk], hash: nil))),
             parameters: parameters)
     }
 
@@ -458,9 +459,8 @@ extension Swiftinit.AnyEndpoint
                 if  let item:MultipartForm.Item = form.first(
                         where: { $0.header.name == "text" })
                 {
-                    return .procedural(Swiftinit.TextUpdateEndpoint.init(text: .init(
-                        id: .robots_txt,
-                        utf8: [UInt8].init(item.value))))
+                    return .procedural(Swiftinit.TextUpdateEndpoint.init(
+                        text: .init(id: .robots_txt, text: .utf8(item.value))))
                 }
 
             default:

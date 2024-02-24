@@ -16,6 +16,15 @@ extension HTML.ContentEncoder
         case .img:      html = .img
         case .input:    html = .input
         case .wbr:      html = .wbr
+
+        case .area:     html = .area
+        case .base:     html = .base
+        case .col:      html = .col
+        case .link:     html = .link
+        case .meta:     html = .meta
+        case .param:    html = .param
+        case .source:   html = .source
+        case .track:    html = .track
         }
 
         self[html, attributes.encode(to:)]

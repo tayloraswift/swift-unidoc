@@ -24,11 +24,17 @@ extension SymbolGraphObject<Void>
         pretty:Bool) async throws
     {
         let metadata:SymbolGraphMetadata
-        let artifacts:Artifacts
+        let package:SPM.PackageSources
 
-        (metadata, artifacts) = try await build.compile(with: swift, pretty: pretty)
+        (metadata, package) = try await build.compile(with: swift)
 
-        let graph:SymbolGraph = try await .build(from: artifacts)
+        let directory:ArtifactsDirectory = { $0.artifacts } (build)
+        let artifacts:[Artifacts] = try await swift.dump(modules: package.cultures,
+            include: package.include,
+            output: directory,
+            pretty: pretty)
+
+        let graph:SymbolGraph = try await .build(package: package, from: artifacts)
         self.init(metadata: metadata, graph: graph)
     }
 }

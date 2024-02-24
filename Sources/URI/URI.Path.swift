@@ -56,15 +56,16 @@ extension URI.Path
     @inlinable public
     var last:String
     {
-        _read
+        //  https://github.com/apple/swift/issues/71598
+        get
         {
             if  case .push(let last)? = self.components.last
             {
-                yield last
+                last
             }
             else
             {
-                yield ""
+                ""
             }
         }
         _modify

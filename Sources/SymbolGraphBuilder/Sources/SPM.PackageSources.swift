@@ -1,3 +1,4 @@
+import MarkdownABI
 import PackageGraphs
 import System
 
@@ -7,47 +8,52 @@ extension SPM
     struct PackageSources
     {
         var cultures:[NominalSources]
-        var snippets:[SnippetSources]
+        var snippets:[ResourceFile]
 
-        private
-        init(cultures:[NominalSources] = [], snippets:[SnippetSources] = [])
+        var include:[FilePath]
+
+        let root:SPM.PackageRoot?
+
+        init(
+            cultures:[NominalSources] = [],
+            snippets:[ResourceFile] = [],
+            include:[FilePath] = [],
+            root:SPM.PackageRoot? = nil)
         {
             self.cultures = cultures
             self.snippets = snippets
+
+            self.include = include
+
+            self.root = root
         }
     }
 }
 extension SPM.PackageSources
 {
-    init(scanning package:borrowing PackageNode, snippetsDirectory:String? = nil) throws
+    init(scanning package:borrowing PackageNode, include:consuming [FilePath] = []) throws
     {
-        let root:FilePath = .init(package.root.path)
+        let root:SPM.PackageRoot = .init(normalizing: package.root)
 
-        self.init()
+        self.init(include: include, root: root)
 
         for i:Int in package.modules.indices
         {
             self.cultures.append(try .init(
-                scanning: package.modules[i],
+                include: &self.include,
                 exclude: package.exclude[i],
-                root: root))
+                package: root,
+                module: package.modules[i]))
         }
 
         guard
-        let snippetsDirectory:String
+        let snippetsDirectory:FilePath.Component = .init(package.snippets)
         else
         {
-            return
+            throw SPM.SnippetDirectoryError.invalid(package.snippets)
         }
 
-        guard
-        let snippetsDirectory:FilePath.Component = .init(snippetsDirectory)
-        else
-        {
-            throw SPM.SnippetDirectoryError.invalid(snippetsDirectory)
-        }
-
-        let snippets:FilePath = root.appending(snippetsDirectory)
+        let snippets:FilePath = root.path.appending(snippetsDirectory)
         if !snippets.directory.exists()
         {
             return
@@ -70,20 +76,13 @@ extension SPM.PackageSources
 
             if  file.extension == "swift"
             {
-                let snippet:SPM.SnippetSources = .init(location: file.path, name: $1.stem)
+                //  Should we be mangling URL-unsafe characters?
+                let snippet:SPM.ResourceFile = .init(location: file.path,
+                    path: root.rebase(file.path),
+                    name: $1.stem)
+
                 self.snippets.append(snippet)
             }
-        }
-    }
-}
-
-extension SPM.PackageSources
-{
-    func yield(include:inout [FilePath])
-    {
-        for module:SPM.NominalSources in self.cultures
-        {
-            include += module.include
         }
     }
 }

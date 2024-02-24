@@ -31,7 +31,7 @@ extension JSON.EscapeCode
     }
 
     @inlinable internal static
-    func += (utf8:inout [UInt8], self:Self)
+    func += (utf8:inout ArraySlice<UInt8>, self:Self)
     {
         utf8.append(0x5C) // '\'
         switch self

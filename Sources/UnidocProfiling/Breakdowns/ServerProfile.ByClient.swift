@@ -18,6 +18,8 @@ extension ServerProfile
         public
         var likelyAhrefsbot:Int
         public
+        var likelyDiscoursebot:Int
+        public
         var otherRobot:Int
         public
         var tooling:Int
@@ -34,6 +36,7 @@ extension ServerProfile
             likelyYandexbot:Int = 0,
             likelyMinorSearchEngine:Int = 0,
             likelyAhrefsbot:Int = 0,
+            likelyDiscoursebot:Int = 0,
             otherRobot:Int = 0,
             tooling:Int = 0,
             barbie:Int = 0,
@@ -45,6 +48,7 @@ extension ServerProfile
             self.likelyYandexbot = likelyYandexbot
             self.likelyMinorSearchEngine = likelyMinorSearchEngine
             self.likelyAhrefsbot = likelyAhrefsbot
+            self.likelyDiscoursebot = likelyDiscoursebot
             self.otherRobot = otherRobot
             self.tooling = tooling
             self.barbie = barbie
@@ -72,6 +76,7 @@ extension ServerProfile.ByClient
             + self.likelyYandexbot
             + self.likelyMinorSearchEngine
             + self.likelyAhrefsbot
+            + self.likelyDiscoursebot
             + self.otherRobot
             + self.tooling
             + self.barbie
@@ -89,6 +94,7 @@ extension ServerProfile.ByClient:PieValues
             .likelyBaiduspider:            self.likelyBaiduspider,
             .likelyYandexbot:              self.likelyYandexbot,
             .likelyMinorSearchEngine:      self.likelyMinorSearchEngine,
+            .likelyDiscoursebot:           self.likelyDiscoursebot,
             .barbie:                       self.barbie,
             .bratz:                        self.bratz,
             .likelyAhrefsbot:              self.likelyAhrefsbot,

@@ -115,7 +115,7 @@ extension Unidoc.DeclVertex:Unidoc.PrincipalVertex
     }
 
     @inlinable public
-    var hash:FNV24.Extended { .init(hashing: "\(self.symbol)") }
+    var hash:FNV24.Extended { .decl(self.symbol) }
 }
 extension Unidoc.DeclVertex
 {
