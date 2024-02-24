@@ -347,81 +347,103 @@ extension HTTP.ServerLoop
         service:IP.Service?,
         as _:Authority.Type) async where Authority:ServerAuthority
     {
-        await withTaskGroup(of: HTTP.ServerMessage<Authority, HPACKHeaders>?.self)
+        await withThrowingTaskGroup(
+            of: NIOAsyncChannel<HTTP2Frame.FramePayload, HTTP2Frame.FramePayload>?.self)
         {
-            (tasks:inout TaskGroup<HTTP.ServerMessage<Authority, HPACKHeaders>?>) in
-
-            var completed:TaskGroup<HTTP.ServerMessage<Authority, HPACKHeaders>?>.Iterator =
-                tasks.makeAsyncIterator()
-
-            let cop:TimeCop = .init()
+            (
+                tasks:inout ThrowingTaskGroup<NIOAsyncChannel<
+                    HTTP2Frame.FramePayload,
+                    HTTP2Frame.FramePayload>?, any Error>
+            ) in
 
             tasks.addTask
             {
-                try? await cop.start(beat: .milliseconds(1000))
-                //  We must close the connection, otherwise we will continue to wait for
-                //  the next inbound stream.
-                connection.close(promise: nil)
-                return nil
-            }
-
-            defer
-            {
-                tasks.cancelAll()
-            }
-
-            do
-            {
+                /// This task awaits the first inbound stream from the peer. To enforce rotation
+                /// of peers, each peer is only allowed to open one stream per connection.
+                /// Otherwise, an attacker could occupy a connection indefinitely, effectively
+                /// starving all other peers if the server is near its connection limit.
                 for try await stream:NIOAsyncChannel<
                     HTTP2Frame.FramePayload,
                     HTTP2Frame.FramePayload> in streams.inbound
                 {
-                    try await stream.executeThenClose
-                    {
-                        (
-                            remote:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
-                            writer:NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
-                        )   in
-
-                        tasks.addTask
-                        {
-                            do
-                            {
-                                return .init(
-                                    response: try await self.respond(to: remote,
-                                        address: address,
-                                        service: service,
-                                        with: cop,
-                                        as: Authority.self),
-                                    using: stream.channel.allocator)
-                            }
-                            catch let error
-                            {
-                                Log[.error] = "(application) \(error)"
-
-                                return .init(
-                                    redacting: error,
-                                    using: stream.channel.allocator)
-                            }
-                        }
-
-                        guard
-                        case let message?? = await completed.next()
-                        else
-                        {
-                            return
-                        }
-
-                        try await cop.pause { try await writer.send(message) }
-                    }
+                    return stream
                 }
+
+                return nil
             }
-            catch NIOSSLError.uncleanShutdown
+            tasks.addTask
             {
+                /// This task emits a timeout event while waiting on the first inbound stream.
+                try await Task.sleep(for: .seconds(5))
+                return nil
+            }
+
+            var events:ThrowingTaskGroup<NIOAsyncChannel<
+                HTTP2Frame.FramePayload,
+                HTTP2Frame.FramePayload>?, any Error>.Iterator = tasks.makeAsyncIterator()
+
+            do
+            {
+                guard case let stream?? = try await events.next()
+                else
+                {
+                    Log[.error] = """
+                    (HTTP/2: \(address)) Connection timed out before peer initiated any streams.
+                    """
+                    return
+                }
+
+                /// Before we even process the first stream, we tell the peer that this is the
+                /// only stream we will serve on this connection, and to retry any contemporary
+                /// requests on a new connection.
+                ///
+                /// If we do not send this frame, users (or robots) who are browsing a large
+                /// number of pages in a short time will not know to retry their requests, and
+                /// they will perceive an unrecoverable server failure. Users who are browsing
+                /// the production server at a sane pace will never be “bursty”, since secondary
+                /// requests will all go to Amazon Cloudfront.
+                ///
+                /// We have no idea what the stream identifier of the first stream is, so we
+                /// can only guess a value of `1`.
+                connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
+                        lastStreamID: 1,
+                        errorCode: .noError,
+                        opaqueData: nil)),
+                    promise: nil)
+
+                try await stream.executeThenClose
+                {
+                    (
+                        remote:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
+                        writer:NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
+                    )   in
+
+                    let message:HTTP.ServerMessage<Authority, HPACKHeaders>
+                    do
+                    {
+                        message = .init(
+                            response: try await self.respond(to: remote,
+                                address: address,
+                                service: service,
+                                as: Authority.self),
+                            using: stream.channel.allocator)
+                    }
+                    catch let error
+                    {
+                        Log[.error] = "(application: \(address)) \(error)"
+
+                        message = .init(
+                            redacting: error,
+                            using: stream.channel.allocator)
+                    }
+
+                    try await writer.send(message)
+                }
             }
             catch let error
             {
-                Log[.error] = "(HTTP/2) \(error)"
+                Log[.error] = "(HTTP/2: \(address)) \(error)"
+                return
             }
         }
     }
@@ -430,22 +452,65 @@ extension HTTP.ServerLoop
     func respond<Authority>(to h2:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
         address:IP.V6,
         service:IP.Service?,
-        with cop:borrowing TimeCop,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:ServerAuthority
     {
-        var inbound:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>.AsyncIterator =
-            h2.makeAsyncIterator()
-
-        var headers:HPACKHeaders? = nil
-        while let payload:HTTP2Frame.FramePayload = try await inbound.next()
+        /// Do the ``AsyncStream`` ritual dance.
+        var c:AsyncThrowingStream<HTTP2Frame.FramePayload?, any Error>.Continuation? = nil
+        let s:AsyncThrowingStream<HTTP2Frame.FramePayload?, any Error> = .init { c = $0 }
+        guard
+        let c:AsyncThrowingStream<HTTP2Frame.FramePayload?, any Error>.Continuation
+        else
         {
-            cop.reset()
-
-            if  case .headers(let payload) = payload
+            fatalError("unreachable")
+        }
+        /// Launch the task that simply forwards the output of the
+        /// ``NIOAsyncChannelInboundStream`` to the combined stream. This seems comically
+        /// inefficient, but it is needed in order to add timeout events to an HTTP/2 stream.
+        async
+        let _:Void =
+        {
+            for try await frame:HTTP2Frame.FramePayload in $1
             {
+                $0.yield(frame)
+            }
+        } (c, h2)
+        /// Launch the task that emits a timeout event after 5 seconds. This doesn’t terminate
+        /// the stream because we want to be able to ignore the timeout events after the peer
+        /// completes authentication, if applicable. This allows us to accept long-running
+        /// uploads from trusted peers.
+        async
+        let _:Void =
+        {
+            try await Task.sleep(for: .seconds(5))
+            $0.yield(nil)
+
+        } (c)
+
+        var inbound:AsyncThrowingStream<HTTP2Frame.FramePayload?, any Error>.AsyncIterator
+        var headers:HPACKHeaders? = nil
+
+        /// Wait for the `HEADERS` frame, which initiates the application-level request. This
+        /// frame contains cookies, so after we get it, we will know if we can ignore timeouts.
+        waiting:
+        do
+        {
+            inbound = s.makeAsyncIterator()
+
+            switch try await inbound.next()
+            {
+            case .headers(let payload)??:
                 headers = payload.headers
-                break
+
+            case _??:
+                continue waiting
+
+            case nil, nil?:
+                Log[.error] = """
+                (HTTP/2: \(address)) Stream timed out before peer sent any headers.
+                """
+
+                return .resource("Time limit exceeded", status: 408)
             }
         }
 
@@ -470,7 +535,7 @@ extension HTTP.ServerLoop
                     address: address,
                     service: service)
             {
-                return try await cop.pause { try await self.response(for: request) }
+                return try await self.response(for: request)
             }
             else
             {
@@ -502,11 +567,11 @@ extension HTTP.ServerLoop
             var body:[UInt8] = []
                 body.reserveCapacity(length)
 
-            while let payload:HTTP2Frame.FramePayload = try await inbound.next()
+            while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
             {
-                cop.reset()
-
-                guard case .data(let payload) = payload
+                //  We could care less about timeout events here, as we have already determined
+                //  the request originates from a trusted source.
+                guard case .data(let payload)? = payload
                 else
                 {
                     continue
@@ -524,7 +589,7 @@ extension HTTP.ServerLoop
                 }
             }
 
-            return try await cop.pause { try await self.response(for: request, with: body) }
+            return try await self.response(for: request, with: body)
 
         case "POST":
             guard
@@ -543,12 +608,10 @@ extension HTTP.ServerLoop
             var body:[UInt8] = []
                 body.reserveCapacity(length)
 
-            while let payload:HTTP2Frame.FramePayload = try await inbound.next()
+            while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
             {
-                cop.reset()
-
                 guard
-                case .data(let payload) = payload,
+                case .data(let payload)? = payload,
                 case .byteBuffer(let buffer) = payload.data
                 else
                 {
@@ -577,7 +640,7 @@ extension HTTP.ServerLoop
                     service: service,
                     body: /* consume */ body) // https://github.com/apple/swift/issues/71605
             {
-                return try await cop.pause { try await self.response(for: request) }
+                return try await self.response(for: request)
             }
             else
             {
