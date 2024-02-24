@@ -86,6 +86,7 @@ extension SSGC.Linker.Tables
             }
 
             block.inline(code: code, base: base, with: parser)
+            block.link = .inline(file.id)
         }
     }
 }

@@ -95,7 +95,7 @@ extension SnippetParser
                     indent: indent,
                     before: before,
                     after: range.upperBound.advanced(by: 1),
-                    line: location.line))
+                    line: location.line - 1))
             }
             else
             {

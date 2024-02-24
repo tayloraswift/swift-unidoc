@@ -91,6 +91,7 @@ extension Unidoc.Resolver
         switch outline
         {
         case .location(let location):
+            //  File references never cross packages, so this is basically a no-op.
             let line:Int? = location.position == .zero ? nil : location.position.line
             return .file(line: line, self.current.id + location.file)
 

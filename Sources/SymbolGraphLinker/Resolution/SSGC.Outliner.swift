@@ -160,6 +160,10 @@ extension SSGC.Outliner
             name = .init(
                 source: link.source,
                 string: String.init(link.string[link.string.index(after: i)...]))
+
+        case .location(let location):
+            //  This is almost a no-op, except we can optimize away duplicated locations.
+            return self.cache.add(outline: .location(location))
         }
 
         if  let resource:SSGC.Resource = self.locate(resource: name.string)

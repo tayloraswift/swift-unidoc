@@ -23,7 +23,9 @@ extension SnippetParser.SliceFetus
     static
     func anonymous(start position:AbsolutePosition) -> Self
     {
-        .init(id: "", position: position, marker: (1, 0))
+        //  Note: line number is zero-indexed.
+        //  This is different from the SwiftSyntax convention.
+        .init(id: "", position: position, marker: (0, 0))
     }
 
     static
