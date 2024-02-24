@@ -4,11 +4,8 @@ extension Markdown.BinaryEncoder
         attributes:(inout Markdown.AttributeEncoder) -> () = { _ in }) -> Value?
         where Value:Markdown.TreeElement
     {
-        get
-        {
-            nil
-        }
-        set(value)
+        get { nil }
+        set (value)
         {
             if  let value:Value
             {

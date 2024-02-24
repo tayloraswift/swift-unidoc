@@ -1,4 +1,5 @@
 @import 'Mixins/InlineCode';
+@import 'Mixins/InlineImage';
 
 p
 {
@@ -8,6 +9,10 @@ p
     code
     {
         @include inline-code;
+    }
+    img
+    {
+        @include inline-image;
     }
 }
 

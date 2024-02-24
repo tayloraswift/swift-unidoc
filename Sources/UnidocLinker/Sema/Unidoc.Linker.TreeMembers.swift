@@ -6,17 +6,17 @@ extension Unidoc.Linker
     struct TreeMembers
     {
         var articles:[Unidoc.Noun]
-        var procs:[Unidoc.Shoot]
         var types:[Unidoc.Shoot: (Unidoc.Citizenship, Phylum.DeclFlags)]
+        var extra:[(Unidoc.Shoot, TreeMapper.Flags?)]
 
         private
         init(articles:[Unidoc.Noun],
-            procs:[Unidoc.Shoot],
-            types:[Unidoc.Shoot: (Unidoc.Citizenship, Phylum.DeclFlags)])
+            types:[Unidoc.Shoot: (Unidoc.Citizenship, Phylum.DeclFlags)],
+            extra:[(Unidoc.Shoot, TreeMapper.Flags?)] = [])
         {
             self.articles = articles
-            self.procs = procs
             self.types = types
+            self.extra = extra
         }
     }
 }
@@ -24,6 +24,6 @@ extension Unidoc.Linker.TreeMembers:ExpressibleByArrayLiteral
 {
     init(arrayLiteral:Never...)
     {
-        self.init(articles: [], procs: [], types: [:])
+        self.init(articles: [], types: [:], extra: [])
     }
 }

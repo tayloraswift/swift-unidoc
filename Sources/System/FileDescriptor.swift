@@ -19,13 +19,14 @@ extension FileDescriptor
     @inlinable public
     func readAll(_:String.Type = String.self) throws -> String
     {
-        try .init(unsafeUninitializedCapacity: try self.length())
+        let bytes:Int = try self.length()
+        return try .init(unsafeUninitializedCapacity: bytes)
         {
             let buffer:UnsafeMutableRawBufferPointer = .init($0)
             let read:Int = try self.read(fromAbsoluteOffset: 0, into: buffer)
-            if  buffer.count != read
+            if  read != bytes
             {
-                throw FileReadError.incomplete(read: read, of: buffer.count)
+                throw FileReadError.incomplete(read: read, of: bytes)
             }
             else
             {
@@ -39,13 +40,14 @@ extension FileDescriptor
     @inlinable public
     func readAll(_:[UInt8].Type = [UInt8].self) throws -> [UInt8]
     {
-        try .init(unsafeUninitializedCapacity: try self.length())
+        let bytes:Int = try self.length()
+        return try .init(unsafeUninitializedCapacity: bytes)
         {
             let buffer:UnsafeMutableRawBufferPointer = .init($0)
             $1 = try self.read(fromAbsoluteOffset: 0, into: buffer)
-            if  buffer.count != $1
+            if  $1 != bytes
             {
-                throw FileReadError.incomplete(read: $1, of: buffer.count)
+                throw FileReadError.incomplete(read: $1, of: bytes)
             }
         }
     }

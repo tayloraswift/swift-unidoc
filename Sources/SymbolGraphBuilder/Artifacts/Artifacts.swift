@@ -1,75 +1,42 @@
-import PackageGraphs
-import PackageMetadata
-import SymbolGraphParts
+import MarkdownABI
+import MarkdownAST
 import SymbolGraphLinker
+import SymbolGraphParts
 import SymbolGraphs
 import Symbols
 import System
 
 struct Artifacts
 {
-    let cultures:[Culture]
-    let snippets:[SPM.SnippetSources]
+    let directory:ArtifactsDirectory
+    let parts:[SymbolGraphPart.ID]
 
-    var root:Symbol.FileBase?
-
-    init(cultures:[Artifacts.Culture],
-        snippets:[SPM.SnippetSources],
-        root:Symbol.FileBase? = nil)
+    init(directory:ArtifactsDirectory, parts:consuming [SymbolGraphPart.ID])
     {
-        self.cultures = cultures
-        self.snippets = snippets
-        self.root = root
+        parts.sort { $0.basename < $1.basename }
+
+        self.directory = directory
+        self.parts = parts
     }
 }
 extension Artifacts
 {
-    private
-    var symbolizer:SPM.PathSymbolizer? { self.root.map(SPM.PathSymbolizer.init(root:)) }
-}
-extension Artifacts
-{
-    func loadMarkdown() throws -> [[MarkdownSourceFile]]
+    func load() throws -> [SymbolGraphPart]
     {
-        guard
-        let symbolizer:SPM.PathSymbolizer = self.symbolizer
-        else
+        try self.parts.map
         {
-            return []
-        }
+            let path:FilePath = self.directory.path / "\($0)"
 
-        return try self.cultures.map
-        {
-            switch $0.module.type
+            print("Loading symbols: \($0)")
+
+            do
             {
-            //  Only load markdown supplements for these module types.
-            case .executable:   break
-            case .regular:      break
-            case .macro:        break
-            case .plugin:       break
-            default:            return []
+                return try .init(json: .init(utf8: try path.read()[...]), id: $0)
             }
-
-            return try $0.loadMarkdown(symbolizer: symbolizer)
-        }
-    }
-
-    func loadSnippets() throws -> [SwiftSourceFile]
-    {
-        guard
-        let symbolizer:SPM.PathSymbolizer = self.symbolizer
-        else
-        {
-            return []
-        }
-
-        return try self.snippets.map
-        {
-            let id:Symbol.File = symbolizer.rebase($0.location)
-
-            print("Loading snippet: \(id)")
-
-            return .init(name: $0.name, path: id, utf8: try $0.location.read())
+            catch let error
+            {
+                throw ArtifactError.init(underlying: error, path: path)
+            }
         }
     }
 }

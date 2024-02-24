@@ -30,8 +30,9 @@ extension Swiftinit.GraphLoader:Unidoc.GraphLoader
             break
 
         case .bson_zz:
+            //  https://github.com/apple/swift/issues/71605
             var inflator:LZ77.Inflator = .init(format: .zlib)
-            try inflator.push((consume bytes)[...])
+            try inflator.push((/* consume */ bytes)[...])
             bytes = inflator.pull()
         }
 

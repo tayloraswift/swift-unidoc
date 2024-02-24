@@ -17,14 +17,21 @@ extension HTTP
         public
         var type:MediaType
         public
+        var gzip:Bool
+        public
         var hash:MD5?
 
         @inlinable public
-        init(headers:Headers = .init(), content:Content, type:MediaType, hash:MD5? = nil)
+        init(headers:Headers = .init(),
+            content:Content,
+            type:MediaType,
+            gzip:Bool,
+            hash:MD5? = nil)
         {
             self.headers = headers
             self.content = content
             self.type = type
+            self.gzip = gzip
             self.hash = hash
         }
     }
@@ -34,7 +41,9 @@ extension HTTP.Resource:ExpressibleByStringLiteral, ExpressibleByStringInterpola
     @inlinable public
     init(stringLiteral:String)
     {
-        self.init(content: .string(stringLiteral), type: .text(.plain, charset: .utf8))
+        self.init(content: .string(stringLiteral),
+            type: .text(.plain, charset: .utf8),
+            gzip: false)
     }
 }
 extension HTTP.Resource

@@ -1,10 +1,9 @@
 import MarkdownABI
-import Sources
 
 extension Markdown
 {
     open
-    class BlockContainer<Element>:BlockElement where Element:Markdown.TreeElement
+    class BlockContainer<Element>:BlockElement where Element:BlockElement
     {
         public final
         var elements:[Element]
@@ -15,23 +14,24 @@ extension Markdown
             self.elements = elements
         }
 
-        /// Recursively calls ``Markdown.TreeElement/outline(by:)`` for each element
-        /// in this container.
-        public final override
-        func outline(by register:(Markdown.InlineAutolink) throws -> Int?) rethrows
-        {
-            for index:Int in self.elements.indices
-            {
-                try self.elements[index].outline(by: register)
-            }
-        }
         /// Emits the elements in this container, with no framing.
-        open override
+        @inlinable open override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {
             for element:Element in self.elements
             {
                 element.emit(into: &binary)
+            }
+        }
+
+        /// Visits this container, and then each of its children, if they are block elements.
+        @inlinable open override
+        func traverse(with visit:(Markdown.BlockElement) throws -> ()) rethrows
+        {
+            try super.traverse(with: visit)
+            for element:Markdown.BlockElement in self.elements
+            {
+                try element.traverse(with: visit)
             }
         }
     }

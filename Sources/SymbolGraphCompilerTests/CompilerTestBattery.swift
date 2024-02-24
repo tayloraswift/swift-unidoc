@@ -12,9 +12,9 @@ protocol CompilerTestBattery:TestBattery
 
     static
     func run(tests:TestGroup,
-        nominations:Compiler.Nominations,
-        namespaces:[[Compiler.Namespace]],
-        extensions:[Compiler.Extension])
+        nominations:SSGC.Nominations,
+        namespaces:[[SSGC.Namespace]],
+        extensions:[SSGC.Extension])
 }
 extension CompilerTestBattery
 {
@@ -22,7 +22,7 @@ extension CompilerTestBattery
     func run(tests:TestGroup)
     {
         let directory:FilePath = "TestModules/SymbolGraphs"
-        var compiler:Compiler = .init(root: "/swift/swift-unidoc/TestModules")
+        var checker:SSGC.TypeChecker = .init(root: "/swift/swift-unidoc/TestModules")
 
         let parts:[SymbolGraphPart] = Self.inputs.compactMap
         {
@@ -40,7 +40,7 @@ extension CompilerTestBattery
             return tests.do
             {
                 let part:SymbolGraphPart = try .init(
-                    json: .init(utf8: try path.read([UInt8].self)),
+                    json: .init(utf8: try path.read([UInt8].self)[...]),
                     id: id)
 
                 tests.expect(part.metadata.version ==? .v(0, 6, 0))
@@ -49,12 +49,12 @@ extension CompilerTestBattery
             }
         }
 
-        let compiled:(([[Compiler.Namespace]], Compiler.Nominations), [Compiler.Extension])? =
+        let compiled:(([[SSGC.Namespace]], SSGC.Nominations), [SSGC.Extension])? =
             (tests ! "Compilation").do
         {
-            try compiler.compile(language: .swift, culture: parts[0].culture, parts: parts)
+            try checker.compile(language: .swift, culture: parts[0].culture, parts: parts)
 
-            return (compiler.declarations.load(), compiler.extensions.load())
+            return (checker.declarations.load(), checker.extensions.load())
         }
 
         guard
@@ -66,9 +66,9 @@ extension CompilerTestBattery
 
         if  let tests:TestGroup = tests / "SourceLocations"
         {
-            for namespace:Compiler.Namespace in namespaces.joined()
+            for namespace:SSGC.Namespace in namespaces.joined()
             {
-                for decl:Compiler.Decl in namespace.decls
+                for decl:SSGC.Decl in namespace.decls
                 {
                     if  let location:SourceLocation<Symbol.File> = tests.expect(
                             value: decl.location)

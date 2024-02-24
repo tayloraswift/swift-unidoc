@@ -100,7 +100,7 @@ extension Mongo.CollectionModel where Capacity == (bytes:Int, count:Int?)
 extension Mongo.CollectionModel
 {
     /// Creates any necessary indexes for this collection. Do not call this directly; call
-    /// the ``setup(with:)`` method instead.
+    /// the ``setup(with:)`` method instead. (Unless you are ``setup(with:)``.)
     private
     func setupIndexes(with session:Mongo.Session) async throws
     {

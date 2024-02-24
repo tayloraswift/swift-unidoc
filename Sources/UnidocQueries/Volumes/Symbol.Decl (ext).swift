@@ -30,7 +30,7 @@ extension Symbol.Decl:Unidoc.VertexPredicate
                 {
                     $0[.expr]
                     {
-                        let hash:FNV24.Extended = .init(hashing: "\(self)")
+                        let hash:FNV24.Extended = .decl(self)
 
                         //  The first three of these clauses should be able to use
                         //  a compound index.

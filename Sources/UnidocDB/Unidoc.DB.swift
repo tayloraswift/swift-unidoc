@@ -7,7 +7,7 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocAPI
-import UnidocDiagnostics
+import SourceDiagnostics
 import UnidocLinker
 @_spi(testable)
 import UnidocRecords
@@ -293,7 +293,7 @@ extension Unidoc.DB
         {
             func load(graph:Unidoc.GraphPath) async throws -> ArraySlice<UInt8>
             {
-                throw Unidoc.GraphLoaderError.unavailable
+                fatalError("unreachable")
             }
         }
 
@@ -305,7 +305,7 @@ extension Unidoc.DB
         let symbol:Symbol.Edition = volume.metadata.symbol
 
         let uploaded:Unidoc.UploadStatus = try await self.snapshots.upsert(
-            snapshot: consume snapshot,
+            snapshot: /* consume */ snapshot, // https://github.com/apple/swift/issues/71605
             with: session)
 
         let uplinked:Unidoc.UplinkStatus = .init(
@@ -458,6 +458,24 @@ extension Unidoc.DB
         clear:Bool = true,
         with session:Mongo.Session) async throws -> Unidoc.SitemapDelta?
     {
+        //  We assume compressing the search JSON will take a (relatively) long time, so we do
+        //  it before performing any database operations.
+        //
+        //  Our gzip compression is about 1.5 percent worse than Amazon CloudFront’s
+        //  compression, which uses the Brotli algorithm. But it saves us local disk space,
+        //  because we always store a copy of the search index in the database.
+        //
+        //  Amazon CloudFront will not re-compress files we have already compressed, so this
+        //  means users will need to download 1.5 percent more data to use the search index.
+        //  We think this is an acceptable trade-off, because compressing the search index
+        //  locally means we can add more symbols to each search index.
+        //
+        //  We could get the best of both worlds by decompressing the search index before
+        //  transferring it out to Amazon CloudFront. But that just doesn’t seem worth the CPU
+        //  cycles, either for us or for Amazon.
+        let search:Unidoc.TextResource<Symbol.Edition> = .init(id: volume.id,
+            text: .init(compressing: volume.index.utf8))
+
         if  clear
         {
             try await self.vertices.clear(range: volume.edition, with: session)
@@ -476,7 +494,7 @@ extension Unidoc.DB
         }
 
         try await self.volumes.insert(some: volume.metadata, with: session)
-        try await self.search.insert(some: volume.search, with: session)
+        try await self.search.insert(some: search, with: session)
         try await self.trees.insert(some: volume.trees, with: session)
 
         try await self.vertices.insert(volume.vertices, with: session)

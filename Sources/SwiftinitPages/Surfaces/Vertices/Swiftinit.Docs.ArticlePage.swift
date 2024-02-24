@@ -76,13 +76,13 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.VertexPage
 
             if  let file:Unidoc.Scalar = self.vertex.readme
             {
-                $0 ?= self.context.link(file: file)
+                $0 ?= self.context.link(source: file)
             }
         }
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
-        main[.section, { $0.class = "details" }] =
+        main[.section, { $0.class = "details literature" }] =
             (self.vertex.details?.markdown).map(self.context.prose(_:))
 
         main += self.groups

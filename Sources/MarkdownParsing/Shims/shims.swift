@@ -1,6 +1,7 @@
 import Markdown
 
 typealias _BlockDirective = Markdown.BlockDirective
+typealias _DirectiveArgument = Markdown.DirectiveArgument
 typealias _BlockQuote = Markdown.BlockQuote
 typealias _BlockContainer = Markdown.BlockContainer
 typealias _BlockMarkup = Markdown.BlockMarkup

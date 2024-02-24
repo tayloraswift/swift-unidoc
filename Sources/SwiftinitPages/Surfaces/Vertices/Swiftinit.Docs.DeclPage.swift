@@ -121,11 +121,11 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
 
             if  let location:SourceLocation<Unidoc.Scalar> = self.vertex.location
             {
-                $0 ?= self.context.link(file: location.file, line: location.position.line)
+                $0 ?= self.context.link(source: location.file, line: location.position.line)
             }
             if  let file:Unidoc.Scalar = self.vertex.readme
             {
-                $0 ?= self.context.link(file: file)
+                $0 ?= self.context.link(source: file)
             }
         }
 
@@ -221,13 +221,21 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
                 $0[.p, { $0.class = "symbol" }]
                 {
                     $0[.code] = self.vertex.symbol.rawValue
+
+                    $0[.span, { $0.class = "parenthetical" }]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "/help/what-are-mangled-names"
+                        } = "What are these?"
+                    }
                 }
 
                 $0[.p]
                 {
                     $0[.code]
                     {
-                        let hash:FNV24 = .init(hashing: "\(self.vertex.symbol)")
+                        let hash:FNV24 = .init(truncating: .decl(self.vertex.symbol))
                         $0 += "FNV24: ["
                         $0[.span] { $0.class = "fnv24" } = "\(hash)"
                         $0 += "]"
@@ -246,7 +254,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
             }
         }
 
-        main[.section, { $0.class = "details" }]
+        main[.section, { $0.class = "details literature" }]
         {
             if  case .protocol = self.vertex.phylum
             {

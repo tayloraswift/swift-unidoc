@@ -42,6 +42,14 @@ enum Main:TestMain, TestBattery
                 tests.expect(link.path.visible ..? ["value"])
                 tests.expect(nil: link.suffix)
             }
+            if  let tests:TestGroup = tests / "SingleCharacter",
+                let link:Codelink = tests.roundtrip("x")
+            {
+                tests.expect(link.base ==? .relative)
+                tests.expect(link.path.components ..? ["x"])
+                tests.expect(link.path.visible ..? ["x"])
+                tests.expect(nil: link.suffix)
+            }
 
             if  let tests:TestGroup = tests / "Real" / "1",
                 let link:Codelink = tests.roundtrip("Real...(_:_:)")

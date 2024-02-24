@@ -87,9 +87,7 @@ extension Markdown.SwiftLanguage
         }
 
         let slices:[SnippetParser.Slice] = parser.finish(at: parsed.endPosition, in: utf8)
-
-        var spans:SyntaxClassifications.Iterator = parsed.classifications.makeIterator()
-        var span:SyntaxClassifiedRange? = spans.next()
+        var cursor:SyntaxClassificationCursor = .init(parsed.classifications)
 
         let rendered:[Markdown.SnippetSlice] = slices.map
         {
@@ -97,40 +95,13 @@ extension Markdown.SwiftLanguage
 
             let bytecode:Markdown.Bytecode = .init
             {
-                ranges:
+                (output:inout Markdown.BinaryEncoder) in
+
                 for var range:Range<Int> in slice.ranges
                 {
-                    while let highlight:SyntaxClassifiedRange = span
+                    cursor.step(through: &range)
                     {
-                        if  range.upperBound < highlight.endOffset
-                        {
-                            //  This range is strictly contained within the current highlight.
-                            $0[highlight: highlight.kind] = utf8[range]
-                            continue ranges
-                        }
-
-                        span = spans.next()
-
-                        if  range.lowerBound >= highlight.endOffset
-                        {
-                            //  This range does not overlap with the current highlight at all.
-                            continue
-                        }
-
-                        if  range.upperBound == highlight.endOffset
-                        {
-                            //  This range ends at the end of the current highlight.
-                            $0[highlight: highlight.kind] = utf8[range]
-                            continue ranges
-                        }
-                        else
-                        {
-                            //  This range ends after the end of the current highlight.
-                            let overlap:Range<Int> = range.lowerBound ..< highlight.endOffset
-                            $0[highlight: highlight.kind] = utf8[overlap]
-
-                            range = highlight.endOffset ..< range.upperBound
-                        }
+                        output[highlight: $1] = utf8[$0]
                     }
                 }
             }
@@ -139,5 +110,43 @@ extension Markdown.SwiftLanguage
         }
 
         return (caption, rendered)
+    }
+
+    public
+    func parse(code utf8:[UInt8], diff:[(Range<Int>, Markdown.DiffType?)]) -> Markdown.Bytecode
+    {
+        .init
+        {
+            (output:inout Markdown.BinaryEncoder) in
+
+            let parsed:SourceFileSyntax = utf8.withUnsafeBufferPointer
+            {
+                Parser.parse(source: $0)
+            }
+
+            var cursor:SyntaxClassificationCursor = .init(parsed.classifications)
+
+            for case (var range, let type) in diff
+            {
+                if  let type:Markdown.DiffType
+                {
+                    output[.diff(type)]
+                    {
+                        output in
+                        cursor.step(through: &range)
+                        {
+                            output[highlight: $1] = utf8[$0]
+                        }
+                    }
+                }
+                else
+                {
+                    cursor.step(through: &range)
+                    {
+                        output[highlight: $1] = utf8[$0]
+                    }
+                }
+            }
+        }
     }
 }

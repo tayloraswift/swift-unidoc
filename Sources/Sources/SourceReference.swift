@@ -1,32 +1,32 @@
 @frozen public
-struct SourceReference<File>
+struct SourceReference<Frame>
 {
     public
-    let file:File
+    let frame:Frame
     public
     let range:Range<SourcePosition>?
 
     @inlinable public
-    init(file:File, range:Range<SourcePosition>?)
+    init(range:Range<SourcePosition>?, in frame:Frame)
     {
-        self.file = file
         self.range = range
+        self.frame = frame
     }
 }
-extension SourceReference:Equatable where File:Equatable
+extension SourceReference:Equatable where Frame:Equatable
 {
 }
-extension SourceReference:Hashable where File:Hashable
+extension SourceReference:Hashable where Frame:Hashable
 {
 }
-extension SourceReference:Sendable where File:Sendable
+extension SourceReference:Sendable where Frame:Sendable
 {
 }
 extension SourceReference
 {
     @inlinable public
-    func map<T>(_ transform:(File) throws -> T) rethrows -> SourceReference<T>
+    func map<T>(_ transform:(Frame) throws -> T) rethrows -> SourceReference<T>
     {
-        .init(file: try transform(self.file), range: self.range)
+        .init(range: self.range, in: try transform(self.frame))
     }
 }

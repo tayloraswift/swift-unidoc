@@ -7,39 +7,46 @@ import SymbolGraphLinker
 import SymbolGraphParts
 import SymbolGraphs
 import Symbols
-import UnidocDiagnostics
+import SourceDiagnostics
 
 extension SymbolGraph
 {
     static
-    func build(from artifacts:Artifacts) async throws -> Self
+    func build(package:SPM.PackageSources, from artifacts:[Artifacts]) async throws -> Self
     {
-        let (namespaces, nominations):([[Compiler.Namespace]], Compiler.Nominations)
-        let (extensions):[Compiler.Extension]
+        precondition(package.cultures.count == artifacts.count,
+            "Mismatched cultures and artifacts!")
+
+        let root:Symbol.FileBase? = (package.root?.path.string).map(Symbol.FileBase.init(_:))
+
+        let (namespaces, nominations):([[SSGC.Namespace]], SSGC.Nominations)
+        let (extensions):[SSGC.Extension]
 
         var profiler:BuildProfiler = .init()
         do
         {
-            var compiler:Compiler = .init(root: artifacts.root)
+            var checker:SSGC.TypeChecker = .init(root: root)
 
-            for culture:Artifacts.Culture in artifacts.cultures
+            for (culture, artifacts):(SPM.NominalSources, Artifacts) in zip(
+                package.cultures,
+                artifacts)
             {
                 let parts:[SymbolGraphPart] = try profiler.measure(\.loadingSymbols)
                 {
-                    try culture.loadSymbols()
+                    try artifacts.load()
                 }
 
                 try profiler.measure(\.compiling)
                 {
-                    try compiler.compile(
+                    try checker.compile(
                         language: culture.module.language ?? .swift,
-                        culture: culture.id,
+                        culture: culture.module.id,
                         parts: parts)
                 }
             }
 
-            (namespaces, nominations) = compiler.declarations.load()
-            (extensions) = compiler.extensions.load()
+            (namespaces, nominations) = checker.declarations.load()
+            (extensions) = checker.extensions.load()
 
             print("""
                 Compiled documentation!
@@ -56,8 +63,8 @@ extension SymbolGraph
         }
         do
         {
-            var linker:StaticLinker = .init(nominations: nominations,
-                modules: artifacts.cultures.map(\.module),
+            var linker:SSGC.Linker = .init(nominations: nominations,
+                modules: package.cultures.map(\.module),
                 plugins: [.swift])
 
             let scalarPositions:[[SymbolGraph.Namespace]] = profiler.measure(\.linking)
@@ -69,37 +76,45 @@ extension SymbolGraph
                 linker.allocate(extensions: extensions)
             }
 
-            let markdown:[[MarkdownSourceFile]]
-            let snippets:[SwiftSourceFile]
+            let resources:[[SPM.ResourceFile]] = package.cultures.map(\.resources)
+            let markdown:[[SPM.ResourceFile]] = package.cultures.map(\.markdown)
+            let snippets:[SPM.ResourceFile] = package.snippets
 
-            (markdown, snippets) = try profiler.measure(\.loadingSources)
-            {
-                (
-                    try artifacts.loadMarkdown(),
-                    try artifacts.loadSnippets()
-                )
-            }
-
-            let articles:[[StaticLinker.Article]] = profiler.measure(\.linking)
+            let articles:[[SSGC.Article]] = try profiler.measure(\.linking)
             {
                 //  Calling this is mandatory, even if there are no supplements!
-                linker.attach(snippets: snippets, markdown: markdown)
+                try linker.attach(resources: resources,
+                    snippets: snippets,
+                    markdown: markdown)
             }
 
-            _ = consume markdown
-            _ = consume snippets
+            for resource:SPM.ResourceFile in (consume resources).joined()
+            {
+                profiler.loadingSources += resource.loadingTime
+                profiler.linking -= resource.loadingTime
+            }
+            for markdown:SPM.ResourceFile in (consume markdown).joined()
+            {
+                profiler.loadingSources += markdown.loadingTime
+                profiler.linking -= markdown.loadingTime
+            }
+            for snippet:SPM.ResourceFile in (consume snippets)
+            {
+                profiler.loadingSources += snippet.loadingTime
+                profiler.linking -= snippet.loadingTime
+            }
 
             let graph:SymbolGraph = try profiler.measure(\.linking)
             {
-                linker.link(articles: articles)
+                try linker.link(articles: articles)
 
-                linker.link(namespaces: namespaces, at: scalarPositions)
-                linker.link(extensions: extensions, at: extensionPositions)
+                try linker.link(namespaces: namespaces, at: scalarPositions)
+                try linker.link(extensions: extensions, at: extensionPositions)
 
                 return try linker.load()
             }
 
-            linker.status(root: artifacts.root).emit(colors: .enabled)
+            linker.status(root: root).emit(colors: .enabled)
 
             print("""
                 Linked documentation!

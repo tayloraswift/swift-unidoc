@@ -7,18 +7,31 @@ extension Symbol.Article:BSONDecodable, BSONEncodable
 }
 extension Symbol.Article
 {
-    @inlinable public
-    init(_ bundle:borrowing Symbol.Module, _ name:borrowing String)
+    /// Creates an article symbol.
+    @inlinable public static
+    func article(_ namespace:borrowing Symbol.Module, _ name:borrowing String) -> Self
     {
-        self.init(rawValue: "\(bundle) \(name)")
+        .init(rawValue: "\(namespace) \(name)")
     }
 
-    @inlinable public
-    var name:Substring
+    // Creates an article symbol appropriate for a tutorial.
+    @inlinable public static
+    func tutorial(_ namespace:borrowing Symbol.Module, _ name:borrowing String) -> Self
     {
-        self.rawValue.firstIndex(of: " ").map
+        .init(rawValue: "\(namespace) \(name)\ttutorial")
+    }
+
+    /// Returns the space-separated article path without the module qualifier.
+    @inlinable public
+    var path:Substring
+    {
+        if  let i:String.Index = self.rawValue.firstIndex(of: " ")
         {
-            self.rawValue[self.rawValue.index(after: $0)...]
-        } ?? self.rawValue[...]
+            self.rawValue[self.rawValue.index(after: i)...]
+        }
+        else
+        {
+            self.rawValue[...]
+        }
     }
 }

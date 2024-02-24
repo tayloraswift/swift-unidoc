@@ -12,7 +12,7 @@ extension SnippetParser
         let before:AbsolutePosition
         /// The UTF-8 offset of the newline after the slice marker, assuming it exists.
         let after:AbsolutePosition
-        /// The line number (1-indexed) of the slice marker.
+        /// The line number (0-indexed) of the slice marker.
         let line:Int
     }
 }

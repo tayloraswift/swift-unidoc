@@ -65,10 +65,9 @@ extension Unidoc.Snapshot
         //  Is this the standard library? If so, is it a release version?
         let swift:PatchVersion?
         if  case .swift = metadata.package.name,
-            let version:SemanticVersion = metadata.swift.stable,
-                version.release
+            case nil = metadata.swift.nightly
         {
-            swift = version.patch
+            swift = metadata.swift.version
         }
         else
         {
@@ -132,7 +131,7 @@ extension Unidoc.Snapshot
         }
         else
         {
-            throw Unidoc.GraphLoaderError.unavailable
+            throw Unidoc.GraphLoaderError.unavailable(self.metadata.package.id)
         }
     }
 }

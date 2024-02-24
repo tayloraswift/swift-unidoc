@@ -24,10 +24,9 @@ extension Swiftinit.RealmPage
 {
     init(from output:consuming Unidoc.RealmQuery.Output)
     {
-        let output:Unidoc.RealmQuery.Output = output
-
-        let packages:[Unidoc.PackageOutput] = output.packages
-        let metadata:Unidoc.RealmMetadata = output.metadata
+        //  5.9 compiler bug :(
+        let packages:[Unidoc.PackageOutput] = (copy output).packages
+        let metadata:Unidoc.RealmMetadata = (copy output).metadata
         let user:Unidoc.User? = (consume output).user
 
         self.init(metadata: metadata,

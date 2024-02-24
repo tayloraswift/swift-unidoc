@@ -1,0 +1,61 @@
+@import "Colors";
+
+pre
+{
+    margin: 2rem 0 2rem;
+    line-height: 1.5rem;
+}
+// line numbers
+pre.snippet
+{
+    overflow: scroll;
+    padding: 0.5rem 0 0.5rem 3rem;
+
+    background-color: $light-code-well;
+    scrollbar-color: $light-accent-barbie-pink transparent;
+    scrollbar-gutter: stable;
+
+    code
+    {
+        counter-set: line 0;
+        white-space: pre;
+
+        span.newline
+        {
+            counter-increment: line;
+        }
+        span.newline:after
+        {
+            color: $light-snippet-line-number;
+
+            position: relative;
+            display: inline-block;
+            content: counter(line);
+            width: 0;
+            right: 2rem;
+            direction: rtl;
+            word-wrap: normal;
+        }
+
+        //  diffs
+        ins
+        {
+            background-color: $light-diff-insert;
+            text-decoration: inherit;
+        }
+        del
+        {
+            background-color: $light-diff-delete;
+            text-decoration: inherit;
+        }
+        mark
+        {
+            background-color: $light-diff-update;
+            text-decoration: inherit;
+        }
+    }
+    code.language-swift
+    {
+        color: $light-swift;
+    }
+}

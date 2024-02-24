@@ -50,14 +50,16 @@ extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
             else
             {
                 return .notFound(.init(content: .string(""),
-                    type: .text(.plain, charset: .utf8)))
+                    type: .text(.plain, charset: .utf8),
+                    gzip: false))
             }
 
             let json:JSON = .object(with: status.encode(to:))
 
             return .ok(.init(
                 content: .binary(json.utf8),
-                type: .application(.json, charset: .utf8)))
+                type: .application(.json, charset: .utf8),
+                gzip: false))
 
         case _:
             let page:Swiftinit.TagsPage = .init(from: output)

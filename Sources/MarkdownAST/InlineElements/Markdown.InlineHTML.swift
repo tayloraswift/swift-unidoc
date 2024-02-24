@@ -1,5 +1,3 @@
-import MarkdownABI
-
 extension Markdown
 {
     @frozen public

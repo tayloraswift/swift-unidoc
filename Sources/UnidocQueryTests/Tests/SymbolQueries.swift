@@ -36,7 +36,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         do
         {
             //  Use the cached binary if available.
-            swift = try .load(package: .swift, at: toolchain.version, in: workspace.path)
+            swift = try .load(swift: toolchain.version, in: workspace.path)
         }
         catch
         {
@@ -160,9 +160,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             ]
             {
                 guard
-                    let tests:TestGroup = tests / name,
-                    let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = tests.expect(
-                        value: query)
+                let tests:TestGroup = tests / name,
+                let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = tests.expect(
+                    value: query)
                 else
                 {
                     continue
@@ -195,7 +195,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     tests.expect(tree.rows ..?
                         [
                             .init(
-                                shoot: .init(stem: "BarbieCore Getting-Started"),
+                                shoot: .init(stem: "BarbieCore External-links"),
+                                type: .text("External links")),
+                            .init(
+                                shoot: .init(stem: "BarbieCore Getting-started"),
                                 type: .text("Getting started")),
                             .init(
                                 shoot: .init(stem: "BarbieCore Barbie"),
@@ -228,10 +231,33 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// The type itself lives in ``BarbieHousing``, but it is namespaced to
         /// ``BarbieCore.Barbie``, and its codelinks should resolve relative to that
         /// namespace.
-        if  let tests:TestGroup = tests / "Barbie" / "Dreamhouse"
+        for case (let tests?, let path, let expected) in
+        [
+            (
+                tests / "Barbie" / "Dreamhouse" as TestGroup?,
+                ["barbiecore", "barbie", "dreamhouse"][...],
+                [
+                    "Int": 1,
+                    "Int max": 2,
+                    "ID": 1,
+                    "Barbie": 1,
+                    "Barbie ID": 2,
+                    "BarbieCore Barbie ID": 3,
+                ] as [String: Int]
+            ),
+            (
+                tests / "Barbie" / "Dreamhouse" / "Keys" as TestGroup?,
+                ["barbiecore", "barbie", "dreamhouse", "keys"][...],
+                [
+                    "Int": 1,
+                    "max": 2, // expands to two components because it is a vector symbol
+                    "ID": 1,
+                    "Barbie": 1,
+                ] as [String: Int]
+            ),
+        ]
         {
-            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
-                "swift-malibu", ["barbiecore", "barbie", "dreamhouse"])
+            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init("swift-malibu", path)
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
@@ -241,9 +267,11 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     let tree:Unidoc.TypeTree = tests.expect(
                         value: output.principal?.tree),
                     let overview:Unidoc.Passage = tests.expect(
-                        value: vertex.overview),
-                    tests.expect(overview.outlines.count ==? 5)
+                        value: vertex.overview)
                 {
+                    //  This checks that we cached the two instances of `Barbie.ID`, and
+                    //  additionally that we optimized away a third reference to it.
+                    tests.expect(overview.outlines.count ==? expected.count)
                     tests.expect(tree.rows ..?
                         [
                             .init(
@@ -284,45 +312,33 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         ])
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))
-
-                    for outline:Unidoc.Outline in overview.outlines
+                    let lengths:[String: Int] = overview.outlines.reduce(into: [:])
                     {
-                        let scalars:[Unidoc.Scalar]?
-                        switch outline
-                        {
-                        case    .path("Int", let path),
-                                .path("ID", let path),
-                                .path("Barbie", let path):
-                            tests.expect(path.count ==? 1)
-                            scalars = path
-
-                        case    .path("Barbie ID", let path):
-                            tests.expect(path.count ==? 2)
-                            scalars = path
-
-                        case    .path("BarbieCore Barbie ID", let path):
-                            tests.expect(path.count ==? 2)
-                            scalars = path
-
-                        case _:
-                            scalars = nil
-                        }
-
-                        guard let scalars:[Unidoc.Scalar] = tests.expect(value: scalars)
+                        guard
+                        case .path(let words, let path) = $1
                         else
                         {
-                            continue
+                            tests.expect(value: nil as [Unidoc.Scalar]?)
+                            return
+                        }
+                        for id:Unidoc.Scalar in path
+                        {
+                            tests.expect(true: secondaries.contains(id))
                         }
 
-                        for scalar:Unidoc.Scalar in scalars
                         {
-                            tests.expect(true: secondaries.contains(scalar))
-                        }
+                            tests.expect(nil: $0)
+                            $0 = path.count
+                        } (&$0[words])
                     }
+                    //  The ``Int.max`` test case is especially valuable because not only is it
+                    //  a multi-component cross-package reference, but the `max` member is also
+                    //  being inherited from ``SignedInteger``.
+                    tests.expect(lengths ==? expected)
                 }
             }
         }
-        /// The symbol graph linker should have mangled the space in `Getting Started.md`
+        /// The symbol graph linker should have mangled the space in `Getting started.md`
         /// into a hyphen.
         if  let tests:TestGroup = tests / "Barbie" / "GettingStarted"
         {
@@ -330,12 +346,51 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 "swift-malibu", ["barbiecore", "getting-started"])
             await tests.do
             {
-
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await session.query(database: unidoc.id, with: query)),
                     let _:Unidoc.AnyVertex = tests.expect(
                         value: output.principal?.vertex)
                 {
+                }
+            }
+        }
+
+        if  let tests:TestGroup = tests / "Barbie" / "ExternalLinks"
+        {
+            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
+                "swift-malibu", ["barbiecore", "external-links"])
+            await tests.do
+            {
+                if  let output:Unidoc.VertexOutput = tests.expect(
+                        value: try await session.query(database: unidoc.id, with: query)),
+                    let vertex:Unidoc.AnyVertex = tests.expect(
+                        value: output.principal?.vertex),
+                    let prose:Unidoc.Passage = tests.expect(
+                            value: vertex.overview)
+                {
+                    //  Note: the duplicate outline was not optimized away because external
+                    //  links are resolved dynamically, and this means their representation
+                    //  within symbol graphs encodes their source locations, for diagnostics.
+                    tests.expect(prose.outlines.count ==? 4)
+                    tests.expect(prose.outlines[..<3] ..? [
+                            .link(https: "en.wikipedia.org/wiki/Main_Page", safe: true),
+                            .link(https: "en.wikipedia.org/wiki/Main_Page", safe: true),
+                            .link(https: "liberationnews.org", safe: false),
+                        ])
+
+                    guard
+                    case .path(let text, let path) = prose.outlines[3]
+                    else
+                    {
+                        tests.expect(value: nil as [Unidoc.Scalar]?)
+                        return
+                    }
+
+                    //  TODO: This is not a bug, but it is a missed optimization opportunity.
+                    //  We do not need to resolve the two leading path components, as they will
+                    //  never be shown to the user.
+                    tests.expect(text ==? "swift string index")
+                    tests.expect(path.count ==? 3)
                 }
             }
         }

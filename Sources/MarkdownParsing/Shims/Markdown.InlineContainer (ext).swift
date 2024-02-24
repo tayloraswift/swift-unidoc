@@ -4,7 +4,7 @@ import MarkdownAST
 extension Markdown.InlineContainer where Element:ParsableAsInlineMarkup
 {
     init(from markup:/* borrowing */ any _InlineContainer,
-        in source:borrowing MarkdownSource,
+        in source:borrowing Markdown.Source,
         as type:Markdown.InlineContainerType)
     {
         self.init(type,

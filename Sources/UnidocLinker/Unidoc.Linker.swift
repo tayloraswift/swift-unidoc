@@ -4,7 +4,7 @@ import Signatures
 import SymbolGraphs
 import Symbols
 import Unidoc
-import UnidocDiagnostics
+import SourceDiagnostics
 import UnidocRecords
 
 @available(*, deprecated, renamed: "Unidoc.Linker")
@@ -17,10 +17,11 @@ typealias DynamicLinker = Unidoc.Linker
 
 extension Unidoc
 {
+    //  https://github.com/apple/swift/issues/71606
     @frozen public
     struct Linker:~Copyable
     {
-        var diagnostics:DiagnosticContext<Unidoc.Symbolicator>
+        var diagnostics:Diagnostics<Unidoc.Symbolicator>
 
         private
         let byPackageName:[Symbol.Package: Graph]
@@ -136,13 +137,13 @@ extension Unidoc.Linker
     }
 
     public consuming
-    func status() -> some Diagnostics
+    func status() -> DiagnosticMessages
     {
-        let diagnostics:DiagnosticContext<Unidoc.Symbolicator> = self.diagnostics
+        let diagnostics:Diagnostics<Unidoc.Symbolicator> = self.diagnostics
         let symbols:Unidoc.Symbolicator = .init(context: self,
             root: self.current.metadata.root)
 
-        return diagnostics.with(symbolicator: symbols)
+        return diagnostics.symbolicated(with: symbols)
     }
 }
 extension Unidoc.Linker
@@ -170,7 +171,7 @@ extension Unidoc.Linker
     {
         self.expand(vector.0, to: length - 1) + [vector.1]
     }
-    func expand(_ scalar:Unidoc.Scalar, to length:Int = .max) -> [Unidoc.Scalar]
+    func expand(_ scalar:Unidoc.Scalar, to length:Int) -> [Unidoc.Scalar]
     {
         var current:Unidoc.Scalar = scalar
         var path:[Unidoc.Scalar] = [current]
@@ -180,16 +181,34 @@ extension Unidoc.Linker
 
         for _:Int in 1 ..< max(1, length)
         {
-            if  case let next? = self[current.package]?.scope(of: current),
-                case nil = seen.update(with: next)
-            {
-                path.append(next)
-                current = next
-            }
+            guard
+            let next:Unidoc.Scalar = self[current.package]?.ancestor(of: current),
+            case nil = seen.update(with: next)
             else
             {
                 break
             }
+
+            path.append(next)
+            current = next
+        }
+
+        return path.reversed()
+    }
+    /// This function looks very similar to `expand(_:to:)`, but it never includes the module
+    /// namespace!
+    func expand(_ scalar:Unidoc.Scalar) -> [Unidoc.Scalar]
+    {
+        var current:Unidoc.Scalar = scalar
+        var path:[Unidoc.Scalar] = [current]
+        var seen:Set<Unidoc.Scalar> = [current]
+
+        while let next:Unidoc.Scalar = self[current.package]?.scope(of: current),
+            case nil = seen.update(with: next)
+        {
+
+            path.append(next)
+            current = next
         }
 
         return path.reversed()
@@ -246,30 +265,31 @@ extension Unidoc.Linker
         {
             for (dependencies, cultures):([Symbol.Package: Set<String>], [Int]) in groups
             {
-                var shared:SymbolGraph.ModuleContext = .init()
-
-                if  let swift:Graph = self[dynamic: .swift]
+                let shared:SymbolGraph.ModuleContext = .init
                 {
-                    shared.add(snapshot: swift, context: self, filter: nil)
-                }
-                for (package, products):(Symbol.Package, Set<String>) in
-                    dependencies.sorted(by: { $0.key < $1.key })
-                {
-                    guard
-                    let snapshot:Graph = self[dynamic: package]
-                    else
+                    if  let swift:Graph = self[dynamic: .swift]
                     {
-                        continue
+                        $0.add(snapshot: swift, context: self, filter: nil)
                     }
-
-                    var filter:Set<Int> = []
-                    for product:SymbolGraph.Product in snapshot.metadata.products
-                        where products.contains(product.name)
+                    for (package, products):(Symbol.Package, Set<String>) in
+                        dependencies.sorted(by: { $0.key < $1.key })
                     {
-                        filter.formUnion(product.cultures)
-                    }
+                        guard
+                        let snapshot:Graph = self[dynamic: package]
+                        else
+                        {
+                            continue
+                        }
 
-                    shared.add(snapshot: snapshot, context: self, filter: filter)
+                        var filter:Set<Int> = []
+                        for product:SymbolGraph.Product in snapshot.metadata.products
+                            where products.contains(product.name)
+                        {
+                            filter.formUnion(product.cultures)
+                        }
+
+                        $0.add(snapshot: snapshot, context: self, filter: filter)
+                    }
                 }
 
                 for c:Int in cultures
@@ -426,6 +446,10 @@ extension Unidoc.Linker
     {
         var resolver:Unidoc.Resolver = .init(
             codelinks: .init(table: module.codelinks, scope: .init(
+                namespace: namespace,
+                imports: module.imports,
+                path: scope)),
+            caseless: .init(table: module.caseless, scope: .init(
                 namespace: namespace,
                 imports: module.imports,
                 path: scope)),

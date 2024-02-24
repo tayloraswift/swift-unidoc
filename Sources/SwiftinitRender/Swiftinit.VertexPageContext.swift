@@ -17,6 +17,7 @@ protocol _SwiftinitVertexPageContext:AnyObject
 {
     /// Returns the metadata document for the principal volume of the associated page.
     var volume:Unidoc.VolumeMetadata { get }
+    var repo:Unidoc.PackageRepo? { get }
 
     /// Returns the metadata document for the specified volume, if available.
     subscript(volume:Unidoc.Edition) -> Unidoc.VolumeMetadata? { get }
@@ -32,9 +33,6 @@ protocol _SwiftinitVertexPageContext:AnyObject
     subscript(culture id:Unidoc.Scalar) -> (vertex:Unidoc.CultureVertex, url:String?)? { get }
     subscript(article id:Unidoc.Scalar) -> (vertex:Unidoc.ArticleVertex, url:String?)? { get }
     subscript(decl id:Unidoc.Scalar) -> (vertex:Unidoc.DeclVertex, url:String?)? { get }
-    subscript(file id:Unidoc.Scalar) ->
-    (
-        vertex:Unidoc.FileVertex,
-        origin:Unidoc.PackageOrigin?
-    )? { get }
+
+    subscript(file id:Unidoc.Scalar) -> Unidoc.FileVertex? { get }
 }

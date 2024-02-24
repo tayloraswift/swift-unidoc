@@ -2,10 +2,10 @@
 struct JSON:Sendable
 {
     public
-    var utf8:[UInt8]
+    var utf8:ArraySlice<UInt8>
 
     @inlinable public
-    init(utf8:[UInt8])
+    init(utf8:ArraySlice<UInt8>)
     {
         self.utf8 = utf8
     }

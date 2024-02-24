@@ -5,8 +5,10 @@ let package:Package = .init(name: "Swiftinit",
     products:
     [
         .library(name: "Articles", targets: ["Articles"]),
+        .library(name: "Help", targets: ["Help"]),
     ],
     targets:
     [
-        .target(name: "Articles", exclude: ["md"]),
+        .target(name: "Articles"),
+        .target(name: "Help"),
     ])

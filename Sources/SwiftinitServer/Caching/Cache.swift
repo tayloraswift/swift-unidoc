@@ -55,6 +55,7 @@ extension Cache
                 let resource:HTTP.Resource = .init(
                     content: .binary(asset),
                     type: key.type,
+                    gzip: false,
                     hash: hash)
                 $0 = resource
                 return resource

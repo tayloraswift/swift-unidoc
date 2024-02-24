@@ -3,25 +3,48 @@ import Sources
 extension Markdown
 {
     @frozen public
-    struct InlineAutolink
+    struct InlineAutolink:Equatable
     {
-        /// Where in the markdown source text this autolink was parsed from.
         public
-        let source:SourceReference<MarkdownSource>
-        /// The text value of this autolink.
-        public
-        let text:String
+        let text:SourceString
         /// Indicates if this autolink originated from an inline code span.
         public
         let code:Bool
 
-        @inlinable public
-        init(source:SourceReference<MarkdownSource>, text:String, code:Bool)
+        @inlinable
+        init(text:SourceString, code:Bool)
         {
-            self.source = source
             self.text = text
             self.code = code
         }
+    }
+}
+@available(*, deprecated)
+extension Markdown.InlineAutolink:CustomStringConvertible
+{
+    @inlinable public
+    var description:String { [][0] }
+}
+extension Markdown.InlineAutolink
+{
+    @inlinable public
+    var source:SourceReference<Markdown.Source>
+    {
+        self.text.source
+    }
+}
+extension Markdown.InlineAutolink
+{
+    @inlinable public static
+    func code(link text:String, at source:SourceReference<Markdown.Source>) -> Self
+    {
+        .init(text: .init(source: source, string: text), code: true)
+    }
+
+    @inlinable public static
+    func doc(link text:String, at source:SourceReference<Markdown.Source>) -> Self
+    {
+        .init(text: .init(source: source, string: text), code: false)
     }
 }
 extension Markdown.InlineAutolink
@@ -30,7 +53,7 @@ extension Markdown.InlineAutolink
     var element:Markdown.InlineElement
     {
         self.code ?
-            .code(.init(text: text)) :
-            .link(.init(source: self.source, url: self.text))
+            .code(.init(text: self.text.string)) :
+            .link(.init(source: self.source, url: self.text.string))
     }
 }

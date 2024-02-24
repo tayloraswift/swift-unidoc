@@ -29,15 +29,26 @@ extension Swiftinit.MediaEndpoint
         }
 
         let content:HTTP.Resource.Content
-        switch output.utf8
+        let gzipped:Bool
+        switch output.text
         {
-        case .binary(let utf8):     content = .binary(utf8)
-        case .length(let bytes):    content = .length(bytes)
+        case .inline(.gzip(let gzip)):
+            content = .binary(gzip)
+            gzipped = true
+
+        case .inline(.utf8(let utf8)):
+            content = .binary(utf8)
+            gzipped = false
+
+        case .length(let bytes):
+            content = .length(bytes)
+            gzipped = false // ???
         }
 
         return .ok(.init(
             content: content,
             type: self.type,
+            gzip: gzipped,
             hash: output.hash))
     }
 }

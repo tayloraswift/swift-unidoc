@@ -22,7 +22,7 @@ struct CodeSection
 }
 extension CodeSection:HTML.OutputStreamableMarkdown
 {
-    func load(_ reference:Int, for attribute:Markdown.Bytecode.Attribute) -> String?
+    func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
     {
         switch attribute
         {

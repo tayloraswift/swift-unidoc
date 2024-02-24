@@ -11,9 +11,9 @@ import System
 struct Toolchain
 {
     public
-    let version:AnyVersion
+    let version:SwiftVersion
     public
-    let tagname:String
+    let commit:SymbolGraphMetadata.Commit?
     public
     let triple:Triple
     /// The `swift` command, which might be a path to a specific Swift toolchain, or just the
@@ -22,10 +22,10 @@ struct Toolchain
     let swift:String
 
     private
-    init(version:AnyVersion, tagname:String, triple:Triple, swift:String)
+    init(version:SwiftVersion, commit:SymbolGraphMetadata.Commit?, triple:Triple, swift:String)
     {
         self.version = version
-        self.tagname = tagname
+        self.commit = commit
         self.triple = triple
         self.swift = swift
     }
@@ -33,7 +33,7 @@ struct Toolchain
 extension Toolchain
 {
     private
-    init(parsing splash:String, swift:String) throws
+    init(parsing splash:String, swift command:String) throws
     {
         //  Splash should consist of two complete lines of the form
         //
@@ -50,53 +50,65 @@ extension Toolchain
         let toolchain:[Substring] = lines[0].split(separator: " ")
         let triple:[Substring] = lines[1].split(separator: " ")
 
-        guard   toolchain.count >= 4,
-                toolchain[0 ... 1] == ["Swift", "version"],
-                triple.count == 2,
-                triple[0] == "Target:"
+        guard
+            toolchain.count >= 4,
+            toolchain[0 ... 1] == ["Swift", "version"],
+            triple.count == 2,
+            triple[0] == "Target:"
         else
         {
             throw ToolchainError.malformedSplash
         }
-
-        //  Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
-        //  Target: x86_64-unknown-linux-gnu
-        if  toolchain.count > 4
-        {
-            throw ToolchainError.developmentSnapshotNotSupported
-        }
-
-        let parenthesized:Substring = toolchain[3]
-
-        guard parenthesized.startIndex < parenthesized.endIndex
-        else
-        {
-            throw ToolchainError.malformedSplash
-        }
-
-        let i:String.Index = parenthesized.index(after: parenthesized.startIndex)
-        let j:String.Index = parenthesized.index(before: parenthesized.endIndex)
-
-        guard   i < j,
-        case ("(", ")") = (parenthesized[parenthesized.startIndex], parenthesized[j])
-        else
-        {
-            throw ToolchainError.malformedSplash
-        }
-
-        if  let triple:Triple = .init(triple[1])
-        {
-
-            self.init(
-                version: .init(toolchain[2]),
-                tagname: .init(parenthesized[i ..< j]),
-                triple: triple,
-                swift: swift)
-        }
+        guard
+        let triple:Triple = .init(triple[1])
         else
         {
             throw ToolchainError.malformedTriple
         }
+
+        let commit:SymbolGraphMetadata.Commit?
+        let swift:SwiftVersion
+        if  toolchain.count == 4,
+            let version:NumericVersion = .init(toolchain[2])
+        {
+            let parenthesized:Substring = toolchain[3]
+
+            guard parenthesized.startIndex < parenthesized.endIndex
+            else
+            {
+                throw ToolchainError.malformedSplash
+            }
+
+            let i:String.Index = parenthesized.index(after: parenthesized.startIndex)
+            let j:String.Index = parenthesized.index(before: parenthesized.endIndex)
+
+            guard i < j,
+            case ("(", ")") = (parenthesized[parenthesized.startIndex], parenthesized[j])
+            else
+            {
+                throw ToolchainError.malformedSplash
+            }
+
+            commit = .init(name: String.init(parenthesized[i ..< j]), sha1: nil)
+            swift = .init(version: PatchVersion.init(padding: version))
+        }
+        //  Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
+        //  Target: x86_64-unknown-linux-gnu
+        else if
+            toolchain.count == 7,
+            let version:MinorVersion = .init(toolchain[2].prefix { $0 != "-" })
+        {
+            commit = nil
+            swift = .init(
+                version: .v(version.components.major, version.components.minor, 0),
+                nightly: .DEVELOPMENT_SNAPSHOT)
+        }
+        else
+        {
+            throw ToolchainError.malformedSwiftVersion
+        }
+
+        self.init(version: swift, commit: commit, triple: triple, swift: command)
     }
 
     public static
@@ -171,7 +183,7 @@ extension Toolchain
                 return try $0.readAll()
             }
 
-            json = .init(utf8: utf8)
+            json = .init(utf8: utf8[...])
         }
         catch let error
         {
@@ -236,51 +248,12 @@ extension Toolchain
 }
 extension Toolchain
 {
-    /// Dumps the symbols for the given package, using the `output` workspace as the
-    /// output directory.
-    func dump(from package:PackageNode,
-        snippetsDirectory:String,
-        include:inout [FilePath],
-        output:ArtifactsDirectory,
-        triple:Triple,
-        pretty:Bool = false) async throws -> Artifacts
-    {
-        let sources:SPM.PackageSources = try .init(scanning: package,
-            snippetsDirectory: snippetsDirectory)
-
-        let cultures:[Artifacts.Culture] = try await self.dump(
-            modules: sources.cultures,
-            include: &include,
-            output: output,
-            triple: triple,
-            pretty: pretty)
-
-        return .init(cultures: cultures, snippets: sources.snippets, root: package.root)
-    }
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
     func dump(modules:[SPM.NominalSources],
+        include:[FilePath],
         output:ArtifactsDirectory,
-        triple:Triple,
-        pretty:Bool = false) async throws -> Artifacts
-    {
-        var include:[FilePath] = []
-        let cultures:[Artifacts.Culture] = try await self.dump(
-            modules: modules,
-            include: &include,
-            output: output,
-            triple: triple,
-            pretty: pretty)
-
-        return .init(cultures: cultures, snippets: [])
-    }
-
-    private
-    func dump(modules:[SPM.NominalSources],
-        include:inout [FilePath],
-        output:ArtifactsDirectory,
-        triple:Triple,
-        pretty:Bool) async throws -> [Artifacts.Culture]
+        pretty:Bool) async throws -> [Artifacts]
     {
         for sources:SPM.NominalSources in modules
         {
@@ -294,10 +267,10 @@ extension Toolchain
                 //  Only dump symbols for library targets.
                 switch sources.module.type
                 {
-                case .binary:       include += sources.include
+                case .binary:       break
                 case .executable:   continue
-                case .regular:      include += sources.include
-                case .macro:        include += sources.include
+                case .regular:      break
+                case .macro:        break
                 case .plugin:       continue
                 case .snippet:      continue
                 case .system:       continue
@@ -309,20 +282,56 @@ extension Toolchain
                 """
             }
 
-            print("Dumping symbols for module '\(sources.module.id)' (\(label))")
+            let module:Symbol.Module = sources.module.id
+
+            print("Dumping symbols for module '\(module)' (\(label))")
+
+            // https://github.com/apple/swift/issues/71635
+            let _minimumACL:String
+            if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
+            {
+                switch module
+                {
+                case "_Concurrency":        _minimumACL = "public"
+                case "_Differentiation":    _minimumACL = "public"
+                case "_StringProcessing":   _minimumACL = "internal"
+                case "Foundation":          _minimumACL = "internal"
+                default:                    _minimumACL = "internal"
+                }
+            }
+            else
+            {
+                _minimumACL = "internal"
+            }
 
             var arguments:[String] =
             [
                 "symbolgraph-extract",
 
-                "-module-name",                     "\(sources.module.id)",
-                "-target",                          "\(triple)",
-                "-minimum-access-level",            "internal",
+                "-module-name",                     "\(module)",
+                "-target",                          "\(self.triple)",
+                "-minimum-access-level",            _minimumACL,
                 "-output-dir",                      "\(output.path)",
-                "-emit-extension-block-symbols",
+                // "-emit-extension-block-symbols",
                 "-include-spi-symbols",
                 "-skip-inherited-docs",
             ]
+
+            if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
+            {
+                switch module
+                {
+                case "_StringProcessing":   break
+                case "Foundation":          break
+                default:
+                    arguments.append("-emit-extension-block-symbols")
+                }
+            }
+            else
+            {
+                arguments.append("-emit-extension-block-symbols")
+            }
+
             if  pretty
             {
                 arguments.append("-pretty-print")
@@ -352,7 +361,7 @@ extension Toolchain
                 catch SystemProcessError.exit(139, _)
                 {
                     print("""
-                    Failed to dump symbols for module '\(sources.module.id)' due to SIGSEGV \
+                    Failed to dump symbols for module '\(module)' due to SIGSEGV \
                     from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
                     compiler; see https://github.com/apple/swift/issues/68767.
                     """)
@@ -399,27 +408,7 @@ extension Toolchain
 
         return modules.map
         {
-            .init($0.module,
-                articles: $0.articles,
-                artifacts: output.path,
-                parts: parts[$0.module.id, default: []])
+            .init(directory: output, parts: parts[$0.module.id, default: []])
         }
-    }
-}
-extension Toolchain
-{
-    @available(*, deprecated)
-    public
-    func generateDocs(for build:Toolchain.Build,
-        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
-    {
-        try await .init(building: build, with: self, pretty: pretty)
-    }
-    @available(*, deprecated)
-    public
-    func generateDocs(for build:SPM.Build,
-        pretty:Bool = false) async throws -> SymbolGraphObject<Void>
-    {
-        try await .init(building: build, with: self, pretty: pretty)
     }
 }

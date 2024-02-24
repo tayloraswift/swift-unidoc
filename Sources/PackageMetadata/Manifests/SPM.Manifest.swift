@@ -57,7 +57,7 @@ extension SPM.Manifest
     /// The name of the snippets directory. This is supposed to be configurable, but due to
     /// sheer incompetence, it is currently always the string `Snippets`.
     @inlinable public
-    var snippets:String { "Snippets"}
+    var snippets:String? { nil }
 }
 extension SPM.Manifest:JSONObjectDecodable
 {

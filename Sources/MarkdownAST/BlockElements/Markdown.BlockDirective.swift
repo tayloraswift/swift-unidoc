@@ -1,23 +1,27 @@
 import MarkdownABI
+import Sources
 
 extension Markdown
 {
+    /// An untyped block directive.
     public final
     class BlockDirective:BlockContainer<BlockElement>
     {
+        public
+        var source:SourceReference<Markdown.Source>?
+
         public
         var name:String
         public
         var arguments:[(name:String, value:String)]
 
         @inlinable public
-        init(name:String,
-            arguments:[(name:String, value:String)] = [],
-            elements:[BlockElement] = [])
+        init(name:String)
         {
+            self.source = nil
             self.name = name
-            self.arguments = arguments
-            super.init(elements)
+            self.arguments = []
+            super.init([])
         }
 
         /// Emits a fallback description of the directive.
@@ -43,5 +47,19 @@ extension Markdown
                 super.emit(into: &$0)
             }
         }
+    }
+}
+extension Markdown.BlockDirective:Markdown.BlockDirectiveType
+{
+    @inlinable public
+    func configure(option:String, value:Markdown.SourceString) throws
+    {
+        self.arguments.append((option, value.string))
+    }
+
+    @inlinable public
+    func append(_ element:Markdown.BlockElement) throws
+    {
+        self.elements.append(element)
     }
 }

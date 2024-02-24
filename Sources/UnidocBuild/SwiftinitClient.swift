@@ -51,7 +51,7 @@ extension SwiftinitClient
 {
     func uplink(editions:FilePath) async throws
     {
-        let json:JSON = .init(utf8: try editions.read())
+        let json:JSON = .init(utf8: try editions.read()[...])
         let coordinates:[Coordinates] = try json.decode()
         for coordinates:Coordinates in coordinates.sorted()
         {
@@ -120,8 +120,8 @@ extension SwiftinitClient
         {
             fatalError("No package search path specified.")
         }
-
-        let bson:BSON.Document = .init(encoding: consume archive)
+        //  https://github.com/apple/swift/issues/71607
+        let bson:BSON.Document = .init(encoding: /* consume */ archive)
 
         try await self.connect
         {
@@ -138,7 +138,7 @@ extension SwiftinitClient
 
     func build(remote symbol:Symbol.Package,
         pretty:Bool,
-        force:Bool) async throws
+        force:Main.Options.Force?) async throws
     {
         //  Building the package might take a long time, and the server might close the
         //  connection before the build is finished. So we do not try to keep this
@@ -202,7 +202,7 @@ extension SwiftinitClient
                 version: edition.coordinate),
             metadata: archive.metadata,
             inline: archive.graph,
-            link: force ? .refresh : .initial))
+            link: force != nil ? .refresh : .initial))
 
         try await self.connect
         {

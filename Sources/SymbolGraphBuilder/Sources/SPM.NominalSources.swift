@@ -1,3 +1,4 @@
+import MarkdownABI
 import SymbolGraphs
 import Symbols
 import System
@@ -7,48 +8,48 @@ extension SPM
     /// Stores information about the source files for a module.
     struct NominalSources
     {
+        private(set)
+        var resources:[ResourceFile]
+        /// Absolute paths to all (non-excluded) markdown articles discovered
+        /// in the relevant target’s sources directory.
+        private(set)
+        var markdown:[ResourceFile]
+
+        private(set)
         var module:SymbolGraph.Module
         /// Absolute path to the module sources directory, if known.
         private(set)
         var origin:Origin?
 
-        /// Absolute paths to all (non-excluded) markdown articles discovered
-        /// in the relevant target’s sources directory.
-        private(set)
-        var articles:[FilePath]
-        /// Directories that contain header files. Empty if this is not a C
-        /// or C++ module.
-        private(set)
-        var include:[FilePath]
-
         private
         init(_ module:SymbolGraph.Module, origin:Origin? = nil)
         {
+            self.resources = []
+            self.markdown = []
+
             self.module = module
             self.origin = origin
-
-            self.articles = []
-            self.include = []
         }
     }
 }
 extension SPM.NominalSources
 {
-    init(scanning module:SymbolGraph.Module,
+    init(include:inout [FilePath],
         exclude:borrowing [String],
-        root:borrowing FilePath) throws
+        package:borrowing SPM.PackageRoot,
+        module:consuming SymbolGraph.Module) throws
     {
         self.init(module)
 
         locations:
-        if  let location:String = module.location
+        if  let location:String = self.module.location
         {
-            self.origin = .sources(root / location)
+            self.origin = .sources(package.path / location)
         }
         else
         {
             let directory:String
-            switch module.type
+            switch self.module.type
             {
             case .binary:       break locations
             case .executable:   directory = "Sources"
@@ -60,10 +61,10 @@ extension SPM.NominalSources
             case .test:         directory = "Tests"
             }
 
-            self.origin = .sources(root / directory / module.name)
+            self.origin = .sources(package.path / directory / self.module.name)
         }
 
-        try self.scan(excluding: exclude)
+        try self.scan(include: &include, exclude: exclude, package: package)
     }
 
     static
@@ -78,7 +79,7 @@ extension SPM.NominalSources
 extension SPM.NominalSources
 {
     private mutating
-    func scan(excluding exclude:[String]) throws
+    func scan(include:inout [FilePath], exclude:[String], package root:SPM.PackageRoot) throws
     {
         guard
         case .sources(let path) = self.origin
@@ -88,18 +89,17 @@ extension SPM.NominalSources
         }
 
         let exclude:[FilePath] = exclude.map { path / $0 }
-        var include:Set<FilePath> = []
+        var headers:Set<FilePath> = []
 
         defer
         {
-            self.articles.sort              { $0.string < $1.string }
-            self.include = include.sorted   { $0.string < $1.string }
+            self.markdown.sort { $0.id < $1.id }
+            include += headers.sorted { $0.string < $1.string }
         }
 
         try path.directory.walk
         {
             let file:(path:FilePath, extension:String)
-
             if  let `extension`:String = $1.extension
             {
                 file.extension = `extension`
@@ -107,15 +107,20 @@ extension SPM.NominalSources
             }
             else
             {
-                //  directory, or some extensionless file we don’t care about
+                //  This is a directory, or some extensionless file we don’t care about
                 return
             }
 
-            guard file.extension != "md"
-            else
+            if  file.extension == "docc"
+            {
+                //  This is a directory.
+                return
+            }
+            if  file.extension == "md"
             {
                 //  It’s common to list markdown files under exclude paths.
-                self.articles.append(file.path)
+                let supplement:SPM.ResourceFile = .init(location: file.path, root: root)
+                self.markdown.append(supplement)
                 return
             }
 
@@ -127,33 +132,68 @@ extension SPM.NominalSources
                     return
                 }
             }
-
-            switch file.extension
+            //  TODO: might also benefit from a better algorithm.
+            var inDocC:Bool = false
+            for component:FilePath.Component in $0.components
             {
-            case "swift":
-                self.module.language |= .swift
+                if  case "docc"? = component.extension
+                {
+                    inDocC = true
+                    break
+                }
+            }
 
-            case "h":
-                //  Header files don’t indicate a C or C++ module on their own.
-                include.update(with: $0)
+            if  inDocC
+            {
+                switch file.extension
+                {
+                case "tutorial":
+                    let tutorial:SPM.ResourceFile = .init(location: file.path, root: root)
+                    self.markdown.append(tutorial)
 
-            case "modulemap":
-                //  But modulemaps do.
-                include.update(with: $0)
-                fallthrough
+                default:
+                    //  Inside a *.docc directory, everything that is not markdown or a tutorial
+                    //  is a resource.
+                    let resource:SPM.ResourceFile = .init(location: file.path,
+                        path: root.rebase(file.path))
 
-            case "c":
-                self.module.language |= .c
+                    self.resources.append(resource)
+                }
+            }
+            else
+            {
+                switch file.extension
+                {
+                case "swift":
+                    self.module.language |= .swift
 
-            case "hpp", "hxx":
-                include.update(with: $0)
-                fallthrough
+                case "h":
+                    //  Header files don’t indicate a C or C++ module on their own.
+                    headers.update(with: $0)
 
-            case "cpp", "cxx":
-                self.module.language |= .cpp
+                case "modulemap":
+                    //  But modulemaps do.
+                    headers.update(with: $0)
+                    fallthrough
 
-            case _:
-                break
+                case "c":
+                    self.module.language |= .c
+
+                case "hpp", "hxx":
+                    headers.update(with: $0)
+                    fallthrough
+
+                case "cpp", "cxx":
+                    self.module.language |= .cpp
+
+                case "txt":
+                    //  The most common culprit is a `CMakeLists.txt`.
+                    //  It’s not worth warning about these.
+                    break
+
+                default:
+                    print("Unknown file type: \(file.path)")
+                }
             }
         }
     }

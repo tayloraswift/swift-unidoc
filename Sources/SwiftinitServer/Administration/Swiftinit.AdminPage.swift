@@ -277,6 +277,9 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 
                 $0[.dt] = "IP address"
                 $0[.dd] = "\(last.address)"
+
+                $0[.dt] = "Accept Language"
+                $0[.dd] = last.headers.acceptLanguage ?? "none"
             }
             if  let last:ServerTour.Request = self.tour.lastRequest
             {
@@ -290,6 +293,9 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 
                 $0[.dt] = "IP address"
                 $0[.dd] = "\(last.address)"
+
+                $0[.dt] = "Accept Language"
+                $0[.dd] = last.headers.acceptLanguage ?? "none"
             }
 
             if  let query:ServerTour.SlowestQuery = self.tour.slowestQuery

@@ -106,7 +106,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
 
             if  let readme:Unidoc.Scalar = self.vertex.readme
             {
-                $0 ?= self.context.link(file: readme)
+                $0 ?= self.context.link(source: readme)
             }
         }
 
@@ -172,9 +172,10 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
             default:
                 break
             }
-
-            $0 ?= (self.vertex.details?.markdown).map(self.context.prose(_:))
         }
+
+        main[.section, { $0.class = "details literature" }] =
+            (self.vertex.details?.markdown).map(self.context.prose(_:))
 
         main += self.groups
     }

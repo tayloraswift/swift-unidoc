@@ -26,6 +26,11 @@ extension PackageNode
             products: try manifest.products.filter { try predicate($0.type) },
             targets: try .init(indexing: manifest.targets),
             root: manifest.root)
+
+        if  let snippets:String = manifest.snippets
+        {
+            self.snippets = snippets
+        }
     }
     private
     init(id:Symbol.Package,

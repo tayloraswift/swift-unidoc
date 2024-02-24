@@ -84,6 +84,19 @@ extension Swiftinit.Stats.PackagePage:Swiftinit.VertexPage
         }
             content:
         {
+            $0[.h2] = Swiftinit.StatsHeading.documentationCoverage
+
+            $0[.h3] = "Declarations"
+            $0[.figure]
+            {
+                $0.class = "chart coverage"
+            } = self.vertex.snapshot.census.unweighted.coverage.chart
+            {
+                """
+                \($1) percent of the declarations in \(self.volume.title) are \($0.name)
+                """
+            }
+
             $0[.h2] = Swiftinit.StatsHeading.interfaceBreakdown
 
             $0[.h3] = "Declarations"
@@ -108,27 +121,18 @@ extension Swiftinit.Stats.PackagePage:Swiftinit.VertexPage
                 """
             }
 
-            $0[.h2] = Swiftinit.StatsHeading.documentationCoverage
+            let interfaces:Unidoc.Stats.SPIs = .init(
+                interfaces: self.vertex.snapshot.census.interfaces)
 
+            $0[.h2] = Swiftinit.StatsHeading.interfaceLayers
             $0[.h3] = "Declarations"
             $0[.figure]
             {
-                $0.class = "chart coverage"
-            } = self.vertex.snapshot.census.unweighted.coverage.chart
+                $0.class = "chart spis"
+            } = interfaces.chart
             {
                 """
                 \($1) percent of the declarations in \(self.volume.title) are \($0.name)
-                """
-            }
-
-            $0[.h3] = "Symbols"
-            $0[.figure]
-            {
-                $0.class = "chart coverage"
-            } = self.vertex.snapshot.census.weighted.coverage.chart
-            {
-                """
-                \($1) percent of the symbols in \(self.volume.title) are \($0.name)
                 """
             }
         }
