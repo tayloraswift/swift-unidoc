@@ -68,10 +68,29 @@ section.details
         }
     }
 
+    pre.title
+    {
+        //padding-left: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 0;
+
+        //background-color: $light-code-well;
+        font-family: $typeface-monospace;
+        font-weight: 700;
+        color: $light-foreground-fade;
+    }
+    pre.title + pre
+    {
+        margin-top: 0.5rem;
+    }
     pre
     {
         font-size: 90.625%;
     }
-
-
+    pre + a.source
+    {
+        margin-top: 0rem;
+        position: relative;
+        top: -1rem;
+    }
 }

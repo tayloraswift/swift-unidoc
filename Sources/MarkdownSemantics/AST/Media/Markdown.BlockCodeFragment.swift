@@ -134,7 +134,8 @@ extension Markdown.BlockCodeFragment
 
             if  let slice:Markdown.SnippetSlice = snippet.slices[slice]
             {
-                yield(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
+                yield(Markdown.BlockCodeLiteral.init(bytecode: slice.code,
+                    location: slice.location(in: snippet.id)))
             }
             else
             {
@@ -151,7 +152,8 @@ extension Markdown.BlockCodeFragment
             }
             for slice:Markdown.SnippetSlice in snippet.slices.values
             {
-                yield(Markdown.BlockCodeLiteral.init(bytecode: slice.code))
+                yield(Markdown.BlockCodeLiteral.init(bytecode: slice.code,
+                    location: slice.location(in: snippet.id)))
             }
         }
     }

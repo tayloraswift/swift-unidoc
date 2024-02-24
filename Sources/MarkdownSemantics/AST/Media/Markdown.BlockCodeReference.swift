@@ -7,17 +7,24 @@ extension Markdown
     public final
     class BlockCodeReference:BlockContainer<BlockElement>
     {
+        /// This is the location of the block directive itself, not the code.
         public
         var source:SourceReference<Source>?
 
         public private(set)
         var language:String?
+
+        /// The title of the snippet. This is entirely fictitious and only used for display
+        /// purposes.
         public private(set)
         var title:String?
 
         /// The name of the snippet, **including** its file extension.
         public private(set)
         var file:String?
+        /// A link to the snippet.
+        public
+        var link:Outlinable<Int32>?
         /// The name of a second snippet, **including** its file extension, which will be used
         /// as the base for computing a diff.
         public private(set)
@@ -41,9 +48,9 @@ extension Markdown
         public override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {
-            binary[.h3] = self.title
             if  let code:Markdown.Bytecode = self.code
             {
+                binary[.pre] { $0[.class] = "title" } = self.title
                 binary[.snippet, { $0[.language] = self.language }] { $0 += code }
             }
             else
@@ -57,6 +64,24 @@ extension Markdown
                     }
                 }
             }
+            if  case .outlined(let reference) = self.link
+            {
+                binary &= reference
+            }
+
+            super.emit(into: &binary)
+        }
+
+        public override
+        func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
+        {
+            if  case .inline(let file) = self.link,
+                let reference:Int = try register(.location(.init(position: .zero, file: file)))
+            {
+                self.link = .outlined(reference)
+            }
+
+            try super.outline(by: register)
         }
     }
 }
