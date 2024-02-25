@@ -6,7 +6,7 @@ extension Markdown
     {
         let name:String
 
-        init(name:String)
+        init(name:String, as _:Markdown.DefineStyle)
         {
             self.name = name
         }
