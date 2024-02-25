@@ -406,7 +406,7 @@ extension HTTP.ServerLoop
                 /// We have no idea what the stream identifier of the first stream is, so we
                 /// can only guess a value of `1`.
                 connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
-                        lastStreamID: 1,
+                        lastStreamID: .maxID,
                         errorCode: .noError,
                         opaqueData: nil)),
                     promise: nil)
