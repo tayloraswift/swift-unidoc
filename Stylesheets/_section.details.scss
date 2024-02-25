@@ -46,6 +46,7 @@ section.details
             > dt
             {
                 counter-increment: parameter-index;
+                font-family: $typeface-monospace;
             }
             > dt:not([id])::before, // backwards compatibility with older symbol graphs
             > dt > a::before

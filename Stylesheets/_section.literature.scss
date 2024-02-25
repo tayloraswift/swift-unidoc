@@ -44,10 +44,12 @@ section.literature
         > dt
         {
             margin-top: 2rem;
-
-            font-family: $typeface-monospace;
             font-weight: 700;
 
+            > a::before
+            {
+                font-family: $typeface-monospace;
+            }
             > a
             {
                 color: inherit;

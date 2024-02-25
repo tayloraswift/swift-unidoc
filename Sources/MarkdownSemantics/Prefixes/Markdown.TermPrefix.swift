@@ -5,10 +5,12 @@ extension Markdown
     struct TermPrefix:Equatable, Hashable, Sendable
     {
         let name:String
+        let style:DefineStyle
 
-        init(name:String)
+        init(name:String, as style:Markdown.DefineStyle)
         {
             self.name = name
+            self.style = style
         }
     }
 }

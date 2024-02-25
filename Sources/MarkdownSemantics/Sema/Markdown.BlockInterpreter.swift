@@ -260,14 +260,13 @@ extension Markdown.BlockInterpreter
                     switch prefix
                     {
                     case .parameter(let parameter):
-                        parameters.list.append(.init(
-                            elements: item.elements,
+                        parameters.list.append(.init(elements: item.elements,
                             name: parameter.name))
 
                     case .term(let term):
-                        terms.append(.init(
-                            elements: item.elements,
-                            name: term.name))
+                        terms.append(.init(elements: item.elements,
+                            name: term.name,
+                            code: term.style == .code))
 
                     case .keywords(.parameters):
                         for block:Markdown.BlockElement in item.elements

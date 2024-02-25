@@ -82,7 +82,9 @@ extension Markdown.SwiftFlavor
             {
                 if  let term:Markdown.TermPrefix = .extract(from: &item.elements)
                 {
-                    terms.append(.init(elements: item.elements, name: term.name))
+                    terms.append(.init(elements: item.elements,
+                        name: term.name,
+                        code: term.style == .code))
                 }
                 else if
                     let aside:Markdown.KeywordPrefix = .extract(from: &item.elements)

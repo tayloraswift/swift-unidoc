@@ -9,7 +9,7 @@ protocol _MarkdownDefinePrefix:Markdown.SemanticPrefix
     static
     var keyword:String { get }
 
-    init(name:String)
+    init(name:String, as style:Markdown.DefineStyle)
 }
 extension Markdown.DefinePrefix
 {
@@ -29,16 +29,24 @@ extension Markdown.DefinePrefix
             omittingEmptySubsequences: true,
             whereSeparator: \.isWhitespace)
 
-        if  words.count == 2,
-            words[0].lowercased() == Self.keyword
-        {
-            //  Don’t attempt to validate the identifier for disallowed characters,
-            //  this is the wrong place for that.
-            self.init(name: String.init(words[1]))
-        }
+        guard words.count == 2,
+        case Self.keyword = words[0].lowercased()
         else
         {
             return nil
         }
+
+        let style:Markdown.DefineStyle
+        if  case .code? = elements.last
+        {
+            style = .code
+        }
+        else
+        {
+            style = .text
+        }
+        //  Don’t attempt to validate the identifier for disallowed characters,
+        //  this is the wrong place for that.
+        self.init(name: String.init(words[1]), as: style)
     }
 }
