@@ -347,104 +347,124 @@ extension HTTP.ServerLoop
         service:IP.Service?,
         as _:Authority.Type) async where Authority:ServerAuthority
     {
-        await withThrowingTaskGroup(
-            of: NIOAsyncChannel<HTTP2Frame.FramePayload, HTTP2Frame.FramePayload>?.self)
+        /// Do the ``AsyncStream`` ritual dance.
+        var c:AsyncThrowingStream<NIOAsyncChannel<
+            HTTP2Frame.FramePayload,
+            HTTP2Frame.FramePayload>?, any Error>.Continuation? = nil
+        let s:AsyncThrowingStream<NIOAsyncChannel<
+            HTTP2Frame.FramePayload,
+            HTTP2Frame.FramePayload>?, any Error> = .init { c = $0 }
+        guard
+        let c:AsyncThrowingStream<NIOAsyncChannel<
+            HTTP2Frame.FramePayload,
+            HTTP2Frame.FramePayload>?, any Error>.Continuation
+        else
         {
-            (
-                tasks:inout ThrowingTaskGroup<NIOAsyncChannel<
-                    HTTP2Frame.FramePayload,
-                    HTTP2Frame.FramePayload>?, any Error>
-            ) in
+            fatalError("unreachable")
+        }
 
-            tasks.addTask
-            {
-                /// This task awaits the first inbound stream from the peer. To enforce rotation
-                /// of peers, each peer is only allowed to open one stream per connection.
-                /// Otherwise, an attacker could occupy a connection indefinitely, effectively
-                /// starving all other peers if the server is near its connection limit.
-                for try await stream:NIOAsyncChannel<
-                    HTTP2Frame.FramePayload,
-                    HTTP2Frame.FramePayload> in streams.inbound
-                {
-                    return stream
-                }
-
-                return nil
-            }
-            tasks.addTask
-            {
-                /// This task emits a timeout event while waiting on the first inbound stream.
-                try await Task.sleep(for: .seconds(5))
-                return nil
-            }
-
-            var events:ThrowingTaskGroup<NIOAsyncChannel<
-                HTTP2Frame.FramePayload,
-                HTTP2Frame.FramePayload>?, any Error>.Iterator = tasks.makeAsyncIterator()
-
+        async
+        let _:Void =
+        {
             do
             {
-                guard case let stream?? = try await events.next()
-                else
+                for try await stream:NIOAsyncChannel<
+                    HTTP2Frame.FramePayload,
+                    HTTP2Frame.FramePayload> in $1
                 {
+                    c.yield(stream)
+                }
+                $0.finish()
+            }
+            catch let error
+            {
+                $0.finish(throwing: error)
+            }
+        } (c, streams.inbound)
+
+        async
+        let _:Void =
+        {
+            try? await Task.sleep(for: .seconds(5))
+            $0.yield(nil)
+        } (c)
+
+        do
+        {
+            var first:Bool = true
+            for try await event:NIOAsyncChannel<
+                HTTP2Frame.FramePayload,
+                HTTP2Frame.FramePayload>? in s
+            {
+                defer
+                {
+                    first = false
+                }
+                switch (event, first: first)
+                {
+                case (nil, first: true):
                     Log[.error] = """
                     (HTTP/2: \(address)) Connection timed out before peer initiated any streams.
                     """
                     return
-                }
 
-                /// Before we even process the first stream, we tell the peer that this is the
-                /// only stream we will serve on this connection, and to retry any contemporary
-                /// requests on a new connection.
-                ///
-                /// If we do not send this frame, users (or robots) who are browsing a large
-                /// number of pages in a short time will not know to retry their requests, and
-                /// they will perceive an unrecoverable server failure. Users who are browsing
-                /// the production server at a sane pace will never be “bursty”, since secondary
-                /// requests will all go to Amazon Cloudfront.
-                ///
-                /// We have no idea what the stream identifier of the first stream is, so we
-                /// can only guess a value of `1`.
-                connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
-                        lastStreamID: .maxID,
-                        errorCode: .noError,
-                        opaqueData: nil)),
-                    promise: nil)
+                case (nil, first: false):
+                    Log[.debug] = """
+                    (HTTP/2: \(address)) Connection timed out after peer initiated _ streams.
+                    """
+                    return
 
-                try await stream.executeThenClose
-                {
-                    (
-                        remote:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
-                        writer:NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
-                    )   in
+                case (let stream?, first: true):
+                    //  Firefox seems to special-case `maxID`, if we don’t send a real `GOAWAY`
+                    //  stream ID, it will assume the server is broken and not retry.
+                    connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
+                            lastStreamID: .maxID,
+                            errorCode: .noError,
+                            opaqueData: nil)),
+                        promise: nil)
+                    connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
+                            lastStreamID: 15,
+                            errorCode: .noError,
+                            opaqueData: nil)),
+                        promise: nil)
 
-                    let message:HTTP.ServerMessage<Authority, HPACKHeaders>
-                    do
+                    fallthrough
+
+                case (let stream?, first: false):
+                    try await stream.executeThenClose
                     {
-                        message = .init(
-                            response: try await self.respond(to: remote,
-                                address: address,
-                                service: service,
-                                as: Authority.self),
-                            using: stream.channel.allocator)
-                    }
-                    catch let error
-                    {
-                        Log[.error] = "(application: \(address)) \(error)"
+                        (
+                            remote:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
+                            writer:NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
+                        )   in
 
-                        message = .init(
-                            redacting: error,
-                            using: stream.channel.allocator)
-                    }
+                        let message:HTTP.ServerMessage<Authority, HPACKHeaders>
+                        do
+                        {
+                            message = .init(
+                                response: try await self.respond(to: remote,
+                                    address: address,
+                                    service: service,
+                                    as: Authority.self),
+                                using: stream.channel.allocator)
+                        }
+                        catch let error
+                        {
+                            Log[.error] = "(application: \(address)) \(error)"
 
-                    try await writer.send(message)
+                            message = .init(
+                                redacting: error,
+                                using: stream.channel.allocator)
+                        }
+
+                        try await writer.send(message)
+                    }
                 }
             }
-            catch let error
-            {
-                Log[.error] = "(HTTP/2: \(address)) \(error)"
-                return
-            }
+        }
+        catch let error
+        {
+            Log[.error] = "(HTTP/2: \(address)) \(error)"
         }
     }
 
@@ -470,9 +490,18 @@ extension HTTP.ServerLoop
         async
         let _:Void =
         {
-            for try await frame:HTTP2Frame.FramePayload in $1
+            do
             {
-                $0.yield(frame)
+                for try await frame:HTTP2Frame.FramePayload in $1
+                {
+                    $0.yield(frame)
+                }
+
+                $0.finish()
+            }
+            catch let error
+            {
+                $0.finish(throwing: error)
             }
         } (c, h2)
         /// Launch the task that emits a timeout event after 5 seconds. This doesn’t terminate
@@ -482,9 +511,8 @@ extension HTTP.ServerLoop
         async
         let _:Void =
         {
-            try await Task.sleep(for: .seconds(5))
+            try? await Task.sleep(for: .seconds(5))
             $0.yield(nil)
-
         } (c)
 
         var inbound:AsyncThrowingStream<HTTP2Frame.FramePayload?, any Error>.AsyncIterator
