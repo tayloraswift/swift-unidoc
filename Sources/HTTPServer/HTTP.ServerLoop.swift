@@ -67,9 +67,7 @@ extension HTTP.ServerLoop
                         HTTPPart<HTTPResponseHead, ByteBuffer>>,
                     (
                         any Channel,
-                        NIOHTTP2Handler.AsyncStreamMultiplexer<NIOAsyncChannel<
-                            HTTP2Frame.FramePayload,
-                            HTTP2Frame.FramePayload>>
+                        NIOHTTP2Handler.AsyncStreamMultiplexer<HTTP.Stream>
                     )>>,
                 Never> = try await bootstrap.bind(
             host: binding.address,
@@ -108,11 +106,18 @@ extension HTTP.ServerLoop
 
                     stream.eventLoop.makeCompletedFuture
                     {
-                        try NIOAsyncChannel<
-                            HTTP2Frame.FramePayload,
-                            HTTP2Frame.FramePayload>.init(
-                            wrappingChannelSynchronously: stream,
-                            configuration: .init())
+                        guard
+                        let id:HTTP2StreamID = try stream.syncOptions?.getOption(
+                            HTTP2StreamChannelOptions.streamID)
+                        else
+                        {
+                            throw HTTP.StreamIdentifierError.missing
+                        }
+
+                        return .init(frames: try .init(
+                                wrappingChannelSynchronously: stream,
+                                configuration: .init()),
+                            id: id)
                     }
                 }
             }
@@ -340,24 +345,16 @@ extension HTTP.ServerLoop
     private
     func handle<Authority>(
         connection:any Channel,
-        streams:NIOHTTP2Handler.AsyncStreamMultiplexer<NIOAsyncChannel<
-            HTTP2Frame.FramePayload,
-            HTTP2Frame.FramePayload>>,
+        streams:NIOHTTP2Handler.AsyncStreamMultiplexer<HTTP.Stream>,
         address:IP.V6,
         service:IP.Service?,
         as _:Authority.Type) async where Authority:ServerAuthority
     {
         /// Do the ``AsyncStream`` ritual dance.
-        var c:AsyncThrowingStream<NIOAsyncChannel<
-            HTTP2Frame.FramePayload,
-            HTTP2Frame.FramePayload>?, any Error>.Continuation? = nil
-        let s:AsyncThrowingStream<NIOAsyncChannel<
-            HTTP2Frame.FramePayload,
-            HTTP2Frame.FramePayload>?, any Error> = .init { c = $0 }
+        var c:AsyncThrowingStream<HTTP.StreamEvent, any Error>.Continuation? = nil
+        let s:AsyncThrowingStream<HTTP.StreamEvent, any Error> = .init { c = $0 }
         guard
-        let c:AsyncThrowingStream<NIOAsyncChannel<
-            HTTP2Frame.FramePayload,
-            HTTP2Frame.FramePayload>?, any Error>.Continuation
+        let c:AsyncThrowingStream<HTTP.StreamEvent, any Error>.Continuation
         else
         {
             fatalError("unreachable")
@@ -366,13 +363,14 @@ extension HTTP.ServerLoop
         async
         let _:Void =
         {
+            //  We *should* terminate the stream on all exit paths out of this subtask, as this
+            //  enables us to return early if the peer closes the connection. But if for some
+            //  reason we don’t, the `quiesce` event will also lead us out of the function.
             do
             {
-                for try await stream:NIOAsyncChannel<
-                    HTTP2Frame.FramePayload,
-                    HTTP2Frame.FramePayload> in $1
+                for try await stream:HTTP.Stream in $1
                 {
-                    c.yield(stream)
+                    c.yield(.inbound(stream))
                 }
                 $0.finish()
             }
@@ -385,53 +383,29 @@ extension HTTP.ServerLoop
         async
         let _:Void =
         {
-            try? await Task.sleep(for: .seconds(5))
-            $0.yield(nil)
+            //  This will throw if the peer closes the connection, or some network error caused
+            //  us to exit the function. Either way, there would no longer be any need to emit
+            //  the `quiesce` event.
+            try await Task.sleep(for: .seconds(5))
+            //  Why emit a `quiesce` event? Because we want to distinguish between the peer
+            //  closing the connection and us closing the connection due to timeout. This
+            //  prevents us from trying to send a `GOAWAY` frame to a peer who is already gone.
+            $0.yield(.quiesce)
         } (c)
 
         do
         {
-            var first:Bool = true
-            for try await event:NIOAsyncChannel<
-                HTTP2Frame.FramePayload,
-                HTTP2Frame.FramePayload>? in s
+            var last:HTTP2StreamID? = nil
+            for try await event:HTTP.StreamEvent in s
             {
-                defer
+                switch event
                 {
-                    first = false
-                }
-                switch (event, first: first)
-                {
-                case (nil, first: true):
-                    Log[.error] = """
-                    (HTTP/2: \(address)) Connection timed out before peer initiated any streams.
-                    """
-                    return
+                case .inbound(let stream):
+                    //  A misbehaving peer might send us non-monotonic stream identifiers.
+                    //  There is no harm in ignoring them, but we might as well `max` them.
+                    last = last.map { max($0, stream.id) } ?? stream.id
 
-                case (nil, first: false):
-                    Log[.debug] = """
-                    (HTTP/2: \(address)) Connection timed out after peer initiated _ streams.
-                    """
-                    return
-
-                case (let stream?, first: true):
-                    //  Firefox seems to special-case `maxID`, if we don’t send a real `GOAWAY`
-                    //  stream ID, it will assume the server is broken and not retry.
-                    connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
-                            lastStreamID: .maxID,
-                            errorCode: .noError,
-                            opaqueData: nil)),
-                        promise: nil)
-                    connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
-                            lastStreamID: 15,
-                            errorCode: .noError,
-                            opaqueData: nil)),
-                        promise: nil)
-
-                    fallthrough
-
-                case (let stream?, first: false):
-                    try await stream.executeThenClose
+                    try await stream.frames.executeThenClose
                     {
                         (
                             remote:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
@@ -446,7 +420,7 @@ extension HTTP.ServerLoop
                                     address: address,
                                     service: service,
                                     as: Authority.self),
-                                using: stream.channel.allocator)
+                                using: stream.frames.channel.allocator)
                         }
                         catch let error
                         {
@@ -454,11 +428,45 @@ extension HTTP.ServerLoop
 
                             message = .init(
                                 redacting: error,
-                                using: stream.channel.allocator)
+                                using: stream.frames.channel.allocator)
                         }
 
                         try await writer.send(message)
                     }
+
+                case .quiesce:
+                    if  let last:HTTP2StreamID
+                    {
+                        //  Formally, we should first be sending a `GOAWAY` frame containing
+                        //  `maxID`. But Firefox doesn’t seem to treat it any differently from
+                        //  simply dropping the connection; it is the second `GOAWAY` frame that
+                        //  determines the retry behavior.
+                        connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
+                                lastStreamID: .maxID,
+                                errorCode: .noError,
+                                opaqueData: nil)),
+                            promise: nil)
+                        //  If we do not send this frame, Firefox will perceive an unclean
+                        //  shutdown and will not retry any cancelled requests.
+                        connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
+                                lastStreamID: last,
+                                errorCode: .noError,
+                                opaqueData: nil)),
+                            promise: nil)
+                    }
+                    else
+                    {
+                        Log[.warning] = """
+                        (HTTP/2: \(address)) \
+                        Connection timed out before peer initiated any streams.
+                        """
+                    }
+
+                    //  There doesn’t seem to be any benefit from sticking around after sending
+                    //  the second `GOAWAY` frame. Notably, Firefox will not close the
+                    //  connection for us. And per the semantics of `GOAWAY`, we have not
+                    //  committed to handling any subsequent streams.
+                    return
                 }
             }
         }
