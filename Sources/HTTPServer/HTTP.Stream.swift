@@ -1,3 +1,6 @@
+import NIOCore
+import NIOHTTP2
+
 extension HTTP
 {
     struct Stream:Sendable
