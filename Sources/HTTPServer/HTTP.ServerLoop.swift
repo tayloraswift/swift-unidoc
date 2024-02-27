@@ -1,3 +1,4 @@
+import _AsyncChannel
 import Atomics
 import HTTP
 import IP
@@ -67,9 +68,7 @@ extension HTTP.ServerLoop
                         HTTPPart<HTTPResponseHead, ByteBuffer>>,
                     (
                         any Channel,
-                        NIOHTTP2Handler.AsyncStreamMultiplexer<NIOAsyncChannel<
-                            HTTP2Frame.FramePayload,
-                            HTTP2Frame.FramePayload>>
+                        NIOHTTP2Handler.AsyncStreamMultiplexer<HTTP.Stream>
                     )>>,
                 Never> = try await bootstrap.bind(
             host: binding.address,
@@ -108,18 +107,24 @@ extension HTTP.ServerLoop
 
                     stream.eventLoop.makeCompletedFuture
                     {
-                        try NIOAsyncChannel<
-                            HTTP2Frame.FramePayload,
-                            HTTP2Frame.FramePayload>.init(
-                            wrappingChannelSynchronously: stream,
-                            configuration: .init())
+                        guard
+                        let id:HTTP2StreamID = try stream.syncOptions?.getOption(
+                            HTTP2StreamChannelOptions.streamID)
+                        else
+                        {
+                            throw HTTP.StreamIdentifierError.missing
+                        }
+
+                        return .init(frames: try .init(
+                                wrappingChannelSynchronously: stream,
+                                configuration: .init()),
+                            id: id)
                     }
                 }
             }
         }
 
         Log[.debug] = "bound to \(binding.address):\(binding.port)"
-
 
         try await listener.executeThenClose
         {
@@ -144,10 +149,24 @@ extension HTTP.ServerLoop
 
                         let service:IP.Service? = policylist[address]
 
-                        await self.handle(connection: connection,
-                            address: address,
-                            service: service,
-                            as: Authority.self)
+                        do
+                        {
+                            try await self.handle(connection: connection,
+                                address: address,
+                                service: service,
+                                as: Authority.self)
+                        }
+                        catch let error as IOError
+                        {
+                            if  error.errnoCode != 104
+                            {
+                                Log[.error] = "(HTTP/1.1) \(error)"
+                            }
+                        }
+                        catch let error
+                        {
+                            Log[.error] = "(HTTP/1.1) \(error)"
+                        }
 
                         try await connection.channel.close()
 
@@ -164,16 +183,24 @@ extension HTTP.ServerLoop
 
                         let service:IP.Service? = policylist[address]
 
-                        await self.handle(connection: channel,
-                            streams: streams,
-                            address: address,
-                            service: service,
-                            as: Authority.self)
+                        do
+                        {
+                            try await self.handle(connection: channel,
+                                streams: streams.inbound,
+                                address: address,
+                                service: service,
+                                as: Authority.self)
+                        }
+                        catch let error
+                        {
+                            Log[.error] = "(HTTP/2: \(address)) \(error)"
+                        }
 
                         try await channel.close()
                     }
                 }
                 //  Normal and expected.
+                //  https://forums.swift.org/t/what-nio-http-2-errors-can-be-safely-ignored/68182/2
                 catch   ChannelError.alreadyClosed,
                         ChannelError.outputClosed,
                         NIOSSLError.uncleanShutdown
@@ -189,6 +216,7 @@ extension HTTP.ServerLoop
 }
 extension HTTP.ServerLoop
 {
+    /// Handles an HTTP/1.1 connection.
     private
     func handle<Authority>(
         connection:NIOAsyncChannel<
@@ -196,107 +224,62 @@ extension HTTP.ServerLoop
             HTTPPart<HTTPResponseHead, ByteBuffer>>,
         address:IP.V6,
         service:IP.Service?,
-        as _:Authority.Type) async where Authority:ServerAuthority
+        as _:Authority.Type) async throws where Authority:ServerAuthority
     {
-        await withTaskGroup(of: HTTP.ServerMessage<Authority, HTTPHeaders>?.self)
+        try await connection.executeThenClose
         {
-            (tasks:inout TaskGroup<HTTP.ServerMessage<Authority, HTTPHeaders>?>) in
+            (
+                remote:NIOAsyncChannelInboundStream<HTTPPart<HTTPRequestHead, ByteBuffer>>,
+                writer:NIOAsyncChannelOutboundWriter<HTTPPart<HTTPResponseHead, ByteBuffer>>
+            )   in
 
-            var completed:TaskGroup<HTTP.ServerMessage<Authority, HTTPHeaders>?>.Iterator =
-                tasks.makeAsyncIterator()
+            let inbound:AsyncThrowingChannel<
+                HTTPPart<HTTPRequestHead, ByteBuffer>, any Error> = .init()
 
-            let cop:TimeCop = .init()
-
-            tasks.addTask
+            async
+            let _:Void = remote.forward(to: inbound) { $0 }
+            async
+            let _:Void =
             {
-                try? await cop.start(beat: .milliseconds(1000))
-                //  We must close the connection, otherwise we will continue to wait for
-                //  the next inbound request fragment.
-                connection.channel.close(promise: nil)
-                return nil
-            }
+                try await Task.sleep(for: .seconds(5))
+                inbound.finish()
+            } ()
 
-            defer
+            for try await case .head(let part) in inbound
             {
-                tasks.cancelAll()
-            }
-
-            do
-            {
-                try await connection.executeThenClose
+                var message:HTTP.ServerMessage<Authority, HTTPHeaders>
+                do
                 {
-                    (
-                        remote:NIOAsyncChannelInboundStream<
-                            HTTPPart<HTTPRequestHead, ByteBuffer>>,
-                        writer:NIOAsyncChannelOutboundWriter<
-                            HTTPPart<HTTPResponseHead, ByteBuffer>>
-                    )   in
-
-                    for try await part:HTTPPart<HTTPRequestHead, ByteBuffer> in remote
-                    {
-                        guard
-                        case .head(let part) = part
-                        else
-                        {
-                            //  Ignore.
-                            continue
-                        }
-
-                        tasks.addTask
-                        {
-                            do
-                            {
-                                return .init(
-                                    response: try await self.respond(to: part,
-                                        address: address,
-                                        service: service,
-                                        with: cop,
-                                        as: Authority.self),
-                                    using: connection.channel.allocator)
-                            }
-                            catch let error
-                            {
-                                Log[.error] = "(application) \(error)"
-
-                                return .init(
-                                    redacting: error,
-                                    using: connection.channel.allocator)
-                            }
-                        }
-
-                        //  If `cop.active` is false, then the other task has already begun
-                        //  closing the connection.
-                        guard
-                        case let message?? = await completed.next()
-                        else
-                        {
-                            return
-                        }
-
-                        try await cop.pause { try await writer.send(message) }
-
-                        guard part.isKeepAlive
-                        else
-                        {
-                            return
-                        }
-                    }
+                    message = .init(
+                        response: try await self.respond(to: part,
+                            address: address,
+                            service: service,
+                            as: Authority.self),
+                        using: connection.channel.allocator)
                 }
-            }
-            //  https://forums.swift.org/t/what-nio-http-2-errors-can-be-safely-ignored/68182/2
-            catch NIOSSLError.uncleanShutdown
-            {
-            }
-            catch let error as IOError
-            {
-                if  error.errnoCode != 104
+                catch let error
                 {
-                    Log[.error] = "(HTTP/1.1) \(error)"
+                    Log[.error] = "(application) \(error)"
+
+                    message = .init(
+                        redacting: error,
+                        using: connection.channel.allocator)
                 }
-            }
-            catch let error
-            {
-                Log[.error] = "(HTTP/1.1) \(error)"
+
+                message.headers.add(name: "connection", value: "close")
+
+                try await writer.send(message)
+
+                guard part.isKeepAlive
+                else
+                {
+                    return
+                }
+
+                if  let service:IP.Service
+                {
+                    Log[.debug] = "(HTTP/1) client '\(service)' sent keep-alive"
+                }
             }
         }
     }
@@ -305,12 +288,9 @@ extension HTTP.ServerLoop
     func respond<Authority>(to h1:HTTPRequestHead,
         address:IP.V6,
         service:IP.Service?,
-        with cop:borrowing TimeCop,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:ServerAuthority
     {
-        cop.reset()
-
         switch h1.method
         {
         case .HEAD:
@@ -323,7 +303,7 @@ extension HTTP.ServerLoop
                     address: address,
                     service: service)
             {
-                return try await cop.pause { try await self.response(for: request) }
+                return try await self.response(for: request)
             }
             else
             {
@@ -337,91 +317,115 @@ extension HTTP.ServerLoop
 }
 extension HTTP.ServerLoop
 {
+    /// Handles an HTTP/2 connection.
     private
     func handle<Authority>(
         connection:any Channel,
-        streams:NIOHTTP2Handler.AsyncStreamMultiplexer<NIOAsyncChannel<
-            HTTP2Frame.FramePayload,
-            HTTP2Frame.FramePayload>>,
+        streams:NIOHTTP2AsyncSequence<HTTP.Stream>,
         address:IP.V6,
         service:IP.Service?,
-        as _:Authority.Type) async where Authority:ServerAuthority
+        as _:Authority.Type) async throws where Authority:ServerAuthority
     {
-        await withTaskGroup(of: HTTP.ServerMessage<Authority, HPACKHeaders>?.self)
+        //  I am not sure why the sequence of streams has no backpressure. Out of an abundance
+        //  of caution, there is a hard limit of 128 buffered streams. A sane peer should never
+        //  come anywhere near this limit.
+        let (events, consumer):
+        (
+            AsyncThrowingStream<HTTP.StreamEvent, any Error>,
+            AsyncThrowingStream<HTTP.StreamEvent, any Error>.Continuation
+        ) = AsyncThrowingStream<HTTP.StreamEvent, any Error>.makeStream(
+            bufferingPolicy: .bufferingOldest(128))
+
+        //  We *should* terminate the stream on all exit paths out of this subtask, as this
+        //  enables us to return early if the peer closes the connection. But if for some
+        //  reason we don’t, the `quiesce` event will also lead us out of the function.
+        async
+        let _:Void = streams.forward(to: consumer) { .inbound($0) }
+        async
+        let _:Void =
         {
-            (tasks:inout TaskGroup<HTTP.ServerMessage<Authority, HPACKHeaders>?>) in
+            //  This will throw if the peer closes the connection, or some network error caused
+            //  us to exit the function. Either way, there would no longer be any need to emit
+            //  the `quiesce` event.
+            try await Task.sleep(for: .seconds(5))
+            //  Why emit a `quiesce` event? Because we want to distinguish between the peer
+            //  closing the connection and us closing the connection due to timeout. This
+            //  prevents us from trying to send a `GOAWAY` frame to a peer who is already gone.
+            consumer.yield(.quiesce)
+        } ()
 
-            var completed:TaskGroup<HTTP.ServerMessage<Authority, HPACKHeaders>?>.Iterator =
-                tasks.makeAsyncIterator()
-
-            let cop:TimeCop = .init()
-
-            tasks.addTask
+        var last:HTTP2StreamID? = nil
+        for try await event:HTTP.StreamEvent in events
+        {
+            switch event
             {
-                try? await cop.start(beat: .milliseconds(1000))
-                //  We must close the connection, otherwise we will continue to wait for
-                //  the next inbound stream.
-                connection.close(promise: nil)
-                return nil
-            }
+            case .inbound(let stream):
+                //  A misbehaving peer might send us non-monotonic stream identifiers.
+                //  There is no harm in ignoring them, but we might as well `max` them.
+                last = last.map { max($0, stream.id) } ?? stream.id
 
-            defer
-            {
-                tasks.cancelAll()
-            }
-
-            do
-            {
-                for try await stream:NIOAsyncChannel<
-                    HTTP2Frame.FramePayload,
-                    HTTP2Frame.FramePayload> in streams.inbound
+                try await stream.frames.executeThenClose
                 {
-                    try await stream.executeThenClose
+                    (
+                        remote:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
+                        writer:NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
+                    )   in
+
+                    let message:HTTP.ServerMessage<Authority, HPACKHeaders>
+                    do
                     {
-                        (
-                            remote:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
-                            writer:NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
-                        )   in
-
-                        tasks.addTask
-                        {
-                            do
-                            {
-                                return .init(
-                                    response: try await self.respond(to: remote,
-                                        address: address,
-                                        service: service,
-                                        with: cop,
-                                        as: Authority.self),
-                                    using: stream.channel.allocator)
-                            }
-                            catch let error
-                            {
-                                Log[.error] = "(application) \(error)"
-
-                                return .init(
-                                    redacting: error,
-                                    using: stream.channel.allocator)
-                            }
-                        }
-
-                        guard
-                        case let message?? = await completed.next()
-                        else
-                        {
-                            return
-                        }
-
-                        try await cop.pause { try await writer.send(message) }
+                        message = .init(
+                            response: try await self.respond(to: remote,
+                                address: address,
+                                service: service,
+                                as: Authority.self),
+                            using: stream.frames.channel.allocator)
                     }
+                    catch let error
+                    {
+                        Log[.error] = "(application: \(address)) \(error)"
+
+                        message = .init(
+                            redacting: error,
+                            using: stream.frames.channel.allocator)
+                    }
+
+                    try await writer.send(message)
                 }
-            }
-            catch NIOSSLError.uncleanShutdown
-            {
-            }
-            catch let error
-            {
-                Log[.error] = "(HTTP/2) \(error)"
+
+            case .quiesce:
+                if  let last:HTTP2StreamID
+                {
+                    //  Formally, we should first be sending a `GOAWAY` frame containing
+                    //  `maxID`. But Firefox doesn’t seem to treat it any differently from
+                    //  simply dropping the connection; it is the second `GOAWAY` frame that
+                    //  determines the retry behavior.
+                    connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
+                            lastStreamID: .maxID,
+                            errorCode: .noError,
+                            opaqueData: nil)),
+                        promise: nil)
+                    //  If we do not send this frame, Firefox will perceive an unclean
+                    //  shutdown and will not retry any cancelled requests.
+                    connection.write(HTTP2Frame.init(streamID: 0, payload: .goAway(
+                            lastStreamID: last,
+                            errorCode: .noError,
+                            opaqueData: nil)),
+                        promise: nil)
+                }
+                else
+                {
+                    Log[.warning] = """
+                    (HTTP/2: \(address)) \
+                    Connection timed out before peer initiated any streams.
+                    """
+                }
+
+                //  There doesn’t seem to be any benefit from sticking around after sending
+                //  the second `GOAWAY` frame. Notably, Firefox will not close the connection
+                //  for us. And per the semantics of `GOAWAY`, we have not committed to handling
+                //  any subsequent streams.
+                return
             }
         }
     }
@@ -430,22 +434,52 @@ extension HTTP.ServerLoop
     func respond<Authority>(to h2:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
         address:IP.V6,
         service:IP.Service?,
-        with cop:borrowing TimeCop,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:ServerAuthority
     {
-        var inbound:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>.AsyncIterator =
-            h2.makeAsyncIterator()
+        /// We should use a channel and not just a stream, in order to preserve backpressure.
+        let frames:AsyncThrowingChannel<HTTP2Frame.FramePayload?, any Error> = .init()
 
-        var headers:HPACKHeaders? = nil
-        while let payload:HTTP2Frame.FramePayload = try await inbound.next()
+        /// Launch the task that simply forwards the output of the
+        /// ``NIOAsyncChannelInboundStream`` to the combined stream. This seems comically
+        /// inefficient, but it is needed in order to add timeout events to an HTTP/2 stream.
+        async
+        let _:Void = h2.forward(to: frames) { $0 }
+        /// Launch the task that emits a timeout event after 5 seconds. This doesn’t terminate
+        /// the stream because we want to be able to ignore the timeout events after the peer
+        /// completes authentication, if applicable. This allows us to accept long-running
+        /// uploads from trusted peers.
+        async
+        let _:Void =
         {
-            cop.reset()
+            try await Task.sleep(for: .seconds(5))
+            await frames.send(nil)
+        } ()
 
-            if  case .headers(let payload) = payload
+        var inbound:AsyncThrowingChannel<HTTP2Frame.FramePayload?, any Error>.Iterator
+        var headers:HPACKHeaders? = nil
+
+        /// Wait for the `HEADERS` frame, which initiates the application-level request. This
+        /// frame contains cookies, so after we get it, we will know if we can ignore timeouts.
+        waiting:
+        do
+        {
+            inbound = frames.makeAsyncIterator()
+
+            switch try await inbound.next()
             {
+            case .headers(let payload)??:
                 headers = payload.headers
-                break
+
+            case _??:
+                continue waiting
+
+            case nil, nil?:
+                Log[.error] = """
+                (HTTP/2: \(address)) Stream timed out before peer sent any headers.
+                """
+
+                return .resource("Time limit exceeded", status: 408)
             }
         }
 
@@ -470,7 +504,7 @@ extension HTTP.ServerLoop
                     address: address,
                     service: service)
             {
-                return try await cop.pause { try await self.response(for: request) }
+                return try await self.response(for: request)
             }
             else
             {
@@ -502,11 +536,11 @@ extension HTTP.ServerLoop
             var body:[UInt8] = []
                 body.reserveCapacity(length)
 
-            while let payload:HTTP2Frame.FramePayload = try await inbound.next()
+            while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
             {
-                cop.reset()
-
-                guard case .data(let payload) = payload
+                //  We could care less about timeout events here, as we have already determined
+                //  the request originates from a trusted source.
+                guard case .data(let payload)? = payload
                 else
                 {
                     continue
@@ -524,7 +558,7 @@ extension HTTP.ServerLoop
                 }
             }
 
-            return try await cop.pause { try await self.response(for: request, with: body) }
+            return try await self.response(for: request, with: body)
 
         case "POST":
             guard
@@ -543,12 +577,10 @@ extension HTTP.ServerLoop
             var body:[UInt8] = []
                 body.reserveCapacity(length)
 
-            while let payload:HTTP2Frame.FramePayload = try await inbound.next()
+            while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
             {
-                cop.reset()
-
                 guard
-                case .data(let payload) = payload,
+                case .data(let payload)? = payload,
                 case .byteBuffer(let buffer) = payload.data
                 else
                 {
@@ -577,7 +609,7 @@ extension HTTP.ServerLoop
                     service: service,
                     body: /* consume */ body) // https://github.com/apple/swift/issues/71605
             {
-                return try await cop.pause { try await self.response(for: request) }
+                return try await self.response(for: request)
             }
             else
             {

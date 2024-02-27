@@ -19,11 +19,12 @@ extension HTTP.OutboundShimHandler:ChannelOutboundHandler
 
     func write(context:ChannelHandlerContext, data:NIOAny, promise:EventLoopPromise<Void>?)
     {
-        let part:OutboundOut = switch self.unwrapOutboundIn(data)
+        let part:OutboundOut
+        switch self.unwrapOutboundIn(data)
         {
-        case .head(let head):   .head(head)
-        case .body(let body):   .body(.byteBuffer(body))
-        case .end(let tail):    .end(tail)
+        case .head(let head):   part = .head(head)
+        case .body(let body):   part = .body(.byteBuffer(body))
+        case .end(let tail):    part = .end(tail)
         }
 
         context.write(self.wrapOutboundOut(part), promise: promise)
