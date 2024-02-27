@@ -154,6 +154,8 @@ let package:Package = .init(
             path: "Macros/IntegerEncodingMacros"),
 
 
+        .target(name: "_AsyncChannel"),
+
         .target(name: "AvailabilityDomain"),
 
         .target(name: "Availability",
@@ -236,6 +238,8 @@ let package:Package = .init(
 
         .target(name: "HTTPServer",
             dependencies: [
+                .target(name: "_AsyncChannel"),
+
                 .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .target(name: "IP"),
@@ -787,6 +791,11 @@ let package:Package = .init(
 
 for target:PackageDescription.Target in package.targets
 {
+    if  target.name == "_AsyncChannel"
+    {
+        continue
+    }
+
     {
         var settings:[PackageDescription.SwiftSetting] = $0 ?? []
 
