@@ -526,9 +526,11 @@ extension Unidoc.DB
         return delta
     }
 
+    /// Pins as many of the snapshot’s dependencies as possible. After this function returns,
+    /// the `snapshot` will contain a list of ``Snapshot/pins`` matching the length of the
+    /// ``SymbolGraphMetadata/dependencies`` list. The two arrays will share indices.
     private
-    func pin(_ snapshot:inout Unidoc.Snapshot,
-        with session:Mongo.Session) async throws -> [Unidoc.Edition]
+    func pin(_ snapshot:inout Unidoc.Snapshot, with session:Mongo.Session) async throws
     {
         print("pinning dependencies for \(snapshot.metadata.package.name)...")
 
@@ -544,7 +546,7 @@ extension Unidoc.DB
         let query:Unidoc.PinDependenciesQuery = .init(for: snapshot)
         else
         {
-            return snapshot.pins.compactMap { $0 }
+            return
         }
 
         var pins:[Symbol.Package: Unidoc.Edition] = [:]
@@ -577,8 +579,6 @@ extension Unidoc.DB
                 print("failed to pin '\(dependency.id)' to '\(dependency.version)'")
             }
         }
-
-        return all
     }
 
     private
@@ -588,10 +588,9 @@ extension Unidoc.DB
         realm:Unidoc.Realm?,
         with session:Mongo.Session) async throws -> Unidoc.Volume
     {
-        let pins:[Unidoc.Edition] = try await self.pin(&snapshot, with: session)
+        try await self.pin(&snapshot, with: session)
         var linker:Unidoc.Linker = try await self.snapshots.load(for: snapshot,
             from: loader,
-            pins: pins,
             with: session)
 
         let dependencies:[Unidoc.VolumeMetadata.Dependency] = linker.dependencies()
