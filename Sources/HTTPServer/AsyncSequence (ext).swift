@@ -1,6 +1,46 @@
+import _AsyncChannel
+
 extension AsyncSequence where Element:Sendable
 {
-    @inlinable internal consuming
+    consuming
+    func forward<T>(to channel:AsyncThrowingChannel<T, any Error>,
+        by transform:(Element) throws -> T ) async rethrows
+    {
+        do
+        {
+            for try await element:Element in self
+            {
+                await channel.send(try transform(element))
+            }
+
+            channel.finish()
+        }
+        catch let error
+        {
+            channel.fail(error)
+        }
+    }
+
+    consuming
+    func forward<T>(to stream:AsyncThrowingStream<T, any Error>.Continuation,
+        by transform:(Element) throws -> T ) async rethrows
+    {
+        do
+        {
+            for try await element:Element in self
+            {
+                stream.yield(try transform(element))
+            }
+
+            stream.finish()
+        }
+        catch let error
+        {
+            stream.finish(throwing: error)
+        }
+    }
+
+    @inlinable consuming
     func iterate(concurrently width:Int,
         with body:@Sendable @escaping (Element) async -> ()) async throws
     {
