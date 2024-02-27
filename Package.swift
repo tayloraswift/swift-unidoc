@@ -154,7 +154,10 @@ let package:Package = .init(
             path: "Macros/IntegerEncodingMacros"),
 
 
-        .target(name: "_AsyncChannel"),
+        .target(name: "_AsyncChannel",
+            dependencies: [
+                .product(name: "OrderedCollections", package: "swift-collections"),
+            ]),
 
         .target(name: "AvailabilityDomain"),
 
