@@ -80,11 +80,11 @@ extension Unidoc.DB.Snapshots
 {
     func load(for snapshot:Unidoc.Snapshot,
         from loader:(some Unidoc.GraphLoader)?,
-        pins:[Unidoc.Edition],
         with session:Mongo.Session) async throws -> Unidoc.Linker
     {
+        let exonyms:[Unidoc.Edition: Symbol.Package] = snapshot.exonyms()
         var objects:[SymbolGraphObject<Unidoc.Edition>] = []
-            objects.reserveCapacity(1 + pins.count)
+            objects.reserveCapacity(1 + exonyms.count)
 
         if  snapshot.metadata.package.name != .swift,
             let swift:Unidoc.Snapshot = try await self.loadStandardLibrary(with: session)
@@ -92,18 +92,27 @@ extension Unidoc.DB.Snapshots
             objects.append(try await swift.load(with: loader))
         }
 
-        for other:Unidoc.Snapshot in try await self.load(pins, with: session)
+        for other:Unidoc.Snapshot in try await self.load(exonyms.keys.sorted(), with: session)
         {
-            objects.append(try await other.load(with: loader))
+            var object:SymbolGraphObject<Unidoc.Edition> = try await other.load(with: loader)
+            if  let exonym:Symbol.Package = exonyms[other.id]
+            {
+                object.metadata.package.name = exonym
+                object.metadata.package.scope = nil
+            }
+            objects.append(object)
         }
 
-        let missing:Set<Unidoc.Edition> = objects.reduce(into: .init(pins))
+        let missing:[Unidoc.Edition: Symbol.Package] = objects.reduce(into: exonyms)
         {
-            $0.remove($1.id)
+            $0[$1.id] = nil
         }
-        for missing:Unidoc.Edition in missing.sorted(by: { $0.package < $1.package })
+        for missing:Symbol.Package in missing.values.sorted()
         {
-            print("warning: could not load snapshot dependency '\(missing)'")
+            print("""
+                warning: could not load pinned dependency '\(missing)' for \
+                snapshot '\(snapshot.metadata.package.name)'
+                """)
         }
 
         return .init(linking: try await snapshot.load(with: loader), against: objects)
