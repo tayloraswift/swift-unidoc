@@ -9,8 +9,9 @@ extension Unidoc.VolumeMetadata
     @frozen public
     struct Dependency:Equatable, Sendable
     {
+        /// The name this volume of documentation uses to refer to the package.
         public
-        let symbol:Symbol.Package
+        let exonym:Symbol.Package
 
         public
         var requirement:SymbolGraphMetadata.DependencyRequirement?
@@ -20,12 +21,12 @@ extension Unidoc.VolumeMetadata
         var pinned:Unidoc.Edition?
 
         @inlinable public
-        init(symbol:Symbol.Package,
+        init(exonym:Symbol.Package,
             requirement:SymbolGraphMetadata.DependencyRequirement?,
             resolution:PatchVersion?,
             pinned:Unidoc.Edition?)
         {
-            self.symbol = symbol
+            self.exonym = exonym
             self.requirement = requirement
             self.resolution = resolution
             self.pinned = pinned
@@ -37,7 +38,7 @@ extension Unidoc.VolumeMetadata.Dependency
     public
     enum CodingKey:String, Sendable
     {
-        case symbol = "_id"
+        case exonym = "_id"
         case requirement_lower = "L"
         case requirement_upper = "U"
         case resolution = "S"
@@ -49,7 +50,7 @@ extension Unidoc.VolumeMetadata.Dependency:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.symbol] = self.symbol
+        bson[.exonym] = self.exonym
 
         switch self.requirement
         {
@@ -90,7 +91,7 @@ extension Unidoc.VolumeMetadata.Dependency:BSONDocumentDecodable
             requirement = upper < lower ? nil : .range(lower ..< upper)
         }
 
-        self.init(symbol: try bson[.symbol].decode(),
+        self.init(exonym: try bson[.exonym].decode(),
             requirement: requirement,
             resolution: try bson[.resolution]?.decode(),
             pinned: try bson[.pinned]?.decode())
