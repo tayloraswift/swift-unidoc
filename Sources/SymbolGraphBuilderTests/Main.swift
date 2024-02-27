@@ -56,7 +56,7 @@ enum Main:TestMain, TestBattery
                 try await .init(building: try await .remote(
                         package: "swift-nio",
                         from: "https://github.com/apple/swift-nio.git",
-                        at: "2.58.0",
+                        at: "2.63.0",
                         in: workspace,
                         clean: [.artifacts]),
                     with: toolchain,
