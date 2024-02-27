@@ -225,14 +225,14 @@ extension Unidoc.Linker
         if  self.current.metadata.package.name != .swift,
             let swift:Graph = self[.swift]
         {
-            dependencies.append(.init(symbol: .swift,
+            dependencies.append(.init(exonym: .swift,
                 requirement: nil,
                 resolution: nil,
                 pinned: swift.id))
         }
         for dependency:SymbolGraphMetadata.Dependency in self.current.metadata.dependencies
         {
-            dependencies.append(.init(symbol: dependency.package.name,
+            dependencies.append(.init(exonym: dependency.package.name,
                 requirement: dependency.requirement,
                 resolution: dependency.version.release,
                 pinned: self[dependency.package.name]?.id))
