@@ -92,7 +92,7 @@ let package:Package = .init(
     ],
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
-           from: "0.3.4")),
+            from: "0.3.4")),
 
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
@@ -101,7 +101,7 @@ let package:Package = .init(
         //.package(path: "../swift-mongodb"),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-            from: "4.2.0")),
+            from: "4.2.1")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -119,7 +119,7 @@ let package:Package = .init(
             from: "2.26.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
-            from: "1.29.0")),
+            from: "1.30.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.3.0")),
         /// swift-system has broken in a minor before, and can't be trusted with a
