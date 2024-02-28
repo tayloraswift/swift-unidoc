@@ -156,6 +156,9 @@ extension HTTP.ServerLoop
                                 service: service,
                                 as: Authority.self)
                         }
+                        catch NIOSSLError.uncleanShutdown
+                        {
+                        }
                         catch let error as IOError
                         {
                             if  error.errnoCode != 104
@@ -241,7 +244,7 @@ extension HTTP.ServerLoop
             async
             let _:Void =
             {
-                try await Task.sleep(for: .seconds(5))
+                try await Task.sleep(for: .seconds(15))
                 inbound.finish()
             } ()
 
@@ -347,7 +350,7 @@ extension HTTP.ServerLoop
             //  This will throw if the peer closes the connection, or some network error caused
             //  us to exit the function. Either way, there would no longer be any need to emit
             //  the `quiesce` event.
-            try await Task.sleep(for: .seconds(5))
+            try await Task.sleep(for: .seconds(10))
             //  Why emit a `quiesce` event? Because we want to distinguish between the peer
             //  closing the connection and us closing the connection due to timeout. This
             //  prevents us from trying to send a `GOAWAY` frame to a peer who is already gone.
