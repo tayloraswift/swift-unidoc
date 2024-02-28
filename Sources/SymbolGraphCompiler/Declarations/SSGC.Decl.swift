@@ -122,7 +122,17 @@ extension SSGC.Decl
             phylum: phylum,
             path: vertex.path)
 
-        self.kinks[is: .open] = vertex.acl == .open
+        //  It’s not like we should ever see a vertex that is both `final` and `open`, but who
+        //  knows what bugs exist in lib/SymbolGraphGen.
+        if  vertex.final
+        {
+            self.kinks[is: .final] = true
+        }
+        else if
+            case .open = vertex.acl
+        {
+            self.kinks[is: .open] = true
+        }
 
         if  let doccomment:SymbolGraphPart.Vertex.Doccomment = vertex.doccomment
         {

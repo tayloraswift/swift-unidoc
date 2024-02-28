@@ -58,9 +58,9 @@ extension Phylum.Decl.Kinks
         }
         set(set)
         {
-            set ?
-            (self.bits |=  kink.rawValue) :
-            (self.bits &= ~kink.rawValue)
+            set
+            ? (self.bits |=  kink.rawValue)
+            : (self.bits &= ~kink.rawValue)
         }
     }
 }

@@ -4,6 +4,11 @@ import URI
 
 extension Swiftinit
 {
+    /// Vertex layers are a way of segregating documentation orthogonally to the normal
+    /// hierarchy. Although they are visible to users, their true purpose is signal to search
+    /// engines what pages to index and what pages to ignore. Vertex layers are **not**
+    /// namespaces; all vertex layers are interchangable, some of them are merely non-canonical.
+    /// This enables us to reclassify pages without disrupting users.
     public
     typealias VertexLayer = _SwiftinitVertexLayer
 }
