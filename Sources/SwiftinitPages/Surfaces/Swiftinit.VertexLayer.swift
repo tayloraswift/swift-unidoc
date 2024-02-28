@@ -24,13 +24,13 @@ protocol _SwiftinitVertexLayer
 extension Swiftinit.VertexLayer
 {
     private static
-    subscript(volume:Unidoc.VolumeSelector, cdecl cdecl:Bool) -> URI
+    subscript(volume:Unidoc.VolumeSelector, detail detail:Bool) -> URI
     {
         if  case _? = volume.version
         {
             Self.hist / "\(volume)"
         }
-        else if cdecl
+        else if detail
         {
             Self.docc / "\(volume)"
         }
@@ -43,7 +43,7 @@ extension Swiftinit.VertexLayer
     static
     subscript(volume:Unidoc.VolumeMetadata, route:Unidoc.Route) -> URI
     {
-        var uri:URI = Self[volume.selector, cdecl: route.cdecl]
+        var uri:URI = Self[volume.selector, detail: route.detail]
 
         uri.path += route.stem
         uri["hash"] = route.hash?.description
@@ -54,6 +54,6 @@ extension Swiftinit.VertexLayer
     static
     subscript(volume:Unidoc.VolumeMetadata) -> URI
     {
-        Self[volume.selector, cdecl: false]
+        Self[volume.selector, detail: false]
     }
 }

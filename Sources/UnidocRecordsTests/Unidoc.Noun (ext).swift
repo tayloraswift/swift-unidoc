@@ -26,6 +26,6 @@ extension Unidoc.Noun
                 language: language,
                 phylum: phylum,
                 kinks: [],
-                route: hash == nil ? .unhashed : .hashed)))
+                route: .init(underscored: false, hashed: hash != nil))))
     }
 }

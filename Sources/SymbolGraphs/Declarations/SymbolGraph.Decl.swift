@@ -68,7 +68,7 @@ extension SymbolGraph
         public
         var topics:[Topic]
 
-        @inlinable internal
+        @inlinable
         init(
             language:Phylum.Language,
             phylum:Phylum.Decl,
@@ -118,7 +118,7 @@ extension SymbolGraph.Decl
         self.init(language: language,
             phylum: phylum,
             kinks: kinks,
-            route: .unhashed,
+            route: .init(underscored: false, hashed: false),
             path: path)
     }
 }

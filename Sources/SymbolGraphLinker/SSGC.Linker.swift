@@ -874,7 +874,7 @@ extension SSGC.Linker
                     {
                         //  If `hash` is present, then we know the decl is a valid
                         //  declaration node index.
-                        self.symbolizer.graph.decls.nodes[stacked].decl?.route = .hashed
+                        self.symbolizer.graph.decls.nodes[stacked].decl?.route.hashed = true
                     }
                     guard
                     case .some(let collisions) = addresses
