@@ -2,7 +2,6 @@ import CodelinkResolution
 import Codelinks
 import DoclinkResolution
 import FNV1
-import InlineArray
 import LexicalPaths
 import MarkdownABI
 import MarkdownAST
@@ -864,42 +863,8 @@ extension SSGC.Linker
     public mutating
     func load() throws -> SymbolGraph
     {
-        for case (let path, .some(let members)) in self.router.paths
-        {
-            for (hash, addresses):(FNV24?, InlineArray<Int32>) in members
-            {
-                if  let hash:FNV24
-                {
-                    for stacked:Int32 in addresses
-                    {
-                        //  If `hash` is present, then we know the decl is a valid
-                        //  declaration node index.
-                        self.symbolizer.graph.decls.nodes[stacked].decl?.route.hashed = true
-                    }
-                    guard
-                    case .some(let collisions) = addresses
-                    else
-                    {
-                        continue
-                    }
-
-                    self.tables.diagnostics[nil] = SSGC.RouteCollisionError.hash(hash,
-                        collisions)
-                }
-                else
-                {
-                    let collisions:[Int32] =
-                    switch addresses
-                    {
-                    case .one(let scalar):  [scalar]
-                    case .some(let scalars): scalars
-                    }
-
-                    self.tables.diagnostics[nil] = SSGC.RouteCollisionError.path(path,
-                        collisions)
-                }
-            }
-        }
+        self.symbolizer.graph.colorize(routes: self.router.paths,
+            with: &self.tables.diagnostics)
 
         return self.symbolizer.graph
     }

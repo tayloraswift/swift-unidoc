@@ -87,6 +87,7 @@ extension Signature.Expanded
                         {
                         case "actor":           keywords.actor = true
                         case "class":           keywords.class = true
+                        case "final":           keywords.final = true
                         default:                break
                         }
                     }
