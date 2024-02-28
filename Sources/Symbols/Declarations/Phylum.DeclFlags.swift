@@ -30,10 +30,17 @@ extension Phylum.DeclFlags
         .init(language: .swift, phylum: flags.phylum, kinks: flags.kinks, route: flags.route)
     }
 
+    /// Indicates whether the declaration should be considered an implementation detail.
+    /// The default behavior depends on the language.
     @inlinable public
-    var cdecl:Bool
+    var detail:Bool
     {
-        self.language == .c || self.language == .cpp
+        switch self.language
+        {
+        case .swift:    self.route.underscored
+        case .c:        true
+        case .cpp:      true
+        }
     }
 }
 extension Phylum.DeclFlags:RawRepresentable

@@ -202,25 +202,13 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                                 type: .text("Getting started")),
                             .init(
                                 shoot: .init(stem: "BarbieCore Barbie"),
-                                type: .stem(.culture, .init(
-                                    language: .swift,
-                                    phylum: .enum,
-                                    kinks: [],
-                                    route: .unhashed))),
+                                type: .stem(.culture, .swift(.enum))),
                             .init(
                                 shoot: .init(stem: "BarbieCore Barbie ID"),
-                                type: .stem(.culture, .init(
-                                    language: .swift,
-                                    phylum: .struct,
-                                    kinks: [],
-                                    route: .unhashed))),
+                                type: .stem(.culture, .swift(.struct))),
                             .init(
                                 shoot: .init(stem: "BarbieCore Barbie PlasticKeychain"),
-                                type: .stem(.culture, .init(
-                                    language: .swift,
-                                    phylum: .struct,
-                                    kinks: [],
-                                    route: .unhashed))),
+                                type: .stem(.culture, .swift(.struct))),
                         ])
                 }
             }
@@ -276,39 +264,19 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         [
                             .init(
                                 shoot: .init(stem: "BarbieCore Barbie"),
-                                type: .stem(.package, .init(
-                                    language: .swift,
-                                    phylum: .enum,
-                                    kinks: [],
-                                    route: .unhashed))),
+                                type: .stem(.package, .swift(.enum))),
                             .init(
                                 shoot: .init(stem: "BarbieCore Barbie Dreamhouse"),
-                                type: .stem(.culture, .init(
-                                    language: .swift,
-                                    phylum: .enum,
-                                    kinks: [],
-                                    route: .unhashed))),
+                                type: .stem(.culture, .swift(.enum))),
                             .init(
                                 shoot: .init(stem: "BarbieCore Barbie Dreamhouse Keys"),
-                                type: .stem(.culture, .init(
-                                    language: .swift,
-                                    phylum: .struct,
-                                    kinks: [],
-                                    route: .unhashed))),
+                                type: .stem(.culture, .swift(.struct))),
                             .init(
                                 shoot: .init(stem: "BarbieCore Barbie PlasticKeychain"),
-                                type: .stem(.package, .init(
-                                    language: .swift,
-                                    phylum: .struct,
-                                    kinks: [],
-                                    route: .unhashed))),
+                                type: .stem(.package, .swift(.struct))),
                             .init(
                                 shoot: .init(stem: "Swift Array"),
-                                type: .stem(.foreign, .init(
-                                    language: .swift,
-                                    phylum: .struct,
-                                    kinks: [],
-                                    route: .unhashed))),
+                                type: .stem(.foreign, .swift(.struct))),
                         ])
 
                     let secondaries:Set<Unidoc.Scalar> = .init(output.vertices.lazy.map(\.id))
