@@ -72,7 +72,6 @@ extension Swiftinit.StatsThumbnail:HTML.OutputStreamable
 
             $0[.div]
             {
-                let interfaces:Unidoc.Stats.SPIs = .init(interfaces: self.census.interfaces)
                 $0[.p]
                 {
                     let target:Swiftinit.StatsHeading = .interfaceLayers
@@ -82,7 +81,7 @@ extension Swiftinit.StatsThumbnail:HTML.OutputStreamable
                 $0[.figure]
                 {
                     $0.class = "chart spis"
-                } = interfaces.pie
+                } = self.census.interfaces.pie
                 {
                     """
                     \($1) percent of the declarations in \(self.domain) are \($0.name)

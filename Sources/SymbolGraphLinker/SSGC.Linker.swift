@@ -8,7 +8,6 @@ import MarkdownAST
 import MarkdownLinking
 import MarkdownParsing
 import MarkdownSemantics
-import OrderedCollections
 import Signatures
 import Snippets
 import Sources

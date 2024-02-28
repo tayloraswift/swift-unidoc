@@ -74,11 +74,14 @@ extension Unidoc.Linker.Mesh
             commit: linker.current.metadata.commit?.sha1)
         var foreign:[Unidoc.ForeignVertex] = []
 
+        var census:Unidoc.Census.Enumerators = .init(cultures: cultures.count)
+
         //  Compute unweighted stats
         for (c, culture):(Int, SymbolGraph.Culture) in zip(cultures.indices,
             linker.current.cultures)
         {
-            guard let range:ClosedRange<Int32> = culture.decls
+            guard
+            let range:ClosedRange<Int32> = culture.decls
             else
             {
                 continue
@@ -87,29 +90,9 @@ extension Unidoc.Linker.Mesh
             {
                 if  let decl:SymbolGraph.Decl = linker.current.decls.nodes[d].decl
                 {
-                    let interface:BSON.Key = decl.signature.spis == nil ? "" : "__unknown__"
-                    let coverage:WritableKeyPath<Unidoc.Stats.Coverage, Int> = .classify(decl,
-                        _from: linker.current,
-                        _at: d)
-
-                    let decl:WritableKeyPath<Unidoc.Stats.Decl, Int> = .classify(decl)
-
-                    cultures[c].census.interfaces[interface, default: 0] += 1
-                    cultures[c].census.unweighted.coverage[keyPath: coverage] += 1
-                    cultures[c].census.unweighted.decls[keyPath: decl] += 1
-
-                    snapshot.census.interfaces[interface, default: 0] += 1
-                    snapshot.census.unweighted.coverage[keyPath: coverage] += 1
-                    snapshot.census.unweighted.decls[keyPath: decl] += 1
+                    census.count(citizen: decl, culture: c, _from: linker.current, _at: d)
                 }
             }
-        }
-
-        //  Create extension records, and compute weighted stats.
-        snapshot.census.weighted = snapshot.census.unweighted
-        for c:Int in cultures.indices
-        {
-            cultures[c].census.weighted = cultures[c].census.unweighted
         }
 
         //  We do this here and not dynamically in the loop after it for several reasons.
@@ -147,10 +130,7 @@ extension Unidoc.Linker.Mesh
             {
                 if  let decl:SymbolGraph.Decl = linker[f.package]?.decls[f.citizen]?.decl
                 {
-                    let bin:WritableKeyPath<Unidoc.Stats.Decl, Int> = .classify(decl)
-
-                    cultures[signature.culture].census.weighted.decls[keyPath: bin] += 1
-                    snapshot.census.weighted.decls[keyPath: bin] += 1
+                    census.count(feature: decl, culture: signature.culture)
                 }
             }
 
@@ -204,6 +184,13 @@ extension Unidoc.Linker.Mesh
             .map
         {
             .init(id: linker.current.id + $0, symbol: $1)
+        }
+
+        //  Integrate stats.
+        snapshot.census = .init(from: census.combined)
+        for c:Int in cultures.indices
+        {
+            cultures[c].census = .init(from: census.cultures[c])
         }
 
         let (trees, index):([Unidoc.TypeTree], JSON) = mapper.build(cultures: cultures)
