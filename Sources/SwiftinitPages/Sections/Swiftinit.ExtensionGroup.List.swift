@@ -5,16 +5,11 @@ extension Swiftinit.ExtensionGroup
 {
     struct List
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
-
         let heading:String
-        let items:[Unidoc.Scalar]
+        let items:Items
 
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            heading:String,
-            items:[Unidoc.Scalar])
+        init(heading:String, items:Items)
         {
-            self.context = context
             self.heading = heading
             self.items = items
         }
@@ -23,14 +18,45 @@ extension Swiftinit.ExtensionGroup
 extension Swiftinit.ExtensionGroup.List:HTML.OutputStreamable
 {
     static
-    func += (html:inout HTML.ContentEncoder, self:Self)
+    func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        html[.h3] = self.heading
-        html[.ul]
+        section[.h3] = self.heading
+
+        if !self.items.visible.isEmpty
         {
-            for scalar:Unidoc.Scalar in self.items
+            section[.ul]
             {
-                $0[.li] = self.context.card(scalar)
+                for card:Swiftinit.DeclCard in self.items.visible
+                {
+                    $0[.li] = card
+                }
+            }
+        }
+
+        if  self.items.details.isEmpty
+        {
+            return
+        }
+
+        section[.details]
+        {
+            $0[.summary]
+            {
+                $0[.p] { $0.class = "view" } = """
+                Show implementation details (\(self.items.details.count))
+                """
+
+                $0[.p] { $0.class = "hide" } = """
+                Hide implementation details
+                """
+            }
+
+            $0[.ul]
+            {
+                for card:Swiftinit.DeclCard in self.items.details
+                {
+                    $0[.li] = card
+                }
             }
         }
     }
