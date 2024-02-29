@@ -51,7 +51,7 @@ extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
         {
             $0[.div, { $0.class = "content" }] { $0[.nav] = HTML.Logo.init() }
         }
-        body[.div]
+        body[.div, { $0.class = "app" }]
         {
             $0[.main, { $0.class = "content" }]
             {
