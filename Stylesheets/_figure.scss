@@ -161,6 +161,10 @@ figure.chart.spis svg > g
     {
         fill: rgb(238, 238, 238);
     }
+    > *.underscored
+    {
+        fill: rgb(177, 177, 177);
+    }
     > *.unknown
     {
         fill: rgb(255, 210, 85);

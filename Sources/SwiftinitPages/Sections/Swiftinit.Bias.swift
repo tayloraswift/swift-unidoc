@@ -4,6 +4,7 @@ extension Swiftinit
     {
         case culture(Unidoc.Scalar)
         case neutral
+        case package
     }
 }
 extension Swiftinit.Bias
@@ -12,8 +13,9 @@ extension Swiftinit.Bias
     {
         switch self
         {
-        case .culture(let culture): return culture.edition
-        case .neutral:              return nil
+        case .culture(let culture): culture.edition
+        case .neutral:              nil
+        case .package:              nil
         }
     }
 }

@@ -3,6 +3,7 @@ import LexicalPaths
 import MarkdownRendering
 import Signatures
 import SymbolGraphs
+import Symbols
 import Unidoc
 import UnidocRecords
 
@@ -32,9 +33,9 @@ extension Swiftinit
         var peerList:[Unidoc.Scalar]
 
         private
-        let bias:Bias
+        let decl:Phylum.DeclFlags?
         private
-        let mode:GroupListMode?
+        let bias:Bias
 
         private
         init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
@@ -46,8 +47,8 @@ extension Swiftinit
             other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
             peerConstraints:[GenericConstraint<Unidoc.Scalar?>] = [],
             peerList:[Unidoc.Scalar] = [],
-            bias:Bias,
-            mode:GroupListMode?)
+            decl:Phylum.DeclFlags?,
+            bias:Bias)
         {
             self.context = context
 
@@ -60,42 +61,46 @@ extension Swiftinit
             self.other = other
             self.peerConstraints = peerConstraints
             self.peerList = peerList
+
+            self.decl = decl
             self.bias = bias
-            self.mode = mode
         }
     }
 }
 extension Swiftinit.GroupLists
 {
     init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-        organizing groups:/*consuming*/ [Unidoc.AnyGroup],
-        vertex:borrowing Unidoc.DeclVertex? = nil,
-        bias:Swiftinit.Bias,
-        mode:Swiftinit.GroupListMode? = nil) throws
+        groups:[Unidoc.AnyGroup],
+        vertex:borrowing Unidoc.DeclVertex,
+        bias:Swiftinit.Bias) throws
     {
-        let container:Unidoc.Group?
-        let generics:Generics
-        if  let vertex:Unidoc.DeclVertex = copy vertex
-        {
-            self.init(consume context,
-                requirements: vertex._requirements,
-                superforms: vertex.superforms,
-                bias: bias,
-                mode: mode)
+        self.init(context, decl: vertex.flags, bias: bias)
 
-            container = vertex.peers
-            generics = .init(vertex.signature.generics.parameters)
-        }
-        else
-        {
-            self.init(consume context,
-                bias: bias,
-                mode: mode)
+        self.requirements = vertex._requirements
+        self.superforms = vertex.superforms
 
-            container = nil
-            generics = .init([])
-        }
+        try self.organize(groups: consume groups,
+            container: vertex.peers,
+            generics: .init(vertex.signature.generics.parameters))
+    }
 
+    init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+        groups:[Unidoc.AnyGroup],
+        decl:Phylum.DeclFlags? = nil,
+        bias:Swiftinit.Bias) throws
+    {
+        self.init(context, decl: decl, bias: bias)
+
+        try self.organize(groups: consume groups)
+    }
+}
+extension Swiftinit.GroupLists
+{
+    private mutating
+    func organize(groups:[Unidoc.AnyGroup],
+        container:Unidoc.Group? = nil,
+        generics:Generics = .init([])) throws
+    {
         var extensions:[(Unidoc.ExtensionGroup, Partisanship, Genericness)] = []
         var curated:Set<Unidoc.Scalar> = [self.context.id]
 
@@ -131,12 +136,12 @@ extension Swiftinit.GroupLists
                     continue
                 }
 
-                switch self.mode
+                switch self.decl?.phylum
                 {
-                case .decl(.protocol, _)?:
+                case .protocol?:
                     self.requirements += group.members
 
-                case .decl(.enum, _)?:
+                case .enum?:
                     self.inhabitants += group.members
 
                 default:
@@ -162,13 +167,24 @@ extension Swiftinit.GroupLists
                 //  Guess what kind of polygon this is by looking at the bit pattern of its
                 //  first vertex.
                 let heading:AutomaticHeading
-                switch (plane, self.mode)
+
+                if  case .package = self.bias
                 {
-                case (.product, .meta): heading = .allProducts
-                case (.product, _):     heading = .otherProducts
-                case (.module, .meta):  heading = .allModules
-                case (.module, _):      heading = .otherModules
-                default:                heading = .miscellaneous
+                    switch plane
+                    {
+                    case .product:  heading = .allProducts
+                    case .module:   heading = .allModules
+                    default:        heading = .miscellaneous
+                    }
+                }
+                else
+                {
+                    switch plane
+                    {
+                    case .product:  heading = .otherProducts
+                    case .module:   heading = .otherModules
+                    default:        heading = .miscellaneous
+                    }
                 }
 
                 self.other.append((heading, group.members))
@@ -207,22 +223,14 @@ extension Swiftinit.GroupLists
         //  curated groups.
         self.extensions = extensions.map { $0.0.subtracting(curated) }
 
+        self.requirements.removeAll(where: curated.contains(_:))
+        self.inhabitants.removeAll(where: curated.contains(_:))
         self.peerList.removeAll(where: curated.contains(_:))
 
         self.topics.sort { $0.id < $1.id }
         self.other.sort { $0.0 < $1.0 }
     }
 }
-extension Swiftinit.GroupLists
-{
-    private
-    func list(_ scalars:__owned [Unidoc.Scalar],
-        under heading:String? = nil) -> Swiftinit.GroupList?
-    {
-        scalars.isEmpty ? nil : .init(self.context, heading: heading, scalars: scalars)
-    }
-}
-
 extension Swiftinit.GroupLists:HTML.OutputStreamable
 {
     static
@@ -285,7 +293,8 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             }
         }
 
-        guard case .decl(let phylum, let kinks)? = self.mode
+        guard
+        let decl:Phylum.DeclFlags = self.decl
         else
         {
             return
@@ -297,19 +306,19 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             {
                 let heading:AutomaticHeading
 
-                if      kinks[is: .required]
+                if      decl.kinks[is: .required]
                 {
                     heading = .restatesRequirements
                 }
-                else if kinks[is: .intrinsicWitness]
+                else if decl.kinks[is: .intrinsicWitness]
                 {
                     heading = .implementsRequirements
                 }
-                else if kinks[is: .override]
+                else if decl.kinks[is: .override]
                 {
                     heading = .overrides
                 }
-                else if case .class = phylum
+                else if case .class = decl.phylum
                 {
                     heading = .superclasses
                 }
@@ -390,11 +399,11 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             {
                 let heading:AutomaticHeading
 
-                if  kinks[is: .required]
+                if  decl.kinks[is: .required]
                 {
                     heading = .otherRequirements
                 }
-                else if case .case = phylum
+                else if case .case = decl.phylum
                 {
                     heading = .otherCases
                 }
@@ -413,56 +422,15 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             }
         }
 
-        for group:Unidoc.ExtensionGroup in self.extensions where !group.isEmpty
+        for group:Unidoc.ExtensionGroup in self.extensions
         {
-            html[.section, { $0.class = "group extension" }]
+            html[.section]
             {
-                $0[.h2] = Swiftinit.ExtensionHeader.init(self.context,
-                    heading: .init(culture: group.culture, bias: self.bias))
-
-                $0[.div, .code]
-                {
-                    $0.class = "constraints"
-                } = Swiftinit.ConstraintsList.init(self.context, constraints: group.constraints)
-
-                $0 ?= self.list(group.conformances, under: "Conformances")
-                $0 ?= self.list(group.nested, under: "Members")
-                $0 ?= self.list(group.features, under: "Features")
-
-                switch phylum
-                {
-                case .protocol:
-                    $0 ?= self.list(group.subforms, under: "Subtypes")
-
-                case .class:
-                    $0 ?= self.list(group.subforms, under: "Subclasses")
-
-                case _:
-                    if  kinks[is: .required]
-                    {
-                        let (restatements, witnesses):([Unidoc.Scalar], [Unidoc.Scalar]) =
-                            group.subforms.reduce(into: ([], []))
-                        {
-                            if  case .decl(let decl)? = self.context[$1],
-                                decl.kinks[is: .intrinsicWitness]
-                            {
-                                $0.1.append($1)
-                            }
-                            else
-                            {
-                                $0.0.append($1)
-                            }
-                        }
-
-                        $0 ?= self.list(restatements, under: "Restated By")
-                        $0 ?= self.list(witnesses, under: "Default Implementations")
-                    }
-                    else
-                    {
-                        $0 ?= self.list(group.subforms, under: "Overridden By")
-                    }
-                }
-            }
+                $0.class = "group extension"
+            } = Swiftinit.ExtensionGroup.init(self.context,
+                group: group,
+                decl: decl,
+                bias: self.bias)
         }
     }
 }

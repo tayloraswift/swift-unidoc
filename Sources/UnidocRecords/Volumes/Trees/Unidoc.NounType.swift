@@ -12,14 +12,13 @@ extension Unidoc
 }
 extension Unidoc.NounType
 {
-    @inlinable internal
-    var cdecl:Bool
+    @inlinable
+    var decl:Phylum.DeclFlags?
     {
         switch self
         {
-        case .stem(_, let flags?):  flags.cdecl
-        case .stem(_, nil):         false
-        case .text:                 false
+        case .stem(_, let decl):    decl
+        case .text:                 nil
         }
     }
 
@@ -28,8 +27,8 @@ extension Unidoc.NounType
     {
         switch self
         {
-        case .stem:             nil
-        case .text(let text):   text
+        case .stem:                 nil
+        case .text(let text):       text
         }
     }
 }

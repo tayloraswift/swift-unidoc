@@ -45,7 +45,7 @@ extension Unidoc.ForeignVertex:Unidoc.PrincipalVertex
     @inlinable public
     var route:Unidoc.Route
     {
-        .init(shoot: self.shoot, cdecl: self.flags.cdecl)
+        .init(shoot: self.shoot, detail: self.flags.detail)
     }
 
     @inlinable public
@@ -53,7 +53,7 @@ extension Unidoc.ForeignVertex:Unidoc.PrincipalVertex
     {
         .init(
             stem: self.stem,
-            hash: self.flags.route == .hashed ? .init(truncating: self.hash) : nil)
+            hash: self.flags.route.hashed ? .init(truncating: self.hash) : nil)
     }
 }
 extension Unidoc.ForeignVertex

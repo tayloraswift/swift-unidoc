@@ -1,5 +1,7 @@
 extension Phylum.Decl
 {
+    /// Kinks represent ways that a declaration interacts with other declarations. Kinks are
+    /// stored in a ``Kinks`` option set.
     @frozen public
     enum Kink:UInt8, Equatable, Hashable, Sendable
     {
@@ -15,5 +17,7 @@ extension Phylum.Decl
         case intrinsicWitness       = 0b0001_0000
         /// Has at least one universal witness from the same package.
         case implemented            = 0b0010_0000
+        /// Is explicitly marked `final`. Actors do not automatically get this kink.
+        case final                  = 0b0100_0000
     }
 }
