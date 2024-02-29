@@ -1,37 +1,34 @@
 import HTML
 import Unidoc
 
-extension Swiftinit
+extension Swiftinit.ExtensionGroup
 {
-    struct GroupList
+    struct List
     {
         let context:IdentifiablePageContext<Swiftinit.Vertices>
 
-        let heading:String?
-        let scalars:[Unidoc.Scalar]
+        let heading:String
+        let items:[Unidoc.Scalar]
 
         init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            heading:String?,
-            scalars:[Unidoc.Scalar])
+            heading:String,
+            items:[Unidoc.Scalar])
         {
             self.context = context
             self.heading = heading
-            self.scalars = scalars
+            self.items = items
         }
     }
 }
-extension Swiftinit.GroupList:HTML.OutputStreamable
+extension Swiftinit.ExtensionGroup.List:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        if  let heading:String = self.heading
-        {
-            html[.h3] = heading
-        }
+        html[.h3] = self.heading
         html[.ul]
         {
-            for scalar:Unidoc.Scalar in self.scalars
+            for scalar:Unidoc.Scalar in self.items
             {
                 $0[.li] = self.context.card(scalar)
             }
