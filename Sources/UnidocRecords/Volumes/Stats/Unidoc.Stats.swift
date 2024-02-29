@@ -1,6 +1,4 @@
 import BSON
-import BSON_OrderedCollections
-import OrderedCollections
 
 extension Unidoc
 {

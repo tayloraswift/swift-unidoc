@@ -3,10 +3,10 @@ extension Phylum.Decl
     @frozen public
     struct Kinks:Equatable, Hashable, Sendable
     {
-        @usableFromInline internal
+        @usableFromInline
         var bits:UInt8
 
-        @inlinable internal
+        @inlinable
         init(bits:UInt8)
         {
             self.bits = bits
@@ -58,9 +58,9 @@ extension Phylum.Decl.Kinks
         }
         set(set)
         {
-            set ?
-            (self.bits |=  kink.rawValue) :
-            (self.bits &= ~kink.rawValue)
+            set
+            ? (self.bits |=  kink.rawValue)
+            : (self.bits &= ~kink.rawValue)
         }
     }
 }

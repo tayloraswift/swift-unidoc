@@ -121,15 +121,12 @@ extension Swiftinit.Stats.PackagePage:Swiftinit.VertexPage
                 """
             }
 
-            let interfaces:Unidoc.Stats.SPIs = .init(
-                interfaces: self.vertex.snapshot.census.interfaces)
-
             $0[.h2] = Swiftinit.StatsHeading.interfaceLayers
             $0[.h3] = "Declarations"
             $0[.figure]
             {
                 $0.class = "chart spis"
-            } = interfaces.chart
+            } = self.vertex.snapshot.census.interfaces.chart
             {
                 """
                 \($1) percent of the declarations in \(self.volume.title) are \($0.name)

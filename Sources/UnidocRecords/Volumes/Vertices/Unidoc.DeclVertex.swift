@@ -103,7 +103,7 @@ extension Unidoc.DeclVertex:Unidoc.PrincipalVertex
     @inlinable public
     var route:Unidoc.Route
     {
-        .init(shoot: self.shoot, cdecl: self.flags.cdecl)
+        .init(shoot: self.shoot, detail: self.flags.detail)
     }
 
     @inlinable public
@@ -111,7 +111,7 @@ extension Unidoc.DeclVertex:Unidoc.PrincipalVertex
     {
         .init(
             stem: self.stem,
-            hash: self.flags.route == .hashed ? .init(truncating: self.hash) : nil)
+            hash: self.flags.route.hashed ? .init(truncating: self.hash) : nil)
     }
 
     @inlinable public

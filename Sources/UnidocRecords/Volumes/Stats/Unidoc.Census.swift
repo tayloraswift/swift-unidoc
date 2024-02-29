@@ -1,6 +1,4 @@
 import BSON
-import BSON_OrderedCollections
-import OrderedCollections
 
 extension Unidoc
 {
@@ -9,7 +7,7 @@ extension Unidoc
     {
         /// System programming interfaces.
         public
-        var interfaces:OrderedDictionary<BSON.Key, Int>
+        var interfaces:BSON.HomogenousFields<Interface, Int>
 
         public
         var unweighted:Stats
@@ -17,7 +15,7 @@ extension Unidoc
         var weighted:Stats
 
         @inlinable public
-        init(interfaces:OrderedDictionary<BSON.Key, Int> = [:],
+        init(interfaces:BSON.HomogenousFields<Interface, Int> = [:],
             unweighted:Stats = .init(),
             weighted:Stats = .init())
         {
@@ -43,7 +41,7 @@ extension Unidoc.Census:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.interfaces] = self.interfaces.isEmpty ? nil : self.interfaces
+        bson[.interfaces] = self.interfaces.ordered.isEmpty ? nil : self.interfaces
         bson[.unweighted] = self.unweighted
         bson[.weighted] = self.weighted
     }

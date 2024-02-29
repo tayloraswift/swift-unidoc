@@ -43,10 +43,8 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
                 volume: context.page.volume,
                 tree: tree)
             let groups:Swiftinit.GroupLists = try .init(context.page,
-                organizing: consume groups,
-                bias: .culture(vertex.culture),
-                mode: nil)
-
+                groups: consume groups,
+                bias: .culture(vertex.culture))
             let page:Swiftinit.Docs.ArticlePage = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
@@ -59,9 +57,8 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
                 volume: context.page.volume,
                 tree: tree)
             let groups:Swiftinit.GroupLists = try .init(context.page,
-                organizing: consume groups,
-                bias: .culture(vertex.id), //  I AM THE CULTURE
-                mode: nil)
+                groups: consume groups,
+                bias: .culture(vertex.id)) //  I AM THE CULTURE
             let page:Swiftinit.Docs.ModulePage = .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
@@ -74,10 +71,9 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
                 volume: context.page.volume,
                 tree: tree)
             let groups:Swiftinit.GroupLists = try .init(context.page,
-                organizing: consume groups,
+                groups: consume groups,
                 vertex: vertex,
-                bias: .culture(vertex.culture),
-                mode: .decl(vertex.phylum, vertex.kinks))
+                bias: .culture(vertex.culture))
             let page:Swiftinit.Docs.DeclPage = try .init(context.page,
                 canonical: context.canonical,
                 sidebar: sidebar,
@@ -90,9 +86,8 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 
         case .product(let vertex):
             let groups:Swiftinit.GroupLists = try .init(context.page,
-                organizing: consume groups,
-                bias: .neutral,
-                mode: nil)
+                groups: consume groups,
+                bias: .neutral)
             let page:Swiftinit.Docs.ProductPage = .init(context.page,
                 canonical: context.canonical,
                 vertex: vertex,
@@ -101,9 +96,9 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 
         case .foreign(let vertex):
             let groups:Swiftinit.GroupLists = try .init(context.page,
-                organizing: consume groups,
-                bias: .neutral,
-                mode: .decl(vertex.phylum, vertex.kinks))
+                groups: consume groups,
+                decl: vertex.flags,
+                bias: .neutral)
             let page:Swiftinit.Docs.ForeignPage = try .init(context.page,
                 canonical: context.canonical,
                 vertex: vertex,
@@ -112,9 +107,8 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 
         case .global(let vertex):
             let groups:Swiftinit.GroupLists = try .init(context.page,
-                organizing: consume groups,
-                bias: .neutral,
-                mode: .meta)
+                groups: consume groups,
+                bias: .package)
             let page:Swiftinit.Docs.PackagePage = .init(context.page,
                 canonical: context.canonical,
                 vertex: vertex,

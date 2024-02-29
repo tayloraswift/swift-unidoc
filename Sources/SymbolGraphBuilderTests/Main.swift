@@ -66,8 +66,10 @@ enum Main:TestMain, TestBattery
             //  the swift-docc-plugin dependency should have been linted.
             tests.expect(docs.metadata.dependencies.map(\.package.name) **?
             [
-                "swift-collections",
                 "swift-atomics",
+                "swift-collections",
+                //  swift-nio grew a dependency on swift-system in 2.63.0
+                "swift-system",
             ])
 
             docs.roundtrip(for: tests, in: workspace.path)

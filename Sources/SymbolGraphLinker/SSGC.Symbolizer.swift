@@ -82,11 +82,12 @@ extension SSGC.Symbolizer
     mutating
     func allocate(decl:SSGC.Decl) -> Int32
     {
-        let scalar:Int32 = self.graph.decls.append(.init(decl: .init(
-                language: decl.language,
-                phylum: decl.phylum,
-                kinks: decl.kinks,
-                path: decl.path)),
+        let vertex:SymbolGraph.Decl = .init(language: decl.language,
+            phylum: decl.phylum,
+            kinks: decl.kinks,
+            path: decl.path)
+
+        let scalar:Int32 = self.graph.decls.append(.init(decl: vertex),
             id: decl.id)
 
         self.decls[decl.id] = scalar

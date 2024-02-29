@@ -72,8 +72,8 @@ extension Unidoc.Linker.TreeMapper
             fallthrough
 
         case .associatedtype, .case, .func, .macro(.freestanding), .var:
-            //  Don’t include C declarations in search.
-            if  vertex.flags.cdecl
+            //  Don’t include implementation details in search.
+            if  vertex.flags.detail
             {
                 break
             }

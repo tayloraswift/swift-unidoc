@@ -95,6 +95,35 @@ extension Unidoc.Stats
         }
     }
 }
+extension Unidoc.Stats.Decl
+{
+    @inlinable public static
+    func + (self:consuming Self, other:Self) -> Self
+    {
+        self += other
+        return self
+    }
+
+    @inlinable public static
+    func += (self:inout Self, other:Self)
+    {
+        self.typealiases += other.typealiases
+        self.structures += other.structures
+        self.protocols += other.protocols
+        self.classes += other.classes
+        self.actors += other.actors
+        self.requirements += other.requirements
+        self.witnesses += other.witnesses
+        self.constructors += other.constructors
+        self.subscripts += other.subscripts
+        self.functors += other.functors
+        self.methods += other.methods
+        self.operators += other.operators
+        self.functions += other.functions
+        self.freestandingMacros += other.freestandingMacros
+        self.attachedMacros += other.attachedMacros
+    }
+}
 extension Unidoc.Stats.Decl:ExpressibleByDictionaryLiteral
 {
     @inlinable public

@@ -20,6 +20,8 @@ extension SymbolGraphPart
         let acl:ACL
         public
         let phylum:Phylum
+        public
+        let final:Bool
 
         public
         let doccomment:Doccomment?
@@ -40,6 +42,7 @@ extension SymbolGraphPart
             usr:Symbol.USR,
             acl:ACL,
             phylum:Phylum,
+            final:Bool,
             doccomment:Doccomment?,
             extension:ExtensionContext,
             signature:Signature<Symbol.Decl>,
@@ -49,6 +52,7 @@ extension SymbolGraphPart
             self.usr = usr
             self.acl = acl
             self.phylum = phylum
+            self.final = final
             self.doccomment = doccomment
             self.extension = `extension`
             self.signature = signature
@@ -141,6 +145,8 @@ extension SymbolGraphPart.Vertex
             usr: usr,
             acl: acl,
             phylum: phylum,
+            //  Actors would also imply `final`, but we don’t want to flatten that here.
+            final: keywords.final,
             doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
             extension: `extension`,
             signature: signature,

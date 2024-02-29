@@ -26,6 +26,17 @@ extension Main.InterestingKeywords:TestBattery
             tests.expect("\(expanded.bytecode.safe)" ==? decl)
             tests.expect(true: keywords.actor)
         }
+        if  let tests:TestGroup = tests / "Final"
+        {
+            let decl:String = "final class C"
+
+            var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
+            let expanded:Signature<Never>.Expanded = .init(decl,
+                keywords: &keywords)
+
+            tests.expect("\(expanded.bytecode.safe)" ==? decl)
+            tests.expect(true: keywords.final)
+        }
         if  let tests:TestGroup = tests / "ClassSubscript"
         {
             let decl:String = "class subscript(index: Int) -> Int"
