@@ -22,6 +22,29 @@ extension Phylum
 }
 extension Phylum.Decl
 {
+    @inlinable public
+    var objectivity:Objectivity?
+    {
+        switch self
+        {
+        case .actor:                    nil
+        case .associatedtype:           nil
+        case .case:                     .static
+        case .class:                    nil
+        case .deinitializer:            .instance
+        case .enum:                     nil
+        case .func(let self):           self
+        case .initializer:              .static
+        case .macro:                    nil
+        case .operator:                 .static
+        case .protocol:                 nil
+        case .struct:                   nil
+        case .subscript(let self):      self
+        case .typealias:                nil
+        case .var(let self):            self
+        }
+    }
+
     /// Indicates if the declaration is typelike. This is not the same as ``orientation``!
     @inlinable public
     var isTypelike:Bool
