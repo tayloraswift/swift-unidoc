@@ -71,6 +71,20 @@ section.group
         }
     }
 }
+section.group.extension
+{
+    details
+    {
+        summary
+        {
+            p.view, p.hide
+            {
+                color: $light-foreground-semi;
+                font-size: 1rem;
+            }
+        }
+    }
+}
 section.group
 {
     > h2

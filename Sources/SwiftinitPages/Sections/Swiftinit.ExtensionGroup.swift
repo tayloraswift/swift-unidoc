@@ -30,19 +30,19 @@ extension Swiftinit.ExtensionGroup
 {
     typealias Lists =
     (
-        conformances:[Unidoc.Scalar],
-        protocols:[Unidoc.Scalar],
-        types:[Unidoc.Scalar],
-        typealiases:[Unidoc.Scalar],
-        membersOnType:[Unidoc.Scalar],
-        membersOnInstance:[Unidoc.Scalar],
-        featuresOnType:[Unidoc.Scalar],
-        featuresOnInstance:[Unidoc.Scalar],
-        subtypes:[Unidoc.Scalar],
-        subclasses:[Unidoc.Scalar],
-        overriddenBy:[Unidoc.Scalar],
-        restatedBy:[Unidoc.Scalar],
-        defaultImplementations:[Unidoc.Scalar]
+        conformances:List.Items,
+        protocols:List.Items,
+        types:List.Items,
+        typealiases:List.Items,
+        membersOnType:List.Items,
+        membersOnInstance:List.Items,
+        featuresOnType:List.Items,
+        featuresOnInstance:List.Items,
+        subtypes:List.Items,
+        subclasses:List.Items,
+        overriddenBy:List.Items,
+        restatedBy:List.Items,
+        defaultImplementations:List.Items
     )
 }
 extension Swiftinit.ExtensionGroup
@@ -60,7 +60,10 @@ extension Swiftinit.ExtensionGroup
         let heading:Swiftinit.ExtensionHeading = .init(culture: group.culture, bias: bias)
         var lists:Lists
 
-        lists.conformances = group.conformances
+        lists.conformances = group.conformances.reduce(into: [])
+        {
+            $0.append(context.card(decl: $1))
+        }
 
         lists.protocols = []
         lists.types = []
@@ -70,33 +73,33 @@ extension Swiftinit.ExtensionGroup
 
         for id:Unidoc.Scalar in group.nested
         {
+            //  We should never see anything in an extension group that isn't a declaration.
             guard
-            let decl:Phylum.DeclFlags = context[id]?.decl?.flags
+            case .decl(let decl)? = context.card(id)
             else
             {
-                //  We should never see anything in an extension group that isn't a declaration.
                 continue
             }
 
-            if  let objectivity:Phylum.Decl.Objectivity = decl.phylum.objectivity
+            if  let objectivity:Phylum.Decl.Objectivity = decl.vertex.phylum.objectivity
             {
                 switch objectivity
                 {
-                case .static:   lists.membersOnType.append(id)
-                case .class:    lists.membersOnType.append(id)
-                case .instance: lists.membersOnInstance.append(id)
+                case .static:   lists.membersOnType.append(decl)
+                case .class:    lists.membersOnType.append(decl)
+                case .instance: lists.membersOnInstance.append(decl)
                 }
             }
             else
             {
-                switch decl.phylum
+                switch decl.vertex.phylum
                 {
-                case .enum:     lists.types.append(id)
-                case .struct:   lists.types.append(id)
-                case .class:    lists.types.append(id)
-                case .actor:    lists.types.append(id)
-                case .protocol: lists.protocols.append(id)
-                default:        lists.typealiases.append(id)
+                case .enum:     lists.types.append(decl)
+                case .struct:   lists.types.append(decl)
+                case .class:    lists.types.append(decl)
+                case .actor:    lists.types.append(decl)
+                case .protocol: lists.protocols.append(decl)
+                default:        lists.typealiases.append(decl)
                 }
             }
         }
@@ -106,15 +109,15 @@ extension Swiftinit.ExtensionGroup
 
         for id:Unidoc.Scalar in group.features
         {
-            if  let decl:Phylum.DeclFlags = context[id]?.decl?.flags
+            if  case .decl(let decl)? = context.card(id)
             {
-                switch decl.phylum.objectivity
+                switch decl.vertex.phylum.objectivity
                 {
                 //  In theory, typealiases can be inherited as features.
-                case nil:           lists.featuresOnType.append(id)
-                case .static?:      lists.featuresOnType.append(id)
-                case .class?:       lists.featuresOnType.append(id)
-                case .instance?:    lists.featuresOnInstance.append(id)
+                case nil:           lists.featuresOnType.append(decl)
+                case .static?:      lists.featuresOnType.append(decl)
+                case .class?:       lists.featuresOnType.append(decl)
+                case .instance?:    lists.featuresOnInstance.append(decl)
                 }
             }
         }
@@ -122,7 +125,10 @@ extension Swiftinit.ExtensionGroup
         switch decl.phylum
         {
         case .protocol:
-            lists.subtypes = group.subforms
+            lists.subtypes = group.subforms.reduce(into: [])
+            {
+                $0.append(context.card(decl: $1))
+            }
             lists.subclasses = []
             lists.restatedBy = []
             lists.overriddenBy = []
@@ -130,7 +136,10 @@ extension Swiftinit.ExtensionGroup
 
         case .class:
             lists.subtypes = []
-            lists.subclasses = group.subforms
+            lists.subclasses = group.subforms.reduce(into: [])
+            {
+                $0.append(context.card(decl: $1))
+            }
             lists.restatedBy = []
             lists.overriddenBy = []
             lists.defaultImplementations = []
@@ -145,14 +154,11 @@ extension Swiftinit.ExtensionGroup
             {
                 for id:Unidoc.Scalar in group.subforms
                 {
-                    if  let member:Phylum.DeclFlags = context[id]?.decl?.flags,
-                            member.kinks[is: .intrinsicWitness]
+                    if  case .decl(let member)? = context.card(id)
                     {
-                        lists.defaultImplementations.append(id)
-                    }
-                    else
-                    {
-                        lists.restatedBy.append(id)
+                        member.vertex.kinks[is: .intrinsicWitness]
+                        ? lists.defaultImplementations.append(member)
+                        : lists.restatedBy.append(member)
                     }
                 }
 
@@ -160,7 +166,10 @@ extension Swiftinit.ExtensionGroup
             }
             else
             {
-                lists.overriddenBy = group.subforms
+                lists.overriddenBy = group.subforms.reduce(into: [])
+                {
+                    $0.append(context.card(decl: $1))
+                }
             }
         }
 
@@ -174,9 +183,9 @@ extension Swiftinit.ExtensionGroup
 extension Swiftinit.ExtensionGroup
 {
     private
-    subscript(dynamicMember keyPath:KeyPath<Lists, [Unidoc.Scalar]>) -> List?
+    subscript(dynamicMember keyPath:KeyPath<Lists, List.Items>) -> List?
     {
-        let items:[Unidoc.Scalar] = self.lists[keyPath: keyPath]
+        let items:List.Items = self.lists[keyPath: keyPath]
         if  items.isEmpty
         {
             return nil
@@ -201,7 +210,7 @@ extension Swiftinit.ExtensionGroup
         default:                        heading = "?"
         }
 
-        return .init(self.context, heading: heading, items: items)
+        return .init(heading: heading, items: items)
     }
 }
 extension Swiftinit.ExtensionGroup:HTML.OutputStreamable

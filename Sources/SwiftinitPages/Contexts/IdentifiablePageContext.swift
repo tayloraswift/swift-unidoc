@@ -64,6 +64,16 @@ extension IdentifiablePageContext
         .init(self, bytecode: snippet.bytecode, scalars: snippet.scalars)
     }
 
+    func card(decl id:Unidoc.Scalar) -> Swiftinit.DeclCard?
+    {
+        guard case (let vertex, let url?)? = self[decl: id]
+        else
+        {
+            return nil
+        }
+        return .init(self, vertex: vertex, target: url)
+    }
+
     func card(_ id:Unidoc.Scalar) -> Swiftinit.AnyCard?
     {
         switch self[vertex: id]
