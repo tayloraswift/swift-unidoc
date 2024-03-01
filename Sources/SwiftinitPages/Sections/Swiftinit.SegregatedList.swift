@@ -83,7 +83,7 @@ extension Swiftinit.SegregatedList:HTML.OutputStreamable
             return
         }
 
-        section[.details]
+        section[.details, { $0.class = "impl" }]
         {
             $0[.summary]
             {

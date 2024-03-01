@@ -54,6 +54,18 @@ section.group
             display: none;
         }
     }
+    details.impl
+    {
+        summary
+        {
+            p.view, p.hide
+            {
+                color: $light-foreground-semi;
+                font-size: 1rem;
+            }
+        }
+    }
+
     details[open]
     {
         summary
@@ -67,20 +79,6 @@ section.group
             p.hide
             {
                 display: block;
-            }
-        }
-    }
-}
-section.group.extension
-{
-    details
-    {
-        summary
-        {
-            p.view, p.hide
-            {
-                color: $light-foreground-semi;
-                font-size: 1rem;
             }
         }
     }
@@ -105,7 +103,8 @@ section.group
         border-top: solid 1px $light-foreground-faint;
     }
 
-    > h3
+    > h3,
+    > details > h3
     {
         margin-top: 1rem;
         border-top: dashed 1px $light-foreground-semi;
