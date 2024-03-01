@@ -224,6 +224,55 @@ extension Markdown.BlockInterpreter
     func organize(_ blocks:ArraySlice<Markdown.BlockElement>,
         snippets:[String: Markdown.Snippet]) -> Markdown.SemanticDocument
     {
+        //  This function looks really complicated, mostly because top-level blocks behave
+        //  very slightly differently from markup in general. For example, top-level blocks can
+        //  contribute Parameters, but nested blocks cannot. Because Parameters are a special
+        //  case of magical aside, the act of extracting Parameters is destructive to the
+        //  markup, so we cannot extract Parameters and then detect magical aside blocks in a
+        //  subsequent pass.
+        //
+        //  We could avoid a lot of this grief if we were willing to recognize Parameters and
+        //  magical asides at the parser level. However that would be stretching the concept of
+        //  “Swift-flavored markdown” further than even we are comfortable with.
+
+        //  It is far simpler to inline snippets in a separate pass, because snippet captions
+        //  themselves can contain things we want to intercept.
+        //
+        //  In theory, this means snippet captions can even produce Parameters, although it’s
+        //  not clear why you would want to do that.
+        let blocks:[Markdown.BlockElement] = blocks.reduce(into: [])
+        {
+            (blocks:inout [Markdown.BlockElement], next:Markdown.BlockElement) in
+
+            guard
+            case let snippet as Markdown.BlockCodeFragment = next
+            else
+            {
+                //  This is **different** from calling `self.rewrite` directly on the top-level
+                //  array of blocks, because we do not want to disturb “extra magical” blocks
+                //  like Parameters or Returns.
+                next.rewrite
+                {
+                    self.rewrite(children: &$0, inlining: snippets)
+                }
+
+                blocks.append(next)
+                return
+            }
+
+            do
+            {
+                try snippet.inline(snippets: snippets)
+                {
+                    blocks.append($0)
+                }
+            }
+            catch let error
+            {
+                self.diagnostics[snippet.source] = .error(error)
+            }
+        }
+
         var parameters:(discussion:[Markdown.BlockElement], list:[Markdown.BlockParameter]) =
         (
             [],
@@ -236,11 +285,6 @@ extension Markdown.BlockInterpreter
 
         for block:Markdown.BlockElement in blocks
         {
-            block.rewrite
-            {
-                self.rewrite(children: &$0, inlining: snippets)
-            }
-
             switch block
             {
             //  If you change this logic, please check if the more-general
@@ -343,21 +387,6 @@ extension Markdown.BlockInterpreter
 
             case let block as Markdown.BlockMetadata:
                 metadata.update(docc: block)
-
-            case let block as Markdown.BlockCodeFragment:
-                //  We still need to do this here, as it is a top-level block and therefore
-                //  not subject to the automatic rewrite.
-                do
-                {
-                    try block.inline(snippets: snippets)
-                    {
-                        self.append($0)
-                    }
-                }
-                catch let error
-                {
-                    self.diagnostics[block.source] = .error(error)
-                }
 
             case let block:
                 self.append(block)
