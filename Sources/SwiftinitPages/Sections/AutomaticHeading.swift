@@ -6,7 +6,7 @@ enum AutomaticHeading:Equatable, Comparable
     case allProducts
     case allProductConstituents
 
-    case miscellaneous
+    case uncategorized
     case otherCases
     case otherModules
     case otherMembers
@@ -33,7 +33,7 @@ extension AutomaticHeading:Identifiable
         case .allProducts:              "ss:all-products"
         case .allProductConstituents:   "ss:all-product-constituents"
 
-        case .miscellaneous:            "ss:misc"
+        case .uncategorized:            "ss:misc"
         case .otherCases:               "ss:other-cases"
         case .otherMembers:             "ss:other-members"
         case .otherModules:             "ss:other-modules"
@@ -62,7 +62,7 @@ extension AutomaticHeading:CustomStringConvertible
         case .allProducts:              "Products"
         case .allProductConstituents:   "Product constituents"
 
-        case .miscellaneous:            "Miscellaneous"
+        case .uncategorized:            "Uncategorized"
         case .otherCases:               "Other cases"
         case .otherMembers:             "Other members in extension"
         case .otherModules:             "Other modules"
@@ -83,58 +83,4 @@ extension AutomaticHeading:CustomStringConvertible
 }
 extension AutomaticHeading:HTML.OutputStreamableHeading
 {
-}
-extension AutomaticHeading
-{
-    func window<T>(_ section:inout HTML.ContentEncoder,
-        listing items:[T],
-        limit:Int,
-        open:Bool = false,
-        with yield:(inout HTML.ContentEncoder, T) -> ())
-    {
-        section[.h2] = self
-
-        guard limit < items.count
-        else
-        {
-            return section[.ul]
-            {
-                for item:T in items
-                {
-                    yield(&$0, item)
-                }
-            }
-        }
-
-        section[.details, { $0.open = open }]
-        {
-            $0[.summary]
-            {
-                $0[.p] { $0.class = "view" } = "View members"
-
-                $0[.p] { $0.class = "hide" } = "Hide members"
-
-                $0[.p, { $0.class = "reason" }]
-                {
-                    $0 += """
-                    This section is hidden by default because it contains too many \
-
-                    """
-
-                    $0[.span] { $0.class = "count" } = "(\(items.count))"
-
-                    $0 += """
-                        members.
-                    """
-                }
-            }
-            $0[.ul]
-            {
-                for item:T in items
-                {
-                    yield(&$0, item)
-                }
-            }
-        }
-    }
 }
