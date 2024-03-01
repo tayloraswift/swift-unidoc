@@ -109,6 +109,32 @@ extension Main.Topics:MarkdownTestBattery
                 expected: html,
                 topics: [3, 2])
         }
+        // if  let tests:TestGroup = tests / "OneList" / "EmptyTopics"
+        // {
+        //     Self.run(tests: tests,
+        //         markdown:
+        //         """
+        //         Overview overview overview
+
+        //         ## Discussion
+
+        //         Details details details
+
+        //         ## Topics
+
+        //         ### Ariana Grande
+
+        //         ### Taylor Swift
+
+        //         -   ``WeAreNeverEverGettingBackTogether``
+        //         -   ``AllTooWell``
+
+        //         ### Lana Del Rey
+
+        //         """,
+        //         expected: html,
+        //         topics: [2])
+        // }
         if  let tests:TestGroup = tests / "ManyLists"
         {
             Self.run(tests: tests,
