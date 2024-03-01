@@ -19,13 +19,17 @@ extension Swiftinit
         var inhabitants:[Unidoc.Scalar]
         private
         var superforms:[Unidoc.Scalar]
-
         private
-        var extensions:[Unidoc.ExtensionGroup]
+        var products:[Unidoc.Scalar]
+        private
+        var modules:[Unidoc.Scalar]
+        private
+        var others:[Unidoc.Scalar]
+
         private
         var topics:[Unidoc.TopicGroup]
         private
-        var other:[(AutomaticHeading, [Unidoc.Scalar])]
+        var extensions:[Unidoc.ExtensionGroup]
 
         private(set)
         var peerConstraints:[GenericConstraint<Unidoc.Scalar?>]
@@ -39,28 +43,22 @@ extension Swiftinit
 
         private
         init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            requirements:[Unidoc.Scalar] = [],
-            inhabitants:[Unidoc.Scalar] = [],
-            superforms:[Unidoc.Scalar] = [],
-            extensions:[Unidoc.ExtensionGroup] = [],
-            topics:[Unidoc.TopicGroup] = [],
-            other:[(AutomaticHeading, [Unidoc.Scalar])] = [],
-            peerConstraints:[GenericConstraint<Unidoc.Scalar?>] = [],
-            peerList:[Unidoc.Scalar] = [],
             decl:Phylum.DeclFlags?,
             bias:Bias)
         {
             self.context = context
 
-            self.requirements = requirements
-            self.inhabitants = inhabitants
-            self.superforms = superforms
+            self.requirements = []
+            self.inhabitants = []
+            self.superforms = []
+            self.products = []
+            self.modules = []
+            self.others = []
 
-            self.extensions = extensions
-            self.topics = topics
-            self.other = other
-            self.peerConstraints = peerConstraints
-            self.peerList = peerList
+            self.topics = []
+            self.extensions = []
+            self.peerConstraints = []
+            self.peerList = []
 
             self.decl = decl
             self.bias = bias
@@ -166,28 +164,12 @@ extension Swiftinit.GroupLists
 
                 //  Guess what kind of polygon this is by looking at the bit pattern of its
                 //  first vertex.
-                let heading:AutomaticHeading
-
-                if  case .package = self.bias
+                switch plane
                 {
-                    switch plane
-                    {
-                    case .product:  heading = .allProducts
-                    case .module:   heading = .allModules
-                    default:        heading = .miscellaneous
-                    }
+                case .product:  self.products += group.members
+                case .module:   self.modules += group.members
+                default:        self.others += group.members
                 }
-                else
-                {
-                    switch plane
-                    {
-                    case .product:  heading = .otherProducts
-                    case .module:   heading = .otherModules
-                    default:        heading = .miscellaneous
-                    }
-                }
-
-                self.other.append((heading, group.members))
 
             case .topic(let group):
                 for case .scalar(let scalar) in group.members
@@ -219,16 +201,17 @@ extension Swiftinit.GroupLists
             ($1.1, $1.0.culture.citizen, $1.2, $1.0.id)
         }
 
-        //  No need to filter the conformers, as it should never appear alongside any custom
-        //  curated groups.
         self.extensions = extensions.map { $0.0.subtracting(curated) }
 
         self.requirements.removeAll(where: curated.contains(_:))
         self.inhabitants.removeAll(where: curated.contains(_:))
+        self.superforms.removeAll(where: curated.contains(_:))
+        self.products.removeAll(where: curated.contains(_:))
+        self.modules.removeAll(where: curated.contains(_:))
+        self.others.removeAll(where: curated.contains(_:))
         self.peerList.removeAll(where: curated.contains(_:))
 
         self.topics.sort { $0.id < $1.id }
-        self.other.sort { $0.0 < $1.0 }
     }
 }
 extension Swiftinit.GroupLists:HTML.OutputStreamable
@@ -253,33 +236,49 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             }
             else
             {
-                //  This is a topic group that doesn’t contain this page.
-                //  It is not a “See Also” section, and we should render
-                //  any prose associated with it.
-                html[.section, { $0.class = "group topic" }]
+                //  This is a topic group that doesn’t contain this page. It is not a “See Also”
+                //  section, and we should render any caption associated with it.
+                html[.section]
                 {
-                    $0 ?= group.overview.map { ProseSection.init(self.context, passage: $0) }
-
-                    $0[.ul]
-                    {
-                        for member:Unidoc.TopicMember in group.members
-                        {
-                            switch member
-                            {
-                            case .scalar(let scalar):
-                                $0[.li] = self.context.card(scalar)
-
-                            case .text(let text):
-                                $0[.li] { $0[.span] { $0[.code] = text } }
-                            }
-                        }
-                    }
-                }
+                    $0.class = "group topic"
+                } = Swiftinit.Topic.init(self.context,
+                    caption: group.overview,
+                    members: group.members)
             }
         }
 
-        for (heading, members):(AutomaticHeading, [Unidoc.Scalar]) in self.other
+        if  let body:Swiftinit.SegregatedBody = .init(self.context, group: self.others)
         {
+            //  If this is an uncategorized section, let’s categorize it.
+            html[.section]
+            {
+                $0.class = "group segregated"
+            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedBody>.init(
+                heading: .uncategorized,
+                body: body)
+        }
+
+        let sections:[(AutomaticHeading, [Unidoc.Scalar])]
+        if  case .package = self.bias
+        {
+            sections =
+            [
+                (.allModules, self.modules),
+                (.allProducts, self.products),
+            ]
+        }
+        else
+        {
+            sections =
+            [
+                (.otherModules, self.modules),
+                (.otherProducts, self.products),
+            ]
+        }
+        for (heading, members):(AutomaticHeading, [Unidoc.Scalar]) in sections
+            where !members.isEmpty
+        {
+            //  Cannot use a ``SegregatedList`` here, because these are not decls.
             html[.section, { $0.class = "group automatic" }]
             {
                 $0[.h2] = heading
@@ -300,134 +299,106 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             return
         }
 
-        if !self.superforms.isEmpty
+        if  let body:Swiftinit.SegregatedList = .init(self.context, group: self.superforms)
         {
-            html[.section, { $0.class = "group superforms" }]
+            let heading:AutomaticHeading
+
+            if      decl.kinks[is: .required]
             {
-                let heading:AutomaticHeading
-
-                if      decl.kinks[is: .required]
-                {
-                    heading = .restatesRequirements
-                }
-                else if decl.kinks[is: .intrinsicWitness]
-                {
-                    heading = .implementsRequirements
-                }
-                else if decl.kinks[is: .override]
-                {
-                    heading = .overrides
-                }
-                else if case .class = decl.phylum
-                {
-                    heading = .superclasses
-                }
-                else
-                {
-                    heading = .supertypes
-                }
-
-                $0[.h2] = heading
-                $0[.ul]
-                {
-                    for id:Unidoc.Scalar in self.superforms
-                    {
-                        $0[.li] = self.context.card(id)
-                    }
-                }
+                heading = .restatesRequirements
             }
+            else if decl.kinks[is: .intrinsicWitness]
+            {
+                heading = .implementsRequirements
+            }
+            else if decl.kinks[is: .override]
+            {
+                heading = .overrides
+            }
+            else if case .class = decl.phylum
+            {
+                heading = .superclasses
+            }
+            else
+            {
+                heading = .supertypes
+            }
+
+            html[.section]
+            {
+                $0.class = "group superforms"
+            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedList>.init(
+                heading: heading,
+                body: body)
         }
-        if !self.requirements.isEmpty
+        if  let body:Swiftinit.SegregatedList = .init(self.context, group: self.inhabitants)
         {
-            html[.section, { $0.class = "group requirements" }]
+            html[.section]
             {
-                let heading:AutomaticHeading = .allRequirements
-
-                $0[.h2] = heading
-                $0[.ul]
-                {
-                    for id:Unidoc.Scalar in self.requirements
-                    {
-                        $0[.li] = self.context.card(id)
-                    }
-                }
-            }
+                $0.class = "group inhabitants"
+            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedList>.init(
+                heading: .allCases,
+                body: body)
         }
-        if !self.inhabitants.isEmpty
+        if  let body:Swiftinit.SegregatedBody = .init(self.context, group: self.requirements)
         {
-            html[.section, { $0.class = "group inhabitants" }]
+            html[.section]
             {
-                let heading:AutomaticHeading = .allCases
-
-                $0[.h2] = heading
-                $0[.ul]
-                {
-                    for id:Unidoc.Scalar in self.inhabitants
-                    {
-                        $0[.li] = self.context.card(id)
-                    }
-                }
-            }
+                $0.class = "group segregated requirements"
+            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedBody>.init(
+                heading: .allRequirements,
+                body: body)
         }
 
         let extensionsEmpty:Bool = self.extensions.allSatisfy(\.isEmpty)
 
         if  let other:Unidoc.TopicGroup
         {
-            html[.section, { $0.class = "group topic" }]
-            {
-                AutomaticHeading.seeAlso.window(&$0,
-                    listing: other.members,
-                    limit: 12,
-                    open: self.peerList.isEmpty && extensionsEmpty)
-                {
-                    switch $1
-                    {
-                    case .scalar(let scalar):
-                        $0[.li] = self.context.card(scalar)
+            let last:Bool = self.peerList.isEmpty && extensionsEmpty
+            let open:Bool = other.members.count <= 12
 
-                    case .text(let text):
-                        $0[.li] { $0[.span] { $0[.code] = text } }
-                    }
-                }
-            }
+            html[.section]
+            {
+                $0.class = "group topic"
+            } = Swiftinit.CollapsibleSection<Swiftinit.Topic>.init(
+                collapse: last ? nil : (other.members.count, open),
+                heading: .seeAlso,
+                body: .init(self.context, members: other.members))
         }
 
-        if  !self.peerList.isEmpty
+        if  case .case = decl.phylum,
+            let peers:Swiftinit.SegregatedList = .init(self.context, group: self.peerList)
         {
-            html[.section, { $0.class = "group sisters" }]
+            let open:Bool = peers.visible.count <= 12
+
+            html[.section]
             {
-                let heading:AutomaticHeading
+                $0.class = "group sisters"
+            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedList>.init(
+                collapse: extensionsEmpty ? nil : (self.peerList.count, open),
+                heading: .otherCases,
+                body: peers)
+        }
+        else if
+            let peers:Swiftinit.SegregatedBody = .init(self.context, group: self.peerList)
+        {
+            let open:Bool = peers.visibleItems <= 12
 
-                if  decl.kinks[is: .required]
-                {
-                    heading = .otherRequirements
-                }
-                else if case .case = decl.phylum
-                {
-                    heading = .otherCases
-                }
-                else
-                {
-                    heading = .otherMembers
-                }
-
-                heading.window(&$0,
-                    listing: self.peerList,
-                    limit: 12,
-                    open: extensionsEmpty)
-                {
-                    $0[.li] = self.context.card($1)
-                }
-            }
+            html[.section]
+            {
+                $0.class = "group segregated sisters"
+            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedBody>.init(
+                collapse: extensionsEmpty ? nil : (self.peerList.count, open),
+                heading: decl.kinks[is: .required] ? .otherRequirements : .otherMembers,
+                body: peers)
         }
 
         for group:Unidoc.ExtensionGroup in self.extensions
         {
             html[.section]
             {
-                $0.class = "group extension"
-            } = Swiftinit.ExtensionGroup.init(self.context,
+                $0.class = "group segregated extension"
+            } = Swiftinit.ExtensionSection.init(self.context,
                 group: group,
                 decl: decl,
                 bias: self.bias)

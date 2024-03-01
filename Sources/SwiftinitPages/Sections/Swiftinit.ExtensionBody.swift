@@ -1,69 +1,71 @@
 import HTML
-import Signatures
 import Symbols
 
 extension Swiftinit
 {
     @dynamicMemberLookup
-    struct ExtensionGroup
+    struct ExtensionBody
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
-        let heading:ExtensionHeading
-        let constraints:[GenericConstraint<Unidoc.Scalar?>]
-        let lists:Lists
+        private
+        var lists:Lists
 
         private
-        init(
-            context:IdentifiablePageContext<Swiftinit.Vertices>,
-            heading:ExtensionHeading,
-            constraints:[GenericConstraint<Unidoc.Scalar?>],
-            lists:Lists)
+        init(lists:Lists)
         {
-            self.context = context
-            self.heading = heading
-            self.constraints = constraints
             self.lists = lists
         }
     }
 }
-extension Swiftinit.ExtensionGroup
+extension Swiftinit.ExtensionBody
 {
     typealias Lists =
     (
-        conformances:List.Items,
-        protocols:List.Items,
-        types:List.Items,
-        typealiases:List.Items,
-        membersOnType:List.Items,
-        membersOnInstance:List.Items,
-        featuresOnType:List.Items,
-        featuresOnInstance:List.Items,
-        subtypes:List.Items,
-        subclasses:List.Items,
-        overriddenBy:List.Items,
-        restatedBy:List.Items,
-        defaultImplementations:List.Items
+        conformances:Swiftinit.SegregatedList,
+        protocols:Swiftinit.SegregatedList,
+        types:Swiftinit.SegregatedList,
+        typealiases:Swiftinit.SegregatedList,
+        membersOnType:Swiftinit.SegregatedList,
+        membersOnInstance:Swiftinit.SegregatedList,
+        featuresOnType:Swiftinit.SegregatedList,
+        featuresOnInstance:Swiftinit.SegregatedList,
+        subtypes:Swiftinit.SegregatedList,
+        subclasses:Swiftinit.SegregatedList,
+        overriddenBy:Swiftinit.SegregatedList,
+        restatedBy:Swiftinit.SegregatedList,
+        defaultImplementations:Swiftinit.SegregatedList
     )
 }
-extension Swiftinit.ExtensionGroup
+extension Swiftinit.ExtensionBody
 {
+    // var visibleItems:Int
+    // {
+    //     self.lists.conformances.visible.count
+    //     + self.lists.protocols.visible.count
+    //     + self.lists.types.visible.count
+    //     + self.lists.typealiases.visible.count
+    //     + self.lists.membersOnType.visible.count
+    //     + self.lists.membersOnInstance.visible.count
+    //     + self.lists.featuresOnType.visible.count
+    //     + self.lists.featuresOnInstance.visible.count
+    //     + self.lists.subtypes.visible.count
+    //     + self.lists.subclasses.visible.count
+    //     + self.lists.overriddenBy.visible.count
+    //     + self.lists.restatedBy.visible.count
+    //     + self.lists.defaultImplementations.visible.count
+    // }
+
     init?(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
         group:borrowing Unidoc.ExtensionGroup,
-        decl:Phylum.DeclFlags,
-        bias:Swiftinit.Bias)
+        decl:Phylum.DeclFlags)
     {
         if  group.isEmpty
         {
             return nil
         }
 
-        let heading:Swiftinit.ExtensionHeading = .init(culture: group.culture, bias: bias)
         var lists:Lists
 
-        lists.conformances = group.conformances.reduce(into: [])
-        {
-            $0.append(context.card(decl: $1))
-        }
+        lists.conformances = .partition(group.conformances, with: context)
 
         lists.protocols = []
         lists.types = []
@@ -85,21 +87,22 @@ extension Swiftinit.ExtensionGroup
             {
                 switch objectivity
                 {
-                case .static:   lists.membersOnType.append(decl)
-                case .class:    lists.membersOnType.append(decl)
-                case .instance: lists.membersOnInstance.append(decl)
+                case .instance:         lists.membersOnInstance.append(decl)
+                case .class:            lists.membersOnType.append(decl)
+                case .static:           lists.membersOnType.append(decl)
                 }
             }
             else
             {
                 switch decl.vertex.phylum
                 {
-                case .enum:     lists.types.append(decl)
-                case .struct:   lists.types.append(decl)
-                case .class:    lists.types.append(decl)
-                case .actor:    lists.types.append(decl)
-                case .protocol: lists.protocols.append(decl)
-                default:        lists.typealiases.append(decl)
+                case .associatedtype:   lists.membersOnType.append(decl)
+                case .enum:             lists.types.append(decl)
+                case .struct:           lists.types.append(decl)
+                case .class:            lists.types.append(decl)
+                case .actor:            lists.types.append(decl)
+                case .protocol:         lists.protocols.append(decl)
+                default:                lists.typealiases.append(decl)
                 }
             }
         }
@@ -125,10 +128,7 @@ extension Swiftinit.ExtensionGroup
         switch decl.phylum
         {
         case .protocol:
-            lists.subtypes = group.subforms.reduce(into: [])
-            {
-                $0.append(context.card(decl: $1))
-            }
+            lists.subtypes = .partition(group.subforms, with: context)
             lists.subclasses = []
             lists.restatedBy = []
             lists.overriddenBy = []
@@ -136,10 +136,7 @@ extension Swiftinit.ExtensionGroup
 
         case .class:
             lists.subtypes = []
-            lists.subclasses = group.subforms.reduce(into: [])
-            {
-                $0.append(context.card(decl: $1))
-            }
+            lists.subclasses = .partition(group.subforms, with: context)
             lists.restatedBy = []
             lists.overriddenBy = []
             lists.defaultImplementations = []
@@ -166,26 +163,22 @@ extension Swiftinit.ExtensionGroup
             }
             else
             {
-                lists.overriddenBy = group.subforms.reduce(into: [])
-                {
-                    $0.append(context.card(decl: $1))
-                }
+                lists.overriddenBy = .partition(group.subforms, with: context)
             }
         }
 
-        self.init(
-            context: context,
-            heading: heading,
-            constraints: group.constraints,
-            lists: lists)
+        self.init(lists: lists)
     }
 }
-extension Swiftinit.ExtensionGroup
+
+extension Swiftinit.ExtensionBody
 {
     private
-    subscript(dynamicMember keyPath:KeyPath<Lists, List.Items>) -> List?
+    subscript(
+        dynamicMember keyPath:
+        KeyPath<Lists, Swiftinit.SegregatedList>) -> Swiftinit.SegregatedSection?
     {
-        let items:List.Items = self.lists[keyPath: keyPath]
+        let items:Swiftinit.SegregatedList = self.lists[keyPath: keyPath]
         if  items.isEmpty
         {
             return nil
@@ -213,38 +206,11 @@ extension Swiftinit.ExtensionGroup
         return .init(heading: heading, items: items)
     }
 }
-extension Swiftinit.ExtensionGroup:HTML.OutputStreamable
+extension Swiftinit.ExtensionBody:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        section[.h2]
-        {
-            let module:Unidoc.Scalar
-
-            switch self.heading
-            {
-            case .citizens(in: let culture):
-                $0 += "Citizens in "
-                module = culture
-
-            case .available(in: let culture):
-                $0 += "Available in "
-                module = culture
-
-            case .extension(in: let culture):
-                $0 += "Extension in "
-                module = culture
-            }
-
-            $0 ?= self.context.link(module: module)
-        }
-
-        section[.div, .code]
-        {
-            $0.class = "constraints"
-        } = Swiftinit.ConstraintsList.init(self.context, constraints: self.constraints)
-
         section ?= self.conformances
         section ?= self.protocols
         section ?= self.types
