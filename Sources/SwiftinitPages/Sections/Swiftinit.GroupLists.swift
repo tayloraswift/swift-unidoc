@@ -292,14 +292,8 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             }
         }
 
-        guard
-        let decl:Phylum.DeclFlags = self.decl
-        else
-        {
-            return
-        }
-
-        if  let body:Swiftinit.SegregatedList = .init(self.context, group: self.superforms)
+        if  let decl:Phylum.DeclFlags = self.decl,
+            let body:Swiftinit.SegregatedList = .init(self.context, group: self.superforms)
         {
             let heading:AutomaticHeading
 
@@ -364,6 +358,14 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 collapse: last ? nil : (other.members.count, open),
                 heading: .seeAlso,
                 body: .init(self.context, members: other.members))
+        }
+
+        guard
+        let decl:Phylum.DeclFlags = self.decl
+        else
+        {
+            //  The rest of the sections are only relevant for declarations.
+            return
         }
 
         if  case .case = decl.phylum,
