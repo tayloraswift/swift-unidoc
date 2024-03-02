@@ -4,7 +4,6 @@ import DoclinkResolution
 import Doclinks
 import LexicalPaths
 import MarkdownAST
-import MarkdownLinking
 import Sources
 import SymbolGraphs
 import SourceDiagnostics
@@ -88,7 +87,7 @@ extension SSGC.OutlineResolver
             }
 
         case .some(let overloads):
-            self.diagnostics[source] = InvalidCodelinkError<SSGC.Symbolicator>.init(
+            self.diagnostics[source] = CodelinkResolutionError<SSGC.Symbolicator>.init(
                 overloads: overloads,
                 codelink: codelink)
 

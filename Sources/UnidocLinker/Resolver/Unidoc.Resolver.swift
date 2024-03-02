@@ -1,7 +1,6 @@
 import CodelinkResolution
 import Codelinks
 import Doclinks
-import MarkdownLinking
 import SourceDiagnostics
 import Sources
 import SymbolGraphs
@@ -299,16 +298,16 @@ extension Unidoc.Resolver
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
-            self.diagnostics[location] = InvalidAutolinkError<Unidoc.Symbolicator>.init(
-                string: unresolved.link)
-
+            self.diagnostics[location] = .error("""
+                autolink expression '\(unresolved.link)' could not be parsed
+                """)
             return nil
         }
 
         switch self.codelinks.resolve(codelink)
         {
         case .some(let overloads):
-            self.diagnostics[location] = InvalidCodelinkError<Unidoc.Symbolicator>.init(
+            self.diagnostics[location] = CodelinkResolutionError<Unidoc.Symbolicator>.init(
                 overloads: overloads,
                 codelink: codelink)
 
