@@ -1,3 +1,4 @@
+import Signatures
 import SymbolGraphs
 import Symbols
 import SourceDiagnostics
@@ -48,5 +49,37 @@ extension Unidoc.Symbolicator:DiagnosticSymbolicator
         SymbolGraph.Plane.file.contains(scalar.citizen)
             ? self.context[scalar.package]?.files[scalar.citizen]
             : nil
+    }
+}
+extension Unidoc.Symbolicator
+{
+    func constraints(_ constraints:[GenericConstraint<Address?>]) -> String
+    {
+        constraints.map
+        {
+            switch $0
+            {
+            case    .where(let parameter, is: .equal, to: .nominal(let type?)):
+                "\(parameter) == \(self[type])"
+
+            case    .where(let parameter, is: .equal, to: .nominal(nil)):
+                "\(parameter) == <unavailable>"
+
+            case    .where(let parameter, is: .equal, to: .complex(let text)):
+                "\(parameter) == \(text)"
+
+            case    .where(let parameter, is: .subclass, to: .nominal(let type?)),
+                    .where(let parameter, is: .conformer, to: .nominal(let type?)):
+                "\(parameter):\(self[type])"
+
+            case    .where(let parameter, is: .subclass, to: .nominal(nil)),
+                    .where(let parameter, is: .conformer, to: .nominal(nil)):
+                "\(parameter):<unavailable>"
+
+            case    .where(let parameter, is: .subclass, to: .complex(let text)),
+                    .where(let parameter, is: .conformer, to: .complex(let text)):
+                "\(parameter):\(text)"
+            }
+        }.joined(separator: ", ")
     }
 }

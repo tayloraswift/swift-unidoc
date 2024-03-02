@@ -176,7 +176,7 @@ let package:Package = .init(
         .target(name: "CodelinkResolution",
             dependencies: [
                 .target(name: "Codelinks"),
-                .target(name: "Symbols"),
+                .target(name: "SourceDiagnostics"),
                 //  This dependency is present for (questionable?) performance reasons.
                 .target(name: "Unidoc"),
             ]),
@@ -320,14 +320,6 @@ let package:Package = .init(
                 .target(name: "URI"),
             ]),
 
-        .target(name: "MarkdownLinking",
-            dependencies: [
-                .target(name: "Codelinks"),
-                .target(name: "Doclinks"),
-                .target(name: "MarkdownAST"),
-                .target(name: "SourceDiagnostics"),
-            ]),
-
         .target(name: "MarkdownParsing",
             dependencies: [
                 .target(name: "MarkdownAST"),
@@ -349,8 +341,10 @@ let package:Package = .init(
 
         .target(name: "MarkdownSemantics",
             dependencies: [
+                .target(name: "Codelinks"),
+                .target(name: "Doclinks"),
+                .target(name: "MarkdownAST"),
                 .target(name: "MarkdownDisplay"),
-                .target(name: "MarkdownLinking"),
                 .target(name: "Snippets"),
                 .target(name: "SourceDiagnostics"),
 
@@ -564,8 +558,8 @@ let package:Package = .init(
 
         .target(name: "SourceDiagnostics",
             dependencies: [
-                .target(name: "CodelinkResolution"),
-                .target(name: "Signatures"),
+                .target(name: "Symbols"),
+                .target(name: "Sources"),
             ]),
 
         .target(name: "UnidocLinker",
@@ -573,7 +567,6 @@ let package:Package = .init(
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
                 .target(name: "MarkdownRendering"),
-                .target(name: "MarkdownLinking"),
                 .target(name: "UnidocRecords"),
             ]),
 

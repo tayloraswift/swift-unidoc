@@ -5,7 +5,6 @@ import FNV1
 import LexicalPaths
 import MarkdownABI
 import MarkdownAST
-import MarkdownLinking
 import MarkdownParsing
 import MarkdownSemantics
 import Signatures
@@ -488,7 +487,7 @@ extension SSGC.Linker
         guard let codelink:Codelink = .init(binding.text.string)
         else
         {
-            throw InvalidAutolinkError<SSGC.Symbolicator>.init(binding.text)
+            throw SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(binding.text)
         }
 
         //  A qualified codelink with a single component that matches the current
@@ -527,7 +526,7 @@ extension SSGC.Linker
             }
             else
             {
-                throw InvalidCodelinkError<SSGC.Symbolicator>.init(
+                throw CodelinkResolutionError<SSGC.Symbolicator>.init(
                     overloads: overloads,
                     codelink: codelink)
             }

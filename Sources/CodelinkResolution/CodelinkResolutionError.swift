@@ -1,9 +1,8 @@
-import CodelinkResolution
 import Codelinks
 import SourceDiagnostics
 
 @frozen public
-struct InvalidCodelinkError<Symbolicator>:Error, Equatable
+struct CodelinkResolutionError<Symbolicator>:Error, Equatable
     where   Symbolicator:DiagnosticSymbolicator,
             Symbolicator.Address:Hashable,
             Symbolicator.Address:Sendable
@@ -21,7 +20,7 @@ struct InvalidCodelinkError<Symbolicator>:Error, Equatable
         self.codelink = codelink
     }
 }
-extension InvalidCodelinkError:Diagnostic
+extension CodelinkResolutionError:Diagnostic
 {
     @inlinable public static
     func += (output:inout DiagnosticOutput<Symbolicator>, self:Self)

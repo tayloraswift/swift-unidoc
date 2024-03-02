@@ -1,10 +1,8 @@
-import CodelinkResolution
 import Codelinks
 import SourceDiagnostics
 
-extension InvalidCodelinkError
+extension CodelinkResolutionError
 {
-    /// TODO: this doesn’t belong in this module.
     @frozen public
     struct Note
     {
@@ -22,7 +20,7 @@ extension InvalidCodelinkError
         }
     }
 }
-extension InvalidCodelinkError.Note:DiagnosticNote
+extension CodelinkResolutionError.Note:DiagnosticNote
 {
     @inlinable public static
     func += (output:inout DiagnosticOutput<Symbolicator>, self:Self)

@@ -5,7 +5,6 @@ import Doclinks
 import LexicalPaths
 import MarkdownABI
 import MarkdownAST
-import MarkdownLinking
 import MarkdownParsing
 import MarkdownSemantics
 import SourceDiagnostics
@@ -140,7 +139,7 @@ extension SSGC.Outliner
             }
 
             self.resolver.diagnostics[link.source] =
-                InvalidAutolinkError<SSGC.Symbolicator>.init(link)
+                SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
 
             return nil
 
@@ -230,7 +229,7 @@ extension SSGC.Outliner
             }
 
             self.resolver.diagnostics[link.source] =
-                InvalidAutolinkError<SSGC.Symbolicator>.init(link)
+                SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
 
             return nil
         }
