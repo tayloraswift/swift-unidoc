@@ -63,37 +63,6 @@ extension IdentifiablePageContext
     {
         .init(self, bytecode: snippet.bytecode, scalars: snippet.scalars)
     }
-
-    func card(decl id:Unidoc.Scalar) -> Swiftinit.DeclCard?
-    {
-        guard case (let vertex, let url?)? = self[decl: id]
-        else
-        {
-            return nil
-        }
-        return .init(self, vertex: vertex, target: url)
-    }
-
-    func card(_ id:Unidoc.Scalar) -> Swiftinit.AnyCard?
-    {
-        switch self[vertex: id]
-        {
-        case (.article(let vertex), let url?)?:
-            .article(.init(self, vertex: vertex, target: url))
-
-        case (.culture(let vertex), let url?)?:
-            .culture(.init(self, vertex: vertex, target: url))
-
-        case (.decl(let vertex), let url?)?:
-            .decl(.init(self, vertex: vertex, target: url))
-
-        case (.product(let vertex), let url?)?:
-            .product(.init(self, vertex: vertex, target: url))
-
-        default:
-            nil
-        }
-    }
 }
 extension IdentifiablePageContext
 {

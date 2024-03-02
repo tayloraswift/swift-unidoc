@@ -3,8 +3,9 @@ import MarkdownABI
 
 extension SymbolGraph
 {
+    /// Deprecated in 0.8.24.
     @frozen public
-    struct Topic:Equatable, Sendable
+    struct _Topic:Equatable, Sendable
     {
         /// Outlines for the ``overview``.
         public
@@ -23,7 +24,7 @@ extension SymbolGraph
         }
     }
 }
-extension SymbolGraph.Topic
+extension SymbolGraph._Topic
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -33,7 +34,7 @@ extension SymbolGraph.Topic
         case members = "M"
     }
 }
-extension SymbolGraph.Topic:BSONDocumentEncodable
+extension SymbolGraph._Topic:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -43,7 +44,7 @@ extension SymbolGraph.Topic:BSONDocumentEncodable
         bson[.members] = self.members
     }
 }
-extension SymbolGraph.Topic:BSONDocumentDecodable
+extension SymbolGraph._Topic:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

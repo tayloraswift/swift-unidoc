@@ -82,8 +82,8 @@ extension Unidoc.DB.Groups
                 //  visibiity.
                 $0 += groups.intrinsics.lazy.map(Unidoc.AnyGroup.intrinsic(_:))
 
-                $0 += groups.polygons.lazy.map(Unidoc.AnyGroup.polygonal(_:))
-                $0 += groups.topics.lazy.map(Unidoc.AnyGroup.topic(_:))
+                $0 += groups.curators.lazy.map(Unidoc.AnyGroup.curator(_:))
+                $0 += groups.topics.lazy.map(Unidoc.AnyGroup._topic(_:))
 
                 guard
                 let realm:Unidoc.Realm

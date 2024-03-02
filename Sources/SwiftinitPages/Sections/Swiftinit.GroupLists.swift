@@ -14,20 +14,23 @@ extension Swiftinit
         let context:IdentifiablePageContext<Swiftinit.Vertices>
 
         private
+        var uncategorized:[Unidoc.Scalar]
+
+        private
         var requirements:[Unidoc.Scalar]
         private
         var inhabitants:[Unidoc.Scalar]
         private
         var superforms:[Unidoc.Scalar]
         private
+        var curation:[Unidoc.Scalar]
+        private
         var products:[Unidoc.Scalar]
         private
         var modules:[Unidoc.Scalar]
-        private
-        var others:[Unidoc.Scalar]
 
         private
-        var topics:[Unidoc.TopicGroup]
+        var _topics:[Unidoc.TopicGroup]
         private
         var extensions:[Unidoc.ExtensionGroup]
 
@@ -48,14 +51,15 @@ extension Swiftinit
         {
             self.context = context
 
+            self.uncategorized = []
             self.requirements = []
             self.inhabitants = []
             self.superforms = []
+            self.curation = []
             self.products = []
             self.modules = []
-            self.others = []
 
-            self.topics = []
+            self._topics = []
             self.extensions = []
             self.peerConstraints = []
             self.peerList = []
@@ -130,25 +134,25 @@ extension Swiftinit.GroupLists
             case .intrinsic(let group):
                 if  case group.id? = container
                 {
-                    self.peerList = group.members
+                    self.peerList = group.items
                     continue
                 }
 
                 switch self.decl?.phylum
                 {
                 case .protocol?:
-                    self.requirements += group.members
+                    self.requirements += group.items
 
                 case .enum?:
-                    self.inhabitants += group.members
+                    self.inhabitants += group.items
 
                 default:
                     throw Unidoc.GroupTypeError.reject(.intrinsic(group))
                 }
 
-            case .polygonal(let group):
+            case .curator(let group):
                 guard
-                let first:Unidoc.Scalar = group.members.first,
+                let first:Unidoc.Scalar = group.items.first,
                 let plane:SymbolGraph.Plane = first.plane
                 else
                 {
@@ -156,7 +160,7 @@ extension Swiftinit.GroupLists
                 }
 
                 if  first == self.context.id,
-                    group.members.count == 1
+                    group.items.count == 1
                 {
                     //  This is a polygon that contains this page only.
                     continue
@@ -166,18 +170,30 @@ extension Swiftinit.GroupLists
                 //  first vertex.
                 switch plane
                 {
-                case .product:  self.products += group.members
-                case .module:   self.modules += group.members
-                default:        self.others += group.members
+                case .product:
+                    self.products += group.items
+
+                case .module:
+                    self.modules += group.items
+
+                default:
+                    if  case nil = group.scope
+                    {
+                        self.curation += group.items
+                    }
+                    else
+                    {
+                        self.uncategorized += group.items
+                    }
                 }
 
-            case .topic(let group):
+            case ._topic(let group):
                 for case .scalar(let scalar) in group.members
                 {
                     curated.insert(scalar)
                 }
 
-                self.topics.append(group)
+                self._topics.append(group)
 
             case let unexpected:
                 throw Unidoc.GroupTypeError.reject(unexpected)
@@ -203,15 +219,15 @@ extension Swiftinit.GroupLists
 
         self.extensions = extensions.map { $0.0.subtracting(curated) }
 
+        self.uncategorized.removeAll(where: curated.contains(_:))
         self.requirements.removeAll(where: curated.contains(_:))
         self.inhabitants.removeAll(where: curated.contains(_:))
         self.superforms.removeAll(where: curated.contains(_:))
         self.products.removeAll(where: curated.contains(_:))
         self.modules.removeAll(where: curated.contains(_:))
-        self.others.removeAll(where: curated.contains(_:))
         self.peerList.removeAll(where: curated.contains(_:))
 
-        self.topics.sort { $0.id < $1.id }
+        self._topics.sort { $0.id < $1.id }
     }
 }
 extension Swiftinit.GroupLists:HTML.OutputStreamable
@@ -220,7 +236,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
         var other:Unidoc.TopicGroup? = nil
-        for group:Unidoc.TopicGroup in self.topics
+        for group:Unidoc.TopicGroup in self._topics
         {
             if  group.members.contains(.scalar(self.context.id))
             {
@@ -241,15 +257,15 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 html[.section]
                 {
                     $0.class = "group topic"
-                } = Swiftinit.Topic.init(self.context,
+                } = Swiftinit._LegacyTopic.init(self.context,
                     caption: group.overview,
                     members: group.members)
             }
         }
 
-        if  let body:Swiftinit.SegregatedBody = .init(self.context, group: self.others)
+        if  let body:Swiftinit.SegregatedBody = .init(self.context, group: self.uncategorized)
         {
-            //  If this is an uncategorized section, let’s categorize it.
+            //  This is an uncategorized section, so let’s categorize it.
             html[.section]
             {
                 $0.class = "group segregated"
@@ -258,38 +274,23 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
                 body: body)
         }
 
-        let sections:[(AutomaticHeading, [Unidoc.Scalar])]
-        if  case .package = self.bias
+        if  let modules:Swiftinit.IntegratedList = .init(self.context, items: self.modules)
         {
-            sections =
-            [
-                (.allModules, self.modules),
-                (.allProducts, self.products),
-            ]
-        }
-        else
-        {
-            sections =
-            [
-                (.otherModules, self.modules),
-                (.otherProducts, self.products),
-            ]
-        }
-        for (heading, members):(AutomaticHeading, [Unidoc.Scalar]) in sections
-            where !members.isEmpty
-        {
-            //  Cannot use a ``SegregatedList`` here, because these are not decls.
-            html[.section, { $0.class = "group automatic" }]
+            html[.section]
             {
-                $0[.h2] = heading
-                $0[.ul]
-                {
-                    for member:Unidoc.Scalar in members
-                    {
-                        $0[.li] = self.context.card(member)
-                    }
-                }
-            }
+                $0.class = "group automatic"
+            } = Swiftinit.CollapsibleSection<Swiftinit.IntegratedList>.init(
+                heading: self.bias == .package ? .allModules : .otherModules,
+                body: modules)
+        }
+        if  let products:Swiftinit.IntegratedList = .init(self.context, items: self.products)
+        {
+            html[.section]
+            {
+                $0.class = "group automatic"
+            } = Swiftinit.CollapsibleSection<Swiftinit.IntegratedList>.init(
+                heading: self.bias == .package ? .allProducts : .otherProducts,
+                body: products)
         }
 
         if  let decl:Phylum.DeclFlags = self.decl,
@@ -346,7 +347,21 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
 
         let extensionsEmpty:Bool = self.extensions.allSatisfy(\.isEmpty)
 
-        if  let other:Unidoc.TopicGroup
+        if  let curation:Swiftinit.IntegratedList = .init(self.context, items: self.curation)
+        {
+            let last:Bool = self.peerList.isEmpty && extensionsEmpty
+            let open:Bool = curation.items.count <= 12
+
+            html[.section]
+            {
+                $0.class = "group topic"
+            } = Swiftinit.CollapsibleSection<Swiftinit.IntegratedList>.init(
+                collapse: last ? nil : (curation.items.count, open),
+                heading: .seeAlso,
+                body: curation)
+        }
+        else if
+            let other:Unidoc.TopicGroup
         {
             let last:Bool = self.peerList.isEmpty && extensionsEmpty
             let open:Bool = other.members.count <= 12
@@ -354,7 +369,7 @@ extension Swiftinit.GroupLists:HTML.OutputStreamable
             html[.section]
             {
                 $0.class = "group topic"
-            } = Swiftinit.CollapsibleSection<Swiftinit.Topic>.init(
+            } = Swiftinit.CollapsibleSection<Swiftinit._LegacyTopic>.init(
                 collapse: last ? nil : (other.members.count, open),
                 heading: .seeAlso,
                 body: .init(self.context, members: other.members))

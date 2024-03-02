@@ -7,7 +7,6 @@ import Symbols
 
 extension Swiftinit.VertexPageContext
 {
-    @usableFromInline
     func vector<Display, Vector>(_ vector:Vector,
         display:Display) -> HTML.VectorLink<Display, Vector>?
         where Vector:Collection<Unidoc.Scalar>
@@ -17,7 +16,39 @@ extension Swiftinit.VertexPageContext
 }
 extension Swiftinit.VertexPageContext
 {
-    @usableFromInline
+    func card(decl id:Unidoc.Scalar) -> Swiftinit.DeclCard?
+    {
+        guard case (let vertex, let url?)? = self[decl: id]
+        else
+        {
+            return nil
+        }
+        return .init(self, vertex: vertex, target: url)
+    }
+
+    func card(_ id:Unidoc.Scalar) -> Swiftinit.AnyCard?
+    {
+        switch self[vertex: id]
+        {
+        case (.article(let vertex), let url?)?:
+            .article(.init(self, vertex: vertex, target: url))
+
+        case (.culture(let vertex), let url?)?:
+            .culture(.init(self, vertex: vertex, target: url))
+
+        case (.decl(let vertex), let url?)?:
+            .decl(.init(self, vertex: vertex, target: url))
+
+        case (.product(let vertex), let url?)?:
+            .product(.init(self, vertex: vertex, target: url))
+
+        default:
+            nil
+        }
+    }
+}
+extension Swiftinit.VertexPageContext
+{
     func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
     {
         self[culture: module].map
@@ -26,7 +57,6 @@ extension Swiftinit.VertexPageContext
         }
     }
 
-    @usableFromInline
     func link(decl:Unidoc.Scalar) -> HTML.Link<UnqualifiedPath>?
     {
         guard
@@ -40,7 +70,6 @@ extension Swiftinit.VertexPageContext
         return .init(display: path, target: url)
     }
 
-    @usableFromInline
     func link(article:Unidoc.Scalar) -> HTML.Link<Markdown.Bytecode.SafeView>?
     {
         self[article: article].map

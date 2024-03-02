@@ -8,6 +8,10 @@ protocol TextOutputStreamableMarkdown:TextOutputStreamable, CustomStringConverti
     /// Writes arbitrary content to the provided UTF-8 output, identified by
     /// the given reference.
     func load(_ reference:Int, into utf8:inout [UInt8])
+
+    /// Do something with the given reference. For example, this can be used to change the
+    /// behavior of a subsequent ``load(_:into:)`` call.
+    func call(_ reference:Int)
 }
 extension TextOutputStreamableMarkdown
 {
@@ -48,6 +52,8 @@ extension TextOutputStreamableMarkdown
         var attributes:Markdown.TextContext.AttributeContext = .init()
         var stack:[Markdown.TextContext] = []
 
+        var call:Bool = false
+
         for instruction:Markdown.Instruction in self.bytecode
         {
             switch instruction
@@ -61,12 +67,24 @@ extension TextOutputStreamableMarkdown
             case .attribute(_, _?):
                 attributes.flush()
 
+            case .call:
+                call = true
+
             case .emit(_):
                 attributes.clear()
 
             case .load(let reference):
                 attributes.clear()
-                self.load(reference, into: &utf8)
+
+                if  call
+                {
+                    call = false
+                    self.call(reference)
+                }
+                else
+                {
+                    self.load(reference, into: &utf8)
+                }
 
             case .push(let element):
                 attributes.clear()

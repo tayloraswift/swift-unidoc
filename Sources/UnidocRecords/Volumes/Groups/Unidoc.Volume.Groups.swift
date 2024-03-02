@@ -10,7 +10,7 @@ extension Unidoc.Volume
         public
         var intrinsics:[Unidoc.IntrinsicGroup]
         public
-        var polygons:[Unidoc.PolygonalGroup]
+        var curators:[Unidoc.CuratorGroup]
         public
         var topics:[Unidoc.TopicGroup]
 
@@ -19,13 +19,13 @@ extension Unidoc.Volume
             conformers:[Unidoc.ConformerGroup] = [],
             extensions:[Unidoc.ExtensionGroup] = [],
             intrinsics:[Unidoc.IntrinsicGroup] = [],
-            polygons:[Unidoc.PolygonalGroup] = [],
+            curators:[Unidoc.CuratorGroup] = [],
             topics:[Unidoc.TopicGroup] = [])
         {
             self.conformers = conformers
             self.extensions = extensions
             self.intrinsics = intrinsics
-            self.polygons = polygons
+            self.curators = curators
             self.topics = topics
         }
     }

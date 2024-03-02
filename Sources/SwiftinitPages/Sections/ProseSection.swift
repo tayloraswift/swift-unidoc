@@ -13,6 +13,9 @@ struct ProseSection
     let bytecode:Markdown.Bytecode
     let outlines:[Unidoc.Outline]
 
+    private
+    var card:Bool
+
     init(_ context:any Swiftinit.VertexPageContext,
         bytecode:Markdown.Bytecode,
         outlines:[Unidoc.Outline])
@@ -21,6 +24,8 @@ struct ProseSection
 
         self.bytecode = bytecode
         self.outlines = outlines
+
+        self.card = false
     }
 }
 extension ProseSection
@@ -113,6 +118,7 @@ extension ProseSection:HTML.OutputStreamableMarkdown
         }
     }
 
+    mutating
     func load(_ reference:Int, into html:inout HTML.ContentEncoder)
     {
         guard self.outlines.indices.contains(reference)
@@ -132,22 +138,43 @@ extension ProseSection:HTML.OutputStreamableMarkdown
         case .text(let text):
             html[.code] = text
 
-        case .path(let stem, let scalars):
+        case .path(let stem, let path):
             //  We never started using path outlines for inline file elements, so we don’t need
             //  any backwards compatibility adaptors here.
-            if  let scalar:Unidoc.Scalar = scalars.first,
-                SymbolGraph.Plane.article.contains(scalar.citizen)
+            guard
+            let id:Unidoc.Scalar = path.last
+            else
             {
-                html ?= self.context.link(article: scalar)
+                html[.code] = "<empty codelink>"
                 return
             }
-
-            //  Take the suffix of the stem, because it may include a module namespace,
-            //  and we never render the module namespace, even if it was written in the
-            //  codelink text.
-            html[.code] = self.context.vector(scalars,
-                display: stem.split(separator: " ").suffix(scalars.count))
+            if  self.card
+            {
+                self.card = false
+                html ?= self.context.card(id)
+            }
+            else if SymbolGraph.Plane.article.contains(id.citizen)
+            {
+                html ?= self.context.link(article: id)
+            }
+            else
+            {
+                //  Take the suffix of the stem, because it may include a module namespace,
+                //  and we never render the module namespace, even if it was written in the
+                //  codelink text.
+                html[.code] = self.context.vector(path,
+                    display: stem.split(separator: " ").suffix(path.count))
+            }
         }
+    }
+
+    mutating
+    func call(_ reference:Int)
+    {
+        //  TODO: stop using magic numbers.
+        assert(reference == 0)
+
+        self.card = true
     }
 }
 extension ProseSection:TextOutputStreamableMarkdown

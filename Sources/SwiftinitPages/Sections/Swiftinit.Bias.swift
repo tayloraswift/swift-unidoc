@@ -1,6 +1,6 @@
 extension Swiftinit
 {
-    enum Bias
+    enum Bias:Equatable
     {
         case culture(Unidoc.Scalar)
         case neutral

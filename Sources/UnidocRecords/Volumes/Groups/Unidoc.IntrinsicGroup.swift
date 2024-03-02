@@ -12,20 +12,20 @@ extension Unidoc
         let scope:Unidoc.Scalar
 
         public
-        var members:[Unidoc.Scalar]
+        var items:[Unidoc.Scalar]
 
         @inlinable public
         init(id:Unidoc.Group,
             culture:Unidoc.Scalar,
             scope:Unidoc.Scalar,
-            members:[Unidoc.Scalar] = [])
+            items:[Unidoc.Scalar] = [])
         {
             self.id = id
 
             self.culture = culture
             self.scope = scope
 
-            self.members = members
+            self.items = items
         }
     }
 }

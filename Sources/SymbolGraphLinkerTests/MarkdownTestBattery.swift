@@ -54,7 +54,7 @@ extension MarkdownTestBattery
 
             if  let tests:TestGroup = tests / "Topics"
             {
-                tests.expect(documentation.topics.map(\.members.count) ..? topics)
+                tests.expect(documentation.topics.map(\.count) ..? topics)
             }
         }
     }

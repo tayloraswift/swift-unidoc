@@ -5,7 +5,7 @@ import Symbols
 extension SymbolGraph
 {
     /// An article node models a standalone article, which includes the ``article`` content
-    /// itself, a ``headline``, and a list of ``topics``.
+    /// itself, a ``headline``.
     ///
     /// The name of the type was chosen for symmetry with ``DeclNode``, but the shape of the
     /// type is more similar to that of ``Decl``. Because declarations can contain ``Article``s
@@ -18,14 +18,14 @@ extension SymbolGraph
         public
         var article:Article
         public
-        var topics:[Topic]
+        var _topics:[_Topic]
 
         @inlinable public
-        init(headline:Markdown.Bytecode, article:Article = .init(), topics:[Topic] = [])
+        init(headline:Markdown.Bytecode, article:Article = .init(), _topics:[_Topic] = [])
         {
             self.headline = headline
             self.article = article
-            self.topics = topics
+            self._topics = _topics
         }
     }
 }
@@ -46,7 +46,7 @@ extension SymbolGraph.ArticleNode
     {
         case headline = "H"
         case article = "B"
-        case topics = "T"
+        case _topics = "T"
     }
 }
 extension SymbolGraph.ArticleNode:BSONDocumentEncodable
@@ -56,7 +56,7 @@ extension SymbolGraph.ArticleNode:BSONDocumentEncodable
     {
         bson[.headline] = self.headline
         bson[.article] = self.article
-        bson[.topics] = self.topics.isEmpty ? nil : self.topics
+        bson[._topics] = self._topics.isEmpty ? nil : self._topics
     }
 }
 extension SymbolGraph.ArticleNode:BSONDocumentDecodable
@@ -67,6 +67,6 @@ extension SymbolGraph.ArticleNode:BSONDocumentDecodable
         self.init(
             headline: try bson[.headline].decode(),
             article: try bson[.article].decode(),
-            topics: try bson[.topics]?.decode() ?? [])
+            _topics: try bson[._topics]?.decode() ?? [])
     }
 }

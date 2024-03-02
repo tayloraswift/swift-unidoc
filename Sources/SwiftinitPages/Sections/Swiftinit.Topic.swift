@@ -2,7 +2,7 @@ import HTML
 
 extension Swiftinit
 {
-    struct Topic
+    struct _LegacyTopic
     {
         private
         let context:IdentifiablePageContext<Swiftinit.Vertices>
@@ -19,7 +19,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.Topic:HTML.OutputStreamable
+extension Swiftinit._LegacyTopic:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
