@@ -24,18 +24,4 @@ extension Unidoc.Linker.Tables.Next
     {
         type.id(self.next(), in: self.base)
     }
-
-    @available(*, deprecated)
-    mutating
-    func polygon() -> Unidoc.Group
-    {
-        Unidoc.GroupType.polygon.id(self.next(), in: self.base)
-    }
-
-    @available(*, deprecated)
-    mutating
-    func topic() -> Unidoc.Group
-    {
-        Unidoc.GroupType.topic.id(self.next(), in: self.base)
-    }
 }

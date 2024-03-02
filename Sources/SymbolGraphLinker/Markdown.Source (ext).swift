@@ -34,14 +34,14 @@ extension Markdown.Source
             diagnostics[$1] = .warning($0)
         }
 
-        var interpreter:Markdown.BlockInterpreter<SSGC.Symbolicator> = .init(
-            diagnostics: consume diagnostics)
+        var analyzer:Markdown.SemanticAnalyzer<SSGC.Symbolicator> = .init(consume diagnostics,
+            snippets: snippetsTable)
         defer
         {
-            diagnostics = interpreter.diagnostics
+            diagnostics = analyzer.diagnostics
         }
 
-        return interpreter.organize(blocks[...], snippets: snippetsTable)
+        return analyzer.organize(article: blocks[...])
     }
 
     @_spi(testable) public
@@ -55,11 +55,11 @@ extension Markdown.Source
             diagnostics[$1] = .warning($0)
         }
 
-        var interpreter:Markdown.BlockInterpreter<SSGC.Symbolicator> = .init(
-            diagnostics: consume diagnostics)
+        var analyzer:Markdown.SemanticAnalyzer<SSGC.Symbolicator> = .init(consume diagnostics,
+            snippets: snippetsTable)
         defer
         {
-            diagnostics = interpreter.diagnostics
+            diagnostics = analyzer.diagnostics
         }
 
         if  case (let tutorial as Markdown.BlockArticle)? = blocks.first
@@ -77,8 +77,7 @@ extension Markdown.Source
                 throw SSGC.SupplementError.untitledTutorial
             }
 
-            let document:Markdown.SemanticDocument = interpreter.organize(tutorial: tutorial,
-                snippets: snippetsTable)
+            let document:Markdown.SemanticDocument = analyzer.organize(tutorial: tutorial)
 
             return .init(type: tutorial is Markdown.TutorialIndex
                     ? .tutorials(headline)
@@ -89,8 +88,8 @@ extension Markdown.Source
             case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1
         {
             let headline:SSGC.Supplement.Headline = .init(heading)
-            let document:Markdown.SemanticDocument = interpreter.organize(blocks.dropFirst(),
-                snippets: snippetsTable)
+            let document:Markdown.SemanticDocument = analyzer.organize(
+                article: blocks.dropFirst())
 
             return .init(type: headline, body: document)
         }

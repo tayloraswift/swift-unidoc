@@ -138,11 +138,11 @@ extension Unidoc.Linker.Tables
     mutating
     func linkProducts() -> [Unidoc.ProductVertex]
     {
-        var productPolygon:Unidoc.PolygonalGroup = .init(id: self.next(.polygon),
+        var products:Unidoc.CuratorGroup = .init(id: self.next(.curator),
             scope: self.current.id.global)
 
-        var products:[Unidoc.ProductVertex] = []
-            products.reserveCapacity(self.current.metadata.products.count)
+        var vertices:[Unidoc.ProductVertex] = []
+            vertices.reserveCapacity(self.current.metadata.products.count)
 
         for (p, product):(Int32, SymbolGraph.Product) in zip(
             self.current.metadata.products.indices,
@@ -171,10 +171,10 @@ extension Unidoc.Linker.Tables
                 constituents: constituents,
                 symbol: product.name,
                 type: product.type,
-                group: productPolygon.id)
+                group: products.id)
 
-            productPolygon.members.append(product.id)
-            products.append(product)
+            products.items.append(product.id)
+            vertices.append(product)
         }
 
         //  Create a synthetic topic containing all the products. This will become a “See Also”
@@ -182,39 +182,56 @@ extension Unidoc.Linker.Tables
 
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.
-        let culturePolygon:Unidoc.PolygonalGroup = .init(id: self.next(.polygon),
+        let cultures:Unidoc.CuratorGroup = .init(id: self.next(.curator),
             scope: self.current.id.global,
-            members: self.current.cultures.indices.sorted
+            items: self.current.cultures.indices.sorted
             {
                 self.current.namespaces[$0] <
                 self.current.namespaces[$1]
             }
-            .map
+                .map
             {
                 self.current.id + $0
             })
 
-        self.groups.polygons.append(productPolygon)
-        self.groups.polygons.append(culturePolygon)
+        self.groups.curators.append(products)
+        self.groups.curators.append(cultures)
 
         for c:Int in self.current.cultures.indices
         {
-            self.group[c * .module] = culturePolygon.id
+            self.group[c * .module] = cultures.id
         }
 
-        return products
+        return vertices
     }
 
     /// This **must** be called after ``linkProducts``!
     mutating
     func linkCultures() -> [Unidoc.CultureVertex]
     {
+        for topic:[Int32] in self.current.curation
+        {
+            let group:Unidoc.CuratorGroup = .init(id: self.next(.curator),
+                items: topic.map
+                {
+                    self.current.id + $0
+                })
+
+            for item:Int32 in topic
+            {
+                //  TODO: diagnose overlapping topics
+                self.group[item] = group.id
+            }
+
+            self.groups.curators.append(group)
+        }
+
         //  First pass to create the topic records, which also populates topic memberships.
         for (namespace, culture):(SymbolGraph.NamespaceContext<Void>, SymbolGraph.Culture) in
             self.modules
         {
             //  Create topic records for the culture.
-            self.link(topics: culture.topics, under: namespace, owner: namespace.culture)
+            self.link(_topics: culture._topics, under: namespace, owner: namespace.culture)
 
             //  Create topic records for the decls.
             for decls:SymbolGraph.Namespace in culture.namespaces
@@ -276,7 +293,7 @@ extension Unidoc.Linker.Tables
                         self.groups.intrinsics.append(.init(id: intrinsicGroup,
                             culture: namespace.culture,
                             scope: owner,
-                            members: self.context.sort(intrinsicMembers,
+                            items: self.context.sort(intrinsicMembers,
                                 by: Unidoc.SemanticPriority.self)))
                     }
 
@@ -308,12 +325,12 @@ extension Unidoc.Linker.Tables
                     }
 
                     //  Optimization
-                    if  decl.topics.isEmpty
+                    if  decl._topics.isEmpty
                     {
                         continue
                     }
 
-                    self.link(topics: decl.topics,
+                    self.link(_topics: decl._topics,
                         under: namespace,
                         scope: decl.scope,
                         owner: owner)
@@ -325,14 +342,14 @@ extension Unidoc.Linker.Tables
                 for (a, node):(Int32, SymbolGraph.ArticleNode) in zip(range,
                     self.current.articles.nodes[range])
                 {
-                    if  node.topics.isEmpty
+                    if  node._topics.isEmpty
                     {
                         continue
                     }
 
                     let owner:Unidoc.Scalar = self.current.id + a
 
-                    self.link(topics: node.topics,
+                    self.link(_topics: node._topics,
                         under: namespace,
                         owner: owner)
                 }
@@ -372,9 +389,9 @@ extension Unidoc.Linker.Tables
                 }
 
                 //  Create top-level polygon.
-                self.groups.polygons.append(.init(id: self.next(.polygon),
+                self.groups.curators.append(.init(id: self.next(.curator),
                     scope: namespace.culture,
-                    members: self.context.sort(consume miscellaneous,
+                    items: self.context.sort(consume miscellaneous,
                         by: Unidoc.SemanticPriority.self)))
             }
             //  Create article records.
@@ -393,12 +410,12 @@ extension Unidoc.Linker.Tables
 extension Unidoc.Linker.Tables
 {
     private mutating
-    func link(topics:[SymbolGraph.Topic],
+    func link(_topics:[SymbolGraph._Topic],
         under namespace:SymbolGraph.NamespaceContext<Void>,
         scope:[String] = [],
         owner:Unidoc.Scalar)
     {
-        for topic:SymbolGraph.Topic in topics
+        for topic:SymbolGraph._Topic in _topics
         {
             var record:Unidoc.TopicGroup = .init(id: self.next(.topic),
                 culture: namespace.culture,
@@ -409,7 +426,7 @@ extension Unidoc.Linker.Tables
                 module: namespace.context,
                 scope: scope)
             {
-                $0.link(topic: topic)
+                $0.link(_topic: topic)
             }
 
             self.groups.topics.append(record)

@@ -165,8 +165,10 @@ extension Markdown.BinaryDecoder:IteratorProtocol
                 return .load(reference)
             }
 
-        case ._reserved?, nil:
-            //  reserved byte
+        case .call?:
+            return .call
+
+        case nil:
             break
         }
 

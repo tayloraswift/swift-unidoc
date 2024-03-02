@@ -76,10 +76,10 @@ extension SymbolQueries.TestCase
                     case .conformer:
                         continue
 
-                    case .polygonal:
+                    case .curator:
                         continue
 
-                    case .topic(let t):
+                    case ._topic(let t):
                         guard self.filters.contains(.topics)
                         else
                         {
@@ -122,7 +122,7 @@ extension SymbolQueries.TestCase
                             continue
                         }
 
-                        for m:Unidoc.Scalar in i.members
+                        for m:Unidoc.Scalar in i.items
                         {
                             counts[secondaries[m] ?? "", default: 0] += 1
                         }

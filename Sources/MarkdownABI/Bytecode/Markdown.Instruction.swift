@@ -6,6 +6,7 @@ extension Markdown
         case invalid
 
         case attribute(Bytecode.Attribute, Int? = nil)
+        case call
         case emit(Bytecode.Emission)
         case load(Int)
         case push(Bytecode.Context)

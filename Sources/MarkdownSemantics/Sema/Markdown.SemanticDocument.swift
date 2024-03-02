@@ -12,36 +12,20 @@ extension Markdown
         public
         var details:SemanticSections
         public
-        var topics:[SemanticTopic]
+        var topics:[[BlockCard]]
 
         @inlinable public
         init(
             metadata:SemanticMetadata,
             overview:BlockParagraph?,
             details:SemanticSections,
-            topics:[SemanticTopic])
+            topics:[[BlockCard]])
         {
             self.metadata = metadata
             self.overview = overview
             self.details = details
             self.topics = topics
         }
-    }
-}
-extension Markdown.SemanticDocument
-{
-    static
-    func tutorial(overview:Markdown.BlockParagraph?, sections:[Markdown.BlockElement]) -> Self
-    {
-        return .init(
-            metadata: .init(),
-            overview: overview,
-            details: .init(
-                parameters: nil,
-                returns: nil,
-                throws: nil,
-                article: sections),
-            topics: [])
     }
 }
 extension Markdown.SemanticDocument

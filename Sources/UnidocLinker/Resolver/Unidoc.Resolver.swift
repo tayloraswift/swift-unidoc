@@ -64,13 +64,13 @@ extension Unidoc.Resolver
 
     mutating
     func link(
-        topic:SymbolGraph.Topic) -> (overview:Unidoc.Passage?, members:[Unidoc.TopicMember])
+        _topic:SymbolGraph._Topic) -> (overview:Unidoc.Passage?, members:[Unidoc.TopicMember])
     {
-        let overview:Unidoc.Passage? = topic.overview.isEmpty ? nil : .init(
-            outlines: topic.outlines.map { self.expand($0) },
-            markdown: topic.overview)
+        let overview:Unidoc.Passage? = _topic.overview.isEmpty ? nil : .init(
+            outlines: _topic.outlines.map { self.expand($0) },
+            markdown: _topic.overview)
 
-        return (overview, topic.members.map { self.resolve($0) })
+        return (overview, _topic.members.map { self.resolve($0) })
     }
 }
 extension Unidoc.Resolver

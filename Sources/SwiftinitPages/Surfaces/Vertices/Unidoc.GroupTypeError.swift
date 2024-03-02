@@ -5,8 +5,8 @@ extension Unidoc
         case  conformer
         case `extension`
         case  intrinsic
-        case  polygonal
-        case  topic
+        case  curator
+        case  _topic
     }
 }
 extension Unidoc.GroupTypeError
@@ -19,8 +19,8 @@ extension Unidoc.GroupTypeError
         case .conformer:    .conformer
         case .extension:    .extension
         case .intrinsic:    .intrinsic
-        case .polygonal:    .polygonal
-        case .topic:        .topic
+        case .curator:      .curator
+        case ._topic:       ._topic
         }
     }
 }
