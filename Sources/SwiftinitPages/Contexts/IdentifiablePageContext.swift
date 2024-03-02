@@ -48,18 +48,18 @@ extension IdentifiablePageContext
 extension IdentifiablePageContext
 {
     @available(*, deprecated)
-    func prose(overview passage:Unidoc.Passage) -> ProseSection
+    func prose(overview passage:Unidoc.Passage) -> Markdown.ProseSection
     {
         .init(self, bytecode: passage.markdown, outlines: passage.outlines)
     }
-    func prose(_ bytecode:Markdown.Bytecode) -> ProseSection
+    func prose(_ bytecode:Markdown.Bytecode) -> Markdown.ProseSection
     {
         //  We need to use the shared outlines, and not the array from the passage
         //  record, lest we make a frameshift indexing error.
         .init(self, bytecode: bytecode, outlines: self.outlines)
     }
 
-    func code(_ snippet:Signature<Unidoc.Scalar?>.Expanded) -> CodeSection
+    func code(_ snippet:Signature<Unidoc.Scalar?>.Expanded) -> Markdown.CodeSection
     {
         .init(self, bytecode: snippet.bytecode, scalars: snippet.scalars)
     }

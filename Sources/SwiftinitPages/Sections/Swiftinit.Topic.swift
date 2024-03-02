@@ -1,4 +1,5 @@
 import HTML
+import MarkdownABI
 
 extension Swiftinit
 {
@@ -24,7 +25,7 @@ extension Swiftinit._LegacyTopic:HTML.OutputStreamable
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        section ?= self.caption.map { ProseSection.init(self.context, passage: $0) }
+        section ?= self.caption.map { Markdown.ProseSection.init(self.context, passage: $0) }
 
         section[.ul]
         {

@@ -26,18 +26,11 @@ protocol _HTMLOutputStreamableMarkdown:HTML.OutputStreamable
     ///
     /// This can be used to influence the behavior of the special syntax
     /// highlight contexts.
-    mutating
     func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
 
     /// Writes arbitrary content to the provided HTML output, identified by
     /// the given reference.
-    mutating
     func load(_ reference:Int, into html:inout HTML.ContentEncoder)
-
-    /// Do something with the given reference. For example, this can be used to change the
-    /// behavior of a subsequent ``load(_:into:)`` call.
-    mutating
-    func call(_ reference:Int)
 }
 extension HTML.OutputStreamableMarkdown
 {
@@ -52,17 +45,12 @@ extension HTML.OutputStreamableMarkdown
     func load(_ reference:Int, into html:inout HTML.ContentEncoder)
     {
     }
-    /// Does nothing.
-    @inlinable public
-    func call(_ reference:Int)
-    {
-    }
 }
 extension HTML.OutputStreamableMarkdown
 {
     /// Equivalent to ``render(to:)``, but ignores all errors.
     @inlinable public static
-    func += (html:inout HTML.ContentEncoder, self:consuming Self)
+    func += (html:inout HTML.ContentEncoder, self:Self)
     {
         do { try self.render(to: &html) } catch { }
     }
@@ -74,7 +62,7 @@ extension HTML.OutputStreamableMarkdown
     ///
     /// See ``TextOutputStreamableMarkdown.write(to:)`` for a simpler version of this function
     /// that only renders visible text.
-    public consuming
+    public
     func render(to html:inout HTML.ContentEncoder) throws
     {
         var attributes:Markdown.TreeContext.AttributeContext = .init()
@@ -89,7 +77,6 @@ extension HTML.OutputStreamableMarkdown
         }
 
         var newlines:Int = 0
-        var call:Bool = false
         for instruction:Markdown.Instruction in (copy self).bytecode
         {
             switch instruction
@@ -108,9 +95,6 @@ extension HTML.OutputStreamableMarkdown
                     attributes.list.append(value: value, as: attribute)
                 }
 
-            case .call:
-                call = true
-
             case .emit(let element):
                 attributes.flush()
 
@@ -121,16 +105,7 @@ extension HTML.OutputStreamableMarkdown
 
             case .load(let reference):
                 attributes.clear()
-
-                if  call
-                {
-                    call = false
-                    self.call(reference)
-                }
-                else
-                {
-                    self.load(reference, into: &html)
-                }
+                self.load(reference, into: &html)
 
             case .push(let element):
                 attributes.flush()

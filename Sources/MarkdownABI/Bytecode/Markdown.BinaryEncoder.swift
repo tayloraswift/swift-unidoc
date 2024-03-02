@@ -61,12 +61,6 @@ extension Markdown.BinaryEncoder
     {
         self.bytecode.write(reference: reference)
     }
-
-    @inlinable public mutating
-    func call()
-    {
-        self.bytecode.write(marker: .call)
-    }
 }
 extension Markdown.BinaryEncoder
 {

@@ -1,5 +1,6 @@
 import MarkdownABI
 import MarkdownAST
+import MarkdownDisplay
 
 extension Markdown
 {
@@ -20,10 +21,7 @@ extension Markdown
             switch self.target
             {
             case .outlined(let reference):
-                //  This tells the renderer to display the reference as preview card.
-                binary.call()
-                binary &= 0
-                binary &= reference
+                binary &= .card(reference)
 
             case .inline(let autolink):
                 binary[.code] = autolink.text.string

@@ -3,24 +3,27 @@ import MarkdownABI
 import MarkdownRendering
 import UnidocRecords
 
-struct CodeSection
+extension Markdown
 {
-    let bytecode:Markdown.Bytecode
-    private
-    let scalars:[Unidoc.Scalar?]
-    private
-    let context:any Swiftinit.VertexPageContext
-
-    init(_ context:any Swiftinit.VertexPageContext,
-        bytecode:Markdown.Bytecode,
-        scalars:[Unidoc.Scalar?])
+    struct CodeSection
     {
-        self.bytecode = bytecode
-        self.scalars = scalars
-        self.context = context
+        let bytecode:Markdown.Bytecode
+        private
+        let scalars:[Unidoc.Scalar?]
+        private
+        let context:any Swiftinit.VertexPageContext
+
+        init(_ context:any Swiftinit.VertexPageContext,
+            bytecode:Markdown.Bytecode,
+            scalars:[Unidoc.Scalar?])
+        {
+            self.bytecode = bytecode
+            self.scalars = scalars
+            self.context = context
+        }
     }
 }
-extension CodeSection:HTML.OutputStreamableMarkdown
+extension Markdown.CodeSection:HTML.OutputStreamableMarkdown
 {
     func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
     {

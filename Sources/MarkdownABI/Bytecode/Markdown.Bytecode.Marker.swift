@@ -17,6 +17,7 @@ extension Markdown.Bytecode
         /// A byte followed by a variable-length reference
         /// (``uint8``, ``uint16``, ``uint32``, or ``uint64``). The reference does not need to
         /// occur immediately after the marker.
+        @available(*, unavailable)
         case call = 0xF5
 
         /// A byte followed by an element code.

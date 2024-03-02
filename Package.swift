@@ -302,17 +302,22 @@ let package:Package = .init(
 
         .target(name: "MarkdownABI"),
 
+        .target(name: "MarkdownAST",
+            dependencies: [
+                .target(name: "MarkdownABI"),
+                .target(name: "Sources"),
+            ]),
+
+        .target(name: "MarkdownDisplay",
+            dependencies: [
+                .target(name: "MarkdownABI"),
+            ]),
+
         .target(name: "MarkdownRendering",
             dependencies: [
                 .target(name: "HTML"),
                 .target(name: "MarkdownABI"),
                 .target(name: "URI"),
-            ]),
-
-        .target(name: "MarkdownAST",
-            dependencies: [
-                .target(name: "MarkdownABI"),
-                .target(name: "Sources"),
             ]),
 
         .target(name: "MarkdownLinking",
@@ -344,6 +349,7 @@ let package:Package = .init(
 
         .target(name: "MarkdownSemantics",
             dependencies: [
+                .target(name: "MarkdownDisplay"),
                 .target(name: "MarkdownLinking"),
                 .target(name: "Snippets"),
                 .target(name: "SourceDiagnostics"),
@@ -449,6 +455,7 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "HTTP"),
                 .target(name: "HTML"),
+                .target(name: "MarkdownDisplay"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "Media"),
                 .target(name: "Swiftinit"),
