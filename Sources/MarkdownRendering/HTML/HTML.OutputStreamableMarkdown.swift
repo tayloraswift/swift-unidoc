@@ -77,7 +77,7 @@ extension HTML.OutputStreamableMarkdown
         }
 
         var newlines:Int = 0
-        for instruction:Markdown.Instruction in (copy self).bytecode
+        for instruction:Markdown.Instruction in self.bytecode
         {
             switch instruction
             {
