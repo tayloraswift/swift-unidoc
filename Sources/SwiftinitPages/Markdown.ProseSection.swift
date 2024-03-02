@@ -1,41 +1,40 @@
 import HTML
 import MarkdownABI
+import MarkdownDisplay
 import MarkdownRendering
 import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
-struct ProseSection
+extension Markdown
 {
-    private
-    let context:any Swiftinit.VertexPageContext
-
-    let bytecode:Markdown.Bytecode
-    let outlines:[Unidoc.Outline]
-
-    private
-    var card:Bool
-
-    init(_ context:any Swiftinit.VertexPageContext,
-        bytecode:Markdown.Bytecode,
-        outlines:[Unidoc.Outline])
+    struct ProseSection
     {
-        self.context = context
+        private
+        let context:any Swiftinit.VertexPageContext
 
-        self.bytecode = bytecode
-        self.outlines = outlines
+        let bytecode:Markdown.Bytecode
+        let outlines:[Unidoc.Outline]
 
-        self.card = false
+        init(_ context:any Swiftinit.VertexPageContext,
+            bytecode:Markdown.Bytecode,
+            outlines:[Unidoc.Outline])
+        {
+            self.context = context
+
+            self.bytecode = bytecode
+            self.outlines = outlines
+        }
     }
 }
-extension ProseSection
+extension Markdown.ProseSection
 {
     init(_ context:any Swiftinit.VertexPageContext, passage:Unidoc.Passage)
     {
         self.init(context, bytecode: passage.markdown, outlines: passage.outlines)
     }
 }
-extension ProseSection:HTML.OutputStreamableMarkdown
+extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
 {
     func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
     {
@@ -118,16 +117,18 @@ extension ProseSection:HTML.OutputStreamableMarkdown
         }
     }
 
-    mutating
     func load(_ reference:Int, into html:inout HTML.ContentEncoder)
     {
-        guard self.outlines.indices.contains(reference)
+        let reference:Markdown.ProseReference = .init(reference)
+        let index:Int = reference.index
+
+        guard self.outlines.indices.contains(index)
         else
         {
             return
         }
 
-        switch self.outlines[reference]
+        switch self.outlines[index]
         {
         case .file(line: let line, let id):
             html ?= self.context.link(source: id, line: line)
@@ -148,9 +149,8 @@ extension ProseSection:HTML.OutputStreamableMarkdown
                 html[.code] = "<empty codelink>"
                 return
             }
-            if  self.card
+            if  reference.card
             {
-                self.card = false
                 html ?= self.context.card(id)
             }
             else if SymbolGraph.Plane.article.contains(id.citizen)
@@ -167,26 +167,20 @@ extension ProseSection:HTML.OutputStreamableMarkdown
             }
         }
     }
-
-    mutating
-    func call(_ reference:Int)
-    {
-        //  TODO: stop using magic numbers.
-        assert(reference == 0)
-
-        self.card = true
-    }
 }
-extension ProseSection:TextOutputStreamableMarkdown
+extension Markdown.ProseSection:TextOutputStreamableMarkdown
 {
     func load(_ reference:Int, into utf8:inout [UInt8])
     {
-        guard self.outlines.indices.contains(reference)
+        let reference:Markdown.ProseReference = .init(reference)
+        let index:Int = reference.index
+
+        guard self.outlines.indices.contains(index)
         else
         {
             return
         }
-        switch self.outlines[reference]
+        switch self.outlines[index]
         {
         case .file(line: let line, let id):
             guard
