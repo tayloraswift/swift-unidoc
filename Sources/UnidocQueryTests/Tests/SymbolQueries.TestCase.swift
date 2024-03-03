@@ -76,20 +76,19 @@ extension SymbolQueries.TestCase
                     case .conformer:
                         continue
 
-                    case .curator:
-                        continue
-
-                    case ._topic(let t):
-                        guard self.filters.contains(.topics)
+                    case .curator(let t):
+                        guard self.filters.contains(.curators)
                         else
                         {
                             continue
                         }
-
-                        for case .scalar(let m) in t.members
+                        for id:Unidoc.Scalar in t.items
                         {
-                            counts[secondaries[m] ?? "", default: 0] += 1
+                            counts[secondaries[id] ?? "", default: 0] += 1
                         }
+
+                    case ._topic:
+                        continue
 
                     case .extension(let e):
                         guard self.filters.contains(.extensions)
