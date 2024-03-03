@@ -467,7 +467,9 @@ extension Unidoc.Linker.Tables
     {
         var vertex:Unidoc.CultureVertex = .init(id: namespace.culture,
             module: culture.module,
-            group: self.group[namespace.culture.citizen])
+            group: culture.article?.footer == .omit
+                ? nil
+                : self.group[namespace.culture.citizen])
 
         if  let article:SymbolGraph.Article = culture.article
         {
@@ -504,7 +506,7 @@ extension Unidoc.Linker.Tables
                 culture: namespace.culture,
                 readme: node.article.file.map { self.current.id + $0 },
                 headline: node.headline,
-                group: self.group[a])
+                group: node.article.footer == .omit ? nil : self.group[a])
 
             (vertex.overview, vertex.details) = self.context.resolving(
                 namespace: namespace.module,
@@ -530,7 +532,7 @@ extension Unidoc.Linker.Tables
             self.current.decls.nodes[range]))
         {
             /// Is this declaration a member of a topic?
-            let group:Unidoc.Group? = self.group[d]
+            let group:Unidoc.Group? = node.decl?.article?.footer == .omit ? nil : self.group[d]
             /// Is this declaration have peers?
             let peers:Unidoc.Group? = self.peers[d]
             /// Is this declaration a top-level member of its module?

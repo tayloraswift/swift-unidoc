@@ -280,7 +280,8 @@ extension SSGC.Outliner
             overview: overview,
             details: details,
             fold: fold,
-            file: file)
+            file: file,
+            footer: body.containsSeeAlso ? .omit : nil)
 
         var topics:[[Int32]] = []
             topics.reserveCapacity(body.topics.count)

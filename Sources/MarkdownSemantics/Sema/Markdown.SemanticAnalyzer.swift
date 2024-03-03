@@ -274,6 +274,8 @@ extension Markdown.SemanticAnalyzer
     {
         /// Was the last `h2` heading a “Topics” heading?
         var insideTopicsSection:Bool = false
+        /// Does the article contain a manual “See also” section?
+        var containsSeeAlso:Bool = false
         /// Was the last markdown block a major (`h3` or greater) heading?
         var headingBefore:String? = nil
 
@@ -323,7 +325,7 @@ extension Markdown.SemanticAnalyzer
 
                     switch headingBefore
                     {
-                    case "see also"?:   break
+                    case "see also"?:   containsSeeAlso = true
                     case _?:            topics.append(topic)
                     case nil:           topics.append(topic)
                     }
@@ -359,6 +361,7 @@ extension Markdown.SemanticAnalyzer
                 returns: self.returns.isEmpty ? nil : .init(self.returns),
                 throws: self.throws.isEmpty ? nil : .init(self.throws),
                 article: article),
-            topics: topics)
+            topics: topics,
+            containsSeeAlso: containsSeeAlso)
     }
 }
