@@ -4,6 +4,6 @@ extension SymbolQueries.TestCase
     {
         case extensions
         case intrinsics
-        case topics
+        case curators
     }
 }
