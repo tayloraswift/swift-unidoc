@@ -13,18 +13,23 @@ extension Markdown
         var details:SemanticSections
         public
         var topics:[Markdown.BlockTopic]
+        /// If true, then an automatic “See also” section will not be generated.
+        public
+        var containsSeeAlso:Bool
 
         @inlinable public
         init(
             metadata:SemanticMetadata,
             overview:BlockParagraph?,
             details:SemanticSections,
-            topics:[Markdown.BlockTopic])
+            topics:[Markdown.BlockTopic],
+            containsSeeAlso:Bool)
         {
             self.metadata = metadata
             self.overview = overview
             self.details = details
             self.topics = topics
+            self.containsSeeAlso = containsSeeAlso
         }
     }
 }

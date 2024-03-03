@@ -7,10 +7,6 @@ extension SymbolGraph
     ///
     /// An instance of `Article` has no identity of its own. To model a standalone article,
     /// see ``ArticleNode``.
-    ///
-    /// Instances of `Article` do not contain ``Topic``s, although articles are frequently
-    /// stored alongside lists of topics. Articles associated with ``Extension``s are an
-    /// exception; extensions can have articles, but they cannot have topics.
     @frozen public
     struct Article:Equatable, Sendable
     {
@@ -26,18 +22,24 @@ extension SymbolGraph
         public
         var file:Int32?
 
+        /// Footer options.
+        public
+        var footer:Footer?
+
         @inlinable public
         init(outlines:[Outline] = [],
             overview:Markdown.Bytecode = [],
             details:Markdown.Bytecode = [],
             fold:Int? = nil,
-            file:Int32? = nil)
+            file:Int32? = nil,
+            footer:Footer? = nil)
         {
             self.outlines = outlines
             self.overview = overview
             self.details = details
             self.fold = fold ?? self.outlines.endIndex
             self.file = file
+            self.footer = footer
         }
     }
 }
@@ -51,6 +53,7 @@ extension SymbolGraph.Article
         case details = "D"
         case fold = "Z"
         case file = "F"
+        case footer = "G"
     }
 }
 extension SymbolGraph.Article:BSONDocumentEncodable
@@ -63,6 +66,7 @@ extension SymbolGraph.Article:BSONDocumentEncodable
         bson[.details] = self.details.isEmpty ? nil : self.details
         bson[.fold] = self.fold == self.outlines.endIndex ? nil : self.fold
         bson[.file] = self.file
+        bson[.footer] = self.footer
     }
 }
 extension SymbolGraph.Article:BSONDocumentDecodable
@@ -75,6 +79,7 @@ extension SymbolGraph.Article:BSONDocumentDecodable
             overview: try bson[.overview]?.decode() ?? [],
             details: try bson[.details]?.decode() ?? [],
             fold: try bson[.fold]?.decode(),
-            file: try bson[.file]?.decode())
+            file: try bson[.file]?.decode(),
+            footer: try bson[.footer]?.decode())
     }
 }
