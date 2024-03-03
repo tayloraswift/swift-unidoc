@@ -34,7 +34,7 @@ extension Swiftinit.IntegratedList:HTML.OutputStreamable
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        section[.ul]
+        section[.ul, { $0.class = "cards" }]
         {
             for item:Unidoc.Scalar in self.items
             {

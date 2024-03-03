@@ -78,7 +78,7 @@ extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.VertexPage
         }
         main[.section, { $0.class = "group choices" }]
         {
-            $0[.ul]
+            $0[.ul, { $0.class = "cards" }]
             {
                 for match:Unidoc.Scalar in self.matches
                 {

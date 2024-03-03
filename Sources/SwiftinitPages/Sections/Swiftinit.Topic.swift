@@ -27,7 +27,7 @@ extension Swiftinit._LegacyTopic:HTML.OutputStreamable
     {
         section ?= self.caption.map { Markdown.ProseSection.init(self.context, passage: $0) }
 
-        section[.ul]
+        section[.ul, { $0.class = "cards" }]
         {
             for member:Unidoc.TopicMember in self.members
             {

@@ -220,7 +220,7 @@ extension Unidoc.AnyGroup:BSONDocumentDecodable
 
         case .curator?:
             self = .curator(.init(id: id,
-                scope: try bson[.scope].decode(),
+                scope: try bson[.scope]?.decode(),
                 items: try bson[.items]?.decode() ?? []))
 
         case _:
