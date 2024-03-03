@@ -217,6 +217,35 @@ extension Main.Topics:MarkdownTestBattery
                 """,
                 topics: [2])
         }
+        if  let tests:TestGroup = tests / "FloatingSeeAlso"
+        {
+            Self.run(tests: tests,
+                markdown:
+                """
+                Overview overview overview
+
+                ## Discussion
+
+                Details details details
+
+                ### See also
+
+                -   ``WeAreNeverEverGettingBackTogether``
+                -   ``AllTooWell``
+
+                """,
+                expected: """
+                <p>Overview overview overview</p>
+                <h2 id='Discussion'><a href='#Discussion'>Discussion</a></h2>\
+                <p>Details details details</p>\
+                <h3 id='See%20also'><a href='#See%20also'>See also</a></h3>\
+                <ul class='cards'>\
+                <li><code>WeAreNeverEverGettingBackTogether</code></li>\
+                <li><code>AllTooWell</code></li>\
+                </ul>
+                """,
+                topics: [])
+        }
         if  let tests:TestGroup = tests / "ManyLists"
         {
             Self.run(tests: tests,
