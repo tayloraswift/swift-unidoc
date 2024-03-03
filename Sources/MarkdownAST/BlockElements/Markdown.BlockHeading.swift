@@ -46,6 +46,18 @@ extension Markdown.BlockHeading
 }
 extension Markdown.BlockHeading
 {
+    /// Returns the lowercased concatenation of the plain text in the heading.
+    @inlinable public
+    func signature() -> String
+    {
+        var signature:String = ""
+        for element:Markdown.InlineElement in self.elements
+        {
+            signature += element.text.lowercased()
+        }
+        return signature
+    }
+
     /// Promotes the heading by the specified increment, unless that would make it a level 1
     /// heading. (Or if it is already a level 1 heading.)
     @inlinable public

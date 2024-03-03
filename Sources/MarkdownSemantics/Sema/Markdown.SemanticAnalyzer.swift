@@ -275,7 +275,7 @@ extension Markdown.SemanticAnalyzer
         /// Was the last `h2` heading a “Topics” heading?
         var insideTopicsSection:Bool = false
         /// Was the last markdown block a major (`h3` or greater) heading?
-        var afterMajorHeading:Bool = false
+        var headingBefore:String? = nil
 
         var article:[Markdown.BlockElement] = []
             article.reserveCapacity((copy details).count)
@@ -289,10 +289,9 @@ extension Markdown.SemanticAnalyzer
                 switch heading.level
                 {
                 case 2:
-                    afterMajorHeading = true
+                    headingBefore = heading.signature()
 
-                    if  heading.elements.count == 1,
-                        heading.elements[0].text.lowercased() == "topics"
+                    if  case "topics"? = headingBefore
                     {
                         insideTopicsSection = true
                         continue
@@ -303,10 +302,10 @@ extension Markdown.SemanticAnalyzer
                     }
 
                 case 3:
-                    afterMajorHeading = true
+                    headingBefore = heading.signature()
 
                 case _:
-                    afterMajorHeading = false
+                    headingBefore = nil
                 }
 
                 if  insideTopicsSection
@@ -317,21 +316,27 @@ extension Markdown.SemanticAnalyzer
                 article.append(heading)
 
             case let list as Markdown.BlockListUnordered:
-                if  insideTopicsSection || afterMajorHeading,
+                if  insideTopicsSection || headingBefore != nil,
                     let topic:Markdown.BlockTopic = .init(from: list)
                 {
                     article.append(topic)
-                    topics.append(topic)
+
+                    switch headingBefore
+                    {
+                    case "see also"?:   break
+                    case _?:            topics.append(topic)
+                    case nil:           topics.append(topic)
+                    }
                 }
                 else
                 {
                     article.append(list)
                 }
 
-                afterMajorHeading = false
+                headingBefore = nil
 
             case let block:
-                afterMajorHeading = false
+                headingBefore = nil
                 article.append(block)
             }
         }

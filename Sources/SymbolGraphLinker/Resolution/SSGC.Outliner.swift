@@ -302,7 +302,8 @@ extension SSGC.Outliner
                 default:                                return
                 }
             }
-            if !topic.isEmpty
+            //  Single-item topics are worthless as curator groups.
+            if  topic.count > 1
             {
                 topics.append(topic)
             }
