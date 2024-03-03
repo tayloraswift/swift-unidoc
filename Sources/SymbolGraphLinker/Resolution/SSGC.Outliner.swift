@@ -285,12 +285,12 @@ extension SSGC.Outliner
         var topics:[[Int32]] = []
             topics.reserveCapacity(body.topics.count)
 
-        for topic:[Markdown.BlockCard] in body.topics
+        for topic:Markdown.BlockTopic in body.topics
         {
-            let topic:[Int32] = topic.reduce(into: [])
+            let topic:[Int32] = topic.items.reduce(into: [])
             {
                 guard
-                case .outlined(let reference) = $1.target
+                case .outlined(let reference) = $1
                 else
                 {
                     return
@@ -302,7 +302,7 @@ extension SSGC.Outliner
                 default:                                return
                 }
             }
-            if !topics.isEmpty
+            if !topic.isEmpty
             {
                 topics.append(topic)
             }

@@ -57,12 +57,15 @@ extension Swiftinit.ConformingTypes:HTML.OutputStreamable
     {
         for group:Unidoc.ConformerGroup in self.conformers
         {
-            html[.section, { $0.class = "group dense conformer" }]
+            html[.section, { $0.class = "group conformer" }]
             {
                 $0[.h2] = Swiftinit.ConformingTypesHeader.init(self.context,
                     heading: .init(culture: group.culture, bias: self.bias))
 
-                $0[.ul] = Swiftinit.DenseList.init(self.context,
+                $0[.ul]
+                {
+                    $0.class = "cards dense"
+                } = Swiftinit.DenseList.init(self.context,
                     members: (group.unconditional, group.conditional))
             }
         }

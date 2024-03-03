@@ -12,14 +12,14 @@ extension Markdown
         public
         var details:SemanticSections
         public
-        var topics:[[BlockCard]]
+        var topics:[Markdown.BlockTopic]
 
         @inlinable public
         init(
             metadata:SemanticMetadata,
             overview:BlockParagraph?,
             details:SemanticSections,
-            topics:[[BlockCard]])
+            topics:[Markdown.BlockTopic])
         {
             self.metadata = metadata
             self.overview = overview

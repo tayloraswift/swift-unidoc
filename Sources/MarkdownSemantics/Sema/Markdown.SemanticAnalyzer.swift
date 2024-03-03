@@ -279,7 +279,7 @@ extension Markdown.SemanticAnalyzer
 
         var article:[Markdown.BlockElement] = []
             article.reserveCapacity((copy details).count)
-        var topics:[[Markdown.BlockCard]] = []
+        var topics:[Markdown.BlockTopic] = []
 
         for block:Markdown.BlockElement in details
         {
@@ -318,13 +318,17 @@ extension Markdown.SemanticAnalyzer
 
             case let list as Markdown.BlockListUnordered:
                 if  insideTopicsSection || afterMajorHeading,
-                    let topic:[Markdown.BlockCard] = list.promoteCards()
+                    let topic:Markdown.BlockTopic = .init(from: list)
                 {
+                    article.append(topic)
                     topics.append(topic)
+                }
+                else
+                {
+                    article.append(list)
                 }
 
                 afterMajorHeading = false
-                article.append(list)
 
             case let block:
                 afterMajorHeading = false

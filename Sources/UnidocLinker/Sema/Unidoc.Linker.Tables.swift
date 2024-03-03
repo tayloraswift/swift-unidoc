@@ -211,12 +211,29 @@ extension Unidoc.Linker.Tables
     {
         for topic:[Int32] in self.current.curation
         {
-            let group:Unidoc.CuratorGroup = .init(id: self.next(.curator),
-                items: topic.map
+            let items:[Unidoc.Scalar] = topic.compactMap
+            {
+                //  This is needed to correctly handle the case where a topic contains a
+                //  reference to a feature inherited from a different package.
+                if  case SymbolGraph.Plane.decl? = .of($0)
+                {
+                    self.current.scalars.decls[$0]
+                }
+                else if
+                    let c:Int = $0 / .module
+                {
+                    self.current.scalars.modules[c]
+                }
+                else
                 {
                     self.current.id + $0
-                })
-
+                }
+            }
+            if  items.isEmpty
+            {
+                continue
+            }
+            let group:Unidoc.CuratorGroup = .init(id: self.next(.curator), items: items)
             for item:Int32 in topic
             {
                 //  TODO: diagnose overlapping topics

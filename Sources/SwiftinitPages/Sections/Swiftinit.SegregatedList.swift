@@ -69,7 +69,7 @@ extension Swiftinit.SegregatedList:HTML.OutputStreamable
     {
         if !self.visible.isEmpty
         {
-            section[.ul]
+            section[.ul, { $0.class = "cards" }]
             {
                 for card:Swiftinit.DeclCard in self.visible
                 {
@@ -96,7 +96,7 @@ extension Swiftinit.SegregatedList:HTML.OutputStreamable
                 """
             }
 
-            $0[.ul]
+            $0[.ul, { $0.class = "cards" }]
             {
                 for card:Swiftinit.DeclCard in self.details
                 {
