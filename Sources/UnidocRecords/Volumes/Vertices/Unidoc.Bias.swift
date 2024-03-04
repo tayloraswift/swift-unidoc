@@ -1,5 +1,6 @@
-extension Swiftinit
+extension Unidoc
 {
+    @frozen public
     enum Bias:Equatable
     {
         case culture(Unidoc.Scalar)
@@ -7,8 +8,9 @@ extension Swiftinit
         case package
     }
 }
-extension Swiftinit.Bias
+extension Unidoc.Bias
 {
+    @inlinable public
     var edition:Unidoc.Edition?
     {
         switch self

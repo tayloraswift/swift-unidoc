@@ -31,7 +31,7 @@ extension Swiftinit.ExtensionSection
     init?(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
         group:borrowing Unidoc.ExtensionGroup,
         decl:Phylum.DeclFlags,
-        bias:Swiftinit.Bias)
+        bias:Unidoc.Bias)
     {
         guard
         let body:Swiftinit.ExtensionBody = .init(context, group: group, decl: decl)

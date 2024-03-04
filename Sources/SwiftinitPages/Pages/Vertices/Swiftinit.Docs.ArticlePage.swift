@@ -9,54 +9,41 @@ extension Swiftinit.Docs
 {
     struct ArticlePage
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
-
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
+        let mesh:Swiftinit.Mesh
+        let apex:Unidoc.ArticleVertex
 
-        private
-        let vertex:Unidoc.ArticleVertex
-        private
-        let groups:Swiftinit.GroupLists
-
-
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            canonical:CanonicalVersion?,
+        init(canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            vertex:Unidoc.ArticleVertex,
-            groups:Swiftinit.GroupLists)
+            mesh:Swiftinit.Mesh,
+            apex:Unidoc.ArticleVertex)
         {
-            self.context = context
             self.canonical = canonical
             self.sidebar = sidebar
-            self.vertex = vertex
-            self.groups = groups
+            self.apex = apex
+            self.mesh = mesh
         }
     }
 }
 extension Swiftinit.Docs.ArticlePage
 {
     private
-    var stem:Unidoc.Stem { self.vertex.stem }
+    var stem:Unidoc.Stem { self.apex.stem }
 }
 extension Swiftinit.Docs.ArticlePage:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.vertex.headline.safe) · \(self.volume.title) Documentation" }
-
-    var description:String?
-    {
-        self.vertex.overview.map { "\(self.context.prose($0.markdown))" }
-    }
+    var title:String { "\(self.apex.headline.safe) · \(self.volume.title) Documentation" }
 }
 extension Swiftinit.Docs.ArticlePage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
+    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
 }
 extension Swiftinit.Docs.ArticlePage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ArticlePage:Swiftinit.VertexPage
+extension Swiftinit.Docs.ArticlePage:Swiftinit.ApicalPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -67,14 +54,14 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.VertexPage
                 $0[.span] { $0.class = "phylum" } = "Article"
 
                 $0[.span, { $0.class = "domain" }] = self.context.subdomain(self.stem.first,
-                    culture: self.vertex.culture)
+                    culture: self.apex.culture)
             }
 
-            $0[.h1] = self.vertex.headline.safe
+            $0[.h1] = self.apex.headline.safe
 
-            $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
+            $0 ?= self.mesh.overview
 
-            if  let file:Unidoc.Scalar = self.vertex.readme
+            if  let file:Unidoc.Scalar = self.apex.readme
             {
                 $0 ?= self.context.link(source: file)
             }
@@ -82,9 +69,8 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.VertexPage
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
-        main[.section, { $0.class = "details literature" }] =
-            (self.vertex.details?.markdown).map(self.context.prose(_:))
+        main[.section, { $0.class = "details literature" }] = self.mesh.details
 
-        main += self.groups
+        main += self.mesh.halo
     }
 }

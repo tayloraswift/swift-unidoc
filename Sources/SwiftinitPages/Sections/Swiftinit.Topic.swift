@@ -25,7 +25,7 @@ extension Swiftinit._LegacyTopic:HTML.OutputStreamable
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        section ?= self.caption.map { Markdown.ProseSection.init(self.context, passage: $0) }
+        section ?= self.caption.map { Markdown.ProseSection.init(self.context, overview: $0) }
 
         section[.ul, { $0.class = "cards" }]
         {

@@ -1,6 +1,6 @@
 import Symbols
 
-extension Swiftinit.GroupLists
+extension Swiftinit.Mesh.Halo
 {
     enum Partisanship:Equatable, Hashable, Comparable, Sendable
     {

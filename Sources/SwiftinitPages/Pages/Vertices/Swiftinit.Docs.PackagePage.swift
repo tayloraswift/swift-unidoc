@@ -16,37 +16,36 @@ extension Swiftinit.Docs
 {
     struct PackagePage
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
-
         let canonical:CanonicalVersion?
+        let mesh:Swiftinit.Mesh
+        let apex:Unidoc.GlobalVertex
 
-        private
-        let vertex:Unidoc.GlobalVertex
-        private
-        let groups:Swiftinit.GroupLists
-
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            canonical:CanonicalVersion?,
-            vertex:Unidoc.GlobalVertex,
-            groups:Swiftinit.GroupLists)
+        init(canonical:CanonicalVersion?, mesh:Swiftinit.Mesh, apex:Unidoc.GlobalVertex)
         {
-            self.context = context
             self.canonical = canonical
-            self.vertex = vertex
-            self.groups = groups
+            self.mesh = mesh
+            self.apex = apex
         }
     }
-}
-extension Swiftinit.Docs.PackagePage
-{
-    private
-    var repo:Unidoc.PackageRepo? { self.context.repo }
 }
 extension Swiftinit.Docs.PackagePage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.volume.title) Documentation" }
 
-    var description:String?
+}
+extension Swiftinit.Docs.PackagePage:Swiftinit.StaticPage
+{
+    var location:URI { Swiftinit.Docs[self.volume] }
+}
+extension Swiftinit.Docs.PackagePage:Swiftinit.ApplicationPage
+{
+    typealias Navigator = HTML.Logo
+}
+extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
+{
+    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
+
+    var descriptionFallback:String
     {
         self.volume.symbol.package == .swift ?
         """
@@ -58,18 +57,6 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.RenderablePage
         \(self.volume.title) package.
         """
     }
-}
-extension Swiftinit.Docs.PackagePage:Swiftinit.StaticPage
-{
-    var location:URI { Swiftinit.Docs[self.volume] }
-}
-extension Swiftinit.Docs.PackagePage:Swiftinit.ApplicationPage
-{
-    typealias Navigator = HTML.Logo
-}
-extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
-{
-    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -105,7 +92,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
 
             $0[.h1] = self.title
 
-            if  let repo:Unidoc.PackageRepo = self.repo
+            if  let repo:Unidoc.PackageRepo = self.context.repo
             {
                 $0 += Swiftinit.PackageBanner.init(repo: repo,
                     tag: self.volume.refname,
@@ -117,7 +104,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  let repo:Unidoc.PackageRepo = self.repo
+            if  let repo:Unidoc.PackageRepo = self.context.repo
             {
                 $0[.h2] = Heading.repository
 
@@ -272,20 +259,20 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
                 $0[.dt] = "Supports Linux?"
                 $0[.dd] = "yes"
 
-                if  let version:PatchVersion = self.vertex.snapshot.latestManifest
+                if  let version:PatchVersion = self.apex.snapshot.latestManifest
                 {
                     $0[.dt] = "Swift tools version"
                     $0[.dd] = "\(version)"
                 }
             }
 
-            if !self.vertex.snapshot.extraManifests.isEmpty
+            if !self.apex.snapshot.extraManifests.isEmpty
             {
                 $0[.p, { $0.class = "note" }]
                 {
                     $0 += "This package vends additional manifests targeting older versions "
                     $0[.em] = """
-                    (\(self.vertex.snapshot.extraManifests.map
+                    (\(self.apex.snapshot.extraManifests.map
                     {
                         "\($0)"
                     }.joined(separator: ", ")))
@@ -293,7 +280,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
                     $0 += " of Swift!"
                 }
             }
-            if !self.vertex.snapshot.requirements.isEmpty
+            if !self.apex.snapshot.requirements.isEmpty
             {
                 $0[.table, { $0.class = "platforms" }]
                 {
@@ -308,7 +295,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
                     $0[.tbody]
                     {
                         for platform:SymbolGraphMetadata.PlatformRequirement in
-                            self.vertex.snapshot.requirements
+                            self.apex.snapshot.requirements
                         {
                             $0[.tr]
                             {
@@ -330,15 +317,15 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
             $0[.dl]
             {
                 $0[.dt] = "Symbol Graph ABI"
-                $0[.dd] = "\(self.vertex.snapshot.abi)"
+                $0[.dd] = "\(self.apex.snapshot.abi)"
 
-                if  let commit:SHA1 = self.vertex.snapshot.commit
+                if  let commit:SHA1 = self.apex.snapshot.commit
                 {
                     $0[.dt] = "Git Revision"
                     $0[.dd]
                     {
                         let url:String?
-                        if  case .github(let origin)? = self.repo?.origin
+                        if  case .github(let origin)? = self.context.repo?.origin
                         {
                             url = "\(origin.https)/tree/\(commit)"
                         }
@@ -359,11 +346,11 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.VertexPage
 
             $0[.div] { $0.class = "more" } = Swiftinit.StatsThumbnail.init(
                 target: Swiftinit.Stats[self.volume],
-                census: self.vertex.snapshot.census,
+                census: self.apex.snapshot.census,
                 domain: self.volume.title,
                 title: "Package stats and coverage details")
         }
 
-        main += self.groups
+        main += self.mesh.halo
     }
 }

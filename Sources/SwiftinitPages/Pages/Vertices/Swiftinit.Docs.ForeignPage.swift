@@ -10,29 +10,22 @@ extension Swiftinit.Docs
 {
     struct ForeignPage
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
-
         let canonical:CanonicalVersion?
-
-        private
-        let vertex:Unidoc.ForeignVertex
-        private
-        let groups:Swiftinit.GroupLists
+        let mesh:Swiftinit.Mesh
+        let apex:Unidoc.ForeignVertex
 
         private
         let stem:Unidoc.StemComponents
 
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            canonical:CanonicalVersion?,
-            vertex:Unidoc.ForeignVertex,
-            groups:Swiftinit.GroupLists) throws
+        init(canonical:CanonicalVersion?,
+            mesh:Swiftinit.Mesh,
+            apex:Unidoc.ForeignVertex) throws
         {
-            self.context = context
             self.canonical = canonical
-            self.vertex = vertex
-            self.groups = groups
+            self.mesh = mesh
+            self.apex = apex
 
-            self.stem = try .init(vertex.stem)
+            self.stem = try .init(self.apex.stem)
         }
     }
 }
@@ -41,31 +34,31 @@ extension Swiftinit.Docs.ForeignPage
     private
     var demonym:Swiftinit.DeclDemonym
     {
-        .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
+        .init(phylum: self.apex.phylum, kinks: self.apex.kinks)
     }
 }
 extension Swiftinit.Docs.ForeignPage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.stem.last) (ext) · \(self.volume.title) Documentation" }
-
-    var description:String?
+}
+extension Swiftinit.Docs.ForeignPage:Swiftinit.StaticPage
+{
+    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
+}
+extension Swiftinit.Docs.ForeignPage:Swiftinit.ApplicationPage
+{
+    typealias Navigator = HTML.Logo
+}
+extension Swiftinit.Docs.ForeignPage:Swiftinit.ApicalPage
+{
+    var descriptionFallback:String
     {
         """
         \(self.stem.last), \(self.demonym.phrase) from \(self.stem.namespace), has extensions \
         available in the package \(self.volume.title)").
         """
     }
-}
-extension Swiftinit.Docs.ForeignPage:Swiftinit.StaticPage
-{
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
-}
-extension Swiftinit.Docs.ForeignPage:Swiftinit.ApplicationPage
-{
-    typealias Navigator = HTML.Logo
-}
-extension Swiftinit.Docs.ForeignPage:Swiftinit.VertexPage
-{
+
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
@@ -78,14 +71,14 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.VertexPage
                 $0[.span] { $0.class = "domain" } = self.context.domain
             }
 
-            $0[.nav] { $0.class = "breadcrumbs" } = self.context.vector(self.vertex.scope,
+            $0[.nav] { $0.class = "breadcrumbs" } = self.context.vector(self.apex.scope,
                 display: self.stem.scope)
 
             $0[.h1] = "\(self.stem.last) (ext)"
         }
 
-        let extendee:HTML.Link<UnqualifiedPath>? = self.context.link(decl: self.vertex.extendee)
-        if  let other:Unidoc.VolumeMetadata = self.context[self.vertex.extendee.edition]
+        let extendee:HTML.Link<UnqualifiedPath>? = self.context.link(decl: self.apex.extendee)
+        if  let other:Unidoc.VolumeMetadata = self.context[self.apex.extendee.edition]
         {
             main[.section, { $0.class = "notice extendee" }]
             {
@@ -129,6 +122,6 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.VertexPage
             }
         }
 
-        main += self.groups
+        main += self.mesh.halo
     }
 }

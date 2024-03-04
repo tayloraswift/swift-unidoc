@@ -89,15 +89,6 @@ extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
                 volumes: volumes),
             repo: principal.repo)
 
-        vertex.overview.map
-        {
-            context.outlines += $0.outlines
-        }
-        vertex.details.map
-        {
-            context.outlines += $0.outlines
-        }
-
         let groups:[Unidoc.AnyGroup] = principal.groups
         let tree:Unidoc.TypeTree? = principal.tree
 

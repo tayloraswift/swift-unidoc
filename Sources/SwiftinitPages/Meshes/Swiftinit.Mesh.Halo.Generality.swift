@@ -1,6 +1,6 @@
-extension Swiftinit.GroupLists
+extension Swiftinit.Mesh.Halo
 {
-    enum Genericness:Equatable, Hashable, Comparable, Sendable
+    enum Generality:Equatable, Hashable, Comparable, Sendable
     {
         /// No generic constraints.
         case unconstrained

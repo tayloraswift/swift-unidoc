@@ -54,4 +54,11 @@ extension Unidoc.CultureVertex:Unidoc.PrincipalVertex
 
     @inlinable public
     var hash:FNV24.Extended { .module(self.module.id) }
+
+    /// I AM THE CULTURE
+    @inlinable public
+    var bias:Unidoc.Bias { .culture(self.id) }
+
+    @inlinable public
+    var decl:Phylum.DeclFlags? { nil }
 }
