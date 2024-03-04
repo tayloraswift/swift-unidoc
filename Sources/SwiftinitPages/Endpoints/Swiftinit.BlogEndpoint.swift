@@ -1,4 +1,5 @@
 import HTTP
+import Media
 import MongoDB
 import UnidocDB
 import UnidocQueries
@@ -7,7 +8,7 @@ import UnidocRecords
 extension Swiftinit
 {
     @frozen public
-    struct PtclEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+    struct BlogEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
     {
         public
         let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent>
@@ -22,12 +23,10 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
+extension Swiftinit.BlogEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
-    typealias VertexCache = Swiftinit.SecondaryOnly
-    public
-    typealias VertexLayer = Swiftinit.Ptcl
+    typealias VertexLayer = Swiftinit.Blog
 
     public static
     func response(
@@ -38,21 +37,9 @@ extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
     {
         switch vertex
         {
-        case .decl(let vertex):
-            let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
-                volume: context.page.volume,
-                tree: tree)
-
-            let groups:Swiftinit.ConformingTypes = try .init(context.page,
-                organizing: consume groups,
-                bias: .culture(vertex.culture))
-
-            let page:Swiftinit.Ptcl.ConformersPage = try .init(context.page,
-                canonical: context.canonical,
-                sidebar: sidebar,
-                vertex: vertex,
-                groups: groups)
-
+        case .article(let vertex):
+            let mesh:Swiftinit.Mesh = try .init(context.page, groups: groups, apex: vertex)
+            let page:Swiftinit.Blog.ArticlePage = .init(mesh: mesh, apex: vertex)
             return .ok(page.resource(format: context.format))
 
         case let unexpected:

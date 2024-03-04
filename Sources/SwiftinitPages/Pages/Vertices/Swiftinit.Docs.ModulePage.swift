@@ -9,27 +9,20 @@ extension Swiftinit.Docs
 {
     struct ModulePage
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
-
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
+        let mesh:Swiftinit.Mesh
+        let apex:Unidoc.CultureVertex
 
-        private
-        let vertex:Unidoc.CultureVertex
-        private
-        let groups:Swiftinit.GroupLists
-
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            canonical:CanonicalVersion?,
+        init(canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            vertex:Unidoc.CultureVertex,
-            groups:Swiftinit.GroupLists)
+            mesh:Swiftinit.Mesh,
+            apex:Unidoc.CultureVertex)
         {
-            self.context = context
             self.canonical = canonical
             self.sidebar = sidebar
-            self.vertex = vertex
-            self.groups = groups
+            self.apex = apex
+            self.mesh = mesh
         }
     }
 }
@@ -39,27 +32,33 @@ extension Swiftinit.Docs.ModulePage
     var demonym:Swiftinit.ModuleDemonym
     {
         .init(
-            language: self.vertex.module.language ?? .swift,
-            type: self.vertex.module.type)
+            language: self.apex.module.language ?? .swift,
+            type: self.apex.module.type)
     }
 
     private
-    var name:String { self.vertex.module.name }
+    var name:String { self.apex.module.name }
 
     private
-    var stem:Unidoc.Stem { self.vertex.stem }
+    var stem:Unidoc.Stem { self.apex.stem }
 }
 extension Swiftinit.Docs.ModulePage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.name) · \(self.volume.title) Documentation" }
-
-    var description:String?
+}
+extension Swiftinit.Docs.ModulePage:Swiftinit.StaticPage
+{
+    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
+}
+extension Swiftinit.Docs.ModulePage:Swiftinit.ApplicationPage
+{
+    typealias Navigator = HTML.Logo
+}
+extension Swiftinit.Docs.ModulePage:Swiftinit.ApicalPage
+{
+    var descriptionFallback:String
     {
-        if  let overview:Markdown.Bytecode = self.vertex.overview?.markdown
-        {
-            "\(self.context.prose(overview))"
-        }
-        else if case .swift = self.volume.symbol.package
+        if  case .swift = self.volume.symbol.package
         {
             "\(self.name) is \(self.demonym.phrase) in the Swift standard library."
         }
@@ -68,17 +67,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.RenderablePage
             "\(self.name) is \(self.demonym.phrase) in the \(self.volume.title) package."
         }
     }
-}
-extension Swiftinit.Docs.ModulePage:Swiftinit.StaticPage
-{
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
-}
-extension Swiftinit.Docs.ModulePage:Swiftinit.ApplicationPage
-{
-    typealias Navigator = HTML.Logo
-}
-extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
-{
+
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
@@ -102,9 +91,9 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
 
             $0[.h1] = self.name
 
-            $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
+            $0 ?= self.mesh.overview
 
-            if  let readme:Unidoc.Scalar = self.vertex.readme
+            if  let readme:Unidoc.Scalar = self.apex.readme
             {
                 $0 ?= self.context.link(source: readme)
             }
@@ -112,7 +101,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
-        switch self.vertex.module.type
+        switch self.apex.module.type
         {
         case .binary, .regular, .macro, .system:
             main[.section, { $0.class = "declaration" }]
@@ -140,13 +129,13 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
         }
             content:
         {
-            switch self.vertex.module.type
+            switch self.apex.module.type
             {
             case .binary, .regular, .macro:
                 $0[.h2] = "Module Information"
 
-                let decls:Int = self.vertex.census.unweighted.decls.total
-                let symbols:Int = self.vertex.census.weighted.decls.total
+                let decls:Int = self.apex.census.unweighted.decls.total
+                let symbols:Int = self.apex.census.weighted.decls.total
 
                 $0[.dl]
                 {
@@ -164,8 +153,8 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
                 }
 
                 $0[.div] { $0.class = "more" } = Swiftinit.StatsThumbnail.init(
-                    target: Swiftinit.Stats[self.volume, self.vertex.route],
-                    census: self.vertex.census,
+                    target: Swiftinit.Stats[self.volume, self.apex.route],
+                    census: self.apex.census,
                     domain: self.name,
                     title: "Module stats and coverage details")
 
@@ -174,9 +163,8 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.VertexPage
             }
         }
 
-        main[.section, { $0.class = "details literature" }] =
-            (self.vertex.details?.markdown).map(self.context.prose(_:))
+        main[.section, { $0.class = "details literature" }] = self.mesh.details
 
-        main += self.groups
+        main += self.mesh.halo
     }
 }

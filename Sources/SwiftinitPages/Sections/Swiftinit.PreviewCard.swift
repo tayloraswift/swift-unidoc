@@ -15,6 +15,6 @@ extension Swiftinit.PreviewCard
 {
     var overview:Markdown.ProseSection?
     {
-        self.passage.map { .init(self.context, passage: $0) }
+        self.passage.map { .init(self.context, overview: $0) }
     }
 }

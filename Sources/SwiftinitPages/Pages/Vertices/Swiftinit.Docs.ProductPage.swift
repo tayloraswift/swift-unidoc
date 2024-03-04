@@ -7,24 +7,15 @@ extension Swiftinit.Docs
 {
     struct ProductPage
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
-
         let canonical:CanonicalVersion?
+        let mesh:Swiftinit.Mesh
+        let apex:Unidoc.ProductVertex
 
-        private
-        let vertex:Unidoc.ProductVertex
-        private
-        let groups:Swiftinit.GroupLists
-
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            canonical:CanonicalVersion?,
-            vertex:Unidoc.ProductVertex,
-            groups:Swiftinit.GroupLists)
+        init(canonical:CanonicalVersion?, mesh:Swiftinit.Mesh, apex:Unidoc.ProductVertex)
         {
-            self.context = context
             self.canonical = canonical
-            self.vertex = vertex
-            self.groups = groups
+            self.mesh = mesh
+            self.apex = apex
         }
     }
 }
@@ -33,32 +24,32 @@ extension Swiftinit.Docs.ProductPage
     private
     var demonym:Swiftinit.ProductDemonym
     {
-        .init(type: self.vertex.type)
+        .init(type: self.apex.type)
     }
 }
 extension Swiftinit.Docs.ProductPage:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.vertex.symbol) · \(self.volume.title) Products" }
-
-    var description:String?
-    {
-        """
-        \(self.vertex.symbol) is \(self.demonym.phrase) \
-        available in the package \(self.volume.title)".
-        """
-    }
+    var title:String { "\(self.apex.symbol) · \(self.volume.title) Products" }
 }
 extension Swiftinit.Docs.ProductPage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
+    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
 }
 extension Swiftinit.Docs.ProductPage:Swiftinit.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
+extension Swiftinit.Docs.ProductPage:Swiftinit.ApicalPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .product(volume: self.volume) }
+
+    var descriptionFallback:String
+    {
+        """
+        \(self.apex.symbol) is \(self.demonym.phrase) \
+        available in the package \(self.volume.title)".
+        """
+    }
 
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -70,17 +61,17 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                 $0[.span] { $0.class = "domain" } = self.context.domain
             }
 
-            $0[.h1] = self.vertex.symbol
+            $0[.h1] = self.apex.symbol
         }
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
         //  Does this product contain a module with the same name as the product?
-        for id:Unidoc.Scalar in self.vertex.constituents
+        for id:Unidoc.Scalar in self.apex.constituents
         {
             guard
             case .culture(let vertex)? = self.context[id],
-                vertex.module.name == self.vertex.symbol
+                vertex.module.name == self.apex.symbol
             else
             {
                 continue
@@ -93,7 +84,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                     $0 += "This page is for the SwiftPM "
                     $0[.em] = "build product"
                     $0 += " named "
-                    $0[.code] = self.vertex.symbol
+                    $0[.code] = self.apex.symbol
                     $0 += "."
                 }
                 $0[.p]
@@ -117,7 +108,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
 
         main[.section, { $0.class = "details" }]
         {
-            if  case .library(let type) = self.vertex.type
+            if  case .library(let type) = self.apex.type
             {
                 $0[.h2] = "Product Information"
 
@@ -147,7 +138,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
                 }
                 $0[.tbody]
                 {
-                    for id:Unidoc.Scalar in self.vertex.constituents
+                    for id:Unidoc.Scalar in self.apex.constituents
                     {
                         guard
                         let volume:Unidoc.VolumeMetadata = self.context[id.edition],
@@ -200,6 +191,6 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.VertexPage
             }
         }
 
-        main += self.groups
+        main += self.mesh.halo
     }
 }

@@ -38,8 +38,20 @@ extension Unidoc
 extension Unidoc.ProductVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
+    var overview:Unidoc.Passage? { nil }
+
+    @inlinable public
+    var details:Unidoc.Passage? { nil }
+
+    @inlinable public
     var stem:Unidoc.Stem { .product(self.symbol) }
 
     @inlinable public
     var hash:FNV24.Extended { .product(self.symbol) }
+
+    @inlinable public
+    var bias:Unidoc.Bias { .neutral }
+
+    @inlinable public
+    var decl:Phylum.DeclFlags? { nil }
 }

@@ -12,7 +12,7 @@ protocol _SwiftinitBiasedHeading
 
 extension Swiftinit.BiasedHeading
 {
-    init(culture:Unidoc.Scalar, bias:Swiftinit.Bias)
+    init(culture:Unidoc.Scalar, bias:Unidoc.Bias)
     {
         if  case .culture(culture) = bias
         {

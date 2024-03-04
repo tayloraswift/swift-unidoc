@@ -29,9 +29,9 @@ extension Markdown
 }
 extension Markdown.ProseSection
 {
-    init(_ context:any Swiftinit.VertexPageContext, passage:Unidoc.Passage)
+    init(_ context:any Swiftinit.VertexPageContext, overview:Unidoc.Passage)
     {
-        self.init(context, bytecode: passage.markdown, outlines: passage.outlines)
+        self.init(context, bytecode: overview.markdown, outlines: overview.outlines)
     }
 }
 extension Markdown.ProseSection:HTML.OutputStreamableMarkdown

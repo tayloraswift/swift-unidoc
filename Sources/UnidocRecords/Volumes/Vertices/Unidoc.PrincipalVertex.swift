@@ -1,4 +1,5 @@
 import FNV1
+import Symbols
 import UnidocAPI
 
 extension Unidoc
@@ -12,10 +13,16 @@ extension Unidoc
 public
 protocol _UnidocPrincipalVertex:Identifiable<Unidoc.Scalar>
 {
-    var hash:FNV24.Extended { get }
+    var overview:Unidoc.Passage? { get }
+    var details:Unidoc.Passage? { get }
+
     var route:Unidoc.Route { get }
     var shoot:Unidoc.Shoot { get }
     var stem:Unidoc.Stem { get }
+    var hash:FNV24.Extended { get }
+
+    var bias:Unidoc.Bias { get }
+    var decl:Phylum.DeclFlags? { get }
 }
 extension Unidoc.PrincipalVertex
 {

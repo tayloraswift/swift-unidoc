@@ -12,9 +12,6 @@ import UnidocRecords
 @usableFromInline final
 class IdentifiablePageContext<Vertices> where Vertices:Swiftinit.VertexCache
 {
-    /// Shared outlines, valid for the overview and details passages.
-    var outlines:[Unidoc.Outline]
-
     private
     var cache:Cache
 
@@ -23,7 +20,6 @@ class IdentifiablePageContext<Vertices> where Vertices:Swiftinit.VertexCache
 
     init(cache:Cache, repo:Unidoc.PackageRepo?)
     {
-        self.outlines = []
         self.cache = cache
         self.repo = repo
     }
@@ -43,25 +39,6 @@ extension IdentifiablePageContext
         self.init(
             cache: .init(vertices: cache, volumes: .init(principal: volume)),
             repo: repo)
-    }
-}
-extension IdentifiablePageContext
-{
-    @available(*, deprecated)
-    func prose(overview passage:Unidoc.Passage) -> Markdown.ProseSection
-    {
-        .init(self, bytecode: passage.markdown, outlines: passage.outlines)
-    }
-    func prose(_ bytecode:Markdown.Bytecode) -> Markdown.ProseSection
-    {
-        //  We need to use the shared outlines, and not the array from the passage
-        //  record, lest we make a frameshift indexing error.
-        .init(self, bytecode: bytecode, outlines: self.outlines)
-    }
-
-    func code(_ snippet:Signature<Unidoc.Scalar?>.Expanded) -> Markdown.CodeSection
-    {
-        .init(self, bytecode: snippet.bytecode, scalars: snippet.scalars)
     }
 }
 extension IdentifiablePageContext

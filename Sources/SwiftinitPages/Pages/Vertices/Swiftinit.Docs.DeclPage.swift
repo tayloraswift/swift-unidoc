@@ -14,32 +14,25 @@ extension Swiftinit.Docs
 {
     struct DeclPage
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
-
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
-
-        private
-        let vertex:Unidoc.DeclVertex
-        private
-        let groups:Swiftinit.GroupLists
+        let mesh:Swiftinit.Mesh
+        let apex:Unidoc.DeclVertex
 
         private
         let stem:Unidoc.StemComponents
 
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            canonical:CanonicalVersion?,
+        init(canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            vertex:Unidoc.DeclVertex,
-            groups:Swiftinit.GroupLists) throws
+            mesh:Swiftinit.Mesh,
+            apex:Unidoc.DeclVertex) throws
         {
-            self.context = context
             self.canonical = canonical
             self.sidebar = sidebar
-            self.vertex = vertex
-            self.groups = groups
+            self.mesh = mesh
+            self.apex = apex
 
-            self.stem = try .init(vertex.stem)
+            self.stem = try .init(self.apex.stem)
         }
     }
 }
@@ -48,20 +41,27 @@ extension Swiftinit.Docs.DeclPage
     private
     var demonym:Swiftinit.DeclDemonym
     {
-        .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
+        .init(phylum: self.apex.phylum, kinks: self.apex.kinks)
     }
 }
 extension Swiftinit.Docs.DeclPage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.stem.last) · \(self.volume.title) Documentation" }
 
-    var description:String?
+}
+extension Swiftinit.Docs.DeclPage:Swiftinit.StaticPage
+{
+    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
+}
+extension Swiftinit.Docs.DeclPage:Swiftinit.ApplicationPage
+{
+    typealias Navigator = HTML.Logo
+}
+extension Swiftinit.Docs.DeclPage:Swiftinit.ApicalPage
+{
+    var descriptionFallback:String
     {
-        if  let overview:Markdown.Bytecode = self.vertex.overview?.markdown
-        {
-            "\(self.context.prose(overview))"
-        }
-        else if case .swift = self.volume.symbol.package
+        if  case .swift = self.volume.symbol.package
         {
             """
             \(self.stem.last) is \(self.demonym.phrase) from the Swift standard library.
@@ -74,17 +74,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.RenderablePage
             """
         }
     }
-}
-extension Swiftinit.Docs.DeclPage:Swiftinit.StaticPage
-{
-    var location:URI { Swiftinit.Docs[self.volume, self.vertex.route] }
-}
-extension Swiftinit.Docs.DeclPage:Swiftinit.ApplicationPage
-{
-    typealias Navigator = HTML.Logo
-}
-extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
-{
+
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
@@ -101,35 +91,40 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
 
                     $0 += self.demonym.title
 
-                    if  self.vertex.kinks[is: .intrinsicWitness]
+                    if  self.apex.kinks[is: .intrinsicWitness]
                     {
                         $0 += " (Default Implementation)"
                     }
                 }
 
-                $0[.span, { $0.class = "domain" }] = self.context.subdomain(self.stem.namespace,
-                    namespace: self.vertex.namespace,
-                    culture: self.vertex.culture)
+                $0[.span]
+                {
+                    $0.class = "domain"
+                } = self.context.subdomain(self.stem.namespace,
+                    namespace: self.apex.namespace,
+                    culture: self.apex.culture)
             }
 
-            $0[.nav] { $0.class = "breadcrumbs" } = self.context.vector(self.vertex.scope,
+            $0[.nav] { $0.class = "breadcrumbs" } = self.context.vector(self.apex.scope,
                 display: self.stem.scope)
 
             $0[.h1] = self.stem.last
 
-            $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
+            $0 ?= self.mesh.overview
 
-            if  let location:SourceLocation<Unidoc.Scalar> = self.vertex.location
+            if  let location:SourceLocation<Unidoc.Scalar> = self.apex.location
             {
-                $0 ?= self.context.link(source: location.file, line: location.position.line)
+                $0 ?= self.context.link(
+                    source: location.file,
+                    line: location.position.line)
             }
-            if  let file:Unidoc.Scalar = self.vertex.readme
+            if  let file:Unidoc.Scalar = self.apex.readme
             {
                 $0 ?= self.context.link(source: file)
             }
         }
 
-        if  let _:[String] = self.vertex.signature.spis
+        if  let _:[String] = self.apex.signature.spis
         {
             main[.section, { $0.class = "signage spi" }]
             {
@@ -139,8 +134,8 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
             }
         }
 
-        let availability:Availability = self.vertex.signature.availability
-        if  let renamed:Unidoc.Scalar = self.vertex.renamed,
+        let availability:Availability = self.apex.signature.availability
+        if  let renamed:Unidoc.Scalar = self.apex.renamed,
             let link:HTML.Link<UnqualifiedPath> = self.context.link(decl: renamed)
         {
             main[.section, { $0.class = "signage deprecation renamed" }]
@@ -203,12 +198,14 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
             $0[.pre]
             {
                 /// See note in `GroupList.Card.swift`.
-                let width:Int = "\(self.vertex.signature.expanded.bytecode.safe)".count
+                let width:Int = "\(self.apex.signature.expanded.bytecode.safe)".count
 
                 $0[.code]
                 {
                     $0.class = width > 80 ? "multiline" : nil
-                } = self.context.code(self.vertex.signature.expanded)
+                } = Markdown.CodeSection.init(self.context,
+                    bytecode: self.apex.signature.expanded.bytecode,
+                    scalars: self.apex.signature.expanded.scalars)
             }
         }
 
@@ -220,7 +217,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
 
                 $0[.p, { $0.class = "symbol" }]
                 {
-                    $0[.code] = self.vertex.symbol.rawValue
+                    $0[.code] = self.apex.symbol.rawValue
 
                     $0[.span, { $0.class = "parenthetical" }]
                     {
@@ -235,7 +232,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
                 {
                     $0[.code]
                     {
-                        let hash:FNV24 = .init(truncating: .decl(self.vertex.symbol))
+                        let hash:FNV24 = .init(truncating: .decl(self.apex.symbol))
                         $0 += "FNV24: ["
                         $0[.span] { $0.class = "fnv24" } = "\(hash)"
                         $0 += "]"
@@ -244,7 +241,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
             }
 
             if  let constraints:Swiftinit.ConstraintsList = .init(self.context,
-                    constraints: self.groups.peerConstraints)
+                    constraints: self.mesh.halo.peerConstraints)
             {
                 $0[.details, { $0.open = true }]
                 {
@@ -256,23 +253,21 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.VertexPage
 
         main[.section, { $0.class = "details literature" }]
         {
-            if  case .protocol = self.vertex.phylum
+            if  case .protocol = self.apex.phylum
             {
                 $0[.div, { $0.class = "more" }]
                 {
                     $0[.a]
                     {
                         $0.class = "button"
-                        $0.href = "\(Swiftinit.Ptcl[self.volume, self.vertex.route])"
+                        $0.href = "\(Swiftinit.Ptcl[self.volume, self.apex.route])"
                     } = "Browse conforming types"
                 }
             }
-            if  let markdown:Markdown.Bytecode = self.vertex.details?.markdown
-            {
-                $0 += self.context.prose(markdown)
-            }
+
+            $0 ?= self.mesh.details
         }
 
-        main += self.groups
+        main += self.mesh.halo
     }
 }

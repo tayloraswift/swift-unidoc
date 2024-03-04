@@ -4,6 +4,8 @@ import SymbolGraphs
 
 extension Unidoc
 {
+    /// A passage holds a **fragment** of written documentation. In general, a passage cannot be
+    /// rendered on its own, because the indices of the ``outlines`` might not match.
     @frozen public
     struct Passage:Equatable, Sendable
     {

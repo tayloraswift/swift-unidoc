@@ -116,6 +116,12 @@ extension Unidoc.DeclVertex:Unidoc.PrincipalVertex
 
     @inlinable public
     var hash:FNV24.Extended { .decl(self.symbol) }
+
+    @inlinable public
+    var bias:Unidoc.Bias { .culture(self.culture) }
+
+    @inlinable public
+    var decl:Phylum.DeclFlags? { self.flags }
 }
 extension Unidoc.DeclVertex
 {

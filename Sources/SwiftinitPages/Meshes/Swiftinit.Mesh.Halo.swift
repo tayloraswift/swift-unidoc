@@ -7,9 +7,9 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension Swiftinit
+extension Swiftinit.Mesh
 {
-    struct GroupLists
+    struct Halo
     {
         let context:IdentifiablePageContext<Swiftinit.Vertices>
 
@@ -42,12 +42,12 @@ extension Swiftinit
         private
         let decl:Phylum.DeclFlags?
         private
-        let bias:Bias
+        let bias:Unidoc.Bias
 
         private
         init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
             decl:Phylum.DeclFlags?,
-            bias:Bias)
+            bias:Unidoc.Bias)
         {
             self.context = context
 
@@ -69,42 +69,44 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.GroupLists
+extension Swiftinit.Mesh.Halo
 {
     init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-        groups:[Unidoc.AnyGroup],
-        vertex:borrowing Unidoc.DeclVertex,
-        bias:Swiftinit.Bias) throws
+        curated:consuming Set<Unidoc.Scalar>,
+        groups:borrowing [Unidoc.AnyGroup],
+        apex:borrowing Unidoc.DeclVertex) throws
     {
-        self.init(context, decl: vertex.flags, bias: bias)
+        self.init(context, decl: apex.flags, bias: apex.bias)
 
-        self.requirements = vertex._requirements
-        self.superforms = vertex.superforms
+        self.requirements = apex._requirements
+        self.superforms = apex.superforms
 
-        try self.organize(groups: consume groups,
-            container: vertex.peers,
-            generics: .init(vertex.signature.generics.parameters))
+        try self.organize(groups: groups,
+            excluding: consume curated,
+            container: apex.peers,
+            generics: .init(apex.signature.generics.parameters))
     }
 
     init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-        groups:[Unidoc.AnyGroup],
+        curated:consuming Set<Unidoc.Scalar>,
+        groups:borrowing [Unidoc.AnyGroup],
         decl:Phylum.DeclFlags? = nil,
-        bias:Swiftinit.Bias) throws
+        bias:Unidoc.Bias) throws
     {
         self.init(context, decl: decl, bias: bias)
 
-        try self.organize(groups: consume groups)
+        try self.organize(groups: groups, excluding: consume curated)
     }
 }
-extension Swiftinit.GroupLists
+extension Swiftinit.Mesh.Halo
 {
     private mutating
     func organize(groups:[Unidoc.AnyGroup],
+        excluding curated:consuming Set<Unidoc.Scalar>,
         container:Unidoc.Group? = nil,
         generics:Generics = .init([])) throws
     {
-        var extensions:[(Unidoc.ExtensionGroup, Partisanship, Genericness)] = []
-        var curated:Set<Unidoc.Scalar> = [self.context.id]
+        var extensions:[(Unidoc.ExtensionGroup, Partisanship, Generality)] = []
 
         for group:Unidoc.AnyGroup in groups
         {
@@ -124,7 +126,7 @@ extension Swiftinit.GroupLists
                     .third($0.symbol.package)
                 } ?? .first
 
-                let genericness:Genericness = group.constraints.isEmpty ?
+                let genericness:Generality = group.constraints.isEmpty ?
                     .unconstrained : generics.count(substituting: group.constraints) > 0 ?
                     .constrained :
                     .concretized
@@ -230,7 +232,7 @@ extension Swiftinit.GroupLists
         self._topics.sort { $0.id < $1.id }
     }
 }
-extension Swiftinit.GroupLists:HTML.OutputStreamable
+extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

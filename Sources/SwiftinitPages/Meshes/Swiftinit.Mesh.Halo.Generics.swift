@@ -2,7 +2,7 @@ import Signatures
 import Unidoc
 import UnidocRecords
 
-extension Swiftinit.GroupLists
+extension Swiftinit.Mesh.Halo
 {
     struct Generics
     {
@@ -16,7 +16,7 @@ extension Swiftinit.GroupLists
         }
     }
 }
-extension Swiftinit.GroupLists.Generics
+extension Swiftinit.Mesh.Halo.Generics
 {
     init(_ generics:__shared [GenericParameter])
     {

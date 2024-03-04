@@ -14,30 +14,26 @@ extension Swiftinit.Ptcl
 {
     struct ConformersPage
     {
-        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
-
         let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
         private
         let vertex:Unidoc.DeclVertex
         private
-        let groups:Swiftinit.ConformingTypes
+        let halo:Swiftinit.ConformingTypes
 
         private
         let stem:Unidoc.StemComponents
 
-        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
-            canonical:CanonicalVersion?,
+        init(canonical:CanonicalVersion?,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             vertex:Unidoc.DeclVertex,
-            groups:Swiftinit.ConformingTypes) throws
+            halo:Swiftinit.ConformingTypes) throws
         {
-            self.context = context
             self.canonical = canonical
             self.sidebar = sidebar
             self.vertex = vertex
-            self.groups = groups
+            self.halo = halo
 
             self.stem = try .init(vertex.stem)
         }
@@ -60,8 +56,10 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.RenderablePage
 
     var description:String?
     {
-        // TODO
-        nil
+        """
+        The protocol \(self.stem.last) has at least \(self.halo.count) \
+        conforming \(self.halo.count == 1 ? "type" : "types") available.
+        """
     }
 }
 extension Swiftinit.Ptcl.ConformersPage:Swiftinit.StaticPage
@@ -74,6 +72,8 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.ApplicationPage
 }
 extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
 {
+    var context:IdentifiablePageContext<Swiftinit.SecondaryOnly> { self.halo.context }
+
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
         let back:String = "\(Swiftinit.Docs[self.volume, self.vertex.route])"
@@ -99,20 +99,20 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
             {
                 $0 += "The protocol "
                 $0[.code] { $0[.a] { $0.href = back } = name }
-                switch self.groups.count
+                switch self.halo.count
                 {
                 case 0:
                     $0 += " has no known conforming types available."
 
                 case 1:
-                    $0 += " has one known conforming type."
+                    $0 += " has at least one known conforming type."
 
                 case let count:
-                    $0 += " has \(count) known conforming types"
+                    $0 += " has at least \(count) conforming types available"
 
-                    if  self.groups.cultures > 1
+                    if  self.halo.cultures > 1
                     {
-                        $0 += " across \(self.groups.cultures) modules."
+                        $0 += " across \(self.halo.cultures) modules."
                     }
                     else
                     {
@@ -124,6 +124,6 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
 
         main[.section] { $0.class = "notice canonical" } = self.canonical
 
-        main += self.groups
+        main += self.halo
     }
 }

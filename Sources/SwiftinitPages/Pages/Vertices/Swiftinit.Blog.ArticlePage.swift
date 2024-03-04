@@ -9,38 +9,34 @@ extension Swiftinit.Blog
     struct ArticlePage
     {
         private
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
-
+        let mesh:Swiftinit.Mesh
         private
-        let vertex:Unidoc.ArticleVertex
+        let apex:Unidoc.ArticleVertex
 
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>, vertex:Unidoc.ArticleVertex)
+        init(mesh:Swiftinit.Mesh, apex:Unidoc.ArticleVertex)
         {
-            self.context = context
-            self.vertex = vertex
+            self.mesh = mesh
+            self.apex = apex
         }
     }
 }
 extension Swiftinit.Blog.ArticlePage
 {
     private
-    var volume:Unidoc.VolumeMetadata { self.context.volume }
+    var volume:Unidoc.VolumeMetadata { self.mesh.halo.context.volume }
 }
 extension Swiftinit.Blog.ArticlePage:Swiftinit.RenderablePage
 {
-    var title:String { "\(self.vertex.headline.safe)" }
+    var title:String { "\(self.apex.headline.safe)" }
 
-    var description:String?
-    {
-        self.vertex.overview.map { "\(self.context.prose($0.markdown))" }
-    }
+    var description:String? { self.mesh.overview?.description }
 }
 extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
 {
     var location:URI
     {
         var uri:URI = []
-            uri.path += self.vertex.stem
+            uri.path += self.apex.stem
         return uri
     }
 
@@ -57,13 +53,13 @@ extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
             {
                 $0[.section, { $0.class = "introduction" }]
                 {
-                    $0[.h1] = self.vertex.headline.safe
+                    $0[.h1] = self.apex.headline.safe
 
                 }
                 $0[.section, { $0.class = "details literature" }]
                 {
-                    $0 ?= (self.vertex.overview?.markdown).map(self.context.prose(_:))
-                    $0 ?= (self.vertex.details?.markdown).map(self.context.prose(_:))
+                    $0 ?= self.mesh.overview
+                    $0 ?= self.mesh.details
                 }
             }
         }
