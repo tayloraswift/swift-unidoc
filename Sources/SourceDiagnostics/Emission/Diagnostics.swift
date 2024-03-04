@@ -72,6 +72,24 @@ extension Diagnostics
                 context: subject.map(DiagnosticContext.around(_:))))
         }
     }
+
+    @inlinable public
+    subscript(subject:SourceLocation<Symbolicator.Address>?) -> DiagnosticAlert?
+    {
+        get { nil }
+        set (value)
+        {
+            guard
+            let value:DiagnosticAlert
+            else
+            {
+                return
+            }
+
+            self.unsymbolicated.append(.literal(value,
+                context: subject.map { .init(location: $0) }))
+        }
+    }
 }
 extension Diagnostics
 {

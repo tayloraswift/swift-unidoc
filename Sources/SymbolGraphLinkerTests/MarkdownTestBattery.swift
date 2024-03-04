@@ -15,7 +15,11 @@ protocol MarkdownTestBattery:TestBattery
 extension MarkdownTestBattery
 {
     static
-    func run(tests:TestGroup, markdown:Markdown.Source, expected:String, topics:[Int] = [])
+    func run(tests:TestGroup,
+        snippets:[String: Markdown.Snippet] = [:],
+        markdown:Markdown.Source,
+        expected:String,
+        topics:[Int] = [])
     {
         let markdownParser:Markdown.Parser<Markdown.SwiftComment> = .init()
         var ignore:Diagnostics<SSGC.Symbolicator> = .init()
@@ -24,7 +28,7 @@ extension MarkdownTestBattery
         {
             let documentation:Markdown.SemanticDocument = markdown.parse(
                 markdownParser: markdownParser,
-                snippetsTable: [:],
+                snippetsTable: snippets,
                 diagnostics: &ignore)
 
             let overview:MarkdownBinary? = documentation.overview.map
@@ -50,7 +54,7 @@ extension MarkdownTestBattery
 
             if  let tests:TestGroup = tests / "Topics"
             {
-                tests.expect(documentation.topics.map(\.members.count) ..? topics)
+                tests.expect(documentation.topics.map(\.items.count) ..? topics)
             }
         }
     }

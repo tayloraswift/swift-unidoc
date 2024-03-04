@@ -1,4 +1,3 @@
-import Signatures
 import Sources
 import Symbols
 
@@ -70,38 +69,5 @@ extension DiagnosticSymbolicator
         {
             nil
         }
-    }
-}
-extension DiagnosticSymbolicator where Address:Hashable
-{
-    @inlinable public
-    func constraints(_ constraints:[GenericConstraint<Address?>]) -> String
-    {
-        constraints.map
-        {
-            switch $0
-            {
-            case    .where(let parameter, is: .equal, to: .nominal(let type?)):
-                "\(parameter) == \(self[type])"
-
-            case    .where(let parameter, is: .equal, to: .nominal(nil)):
-                "\(parameter) == <unavailable>"
-
-            case    .where(let parameter, is: .equal, to: .complex(let text)):
-                "\(parameter) == \(text)"
-
-            case    .where(let parameter, is: .subclass, to: .nominal(let type?)),
-                    .where(let parameter, is: .conformer, to: .nominal(let type?)):
-                "\(parameter):\(self[type])"
-
-            case    .where(let parameter, is: .subclass, to: .nominal(nil)),
-                    .where(let parameter, is: .conformer, to: .nominal(nil)):
-                "\(parameter):<unavailable>"
-
-            case    .where(let parameter, is: .subclass, to: .complex(let text)),
-                    .where(let parameter, is: .conformer, to: .complex(let text)):
-                "\(parameter):\(text)"
-            }
-        }.joined(separator: ", ")
     }
 }

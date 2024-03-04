@@ -5,7 +5,6 @@ import FNV1
 import LexicalPaths
 import MarkdownABI
 import MarkdownAST
-import MarkdownLinking
 import MarkdownParsing
 import MarkdownSemantics
 import Signatures
@@ -488,7 +487,7 @@ extension SSGC.Linker
         guard let codelink:Codelink = .init(binding.text.string)
         else
         {
-            throw InvalidAutolinkError<SSGC.Symbolicator>.init(binding.text)
+            throw SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(binding.text)
         }
 
         //  A qualified codelink with a single component that matches the current
@@ -527,7 +526,7 @@ extension SSGC.Linker
             }
             else
             {
-                throw InvalidCodelinkError<SSGC.Symbolicator>.init(
+                throw CodelinkResolutionError<SSGC.Symbolicator>.init(
                     overloads: overloads,
                     codelink: codelink)
             }
@@ -682,7 +681,7 @@ extension SSGC.Linker
             ?? signature.availability.agnostic[.swift]?.renamed
             ?? signature.availability.agnostic[.swiftPM]?.renamed
 
-        let linked:(article:SymbolGraph.Article, topics:[SymbolGraph.Topic])?
+        let article:SymbolGraph.Article?
         let rename:Int32?
 
         if  let sections:Markdown.SemanticSections = markdown?.parsed.details
@@ -693,14 +692,22 @@ extension SSGC.Linker
         }
         if  markdown != nil || renamed != nil
         {
-            (linked, rename) = self.tables.resolving(with: .init(
+            (article, rename) = self.tables.resolving(with: .init(
                 namespace: namespace,
                 culture: culture,
                 scope: decl.phylum.scope(trimming: decl.path)))
             {
                 (outliner:inout SSGC.Outliner) in
                 (
-                    markdown.map { outliner.link(attached: $0.parsed, file: $0.file) },
+                    markdown.map
+                    {
+                        let (article, topics):(SymbolGraph.Article, [[Int32]]) = outliner.link(
+                            body: $0.parsed,
+                            file: $0.file)
+
+                        self.symbolizer.graph.curation += topics
+                        return article
+                    },
                     renamed.map
                     {
                         outliner.follow(rename: $0, of: decl.path, at: location)
@@ -710,7 +717,7 @@ extension SSGC.Linker
         }
         else
         {
-            linked = nil
+            article = nil
             rename = nil
         }
 
@@ -723,8 +730,7 @@ extension SSGC.Linker
 
             $0?.signature = signature
             $0?.location = location
-            $0?.article = linked?.article
-            $0?.topics = linked?.topics ?? []
+            $0?.article = article
 
         } (&self.symbolizer.graph.decls.nodes[address].decl)
     }
@@ -803,10 +809,14 @@ extension SSGC.Linker
                     culture: culture,
                     scope: [String].init(`extension`.path))
 
-                $0.article = self.tables.resolving(with: scopes)
+                let topics:[[Int32]]
+
+                ($0.article, topics) = self.tables.resolving(with: scopes)
                 {
-                    $0.link(article: parsed, file: file)
+                    $0.link(body: parsed, file: file)
                 }
+
+                self.symbolizer.graph.curation += topics
 
             } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])
         }
@@ -835,22 +845,20 @@ extension SSGC.Linker
 
                 self.tables.resolving(with: .init(culture: culture))
                 {
-                    let documentation:(SymbolGraph.Article, [SymbolGraph.Topic]) = $0.link(
-                        attached: article.body,
+                    let (documentation, topics):(SymbolGraph.Article, [[Int32]]) = $0.link(
+                        body: article.body,
                         file: article.file)
 
-                    if  let standalone:Int32 = article.standalone
+                    self.symbolizer.graph.curation += topics
+
+                    if  let a:Int32 = article.standalone
                     {
-                        {
-                            ($0.article, $0.topics) = documentation
-                        } (&self.symbolizer.graph.articles.nodes[standalone])
+                        self.symbolizer.graph.articles.nodes[a].article = documentation
                     }
                     else
                     {
                         //  This is the article for the module’s landing page.
-                        {
-                            ($0.article, $0.topics) = documentation
-                        } (&self.symbolizer.graph.cultures[c])
+                        self.symbolizer.graph.cultures[c].article = documentation
                     }
                 }
             }

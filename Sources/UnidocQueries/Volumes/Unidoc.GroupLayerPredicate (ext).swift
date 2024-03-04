@@ -45,10 +45,12 @@ extension Unidoc.GroupLayerPredicate
 
                 $0.expr
                 {
-                    let members:Mongo.List<Unidoc.TopicMember, Mongo.AnyKeyPath> = .init(
-                        in: group[.members])
+                    //  TODO: After we phase out all the legacy topics groups, we should no
+                    //  longer need to check the element type.
+                    let items:Mongo.List<Unidoc.TopicMember, Mongo.AnyKeyPath> = .init(
+                        in: group[.items])
 
-                    $0[.filter] = members.filter
+                    $0[.filter] = items.filter
                     {
                         (link:Mongo.Variable<Unidoc.TopicMember>) in Mongo.Expression.expr
                         {

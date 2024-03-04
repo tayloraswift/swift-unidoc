@@ -1,3 +1,5 @@
+import MarkdownABI
+import MarkdownPluginSwift
 import Testing
 
 extension Main
@@ -94,6 +96,56 @@ extension Main.Blockquotes:MarkdownTestBattery
                 <p>Princess barbies never care about sloth politics. To ignore \
                 liberal sloths, convert barbie princesses into princess barbies.</p>\
                 </aside>
+                """)
+        }
+        if  let tests:TestGroup = tests / "AsidesFromSnippetCaptions"
+        {
+            let markdownParser:Markdown.Parser<Markdown.SwiftComment> = .init()
+            let swiftParser:Markdown.SwiftLanguage = .swift
+            let swiftSource:String = """
+            //  > Tip:
+            //  Liberal barbies never care about political sloths. To ignore political sloths,
+            //  convert sloth politics into liberal barbies.
+
+            let barbie:Barbie = .convert(sloth, type: .liberal)
+
+            """
+
+            let snippet:(caption:String, slices:[Markdown.SnippetSlice]) = swiftParser.parse(
+                snippet: [UInt8].init(swiftSource.utf8))
+
+            let snippets:[String: Markdown.Snippet] =
+            [
+                "Example": .init(id: 0,
+                caption: snippet.caption,
+                slices: snippet.slices,
+                using: markdownParser)
+            ]
+
+            Self.run(tests: tests,
+                snippets: snippets,
+                markdown:
+                """
+                Overview overview overview
+
+                @Snippet(id: Example)
+                """,
+                expected:
+                """
+                <p>Overview overview overview</p>\
+
+                <aside class='tip'>\
+                <h3>Tip</h3>\
+                <p>Liberal barbies never care about political sloths. To ignore political \
+                sloths, convert sloth politics into liberal barbies.</p>\
+                </aside>\
+                <pre class='snippet'><code class='language-swift'>\
+                <span class='newline'></span>\
+                <span class='xk'>let</span> <span class='xv'>barbie</span>:\
+                <span class='xt'>Barbie</span> = .\
+                <span class='xv'>convert</span>(<span class='xv'>sloth</span>, \
+                <span class='xv'>type</span>: .<span class='xv'>liberal</span>)\
+                </code></pre>
                 """)
         }
         if  let tests:TestGroup = tests / "Formatting"

@@ -14,7 +14,11 @@ extension Markdown.Bytecode
         /// Closes the current markdown context.
         case pop = 0xC1
 
-        case _reserved = 0xF5
+        /// A byte followed by a variable-length reference
+        /// (``uint8``, ``uint16``, ``uint32``, or ``uint64``). The reference does not need to
+        /// occur immediately after the marker.
+        @available(*, unavailable)
+        case call = 0xF5
 
         /// A byte followed by an element code.
         case emit = 0xF6

@@ -377,7 +377,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     [
                         "subscript(_:)",
                     ],
-                    filter: .topics)
+                    filter: .curators)
             {
                 await test.run(on: unidoc, with: session)
             }

@@ -12,8 +12,8 @@ extension Unidoc
         case  conformer(ConformerGroup)
         case `extension`(ExtensionGroup)
         case  intrinsic(IntrinsicGroup)
-        case  polygonal(PolygonalGroup)
-        case  topic(TopicGroup)
+        case  curator(CuratorGroup)
+        case  _topic(TopicGroup)
     }
 }
 
@@ -63,11 +63,11 @@ extension Unidoc.AnyGroup
         /// Contains a passage, which contains a list of outlines,
         /// each of which may contain a scalar. Only appears in ``Extension``.
         case details = "d"
-        /// Appears in ``PolygonalGroup``, ``IntrinsicGroup`` and ``TopicGroup``.
+        /// Appears in ``CuratorGroup``, ``IntrinsicGroup`` and ``TopicGroup``.
         /// In ``TopicGroup``, the field contains links, some of which are scalars.
-        /// In ``PolygonalGroup`` and ``IntrinsicGroup`` the field contains scalars, all of
+        /// In ``CuratorGroup`` and ``IntrinsicGroup`` the field contains scalars, all of
         /// which are, of course, scalars.
-        case members = "t"
+        case items = "t"
 
         /// Optional and appears in ``ConformingTypesGroup`` only.
         /// The field contains a list of scalars.
@@ -103,8 +103,8 @@ extension Unidoc.AnyGroup:Identifiable
         case .conformer(let group):     group.id
         case .extension(let group):     group.id
         case .intrinsic(let group):     group.id
-        case .polygonal(let group):     group.id
-        case .topic(let group):         group.id
+        case .curator(let group):       group.id
+        case ._topic(let group):        group.id
         }
     }
 }
@@ -161,23 +161,23 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
             bson[.culture] = self.culture
             bson[.scope] = self.scope
 
-            bson[.members] = self.members.isEmpty ? nil : self.members
+            bson[.items] = self.items
 
             zones.update(with: self.culture.edition)
-            zones.update(with: self.members)
+            zones.update(with: self.items)
 
-        case .polygonal(let self):
+        case .curator(let self):
             bson[.scope] = self.scope
-            bson[.members] = self.members.isEmpty ? nil : self.members
+            bson[.items] = self.items
 
-            zones.update(with: self.members)
+            zones.update(with: self.items)
 
-        case .topic(let self):
+        case ._topic(let self):
             bson[.culture] = self.culture
             bson[.scope] = self.scope
 
             bson[.overview] = self.overview
-            bson[.members] = self.members.isEmpty ? nil : self.members
+            bson[.items] = self.members.isEmpty ? nil : self.members
 
             zones.update(with: self.culture?.edition)
         }
@@ -216,19 +216,19 @@ extension Unidoc.AnyGroup:BSONDocumentDecodable
             self = .intrinsic(.init(id: id,
                 culture: try bson[.culture].decode(),
                 scope: try bson[.scope].decode(),
-                members: try bson[.members]?.decode() ?? []))
+                items: try bson[.items]?.decode() ?? []))
 
-        case .polygon?:
-            self = .polygonal(.init(id: id,
-                scope: try bson[.scope].decode(),
-                members: try bson[.members]?.decode() ?? []))
+        case .curator?:
+            self = .curator(.init(id: id,
+                scope: try bson[.scope]?.decode(),
+                items: try bson[.items]?.decode() ?? []))
 
         case _:
-            self = .topic(.init(id: id,
+            self = ._topic(.init(id: id,
                 culture: try bson[.culture]?.decode(),
                 scope: try bson[.scope]?.decode(),
                 overview: try bson[.overview]?.decode(),
-                members: try bson[.members]?.decode() ?? []))
+                members: try bson[.items]?.decode() ?? []))
         }
     }
 }

@@ -18,6 +18,20 @@ struct DiagnosticAlert
 extension DiagnosticAlert
 {
     @inlinable public static
+    func warning(_ text:String) -> Self
+    {
+        .init(type: .warning, text: text)
+    }
+
+    @inlinable public static
+    func error(_ text:String) -> Self
+    {
+        .init(type: .error, text: text)
+    }
+}
+extension DiagnosticAlert
+{
+    @inlinable public static
     func warning(_ error:some Error) -> Self
     {
         .init(type: .warning, text: "\(error)")

@@ -1,4 +1,5 @@
 import HTML
+import MarkdownABI
 
 extension Swiftinit
 {
@@ -12,8 +13,8 @@ protocol _SwiftinitPreviewCard:HTML.OutputStreamable
 }
 extension Swiftinit.PreviewCard
 {
-    var overview:ProseSection?
+    var overview:Markdown.ProseSection?
     {
-        self.passage.map { .init(self.context, passage: $0) }
+        self.passage.map { .init(self.context, overview: $0) }
     }
 }

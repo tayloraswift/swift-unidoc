@@ -7,31 +7,30 @@ extension Swiftinit
         let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
 
         private
+        let culture:Unidoc.Scalar
+
+        private
         var conformers:[Unidoc.ConformerGroup]
         private(set)
         var count:Int
 
         private
-        let bias:Bias
-
-        private
-        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
-            bias:Bias)
+        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>, culture:Unidoc.Scalar)
         {
             self.context = context
+            self.culture = culture
             self.conformers = []
             self.count = 0
-            self.bias = bias
         }
     }
 }
 extension Swiftinit.ConformingTypes
 {
     init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
-        organizing groups:consuming [Unidoc.AnyGroup],
-        bias:Swiftinit.Bias) throws
+        groups:[Unidoc.AnyGroup],
+        bias culture:Unidoc.Scalar) throws
     {
-        self.init(consume context, bias: bias)
+        self.init(context, culture: culture)
 
         for group:Unidoc.AnyGroup in groups
         {
@@ -57,12 +56,15 @@ extension Swiftinit.ConformingTypes:HTML.OutputStreamable
     {
         for group:Unidoc.ConformerGroup in self.conformers
         {
-            html[.section, { $0.class = "group dense conformer" }]
+            html[.section, { $0.class = "group conformer" }]
             {
                 $0[.h2] = Swiftinit.ConformingTypesHeader.init(self.context,
-                    heading: .init(culture: group.culture, bias: self.bias))
+                    heading: .init(culture: group.culture, bias: .culture(self.culture)))
 
-                $0[.ul] = Swiftinit.DenseList.init(self.context,
+                $0[.ul]
+                {
+                    $0.class = "cards dense"
+                } = Swiftinit.DenseList.init(self.context,
                     members: (group.unconditional, group.conditional))
             }
         }

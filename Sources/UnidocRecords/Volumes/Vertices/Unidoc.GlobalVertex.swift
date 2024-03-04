@@ -1,4 +1,5 @@
 import FNV1
+import Symbols
 import UnidocAPI
 
 extension Unidoc
@@ -23,10 +24,22 @@ extension Unidoc
 extension Unidoc.GlobalVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
+    var overview:Unidoc.Passage? { nil }
+
+    @inlinable public
+    var details:Unidoc.Passage? { nil }
+
+    @inlinable public
     var stem:Unidoc.Stem { "" }
 
     //  This must have a value, otherwise it would get lost among all the file
     //  vertices, and queries for it would be very slow.
     @inlinable public
     var hash:FNV24.Extended { .init(rawValue: 0) }
+
+    @inlinable public
+    var bias:Unidoc.Bias { .package }
+
+    @inlinable public
+    var decl:Phylum.DeclFlags? { nil }
 }

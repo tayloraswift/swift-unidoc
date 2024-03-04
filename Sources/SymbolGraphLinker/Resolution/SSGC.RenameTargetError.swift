@@ -1,7 +1,6 @@
 import Codelinks
 import CodelinkResolution
 import LexicalPaths
-import MarkdownLinking
 import SourceDiagnostics
 
 extension SSGC
@@ -44,7 +43,7 @@ extension SSGC.RenameTargetError:Diagnostic
         }
     }
 
-    var notes:[InvalidCodelinkError<SSGC.Symbolicator>.Note]
+    var notes:[CodelinkResolutionError<SSGC.Symbolicator>.Note]
     {
         self.overloads.map
         {
