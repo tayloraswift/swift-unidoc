@@ -272,12 +272,14 @@ extension Markdown.SemanticAnalyzer
         overview:consuming Markdown.BlockParagraph?,
         details:consuming [Markdown.BlockElement]) -> Markdown.SemanticDocument
     {
-        /// Was the last `h2` heading a “Topics” heading?
-        var insideTopicsSection:Bool = false
         /// Does the article contain a manual “See also” section?
         var containsSeeAlso:Bool = false
+        /// Was the last `h2` heading a “Topics” heading?
+        var insideTopicsSection:Bool = false
         /// Was the last markdown block a major (`h3` or greater) heading?
-        var headingBefore:String? = nil
+        /// If so, was there a “Topics” heading that had been skipped in order to prevent an
+        /// `<h2>` heading from being followed by a `<h3>` heading promoted to `<h2>`?
+        var headingBefore:(seeAlso:Bool, buffered: Markdown.BlockHeading?)? = nil
 
         var article:[Markdown.BlockElement] = []
             article.reserveCapacity((copy details).count)
@@ -290,23 +292,35 @@ extension Markdown.SemanticAnalyzer
             case let heading as Markdown.BlockHeading:
                 switch heading.level
                 {
-                case 2:
-                    headingBefore = heading.signature()
-
-                    if  case "topics"? = headingBefore
+                case ...2:
+                    switch heading.signature()
                     {
+                    case "topics":
                         insideTopicsSection = true
+                        headingBefore = (seeAlso: false, heading)
                         continue
+
+                    case "see also":
+                        headingBefore = (seeAlso: true, nil)
+
+                    default:
+                        headingBefore = (seeAlso: false, nil)
                     }
-                    else
-                    {
-                        insideTopicsSection = false
-                    }
+
+                    insideTopicsSection = false
 
                 case 3:
-                    headingBefore = heading.signature()
+                    switch heading.signature()
+                    {
+                    case "see also":
+                        headingBefore = (seeAlso: true, nil)
+
+                    default:
+                        headingBefore = (seeAlso: false, nil)
+                    }
 
                 case _:
+                    //  Minor headings don’t count.
                     headingBefore = nil
                 }
 
@@ -321,14 +335,24 @@ extension Markdown.SemanticAnalyzer
                 if  insideTopicsSection || headingBefore != nil,
                     let topic:Markdown.BlockTopic = .init(from: list)
                 {
-                    article.append(topic)
-
-                    switch headingBefore
+                    /// Manual “See also” sections don’t create topics, because they would
+                    /// conflict with any manual curations that overlap with them, and the
+                    /// other curations are likely to be better.
+                    if  case true? = headingBefore?.seeAlso
                     {
-                    case "see also"?:   containsSeeAlso = true
-                    case _?:            topics.append(topic)
-                    case nil:           topics.append(topic)
+                        containsSeeAlso = true
                     }
+                    else
+                    {
+                        topics.append(topic)
+                    }
+
+                    if  let buffered:Markdown.BlockHeading = headingBefore?.buffered
+                    {
+                        article.append(buffered)
+                    }
+
+                    article.append(topic)
                 }
                 else
                 {
