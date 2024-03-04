@@ -22,7 +22,7 @@ protocol _HTMLOutputStreamableMarkdown:HTML.OutputStreamable
     ///
     /// The witness can change the attribute that will be rendered by modifying the argument.
     /// This is useful for replacing ``Markdown.Bytecode.Attribute/href`` with
-    /// ``Markdown.Bytecode.Attribute/external``
+    /// ``Markdown.Bytecode.Attribute/external``.
     ///
     /// This can be used to influence the behavior of the special syntax
     /// highlight contexts.

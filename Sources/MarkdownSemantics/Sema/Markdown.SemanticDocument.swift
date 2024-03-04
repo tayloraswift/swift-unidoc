@@ -12,36 +12,25 @@ extension Markdown
         public
         var details:SemanticSections
         public
-        var topics:[SemanticTopic]
+        var topics:[Markdown.BlockTopic]
+        /// If true, then an automatic “See also” section will not be generated.
+        public
+        var containsSeeAlso:Bool
 
         @inlinable public
         init(
             metadata:SemanticMetadata,
             overview:BlockParagraph?,
             details:SemanticSections,
-            topics:[SemanticTopic])
+            topics:[Markdown.BlockTopic],
+            containsSeeAlso:Bool)
         {
             self.metadata = metadata
             self.overview = overview
             self.details = details
             self.topics = topics
+            self.containsSeeAlso = containsSeeAlso
         }
-    }
-}
-extension Markdown.SemanticDocument
-{
-    static
-    func tutorial(overview:Markdown.BlockParagraph?, sections:[Markdown.BlockElement]) -> Self
-    {
-        return .init(
-            metadata: .init(),
-            overview: overview,
-            details: .init(
-                parameters: nil,
-                returns: nil,
-                throws: nil,
-                article: sections),
-            topics: [])
     }
 }
 extension Markdown.SemanticDocument

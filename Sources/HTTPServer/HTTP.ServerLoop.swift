@@ -279,10 +279,10 @@ extension HTTP.ServerLoop
                     return
                 }
 
-                if  let service:IP.Service
-                {
-                    Log[.debug] = "(HTTP/1) client '\(service)' sent keep-alive"
-                }
+                // if  let service:IP.Service
+                // {
+                //     Log[.debug] = "(HTTP/1) client '\(service)' sent keep-alive"
+                // }
             }
         }
     }

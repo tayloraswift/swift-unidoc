@@ -1,5 +1,6 @@
 import FNV1
 import MarkdownABI
+import Symbols
 import Unidoc
 import UnidocAPI
 
@@ -58,4 +59,10 @@ extension Unidoc.ArticleVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
     var hash:FNV24.Extended { .init(hashing: "\(self.stem)") }
+
+    @inlinable public
+    var bias:Unidoc.Bias { .culture(self.culture) }
+
+    @inlinable public
+    var decl:Phylum.DeclFlags? { nil }
 }

@@ -176,7 +176,7 @@ let package:Package = .init(
         .target(name: "CodelinkResolution",
             dependencies: [
                 .target(name: "Codelinks"),
-                .target(name: "Symbols"),
+                .target(name: "SourceDiagnostics"),
                 //  This dependency is present for (questionable?) performance reasons.
                 .target(name: "Unidoc"),
             ]),
@@ -302,25 +302,22 @@ let package:Package = .init(
 
         .target(name: "MarkdownABI"),
 
-        .target(name: "MarkdownRendering",
-            dependencies: [
-                .target(name: "HTML"),
-                .target(name: "MarkdownABI"),
-                .target(name: "URI"),
-            ]),
-
         .target(name: "MarkdownAST",
             dependencies: [
                 .target(name: "MarkdownABI"),
                 .target(name: "Sources"),
             ]),
 
-        .target(name: "MarkdownLinking",
+        .target(name: "MarkdownDisplay",
             dependencies: [
-                .target(name: "Codelinks"),
-                .target(name: "Doclinks"),
-                .target(name: "MarkdownAST"),
-                .target(name: "SourceDiagnostics"),
+                .target(name: "MarkdownABI"),
+            ]),
+
+        .target(name: "MarkdownRendering",
+            dependencies: [
+                .target(name: "HTML"),
+                .target(name: "MarkdownABI"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "MarkdownParsing",
@@ -344,7 +341,10 @@ let package:Package = .init(
 
         .target(name: "MarkdownSemantics",
             dependencies: [
-                .target(name: "MarkdownLinking"),
+                .target(name: "Codelinks"),
+                .target(name: "Doclinks"),
+                .target(name: "MarkdownAST"),
+                .target(name: "MarkdownDisplay"),
                 .target(name: "Snippets"),
                 .target(name: "SourceDiagnostics"),
 
@@ -449,6 +449,7 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "HTTP"),
                 .target(name: "HTML"),
+                .target(name: "MarkdownDisplay"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "Media"),
                 .target(name: "Swiftinit"),
@@ -557,8 +558,8 @@ let package:Package = .init(
 
         .target(name: "SourceDiagnostics",
             dependencies: [
-                .target(name: "CodelinkResolution"),
-                .target(name: "Signatures"),
+                .target(name: "Symbols"),
+                .target(name: "Sources"),
             ]),
 
         .target(name: "UnidocLinker",
@@ -566,7 +567,6 @@ let package:Package = .init(
                 .target(name: "CodelinkResolution"),
                 .target(name: "DoclinkResolution"),
                 .target(name: "MarkdownRendering"),
-                .target(name: "MarkdownLinking"),
                 .target(name: "UnidocRecords"),
             ]),
 

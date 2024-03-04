@@ -9,8 +9,9 @@ extension Unidoc
     {
         case  conformer     = 0x00_000000
 
-        case  polygon       = 0xC0_000000
+        case  curator       = 0xC0_000000
         case `extension`    = 0xC2_000000
+        /// Deprecated, do not use anymore.
         case  topic         = 0xC3_000000
         case  intrinsic     = 0xC4_000000
     }

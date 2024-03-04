@@ -2,6 +2,9 @@ import Unidoc
 
 extension Unidoc
 {
+    /// This type of group is deprecated and should not be used anymore.
+    ///
+    /// It has been superseded by ``CuratorGroup``.
     @frozen public
     struct TopicGroup:Identifiable, Equatable, Sendable
     {
