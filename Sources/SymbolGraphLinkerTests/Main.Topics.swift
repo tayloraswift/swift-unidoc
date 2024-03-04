@@ -29,6 +29,7 @@ extension Main.Topics:MarkdownTestBattery
                 """,
                 expected: """
                 <p>Overview overview overview</p>
+                <h2 id='Topics'><a href='#Topics'>Topics</a></h2>\
                 <ul class='cards'>\
                 <li><code>StopIt</code></li>\
                 <li><code>DropIt</code></li>\
