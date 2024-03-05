@@ -279,10 +279,10 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                     $0[.dt] = "Repo read"
                     $0[.dd] = age.long
                 }
-                if  let crawled:BSON.Millisecond = self.package.repo?.crawled
+                if  let fetched:BSON.Millisecond = self.package.repo?.fetched
                 {
-                    let crawled:UnixInstant = .millisecond(crawled.value)
-                    let age:Swiftinit.Age = .init(now - crawled)
+                    let fetched:UnixInstant = .millisecond(fetched.value)
+                    let age:Swiftinit.Age = .init(now - fetched)
 
                     $0[.dt] = "Tags read"
                     $0[.dd]
