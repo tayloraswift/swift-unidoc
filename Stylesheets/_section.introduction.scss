@@ -60,6 +60,7 @@ section.introduction
         a:not(:hover)
         {
             color: $light-foreground-semi;
+            text-decoration: underline dashed;
         }
 
         > *:first-child
