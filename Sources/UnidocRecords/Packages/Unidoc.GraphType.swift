@@ -2,8 +2,6 @@ import BSON
 
 extension Unidoc
 {
-    /// This currently only has one inhabitant, but eventually we should start compressing
-    /// the symbol graphs.
     @frozen public
     enum GraphType:Int32, Sendable
     {

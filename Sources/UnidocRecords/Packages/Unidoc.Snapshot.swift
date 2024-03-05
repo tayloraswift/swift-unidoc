@@ -14,6 +14,8 @@ extension Unidoc
 
         public
         var metadata:SymbolGraphMetadata
+        /// Holds an optional inline symbol graph. Inline symbol graphs are bad for database
+        /// performance, so this is only really used for local testing.
         public
         var inline:SymbolGraph?
 
@@ -21,14 +23,20 @@ extension Unidoc
         /// the latest version of the standard library without querying git tags.
         public
         var swift:PatchVersion?
+        /// Any dependencies that have been pinned for this snapshot.
         public
         var pins:[Unidoc.Edition?]
 
+        /// Indicates if the snapshot is going to be linked for the first time. This controls
+        /// whether or not the link event will be published to the activity feed.
         public
         var link:LinkState?
-
+        /// Indicates the format (compressed or not) of the symbol graph. This is currently only
+        /// meaningful for symbol graphs stored in Amazon S3.
         public
         var type:GraphType
+        /// The size, in bytes, of the symbol graph. This is currently only meaningful for
+        /// symbol graphs stored in Amazon S3.
         public
         var size:Int64
 
