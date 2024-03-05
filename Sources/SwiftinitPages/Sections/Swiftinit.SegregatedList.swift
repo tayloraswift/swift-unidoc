@@ -6,7 +6,7 @@ extension Swiftinit
     {
         private(set)
         var visible:[Swiftinit.DeclCard]
-        private(set)
+        private
         var details:[Swiftinit.DeclCard]
 
         private
@@ -41,12 +41,14 @@ extension Swiftinit.SegregatedList
         items.reduce(into: []) { $0.append(context.card(decl: $1)) }
     }
 }
+extension Swiftinit.SegregatedList:Swiftinit.CollapsibleContent
+{
+    var length:Int { self.visible.count }
+    var count:Int { self.visible.count + self.details.count }
+}
 extension Swiftinit.SegregatedList
 {
-    var isEmpty:Bool
-    {
-        self.visible.isEmpty && self.details.isEmpty
-    }
+    var isEmpty:Bool { self.visible.isEmpty && self.details.isEmpty }
 
     mutating
     func append(_ card:Swiftinit.DeclCard?)

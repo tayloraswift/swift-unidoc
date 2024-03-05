@@ -138,6 +138,12 @@ extension Unidoc.Linker.Tables
     mutating
     func linkProducts() -> [Unidoc.ProductVertex]
     {
+        //  Create a synthetic topic containing all the products. This will become a “See Also”
+        //  for their product pages.
+        //
+        //  This should have been a ``Unidoc.IntrinsicGroup``. But at the time that this was
+        //  written, ``Unidoc.IntrinsicGroup`` demanded a culture, and we don’t have a culture
+        //  for package-level groups.
         var products:Unidoc.CuratorGroup = .init(id: self.next(.curator),
             scope: self.current.id.global)
 
@@ -177,8 +183,6 @@ extension Unidoc.Linker.Tables
             vertices.append(product)
         }
 
-        //  Create a synthetic topic containing all the products. This will become a “See Also”
-        //  for their product pages.
 
         //  Create a synthetic topic containing all the cultures. This will become a “See Also”
         //  for their module pages, unless they belong to a custom topic group.

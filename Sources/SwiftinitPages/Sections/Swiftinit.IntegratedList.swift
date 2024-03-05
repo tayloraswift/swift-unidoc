@@ -6,6 +6,7 @@ extension Swiftinit
     {
         private
         let context:IdentifiablePageContext<Swiftinit.Vertices>
+        private
         let items:[Unidoc.Scalar]
 
         private
@@ -28,6 +29,11 @@ extension Swiftinit.IntegratedList
 
         self.init(context: context, items: items)
     }
+}
+extension Swiftinit.IntegratedList:Swiftinit.CollapsibleContent
+{
+    var length:Int { self.items.count }
+    var count:Int { self.items.count }
 }
 extension Swiftinit.IntegratedList:HTML.OutputStreamable
 {

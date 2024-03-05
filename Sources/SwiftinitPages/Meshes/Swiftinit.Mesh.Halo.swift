@@ -182,6 +182,11 @@ extension Swiftinit.Mesh.Halo
                     if  case nil = group.scope
                     {
                         self.curation += group.items
+                        //  We’re not filtering these, so we need to remove these members from
+                        //  any other groups that might also contain them.
+                        //
+                        //  This logic probably needs to be revisited.
+                        curated.formUnion(group.items)
                     }
                     else
                     {
@@ -273,7 +278,7 @@ extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
                 $0.class = "group segregated"
             } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedBody>.init(
                 heading: .uncategorized,
-                body: body)
+                content: body)
         }
 
         if  let modules:Swiftinit.IntegratedList = .init(self.context, items: self.modules)
@@ -283,7 +288,7 @@ extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
                 $0.class = "group automatic"
             } = Swiftinit.CollapsibleSection<Swiftinit.IntegratedList>.init(
                 heading: self.bias == .package ? .allModules : .otherModules,
-                body: modules)
+                content: modules)
         }
         if  let products:Swiftinit.IntegratedList = .init(self.context, items: self.products)
         {
@@ -292,7 +297,7 @@ extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
                 $0.class = "group automatic"
             } = Swiftinit.CollapsibleSection<Swiftinit.IntegratedList>.init(
                 heading: self.bias == .package ? .allProducts : .otherProducts,
-                body: products)
+                content: products)
         }
 
         if  let decl:Phylum.DeclFlags = self.decl,
@@ -326,7 +331,7 @@ extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
                 $0.class = "group superforms"
             } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedList>.init(
                 heading: heading,
-                body: body)
+                content: body)
         }
         if  let body:Swiftinit.SegregatedList = .init(self.context, group: self.inhabitants)
         {
@@ -335,7 +340,7 @@ extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
                 $0.class = "group inhabitants"
             } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedList>.init(
                 heading: .allCases,
-                body: body)
+                content: body)
         }
         if  let body:Swiftinit.SegregatedBody = .init(self.context, group: self.requirements)
         {
@@ -344,7 +349,7 @@ extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
                 $0.class = "group segregated requirements"
             } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedBody>.init(
                 heading: .allRequirements,
-                body: body)
+                content: body)
         }
 
         let extensionsEmpty:Bool = self.extensions.allSatisfy(\.isEmpty)
@@ -352,29 +357,27 @@ extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
         if  let curation:Swiftinit.IntegratedList = .init(self.context, items: self.curation)
         {
             let last:Bool = self.peerList.isEmpty && extensionsEmpty
-            let open:Bool = curation.items.count <= 12
 
             html[.section]
             {
                 $0.class = "group topic"
             } = Swiftinit.CollapsibleSection<Swiftinit.IntegratedList>.init(
-                collapse: last ? nil : (curation.items.count, open),
                 heading: .seeAlso,
-                body: curation)
+                content: curation,
+                window: last ? nil : 12 ... 12)
         }
         else if
             let other:Unidoc.TopicGroup
         {
             let last:Bool = self.peerList.isEmpty && extensionsEmpty
-            let open:Bool = other.members.count <= 12
 
             html[.section]
             {
                 $0.class = "group topic"
             } = Swiftinit.CollapsibleSection<Swiftinit._LegacyTopic>.init(
-                collapse: last ? nil : (other.members.count, open),
                 heading: .seeAlso,
-                body: .init(self.context, members: other.members))
+                content: .init(self.context, members: other.members),
+                window: last ? nil : 12 ... 12)
         }
 
         guard
@@ -388,28 +391,26 @@ extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
         if  case .case = decl.phylum,
             let peers:Swiftinit.SegregatedList = .init(self.context, group: self.peerList)
         {
-            let open:Bool = peers.visible.count <= 12
-
             html[.section]
             {
                 $0.class = "group sisters"
             } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedList>.init(
-                collapse: extensionsEmpty ? nil : (self.peerList.count, open),
                 heading: .otherCases,
-                body: peers)
+                content: peers,
+                window: extensionsEmpty ? nil : 12 ... 12)
         }
         else if
             let peers:Swiftinit.SegregatedBody = .init(self.context, group: self.peerList)
         {
-            let open:Bool = peers.visibleItems <= 12
-
             html[.section]
             {
                 $0.class = "group segregated sisters"
             } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedBody>.init(
-                collapse: extensionsEmpty ? nil : (self.peerList.count, open),
                 heading: decl.kinks[is: .required] ? .otherRequirements : .otherMembers,
-                body: peers)
+                content: peers,
+                //  If there are 8–12 members, and this is not the last section, this section
+                //  will be collapsible, but open by default.
+                window: extensionsEmpty ? nil : 8 ... 12)
         }
 
         for group:Unidoc.ExtensionGroup in self.extensions
