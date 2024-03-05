@@ -7,7 +7,9 @@ extension Swiftinit
     {
         private
         let context:IdentifiablePageContext<Swiftinit.Vertices>
+        private
         let caption:Unidoc.Passage?
+        private
         let members:[Unidoc.TopicMember]
 
         init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
@@ -19,6 +21,11 @@ extension Swiftinit
             self.members = members
         }
     }
+}
+extension Swiftinit._LegacyTopic:Swiftinit.CollapsibleContent
+{
+    var length:Int { self.members.count }
+    var count:Int { self.members.count }
 }
 extension Swiftinit._LegacyTopic:HTML.OutputStreamable
 {

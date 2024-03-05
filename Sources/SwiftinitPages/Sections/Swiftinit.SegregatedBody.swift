@@ -7,11 +7,14 @@ extension Swiftinit
     struct SegregatedBody
     {
         let lists:Lists
+        /// Cached for performance.
+        let count:Int
 
         private
-        init(lists:Lists)
+        init(lists:Lists, count:Int)
         {
             self.lists = lists
+            self.count = count
         }
     }
 }
@@ -27,8 +30,10 @@ extension Swiftinit.SegregatedBody
         membersOnInstance:Swiftinit.SegregatedList,
         globals:Swiftinit.SegregatedList
     )
-
-    var visibleItems:Int
+}
+extension Swiftinit.SegregatedBody:Swiftinit.CollapsibleContent
+{
+    var length:Int
     {
         self.lists.protocols.visible.count
         + self.lists.types.visible.count
@@ -86,7 +91,7 @@ extension Swiftinit.SegregatedBody
             }
         }
 
-        self.init(lists: lists)
+        self.init(lists: lists, count: group.count)
     }
 }
 extension Swiftinit.SegregatedBody

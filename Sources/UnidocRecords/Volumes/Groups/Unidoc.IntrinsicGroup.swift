@@ -6,6 +6,8 @@ extension Unidoc
         public
         let id:Unidoc.Group
 
+        /// TODO: It’s not clear what purpose this serves today. There should never be a need to
+        /// display a culture alongside an intrinsic group.
         public
         let culture:Unidoc.Scalar
         public
