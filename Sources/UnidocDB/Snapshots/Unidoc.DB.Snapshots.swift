@@ -36,6 +36,13 @@ extension Unidoc.DB.Snapshots
     }
 
     public static
+    let indexSymbolGraphABI:Mongo.CollectionIndex = .init("ABI",
+        unique: false)
+    {
+        $0[Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]] = (+)
+    }
+
+    public static
     let indexUplinking:Mongo.CollectionIndex = .init("Uplinking",
         unique: false)
     {
@@ -59,6 +66,7 @@ extension Unidoc.DB.Snapshots:Mongo.CollectionModel
     {
         [
             Self.indexSwiftReleases,
+            Self.indexSymbolGraphABI,
             Self.indexUplinking,
         ]
     }
