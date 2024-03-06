@@ -295,7 +295,22 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
                         } = self.package.crawlingIntervalTarget.map
                         {
                             let interval:Swiftinit.Age = .init(.milliseconds($0))
-                            return "target: \(interval.short)"
+                            if  maintainer,
+                                let expires:BSON.Millisecond = self.package.repo?.expires
+                            {
+                                let expires:UnixInstant = .millisecond(expires.value)
+
+                                return """
+                                target: \(interval.short), \
+                                expires: \(expires.timestamp?.http ?? "never")
+                                """
+                            }
+                            else
+                            {
+                                return """
+                                target: \(interval.short)
+                                """
+                            }
                         }
                     }
                 }
