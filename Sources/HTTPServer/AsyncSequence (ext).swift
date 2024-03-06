@@ -4,7 +4,7 @@ extension AsyncSequence where Element:Sendable
 {
     consuming
     func forward<T>(to channel:AsyncThrowingChannel<T, any Error>,
-        by transform:(Element) throws -> T ) async rethrows
+        by transform:(Element) throws -> T) async rethrows
     {
         do
         {
@@ -23,7 +23,7 @@ extension AsyncSequence where Element:Sendable
 
     consuming
     func forward<T>(to stream:AsyncThrowingStream<T, any Error>.Continuation,
-        by transform:(Element) throws -> T ) async rethrows
+        by transform:(Element) throws -> T) async rethrows
     {
         do
         {
