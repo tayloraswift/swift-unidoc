@@ -65,6 +65,9 @@ extension Unidoc.PackageMetadata
     mutating
     func crawled(repo:consuming Unidoc.PackageRepo)
     {
+        //  Don’t wipe the fetched time.
+        repo.fetched = self.repo?.fetched
+
         schedule:
         if  let interval:Milliseconds = repo.crawlingIntervalTarget(
                 hidden: self.hidden,
