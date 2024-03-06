@@ -102,7 +102,7 @@ extension Mongo.CollectionModel
     /// Creates any necessary indexes for this collection. Do not call this directly; call
     /// the ``setup(with:)`` method instead. (Unless you are ``setup(with:)``.)
     private
-    func setupIndexes(with session:Mongo.Session) async throws
+    func setupIndexes(with session:Mongo.Session, dropUnused:Bool = false) async throws
     {
         let indexes:[Mongo.CollectionIndex] = Self.indexes
         if  indexes.isEmpty
@@ -110,42 +110,96 @@ extension Mongo.CollectionModel
             return
         }
 
+        var indexesNeeded:[String: Mongo.CollectionIndex] = Self.indexes.reduce(into: [:])
+        {
+            $0[$1.id] = $1
+        }
+        let indexesUnused:[String] = try await session.run(
+            command: Mongo.ListIndexes.init(Self.name),
+            against: self.database)
+        {
+            try await $0.reduce(into: [])
+            {
+                for index:Mongo.IndexBinding in $1
+                {
+                    if  case _? = indexesNeeded.removeValue(forKey: index.name)
+                    {
+                        print("DEBUG: index '\(Self.name):\(index.name)' already exists")
+                    }
+                    else if index.name != "_id_"
+                    {
+                        $0.append(index.name)
+                    }
+                }
+            }
+        }
+
+        try await self.create(indexes: indexesNeeded, with: session)
+
+        guard dropUnused
+        else
+        {
+            if !indexesUnused.isEmpty
+            {
+                print("WARNING: unused indexes (\(indexesUnused)) in \(Self.name)")
+            }
+
+            return
+        }
+
+        try await self.drop(indexes: indexesUnused, with: session)
+    }
+
+    private
+    func create(indexes:[String: Mongo.CollectionIndex],
+        with session:Mongo.Session) async throws
+    {
+        if  indexes.isEmpty
+        {
+            return
+        }
+
+        let indexes:[Mongo.CollectionIndex] = indexes.values.sorted { $0.id < $1.id }
+        let response:Mongo.CreateIndexesResponse
         do
         {
-            let response:Mongo.CreateIndexesResponse = try await session.run(
-                command: Mongo.CreateIndexes.init(Self.name,
+            print("DEBUG: creating indexes (\(indexes.map(\.id))) in \(Self.name)")
+
+            response = try await session.run(command: Mongo.CreateIndexes.init(Self.name,
                     writeConcern: .majority,
                     indexes: indexes.map { .init(with: $0.build(statement:)) }),
                 against: self.database)
 
-            if  response.indexesAfter == indexes.count + 1
-            {
-                return
-            }
         }
         catch let error
         {
+            print("ERROR: failed to create indexes in \(Self.name)")
             print(error)
+            return
         }
 
-        print("warning: dropping and recreating ALL indexes in \(Self.name)")
+        if  response.indexesAfter - response.indexesBefore == indexes.count
+        {
+            //  Okay, all expected indexes are present, plus the `_id_` index.
+            return
+        }
+        else
+        {
+            print("ERROR: failed to create indexes in \(Self.name)")
+        }
+    }
+
+    private
+    func drop(indexes:[String], with session:Mongo.Session) async throws
+    {
+        if  indexes.isEmpty
+        {
+            return
+        }
 
         try await session.run(
-            command: Mongo.DropIndexes.init(Self.name)
-            {
-                $0[.index] = "*"
-            },
+            command: Mongo.DropIndexes.init(Self.name) { $0[.index] = indexes },
             against: self.database)
-
-        let response:Mongo.CreateIndexesResponse = try await session.run(
-            command: Mongo.CreateIndexes.init(Self.name,
-                writeConcern: .majority,
-                indexes: indexes.map { .init(with: $0.build(statement:)) }),
-            against: self.database)
-
-        assert(response.indexesAfter == indexes.count + 1)
-
-        print("note: recreated \(response.indexesAfter - 1) indexes in \(Self.name)")
     }
 
     /// Drops the collection and reinitializes it by calling ``setup(with:)``.
