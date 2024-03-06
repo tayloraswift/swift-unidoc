@@ -428,13 +428,7 @@ extension HTTP.ServerLoop
                 //  the second `GOAWAY` frame. Notably, Firefox will not close the connection
                 //  for us. And per the semantics of `GOAWAY`, we have not committed to handling
                 //  any subsequent streams.
-
-                //  Can’t return immediately, because that discards all the buffered streams,
-                //  and if we do that, SwiftNIO crashes. This doesn’t solve the problem (because
-                //  of task cancellation), but it does make it somewhat less likely to happen.
-                //  Ultimately, we need people at Apple to do their jobs.
                 consumer.finish()
-                //  return
             }
         }
     }
