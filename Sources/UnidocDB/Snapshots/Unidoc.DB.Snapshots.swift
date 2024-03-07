@@ -1,5 +1,6 @@
 import BSON
 import MongoDB
+import SemanticVersions
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -170,13 +171,14 @@ extension Unidoc.DB.Snapshots
 }
 extension Unidoc.DB.Snapshots
 {
+    /// Returns a single batch of symbol graphs that are queued for linking.
     public
     func linkable(_ limit:Int,
         with session:Mongo.Session) async throws -> [Unidoc.Edition]
     {
         let editions:[Mongo.IdentityView<Unidoc.Edition>] = try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<Mongo.IdentityView<Unidoc.Edition>>>.init(
-                Self.name,
+            command: Mongo.Find<
+                Mongo.SingleBatch<Mongo.IdentityView<Unidoc.Edition>>>.init(Self.name,
                 limit: limit)
             {
                 $0[.filter]
@@ -189,6 +191,42 @@ extension Unidoc.DB.Snapshots
                 }
 
                 $0[.hint] = Self.indexUplinking.id
+            },
+            against: self.database)
+
+        return editions.map(\.id)
+    }
+
+    /// Returns a single batch of the symbol graphs in the database with the oldest ABI
+    /// versions.
+    public
+    func oldest(_ limit:Int,
+        until version:PatchVersion,
+        with session:Mongo.Session) async throws -> [Unidoc.Edition]
+    {
+        let editions:[Mongo.IdentityView<Unidoc.Edition>] = try await session.run(
+            command: Mongo.Find<
+                Mongo.SingleBatch<Mongo.IdentityView<Unidoc.Edition>>>.init(Self.name,
+                limit: limit)
+            {
+                $0[.filter]
+                {
+                    $0[Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]]
+                    {
+                        $0[.lt] = version
+                    }
+                }
+                $0[.sort]
+                {
+                    $0[Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]] = (+)
+                }
+
+                $0[.projection] = .init
+                {
+                    $0[Unidoc.Snapshot[.id]] = true
+                }
+
+                $0[.hint] = Self.indexSymbolGraphABI.id
             },
             against: self.database)
 
