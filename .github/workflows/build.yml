@@ -33,6 +33,7 @@ jobs:
                     docker run -t --rm \
                         --network=unidoc-test \
                         --name swift-environment \
+                        --user root \
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
                         ${{ matrix.image }} \
