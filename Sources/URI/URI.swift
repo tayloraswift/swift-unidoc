@@ -63,8 +63,7 @@ extension URI:LosslessStringConvertible
     @inlinable public
     init?(_ description:borrowing String)
     {
-        //  ???
-        self.init((copy description)[...])
+        self.init(description[...])
     }
     public
     init?(_ description:borrowing Substring)

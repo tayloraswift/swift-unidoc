@@ -200,7 +200,7 @@ extension Unidoc.Linker.Mesh
                 cultures: cultures,
                 decls: decls,
                 files: files,
-                products: (copy products),
+                products: copy products,
                 foreign: foreign,
                 global: .init(id: linker.current.id.global, snapshot: snapshot)),
             groups: groups,

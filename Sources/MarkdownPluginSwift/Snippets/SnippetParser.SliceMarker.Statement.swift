@@ -33,7 +33,7 @@ extension SnippetParser.SliceMarker.Statement
             fatalError("Encountered a line comment with no leading slashes!")
         }
 
-        let text:Substring = (copy text)[i...].drop(while: \.isWhitespace)
+        let text:Substring = text[i...].drop(while: \.isWhitespace)
 
         guard
         let j:String.Index = text.firstIndex(of: "."),
