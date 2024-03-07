@@ -37,11 +37,11 @@ extension Unidoc.DB.Users
         let matches:[LevelView] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<LevelView>>.init(Self.name, limit: 1)
             {
-                $0[.hint] = .init
+                $0[.hint]
                 {
                     $0[Element[.id]] = (+)
                 }
-                $0[.filter] = .init
+                $0[.filter]
                 {
                     $0[Element[.id]] = credential.user
                     $0[Element[.cookie]] = credential.cookie
@@ -73,15 +73,15 @@ extension Unidoc.DB.Users
                 Self.name,
                 returning: .new)
             {
-                $0[.hint] = .init
+                $0[.hint]
                 {
                     $0[Element[.id]] = (+)
                 }
-                $0[.query] = .init
+                $0[.query]
                 {
                     $0[Element[.id]] = user.id
                 }
-                $0[.update] = .init
+                $0[.update]
                 {
                     $0[.set] = user
                     $0[.setOnInsert]
@@ -112,15 +112,15 @@ extension Unidoc.DB.Users
             command: Mongo.FindAndModify<Mongo.Existing<Unidoc.Cookie>>.init(Self.name,
                 returning: .new)
             {
-                $0[.hint] = .init
+                $0[.hint]
                 {
                     $0[Element[.id]] = (+)
                 }
-                $0[.query] = .init
+                $0[.query]
                 {
                     $0[Element[.id]] = user
                 }
-                $0[.update] = .init
+                $0[.update]
                 {
                     $0[.set]
                     {

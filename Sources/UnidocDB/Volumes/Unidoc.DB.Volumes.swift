@@ -114,14 +114,13 @@ extension Unidoc.DB.Volumes
                 limit: 1)
             {
                 $0[.collation] = VolumeCollation.spec
-                $0[.filter] = .init
+                $0[.filter]
                 {
                     $0[Unidoc.VolumeMetadata[.package]] = symbol.package
                     $0[Unidoc.VolumeMetadata[.version]] = symbol.version
                 }
-                $0[.hint] = .init
+                $0[.hint]
                 {
-
                     $0[Unidoc.VolumeMetadata[.package]] = (+)
                     $0[Unidoc.VolumeMetadata[.version]] = (+)
                 }
@@ -146,7 +145,7 @@ extension Unidoc.DB.Volumes
     {
         .init(Self.name, limit: 1)
         {
-            $0[.filter] = .init
+            $0[.filter]
             {
                 $0[.and]
                 {
@@ -166,11 +165,11 @@ extension Unidoc.DB.Volumes
                     }
                 }
             }
-            $0[.sort] = .init
+            $0[.sort]
             {
                 $0[Unidoc.VolumeMetadata[.patch]] = (-)
             }
-            $0[.hint] = .init
+            $0[.hint]
             {
                 $0[Unidoc.VolumeMetadata[.id]] = (+)
                 $0[Unidoc.VolumeMetadata[.patch]] = (-)

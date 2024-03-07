@@ -92,7 +92,7 @@ extension Mongo.CollectionModel where Capacity == (bytes:Int, count:Int?)
             command: Mongo.Find<Mongo.SingleBatch<Decodable>>.init(Self.name,
                 limit: count)
             {
-                $0[.sort] = .init { $0[.natural] = (-) }
+                $0[.sort] { $0[.natural] = (-) }
             },
             against: self.database)
     }
@@ -242,11 +242,11 @@ extension Mongo.CollectionModel
             command: Mongo.Find<Mongo.SingleBatch<Decodable>>.init(Self.name,
                 limit: 1)
             {
-                $0[.filter] = .init
+                $0[.filter]
                 {
                     $0[index] = key
                 }
-                $0[.hint] = .init
+                $0[.hint]
                 {
                     $0[index] = (+)
                 }
