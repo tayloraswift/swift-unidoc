@@ -159,6 +159,8 @@ let package:Package = .init(
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ]),
 
+        .target(name: "ArgumentParsing"),
+
         .target(name: "AvailabilityDomain"),
 
         .target(name: "Availability",
@@ -615,6 +617,7 @@ let package:Package = .init(
 
         .executableTarget(name: "UnidocBuild",
             dependencies: [
+                .target(name: "ArgumentParsing"),
                 .target(name: "HTTPClient"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "UnidocLinker"),

@@ -1,10 +1,11 @@
+import ArgumentParsing
 import Symbols
 
 extension Main
 {
     struct Options:Sendable
     {
-        var package:Symbol.Package
+        var package:Symbol.Package?
         var cookie:String
         var remote:String
         var port:Int
@@ -16,11 +17,11 @@ extension Main
         var tool:Tool
 
         private
-        init(package:Symbol.Package)
+        init()
         {
-            self.package = package
+            self.package = nil
             self.cookie = ""
-            self.remote = "unidoc-local"
+            self.remote = "localhost"
             self.port = 8443
 
             self.pretty = false
@@ -31,73 +32,40 @@ extension Main
         }
     }
 }
+
+
 extension Main.Options
 {
     static
     func parse() throws -> Self
     {
-        var arguments:ArraySlice<String> = CommandLine.arguments[1...]
+        var arguments:CommandLine.Arguments = .init()
+        var options:Self = .init()
 
-        guard
-        let package:String = arguments.popFirst()
-        else
-        {
-            fatalError("Usage: \(CommandLine.arguments[0]) <package>")
-        }
-
-        var options:Self = .init(package: .init(package))
-
-        while let option:String = arguments.popFirst()
+        while let option:String = arguments.next()
         {
             switch option
             {
-            case "--cookie", "-i":
-                guard
-                let cookie:String = arguments.popFirst()
-                else
-                {
-                    fatalError("Expected cookie after '\(option)'")
-                }
-
-                options.cookie = cookie
-
-            case "--remote", "-h":
-                guard
-                let remote:String = arguments.popFirst()
-                else
-                {
-                    fatalError("Expected remote hostname after '\(option)'")
-                }
-
-                options.remote = remote
-
-            case "--port", "-p":
-                guard
-                let port:String = arguments.popFirst(),
-                let port:Int = .init(port)
-                else
-                {
-                    fatalError("Expected port number after '\(option)'")
-                }
-
-                options.port = port
-
             case "--swiftinit", "-S":
                 options.remote = "swiftinit.org"
                 options.port = 443
+
+                options.cookie = try arguments.next(for: option)
+
+            case "--cookie", "-i":
+                options.cookie = try arguments.next(for: option)
+
+            case "--remote", "-h":
+                options.remote = try arguments.next(for: option)
+
+            case "--port", "-p":
+                options.port = try arguments.next(for: option)
 
             case "--pretty", "-P":
                 options.pretty = true
 
             case "--input", "-r":
-                guard
-                let input:String = arguments.popFirst()
-                else
-                {
-                    fatalError("Expected project path after '\(option)'")
-                }
-
-                options.input = input
+                options.input = try arguments.next(for: option)
 
             case "--force", "-f":
                 options.force = .release
@@ -112,7 +80,14 @@ extension Main.Options
                 options.tool = .uplinkMultiple
 
             case let option:
-                fatalError("Unknown option '\(option)'")
+                if  case nil = options.package
+                {
+                    options.package = .init(option)
+                }
+                else
+                {
+                    throw CommandLine.ArgumentError.unknown(option)
+                }
             }
         }
 

@@ -2,6 +2,7 @@ import HTTPClient
 import NIOCore
 import NIOPosix
 import NIOSSL
+import Symbols
 import System
 import UnidocAPI
 
@@ -18,6 +19,12 @@ enum Main
     func _main() async throws
     {
         let options:Options = try .parse()
+        guard
+        let package:Symbol.Package = options.package
+        else
+        {
+            fatalError("No package specified")
+        }
 
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
 
@@ -56,19 +63,19 @@ enum Main
             try await swiftinit.uplink(editions: FilePath.init(input))
 
         case .uplink:
-            try await swiftinit.uplink(package: options.package)
+            try await swiftinit.uplink(package: package)
 
         case .build:
-            if  options.package != .swift,
+            if  package != .swift,
                 options.input == nil
             {
-                try await swiftinit.build(remote: options.package,
+                try await swiftinit.build(remote: package,
                     pretty: options.pretty,
                     force: options.force)
             }
             else
             {
-                try await swiftinit.build(local: options.package,
+                try await swiftinit.build(local: package,
                     search: options.input.map(FilePath.init(_:)),
                     pretty: options.pretty)
             }
