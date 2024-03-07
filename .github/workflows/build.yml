@@ -14,7 +14,7 @@ jobs:
         strategy:
             matrix:
                 image:
-                -   swift:5.9.2-amazonlinux2
+                -   tayloraswift/5.10.0-amazonlinux2023:latest
         steps:
             -   name: checkout repository
                 uses: actions/checkout@v3
