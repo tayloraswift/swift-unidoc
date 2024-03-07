@@ -87,7 +87,7 @@ extension Unidoc.DB.CrawlingWindows
         let command:Mongo.Find<Mongo.Single<Unidoc.CrawlingWindow>> = .init(Self.name,
             limit: 1)
         {
-            $0[.sort] = .init { $0[Unidoc.CrawlingWindow[.expires]] = (+) }
+            $0[.sort] { $0[Unidoc.CrawlingWindow[.expires]] = (+) }
             $0[.hint] = Self.indexExpiration.id
         }
 

@@ -136,11 +136,11 @@ extension Unidoc.DB.Snapshots
             command: Mongo.Find<Mongo.Single<Unidoc.Snapshot>>.init(Self.name,
                 limit: 1)
             {
-                $0[.filter] = .init
+                $0[.filter]
                 {
                     $0[Unidoc.Snapshot[.swift]] { $0[.exists] = true }
                 }
-                $0[.sort] = .init
+                $0[.sort]
                 {
                     $0[Unidoc.Snapshot[.swift]] = (-)
                 }
@@ -157,7 +157,7 @@ extension Unidoc.DB.Snapshots
                 stride: 16,
                 limit: 32)
             {
-                $0[.filter] = .init
+                $0[.filter]
                 {
                     $0[Unidoc.Snapshot[.id]] { $0[.in] = pins }
                 }
@@ -179,7 +179,7 @@ extension Unidoc.DB.Snapshots
                 Self.name,
                 limit: limit)
             {
-                $0[.filter] = .init
+                $0[.filter]
                 {
                     $0[Unidoc.Snapshot[.link]] { $0[.exists] = true }
                 }

@@ -39,7 +39,7 @@ extension Mongo.CollectionIndex
     init(_ id:String,
         collation:Mongo.Collation? = nil,
         unique:Bool = false,
-        fields:(inout Mongo.SortDocument) -> (),
+        fields:(inout Mongo.SortEncoder) -> (),
         where filter:((inout Mongo.PredicateEncoder) -> ())? = nil)
     {
         self.init(id: id,

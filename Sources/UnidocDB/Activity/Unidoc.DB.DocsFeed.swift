@@ -54,15 +54,15 @@ extension Unidoc.DB.DocsFeed
                 Self.name,
                 returning: .new)
             {
-                $0[.hint] = .init
+                $0[.hint]
                 {
                     $0[Activity<Unidoc.Edition>[.volume]] = (+)
                 }
-                $0[.query] = .init
+                $0[.query]
                 {
                     $0[Activity<Unidoc.Edition>[.volume]] = activity.volume
                 }
-                $0[.update] = .init
+                $0[.update]
                 {
                     $0[.setOnInsert]
                     {

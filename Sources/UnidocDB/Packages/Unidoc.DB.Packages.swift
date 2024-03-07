@@ -120,7 +120,7 @@ extension Unidoc.DB.Packages
         let command:Mongo.Find<Mongo.Single<Unidoc.PackageMetadata>> = .init(Self.name,
             limit: 1)
         {
-            $0[.filter] = .init
+            $0[.filter]
             {
                 //  We need this to use the partial index, for some reason.
                 $0[ Unidoc.PackageMetadata[.repo] /
@@ -171,11 +171,11 @@ extension Unidoc.DB.Packages
                 Self.name,
                 returning: .new)
             {
-                $0[.query] = .init
+                $0[.query]
                 {
                     $0[Unidoc.PackageMetadata[.id]] = package
                 }
-                $0[.update] = Mongo.UpdateDocument.init
+                $0[.update]
                 {
                     if  hidden
                     {
@@ -204,14 +204,14 @@ extension Unidoc.DB.Packages
         let command:Mongo.Find<Mongo.SingleBatch<Unidoc.PackageMetadata>> = .init(Self.name,
             limit: limit)
         {
-            $0[.filter] = .init
+            $0[.filter]
             {
                 $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]]
                 {
                     $0[.exists] = true
                 }
             }
-            $0[.sort] = .init
+            $0[.sort]
             {
                 $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = (+)
             }
@@ -235,7 +235,7 @@ extension Unidoc.DB.Packages
                 command: Mongo.Find<Mongo.Cursor<Unidoc.PackageMetadata>>.init(Self.name,
                     stride: 1024)
                 {
-                    $0[.filter] = .init
+                    $0[.filter]
                     {
                         $0[Unidoc.PackageMetadata[.hidden]] { $0[.exists] = false }
                     }

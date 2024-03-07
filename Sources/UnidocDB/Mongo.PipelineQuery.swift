@@ -40,7 +40,7 @@ extension Mongo.PipelineQuery
             stride: stride)
         {
             $0[.collation] = Collation.spec
-            $0[.hint] = self.hint?.fields
+            $0[.hint] = self.hint?.id
         }
     }
 }
