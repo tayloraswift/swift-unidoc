@@ -12,7 +12,7 @@ services:
             - SYS_PTRACE
         ports:
             - '8443:8443'
-        command: unidoc-server --certificates /unidoc/Certificates
+        command: swiftinit --certificates /unidoc/Certificates
         networks:
             - unidoc-test
 
