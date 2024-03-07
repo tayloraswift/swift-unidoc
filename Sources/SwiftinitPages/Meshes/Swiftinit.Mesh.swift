@@ -68,12 +68,15 @@ extension Swiftinit.Mesh
 
         if  let apex:Unidoc.DeclVertex = apex as? Unidoc.DeclVertex
         {
-            halo = try .init(context, curated: consume curated, groups: groups, apex: apex)
+            halo = try .init(context,
+                curated: /* consume */ curated,
+                groups: groups,
+                apex: apex)
         }
         else
         {
             halo = try .init(context,
-                curated: consume curated,
+                curated: /* consume */ curated,
                 groups: groups,
                 decl: apex.decl,
                 bias: apex.bias)

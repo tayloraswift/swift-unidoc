@@ -58,20 +58,19 @@ extension Unidoc.Extension:Unidoc.LinkerIndexable
     func assemble(signature:Unidoc.ExtensionSignature,
         with linker:borrowing Unidoc.Linker) -> Unidoc.ExtensionGroup
     {
-        //  5.9 compiler bug :(
-        return .init(id: (copy self).id.in(linker.current.id),
+        return .init(id: self.id.in(linker.current.id),
             constraints: signature.conditions.constraints,
             culture: linker.current.id + signature.culture,
             scope: signature.extendee,
-            conformances: linker.sort((copy self).conformances,
+            conformances: linker.sort(self.conformances,
                 by: Unidoc.SemanticPriority.self),
-            features: linker.sort((copy self).features,
+            features: linker.sort(self.features,
                 by: Unidoc.SemanticPriority.self),
-            nested: linker.sort((copy self).nested,
+            nested: linker.sort(self.nested,
                 by: Unidoc.SemanticPriority.self),
-            subforms: linker.sort((copy self).subforms,
+            subforms: linker.sort(self.subforms,
                 by: Unidoc.SemanticPriority.self),
-            overview: (copy self).overview,
-            details: (copy self).details)
+            overview: self.overview,
+            details: self.details)
     }
 }

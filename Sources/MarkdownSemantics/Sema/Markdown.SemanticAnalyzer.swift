@@ -111,7 +111,7 @@ extension Markdown.SemanticAnalyzer
     func rewrite(blocks:consuming ArraySlice<Markdown.BlockElement>) -> [Markdown.BlockElement]
     {
         var rewritten:[Markdown.BlockElement] = []
-            rewritten.reserveCapacity((copy blocks).count)
+            rewritten.reserveCapacity(blocks.count)
         for block:Markdown.BlockElement in blocks
         {
             self.expand(block: block)
@@ -282,7 +282,7 @@ extension Markdown.SemanticAnalyzer
         var headingBefore:(seeAlso:Bool, buffered: Markdown.BlockHeading?)? = nil
 
         var article:[Markdown.BlockElement] = []
-            article.reserveCapacity((copy details).count)
+            article.reserveCapacity(details.count)
         var topics:[Markdown.BlockTopic] = []
 
         for block:Markdown.BlockElement in details

@@ -47,13 +47,12 @@ extension Unidoc.Conformers:Unidoc.LinkerIndexable
     func assemble(signature:Unidoc.ConformanceSignature,
         with linker:borrowing Unidoc.Linker) -> Unidoc.ConformerGroup
     {
-        //  5.9 compiler bug :(
-        .init(id: (copy self).id.in(linker.current.id),
+        .init(id: self.id.in(linker.current.id),
             culture: linker.current.id + signature.culture,
             scope: signature.conformance,
-            unconditional: linker.sort((copy self).unconditional,
+            unconditional: linker.sort(self.unconditional,
                 by: Unidoc.LexicalPriority.self),
-            conditional: linker.sort((copy self).conditional,
+            conditional: linker.sort(self.conditional,
                 by: Unidoc.LexicalPriority.self))
     }
 }
