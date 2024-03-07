@@ -114,24 +114,33 @@ extension Mongo.CollectionModel
         {
             $0[$1.id] = $1
         }
-        let indexesUnused:[String] = try await session.run(
-            command: Mongo.ListIndexes.init(Self.name),
-            against: self.database)
+        let indexesUnused:[String]
+        do
         {
-            try await $0.reduce(into: [])
+            indexesUnused = try await session.run(
+                command: Mongo.ListIndexes.init(Self.name),
+                against: self.database)
             {
-                for index:Mongo.IndexBinding in $1
+                try await $0.reduce(into: [])
                 {
-                    if  case _? = indexesNeeded.removeValue(forKey: index.name)
+                    for index:Mongo.IndexBinding in $1
                     {
-                        print("DEBUG: index '\(Self.name):\(index.name)' already exists")
-                    }
-                    else if index.name != "_id_"
-                    {
-                        $0.append(index.name)
+                        if  case _? = indexesNeeded.removeValue(forKey: index.name)
+                        {
+                            print("DEBUG: index '\(Self.name):\(index.name)' already exists")
+                        }
+                        else if index.name != "_id_"
+                        {
+                            $0.append(index.name)
+                        }
                     }
                 }
             }
+        }
+        catch let error as Mongo.ServerError where error.code == 26
+        {
+            //  Collection has not been created yet.
+            indexesUnused = []
         }
 
         try await self.create(indexes: indexesNeeded, with: session)
