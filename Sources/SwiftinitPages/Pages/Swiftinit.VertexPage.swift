@@ -35,7 +35,7 @@ extension Swiftinit.VertexPage
     {
         let json:JSON = .array
         {
-            $0[+, Any.self]
+            $0
             {
                 $0["id"] = "\(self.volume.symbol)"
                 $0["trunk"] = "\(Swiftinit.Docs[self.volume])"
@@ -46,7 +46,7 @@ extension Swiftinit.VertexPage
                 if  let dependency:Unidoc.Edition = dependency.pinned,
                     let dependency:Unidoc.VolumeMetadata = self.context[dependency]
                 {
-                    $0[+, Any.self]
+                    $0
                     {
                         $0["id"] = "\(dependency.symbol)"
                         $0["trunk"] = "\(Swiftinit.Docs[dependency])"
