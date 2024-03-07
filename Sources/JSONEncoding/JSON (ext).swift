@@ -2,8 +2,9 @@ import JSONAST
 
 extension JSON
 {
-    @inlinable internal
-    subscript<Encoder>(as _:Encoder.Type = Encoder.self) -> Encoder where Encoder:JSONEncoder
+    @inlinable
+    subscript<Encoder>(as _:Encoder.Type = Encoder.self) -> Encoder
+        where Encoder:JSON.InlineEncoder
     {
         _read
         {
@@ -15,6 +16,15 @@ extension JSON
             defer { self = encoder.move() }
             yield &encoder
         }
+    }
+}
+extension JSON
+{
+    @inlinable public mutating
+    func callAsFunction<CodingKey>(_:CodingKey.Type,
+        yield:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
+    {
+        yield(&self[as: JSON.ObjectEncoder<CodingKey>.self])
     }
 }
 extension JSON

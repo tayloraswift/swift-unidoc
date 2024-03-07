@@ -18,7 +18,7 @@ extension JSON
         }
     }
 }
-extension JSON.ArrayEncoder:JSONEncoder
+extension JSON.ArrayEncoder:JSON.InlineEncoder
 {
     @inlinable internal static
     func move(_ json:inout JSON) -> Self
@@ -38,8 +38,15 @@ extension JSON.ArrayEncoder:JSONEncoder
 }
 extension JSON.ArrayEncoder
 {
-    @inlinable internal
-    subscript(with _:(Index) -> Void) -> JSON
+    /// Creates a nested JSON encoding context.
+    ///
+    /// This accessor isn’t very useful on its own, rather, you should chain it with a call to
+    /// ``JSON.subscript(_:_:)`` to bind the context to a particular coding key.
+    ///
+    /// You can also encode values directly with this accessor, via the `encode(to: &$0.next)`
+    /// pattern, although the ``subscript(_:)`` setter is probably more convenient for that.
+    @inlinable public
+    var next:JSON
     {
         _read
         {
@@ -59,30 +66,31 @@ extension JSON.ArrayEncoder
             yield &self.json
         }
     }
-}
-extension JSON.ArrayEncoder
-{
-    @inlinable public
-    subscript(_:(Index) -> Void,
-        yield:(inout Self) -> ()) -> Void
+
+    /// Creates a nested object encoding context.
+    @inlinable public mutating
+    func callAsFunction<Key>(_:Key.Type = Key.self,
+        _ yield:(inout JSON.ObjectEncoder<Key>) -> ())
     {
-        mutating
-        get { yield(&self[with: +][as: Self.self]) }
+        yield(&self.next[as: JSON.ObjectEncoder<Key>.self])
     }
 
-    @inlinable public
-    subscript<CodingKey>(_:(Index) -> Void,
-        _:CodingKey.Type = CodingKey.self,
-        yield:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
+    /// Creates a nested array encoding context.
+    @inlinable public mutating
+    func callAsFunction(
+        _ yield:(inout JSON.ArrayEncoder) -> ())
     {
-        mutating
-        get { yield(&self[with: +][as: JSON.ObjectEncoder<CodingKey>.self]) }
+        yield(&self.next[as: Self.self])
     }
 
+    /// Appends a value to the array.
+    ///
+    /// Why a subscript and not an `append` method? Because we often want to optionally append a
+    /// value while building an array, and the subscript syntax is more convenient for that.
     @inlinable public
     subscript<Encodable>(_:(Index) -> Void) -> Encodable? where Encodable:JSONEncodable
     {
         get { nil }
-        set (value) { value?.encode(to: &self[with: +]) }
+        set (value) { value?.encode(to: &self.next) }
     }
 }

@@ -5,12 +5,12 @@ extension JSON
     @frozen public
     struct ObjectEncoder<Key>:Sendable
     {
-        @usableFromInline internal
+        @usableFromInline
         var first:Bool
-        @usableFromInline internal
+        @usableFromInline
         var json:JSON
 
-        @inlinable internal
+        @inlinable
         init(json:JSON)
         {
             self.first = true
@@ -18,16 +18,16 @@ extension JSON
         }
     }
 }
-extension JSON.ObjectEncoder:JSONEncoder
+extension JSON.ObjectEncoder:JSON.InlineEncoder
 {
-    @inlinable internal static
+    @inlinable static
     func move(_ json:inout JSON) -> Self
     {
         json.utf8.append(0x7B) // '{'
         defer { json.utf8 = [] }
         return .init(json: json)
     }
-    @inlinable internal mutating
+    @inlinable mutating
     func move() -> JSON
     {
         self.first = true
@@ -38,7 +38,7 @@ extension JSON.ObjectEncoder:JSONEncoder
 }
 extension JSON.ObjectEncoder
 {
-    @inlinable internal
+    @inlinable
     subscript(with key:String) -> JSON
     {
         _read
@@ -66,20 +66,24 @@ extension JSON.ObjectEncoder
 extension JSON.ObjectEncoder<Any>
 {
     @inlinable public
-    subscript(key:String,
-        yield:(inout JSON.ArrayEncoder) -> ()) -> Void
+    subscript(key:String) -> JSON
     {
-        mutating
-        get { yield(&self[with: key][as: JSON.ArrayEncoder.self]) }
+        _read   { yield  self[with: key] }
+        _modify { yield &self[with: key] }
     }
 
     @inlinable public
-    subscript<CodingKey>(key:String,
-        _:CodingKey.Type = CodingKey.self,
-        yield:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
+    subscript<NestedKey>(key:String, yield:(inout JSON.ObjectEncoder<NestedKey>) -> ()) -> Void
     {
         mutating
-        get { yield(&self[with: key][as: JSON.ObjectEncoder<CodingKey>.self]) }
+        get { yield(&self[key][as: JSON.ObjectEncoder<NestedKey>.self]) }
+    }
+
+    @inlinable public
+    subscript(key:String, yield:(inout JSON.ArrayEncoder) -> ()) -> Void
+    {
+        mutating
+        get { yield(&self[with: key][as: JSON.ArrayEncoder.self]) }
     }
 
     @inlinable public
@@ -92,26 +96,30 @@ extension JSON.ObjectEncoder<Any>
 extension JSON.ObjectEncoder where Key:RawRepresentable<String>
 {
     @inlinable public
-    subscript(key:Key,
-        yield:(inout JSON.ArrayEncoder) -> ()) -> Void
+    subscript(key:Key) -> JSON
     {
-        mutating
-        get { yield(&self[with: key.rawValue][as: JSON.ArrayEncoder.self]) }
+        _read   { yield  self[with: key.rawValue] }
+        _modify { yield &self[with: key.rawValue] }
     }
 
     @inlinable public
-    subscript<CodingKey>(key:Key,
-        _:CodingKey.Type = CodingKey.self,
-        yield:(inout JSON.ObjectEncoder<CodingKey>) -> ()) -> Void
+    subscript<NestedKey>(key:Key, yield:(inout JSON.ObjectEncoder<NestedKey>) -> ()) -> Void
     {
         mutating
-        get { yield(&self[with: key.rawValue][as: JSON.ObjectEncoder<CodingKey>.self]) }
+        get { yield(&self[key][as: JSON.ObjectEncoder<NestedKey>.self]) }
+    }
+
+    @inlinable public
+    subscript(key:Key, yield:(inout JSON.ArrayEncoder) -> ()) -> Void
+    {
+        mutating
+        get { yield(&self[key][as: JSON.ArrayEncoder.self]) }
     }
 
     @inlinable public
     subscript<Encodable>(key:Key) -> Encodable? where Encodable:JSONEncodable
     {
         get { nil }
-        set (value) { value?.encode(to: &self[with: key.rawValue]) }
+        set (value) { value?.encode(to: &self[key]) }
     }
 }

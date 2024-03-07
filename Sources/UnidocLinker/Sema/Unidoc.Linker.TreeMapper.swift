@@ -214,7 +214,7 @@ extension Unidoc.Linker.TreeMapper
                     $0.shoot < $1.shoot
                 }
 
-                $0[+, Any.self]
+                $0
                 {
                     $0["c"] = "\(culture)"
                     $0["n"]
@@ -227,7 +227,7 @@ extension Unidoc.Linker.TreeMapper
                                 continue
                             }
 
-                            $0[+, Any.self]
+                            $0
                             {
                                 $0["s"] = noun.shoot.stem.rawValue
                                 $0["h"] = noun.shoot.hash?.value
@@ -235,7 +235,7 @@ extension Unidoc.Linker.TreeMapper
                         }
                         for (shoot, flags):(Unidoc.Shoot, Flags?) in members.extra
                         {
-                            $0[+, Any.self]
+                            $0
                             {
                                 $0["s"] = shoot.stem.rawValue
                                 $0["h"] = shoot.hash?.value
