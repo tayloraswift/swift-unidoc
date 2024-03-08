@@ -17,6 +17,17 @@ extension Swiftinit
 
 extension Swiftinit.BuilderEndpoint:RestrictedEndpoint
 {
+    static
+    func admit(user:Unidoc.User.ID, level:Unidoc.User.Level) -> Bool
+    {
+        switch level
+        {
+        case .administratrix:   true
+        case .machine:          true
+        case .human:            false
+        }
+    }
+
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)

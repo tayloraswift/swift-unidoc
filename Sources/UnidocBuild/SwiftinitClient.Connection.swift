@@ -133,6 +133,7 @@ extension SwiftinitClient.Connection
         type:MediaType? = nil) async throws -> [ByteBuffer]
     {
         var endpoint:String = endpoint
+        var message:String = ""
         var status:UInt? = nil
 
         following:
@@ -164,6 +165,10 @@ extension SwiftinitClient.Connection
                     continue following
                 }
             case _:
+                message = response.buffers.reduce(into: "")
+                {
+                    $0 += String.init(decoding: $1.readableBytesView, as: Unicode.UTF8.self)
+                }
                 break
             }
 
@@ -171,6 +176,6 @@ extension SwiftinitClient.Connection
             break following
         }
 
-        throw HTTP.StatusError.init(code: status)
+        throw HTTP.StatusError.init(code: status, message: message)
     }
 }
