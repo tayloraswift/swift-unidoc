@@ -225,8 +225,16 @@ extension SPM.Build:DocumentationBuild
         let pins:[SPM.DependencyPin] = try await swift.resolve(package: self.root,
             log: log.resolution)
 
-        let scratch:SPM.BuildDirectory = try await swift.build(package: self.root,
-            log: log.build)
+        let scratch:SPM.BuildDirectory
+        do
+        {
+            scratch = try await swift.build(package: self.root,
+                log: log.build)
+        }
+        catch SystemProcessError.exit(let code, _)
+        {
+            throw SPM.BuildError.swift_build(code)
+        }
 
         let platform:SymbolGraphMetadata.Platform = try swift.platform()
 
