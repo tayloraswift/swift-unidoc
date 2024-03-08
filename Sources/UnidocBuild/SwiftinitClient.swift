@@ -184,48 +184,76 @@ extension SwiftinitClient
 {
     func upgrade(pretty:Bool) async throws
     {
-        let editions:[Unidoc.Edition] = try await self.connect
-        {
-            @Sendable (connection:SwiftinitClient.Connection) in
+        var unbuildable:[Unidoc.Edition: ()] = [:]
 
-            try await connection.oldest(until: SymbolGraphABI.version)
-        }
-
-        for edition:Unidoc.Edition in editions where edition.version != -1
+        upgrading:
+        do
         {
-            let buildable:Unidoc.BuildArguments
-            do
+            let editions:[Unidoc.Edition] = try await self.connect
             {
-                buildable = try await self.connect
-                {
-                    @Sendable (connection:SwiftinitClient.Connection) in
+                @Sendable (connection:SwiftinitClient.Connection) in
 
-                    try await connection.build(id: edition)
-                }
+                try await connection.oldest(until: SymbolGraphABI.version)
             }
-            catch let error as HTTP.StatusError
+
+            var upgraded:Int = 0
+
+            for edition:Unidoc.Edition in editions where edition.version != -1
             {
-                guard
-                case 404? = error.code
-                else
+                if  unbuildable.keys.contains(edition)
                 {
-                    throw error
+                    continue
                 }
 
-                print("No buildable package for \(edition).")
-                continue
-            }
+                let buildable:Unidoc.BuildArguments
+                do
+                {
+                    buildable = try await self.connect
+                    {
+                        @Sendable (connection:SwiftinitClient.Connection) in
 
-            if  case .swift = buildable.package
+                        try await connection.build(id: edition)
+                    }
+                }
+                catch let error as HTTP.StatusError
+                {
+                    guard
+                    case 404? = error.code
+                    else
+                    {
+                        throw error
+                    }
+
+                    print("No buildable package for \(edition).")
+                    continue
+                }
+
+                if  case .swift = buildable.package
+                {
+                    //  We cannot build the standard library this way.
+                    print("Skipping 'swift'")
+                    continue
+                }
+
+                do
+                {
+                    try await self.build(buildable,
+                        pretty: pretty,
+                        link: .refresh)
+
+                    upgraded += 1
+                }
+                catch SPM.BuildError.swift_build
+                {
+                    print("Failed to build \(buildable.package) \(buildable.tag ?? "?")")
+                    unbuildable[edition] = ()
+                }
+            }
+            //  If we have upgraded at least one package, there are probably more.
+            if  upgraded > 0
             {
-                //  We cannot build the standard library this way.
-                print("Skipping 'swift'")
-                continue
+                continue upgrading
             }
-
-            try await self.build(buildable,
-                pretty: pretty,
-                link: .refresh)
         }
     }
 }

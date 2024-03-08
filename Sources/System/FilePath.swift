@@ -52,29 +52,30 @@ extension FilePath
         options:FileDescriptor.OpenOptions = [],
         with body:(FileDescriptor) async throws -> T) async throws -> T
     {
+        let file:FileDescriptor = try .open(self, mode,
+            options: options,
+            permissions: permissions.map(FilePermissions.init(_:)))
+
+        let success:T
         do
         {
-            let file:FileDescriptor = try .open(self, mode,
-                options: options,
-                permissions: permissions.map(FilePermissions.init(_:)))
-
-            let success:T
-            do
-            {
-                success = try await body(file)
-            }
-            catch let error
-            {
-                try? file.close()
-                throw error
-            }
+            success = try await body(file)
+        }
+        catch let error
+        {
+            try? file.close()
+            throw error
+        }
+        do
+        {
             try file.close()
-            return success
         }
         catch let error
         {
             throw FileError.init(underlying: error, path: self)
         }
+
+        return success
     }
 }
 extension FilePath

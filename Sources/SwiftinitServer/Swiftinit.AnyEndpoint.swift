@@ -271,9 +271,9 @@ extension Swiftinit.AnyEndpoint
     static
     func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .explainable(Swiftinit.TagsEndpoint.init(query: .tags(.init(trunk),
-                limit: 12,
-                user: parameters.user)),
+        .explainable(Swiftinit.TagsEndpoint.init(query: .init(
+                symbol: .init(trunk),
+                filter: .tags(limit: 12, user: parameters.user))),
             parameters: parameters)
     }
 
