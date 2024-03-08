@@ -423,15 +423,6 @@ let package:Package = .init(
                 .target(name: "URI"),
             ]),
 
-        .target(name: "SwiftinitAPI",
-            dependencies: [
-                .target(name: "HTTP"),
-                .target(name: "Media"),
-                .target(name: "Swiftinit"),
-                .target(name: "UnidocAPI"),
-                .target(name: "UnidocQueries"),
-            ]),
-
         .target(name: "SwiftinitAssets",
             dependencies: [
                 .target(name: "SwiftinitPages"),
@@ -638,13 +629,15 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "GitHubClient"),
                 .target(name: "HTTPServer"),
+                .target(name: "Media"),
                 .target(name: "Multiparts"),
                 .target(name: "S3Client"),
                 .target(name: "Sitemaps"),
-                .target(name: "SwiftinitAPI"),
                 .target(name: "SwiftinitAssets"),
                 .target(name: "SwiftinitPages"),
                 .target(name: "SwiftinitPlugins"),
+                .target(name: "UnidocAPI"),
+                .target(name: "UnidocQueries"),
             ]),
 
 

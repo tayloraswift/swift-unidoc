@@ -184,8 +184,7 @@ extension Swiftinit.IntegralRequest
         switch root
         {
         case Swiftinit.Root.api.id:
-            endpoint = .get(api: trunk, path,
-                with: .init(uri.query?.parameters, tag: tag))
+            endpoint = .get(api: trunk, path, with: uri.query?.parameters ?? [])
 
         case Swiftinit.Root.admin.id:
             endpoint = .get(admin: trunk, path, tag: tag)

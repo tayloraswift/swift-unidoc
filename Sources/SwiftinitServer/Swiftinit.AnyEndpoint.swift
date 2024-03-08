@@ -4,6 +4,7 @@ import MD5
 import Media
 import MongoDB
 import Multiparts
+import SemanticVersions
 import SwiftinitPages
 import Symbols
 import UnidocDB
@@ -34,11 +35,9 @@ extension Swiftinit.AnyEndpoint
                 Base:Sendable
     {
         parameters.explain
-            ? .interactive(Swiftinit.ExplanatoryEndpoint<Base.Query>.init(
-                query: endpoint.query))
-            : .interactive(Swiftinit.OptimizingEndpoint<Base>.init(accept: accept,
-                etag: parameters.tag,
-                base: endpoint))
+        ? .interactive(Swiftinit.ExplanatoryEndpoint<Base.Query>.init(query: endpoint.query))
+        : .interactive(Swiftinit.OptimizingEndpoint<Base>.init(base: endpoint,
+            etag: parameters.tag))
     }
 }
 //  GET endpoints
@@ -88,7 +87,7 @@ extension Swiftinit.AnyEndpoint
     static
     func get(api trunk:String,
         _ stem:ArraySlice<String>,
-        with parameters:Swiftinit.PipelineParameters) -> Self?
+        with parameters:[(key:String, value:String)]) -> Self?
     {
         guard
         let trunk:Swiftinit.API.Get = .init(trunk)
@@ -97,15 +96,43 @@ extension Swiftinit.AnyEndpoint
             return nil
         }
 
+        let parameters:[String: String] = parameters.reduce(into: [:]) { $0[$1.key] = $1.value }
+
         switch trunk
         {
         case .build:
             if  let package:String = stem.first
             {
                 let package:Symbol.Package = .init(package)
-                return .explainable(Swiftinit.TagsEndpoint.init(query: .latest(package)),
-                    parameters: parameters,
-                    accept: .application(.json))
+                let subject:Unidoc.BuildLatest?
+
+                if  let force:String = parameters["force"]
+                {
+                    subject = .init(force)
+                }
+                else
+                {
+                    subject = nil
+                }
+
+                return .interactive(Swiftinit.BuilderEndpoint._latest(subject, of: package))
+            }
+            else if
+                let package:String = parameters["package"],
+                let package:Unidoc.Package = .init(package),
+                let version:String = parameters["version"],
+                let version:Unidoc.Version = .init(version)
+            {
+                return .interactive(Swiftinit.BuilderEndpoint.edition(.init(
+                    package: package,
+                    version: version)))
+            }
+
+        case .oldest:
+            if  let version:String = parameters["until"],
+                let version:PatchVersion = .init(version)
+            {
+                return .interactive(Swiftinit.BuilderEndpoint.oldest(until: version))
             }
         }
 
