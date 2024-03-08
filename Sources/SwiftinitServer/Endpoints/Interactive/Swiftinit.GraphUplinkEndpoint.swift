@@ -1,7 +1,6 @@
 import HTTP
 import HTTPServer
 import MongoDB
-import Symbols
 import Unidoc
 import UnidocDB
 import UnidocRecords

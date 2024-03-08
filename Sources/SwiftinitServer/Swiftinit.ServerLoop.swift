@@ -91,15 +91,14 @@ extension Swiftinit.ServerLoop
     nonisolated
     var format:Swiftinit.RenderFormat
     {
-        self.format(accept: .application(.html), locale: nil)
+        self.format(locale: nil)
     }
 
     nonisolated private
-    func format(accept:HTTP.AcceptType, locale:HTTP.Locale?) -> Swiftinit.RenderFormat
+    func format(locale:HTTP.Locale?) -> Swiftinit.RenderFormat
     {
         .init(
             assets: self.options.cloudfront ? .cloudfront : .local,
-            accept: accept,
             locale: locale,
             secure: self.options.mode.secure)
     }
@@ -297,9 +296,7 @@ extension Swiftinit.ServerLoop
         let response:HTTP.ServerResponse = try await endpoint.load(
             from: .init(self, tour: self.tour),
             with: metadata.cookies,
-            as: self.format(
-                accept: .text(.html),
-                locale: metadata.annotation.locale))
+            as: self.format(locale: metadata.annotation.locale))
             ?? .notFound(.init(
                 content: .string("not found"),
                 type: .text(.plain, charset: .utf8),

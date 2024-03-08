@@ -14,10 +14,6 @@ extension Swiftinit
                 Base:Mongo.PipelineEndpoint,
                 Base:Sendable
     {
-        /// An `accept-type` to propogate to the base endpoint, which may influence the response
-        /// it produces. Overrides the request’s `accept-type` if non-nil.
-        private
-        let accept:HTTP.AcceptType?
         /// An optional cache tag used to optimize the response.
         private
         let etag:MD5?
@@ -25,11 +21,8 @@ extension Swiftinit
         private
         var base:Base
 
-        init(accept:HTTP.AcceptType? = nil,
-            etag:MD5? = nil,
-            base:Base)
+        init(base:Base, etag:MD5? = nil)
         {
-            self.accept = accept
             self.etag = etag
             self.base = base
         }
@@ -45,13 +38,7 @@ extension Swiftinit.OptimizingEndpoint:PublicEndpoint
 
         try await self.base.pull(from: server.db.unidoc.id, with: session)
 
-        let (accept, etag):(HTTP.AcceptType?, MD5?) = { ($0.accept, $0.etag) } (self)
-
-        var format:Swiftinit.RenderFormat = format
-        if  let accept:HTTP.AcceptType
-        {
-            format.accept = accept
-        }
+        let etag:MD5? = self.etag
 
         switch try self.base.response(as: format)
         {

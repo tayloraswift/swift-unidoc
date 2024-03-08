@@ -4,5 +4,6 @@ extension Swiftinit.API
     enum Get:String, Swiftinit.Method
     {
         case build
+        case oldest
     }
 }

@@ -3,7 +3,7 @@
 # This dockerfile creates the base image we use to distribute the Unidoc compiler.
 # It includes a superset of the system dependencies the swiftpackageindex.com builder
 # image supports, so we can compile any package that swiftpackageindex.com can compile.
-FROM swift:5.9.2
+FROM swift:5.10
 
 RUN apt update && apt install -y \
     sqlite3 libsqlite3-dev \

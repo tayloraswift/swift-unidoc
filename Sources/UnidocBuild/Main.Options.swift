@@ -1,5 +1,6 @@
 import ArgumentParsing
 import Symbols
+import Unidoc
 
 extension Main
 {
@@ -11,7 +12,7 @@ extension Main
         var port:Int
 
         var pretty:Bool
-        var force:Force?
+        var force:Unidoc.BuildLatest?
         var input:String?
 
         var tool:Tool
@@ -28,11 +29,10 @@ extension Main
             self.force = nil
             self.input = nil
 
-            self.tool = .build
+            self.tool = .latest
         }
     }
 }
-
 
 extension Main.Options
 {
@@ -73,11 +73,8 @@ extension Main.Options
             case "--force-prerelease", "-e":
                 options.force = .prerelease
 
-            case "--uplink-only", "-u":
-                options.tool = .uplink
-
-            case "--uplink-multi":
-                options.tool = .uplinkMultiple
+            case "--upgrade":
+                options.tool = .upgrade
 
             case let option:
                 if  case nil = options.package
