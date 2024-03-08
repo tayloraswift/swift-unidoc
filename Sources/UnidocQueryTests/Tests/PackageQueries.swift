@@ -125,7 +125,10 @@ struct PackageQueries:UnidocDatabaseTestBattery
         {
             if  let tests:TestGroup = tests / "Debut"
             {
-                let query:Unidoc.VersionsQuery = .tags("swift-debut", limit: 2)
+                let query:Unidoc.VersionsQuery = .init(
+                    symbol: "swift-debut",
+                    filter: .tags(limit: 2))
+
                 await tests.do
                 {
                     guard
@@ -144,7 +147,9 @@ struct PackageQueries:UnidocDatabaseTestBattery
             }
             if  let tests:TestGroup = tests / "Fearless"
             {
-                let query:Unidoc.VersionsQuery = .tags("swift-fearless", limit: 2)
+                let query:Unidoc.VersionsQuery = .init(
+                    symbol: "swift-fearless",
+                    filter: .tags(limit: 2))
                 await tests.do
                 {
                     guard
@@ -171,7 +176,9 @@ struct PackageQueries:UnidocDatabaseTestBattery
             }
             if  let tests:TestGroup = tests / "SpeakNow"
             {
-                let query:Unidoc.VersionsQuery = .tags("swift-speak-now", limit: 2)
+                let query:Unidoc.VersionsQuery = .init(
+                    symbol: "swift-speak-now",
+                    filter: .tags(limit: 2))
                 await tests.do
                 {
                     guard
@@ -196,7 +203,9 @@ struct PackageQueries:UnidocDatabaseTestBattery
             }
             if  let tests:TestGroup = tests / "Red"
             {
-                let query:Unidoc.VersionsQuery = .tags("swift-red", limit: 2)
+                let query:Unidoc.VersionsQuery = .init(
+                    symbol: "swift-red",
+                    filter: .tags(limit: 2))
                 await tests.do
                 {
                     guard

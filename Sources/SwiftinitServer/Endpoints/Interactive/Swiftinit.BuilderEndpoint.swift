@@ -70,8 +70,17 @@ extension Swiftinit.BuilderEndpoint:RestrictedEndpoint
             json = .object(with: build.encode(to:))
 
         case ._latest(let subject, let package):
+            let filter:Unidoc.VersionsPredicate
+
+            switch subject
+            {
+            case nil:           filter = .releases(limit: 1)
+            case .release?:     filter = .releases(limit: 1)
+            case .prerelease?:  filter = .prereleases(limit: 1)
+            }
+
             var endpoint:Mongo.SingleOutputFromPrimary<Unidoc.VersionsQuery> = .init(
-                query: .latest(package))
+                query: .init(symbol: package, filter: filter))
 
             try await endpoint.pull(from: server.db.unidoc.id, with: session)
 
