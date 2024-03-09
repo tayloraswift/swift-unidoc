@@ -77,5 +77,16 @@ extension Swiftinit.TagsTable.GraphCell:HTML.OutputStreamable
             $0.action = "\(Swiftinit.API[.unlink])"
             $0.method = "post"
         } = self.unlink
+
+        td[.a]
+        {
+            let path:Unidoc.GraphPath = .init(edition: self.graph.id, type: .bson_zz)
+
+            $0.target = "_blank"
+            $0.href = """
+            https://s3.console.aws.amazon.com/s3/object/symbolgraphs\
+            ?region=us-east-1&bucketType=general&prefix=\(path.prefix)
+            """
+        } = "S3"
     }
 }
