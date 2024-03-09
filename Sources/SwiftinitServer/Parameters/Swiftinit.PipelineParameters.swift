@@ -53,6 +53,13 @@ extension Swiftinit.PipelineParameters
             case _:         continue
             }
         }
+
+        //  As a security measure, clamp the page number to a reasonable range.
+        //  This prevents Swift from crashing on integer overflow.
+        if  let page:Int = self.page
+        {
+            self.page = max(0, min(page, 1000))
+        }
     }
 
     static
