@@ -477,10 +477,14 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .unlink:
-                if  let volume:String = form["volume"],
-                    let volume:Symbol.Edition = .init(volume)
+                if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package),
+                    let version:String = form["version"],
+                    let version:Unidoc.Version = .init(version)
                 {
-                    return .procedural(Swiftinit.GraphUnlinkEndpoint.init(volume: volume))
+                    return .interactive(Swiftinit.GraphUnlinkEndpoint.init(
+                        volume: .init(package: package, version: version),
+                        uri: form["redirect"]))
                 }
 
             default:

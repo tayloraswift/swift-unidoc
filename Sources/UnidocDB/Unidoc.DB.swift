@@ -421,6 +421,20 @@ extension Unidoc.DB
     }
 
     public
+    func unlink(volume:Unidoc.VolumeMetadata,
+        with session:Mongo.Session) async throws
+    {
+        try await self.vertices.clear(range: volume.id, with: session)
+        try await self.groups.clear(range: volume.id, with: session)
+        try await self.trees.clear(range: volume.id, with: session)
+
+        try await self.search.delete(id: volume.symbol, with: session)
+        //  Delete this last, otherwise if one of the other steps fails, we won’t
+        //  have an easy way to clean up the remaining documents.
+        try await self.volumes.delete(id: volume.id, with: session)
+    }
+
+    private
     func unlink(volume:Symbol.Edition,
         with session:Mongo.Session) async throws -> Unidoc.UnlinkStatus?
     {
@@ -434,15 +448,7 @@ extension Unidoc.DB
 
         if  case nil = volume.patch
         {
-            try await self.vertices.clear(range: volume.id, with: session)
-            try await self.groups.clear(range: volume.id, with: session)
-            try await self.trees.clear(range: volume.id, with: session)
-
-            try await self.search.delete(id: volume.symbol, with: session)
-            //  Delete this last, otherwise if one of the other steps fails, we won’t
-            //  have an easy way to clean up the remaining documents.
-            try await self.volumes.delete(id: volume.id, with: session)
-
+            try await self.unlink(volume: volume, with: session)
             return .unlinked(volume.id)
         }
         else
