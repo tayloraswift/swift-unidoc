@@ -16,15 +16,24 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.GraphPath
+{
+    /// Same as ``description``, but with no leading slash.
+    @inlinable public
+    var prefix:String
+    {
+        """
+        graphs/\
+        \(String.init(self.edition.package.bits, radix: 16))/\
+        \(String.init(self.edition.version.bits, radix: 16)).\(self.type)
+        """
+    }
+}
 extension Unidoc.GraphPath:CustomStringConvertible
 {
     @inlinable public
     var description:String
     {
-        """
-        /graphs/\
-        \(String.init(self.edition.package.bits, radix: 16))/\
-        \(String.init(self.edition.version.bits, radix: 16)).\(self.type)
-        """
+        "/\(self.prefix)"
     }
 }
