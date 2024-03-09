@@ -127,7 +127,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             {
                 let query:Unidoc.VersionsQuery = .init(
                     symbol: "swift-debut",
-                    filter: .tags(limit: 2))
+                    filter: .none(limit: 2))
 
                 await tests.do
                 {
@@ -149,7 +149,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             {
                 let query:Unidoc.VersionsQuery = .init(
                     symbol: "swift-fearless",
-                    filter: .tags(limit: 2))
+                    filter: .none(limit: 2))
                 await tests.do
                 {
                     guard
@@ -178,7 +178,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             {
                 let query:Unidoc.VersionsQuery = .init(
                     symbol: "swift-speak-now",
-                    filter: .tags(limit: 2))
+                    filter: .none(limit: 2))
                 await tests.do
                 {
                     guard
@@ -205,7 +205,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             {
                 let query:Unidoc.VersionsQuery = .init(
                     symbol: "swift-red",
-                    filter: .tags(limit: 2))
+                    filter: .none(limit: 2))
                 await tests.do
                 {
                     guard

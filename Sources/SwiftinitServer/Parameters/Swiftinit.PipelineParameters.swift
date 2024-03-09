@@ -7,7 +7,9 @@ extension Swiftinit
     struct PipelineParameters
     {
         var explain:Bool
+        var beta:Bool
         var hash:FNV24?
+        var page:Int?
 
         let user:Unidoc.User.ID?
         let tag:MD5?
@@ -16,7 +18,9 @@ extension Swiftinit
         init(user:Unidoc.User.ID?, tag:MD5?)
         {
             self.explain = false
+            self.beta = false
             self.hash = nil
+            self.page = nil
 
             self.user = user
             self.tag = tag
@@ -43,7 +47,9 @@ extension Swiftinit.PipelineParameters
             switch key
             {
             case "explain": self.explain = value == "true"
+            case "beta":    self.beta = value == "true"
             case "hash":    self.hash = .init(value)
+            case "page":    self.page = .init(value)
             case _:         continue
             }
         }

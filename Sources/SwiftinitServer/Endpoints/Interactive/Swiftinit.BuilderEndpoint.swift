@@ -74,9 +74,9 @@ extension Swiftinit.BuilderEndpoint:RestrictedEndpoint
 
             switch subject
             {
-            case nil:           filter = .releases(limit: 1)
-            case .release?:     filter = .releases(limit: 1)
-            case .prerelease?:  filter = .prereleases(limit: 1)
+            case nil:           filter = .tags(limit: 1, beta: false)
+            case .release?:     filter = .tags(limit: 1, beta: false)
+            case .prerelease?:  filter = .tags(limit: 1, beta: true)
             }
 
             var endpoint:Mongo.SingleOutputFromPrimary<Unidoc.VersionsQuery> = .init(
