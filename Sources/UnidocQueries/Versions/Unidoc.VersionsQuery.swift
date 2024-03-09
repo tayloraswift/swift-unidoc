@@ -15,12 +15,15 @@ extension Unidoc
         let symbol:Symbol.Package
         public
         let filter:VersionsPredicate
+        public
+        let user:Unidoc.User.ID?
 
         @inlinable public
-        init(symbol:Symbol.Package, filter:VersionsPredicate)
+        init(symbol:Symbol.Package, filter:VersionsPredicate, as user:Unidoc.User.ID? = nil)
         {
             self.symbol = symbol
             self.filter = filter
+            self.user = user
         }
     }
 }
@@ -44,25 +47,41 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
     {
         switch self.filter
         {
-        case .prereleases(limit: let limit, page: let page):
-            Self.loadTagged(releases: false,
+        case .tags(limit: let limit, page: let page, beta: let beta):
+            Self.loadTagged(releases: !beta,
                 limit: limit,
                 skip: limit * page,
                 with: &pipeline)
 
-        case .releases(limit: let limit, page: let page):
-            Self.loadTagged(releases: true,
-                limit: limit,
-                skip: limit * page,
-                with: &pipeline)
-
-        case .tags(limit: let limit, user: let user):
+        case .none(limit: let limit):
+            Self.loadPackageConfiguration(with: &pipeline)
             Self.loadTagless(with: &pipeline)
 
             Self.loadTagged(releases: false, limit: limit, with: &pipeline)
             Self.loadTagged(releases: true, limit: limit, with: &pipeline)
+        }
 
-            Self.loadPackageTools(user: user, with: &pipeline)
+        if  let user:Unidoc.User.ID = self.user
+        {
+            //  Lookup the querying user.
+            pipeline[stage: .lookup] = .init
+            {
+                $0[.from] = Unidoc.DB.Users.name
+                $0[.pipeline] = .init
+                {
+                    $0[stage: .match] = .init
+                    {
+                        $0[Unidoc.User[.id]] = user
+                    }
+                }
+                $0[.as] = Output[.user]
+            }
+
+            //  Unbox single-element array.
+            pipeline[stage: .set] = .init
+            {
+                $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
+            }
         }
     }
 }
@@ -145,7 +164,7 @@ extension Unidoc.VersionsQuery
     }
 
     private static
-    func loadPackageTools(user:Unidoc.User.ID?, with pipeline:inout Mongo.PipelineEncoder)
+    func loadPackageConfiguration(with pipeline:inout Mongo.PipelineEncoder)
     {
         //  Lookup other aliases for this package.
         let aliases:Mongo.List<Unidoc.PackageAlias, Mongo.AnyKeyPath> = .init(
@@ -176,29 +195,6 @@ extension Unidoc.VersionsQuery
         pipeline[stage: .set] = .init
         {
             $0[Output[.realm]] = .expr { $0[.first] = Output[.realm] }
-        }
-
-        if  let user:Unidoc.User.ID
-        {
-            //  Lookup the querying user.
-            pipeline[stage: .lookup] = .init
-            {
-                $0[.from] = Unidoc.DB.Users.name
-                $0[.pipeline] = .init
-                {
-                    $0[stage: .match] = .init
-                    {
-                        $0[Unidoc.User[.id]] = user
-                    }
-                }
-                $0[.as] = Output[.user]
-            }
-
-            //  Unbox single-element array.
-            pipeline[stage: .set] = .init
-            {
-                $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
-            }
         }
     }
 }

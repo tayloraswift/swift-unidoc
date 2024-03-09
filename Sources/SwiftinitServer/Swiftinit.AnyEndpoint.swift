@@ -271,9 +271,21 @@ extension Swiftinit.AnyEndpoint
     static
     func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .explainable(Swiftinit.TagsEndpoint.init(query: .init(
+        let filter:Unidoc.VersionsPredicate
+
+        if  let page:Int = parameters.page
+        {
+            filter = .tags(limit: 20, page: page, beta: parameters.beta)
+        }
+        else
+        {
+            filter = .none(limit: 12)
+        }
+
+        return .explainable(Swiftinit.TagsEndpoint.init(query: .init(
                 symbol: .init(trunk),
-                filter: .tags(limit: 12, user: parameters.user))),
+                filter: filter,
+                as: parameters.user)),
             parameters: parameters)
     }
 

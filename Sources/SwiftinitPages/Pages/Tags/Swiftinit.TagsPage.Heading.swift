@@ -4,6 +4,8 @@ extension Swiftinit.TagsPage
 {
     enum Heading
     {
+        case prereleases
+        case releases
         case tags
         case settings
     }
@@ -14,8 +16,10 @@ extension Swiftinit.TagsPage.Heading:Identifiable
     {
         switch self
         {
-        case .tags:     "ss:tags"
-        case .settings: "ss:settings"
+        case .prereleases:  "ss:prereleases"
+        case .releases:     "ss:releases"
+        case .tags:         "ss:tags"
+        case .settings:     "ss:settings"
         }
     }
 }
@@ -25,8 +29,10 @@ extension Swiftinit.TagsPage.Heading:HTML.OutputStreamableHeading
     {
         switch self
         {
-        case .tags:     "Package tags"
-        case .settings: "Package settings"
+        case .prereleases:  "Prereleases"
+        case .releases:     "Releases"
+        case .tags:         "Package tags"
+        case .settings:     "Package settings"
         }
     }
 }
