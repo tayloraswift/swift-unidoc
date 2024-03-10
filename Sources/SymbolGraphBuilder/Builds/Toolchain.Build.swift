@@ -75,6 +75,9 @@ extension Toolchain.Build:DocumentationBuild
             // 12:
             .toolchain(module: "FoundationXML",
                 dependencies: 0, 8, 10),
+            // 12:
+            .toolchain(module: "XCTest",
+                dependencies: 0),
         ]
 
         let metadata:SymbolGraphMetadata = .swift(swift.version,
