@@ -463,7 +463,7 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .uplinkAll:
-                return .interactive(Swiftinit.GraphUplinkEndpoint.init(queue: .all))
+                return .interactive(Swiftinit.GraphActionEndpoint.init(queue: .all))
 
             case .uplink:
                 if  let package:String = form["package"],
@@ -471,8 +471,9 @@ extension Swiftinit.AnyEndpoint
                     let version:String = form["version"],
                     let version:Unidoc.Version = .init(version)
                 {
-                    return .interactive(Swiftinit.GraphUplinkEndpoint.init(
-                        queue: .one(.init(package: package, version: version)),
+                    return .interactive(Swiftinit.GraphActionEndpoint.init(
+                        queue: .one(.init(package: package, version: version),
+                            action: .uplinkRefresh),
                         uri: form["redirect"]))
                 }
 
@@ -482,8 +483,21 @@ extension Swiftinit.AnyEndpoint
                     let version:String = form["version"],
                     let version:Unidoc.Version = .init(version)
                 {
-                    return .interactive(Swiftinit.GraphUnlinkEndpoint.init(
-                        volume: .init(package: package, version: version),
+                    return .interactive(Swiftinit.GraphActionEndpoint.init(
+                        queue: .one(.init(package: package, version: version),
+                            action: .unlink),
+                        uri: form["redirect"]))
+                }
+
+            case .delete:
+                if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package),
+                    let version:String = form["version"],
+                    let version:Unidoc.Version = .init(version)
+                {
+                    return .interactive(Swiftinit.GraphActionEndpoint.init(
+                        queue: .one(.init(package: package, version: version),
+                            action: .delete),
                         uri: form["redirect"]))
                 }
 
@@ -515,6 +529,61 @@ extension Swiftinit.AnyEndpoint
         default:
             return nil
         }
+    }
+
+    static
+    func post(really trunk:String,
+        body:consuming [UInt8],
+        type:ContentType) throws -> Self?
+    {
+        guard
+        let trunk:Swiftinit.API.Post = .init(trunk)
+        else
+        {
+            return nil
+        }
+
+        guard
+        case .media(.application(.x_www_form_urlencoded, charset: _)) = type
+        else
+        {
+            return nil
+        }
+        let action:URI = .init(path: Swiftinit.API[trunk].path,
+            query: try .parse(parameters: body))
+
+        let heading:String
+        let prompt:String
+        let button:String
+
+        switch trunk
+        {
+        case .unlink:
+            heading = "Unlink symbol graph?"
+            prompt = """
+            Nobody will be able to read the documentation for this version of the package. \
+            You can reverse this action by uplinking the symbol graph again.
+            """
+            button = "Remove documentation"
+
+        case .delete:
+            heading = "Delete symbol graph?"
+            prompt = """
+            Nobody will be able to read the documentation for this version of the package. \
+            This action is irreversible!
+            """
+            button = "It is so ordered"
+
+        default:
+            return nil
+        }
+
+        let really:Swiftinit.ReallyPage = .init(title: heading,
+            prompt: prompt,
+            button: button,
+            action: action)
+
+        return .stateless(really)
     }
 }
 

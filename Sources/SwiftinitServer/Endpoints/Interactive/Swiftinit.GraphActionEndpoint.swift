@@ -8,19 +8,19 @@ import UnidocRecords
 extension Swiftinit
 {
     /// Queues one or more editions for uplinking. The uplinking process itself is asynchronous.
-    struct GraphUplinkEndpoint:Sendable
+    struct GraphActionEndpoint:Sendable
     {
-        let queue:Unidoc.DB.Snapshots.QueueUplink
+        let queue:Unidoc.DB.Snapshots.QueueAction
         let uri:String?
 
-        init(queue:Unidoc.DB.Snapshots.QueueUplink, uri:String? = nil)
+        init(queue:Unidoc.DB.Snapshots.QueueAction, uri:String? = nil)
         {
             self.queue = queue
             self.uri = uri
         }
     }
 }
-extension Swiftinit.GraphUplinkEndpoint:RestrictedEndpoint
+extension Swiftinit.GraphActionEndpoint:RestrictedEndpoint
 {
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
     {

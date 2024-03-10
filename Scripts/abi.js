@@ -1,4 +1,4 @@
-db = connect('mongodb://localhost:27017/unidoc');
+db = connect('mongodb://vesta.swiftinit.org:27017/unidoc');
 
 var aggregate = {
     aggregate: 'Snapshots',

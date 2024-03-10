@@ -125,7 +125,7 @@ extension SwiftinitClient
         {
             try await self.build(buildable,
                 pretty: pretty,
-                link: force != nil ? .refresh : .initial)
+                action: force != nil ? .uplinkRefresh : .uplinkInitial)
         }
         else
         {
@@ -136,7 +136,7 @@ extension SwiftinitClient
     private
     func build(_ buildable:Unidoc.BuildArguments,
         pretty:Bool,
-        link:Unidoc.Snapshot.LinkState) async throws
+        action:Unidoc.Snapshot.PendingAction) async throws
     {
         let toolchain:Toolchain = try await .detect()
         let workspace:SPM.Workspace = try await .create(at: ".swiftinit")
@@ -166,7 +166,7 @@ extension SwiftinitClient
         let bson:BSON.Document = .init(encoding: Unidoc.Snapshot.init(id: buildable.coordinate,
             metadata: archive.metadata,
             inline: archive.graph,
-            link: link))
+            action: action))
 
         try await self.connect
         {
@@ -239,7 +239,7 @@ extension SwiftinitClient
                 {
                     try await self.build(buildable,
                         pretty: pretty,
-                        link: .refresh)
+                        action: .uplinkRefresh)
 
                     upgraded += 1
                 }

@@ -5,12 +5,12 @@ import UnidocRecords
 extension Unidoc.DB.Snapshots
 {
     @frozen public
-    enum ClearUplink
+    enum ClearAction
     {
         case one(Unidoc.Edition)
     }
 }
-extension Unidoc.DB.Snapshots.ClearUplink:Mongo.UpdateQuery
+extension Unidoc.DB.Snapshots.ClearAction:Mongo.UpdateQuery
 {
     public
     typealias Target = Unidoc.DB.Snapshots
@@ -35,7 +35,7 @@ extension Unidoc.DB.Snapshots.ClearUplink:Mongo.UpdateQuery
             {
                 $0[.unset]
                 {
-                    $0[Unidoc.Snapshot[.link]] = ()
+                    $0[Unidoc.Snapshot[.action]] = ()
                 }
             }
         }
