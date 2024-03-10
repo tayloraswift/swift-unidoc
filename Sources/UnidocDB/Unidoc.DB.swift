@@ -321,6 +321,21 @@ extension Unidoc.DB
         return (uploaded, uplinked)
     }
 
+    /// Indexes and stores a symbol graph in the database, queueing it for an **asynchronous**
+    /// uplink.
+    @_spi(testable)
+    public
+    func store(docs documentation:consuming SymbolGraphObject<Void>,
+        with session:Mongo.Session) async throws -> Unidoc.UploadStatus
+    {
+        let (snapshot, _):(Unidoc.Snapshot, Unidoc.Realm?) = try await self.label(
+            documentation: documentation,
+            action: .uplinkInitial,
+            with: session)
+
+        return try await self.snapshots.upsert(snapshot: snapshot, with: session)
+    }
+
     public
     func label(
         documentation:consuming SymbolGraphObject<Void>,

@@ -603,10 +603,10 @@ extension Swiftinit.AnyEndpoint
         switch (trunk, type)
         {
         case (.snapshot, .media(.application(.bson, charset: nil))):
-            return .procedural(Swiftinit.GraphStorageEndpoint.put)
+            return .procedural(Swiftinit.GraphStorageEndpoint.placed)
 
         case (.graph, .media(.application(.bson, charset: nil))):
-            return .procedural(Swiftinit.GraphPlacementEndpoint.put)
+            return .procedural(Swiftinit.GraphStorageEndpoint.object)
 
         case (_, _):
             return nil
