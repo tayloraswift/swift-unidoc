@@ -4,6 +4,7 @@ import JSON
 import Media
 import NIOCore
 import NIOHPACK
+import SemanticVersions
 import Symbols
 import Unidoc
 import UnidocAPI
@@ -31,16 +32,27 @@ extension SwiftinitClient
 
 extension SwiftinitClient.Connection
 {
-    func status(of package:Symbol.Package) async throws -> Unidoc.PackageStatus
+    func oldest(until abi:PatchVersion) async throws -> [Unidoc.Edition]
     {
-        try await self.get(from: "/api/build/\(package)")
+        try await self.get(from: "/api/oldest?until=\(abi)")
     }
 
-    func uplink(package:Unidoc.Package, version:Unidoc.Version) async throws
+    func build(id:Unidoc.Edition) async throws -> Unidoc.BuildArguments
     {
-        try await self.post(
-            urlencoded: "package=\(package)&version=\(version)",
-            to: "/api/uplink")
+        try await self.get(from: "/api/build?package=\(id.package)&version=\(id.version)")
+    }
+
+    func latest(_ force:Unidoc.BuildLatest?,
+        of package:Symbol.Package) async throws -> Unidoc.BuildArguments
+    {
+        if  let force:Unidoc.BuildLatest
+        {
+            try await self.get(from: "/api/build/\(package)?force=\(force)")
+        }
+        else
+        {
+            try await self.get(from: "/api/build/\(package)")
+        }
     }
 }
 
@@ -121,6 +133,7 @@ extension SwiftinitClient.Connection
         type:MediaType? = nil) async throws -> [ByteBuffer]
     {
         var endpoint:String = endpoint
+        var message:String = ""
         var status:UInt? = nil
 
         following:
@@ -152,6 +165,10 @@ extension SwiftinitClient.Connection
                     continue following
                 }
             case _:
+                message = response.buffers.reduce(into: "")
+                {
+                    $0 += String.init(decoding: $1.readableBytesView, as: Unicode.UTF8.self)
+                }
                 break
             }
 
@@ -159,6 +176,6 @@ extension SwiftinitClient.Connection
             break following
         }
 
-        throw HTTP.StatusError.init(code: status)
+        throw HTTP.StatusError.init(code: status, message: message)
     }
 }

@@ -7,11 +7,14 @@ extension HTTP
         /// The response status code, if it could be parsed, nil otherwise.
         public
         let code:UInt?
+        public
+        let message:String
 
         @inlinable public
-        init(code:UInt?)
+        init(code:UInt?, message:String = "")
         {
             self.code = code
+            self.message = message
         }
     }
 }
@@ -24,7 +27,7 @@ extension HTTP.StatusError:CustomStringConvertible
         let code:UInt = self.code
         else
         {
-            return "(None) Unknown"
+            return "(None) Unknown '\(self.message)'"
         }
 
         let phrase:String = switch code
@@ -92,6 +95,6 @@ extension HTTP.StatusError:CustomStringConvertible
         case _:     "Unknown"
         }
 
-        return "\(code) \(phrase)"
+        return "\(code) \(phrase) '\(self.message)'"
     }
 }

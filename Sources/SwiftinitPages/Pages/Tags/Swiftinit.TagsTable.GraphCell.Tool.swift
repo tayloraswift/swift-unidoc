@@ -1,21 +1,23 @@
 import HTML
 import Symbols
 
-extension Swiftinit.TagsPage
+extension Swiftinit.TagsTable.GraphCell
 {
-    struct UplinkButton
+    struct Tool
     {
         let edition:Unidoc.Edition
         let package:Symbol.Package
+        let label:String
 
-        init(edition:Unidoc.Edition, package:Symbol.Package)
+        init(edition:Unidoc.Edition, package:Symbol.Package, label:String)
         {
             self.edition = edition
             self.package = package
+            self.label = label
         }
     }
 }
-extension Swiftinit.TagsPage.UplinkButton:HTML.OutputStreamable
+extension Swiftinit.TagsTable.GraphCell.Tool:HTML.OutputStreamable
 {
     static
     func += (form:inout HTML.ContentEncoder, self:Self)
@@ -39,6 +41,6 @@ extension Swiftinit.TagsPage.UplinkButton:HTML.OutputStreamable
             $0.value = "\(Swiftinit.Tags[self.package])"
         }
 
-        form[.button] { $0.type = "submit" } = "Uplink"
+        form[.button] { $0.type = "submit" } = self.label
     }
 }

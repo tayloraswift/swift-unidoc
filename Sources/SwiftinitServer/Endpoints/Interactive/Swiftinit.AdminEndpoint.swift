@@ -52,23 +52,8 @@ extension Swiftinit.AdminEndpoint:RestrictedEndpoint
         case .perform(.restart, _):
             fatalError("Restarting server...")
 
-        case .perform(.upload, let form?):
-            var receipts:[Unidoc.UploadStatus] = []
-
-            for item:MultipartForm.Item in form
-                where item.header.name == "documentation-binary"
-            {
-                let archive:SymbolGraphObject<Void> = try .init(buffer: item.value)
-                let receipt:Unidoc.UploadStatus = try await server.db.unidoc.store(
-                    docs: archive,
-                    with: session)
-
-                receipts.append(receipt)
-            }
-
-            page = .init(action: .upload, text: "\(receipts)")
-
-        case .perform(.upload, nil):
+        case .perform(.upload, _):
+            //  No longer supported.
             return nil
 
         case .telescope(days: let days):

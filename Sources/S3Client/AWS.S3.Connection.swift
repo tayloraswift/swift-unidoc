@@ -26,30 +26,6 @@ extension AWS.S3
 extension AWS.S3.Connection
 {
     public
-    func get(path:String) async throws -> [UInt8]
-    {
-        let facet:HTTP1Client.Facet = try await self.http1.fetch(.init(
-            method: .GET,
-            path: path,
-            head: ["host": bucket.domain]))
-
-        guard
-        let status:HTTPResponseStatus = facet.head?.status
-        else
-        {
-            throw AWS.S3.RequestError.get(0)
-        }
-        guard
-        case .ok = status
-        else
-        {
-            throw AWS.S3.RequestError.get(status.code)
-        }
-
-        return facet.body
-    }
-
-    public
     func put(_ content:[UInt8],
         using storage:AWS.S3.StorageClass = .standard,
         path:String,
@@ -95,6 +71,55 @@ extension AWS.S3.Connection
         else
         {
             throw AWS.S3.RequestError.put(status.code)
+        }
+    }
+
+    public
+    func get(path:String) async throws -> [UInt8]
+    {
+        let facet:HTTP1Client.Facet = try await self.http1.fetch(.init(
+            method: .GET,
+            path: path,
+            head: ["host": bucket.domain]))
+
+        guard
+        let status:HTTPResponseStatus = facet.head?.status
+        else
+        {
+            throw AWS.S3.RequestError.get(0)
+        }
+        guard
+        case .ok = status
+        else
+        {
+            throw AWS.S3.RequestError.get(status.code)
+        }
+
+        return facet.body
+    }
+
+    public
+    func delete(path:String) async throws -> Bool
+    {
+        let facet:HTTP1Client.Facet = try await self.http1.fetch(.init(
+            method: .DELETE,
+            path: path,
+            head: ["host": bucket.domain]))
+
+        guard
+        let status:HTTPResponseStatus = facet.head?.status
+        else
+        {
+            throw AWS.S3.RequestError.delete(0)
+        }
+
+        switch status
+        {
+        case .ok:           return true
+        case .noContent:    return true
+        case .notFound:     return false
+        case let status:
+            throw AWS.S3.RequestError.delete(status.code)
         }
     }
 }

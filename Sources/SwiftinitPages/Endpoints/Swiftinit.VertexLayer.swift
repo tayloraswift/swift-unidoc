@@ -10,26 +10,22 @@ extension Swiftinit
     /// namespaces; all vertex layers are interchangable, some of them are merely non-canonical.
     /// This enables us to reclassify pages without disrupting users.
     public
-    typealias VertexLayer = _SwiftinitVertexLayer
-}
-
-/// The name of this protocol is ``Swiftinit.VertexLayer``.
-public
-protocol _SwiftinitVertexLayer
-{
-    /// The primary layer, which is visible to search engines. The **s** used to stand for
-    /// *Swift*, but now it’s just part of the plural.
-    static
-    var docs:Swiftinit.Root { get }
-    /// The detail layer, which is hidden from search engines. The **c** used to stand for
-    /// *C* (and later C++), but today we also use it for underscored declarations and
-    /// low-value documentation in general. It has no relation to DocC.
-    static
-    var docc:Swiftinit.Root { get }
-    /// The archive layer, which is hidden from search engines. Historical documentation is not
-    /// segregated into primary and detail layers, because it is all considered supplementary.
-    static
-    var hist:Swiftinit.Root { get }
+    protocol VertexLayer
+    {
+        /// The primary layer, which is visible to search engines. The **s** used to stand for
+        /// *Swift*, but now it’s just part of the plural.
+        static
+        var docs:Swiftinit.Root { get }
+        /// The detail layer, which is hidden from search engines. The **c** used to stand for
+        /// *C* (and later C++), but today we also use it for underscored declarations and
+        /// low-value documentation in general. It has no relation to DocC.
+        static
+        var docc:Swiftinit.Root { get }
+        /// The archive layer, which is hidden from search engines. Historical documentation is not
+        /// segregated into primary and detail layers, because it is all considered supplementary.
+        static
+        var hist:Swiftinit.Root { get }
+    }
 }
 extension Swiftinit.VertexLayer
 {

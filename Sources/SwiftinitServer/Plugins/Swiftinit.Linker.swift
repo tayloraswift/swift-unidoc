@@ -69,13 +69,13 @@ extension Swiftinit.Linker
             async
             let cooldown:Void = Task.sleep(for: .seconds(5))
 
-            for edition:Unidoc.Edition in try await db.snapshots.linkable(8,
+            for queued:Unidoc.DB.Snapshots.QueuedOperation in try await db.snapshots.pending(8,
                 with: session)
             {
                 async
                 let cooldown:Void = Task.sleep(for: .seconds(5))
 
-                try await self.uplink(snapshot: edition,
+                try await self.perform(operation: queued,
                     updating: db,
                     with: session)
 
@@ -87,7 +87,7 @@ extension Swiftinit.Linker
     }
 
     private mutating
-    func uplink(snapshot edition:Unidoc.Edition,
+    func perform(operation:Unidoc.DB.Snapshots.QueuedOperation,
         updating db:Swiftinit.DB,
         with session:Mongo.Session) async throws
     {
@@ -96,29 +96,112 @@ extension Swiftinit.Linker
             self.publish()
         }
 
+        let event:Event?
+
+        action:
+        switch operation.action
+        {
+        case .uplinkInitial, .uplinkRefresh:
+            let status:Unidoc.UplinkStatus? = try await self.uplink(snapshot: operation.edition,
+                updating: db,
+                with: session)
+
+            event = status.map(Event.uplinked(_:))
+
+        case .unlink:
+            let status:Unidoc.UnlinkStatus? = try await db.unidoc.unlink(operation.edition,
+                with: session)
+
+            event = status.map(Event.unlinked(_:))
+
+        case .delete:
+            //  Okay if the volume has already been unlinked, which causes this to return nil.
+            if  let unlink:Unidoc.UnlinkStatus = try await db.unidoc.unlink(operation.edition,
+                    with: session)
+            {
+                switch unlink
+                {
+                case .declined(let id):
+                    event = .unlinked(.declined(id))
+                    break action
+
+                case .unlinked(let id):
+                    self.buffer.push(event: .unlinked(.unlinked(id)))
+                }
+            }
+
+            let path:Unidoc.GraphPath = .init(edition: operation.edition,
+                type: operation.graphType)
+
+            let deletedS3:Bool
+            if  operation.graphSize > 0
+            {
+                //  There is almost certainly an S3 graph to delete.
+                guard
+                let graphs:AWS.S3.Client = self.graphs
+                else
+                {
+                    event = nil
+                    break action
+                }
+
+                deletedS3 = try await graphs.connect { try await $0.delete(path: "\(path)") }
+            }
+            else if
+                let graphs:AWS.S3.Client = self.graphs
+            {
+                //  There might be an S3 graph to delete.
+                deletedS3 = try await graphs.connect { try await $0.delete(path: "\(path)") }
+            }
+            else
+            {
+                //  We cannot delete any S3 graphs.
+                deletedS3 = false
+            }
+
+            if  try await db.snapshots.delete(id: operation.edition,  with: session)
+            {
+                event = .deleted(.deleted(operation.edition, fromS3: deletedS3))
+            }
+            else
+            {
+                event = nil
+            }
+        }
+
+        try await session.update(database: db.unidoc.id,
+            with: Unidoc.DB.Snapshots.ClearAction.one(operation.edition))
+
+        if  let event:Event
+        {
+            self.buffer.push(event: event)
+        }
+        else
+        {
+            self.buffer.push(event: .failed(operation.edition, action: operation.action))
+        }
+    }
+
+    private
+    func uplink(snapshot id:Unidoc.Edition,
+        updating db:Swiftinit.DB,
+        with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
+    {
         guard
-        let status:Unidoc.UplinkStatus = try await db.unidoc.uplink(edition,
+        let status:Unidoc.UplinkStatus = try await db.unidoc.uplink(id,
             from: self.graphs,
             with: session)
         else
         {
-            self.buffer.push(event: .failed(edition))
-            return
+            return nil
         }
 
-        try await session.update(database: db.unidoc.id,
-            with: Unidoc.DB.Snapshots.ClearUplink.one(edition))
-
-        self.buffer.push(event: .uplinked(status))
-
-        if  status.hidden
+        if !status.hidden
         {
-            return
+            _ = try await db.docsFeed.push(.init(discovered: .now(), volume: status.edition),
+                with: session)
         }
 
-        _ = try await db.docsFeed.push(.init(
-                    discovered: .now(),
-                    volume: status.edition),
-                with: session)
+        return status
     }
 }
