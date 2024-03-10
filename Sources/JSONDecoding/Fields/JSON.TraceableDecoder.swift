@@ -1,18 +1,16 @@
 extension JSON
 {
     /// A type that represents a scope for decoding operations.
-    typealias TraceableDecoder = _JSONTraceableDecoder
+    public
+    protocol TraceableDecoder
+    {
+        /// Attempts to load a JSON variant value and passes it to the given
+        /// closure, returns its result. If decoding fails, the implementation
+        /// should annotate the error with appropriate context and re-throw it.
+        func decode<T>(with decode:(JSON.Node) throws -> T) throws -> T
+    }
 }
 
-/// The name of this protocol is ``JSON.TraceableDecoder``.
-public
-protocol _JSONTraceableDecoder
-{
-    /// Attempts to load a JSON variant value and passes it to the given
-    /// closure, returns its result. If decoding fails, the implementation
-    /// should annotate the error with appropriate context and re-throw it.
-    func decode<T>(with decode:(JSON.Node) throws -> T) throws -> T
-}
 extension JSON.TraceableDecoder
 {
     @inlinable public

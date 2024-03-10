@@ -49,48 +49,6 @@ extension SwiftinitClient
 }
 extension SwiftinitClient
 {
-    func uplink(editions:FilePath) async throws
-    {
-        let json:JSON = .init(utf8: try editions.read()[...])
-        let coordinates:[Coordinates] = try json.decode()
-        for coordinates:Coordinates in coordinates.sorted()
-        {
-            try await self.connect
-            {
-                @Sendable (connection:SwiftinitClient.Connection) in
-
-                do
-                {
-                    try await connection.uplink(
-                        package: coordinates.package,
-                        version: coordinates.version)
-
-                    print("Successfully uplinked symbol graph \(coordinates)")
-                }
-                catch let error
-                {
-                    print("Failed to uplink \(coordinates): \(error)")
-                }
-            }
-        }
-    }
-    func uplink(package symbol:Symbol.Package) async throws
-    {
-        try await self.connect
-        {
-            @Sendable (connection:SwiftinitClient.Connection) in
-
-            let package:Unidoc.PackageStatus = try await connection.status(
-                of: symbol)
-
-            try await connection.uplink(
-                package: package.coordinate,
-                version: package.release.coordinate)
-
-            print("Successfully uplinked symbol graph!")
-        }
-    }
-
     func build(local symbol:Symbol.Package,
         search:FilePath?,
         pretty:Bool) async throws
@@ -138,18 +96,18 @@ extension SwiftinitClient
 
     func build(remote symbol:Symbol.Package,
         pretty:Bool,
-        force:Main.Options.Force?) async throws
+        force:Unidoc.BuildLatest?) async throws
     {
         //  Building the package might take a long time, and the server might close the
         //  connection before the build is finished. So we do not try to keep this
         //  connection open.
-        let package:Unidoc.PackageStatus? = try await self.connect
+        let buildable:Unidoc.BuildArguments? = try await self.connect
         {
             @Sendable (connection:SwiftinitClient.Connection) in
 
             do
             {
-                return try await connection.status(of: symbol)
+                return try await connection.latest(force, of: symbol)
             }
             catch let error as HTTP.StatusError
             {
@@ -163,33 +121,41 @@ extension SwiftinitClient
                 return nil
             }
         }
-
-        guard
-        let package:Unidoc.PackageStatus
+        if  let buildable:Unidoc.BuildArguments
+        {
+            try await self.build(buildable,
+                pretty: pretty,
+                action: force != nil ? .uplinkRefresh : .uplinkInitial)
+        }
         else
         {
             print("Not a buildable package.")
-            return
         }
+    }
 
+    private
+    func build(_ buildable:Unidoc.BuildArguments,
+        pretty:Bool,
+        action:Unidoc.Snapshot.PendingAction) async throws
+    {
         let toolchain:Toolchain = try await .detect()
         let workspace:SPM.Workspace = try await .create(at: ".swiftinit")
 
         guard
-        let edition:Unidoc.PackageStatus.Edition = package.choose(force: force)
+        let tag:String = buildable.tag
         else
         {
             print("""
-                No new documentation to build, run with -f to force upload of \
-                unindexed documentation.
+                No new documentation to build, run with -f or -e to build the latest release
+                or prerelease anyway.
                 """)
             return
         }
 
         let build:SPM.Build = try await .remote(
-            package: symbol,
-            from: package.repo,
-            at: edition.tag,
+            package: buildable.package,
+            from: buildable.repo,
+            at: tag,
             in: workspace,
             clean: [.artifacts])
 
@@ -197,12 +163,10 @@ extension SwiftinitClient
             with: toolchain,
             pretty: pretty)
 
-        let bson:BSON.Document = .init(encoding: Unidoc.Snapshot.init(id: .init(
-                package: package.coordinate,
-                version: edition.coordinate),
+        let bson:BSON.Document = .init(encoding: Unidoc.Snapshot.init(id: buildable.coordinate,
             metadata: archive.metadata,
             inline: archive.graph,
-            link: force != nil ? .refresh : .initial))
+            action: action))
 
         try await self.connect
         {
@@ -213,6 +177,83 @@ extension SwiftinitClient
             try await connection.put(bson: bson, to: "/api/snapshot")
 
             print("Successfully uploaded symbol graph!")
+        }
+    }
+}
+extension SwiftinitClient
+{
+    func upgrade(pretty:Bool) async throws
+    {
+        var unbuildable:[Unidoc.Edition: ()] = [:]
+
+        upgrading:
+        do
+        {
+            let editions:[Unidoc.Edition] = try await self.connect
+            {
+                @Sendable (connection:SwiftinitClient.Connection) in
+
+                try await connection.oldest(until: SymbolGraphABI.version)
+            }
+
+            var upgraded:Int = 0
+
+            for edition:Unidoc.Edition in editions where edition.version != -1
+            {
+                if  unbuildable.keys.contains(edition)
+                {
+                    continue
+                }
+
+                let buildable:Unidoc.BuildArguments
+                do
+                {
+                    buildable = try await self.connect
+                    {
+                        @Sendable (connection:SwiftinitClient.Connection) in
+
+                        try await connection.build(id: edition)
+                    }
+                }
+                catch let error as HTTP.StatusError
+                {
+                    guard
+                    case 404? = error.code
+                    else
+                    {
+                        throw error
+                    }
+
+                    print("No buildable package for \(edition).")
+                    continue
+                }
+
+                if  case .swift = buildable.package
+                {
+                    //  We cannot build the standard library this way.
+                    print("Skipping 'swift'")
+                    continue
+                }
+
+                do
+                {
+                    try await self.build(buildable,
+                        pretty: pretty,
+                        action: .uplinkRefresh)
+
+                    upgraded += 1
+                }
+                catch SPM.BuildError.swift_build
+                {
+                    print("Failed to build \(buildable.package) \(buildable.tag ?? "?")")
+                    unbuildable[edition] = ()
+                }
+            }
+            //  If we have upgraded at least one package, there are probably more.
+            if  upgraded > 0
+            {
+                continue upgrading
+            }
         }
     }
 }

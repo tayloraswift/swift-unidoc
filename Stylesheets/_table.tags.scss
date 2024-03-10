@@ -40,4 +40,12 @@ table.tags
     {
         content: '⟳';
     }
+    td.graph > .abi.unlinking:first-child::before
+    {
+        content: '▼';
+    }
+    td.graph > .abi.deleting:first-child::before
+    {
+        content: '✗';
+    }
 }

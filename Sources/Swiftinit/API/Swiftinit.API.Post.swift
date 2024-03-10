@@ -16,5 +16,6 @@ extension Swiftinit.API
         case uplinkAll = "uplink-all"
         case uplink
         case unlink
+        case delete
     }
 }

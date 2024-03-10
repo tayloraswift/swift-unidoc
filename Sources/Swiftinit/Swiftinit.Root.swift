@@ -19,6 +19,7 @@ extension Swiftinit
         case ptcl
         case pdct
         case realm
+        case really
         case stats
         case tags
         case telescope
@@ -62,6 +63,7 @@ extension Swiftinit.Root:Identifiable
         case .ptcl:         "ptcl"
         case .pdct:         "pdct"
         case .realm:        "realm"
+        case .really:       "really"
         case .stats:        "stats"
         case .tags:         "tags"
         case .telescope:    "telescope"

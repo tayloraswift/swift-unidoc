@@ -19,12 +19,7 @@ enum Main
     func _main() async throws
     {
         let options:Options = try .parse()
-        guard
-        let package:Symbol.Package = options.package
-        else
-        {
-            fatalError("No package specified")
-        }
+
 
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
 
@@ -52,20 +47,17 @@ enum Main
 
         switch options.tool
         {
-        case .uplinkMultiple:
+        case .upgrade:
+            try await swiftinit.upgrade(pretty: options.pretty)
+
+        case .latest:
             guard
-            let input:String = options.input
+            let package:Symbol.Package = options.package
             else
             {
-                fatalError("Missing input file")
+                fatalError("No package specified")
             }
 
-            try await swiftinit.uplink(editions: FilePath.init(input))
-
-        case .uplink:
-            try await swiftinit.uplink(package: package)
-
-        case .build:
             if  package != .swift,
                 options.input == nil
             {

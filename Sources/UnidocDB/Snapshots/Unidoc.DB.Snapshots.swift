@@ -44,14 +44,14 @@ extension Unidoc.DB.Snapshots
     }
 
     public static
-    let indexUplinking:Mongo.CollectionIndex = .init("Uplinking",
+    let indexPendingActions:Mongo.CollectionIndex = .init("Uplinking",
         unique: false)
     {
-        $0[Unidoc.Snapshot[.link]] = (+)
+        $0[Unidoc.Snapshot[.action]] = (+)
     }
         where:
     {
-        $0[Unidoc.Snapshot[.link]] { $0[.exists] = true }
+        $0[Unidoc.Snapshot[.action]] { $0[.exists] = true }
     }
 }
 extension Unidoc.DB.Snapshots:Mongo.CollectionModel
@@ -68,7 +68,7 @@ extension Unidoc.DB.Snapshots:Mongo.CollectionModel
         [
             Self.indexSwiftReleases,
             Self.indexSymbolGraphABI,
-            Self.indexUplinking,
+            Self.indexPendingActions,
         ]
     }
 }
@@ -169,32 +169,32 @@ extension Unidoc.DB.Snapshots
         }
     }
 }
+
 extension Unidoc.DB.Snapshots
 {
     /// Returns a single batch of symbol graphs that are queued for linking.
     public
-    func linkable(_ limit:Int,
-        with session:Mongo.Session) async throws -> [Unidoc.Edition]
+    func pending(_ limit:Int,
+        with session:Mongo.Session) async throws -> [QueuedOperation]
     {
-        let editions:[Mongo.IdentityView<Unidoc.Edition>] = try await session.run(
-            command: Mongo.Find<
-                Mongo.SingleBatch<Mongo.IdentityView<Unidoc.Edition>>>.init(Self.name,
+        try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<QueuedOperation>>.init(Self.name,
                 limit: limit)
             {
                 $0[.filter]
                 {
-                    $0[Unidoc.Snapshot[.link]] { $0[.exists] = true }
+                    $0[Unidoc.Snapshot[.action]] { $0[.exists] = true }
                 }
                 $0[.projection] = .init
                 {
-                    $0[Unidoc.Snapshot[.id]] = true
+                    $0[Unidoc.Snapshot[.action]] = true
+                    $0[Unidoc.Snapshot[.type]] = true
+                    $0[Unidoc.Snapshot[.size]] = true
                 }
 
-                $0[.hint] = Self.indexUplinking.id
+                $0[.hint] = Self.indexPendingActions.id
             },
             against: self.database)
-
-        return editions.map(\.id)
     }
 
     /// Returns a single batch of the symbol graphs in the database with the oldest ABI

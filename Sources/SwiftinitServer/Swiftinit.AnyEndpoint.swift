@@ -4,6 +4,7 @@ import MD5
 import Media
 import MongoDB
 import Multiparts
+import SemanticVersions
 import SwiftinitPages
 import Symbols
 import UnidocDB
@@ -34,11 +35,9 @@ extension Swiftinit.AnyEndpoint
                 Base:Sendable
     {
         parameters.explain
-            ? .interactive(Swiftinit.ExplanatoryEndpoint<Base.Query>.init(
-                query: endpoint.query))
-            : .interactive(Swiftinit.OptimizingEndpoint<Base>.init(accept: accept,
-                etag: parameters.tag,
-                base: endpoint))
+        ? .interactive(Swiftinit.ExplanatoryEndpoint<Base.Query>.init(query: endpoint.query))
+        : .interactive(Swiftinit.OptimizingEndpoint<Base>.init(base: endpoint,
+            etag: parameters.tag))
     }
 }
 //  GET endpoints
@@ -88,7 +87,7 @@ extension Swiftinit.AnyEndpoint
     static
     func get(api trunk:String,
         _ stem:ArraySlice<String>,
-        with parameters:Swiftinit.PipelineParameters) -> Self?
+        with parameters:[(key:String, value:String)]) -> Self?
     {
         guard
         let trunk:Swiftinit.API.Get = .init(trunk)
@@ -97,15 +96,43 @@ extension Swiftinit.AnyEndpoint
             return nil
         }
 
+        let parameters:[String: String] = parameters.reduce(into: [:]) { $0[$1.key] = $1.value }
+
         switch trunk
         {
         case .build:
             if  let package:String = stem.first
             {
                 let package:Symbol.Package = .init(package)
-                return .explainable(Swiftinit.TagsEndpoint.init(query: .latest(package)),
-                    parameters: parameters,
-                    accept: .application(.json))
+                let subject:Unidoc.BuildLatest?
+
+                if  let force:String = parameters["force"]
+                {
+                    subject = .init(force)
+                }
+                else
+                {
+                    subject = nil
+                }
+
+                return .interactive(Swiftinit.BuilderEndpoint._latest(subject, of: package))
+            }
+            else if
+                let package:String = parameters["package"],
+                let package:Unidoc.Package = .init(package),
+                let version:String = parameters["version"],
+                let version:Unidoc.Version = .init(version)
+            {
+                return .interactive(Swiftinit.BuilderEndpoint.edition(.init(
+                    package: package,
+                    version: version)))
+            }
+
+        case .oldest:
+            if  let version:String = parameters["until"],
+                let version:PatchVersion = .init(version)
+            {
+                return .interactive(Swiftinit.BuilderEndpoint.oldest(until: version))
             }
         }
 
@@ -244,9 +271,21 @@ extension Swiftinit.AnyEndpoint
     static
     func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .explainable(Swiftinit.TagsEndpoint.init(query: .tags(.init(trunk),
-                limit: 12,
-                user: parameters.user)),
+        let filter:Unidoc.VersionsPredicate
+
+        if  let page:Int = parameters.page
+        {
+            filter = .tags(limit: 20, page: page, beta: parameters.beta)
+        }
+        else
+        {
+            filter = .none(limit: 12)
+        }
+
+        return .explainable(Swiftinit.TagsEndpoint.init(query: .init(
+                symbol: .init(trunk),
+                filter: filter,
+                as: parameters.user)),
             parameters: parameters)
     }
 
@@ -424,7 +463,7 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .uplinkAll:
-                return .interactive(Swiftinit.GraphUplinkEndpoint.init(queue: .all))
+                return .interactive(Swiftinit.GraphActionEndpoint.init(queue: .all))
 
             case .uplink:
                 if  let package:String = form["package"],
@@ -432,16 +471,34 @@ extension Swiftinit.AnyEndpoint
                     let version:String = form["version"],
                     let version:Unidoc.Version = .init(version)
                 {
-                    return .interactive(Swiftinit.GraphUplinkEndpoint.init(
-                        queue: .one(.init(package: package, version: version)),
+                    return .interactive(Swiftinit.GraphActionEndpoint.init(
+                        queue: .one(.init(package: package, version: version),
+                            action: .uplinkRefresh),
                         uri: form["redirect"]))
                 }
 
             case .unlink:
-                if  let volume:String = form["volume"],
-                    let volume:Symbol.Edition = .init(volume)
+                if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package),
+                    let version:String = form["version"],
+                    let version:Unidoc.Version = .init(version)
                 {
-                    return .procedural(Swiftinit.GraphUnlinkEndpoint.init(volume: volume))
+                    return .interactive(Swiftinit.GraphActionEndpoint.init(
+                        queue: .one(.init(package: package, version: version),
+                            action: .unlink),
+                        uri: form["redirect"]))
+                }
+
+            case .delete:
+                if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package),
+                    let version:String = form["version"],
+                    let version:Unidoc.Version = .init(version)
+                {
+                    return .interactive(Swiftinit.GraphActionEndpoint.init(
+                        queue: .one(.init(package: package, version: version),
+                            action: .delete),
+                        uri: form["redirect"]))
                 }
 
             default:
@@ -473,6 +530,61 @@ extension Swiftinit.AnyEndpoint
             return nil
         }
     }
+
+    static
+    func post(really trunk:String,
+        body:consuming [UInt8],
+        type:ContentType) throws -> Self?
+    {
+        guard
+        let trunk:Swiftinit.API.Post = .init(trunk)
+        else
+        {
+            return nil
+        }
+
+        guard
+        case .media(.application(.x_www_form_urlencoded, charset: _)) = type
+        else
+        {
+            return nil
+        }
+        let action:URI = .init(path: Swiftinit.API[trunk].path,
+            query: try .parse(parameters: body))
+
+        let heading:String
+        let prompt:String
+        let button:String
+
+        switch trunk
+        {
+        case .unlink:
+            heading = "Unlink symbol graph?"
+            prompt = """
+            Nobody will be able to read the documentation for this version of the package. \
+            You can reverse this action by uplinking the symbol graph again.
+            """
+            button = "Remove documentation"
+
+        case .delete:
+            heading = "Delete symbol graph?"
+            prompt = """
+            Nobody will be able to read the documentation for this version of the package. \
+            This action is irreversible!
+            """
+            button = "It is so ordered"
+
+        default:
+            return nil
+        }
+
+        let really:Swiftinit.ReallyPage = .init(title: heading,
+            prompt: prompt,
+            button: button,
+            action: action)
+
+        return .stateless(really)
+    }
 }
 
 //  PUT endpoints
@@ -491,10 +603,10 @@ extension Swiftinit.AnyEndpoint
         switch (trunk, type)
         {
         case (.snapshot, .media(.application(.bson, charset: nil))):
-            return .procedural(Swiftinit.GraphStorageEndpoint.put)
+            return .procedural(Swiftinit.GraphStorageEndpoint.placed)
 
         case (.graph, .media(.application(.bson, charset: nil))):
-            return .procedural(Swiftinit.GraphPlacementEndpoint.put)
+            return .procedural(Swiftinit.GraphStorageEndpoint.object)
 
         case (_, _):
             return nil
