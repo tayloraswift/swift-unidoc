@@ -280,14 +280,16 @@ extension Unidoc.DB
     /// Indexes and stores a symbol graph in the database, linking it **synchronously**.
     @_spi(testable)
     public
-    func store(linking docs:SymbolGraphObject<Void>,
+    func store(linking documentation:SymbolGraphObject<Void>,
         with session:Mongo.Session) async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
     {
         var snapshot:Unidoc.Snapshot
         let realm:Unidoc.Realm?
 
         //  Don’t queue for uplink, since we’re going to do that synchronously.
-        (snapshot, realm) = try await self.label(docs: docs, action: nil, with: session)
+        (snapshot, realm) = try await self.label(documentation: documentation,
+            action: nil,
+            with: session)
 
         enum NoLoader:Unidoc.GraphLoader
         {
@@ -298,7 +300,7 @@ extension Unidoc.DB
         }
 
         let volume:Unidoc.Volume = try await self.link(&snapshot,
-            symbol: docs.metadata.package.id,
+            symbol: documentation.metadata.package.id,
             loader: nil as NoLoader?,
             realm: realm,
             with: session)
@@ -319,21 +321,9 @@ extension Unidoc.DB
         return (uploaded, uplinked)
     }
 
-    /// Indexes and stores a symbol graph in the database, queueing it for an **asynchronous**
-    /// uplink.
     public
-    func store(docs:consuming SymbolGraphObject<Void>,
-        with session:Mongo.Session) async throws -> Unidoc.UploadStatus
-    {
-        let (snapshot, _):(Unidoc.Snapshot, Unidoc.Realm?) = try await self.label(docs: docs,
-            action: .uplinkInitial,
-            with: session)
-
-        return try await self.snapshots.upsert(snapshot: snapshot, with: session)
-    }
-
-    private
-    func label(docs:consuming SymbolGraphObject<Void>,
+    func label(
+        documentation:consuming SymbolGraphObject<Void>,
         action:Unidoc.Snapshot.PendingAction?,
         with session:Mongo.Session) async throws ->
         (
@@ -341,16 +331,16 @@ extension Unidoc.DB
             realm:Unidoc.Realm?
         )
     {
-        let docs:SymbolGraphObject<Void> = docs
         let (package, _):(Unidoc.PackageMetadata, Bool) = try await self.index(
-            package: docs.metadata.package.id,
+            package: documentation.metadata.package.id,
             repo: nil,
             with: session)
 
         //  Is this a version-controlled package?
         let version:Unidoc.Version
-        if  let commit:SymbolGraphMetadata.Commit = docs.metadata.commit,
-            let semver:SemanticVersion = docs.metadata.package.name.version(tag: commit.name)
+        if  let commit:SymbolGraphMetadata.Commit = documentation.metadata.commit,
+            let semver:SemanticVersion = documentation.metadata.package.name.version(
+                tag: commit.name)
         {
             let (edition, _):(Unidoc.EditionMetadata, Bool) = try await self.index(
                 package: package.id,
@@ -369,8 +359,8 @@ extension Unidoc.DB
         let snapshot:Unidoc.Snapshot = .init(id: .init(
                 package: package.id,
                 version: version),
-            metadata: docs.metadata,
-            inline: docs.graph,
+            metadata: documentation.metadata,
+            inline: documentation.graph,
             action: action)
 
         return (snapshot, package.realm)
