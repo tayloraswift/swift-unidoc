@@ -33,6 +33,12 @@ extension Swiftinit.TagsTable.GraphCell
     {
         .init(edition: self.graph.id, package: self.package, label: "Unlink")
     }
+
+    private
+    var delete:Tool
+    {
+        .init(edition: self.graph.id, package: self.package, label: "Delete")
+    }
 }
 extension Swiftinit.TagsTable.GraphCell:HTML.OutputStreamable
 {
@@ -43,10 +49,29 @@ extension Swiftinit.TagsTable.GraphCell:HTML.OutputStreamable
 
         td[.span]
         {
-            $0.class = self.graph.link != nil ? "abi uplinking" : "abi"
-            $0.title = self.graph.link != nil ? """
+            switch self.graph.action
+            {
+            case nil:
+                $0.class = "abi"
+
+            case .uplinkInitial, .uplinkRefresh:
+                $0.class = "abi uplinking"
+                $0.title = """
                 This symbol graph is currently queued for documentation generation.
-                """ : nil
+                """
+
+            case .unlink:
+                $0.class = "abi unlinking"
+                $0.title = """
+                This symbol graph is currently queued for documentation removal.
+                """
+
+            case .delete:
+                $0.class = "abi deleting"
+                $0.title = """
+                This symbol graph is currently queued for deletion.
+                """
+            }
         } = "\(self.graph.abi)"
 
         td += " "
@@ -74,9 +99,16 @@ extension Swiftinit.TagsTable.GraphCell:HTML.OutputStreamable
         td[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.unlink])"
+            $0.action = "\(Swiftinit.API[.unlink, really: false])"
             $0.method = "post"
         } = self.unlink
+
+        td[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Swiftinit.API[.delete, really: false])"
+            $0.method = "post"
+        } = self.delete
 
         td[.a]
         {

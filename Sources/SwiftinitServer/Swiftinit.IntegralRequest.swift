@@ -289,11 +289,14 @@ extension Swiftinit.IntegralRequest
 
         switch root
         {
+        case Swiftinit.Root.admin.id:
+            endpoint = try? .post(admin: trunk, path, body: body, type: type)
+
         case Swiftinit.Root.api.id:
             endpoint = try? .post(api: trunk, body: body, type: type)
 
-        case Swiftinit.Root.admin.id:
-            endpoint = try? .post(admin: trunk, path, body: body, type: type)
+        case Swiftinit.Root.really.id:
+            endpoint = try? .post(really: trunk, body: body, type: type)
 
         case _:
             return nil

@@ -239,7 +239,7 @@ extension Unidoc.VersionsQuery
                     {
                         $0[.coalesce] = (Unidoc.Snapshot[.size], 0)
                     }
-                    $0[Graph[.link]] = Unidoc.Snapshot[.link]
+                    $0[Graph[.action]] = Unidoc.Snapshot[.action]
                     $0[Graph[.abi]] = Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]
                 }
             }

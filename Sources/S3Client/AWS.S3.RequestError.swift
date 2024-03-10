@@ -5,5 +5,6 @@ extension AWS.S3
     {
         case get(UInt)
         case put(UInt)
+        case delete(UInt)
     }
 }

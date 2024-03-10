@@ -5,13 +5,25 @@ import UnidocRecords
 extension Unidoc.DB.Snapshots
 {
     @frozen public
-    enum QueueUplink
+    enum QueueAction
     {
         case all
-        case one(Unidoc.Edition)
+        case one(Unidoc.Edition, action:Unidoc.Snapshot.PendingAction = .uplinkRefresh)
     }
 }
-extension Unidoc.DB.Snapshots.QueueUplink:Mongo.UpdateQuery
+extension Unidoc.DB.Snapshots.QueueAction
+{
+    private
+    var action:Unidoc.Snapshot.PendingAction
+    {
+        switch self
+        {
+        case .all:                  .uplinkRefresh
+        case .one(_, let action):   action
+        }
+    }
+}
+extension Unidoc.DB.Snapshots.QueueAction:Mongo.UpdateQuery
 {
     public
     typealias Target = Unidoc.DB.Snapshots
@@ -35,8 +47,12 @@ extension Unidoc.DB.Snapshots.QueueUplink:Mongo.UpdateQuery
             {
                 switch self
                 {
-                case .all:              return
-                case .one(let edition): $0[Unidoc.Snapshot[.id]] = edition
+                case .one(let edition, _):
+                    $0[Unidoc.Snapshot[.id]] = edition
+                    fallthrough
+
+                case .all:
+                    $0[Unidoc.Snapshot[.action]] { $0[.exists] = false }
                 }
             }
 
@@ -44,7 +60,7 @@ extension Unidoc.DB.Snapshots.QueueUplink:Mongo.UpdateQuery
             {
                 $0[.set]
                 {
-                    $0[Unidoc.Snapshot[.link]] = Unidoc.Snapshot.LinkState.refresh
+                    $0[Unidoc.Snapshot[.action]] = self.action
                 }
             }
         }

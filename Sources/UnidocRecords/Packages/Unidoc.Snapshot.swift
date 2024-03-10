@@ -19,6 +19,9 @@ extension Unidoc
         public
         var inline:SymbolGraph?
 
+        public
+        var action:PendingAction?
+
         /// Only present for standard library snapshots. This is used to automatically load
         /// the latest version of the standard library without querying git tags.
         public
@@ -27,10 +30,6 @@ extension Unidoc
         public
         var pins:[Unidoc.Edition?]
 
-        /// Indicates if the snapshot is going to be linked for the first time. This controls
-        /// whether or not the link event will be published to the activity feed.
-        public
-        var link:LinkState?
         /// Indicates the format (compressed or not) of the symbol graph. This is currently only
         /// meaningful for symbol graphs stored in Amazon S3.
         public
@@ -44,19 +43,18 @@ extension Unidoc
         init(id:Unidoc.Edition,
             metadata:SymbolGraphMetadata,
             inline:SymbolGraph?,
+            action:PendingAction?,
             swift:PatchVersion?,
             pins:[Unidoc.Edition?],
-            link:LinkState?,
             type:GraphType,
             size:Int64)
         {
             self.id = id
             self.metadata = metadata
             self.inline = inline
+            self.action = action
             self.swift = swift
             self.pins = pins
-
-            self.link = link
             self.type = type
             self.size = size
         }
@@ -68,7 +66,7 @@ extension Unidoc.Snapshot
     init(id:Unidoc.Edition,
         metadata:SymbolGraphMetadata,
         inline:SymbolGraph,
-        link:LinkState?)
+        action:PendingAction?)
     {
         //  Is this the standard library? If so, is it a release version?
         let swift:PatchVersion?
@@ -85,9 +83,9 @@ extension Unidoc.Snapshot
         self.init(id: id,
             metadata: metadata,
             inline: inline,
+            action: action,
             swift: swift,
             pins: [],
-            link: link,
             type: .bson,
             size: 0)
     }
@@ -151,16 +149,20 @@ extension Unidoc.Snapshot
         case id = "_id"
         case metadata = "M"
         case inline = "D"
+        case action = "U"
+
         case swift = "S"
         case pins = "p"
-
-        case link = "U"
         case type = "T"
         case size = "B"
 
         @available(*, deprecated, renamed: "inline")
         @inlinable public static
         var graph:Self { .inline }
+
+        @available(*, deprecated, renamed: "action")
+        @inlinable public static
+        var link:Self { .action }
     }
 }
 extension Unidoc.Snapshot:BSONDocumentEncodable
@@ -171,10 +173,10 @@ extension Unidoc.Snapshot:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.metadata] = self.metadata
         bson[.inline] = self.inline
+        bson[.action] = self.action
+
         bson[.swift] = self.swift
         bson[.pins] = self.pins.isEmpty ? nil : self.pins
-
-        bson[.link] = self.link
         bson[.type] = self.type
         bson[.size] = self.size
     }
@@ -187,9 +189,9 @@ extension Unidoc.Snapshot:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(),
             metadata: try bson[.metadata].decode(),
             inline: try bson[.inline]?.decode(),
+            action: try bson[.action]?.decode(),
             swift: try bson[.swift]?.decode(),
             pins: try bson[.pins]?.decode() ?? [],
-            link: try bson[.link]?.decode(),
             type: try bson[.type]?.decode() ?? .bson,
             size: try bson[.size]?.decode() ?? 0)
     }

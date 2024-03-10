@@ -17,7 +17,7 @@ extension Unidoc.VersionsQuery
         let remoteBytes:Int
 
         public
-        let link:Unidoc.Snapshot.LinkState?
+        let action:Unidoc.Snapshot.PendingAction?
         public
         let abi:PatchVersion
 
@@ -25,13 +25,13 @@ extension Unidoc.VersionsQuery
         init(id:Unidoc.Edition,
             inlineBytes:Int?,
             remoteBytes:Int,
-            link:Unidoc.Snapshot.LinkState?,
+            action:Unidoc.Snapshot.PendingAction?,
             abi:PatchVersion)
         {
             self.id = id
             self.inlineBytes = inlineBytes
             self.remoteBytes = remoteBytes
-            self.link = link
+            self.action = action
             self.abi = abi
         }
     }
@@ -44,7 +44,7 @@ extension Unidoc.VersionsQuery.Graph:MongoMasterCodingModel
         case id = "_id"
         case inlineBytes
         case remoteBytes
-        case link
+        case action
         case abi
     }
 }
@@ -56,7 +56,7 @@ extension Unidoc.VersionsQuery.Graph:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(),
             inlineBytes: try bson[.inlineBytes]?.decode(),
             remoteBytes: try bson[.remoteBytes].decode(),
-            link: try bson[.link]?.decode(),
+            action: try bson[.action]?.decode(),
             abi: try bson[.abi].decode())
     }
 }

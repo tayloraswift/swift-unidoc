@@ -13,8 +13,11 @@ extension Swiftinit.API
     subscript(get:Get) -> URI { Swiftinit.Root.api / "\(get)" }
 
     @inlinable public static
-    subscript(post:Post) -> URI { Swiftinit.Root.api / "\(post)" }
+    subscript(put:Put) -> URI { Swiftinit.Root.api / "\(put)" }
 
     @inlinable public static
-    subscript(put:Put) -> URI { Swiftinit.Root.api / "\(put)" }
+    subscript(post:Post, really really:Bool = true) -> URI
+    {
+        (really ? Swiftinit.Root.api : Swiftinit.Root.really) / "\(post)"
+    }
 }
