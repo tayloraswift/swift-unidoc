@@ -391,7 +391,6 @@ extension Toolchain
                         "SwiftOnoneSupport",            // contains no symbols
                         "SwiftOverlayShims",            // too low-level
                         "SwiftShims",                   // contains no symbols
-                        "XCTest",                       // site policy
                         "_Builtin_intrinsics",          // contains only one symbol, free(_:)
                         "_Builtin_stddef_max_align_t",  // contains only two symbols
                         "_InternalStaticMirror",        // unbuildable
