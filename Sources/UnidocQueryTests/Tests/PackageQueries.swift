@@ -4,6 +4,7 @@ import MongoDB
 import MongoTesting
 import SymbolGraphBuilder
 import SymbolGraphs
+@_spi(testable)
 import UnidocDB
 import UnidocQueries
 
