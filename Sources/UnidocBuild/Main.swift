@@ -34,12 +34,12 @@ enum Main
 
         let niossl:NIOSSLContext = try .init(configuration: configuration)
 
-        print("Connecting to \(options.remote):\(options.port)...")
+        print("Connecting to \(options.host):\(options.port)...")
 
         let http2:HTTP2Client = .init(
             threads: threads,
             niossl: niossl,
-            remote: options.remote)
+            remote: options.host)
 
         let swiftinit:SwiftinitClient = .init(http2: http2,
             cookie: options.cookie,
@@ -69,7 +69,8 @@ enum Main
             {
                 try await swiftinit.build(local: package,
                     search: options.input.map(FilePath.init(_:)),
-                    pretty: options.pretty)
+                    pretty: options.pretty,
+                    swift: options.swift)
             }
         }
     }
