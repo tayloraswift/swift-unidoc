@@ -8,10 +8,11 @@ extension Main
     {
         var package:Symbol.Package?
         var cookie:String
-        var remote:String
+        var host:String
         var port:Int
 
         var pretty:Bool
+        var swift:String?
         var force:Unidoc.BuildLatest?
         var input:String?
 
@@ -22,10 +23,11 @@ extension Main
         {
             self.package = nil
             self.cookie = ""
-            self.remote = "localhost"
+            self.host = "localhost"
             self.port = 8443
 
             self.pretty = false
+            self.swift = nil
             self.force = nil
             self.input = nil
 
@@ -47,7 +49,7 @@ extension Main.Options
             switch option
             {
             case "--swiftinit", "-S":
-                options.remote = "swiftinit.org"
+                options.host = "swiftinit.org"
                 options.port = 443
 
                 options.cookie = try arguments.next(for: option)
@@ -55,16 +57,19 @@ extension Main.Options
             case "--cookie", "-i":
                 options.cookie = try arguments.next(for: option)
 
-            case "--remote", "-h":
-                options.remote = try arguments.next(for: option)
+            case "--host", "-h":
+                options.host = try arguments.next(for: option)
 
             case "--port", "-p":
                 options.port = try arguments.next(for: option)
 
-            case "--pretty", "-P":
+            case "--pretty", "-o":
                 options.pretty = true
 
-            case "--input", "-r":
+            case "--swift", "-s":
+                options.swift = try arguments.next(for: option)
+
+            case "--input", "-I":
                 options.input = try arguments.next(for: option)
 
             case "--force", "-f":

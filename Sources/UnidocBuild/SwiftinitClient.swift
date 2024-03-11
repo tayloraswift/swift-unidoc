@@ -51,9 +51,10 @@ extension SwiftinitClient
 {
     func build(local symbol:Symbol.Package,
         search:FilePath?,
-        pretty:Bool) async throws
+        pretty:Bool,
+        swift:String?) async throws
     {
-        let toolchain:Toolchain = try await .detect()
+        let toolchain:Toolchain = try await .detect(swift: swift ?? "swift")
         let workspace:SPM.Workspace = try await .create(at: ".swiftinit")
 
         let archive:SymbolGraphObject<Void>
