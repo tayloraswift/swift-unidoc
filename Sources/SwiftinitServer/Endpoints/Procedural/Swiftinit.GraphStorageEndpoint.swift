@@ -50,7 +50,9 @@ extension Swiftinit.GraphStorageEndpoint:BlockingEndpoint
 
             var (snapshot, _):(Unidoc.Snapshot, _?) = try await server.db.unidoc.label(
                 documentation: documentation,
-                action: .uplinkInitial,
+                //  This is probably the standard library, or some other ‘special’ package, so
+                //  we don’t want it to appear in the activity feed.
+                action: .uplinkRefresh,
                 with: session)
 
             if  let bucket:AWS.S3.Bucket = server.bucket
