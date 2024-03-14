@@ -26,15 +26,16 @@ extension Swiftinit.PackageIndicators:HTML.OutputStreamable
     static
     func += (span:inout HTML.ContentEncoder, self:Self)
     {
-        let age:Swiftinit.Age = .init(self.now - .millisecond(self.pushed.value))
+        let dynamicInterval:Duration.DynamicFormat = .init(
+            truncating: self.now - .millisecond(self.pushed.value))
 
         span[.span]
         {
             $0.class = "pushed"
             $0.title = """
-            This package’s repository was last pushed to \(age.long).
+            This package’s repository was last pushed to \(dynamicInterval) ago.
             """
-        } = age.short
+        } = "\(dynamicInterval.short)"
 
         span[.span]
         {

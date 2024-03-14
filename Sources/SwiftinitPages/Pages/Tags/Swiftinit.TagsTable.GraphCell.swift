@@ -83,7 +83,7 @@ extension Swiftinit.TagsTable.GraphCell:HTML.OutputStreamable
 
         } = "(\(size >> 10) kb)"
 
-        guard case .maintainer = self.view
+        guard self.view >= .admin
         else
         {
             return

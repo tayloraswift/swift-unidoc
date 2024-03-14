@@ -128,7 +128,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
-            exact: "509.1.1"),
+            exact: "510.0.1"),
     ],
     targets: [
         .target(name: "guides", path: "Guides"),

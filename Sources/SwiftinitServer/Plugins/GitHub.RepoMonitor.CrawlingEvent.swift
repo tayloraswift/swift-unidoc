@@ -1,6 +1,7 @@
 import Durations
 import GitHubAPI
 import HTML
+import SwiftinitPages
 import Symbols
 
 extension GitHub.RepoMonitor
@@ -43,14 +44,14 @@ extension GitHub.RepoMonitor.CrawlingEvent:HTML.OutputStreamable
 
         if  let milliseconds:Milliseconds = self.sinceActual
         {
-            let age:Swiftinit.Age = .init(.milliseconds(milliseconds))
+            let age:Duration.DynamicFormat = .init(truncating: .milliseconds(milliseconds))
 
             dl[.dt] = "Previously crawled"
-            dl[.dd] = age.long
+            dl[.dd] = "\(age) ago"
         }
         if  let milliseconds:Milliseconds = self.sinceExpected
         {
-            let error:Swiftinit.Age = .init(.milliseconds(milliseconds))
+            let error:Duration.DynamicFormat = .init(truncating: .milliseconds(milliseconds))
 
             dl[.dt] = "Scheduling error"
             dl[.dd] = error.short
