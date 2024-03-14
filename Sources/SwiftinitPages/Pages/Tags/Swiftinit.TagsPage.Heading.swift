@@ -8,6 +8,7 @@ extension Swiftinit.TagsPage
         case releases
         case tags
         case settings
+        case settingsAdmin
     }
 }
 extension Swiftinit.TagsPage.Heading:Identifiable
@@ -16,10 +17,11 @@ extension Swiftinit.TagsPage.Heading:Identifiable
     {
         switch self
         {
-        case .prereleases:  "ss:prereleases"
-        case .releases:     "ss:releases"
-        case .tags:         "ss:tags"
-        case .settings:     "ss:settings"
+        case .prereleases:      "ss:prereleases"
+        case .releases:         "ss:releases"
+        case .tags:             "ss:tags"
+        case .settings:         "ss:settings"
+        case .settingsAdmin:    "ss:settings-admin"
         }
     }
 }
@@ -29,10 +31,11 @@ extension Swiftinit.TagsPage.Heading:HTML.OutputStreamableHeading
     {
         switch self
         {
-        case .prereleases:  "Prereleases"
-        case .releases:     "Releases"
-        case .tags:         "Package tags"
-        case .settings:     "Package settings"
+        case .prereleases:      "Prereleases"
+        case .releases:         "Releases"
+        case .tags:             "Package tags"
+        case .settings:         "Package settings"
+        case .settingsAdmin:    "Admin actions"
         }
     }
 }

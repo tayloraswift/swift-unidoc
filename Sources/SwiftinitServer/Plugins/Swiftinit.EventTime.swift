@@ -1,17 +1,18 @@
 import HTML
+import SwiftinitPages
 import UnixTime
 
 extension Swiftinit
 {
     struct EventTime
     {
-        let stamp:Timestamp.Components
-        let age:Swiftinit.Age
+        let components:Timestamp.Components
+        let dynamicAge:Duration.DynamicFormat
 
-        init(stamp:Timestamp.Components, age:Swiftinit.Age)
+        init(components:Timestamp.Components, dynamicAge:Duration.DynamicFormat)
         {
-            self.stamp = stamp
-            self.age = age
+            self.components = components
+            self.dynamicAge = dynamicAge
         }
     }
 }
@@ -23,10 +24,10 @@ extension Swiftinit.EventTime:HTML.OutputStreamable
         html[.time]
         {
             $0.datetime = """
-            \(self.stamp.date)T\(self.stamp.time)Z
+            \(self.components.date)T\(self.components.time)Z
             """
-        } = "\(self.stamp.date) \(self.stamp.time)"
+        } = "\(self.components.date) \(self.components.time)"
 
-        html[.span] { $0.class = "parenthetical" } = self.age.long
+        html[.span] { $0.class = "parenthetical" } = "\(self.dynamicAge) ago"
     }
 }

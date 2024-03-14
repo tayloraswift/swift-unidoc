@@ -39,16 +39,9 @@ extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let view:Swiftinit.ViewMode
-
-        if  case true? = output.user?.maintains(package: output.package)
-        {
-            view = .maintainer
-        }
-        else
-        {
-            view = format.secure ? .reader : .maintainer
-        }
+        let view:Swiftinit.ViewMode = format.secure
+            ? .init(package: output.package, user: output.user)
+            : .admin
 
         let tags:Swiftinit.TagsTable
 

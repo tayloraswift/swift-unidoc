@@ -102,6 +102,8 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                     }
                 }
 
+                let now:UnixInstant = .now()
+
                 $0[.div, { $0.class = "feeds" }]
                 {
                     $0[.section, { $0.class = "repo" }]
@@ -109,13 +111,12 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                         $0[.h2] = "Recent Activity"
                         $0[.ol]
                         {
-                            let now:UnixInstant = .now()
                             for item:Unidoc.DB.RepoFeed.Activity in self.repo
                             {
                                 $0[.li]
                                 {
-                                    let discovered:UnixInstant = .millisecond(item.id.value)
-                                    let age:Swiftinit.Age = .init(now - discovered)
+                                    let dynamicAge:Duration.DynamicFormat = .init(
+                                        truncating: now - .millisecond(item.id.value))
 
                                     $0[.p, { $0.class = "edition"}]
                                     {
@@ -127,7 +128,9 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                                         $0[.span] = item.refname
                                     }
 
-                                    $0[.p] { $0.class = "age" } = age.long
+                                    $0[.p] { $0.class = "age" } = dynamicAge.unit != .seconds
+                                        ? "\(dynamicAge) ago"
+                                        : "just now"
                                 }
                             }
                         }
@@ -138,14 +141,13 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                         $0[.h2] = "Recent Docs"
                         $0[.ol]
                         {
-                            let now:UnixInstant = .now()
                             for item:Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata> in
                                 self.docs
                             {
                                 $0[.li]
                                 {
-                                    let discovered:UnixInstant = .millisecond(item.id.value)
-                                    let age:Swiftinit.Age = .init(now - discovered)
+                                    let dynamicAge:Duration.DynamicFormat = .init(
+                                        truncating: now - .millisecond(item.id.value))
 
                                     $0[.p, { $0.class = "edition"}]
                                     {
@@ -156,7 +158,9 @@ extension Swiftinit.HomePage:Swiftinit.RenderablePage
                                         } = item.volume.symbol.version
                                     }
 
-                                    $0[.p] { $0.class = "age" } = age.long
+                                    $0[.p] { $0.class = "age" } = dynamicAge.unit != .seconds
+                                        ? "\(dynamicAge) ago"
+                                        : "just now"
                                 }
                             }
                         }

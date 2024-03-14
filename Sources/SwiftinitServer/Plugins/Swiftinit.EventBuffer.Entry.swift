@@ -23,7 +23,7 @@ extension Swiftinit.EventBuffer.Entry
     {
         self.pushed.timestamp.map
         {
-            .init(stamp: $0.components, age: .init(now - self.pushed))
+            .init(components: $0.components, dynamicAge: .init(truncating: now - self.pushed))
         }
     }
 }

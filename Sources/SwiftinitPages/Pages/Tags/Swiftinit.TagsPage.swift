@@ -247,65 +247,57 @@ extension Swiftinit.TagsPage
             {
                 $0 += self.package.hidden ? "yes" : "no"
 
-                guard case .maintainer = self.view
-                else
+                if  self.view >= .admin
                 {
-                    return
+                    $0[.form]
+                    {
+                        $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                        $0.action = "\(Swiftinit.API[.packageConfig])"
+                        $0.method = "post"
+                    } = ConfigButton.init(package: self.package.id,
+                        update: "hidden",
+                        value: self.package.hidden ? "false" : "true",
+                        label: self.package.hidden ? "Unhide Package" : "Hide Package")
                 }
-
-                $0[.form]
-                {
-                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Swiftinit.API[.packageConfig])"
-                    $0.method = "post"
-                } = ConfigButton.init(package: self.package.id,
-                    update: "hidden",
-                    value: self.package.hidden ? "false" : "true",
-                    label: self.package.hidden ? "Unhide Package" : "Hide Package")
             }
 
             if  let crawled:BSON.Millisecond = self.package.repo?.crawled
             {
-                let crawled:UnixInstant = .millisecond(crawled.value)
-                let age:Swiftinit.Age = .init(now - crawled)
+                let dynamicAge:Duration.DynamicFormat = .init(
+                    truncating: now - .millisecond(crawled.value))
 
                 $0[.dt] = "Repo read"
-                $0[.dd] = age.long
+                $0[.dd] = "\(dynamicAge) ago"
             }
             if  let fetched:BSON.Millisecond = self.package.repo?.fetched
             {
-                let fetched:UnixInstant = .millisecond(fetched.value)
-                let age:Swiftinit.Age = .init(now - fetched)
+                let dynamicAge:Duration.DynamicFormat = .init(
+                    truncating: now - .millisecond(fetched.value))
 
                 $0[.dt] = "Tags read"
                 $0[.dd]
                 {
-                    $0 += age.long
+                    $0 += "\(dynamicAge) ago"
 
                     $0[.span]
                     {
                         $0.class = "parenthetical"
                     } = self.package.crawlingIntervalTarget.map
                     {
-                        let interval:Swiftinit.Age = .init(.milliseconds($0))
-                        if  case .maintainer = self.view,
-                            let expires:BSON.Millisecond = self.package.repo?.expires
-                        {
-                            let expires:UnixInstant = .millisecond(expires.value)
-
-                            return """
-                            target: \(interval.short), \
-                            expires: \(expires.timestamp?.http ?? "never")
-                            """
-                        }
-                        else
-                        {
-                            return """
-                            target: \(interval.short)
-                            """
-                        }
+                        let interval:Duration.DynamicFormat = .init(
+                            truncating: .milliseconds($0))
+                        return "target: \(interval)"
                     }
                 }
+            }
+            if  self.view >= .owner,
+                let expires:BSON.Millisecond = self.package.repo?.expires
+            {
+                let dynamicInterval:Duration.DynamicFormat = .init(
+                    truncating: .millisecond(expires.value) - now)
+
+                $0[.dt] = "Tags fetch in"
+                $0[.dd] = "\(dynamicInterval)"
             }
         }
 
@@ -324,7 +316,7 @@ extension Swiftinit.TagsPage
                         $0[.span] { $0.class = "placeholder" } = "current name"
                     }
                 }
-                else if case .maintainer = self.view
+                else if self.view >= .owner
                 {
                     $0[.dd]
                     {
@@ -346,11 +338,13 @@ extension Swiftinit.TagsPage
             }
         }
 
-        guard case .maintainer = self.view
+        guard self.view >= .admin
         else
         {
             return
         }
+
+        section[.h2] = Heading.settingsAdmin
 
         section[.form]
         {

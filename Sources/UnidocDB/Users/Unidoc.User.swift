@@ -41,22 +41,6 @@ extension Unidoc.User
         .init(id: .init(type: .unidoc, user: number), level: .machine)
     }
 }
-extension Unidoc.User
-{
-    @inlinable public
-    func maintains(package:Unidoc.PackageMetadata) -> Bool
-    {
-        if  case .administratrix = self.level
-        {
-            true
-        }
-        else
-        {
-            //  We currently don’t have a way to determine if a user maintains a package.
-            false
-        }
-    }
-}
 extension Unidoc.User:MongoMasterCodingModel
 {
     public
