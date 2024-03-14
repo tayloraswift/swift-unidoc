@@ -61,7 +61,7 @@ extension SPM.DependencyResolutions:JSONObjectDecodable
                 }
             }
 
-        case .v2:
+        case .v2, .v3:
             pins = try json[.pins].decode
             {
                 try $0.map

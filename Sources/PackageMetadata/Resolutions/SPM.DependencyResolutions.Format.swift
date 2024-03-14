@@ -7,6 +7,7 @@ extension SPM.DependencyResolutions
     {
         case v1 = 1
         case v2 = 2
+        case v3 = 3
     }
 }
 extension SPM.DependencyResolutions.Format:Comparable
