@@ -1,3 +1,4 @@
+import BSON
 import FNV1
 import HTTP
 import MD5
@@ -413,27 +414,13 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .packageConfig:
-                guard
-                let package:String = form["package"],
-                let package:Unidoc.Package = .init(package)
-                else
-                {
-                    break
-                }
-
-                if  let hidden:String = form["hidden"],
-                    let hidden:Bool = .init(hidden)
+                if  let package:String = form["package"],
+                    let package:Unidoc.Package = .init(package),
+                    let update:Swiftinit.PackageConfigEndpoint.Update = .init(from: form)
                 {
                     return .interactive(Swiftinit.PackageConfigEndpoint.init(
                         package: package,
-                        update: .hidden(hidden)))
-                }
-                else if
-                    let symbol:Symbol.Package = form["symbol"].map(Symbol.Package.init(_:))
-                {
-                    return .interactive(Swiftinit.PackageConfigEndpoint.init(
-                        package: package,
-                        update: .symbol(symbol)))
+                        update: update))
                 }
 
             case .packageIndex:
@@ -549,8 +536,8 @@ extension Swiftinit.AnyEndpoint
         {
             return nil
         }
-        let action:URI = .init(path: Swiftinit.API[trunk].path,
-            query: try .parse(parameters: body))
+
+        let query:URI.Query = try .parse(parameters: body)
 
         let heading:String
         let prompt:String
@@ -574,6 +561,33 @@ extension Swiftinit.AnyEndpoint
             """
             button = "It is so ordered"
 
+        case .packageConfig:
+            let form:[String: String] = query.parameters.reduce(into: [:])
+            {
+                $0[$1.key] = $1.value
+            }
+
+            guard
+            let update:Swiftinit.PackageConfigEndpoint.Update = .init(from: form)
+            else
+            {
+                return nil
+            }
+
+            switch update
+            {
+            case .expires:
+                heading = "Refresh package tags?"
+                prompt = """
+                This package will be added to a priority crawl queue. \
+                Submitting this form multiple times will not improve its queue position.
+                """
+                button = "Refresh tags"
+
+            default:
+                return nil
+            }
+
         default:
             return nil
         }
@@ -581,7 +595,7 @@ extension Swiftinit.AnyEndpoint
         let really:Swiftinit.ReallyPage = .init(title: heading,
             prompt: prompt,
             button: button,
-            action: action)
+            action: .init(path: Swiftinit.API[trunk].path, query: query))
 
         return .stateless(really)
     }
