@@ -21,12 +21,13 @@ jobs:
 
             -   name: set up mock deployments
                 run: |
-                    docker compose -f Local/Deployment/docker-compose.yml up -d
+                    docker compose -f Guides/docs.docc/local/docker-compose.yml up -d
 
             -   name: initialize replica set
                 run: |
                     timeout 60s bash -c \
-                    'until docker exec -t unidoc-mongod-container /bin/mongosh --file /unidoc-rs-init.js; do sleep 1; done'
+                    'until docker exec -t unidoc-mongod-container \
+                    /bin/mongosh --file /unidoc-rs-init.js; do sleep 1; done'
 
             -   name: build and test
                 run: |
