@@ -178,6 +178,7 @@ extension Main
         {
             return .init(authority: authority,
                 github: github,
+                mirror: self.mirror,
                 bucket: self.development.bucket,
                 mode: .development(.init(source: assets), self.development))
         }
@@ -185,8 +186,9 @@ extension Main
         {
             return .init(authority: authority,
                 github: github,
+                mirror: self.mirror,
                 bucket: .init(region: .us_east_1, name: "symbolgraphs"),
-                mode: .production(mirror: self.mirror))
+                mode: .production)
         }
     }
 
@@ -238,7 +240,7 @@ extension Main
                 }
 
                 nonmirror:
-                if !options.mode.mirror
+                if !options.mirror
                 {
                     plugins.append(Swiftinit.LinkerPlugin.init(bucket: options.bucket))
 
