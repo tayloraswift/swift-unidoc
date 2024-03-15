@@ -63,7 +63,7 @@ extension Markdown.BlockHeading
     @inlinable public
     func promote(by increment:Int = 1)
     {
-        self.level = min(self.level - increment, 2)
+        self.level = max(self.level - increment, 2)
     }
     /// Clips the heading to the specified maximum level. For example, if `level` is 3, then
     /// this function will demote `h1` and `h2` headings to `h3`, but it will leave `h3` and
