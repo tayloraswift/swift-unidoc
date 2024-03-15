@@ -2,8 +2,8 @@ version: "3.9"
 services:
     unidoc-mongod:
         image: mongo:latest
-        hostname: unidoc-mongod
         container_name: unidoc-mongod-container
+        hostname: unidoc-mongod
         networks:
             - unidoc-test
         ports:
@@ -13,13 +13,8 @@ services:
             # cannot put this in docker-entrypoint-initdb.d, it does not work
             - ./unidoc-rs-init.js:/unidoc-rs-init.js
             - ./unidoc-rs.conf:/etc/mongod.conf
-            - ./data/db:/data/db
+            - ../../../.mongod:/data/db
         command: mongod --config /etc/mongod.conf
-        deploy:
-            resources:
-                limits:
-                    cpus: '1.00'
-                    memory: 500M
 
 
 networks:
