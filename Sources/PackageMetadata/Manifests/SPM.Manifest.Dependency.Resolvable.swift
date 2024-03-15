@@ -84,17 +84,25 @@ extension SPM.Manifest.Dependency.Resolvable:JSONObjectDecodable
                     with: \.value.value)))
 
             case .range:
-                return .stable(.range(try json.decode(
+                let (lower, upper):(SemanticVersion, PatchVersion) = try json.decode(
                     as: JSON.SingleElementRepresentation<
                         JSON.ObjectDecoder<CodingKey.Requirement.Range>>.self)
                 {
-                    try $0.value[.lowerBound].decode(
-                        as: JSON.StringRepresentation<PatchVersion>.self,
-                        with: \.value)
-                    ..< $0.value[.upperBound].decode(
-                        as: JSON.StringRepresentation<PatchVersion>.self,
-                        with: \.value)
-                }))
+                    (
+                        try $0.value[.lowerBound].decode(
+                            as: JSON.StringRepresentation<SemanticVersion>.self,
+                            with: \.value),
+                        try $0.value[.upperBound].decode(
+                            as: JSON.StringRepresentation<PatchVersion>.self,
+                            with: \.value)
+                    )
+                }
+                if  case .prerelease = lower
+                {
+                    fatalError("not implemented yet, see: https://github.com/tayloraswift/swift-unidoc/issues/160")
+                }
+
+                return .stable(.range(lower.patch ..< upper))
 
             case .revision:
                 return .revision(try json.decode(
