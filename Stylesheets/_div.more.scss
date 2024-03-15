@@ -3,7 +3,8 @@ div.more
     margin: 1.5rem 0;
     text-align: center;
 
-    > a.button
+    > a.button,
+    > form button
     {
         display: block;
         padding: 0.5rem 0;
@@ -11,16 +12,28 @@ div.more
         text-decoration: none;
     }
     > a.button:hover,
-    > a.button:focus
+    > a.button:focus,
+    > form button:hover,
+    > form button:focus
     {
         border-color: $light-accent-barbie-pink;
     }
 
-    > a
+    > a,
+    > form button
     {
         font-family: $typeface-sans;
         font-weight: 700;
         font-size: 120%;
+    }
+
+    > form button
+    {
+        width: 100%;
+        background: none;
+        box-shadow: none;
+        border-radius: 0;
+        color: $light-accent-barbie-pink;
     }
 
     > div.charts

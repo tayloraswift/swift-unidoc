@@ -163,6 +163,33 @@ extension Unidoc.DB.Packages
 
     public
     func update(package:Unidoc.Package,
+        expires time:BSON.Millisecond,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(
+                Self.name,
+                returning: .new)
+            {
+                $0[.query]
+                {
+                    $0[Unidoc.PackageMetadata[.id]] = package
+                    $0[Unidoc.PackageMetadata[.repo]] { $0[.exists] = true }
+                }
+                $0[.update]
+                {
+                    $0[.set]
+                    {
+                        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = time
+                    }
+                }
+            },
+            against: self.database)
+        return package
+    }
+
+    public
+    func update(package:Unidoc.Package,
         hidden:Bool,
         with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
