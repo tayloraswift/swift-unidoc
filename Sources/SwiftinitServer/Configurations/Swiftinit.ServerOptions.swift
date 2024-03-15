@@ -9,16 +9,19 @@ extension Swiftinit
     {
         let authority:any ServerAuthority
         var github:GitHub.Integration?
+        var mirror:Bool
         var bucket:AWS.S3.Bucket?
         var mode:Mode
 
         init(authority:any ServerAuthority,
             github:GitHub.Integration? = nil,
+            mirror:Bool = false,
             bucket:AWS.S3.Bucket? = nil,
-            mode:Mode = .production(mirror: false))
+            mode:Mode = .production)
         {
             self.authority = authority
             self.github = github
+            self.mirror = mirror
             self.bucket = bucket
             self.mode = mode
         }
