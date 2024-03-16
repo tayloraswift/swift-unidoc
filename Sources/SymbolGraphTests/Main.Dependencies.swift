@@ -18,7 +18,7 @@ extension Main.Dependencies:TestBattery
             (
                 "Semver",
                 .init(package: .init(name: "swift-example"),
-                    requirement: .exact(.v(1, 2, 3)),
+                    requirement: .exact(.release(.v(1, 2, 3))),
                     revision: 0xabcd1234,
                     version: .stable(.release(.v(1, 2, 3))))
             ),

@@ -44,6 +44,7 @@ extension SymbolGraphMetadata.Dependency
     {
         case package_name = "P"
         case package_scope = "S"
+        case requirement_suffix = "B"
         case requirement_lower = "L"
         case requirement_upper = "U"
         case revision = "H"
@@ -63,12 +64,14 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
         case nil:
             break
 
-        case .exact(let version)?:
-            bson[.requirement_lower] = version
+        case .range(let version, to: let upper)?:
+            bson[.requirement_upper] = upper
+            fallthrough
 
-        case .range(let versions)?:
-            bson[.requirement_lower] = versions.lowerBound
-            bson[.requirement_upper] = versions.upperBound
+        case .exact(let version)?:
+            let suffix:String = "\(version.suffix)"
+            bson[.requirement_lower] = version.number
+            bson[.requirement_suffix] = suffix.isEmpty ? nil : suffix
         }
 
         bson[.revision] = self.revision
@@ -80,22 +83,10 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        let requirement:SymbolGraphMetadata.DependencyRequirement?
-        switch
-        (
-            try bson[.requirement_lower]?.decode(to: PatchVersion.self),
-            try bson[.requirement_upper]?.decode(to: PatchVersion.self)
-        )
-        {
-        case (nil, _):
-            requirement = nil
-
-        case (let lower?, nil):
-            requirement = .exact(lower)
-
-        case (let lower?, let upper?):
-            requirement = upper < lower ? nil : .range(lower ..< upper)
-        }
+        let requirement:SymbolGraphMetadata.DependencyRequirement? = .init(
+            suffix: try bson[.requirement_suffix]?.decode(),
+            lower: try bson[.requirement_lower]?.decode(),
+            upper: try bson[.requirement_upper]?.decode())
 
         self.init(package: .init(
                 scope: try bson[.package_scope]?.decode(),

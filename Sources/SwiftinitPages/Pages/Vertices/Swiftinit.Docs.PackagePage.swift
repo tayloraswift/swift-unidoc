@@ -218,11 +218,11 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
                                 {
                                 case nil:                   $0[.td]
                                 case .exact(let version)?:  $0[.td] = "\(version)"
-                                case .range(let range)?:    $0[.td]
+                                case .range(let lower, to: let upper)?:    $0[.td]
                                     {
-                                        $0 += "\(range.lowerBound)"
+                                        $0 += "\(lower)"
                                         $0[.span] { $0.class = "upto" } = "..<"
-                                        $0 += "\(range.upperBound)"
+                                        $0 += "\(upper)"
                                     }
                                 }
 

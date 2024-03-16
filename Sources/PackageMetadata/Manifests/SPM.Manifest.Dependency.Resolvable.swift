@@ -80,7 +80,7 @@ extension SPM.Manifest.Dependency.Resolvable:JSONObjectDecodable
             case .exact:
                 return .stable(.exact(try json.decode(
                     as: JSON.SingleElementRepresentation<
-                        JSON.StringRepresentation<PatchVersion>>.self,
+                        JSON.StringRepresentation<SemanticVersion>>.self,
                     with: \.value.value)))
 
             case .range:
@@ -97,13 +97,8 @@ extension SPM.Manifest.Dependency.Resolvable:JSONObjectDecodable
                             with: \.value)
                     )
                 }
-                guard case .release(build: nil) = lower.suffix
-                else
-                {
-                    fatalError("not implemented yet, see: https://github.com/tayloraswift/swift-unidoc/issues/160")
-                }
 
-                return .stable(.range(lower.number ..< upper))
+                return .stable(.range(lower, to: upper))
 
             case .revision:
                 return .revision(try json.decode(
