@@ -202,8 +202,7 @@ extension Main.PackageSwift:TestBattery
             {
                 let expected:SPM.Manifest = .init(name: "swift-unidoc",
                     root: "/swift/swift-unidoc",
-                    dependencies:
-                    [
+                    dependencies: [
                         .resolvable(.init(
                             identity: "swift-json",
                             location: .remote(
@@ -214,7 +213,8 @@ extension Main.PackageSwift:TestBattery
                             identity: "swift-grammar",
                             location: .remote(
                                 url: "https://github.com/kelvin13/swift-grammar"),
-                            requirement: .stable(.range(.v(0, 3, 1) ..< .v(0, 4, 0))))),
+                            requirement: .stable(.range(.release(.v(0, 3, 1)),
+                                to: .v(0, 4, 0))))),
 
                         .resolvable(.init(
                             identity: "swift-hash",
@@ -227,13 +227,14 @@ extension Main.PackageSwift:TestBattery
                             identity: "swift-mongodb",
                             location: .local(
                                 root: "/swift/swift-mongodb"),
-                            requirement: .stable(.range(.v(0, 4, 5) ..< .v(0, 5, 0))))),
+                            requirement: .stable(.range(.release(.v(0, 4, 5)),
+                                to: .v(0, 5, 0))))),
 
                         .resolvable(.init(
                             identity: "swift-system",
                             location: .remote(
                                 url: "https://github.com/apple/swift-system"),
-                            requirement: .stable(.exact(.v(0, 4, 5))))),
+                            requirement: .stable(.exact(.release(.v(0, 4, 5)))))),
                     ],
                     format: .v(5, 7, 0))
                 tests.expect(try .init(parsing: json) ==? expected)

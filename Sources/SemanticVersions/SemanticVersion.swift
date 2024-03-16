@@ -6,7 +6,7 @@ struct SemanticVersion:Equatable, Hashable, Sendable
     public
     var suffix:Suffix
 
-    @inlinable
+    @inlinable public
     init(number:PatchVersion, suffix:Suffix)
     {
         self.number = number
@@ -45,20 +45,7 @@ extension SemanticVersion:CustomStringConvertible
     @inlinable public
     var description:String
     {
-        switch self.suffix
-        {
-        case .release(build: nil):
-            "\(self.number)"
-
-        case .release(build: let build?):
-            "\(self.number)+\(build)"
-
-        case .prerelease(let alpha, build: nil):
-            "\(self.number)-\(alpha)"
-
-        case .prerelease(let alpha, build: let build?):
-            "\(self.number)-\(alpha)+\(build)"
-        }
+        "\(self.number)\(self.suffix)"
     }
 }
 extension SemanticVersion:LosslessStringConvertible
@@ -66,49 +53,17 @@ extension SemanticVersion:LosslessStringConvertible
     @inlinable public
     init?(_ string:some StringProtocol)
     {
-        let number:PatchVersion
-        let alpha:String?
-        let build:String?
-
         var i:String.Index = string.endIndex
+        let suffix:Suffix = .init(string, index: &i)
 
-        if  let plus:String.Index = string.lastIndex(of: "+")
-        {
-            build = .init(string[string.index(after: plus)...])
-            i = plus
-        }
-        else
-        {
-            build = nil
-        }
-
-        if  let dash:String.Index = string[..<i].lastIndex(of: "-")
-        {
-            alpha = .init(string[string.index(after: dash) ..< i])
-            i = dash
-        }
-        else
-        {
-            alpha = nil
-        }
-
-        if  let version:NumericVersion = .init(string[..<i])
-        {
-            number = .init(padding: version)
-        }
+        guard
+        let version:NumericVersion = .init(string[..<i])
         else
         {
             return nil
         }
 
-        if  let alpha:String
-        {
-            self.init(number: number, suffix: .prerelease(alpha, build: build))
-        }
-        else
-        {
-            self.init(number: number, suffix: .release(build: build))
-        }
+        self.init(number: .init(padding: version), suffix: suffix)
     }
 }
 // extension SemanticVersion:RawRepresentable
