@@ -36,6 +36,12 @@ div.more
         color: $light-accent-barbie-pink;
     }
 
+    > form button:active
+    {
+        box-shadow: none;
+        transform: none;
+    }
+
     > div.charts
     {
         display: flex;
