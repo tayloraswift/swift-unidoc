@@ -97,12 +97,13 @@ extension SPM.Manifest.Dependency.Resolvable:JSONObjectDecodable
                             with: \.value)
                     )
                 }
-                if  case .prerelease = lower
+                guard case .release(build: nil) = lower.suffix
+                else
                 {
                     fatalError("not implemented yet, see: https://github.com/tayloraswift/swift-unidoc/issues/160")
                 }
 
-                return .stable(.range(lower.patch ..< upper))
+                return .stable(.range(lower.number ..< upper))
 
             case .revision:
                 return .revision(try json.decode(

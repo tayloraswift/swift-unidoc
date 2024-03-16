@@ -1,26 +1,39 @@
 @frozen public
-enum SemanticVersion:Equatable, Hashable, Sendable
+struct SemanticVersion:Equatable, Hashable, Sendable
 {
-    case release    (PatchVersion, build:String? = nil)
-    case prerelease (PatchVersion, String, build:String? = nil)
+    public
+    var number:PatchVersion
+    public
+    var suffix:Suffix
+
+    @inlinable
+    init(number:PatchVersion, suffix:Suffix)
+    {
+        self.number = number
+        self.suffix = suffix
+    }
 }
 extension SemanticVersion
 {
-    @inlinable public
-    var patch:PatchVersion
+    @inlinable public static
+    func release(_ number:PatchVersion, build:String? = nil) -> Self
     {
-        switch self
-        {
-        case .release   (let version,    build: _): version
-        case .prerelease(let version, _, build: _): version
-        }
+        .init(number: number, suffix: .release(build: build))
     }
 
+    @inlinable public static
+    func prerelease(_ number:PatchVersion, _ alpha:String, build:String? = nil) -> Self
+    {
+        .init(number: number, suffix: .prerelease(alpha, build: build))
+    }
+}
+extension SemanticVersion
+{
     /// Returns true if this is a release version, false if it is a prerelease.
     @inlinable public
     var release:Bool
     {
-        switch self
+        switch self.suffix
         {
         case .release:      true
         case .prerelease:   false
@@ -32,19 +45,19 @@ extension SemanticVersion:CustomStringConvertible
     @inlinable public
     var description:String
     {
-        switch self
+        switch self.suffix
         {
-        case .release(let version, build: nil):
-            "\(version)"
+        case .release(build: nil):
+            "\(self.number)"
 
-        case .release(let version, build: let build?):
-            "\(version)+\(build)"
+        case .release(build: let build?):
+            "\(self.number)+\(build)"
 
-        case .prerelease(let version, let alpha, build: nil):
-            "\(version)-\(alpha)"
+        case .prerelease(let alpha, build: nil):
+            "\(self.number)-\(alpha)"
 
-        case .prerelease(let version, let alpha, build: let build?):
-            "\(version)-\(alpha)+\(build)"
+        case .prerelease(let alpha, build: let build?):
+            "\(self.number)-\(alpha)+\(build)"
         }
     }
 }
@@ -53,7 +66,7 @@ extension SemanticVersion:LosslessStringConvertible
     @inlinable public
     init?(_ string:some StringProtocol)
     {
-        let patch:PatchVersion
+        let number:PatchVersion
         let alpha:String?
         let build:String?
 
@@ -81,7 +94,7 @@ extension SemanticVersion:LosslessStringConvertible
 
         if  let version:NumericVersion = .init(string[..<i])
         {
-            patch = .init(padding: version)
+            number = .init(padding: version)
         }
         else
         {
@@ -90,27 +103,27 @@ extension SemanticVersion:LosslessStringConvertible
 
         if  let alpha:String
         {
-            self = .prerelease(patch, alpha, build: build)
+            self.init(number: number, suffix: .prerelease(alpha, build: build))
         }
         else
         {
-            self = .release(patch, build: build)
+            self.init(number: number, suffix: .release(build: build))
         }
     }
 }
-extension SemanticVersion:RawRepresentable
-{
-    @inlinable public
-    var rawValue:String
-    {
-        self.description
-    }
-    @inlinable public
-    init?(rawValue:String)
-    {
-        self.init(rawValue)
-    }
-}
+// extension SemanticVersion:RawRepresentable
+// {
+//     @inlinable public
+//     var rawValue:String
+//     {
+//         self.description
+//     }
+//     @inlinable public
+//     init?(rawValue:String)
+//     {
+//         self.init(rawValue)
+//     }
+// }
 extension SemanticVersion
 {
     /// Attempts to parse a semantic version from a tag string, such as `1.2.3` or

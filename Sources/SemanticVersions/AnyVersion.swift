@@ -34,8 +34,8 @@ extension AnyVersion
     {
         switch self.canonical
         {
-        case .stable(.release(let version, build: _)):  version
-        case _:                                         nil
+        case .stable(let version):  version.release ? version.number : nil
+        case _:                     nil
         }
     }
 }

@@ -1,4 +1,3 @@
-
 import BSON
 import SemanticVersions
 
@@ -7,9 +6,10 @@ extension AnyVersion:BSONEncodable
     public
     func encode(to field:inout BSON.FieldEncoder)
     {
-        if  case .stable(.release(let version, build: nil)) = self.canonical
+        if  case .stable(let version) = self.canonical,
+            case .release(build: nil) = version.suffix
         {
-            version.encode(to: &field)
+            version.number.encode(to: &field)
         }
         else
         {

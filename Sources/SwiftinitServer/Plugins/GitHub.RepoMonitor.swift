@@ -122,7 +122,7 @@ extension GitHub.RepoMonitor:GitHub.Crawler
                 case (let edition, new: true):
                     indexed.updated += 1
 
-                    switch version
+                    switch version.suffix
                     {
                     case .prerelease:   indexed.prerelease = edition
                     case .release:      indexed.release = edition

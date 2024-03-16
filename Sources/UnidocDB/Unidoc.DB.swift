@@ -255,7 +255,7 @@ extension Unidoc.DB
                     package: package,
                     version: id),
                 release: version.release,
-                patch: version.patch,
+                patch: version.number,
                 name: name,
                 sha1: sha1)
             //  This can fail if we race with another process.
@@ -629,17 +629,34 @@ extension Unidoc.DB
         let thisRelease:PatchVersion?
         let version:String
 
+        versioning:
         if  let commit:SymbolGraphMetadata.Commit = snapshot.metadata.commit
         {
             let formerRelease:Volumes.PatchView? = try await self.volumes.latestRelease(
                 of: snapshot.id.package,
                 with: session)
 
-            switch snapshot.metadata.package.name.version(tag: commit.name)
+            guard
+            let semver:SemanticVersion = snapshot.metadata.package.name.version(
+                tag: commit.name)
+            else
             {
-            case .release(let patch, build: _)?:
+                latestRelease = formerRelease?.id
+                thisRelease = nil
+                version = "0.0.0"
+
+                break versioning
+            }
+
+            switch semver.suffix
+            {
+            case .prerelease(_, build: _):
+                latestRelease = formerRelease?.id
+                thisRelease = nil
+
+            case .release(build: _):
                 if  let formerRelease:Volumes.PatchView,
-                        formerRelease.patch > patch
+                        formerRelease.patch > semver.number
                 {
                     latestRelease = formerRelease.id
                 }
@@ -648,19 +665,10 @@ extension Unidoc.DB
                     latestRelease = snapshot.id
                 }
 
-                thisRelease = patch
-                version = "\(patch)"
-
-            case .prerelease(let patch, _, build: _)?:
-                latestRelease = formerRelease?.id
-                thisRelease = nil
-                version = "\(patch)"
-
-            case nil:
-                latestRelease = formerRelease?.id
-                thisRelease = nil
-                version = "0.0.0"
+                thisRelease = semver.number
             }
+
+            version = "\(semver.number)"
         }
         else
         {
