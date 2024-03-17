@@ -241,14 +241,34 @@ extension SPM.Build:DocumentationBuild
         var dependencies:[PackageNode] = []
         var include:[FilePath] = [ scratch.path / "\(self.configuration)" ]
 
+        //  Nominal dependencies mean we need to perform two passes.
+        var packageContainingProduct:[String: Symbol.Package] = [:]
+        var manifests:[SPM.Manifest] = []
+            manifests.reserveCapacity(pins.count)
+
         for pin:SPM.DependencyPin in pins
         {
             let checkout:FilePath = scratch.path / "checkouts" / "\(pin.location.name)"
 
+            print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
+
             let manifest:SPM.Manifest = try await swift.manifest(package: checkout,
                 json: self.artifacts.path / "\(pin.identity).package.json")
 
-            let dependency:PackageNode = try .all(flattening: manifest,
+            for product:SPM.Manifest.Product in manifest.products
+            {
+                packageContainingProduct[product.name] = pin.identity
+            }
+
+            manifests.append(manifest)
+        }
+
+        for (manifest, pin):(Int, SPM.DependencyPin) in zip(manifests.indices, pins)
+        {
+            try manifests[manifest].normalizeUnqualifiedDependencies(
+                with: packageContainingProduct)
+
+            let dependency:PackageNode = try .all(flattening: manifests[manifest],
                 on: platform,
                 as: pin.identity)
 

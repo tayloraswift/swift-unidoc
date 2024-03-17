@@ -8,14 +8,14 @@ struct TargetNode:Equatable, Sendable
     public
     let type:SymbolGraph.ModuleType
     public
-    let dependencies:Dependencies
+    var dependencies:Dependencies
     /// Paths of excluded files, relative to the target source directory.
     public
-    let exclude:[String]
+    var exclude:[String]
     /// The path to the target’s source directory, relative to the
     /// package root. If nil, the path is just [`"Sources/\(self.id)"`]().
     public
-    let path:String?
+    var path:String?
 
     @inlinable public
     init(name:String, type:SymbolGraph.ModuleType = .regular,

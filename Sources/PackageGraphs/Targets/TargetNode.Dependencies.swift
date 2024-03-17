@@ -10,14 +10,18 @@ extension TargetNode
         var products:[Dependency<Symbol.Product>]
         public
         var targets:[Dependency<String>]
+        public
+        var nominal:[Dependency<String>]
 
         @inlinable public
         init(
             products:[Dependency<Symbol.Product>] = [],
-            targets:[Dependency<String>] = [])
+            targets:[Dependency<String>] = [],
+            nominal:[Dependency<String>] = [])
         {
             self.products = products
             self.targets = targets
+            self.nominal = nominal
         }
     }
 }
@@ -34,5 +38,11 @@ extension TargetNode.Dependencies
         on platform:SymbolGraphMetadata.Platform) -> TargetNode.DependencyView<String>
     {
         .init(platform: platform, base: self.targets)
+    }
+    @inlinable public
+    func nominal(
+        on platform:SymbolGraphMetadata.Platform) -> TargetNode.DependencyView<String>
+    {
+        .init(platform: platform, base: self.nominal)
     }
 }
