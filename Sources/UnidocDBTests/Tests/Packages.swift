@@ -50,8 +50,13 @@ struct Packages:MongoTestBattery
         await tests.do
         {
             try await database.alias(existing: "a", package: "aa", with: session)
+
             try await database.alias(existing: "b", package: "bb", with: session)
+
             try await database.alias(existing: "c", package: "cc", with: session)
+            try await database.alias(existing: "c", package: "cc", with: session)
+            try await database.alias(existing: "cc", package: "ccc", with: session)
+            try await database.alias(existing: "cc", package: "ccc", with: session)
         }
 
         guard
@@ -72,6 +77,7 @@ struct Packages:MongoTestBattery
                 ("aa", ("a", 0)),
                 ("bb", ("b", 1)),
                 ("cc", ("c", 2)),
+                ("ccc", ("c", 2)),
             ]
             {
                 let (package, new):(Unidoc.PackageMetadata, Bool) = try await database.index(

@@ -41,6 +41,15 @@ extension Unidoc.DB.PackageAliases:Mongo.CollectionModel
 extension Unidoc.DB.PackageAliases
 {
     public
+    func upsert(alias:Symbol.Package,
+        of coordinate:Unidoc.Package,
+        with session:Mongo.Session) async throws
+    {
+        try await self.upsert(
+            some: Unidoc.PackageAlias.init(id: alias, coordinate: coordinate),
+            with: session)
+    }
+
     func insert(alias:Symbol.Package,
         of coordinate:Unidoc.Package,
         with session:Mongo.Session) async throws
