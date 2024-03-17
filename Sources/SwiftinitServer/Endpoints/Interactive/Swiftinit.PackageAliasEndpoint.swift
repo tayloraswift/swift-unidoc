@@ -23,7 +23,7 @@ extension Swiftinit.PackageAliasEndpoint:RestrictedEndpoint
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 
-        try await server.db.packageAliases.insert(alias: self.alias,
+        try await server.db.packageAliases.upsert(alias: self.alias,
             of: self.package,
             with: session)
 
