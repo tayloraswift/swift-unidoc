@@ -79,8 +79,12 @@ extension Main
             case "--enable-cloudfront":
                 self.development.cloudfront = true
 
+            case "--enable-github":
+                self.development.runTelescope = true
+                self.development.runMonitor = true
+
             case "--enable-whitelists":
-                self.development.whitelists = true
+                self.development.runPolicy = true
 
             case "-q", "--mirror":
                 self.mirror = true
@@ -103,11 +107,6 @@ extension Main
                 case let host?:     self.mongo = .init(host)
                 case nil:           throw Main.OptionsError.invalidMongoReplicaSetSeed
                 }
-
-            case "--enable-github":
-                Log[.warning] = """
-                This option is deprecated, GitHub integration is now always enabled.
-                """
 
             case "-p", "--port":
                 guard let port:String = arguments.next()
@@ -231,38 +230,9 @@ extension Main
             await mongodb.withSessionPool(logger: .init(level: .error))
             {
                 @Sendable (pool:Mongo.SessionPool) in
-
-                var plugins:[any Swiftinit.ServerPlugin] = []
-
-                if  options.whitelists
-                {
-                    plugins.append(Swiftinit.PolicyPlugin.init())
-                }
-
-                nonmirror:
-                if !options.mirror
-                {
-                    plugins.append(Swiftinit.LinkerPlugin.init(bucket: options.bucket))
-
-                    guard
-                    let github:GitHub.Integration = options.github
-                    else
-                    {
-                        break nonmirror
-                    }
-
-                    plugins.append(GitHub.CrawlerPlugin<GitHub.RepoTelescope>.init(
-                        api: github.api,
-                        id: "telescope"))
-                    plugins.append(GitHub.CrawlerPlugin<GitHub.RepoMonitor>.init(
-                        api: github.api,
-                        id: "monitor"))
-                }
-
                 do
                 {
                     let server:Swiftinit.ServerLoop = try await .init(
-                        plugins: plugins,
                         context: context,
                         options: options,
                         mongodb: pool)
