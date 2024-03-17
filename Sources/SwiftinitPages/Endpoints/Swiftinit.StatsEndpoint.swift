@@ -36,10 +36,15 @@ extension Swiftinit.StatsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
         tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
     {
-        let resource:HTTP.Resource
+        let route:Unidoc.Route
 
         switch vertex
         {
+        case .article(let vertex):  route = vertex.route
+        case .decl(let vertex):     route = vertex.route
+        case .foreign(let vertex):  route = vertex.route
+        case .product(let vertex):  route = vertex.route
+
         case .culture(let vertex):
             let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>? = .package(
                 volume: context.page.volume)
@@ -47,7 +52,7 @@ extension Swiftinit.StatsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex)
-            resource = page.resource(format: context.format)
+            return .ok(page.resource(format: context.format))
 
         case .global(let vertex):
             let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>? = .package(
@@ -56,12 +61,13 @@ extension Swiftinit.StatsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
                 canonical: context.canonical,
                 sidebar: sidebar,
                 vertex: vertex)
-            resource = page.resource(format: context.format)
+            return .ok(page.resource(format: context.format))
 
-        case let unexpected:
-            throw Unidoc.VertexTypeError.reject(unexpected)
+        case .file(let vertex):
+            throw Unidoc.VertexTypeError.reject(.file(vertex))
         }
 
-        return .ok(resource)
+        //  There is documentation for this vertex, but it doesn’t have any stats.
+        return .redirect(.temporary("\(Swiftinit.Docs[context.page.volume, route])"))
     }
 }

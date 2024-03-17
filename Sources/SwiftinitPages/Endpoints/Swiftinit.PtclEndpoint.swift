@@ -3,6 +3,7 @@ import MongoDB
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
+import URI
 
 extension Swiftinit
 {
@@ -36,9 +37,24 @@ extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
         tree:consuming Unidoc.TypeTree?,
         with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
     {
+        let route:Unidoc.Route
+
         switch vertex
         {
+        case .article(let vertex):  route = vertex.route
+        case .culture(let vertex):  route = vertex.route
+        case .foreign(let vertex):  route = vertex.route
+        case .product(let vertex):  route = vertex.route
+        case .global(let vertex):   route = vertex.route
+
         case .decl(let vertex):
+            guard case .protocol = vertex.phylum
+            else
+            {
+                route = vertex.route
+                break
+            }
+
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
                 volume: context.page.volume,
                 tree: tree)
@@ -54,8 +70,11 @@ extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 
             return .ok(page.resource(format: context.format))
 
-        case let unexpected:
-            throw Unidoc.VertexTypeError.reject(unexpected)
+        case .file(let vertex):
+            throw Unidoc.VertexTypeError.reject(.file(vertex))
         }
+
+        //  There is documentation for this vertex, but it is not a protocol.
+        return .redirect(.temporary("\(Swiftinit.Docs[context.page.volume, route])"))
     }
 }
