@@ -90,7 +90,7 @@ extension Main.PackageSwift:TestBattery
                                 "identity" : "swift-json",
                                 "location" : {
                                     "remote" : [
-                                        "https://github.com/kelvin13/swift-json"
+                                        "https://github.com/tayloraswift/swift-json"
                                     ]
                                 },
                                 "productFilter" : null,
@@ -108,7 +108,7 @@ extension Main.PackageSwift:TestBattery
                                 "identity" : "swift-grammar",
                                 "location" : {
                                     "remote" : [
-                                        "https://github.com/kelvin13/swift-grammar"
+                                        "https://github.com/tayloraswift/swift-grammar"
                                     ]
                                 },
                                 "productFilter" : null,
@@ -129,7 +129,7 @@ extension Main.PackageSwift:TestBattery
                                 "identity" : "swift-hash",
                                 "location" : {
                                     "remote" : [
-                                        "https://github.com/kelvin13/swift-hash"
+                                        "https://github.com/tayloraswift/swift-hash"
                                     ]
                                 },
                                 "productFilter" : null,
@@ -206,20 +206,20 @@ extension Main.PackageSwift:TestBattery
                         .resolvable(.init(
                             identity: "swift-json",
                             location: .remote(
-                                url: "https://github.com/kelvin13/swift-json"),
+                                url: "https://github.com/tayloraswift/swift-json"),
                             requirement: .refname("master"))),
 
                         .resolvable(.init(
                             identity: "swift-grammar",
                             location: .remote(
-                                url: "https://github.com/kelvin13/swift-grammar"),
+                                url: "https://github.com/tayloraswift/swift-grammar"),
                             requirement: .stable(.range(.release(.v(0, 3, 1)),
                                 to: .v(0, 4, 0))))),
 
                         .resolvable(.init(
                             identity: "swift-hash",
                             location: .remote(
-                                url: "https://github.com/kelvin13/swift-hash"),
+                                url: "https://github.com/tayloraswift/swift-hash"),
                             requirement: .revision(
                                 0x36ef4bf1e6ae38f881ed253d5656839a046456f1))),
 
@@ -284,7 +284,7 @@ extension Main.PackageSwift:TestBattery
                 {
                     let json:JSON.Object = try .init(parsing: json)
                     let expected:TargetNode = .init(name: "SwiftSyntax",
-                        dependencies: .init(targets:
+                        dependencies: .init(nominal:
                         [
                             .init(id: "SwiftBasicFormat"),
                             .init(id: "SwiftSyntax"),
