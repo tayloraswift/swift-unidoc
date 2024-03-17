@@ -64,13 +64,12 @@ extension Swiftinit
 extension Swiftinit.ServerLoop
 {
     init(
-        plugins:[any Swiftinit.ServerPlugin],
         context:Swiftinit.ServerPluginContext,
         options:Swiftinit.ServerOptions,
         mongodb:Mongo.SessionPool) async throws
     {
         self.init(
-            plugins: plugins.reduce(into: [:]) { $0[$1.id] = $1 },
+            plugins: options.plugins.reduce(into: [:]) { $0[$1.id] = $1 },
             context: context,
             options: options,
             db: .init(sessions: mongodb,

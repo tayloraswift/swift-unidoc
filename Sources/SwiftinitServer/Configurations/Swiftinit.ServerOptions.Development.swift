@@ -7,8 +7,12 @@ extension Swiftinit.ServerOptions
     {
         /// Whether to enable CloudFront integration.
         var cloudfront:Bool
-        /// Whether to enable IP whitelisting.
-        var whitelists:Bool
+        /// Whether to run the telescope plugin. Only effective when not running in mirror mode.
+        var runTelescope:Bool
+        /// Whether to run the monitor plugin. Only effective when not running in mirror mode.
+        var runMonitor:Bool
+        /// Whether to run the policy plugin.
+        var runPolicy:Bool
 
         /// The name of the replica set to use for development.
         var replicaSet:String
@@ -23,7 +27,11 @@ extension Swiftinit.ServerOptions
         init()
         {
             self.cloudfront = false
-            self.whitelists = false
+
+            self.runTelescope = false
+            self.runMonitor = false
+            self.runPolicy = false
+
             self.replicaSet = "unidoc-rs"
             self.bucket = nil
             self.port = 8443

@@ -56,3 +56,46 @@ extension Swiftinit.ServerOptions
         self.development?.port ?? 443
     }
 }
+extension Swiftinit.ServerOptions
+{
+    var plugins:[any Swiftinit.ServerPlugin]
+    {
+        var list:[any Swiftinit.ServerPlugin] = []
+
+        if  self.runPolicy
+        {
+            list.append(Swiftinit.PolicyPlugin.init())
+        }
+
+        if  self.mirror
+        {
+            return list
+        }
+        else
+        {
+            list.append(Swiftinit.LinkerPlugin.init(bucket: self.bucket))
+        }
+
+        guard
+        let github:GitHub.Integration = self.github
+        else
+        {
+            return list
+        }
+
+        if  self.runTelescope
+        {
+            list.append(GitHub.CrawlerPlugin<GitHub.RepoTelescope>.init(
+                api: github.api,
+                id: "telescope"))
+        }
+        if  self.runMonitor
+        {
+            list.append(GitHub.CrawlerPlugin<GitHub.RepoMonitor>.init(
+                api: github.api,
+                id: "monitor"))
+        }
+
+        return list
+    }
+}
