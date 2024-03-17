@@ -20,18 +20,18 @@ extension SPM
         public
         let name:String
         public
-        let root:Symbol.FileBase
+        var root:Symbol.FileBase
         public
-        let requirements:[SymbolGraphMetadata.PlatformRequirement]
+        var requirements:[SymbolGraphMetadata.PlatformRequirement]
         public
-        let dependencies:[Dependency]
+        var dependencies:[Dependency]
         public
-        let products:[Product]
+        var products:[Product]
         public
-        let targets:[TargetNode]
+        var targets:[TargetNode]
         /// The `swift-tools-version` format of this manifest.
         public
-        let format:PatchVersion
+        var format:PatchVersion
 
         @inlinable public
         init(name:String,
@@ -58,6 +58,40 @@ extension SPM.Manifest
     /// sheer incompetence, it is currently always the string `Snippets`.
     @inlinable public
     var snippets:String? { nil }
+
+    public mutating
+    func normalizeUnqualifiedDependencies(
+        with packageContainingProduct:[String: Symbol.Package]) throws
+    {
+        let targets:Set<String> = self.targets.reduce(into: []) { $0.insert($1.name) }
+
+        for i:Int in self.targets.indices
+        {
+            try
+            {
+                for nominal:TargetNode.Dependency<String> in $0.nominal
+                {
+                    if  targets.contains(nominal.id)
+                    {
+                        $0.targets.append(.init(id: nominal.id, platforms: nominal.platforms))
+                    }
+                    else if
+                        let package:Symbol.Package = packageContainingProduct[nominal.id]
+                    {
+                        let id:Symbol.Product = .init(name: nominal.id, package: package)
+                        $0.products.append(.init(id: id, platforms: nominal.platforms))
+                    }
+                    else
+                    {
+                        throw TargetNode.DependencyError.undefinedNominal(nominal.id)
+                    }
+                }
+
+                $0.nominal = []
+
+            } (&self.targets[i].dependencies)
+        }
+    }
 }
 extension SPM.Manifest:JSONObjectDecodable
 {
