@@ -45,7 +45,7 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
             {
                 $0[.setUnion] = .init
                 {
-                    $0.expr { $0[.map] = dependencies.map { $0[.pinned] } }
+                    $0.expr { $0[.map] = dependencies.map { $0[.linked] } }
                 }
             }
             $0[output.scalars] = [] as [Never]

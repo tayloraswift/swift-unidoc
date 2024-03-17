@@ -171,7 +171,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
                             {
                                 let pinned:Unidoc.VolumeMetadata?
 
-                                if  let volume:Unidoc.Edition = dependency.pinned,
+                                if  let volume:Unidoc.Edition = dependency.pin?.linked,
                                     let volume:Unidoc.VolumeMetadata = self.context[volume]
                                 {
                                     //  We link to the tags page here, because we are already
@@ -185,7 +185,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
                                         } = "\(volume.symbol.package)"
                                     }
                                 }
-                                else if case _? = dependency.pinned
+                                else if case _? = dependency.pin
                                 {
                                     //  We were able to pin the dependency to a known edition,
                                     //  but we don't have any documentation for it.

@@ -620,7 +620,8 @@ extension Unidoc.DB
             from: loader,
             with: session)
 
-        let dependencies:[Unidoc.VolumeMetadata.Dependency] = linker.dependencies()
+        let dependencies:[Unidoc.VolumeMetadata.Dependency] = linker.dependencies(
+            pinned: snapshot.pins)
         let mesh:Unidoc.Linker.Mesh = linker.link()
 
         linker.status().emit(colors: .enabled)
