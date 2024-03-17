@@ -1,10 +1,10 @@
-// swift-tools-version:5.9
+// swift-tools-version:5.10
 import PackageDescription
 import CompilerPluginSupport
 
 let package:Package = .init(
     name: "swift-unidoc",
-    platforms: [.macOS(.v11)],
+    platforms: [.macOS(.v14)],
     products: [
         .library(name: "guides", targets: ["guides"]),
 
@@ -97,11 +97,11 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.13.0")),
+            from: "0.13.1")),
         //.package(path: "../swift-mongodb"),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-            from: "4.2.1")),
+            from: "4.3.0")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
