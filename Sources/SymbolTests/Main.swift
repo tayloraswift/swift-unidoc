@@ -58,6 +58,20 @@ enum Main:TestMain, TestBattery
                 "s:s12IdentifiablePsRlzCrlE2idSOvp::SYNTHESIZED::s:"))
         }
 
+        if  let tests:TestGroup = tests / "MacroDollarIdentifier"
+        {
+            if  let usr:Symbol.USR = tests.expect(value: .init("""
+                    s:9FluentKit5ModelPAAE4_$idAA10IDPropertyCyx7IDValueQzGvp\
+                    ::SYNTHESIZED::s:17HummingbirdFluent12PersistModelC
+                    """))
+            {
+                tests.expect(usr ==? .vector(.init(.init(.s,
+                        ascii: "9FluentKit5ModelPAAE4_$idAA10IDPropertyCyx7IDValueQzGvp"),
+                    self: .init(.s,
+                        ascii: "17HummingbirdFluent12PersistModelC"))))
+            }
+        }
+
         if  let tests:TestGroup = tests / "Block" / "FirstMember"
         {
             if  let usr:Symbol.USR = tests.expect(value: .init(
