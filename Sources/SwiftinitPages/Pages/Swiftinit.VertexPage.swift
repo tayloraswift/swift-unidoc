@@ -43,7 +43,7 @@ extension Swiftinit.VertexPage
 
             for dependency:Unidoc.VolumeMetadata.Dependency in self.volume.dependencies
             {
-                if  let dependency:Unidoc.Edition = dependency.pinned,
+                if  let dependency:Unidoc.Edition = dependency.pin?.linked,
                     let dependency:Unidoc.VolumeMetadata = self.context[dependency]
                 {
                     $0

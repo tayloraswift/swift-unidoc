@@ -23,7 +23,7 @@ extension Unidoc.LookupAdjacent.Volumes
     static
     func += (list:inout BSON.ListEncoder, self:Self)
     {
-        list.expr { $0[.map] = self.upstream.map { $0[.pinned] } }
+        list.expr { $0[.map] = self.upstream.map { $0[.linked] } }
         list.expr
         {
             $0[.reduce] = self.groups.flatMap

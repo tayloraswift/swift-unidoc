@@ -2,7 +2,6 @@ import BSON
 import SemanticVersions
 import SymbolGraphs
 import Symbols
-import Unidoc
 
 extension Unidoc.VolumeMetadata
 {
@@ -18,18 +17,18 @@ extension Unidoc.VolumeMetadata
         public
         var resolution:PatchVersion?
         public
-        var pinned:Unidoc.Edition?
+        var pin:DependencyPin?
 
         @inlinable public
         init(exonym:Symbol.Package,
             requirement:SymbolGraphMetadata.DependencyRequirement?,
             resolution:PatchVersion?,
-            pinned:Unidoc.Edition?)
+            pin:DependencyPin?)
         {
             self.exonym = exonym
             self.requirement = requirement
             self.resolution = resolution
-            self.pinned = pinned
+            self.pin = pin
         }
     }
 }
@@ -43,7 +42,8 @@ extension Unidoc.VolumeMetadata.Dependency
         case requirement_lower = "L"
         case requirement_upper = "U"
         case resolution = "S"
-        case pinned = "p"
+        case linked = "p"
+        case pinned = "q"
     }
 }
 extension Unidoc.VolumeMetadata.Dependency:BSONDocumentEncodable
@@ -69,7 +69,13 @@ extension Unidoc.VolumeMetadata.Dependency:BSONDocumentEncodable
         }
 
         bson[.resolution] = self.resolution
-        bson[.pinned] = self.pinned
+
+        switch self.pin
+        {
+        case .linked(let edition)?: bson[.linked] = edition
+        case .pinned(let edition)?: bson[.pinned] = edition
+        case nil:                   break
+        }
     }
 }
 extension Unidoc.VolumeMetadata.Dependency:BSONDocumentDecodable
@@ -82,9 +88,25 @@ extension Unidoc.VolumeMetadata.Dependency:BSONDocumentDecodable
             lower: try bson[.requirement_lower]?.decode(),
             upper: try bson[.requirement_upper]?.decode())
 
+        let pin:Unidoc.VolumeMetadata.DependencyPin?
+
+        if  let linked:Unidoc.Edition = try bson[.linked]?.decode()
+        {
+            pin = .linked(linked)
+        }
+        else if
+            let pinned:Unidoc.Edition = try bson[.pinned]?.decode()
+        {
+            pin = .pinned(pinned)
+        }
+        else
+        {
+            pin = nil
+        }
+
         self.init(exonym: try bson[.exonym].decode(),
             requirement: requirement,
             resolution: try bson[.resolution]?.decode(),
-            pinned: try bson[.pinned]?.decode())
+            pin: pin)
     }
 }

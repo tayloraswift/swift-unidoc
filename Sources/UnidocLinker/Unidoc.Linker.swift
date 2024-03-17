@@ -218,7 +218,7 @@ extension Unidoc.Linker
 extension Unidoc.Linker
 {
     public
-    func dependencies() -> [Unidoc.VolumeMetadata.Dependency]
+    func dependencies(pinned:[Unidoc.Edition?]) -> [Unidoc.VolumeMetadata.Dependency]
     {
         var dependencies:[Unidoc.VolumeMetadata.Dependency] = []
             dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
@@ -229,14 +229,31 @@ extension Unidoc.Linker
             dependencies.append(.init(exonym: .swift,
                 requirement: nil,
                 resolution: nil,
-                pinned: swift.id))
+                pin: .linked(swift.id)))
         }
-        for dependency:SymbolGraphMetadata.Dependency in self.current.metadata.dependencies
+        for (id, dependency):(Unidoc.Edition?, SymbolGraphMetadata.Dependency) in zip(pinned,
+            self.current.metadata.dependencies)
         {
+            let pin:Unidoc.VolumeMetadata.DependencyPin?
+
+            if  let id:Unidoc.Edition = self[dependency.package.name]?.id
+            {
+                pin = .linked(id)
+            }
+            else if
+                let id:Unidoc.Edition
+            {
+                pin = .pinned(id)
+            }
+            else
+            {
+                pin = nil
+            }
+
             dependencies.append(.init(exonym: dependency.package.name,
                 requirement: dependency.requirement,
                 resolution: dependency.version.release,
-                pinned: self[dependency.package.name]?.id))
+                pin: pin))
         }
 
         return dependencies
