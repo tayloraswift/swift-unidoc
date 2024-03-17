@@ -49,13 +49,17 @@ extension Symbol.Decl
     {
         for ascii:UInt8 in suffix.utf8
         {
-            switch ascii
+            switch Unicode.Scalar.init(ascii)
             {
-            //    '-'   '.'   '_'   'A' ... 'Z'    'a' ... 'z'    '0' ... '9',   '@'
-            case 0x2d, 0x2e, 0x5f, 0x41 ... 0x5a, 0x61 ... 0x7a, 0x30 ... 0x39, 0x40:
-                continue
-            default:
-                return nil
+            case "$":           continue
+            case "-":           continue
+            case ".":           continue
+            case "_":           continue
+            case "0" ... "9":   continue
+            case "@":           continue
+            case "A" ... "Z":   continue
+            case "a" ... "z":   continue
+            default:            return nil
             }
         }
         self.init(language, ascii: suffix)
