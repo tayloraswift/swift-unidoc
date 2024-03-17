@@ -205,7 +205,7 @@ extension SPM.Build:DocumentationBuild
         }
 
         let manifestVersions:[MinorVersion] = try self.listExtraManifests()
-        let manifest:SPM.Manifest = try await swift.manifest(package: self.root,
+        var manifest:SPM.Manifest = try await swift.manifest(package: self.root,
             json: self.artifacts.path / "\(self.id.package).package.json")
 
         print("""
@@ -277,6 +277,13 @@ extension SPM.Build:DocumentationBuild
             dependencies.append(dependency)
             include += sources.include
         }
+
+        //  Now it is time to normalize the leaf manifest.
+        for product:SPM.Manifest.Product in manifest.products
+        {
+            packageContainingProduct[product.name] = self.id.package
+        }
+        try manifest.normalizeUnqualifiedDependencies(with: packageContainingProduct)
 
         let sinkNode:PackageNode = try .all(flattening: manifest,
             on: platform,
