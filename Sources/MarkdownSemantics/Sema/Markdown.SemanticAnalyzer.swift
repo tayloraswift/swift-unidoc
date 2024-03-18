@@ -43,7 +43,7 @@ extension Markdown.SemanticAnalyzer
 {
     public mutating
     func organize(
-        tutorial:borrowing Markdown.BlockArticle) -> Markdown.SemanticDocument
+        tutorial:/* borrowing */ Markdown.BlockArticle) -> Markdown.SemanticDocument
     {
         tutorial.rewrite { self.rewrite(blocks: &$0) }
 
