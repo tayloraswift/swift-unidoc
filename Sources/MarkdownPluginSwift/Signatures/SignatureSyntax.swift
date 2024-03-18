@@ -2,10 +2,10 @@ import SwiftIDEUtils
 import SwiftParser
 import SwiftSyntax
 
-@frozen @usableFromInline internal
+@frozen @usableFromInline
 struct SignatureSyntax
 {
-    @usableFromInline internal
+    @usableFromInline
     let elements:[Span]
 
     private
@@ -30,7 +30,58 @@ extension SignatureSyntax
 }
 extension SignatureSyntax
 {
-    @usableFromInline internal static
+    @usableFromInline
+    func split(on boundaries:[Int]) -> [Span]
+    {
+        var spans:[SignatureSyntax.Span] = []
+            spans.reserveCapacity(self.elements.count)
+
+        var boundaries:IndexingIterator<[Int]> = boundaries.makeIterator()
+        var next:Int? = boundaries.next()
+
+        for span:SignatureSyntax.Span in self.elements
+        {
+            guard case .text(var range, let color, let depth) = span
+            else
+            {
+                spans.append(span)
+                continue
+            }
+            defer
+            {
+                spans.append(.text(range, color, depth))
+            }
+
+            while let split:Int = next
+            {
+                guard split < range.upperBound
+                else
+                {
+                    break
+                }
+
+                defer
+                {
+                    next = boundaries.next()
+                }
+
+                guard range.lowerBound < split
+                else
+                {
+                    continue
+                }
+
+                spans.append(.text(range.lowerBound ..< split, color, depth))
+                range = split ..< range.upperBound
+            }
+        }
+
+        return spans
+    }
+}
+extension SignatureSyntax
+{
+    @usableFromInline static
     func abridged(_ utf8:UnsafeBufferPointer<UInt8>) -> Self
     {
         var encoder:Encoder<AbridgedParameter> = .init()
@@ -40,7 +91,7 @@ extension SignatureSyntax
 
         return .init(elements: encoder.move())
     }
-    @usableFromInline internal static
+    @usableFromInline static
     func expanded(_ utf8:UnsafeBufferPointer<UInt8>) -> Self
     {
         var encoder:Encoder<ExpandedParameter> = .init()

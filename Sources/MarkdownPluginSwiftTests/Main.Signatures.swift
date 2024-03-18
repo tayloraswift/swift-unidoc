@@ -84,6 +84,45 @@ extension Main.Signatures:TestBattery
             <span class='xt'>Sendable</span>
             """)
         }
+        if  let tests:TestGroup = tests / "ExpandedWithResultBuilders"
+        {
+            let decl:String = """
+            init(@Builder<A<B, C>, D> builder:() -> Handler)
+            """
+
+            let expanded:Signature<Never>.Expanded = .init(decl, linkBoundaries: [
+                6, 13,
+                14, 15,
+                16, 17,
+                19, 20,
+                23, 24,
+            ])
+            tests.expect("\(expanded.bytecode.safe)" ==? decl)
+
+            let abridged:Signature<Never>.Abridged = .init(decl)
+            tests.expect("\(abridged.bytecode.safe)" ==? """
+            init(builder:() -> Handler)
+            """)
+
+            let html:HTML = .init { $0 += expanded.bytecode.safe }
+
+            tests.expect("\(html)" ==? """
+            <span class='xk'>init</span>(\
+            <span class='xi'></span>\
+            <span class='xa'>@</span>\
+            <span class='xa'>Builder</span>\
+            <span class='xa'>&lt;</span>\
+            <span class='xa'>A</span>\
+            <span class='xa'>&lt;</span>\
+            <span class='xa'>B</span>\
+            <span class='xa'>, </span>\
+            <span class='xa'>C</span>\
+            <span class='xa'>&gt;, </span>\
+            <span class='xa'>D</span>\
+            <span class='xa'>&gt;</span> \
+            <span class='xv'>builder</span>:() -&gt; <span class='xt'>Handler</span><wbr>)
+            """)
+        }
 
         if  let tests:TestGroup = tests / "Malformed"
         {

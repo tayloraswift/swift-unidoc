@@ -10,45 +10,68 @@ extension Signature.Expanded
         var utf8:[UInt8] = []
             utf8.reserveCapacity(fragments.reduce(0) { $0 + $1.spelling.utf8.count })
 
-        var symbols:[Int: Scalar] = [:]
+        var linkBoundaries:[Int] = []
+        var linkTargets:[Int: Scalar] = [:]
         for fragment:Signature.Fragment in fragments
         {
             let i:Int = utf8.endIndex
+
             utf8 += fragment.spelling.utf8
 
             if  let referent:Scalar = fragment.referent
             {
-                symbols[i] = referent
+                linkTargets[i] = referent
+                linkBoundaries.append(i)
+                linkBoundaries.append(utf8.endIndex)
             }
         }
 
-        self.init(utf8: utf8, keywords: &keywords, symbols: &symbols)
+        self.init(utf8: utf8,
+            linkBoundaries: linkBoundaries,
+            linkTargets: &linkTargets,
+            keywords: &keywords)
 
-        if !symbols.isEmpty
+        if !linkTargets.isEmpty
         {
-            fatalError("""
-                syntax didn’t round-trip, failed to match symbols: \(symbols), \
-                source: '\(String.init(decoding: utf8, as: Unicode.UTF8.self))'
-                """)
+            let source:String = .init(decoding: utf8, as: Unicode.UTF8.self)
+
+            print("ERROR: failed to round-trip swift syntax!")
+            for (offset, symbol):(Int, Scalar) in linkTargets
+            {
+                print("Note: (offset = \(offset) symbol = \(symbol))")
+                print("'\(source)'")
+                print(" \(String.init(repeating: " ", count: offset))^")
+            }
+
+            fatalError()
         }
     }
 
     @inlinable @_spi(testable) public
-    init(_ string:String)
+    init(_ string:String,
+        linkBoundaries:borrowing [Int] = [])
     {
         var ignored:InterestingKeywords = .init()
-        self.init(string, keywords: &ignored)
+        self.init(string, linkBoundaries: linkBoundaries, keywords: &ignored)
     }
 
     @inlinable @_spi(testable) public
-    init(_ string:String, keywords:inout InterestingKeywords)
+    init(_ string:String,
+        linkBoundaries:borrowing [Int] = [],
+        keywords:inout InterestingKeywords)
     {
         var empty:[Int: Scalar] = [:]
-        self.init(utf8: [UInt8].init(string.utf8), keywords: &keywords, symbols: &empty)
+        self.init(utf8: [UInt8].init(string.utf8),
+            linkBoundaries: linkBoundaries,
+            linkTargets: &empty,
+            keywords: &keywords)
     }
 
-    @inlinable internal
-    init(utf8:[UInt8], keywords:inout InterestingKeywords, symbols:inout [Int: Scalar])
+    @inlinable
+    init(utf8:[UInt8],
+        linkBoundaries:borrowing [Int],
+        linkTargets:inout [Int: Scalar],
+        keywords:inout InterestingKeywords)
     {
         let signature:SignatureSyntax = utf8.withUnsafeBufferPointer { .expanded($0) }
         var references:[Scalar: Int] = [:]
@@ -56,7 +79,7 @@ extension Signature.Expanded
 
         let bytecode:Markdown.Bytecode = .init
         {
-            for span:SignatureSyntax.Span in signature.elements
+            for span:SignatureSyntax.Span in signature.split(on: linkBoundaries)
             {
                 switch span
                 {
@@ -95,21 +118,10 @@ extension Signature.Expanded
                     fallthrough
 
                 case .text(let range, let color?, _):
-
                     $0[color]
                     {
-                        let offset:Int
-                        if  case .attribute = color,
-                            case 0x40 = utf8[range.lowerBound] // '@'
-                        {
-                            offset = range.lowerBound + 1
-                        }
-                        else
-                        {
-                            offset = range.lowerBound
-                        }
-
-                        if  let referent:Scalar = symbols.removeValue(forKey: offset)
+                        if  let referent:Scalar = linkTargets.removeValue(
+                                forKey: range.lowerBound)
                         {
                             $0[.href] =
                             {
