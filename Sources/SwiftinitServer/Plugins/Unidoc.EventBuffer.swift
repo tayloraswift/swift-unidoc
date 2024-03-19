@@ -1,7 +1,7 @@
 import DequeModule
 import UnixTime
 
-extension Swiftinit
+extension Unidoc
 {
     struct EventBuffer<Event>
     {
@@ -17,10 +17,10 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.EventBuffer:Sendable where Event:Sendable
+extension Unidoc.EventBuffer:Sendable where Event:Sendable
 {
 }
-extension Swiftinit.EventBuffer
+extension Unidoc.EventBuffer
 {
     mutating
     func push(event:Event)

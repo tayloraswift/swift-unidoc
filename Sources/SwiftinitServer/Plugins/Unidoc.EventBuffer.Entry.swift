@@ -1,6 +1,6 @@
 import UnixTime
 
-extension Swiftinit.EventBuffer
+extension Unidoc.EventBuffer
 {
     struct Entry
     {
@@ -14,12 +14,12 @@ extension Swiftinit.EventBuffer
         }
     }
 }
-extension Swiftinit.EventBuffer.Entry:Sendable where Event:Sendable
+extension Unidoc.EventBuffer.Entry:Sendable where Event:Sendable
 {
 }
-extension Swiftinit.EventBuffer.Entry
+extension Unidoc.EventBuffer.Entry
 {
-    func time(now:UnixInstant) -> Swiftinit.EventTime?
+    func time(now:UnixInstant) -> Unidoc.EventTime?
     {
         self.pushed.timestamp.map
         {

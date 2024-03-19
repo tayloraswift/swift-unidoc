@@ -230,7 +230,7 @@ extension Mongo.CollectionModel where Element:BSONDocumentDecodable
 }
 extension Mongo.CollectionModel
 {
-    @inlinable internal
+    @inlinable
     func find<Decodable>(_:Decodable.Type = Decodable.self,
         by index:Mongo.AnyKeyPath,
         of key:__owned some BSONEncodable,
@@ -257,6 +257,62 @@ extension Mongo.CollectionModel
     }
 }
 
+extension Mongo.CollectionModel
+    where Element:BSONDecodable, Element.ID:BSONEncodable & Comparable
+{
+    /// Queries the **primary** replica for up to `limit` documents in this collection, ordered
+    /// by `_id`, and starting after the specified identifier if non-nil.
+    ///
+    /// This is useful for implementing application-level cursors when starting a native mongod
+    /// cursor on every application run is not desirable.
+    ///
+    /// You should **always** call this in a loop with a cooldown, to avoid spinning when the
+    /// collection is empty.
+    @inlinable public
+    func pull(_ limit:Int,
+        after cursor:inout Element.ID?,
+        with session:Mongo.Session) async throws -> [Element]
+    {
+        let elements:[Element] = try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<Element>>.init(Self.name, limit: limit)
+            {
+                $0[.filter]
+                {
+                    $0["_id"]
+                    {
+                        if  let cursor:Element.ID
+                        {
+                            $0[.gt] = cursor
+                        }
+                        else
+                        {
+                            $0[.gte] = BSON.Min.init()
+                        }
+                    }
+                }
+                $0[.sort]
+                {
+                    $0["_id"] = (+)
+                }
+                $0[.hint]
+                {
+                    $0["_id"] = (+)
+                }
+            },
+            against: self.database)
+
+        if  let last:Element = elements.last
+        {
+            cursor = last.id
+        }
+        else
+        {
+            cursor = nil
+        }
+
+        return elements
+    }
+}
 extension Mongo.CollectionModel
 {
     /// Decode and re-encode all documents in this collection using the specified master type.

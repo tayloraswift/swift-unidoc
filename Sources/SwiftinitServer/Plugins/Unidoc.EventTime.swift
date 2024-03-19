@@ -2,7 +2,7 @@ import HTML
 import SwiftinitPages
 import UnixTime
 
-extension Swiftinit
+extension Unidoc
 {
     struct EventTime
     {
@@ -16,7 +16,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.EventTime:HTML.OutputStreamable
+extension Unidoc.EventTime:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
