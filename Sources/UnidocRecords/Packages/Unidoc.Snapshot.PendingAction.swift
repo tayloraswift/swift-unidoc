@@ -14,3 +14,17 @@ extension Unidoc.Snapshot
 extension Unidoc.Snapshot.PendingAction:BSONDecodable, BSONEncodable
 {
 }
+extension Unidoc.Snapshot.PendingAction:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        switch self
+        {
+        case .uplinkInitial:    "uplink (initial)"
+        case .uplinkRefresh:    "uplink (refresh)"
+        case .unlink:           "unlink"
+        case .delete:           "delete"
+        }
+    }
+}

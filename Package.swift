@@ -194,6 +194,8 @@ let package:Package = .init(
                 .target(name: "Symbols"),
             ]),
 
+        .target(name: "DynamicTime"),
+
         .target(name: "FNV1"),
 
         .target(name: "GitHubClient",
@@ -431,6 +433,7 @@ let package:Package = .init(
 
         .target(name: "SwiftinitPages",
             dependencies: [
+                .target(name: "DynamicTime"),
                 .target(name: "GitHubAPI"),
                 .target(name: "SwiftinitRender"),
                 .target(name: "UnidocAPI"),
