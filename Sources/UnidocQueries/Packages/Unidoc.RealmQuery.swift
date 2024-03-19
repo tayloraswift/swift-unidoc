@@ -14,10 +14,10 @@ extension Unidoc
         let symbol:String
 
         @usableFromInline
-        let user:Unidoc.User.ID?
+        let user:Unidoc.Account?
 
         @inlinable public
-        init(realm symbol:String, user:Unidoc.User.ID? = nil)
+        init(realm symbol:String, user:Unidoc.Account? = nil)
         {
             self.symbol = symbol
             self.user = user
@@ -42,7 +42,7 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        if  let user:Unidoc.User.ID = self.user
+        if  let user:Unidoc.Account = self.user
         {
             pipeline[stage: .lookup] = .init
             {

@@ -12,24 +12,18 @@ extension Unidoc
         var id:Account
         public
         var level:Level
-        public
-        var realm:Unidoc.Realm?
 
         public
-        var github:GitHub.User<Void>?
+        var github:GitHub.User.Profile?
 
         @inlinable public
         init(id:Account,
             level:Level,
-            realm:Unidoc.Realm? = nil,
-            github:GitHub.User<Void>? = nil)
+            github:GitHub.User.Profile? = nil)
         {
             self.id = id
-
             self.level = level
-            self.realm = realm
-
-            self.github = nil
+            self.github = github
         }
     }
 }
@@ -48,13 +42,13 @@ extension Unidoc.User:MongoMasterCodingModel
     {
         case id = "_id"
         case level
-        case realm
 
         case github = "github"
 
         /// The session cookie associated with this account, if logged in. This is generated
         /// randomly in ``AccountDatabase.Users.update(account:with:)``.
         case cookie
+        case apiKey
     }
 }
 extension Unidoc.User:BSONDocumentEncodable
@@ -63,10 +57,7 @@ extension Unidoc.User:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-
         bson[.level] = self.level
-        bson[.realm] = self.realm
-
         bson[.github] = self.github
     }
 }
@@ -77,7 +68,6 @@ extension Unidoc.User:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             level: try bson[.level].decode(),
-            realm: try bson[.realm]?.decode(),
             github: try bson[.github]?.decode())
     }
 }

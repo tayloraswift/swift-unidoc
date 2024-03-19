@@ -1,7 +1,31 @@
 import BSON
 import GitHubAPI
 
-extension GitHub.User<Void>:BSONDocumentEncodable, BSONEncodable
+extension GitHub.User.Profile
+{
+    @frozen public
+    enum CodingKey:String, Sendable
+    {
+        case login = "U"
+        case icon = "P"
+        case node = "Z"
+        case location = "L"
+        case hireable = "H"
+        case company = "O"
+        case email = "E"
+        case name = "N"
+        case blog = "B"
+        case bio = "A"
+        case x = "X"
+        case publicRepos = "R"
+        case publicGists = "G"
+        case followers = "I"
+        case following = "J"
+        case created = "C"
+        case updated = "M"
+    }
+}
+extension GitHub.User.Profile:BSONDocumentEncodable, BSONEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -25,12 +49,12 @@ extension GitHub.User<Void>:BSONDocumentEncodable, BSONEncodable
         bson[.updated] = self.updated
     }
 }
-extension GitHub.User<Void>:BSONDocumentDecodable, BSONDecodable
+extension GitHub.User.Profile:BSONDocumentDecodable, BSONDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(id: (),
+        self.init(
             login: try bson[.login].decode(),
             icon: try bson[.icon].decode(),
             node: try bson[.node].decode(),

@@ -30,9 +30,11 @@ extension Unidoc.DB.Users:Mongo.CollectionModel
 }
 extension Unidoc.DB.Users
 {
+    /// Checks if the given cookie matches the associated user, returning the user's ID and
+    /// access level if the cookie is valid.
     public
-    func validate(cookie credential:Unidoc.Cookie,
-        with session:Mongo.Session) async throws -> (Unidoc.User.ID, Unidoc.User.Level)?
+    func validate(user:Unidoc.UserSession,
+        with session:Mongo.Session) async throws -> (Unidoc.Account, Unidoc.User.Level)?
     {
         let matches:[LevelView] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<LevelView>>.init(Self.name, limit: 1)
@@ -43,8 +45,8 @@ extension Unidoc.DB.Users
                 }
                 $0[.filter]
                 {
-                    $0[Element[.id]] = credential.user
-                    $0[Element[.cookie]] = credential.cookie
+                    $0[Element[.id]] = user.account
+                    $0[Element[.cookie]] = user.cookie
                 }
                 $0[.projection] = .init
                 {
@@ -66,11 +68,11 @@ extension Unidoc.DB.Users
     /// secure if the system's random number generator is secure.
     public
     func update(user:Unidoc.User,
-        with session:Mongo.Session) async throws -> Unidoc.Cookie
+        with session:Mongo.Session) async throws -> Unidoc.UserSession
     {
-        let (upserted, _):(Unidoc.Cookie, Unidoc.User.ID?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Upserting<Unidoc.Cookie, Unidoc.User.ID>>.init(
-                Self.name,
+        let (upserted, _):(Unidoc.UserSession, Unidoc.Account?) = try await session.run(
+            command: Mongo.FindAndModify<
+                Mongo.Upserting<Unidoc.UserSession, Unidoc.Account>>.init(Self.name,
                 returning: .new)
             {
                 $0[.hint]
@@ -105,11 +107,11 @@ extension Unidoc.DB.Users
     /// Scrambles the cookie for the given user, returning the new cookie. Returns nil if
     /// the user does not exist.
     public
-    func scramble(user:Unidoc.User.ID,
-        with session:Mongo.Session) async throws -> Unidoc.Cookie?
+    func scramble(user:Unidoc.Account,
+        with session:Mongo.Session) async throws -> Unidoc.UserSession?
     {
-        let (updated, _):(Unidoc.Cookie?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.Cookie>>.init(Self.name,
+        let (updated, _):(Unidoc.UserSession?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.UserSession>>.init(Self.name,
                 returning: .new)
             {
                 $0[.hint]
