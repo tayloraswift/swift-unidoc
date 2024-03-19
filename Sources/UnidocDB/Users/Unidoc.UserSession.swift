@@ -1,4 +1,3 @@
-import BSON
 import MongoQL
 import UnidocRecords
 
@@ -40,16 +39,5 @@ extension Unidoc.UserSession:LosslessStringConvertible
         {
             return nil
         }
-    }
-}
-extension Unidoc.UserSession:BSONDocumentDecodable
-{
-    public
-    typealias CodingKey = Unidoc.User.CodingKey
-
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(account: try bson[.id].decode(), cookie: try bson[.cookie].decode())
     }
 }

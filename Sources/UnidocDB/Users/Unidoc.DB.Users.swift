@@ -34,7 +34,7 @@ extension Unidoc.DB.Users
     /// access level if the cookie is valid.
     public
     func validate(user:Unidoc.UserSession,
-        with session:Mongo.Session) async throws -> (Unidoc.Account, Unidoc.User.Level)?
+        with session:Mongo.Session) async throws -> Unidoc.User.Level?
     {
         let matches:[LevelView] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<LevelView>>.init(Self.name, limit: 1)
@@ -56,7 +56,7 @@ extension Unidoc.DB.Users
             },
             against: self.database)
 
-        return matches.first.map { ($0.id, $0.level) }
+        return matches.first?.level
     }
 
     /// Upserts the given account into the database, returning a new, randomly-generated
@@ -68,11 +68,11 @@ extension Unidoc.DB.Users
     /// secure if the system's random number generator is secure.
     public
     func update(user:Unidoc.User,
-        with session:Mongo.Session) async throws -> Unidoc.UserSession
+        with session:Mongo.Session) async throws -> Unidoc.UserSecrets
     {
-        let (upserted, _):(Unidoc.UserSession, Unidoc.Account?) = try await session.run(
+        let (secrets, _):(Unidoc.UserSecrets, Unidoc.Account?) = try await session.run(
             command: Mongo.FindAndModify<
-                Mongo.Upserting<Unidoc.UserSession, Unidoc.Account>>.init(Self.name,
+                Mongo.Upserting<Unidoc.UserSecrets, Unidoc.Account>>.init(Self.name,
                 returning: .new)
             {
                 $0[.hint]
@@ -85,7 +85,14 @@ extension Unidoc.DB.Users
                 }
                 $0[.update]
                 {
-                    $0[.set] = user
+                    //  Set the fields individually, to avoid overwriting session cookie and/or
+                    //  generated API keys.
+                    $0[.set]
+                    {
+                        $0[Element[.id]] = user.id
+                        $0[Element[.level]] = user.level
+                        $0[Element[.github]] = user.github
+                    }
                     $0[.setOnInsert]
                     {
                         $0[Element[.cookie]] = Int64.random(in: .min ... .max)
@@ -95,23 +102,26 @@ extension Unidoc.DB.Users
                 {
                     $0[Element[.id]] = true
                     $0[Element[.cookie]] = true
+                    $0[Element[.apiKey]] = true
                 }
             },
             against: self.database)
 
-        return upserted
+        return secrets
     }
 }
 extension Unidoc.DB.Users
 {
-    /// Scrambles the cookie for the given user, returning the new cookie. Returns nil if
-    /// the user does not exist.
+    /// Scrambles the specified secret for the given user, returning the new secrets.
+    ///
+    /// Returns nil if the user does not exist.
     public
-    func scramble(user:Unidoc.Account,
-        with session:Mongo.Session) async throws -> Unidoc.UserSession?
+    func scramble(secret:Unidoc.User.CodingKey,
+        user:Unidoc.Account,
+        with session:Mongo.Session) async throws -> Unidoc.UserSecrets?
     {
-        let (updated, _):(Unidoc.UserSession?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.UserSession>>.init(Self.name,
+        let (updated, _):(Unidoc.UserSecrets?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.UserSecrets>>.init(Self.name,
                 returning: .new)
             {
                 $0[.hint]
@@ -126,13 +136,13 @@ extension Unidoc.DB.Users
                 {
                     $0[.set]
                     {
-                        $0[Element[.cookie]] = Int64.random(in: .min ... .max)
+                        $0[Element[secret]] = Int64.random(in: .min ... .max)
                     }
                 }
                 $0[.fields] = .init
                 {
-                    $0[Element[.id]] = true
                     $0[Element[.cookie]] = true
+                    $0[Element[.apiKey]] = true
                 }
             },
             against: self.database)

@@ -46,7 +46,7 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
         }
 
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let cookie:Unidoc.UserSession = try await server.db.users.update(user: user,
+        let secrets:Unidoc.UserSecrets = try await server.db.users.update(user: user,
             with: session)
 
         let target:Swiftinit.Root
@@ -60,7 +60,7 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
             target = .acct
         }
 
-        return .redirect(.temporary("\(target)"),
-            cookies: [Swiftinit.Cookies.session: "\(cookie)"])
+        return .redirect(.temporary("\(target)"), // meet taylor swift
+            cookies: [Swiftinit.Cookies.session: "\(secrets.session)"])
     }
 }

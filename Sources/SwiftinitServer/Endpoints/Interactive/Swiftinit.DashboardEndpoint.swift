@@ -20,13 +20,14 @@ extension Swiftinit.DashboardEndpoint:RestrictedEndpoint
         {
         case .cookie(scramble: let scramble):
             let session:Mongo.Session = try await .init(from: server.db.sessions)
-            let cookie:Unidoc.UserSession
+            let secrets:Unidoc.UserSecrets
 
             switch scramble
             {
             case true:
                 guard
-                let changed:Unidoc.UserSession = try await server.db.users.scramble(
+                let changed:Unidoc.UserSecrets = try await server.db.users.scramble(
+                    secret: .cookie,
                     user: .init(type: .unidoc, user: 0),
                     with: session)
                 else
@@ -36,15 +37,15 @@ extension Swiftinit.DashboardEndpoint:RestrictedEndpoint
                     fallthrough
                 }
 
-                cookie = changed
+                secrets = changed
 
             case false:
-                cookie = try await server.db.users.update(
+                secrets = try await server.db.users.update(
                     user: .machine(0),
                     with: session)
             }
 
-            let page:Swiftinit.CookiePage = .init(cookie: "\(cookie)")
+            let page:Swiftinit.CookiePage = .init(cookie: "\(secrets.session)")
             return .ok(page.resource(format: server.format))
 
         case .master:

@@ -1,5 +1,6 @@
 import GitHubAPI
 import HTML
+import Media
 import URI
 
 extension Swiftinit
@@ -72,6 +73,55 @@ extension Swiftinit.UserPage:Swiftinit.ApplicationPage
 
                     $0[.dt] = "Email"
                     $0[.dd] = github.email
+                }
+            }
+
+            $0[.h2] = "API keys"
+
+            let button:String
+
+            if  let apiKey:Int64 = self.user.apiKey
+            {
+                button = "Scramble API key"
+
+                $0[.dl]
+                {
+                    $0[.dt] = "API key"
+                    $0[.dd] = String.init(UInt64.init(bitPattern: apiKey), radix: 16)
+                }
+            }
+            else
+            {
+                button = "Generate API key"
+
+                $0[.p] = "You have not generated an API key yet."
+            }
+
+            $0[.div, { $0.class = "more" }]
+            {
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Swiftinit.API[.userConfig, really: false])"
+                    $0.method = "post"
+                }
+                    content:
+                {
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "account"
+                        $0.value = "\(self.user.id)"
+                    }
+
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "generate"
+                        $0.value = "api-key"
+                    }
+
+                    $0[.button] { $0.type = "submit" } = button
                 }
             }
         }

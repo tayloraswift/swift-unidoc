@@ -119,7 +119,7 @@ extension Swiftinit.ServerLoop
 
         //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
         //  want to be able to change it without restarting the server.
-        let _:Unidoc.UserSession = try await self.db.users.update(user: .machine(0),
+        let _:Unidoc.UserSecrets = try await self.db.users.update(user: .machine(0),
             with: session)
 
         _ = consume session
@@ -187,9 +187,9 @@ extension Swiftinit.ServerLoop
 
         switch try await self.db.users.validate(user: user, with: session)
         {
-        case (_, .administratrix)?: return nil
-        case (_, .machine)?:        return nil
-        default:                    return .forbidden("")
+        case .administratrix?:  return nil
+        case .machine?:         return nil
+        default:                return .forbidden("")
         }
     }
 }
