@@ -54,6 +54,11 @@ extension Swiftinit.LoginPage:Swiftinit.AdministrativePage
                 $0.name = "client_id"
                 $0.value = self.app.client
             }
+
+            //  Note, for some reason, setting the `redirect_uri` to 127.0.0.1 does not work,
+            //  even though the GitHub OAuth documentation suggests it should.
+            //  https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#loopback-redirect-urls
+
             //  Don’t actually need this yet.
             // $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "user:email" }
 

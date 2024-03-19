@@ -16,10 +16,10 @@ extension Unidoc
         public
         let filter:VersionsPredicate
         public
-        let user:Unidoc.User.ID?
+        let user:Unidoc.Account?
 
         @inlinable public
-        init(symbol:Symbol.Package, filter:VersionsPredicate, as user:Unidoc.User.ID? = nil)
+        init(symbol:Symbol.Package, filter:VersionsPredicate, as user:Unidoc.Account? = nil)
         {
             self.symbol = symbol
             self.filter = filter
@@ -61,7 +61,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             Self.loadTagged(releases: true, limit: limit, with: &pipeline)
         }
 
-        if  let user:Unidoc.User.ID = self.user
+        if  let user:Unidoc.Account = self.user
         {
             //  Lookup the querying user.
             pipeline[stage: .lookup] = .init

@@ -16,18 +16,15 @@ extension Swiftinit
         let plugins:[any Swiftinit.ServerPlugin]
 
         let tour:ServerTour
-        let real:Bool
 
         init(
             servers:[(host:Mongo.Host, latency:Nanoseconds)],
             plugins:[any Swiftinit.ServerPlugin],
-            tour:ServerTour,
-            real:Bool)
+            tour:ServerTour)
         {
             self.servers = servers
             self.plugins = plugins
             self.tour = tour
-            self.real = real
         }
     }
 }
@@ -56,7 +53,7 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
         main[.p]
         {
             $0 += "This is a "
-            $0[.strong] = self.real ? "real" : "test"
+            $0[.strong] = format.secure ? "real" : "test"
             $0 += " deployment."
         }
 

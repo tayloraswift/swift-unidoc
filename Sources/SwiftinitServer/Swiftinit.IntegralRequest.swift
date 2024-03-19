@@ -153,6 +153,19 @@ extension Swiftinit.IntegralRequest
 
             switch root
             {
+            case Swiftinit.Root.acct.id:
+                guard
+                let user:Unidoc.UserSession = metadata.cookies.session
+                else
+                {
+                    endpoint = .redirect("\(Swiftinit.Root.login)")
+                    break
+                }
+
+                endpoint = .explainable(Swiftinit.AcctEndpoint.init(
+                        query: .init(session: user)),
+                    parameters: .init(uri.query?.parameters, tag: tag))
+
             case Swiftinit.Root.admin.id:
                 endpoint = .interactive(Swiftinit.DashboardEndpoint.master)
 
@@ -236,7 +249,9 @@ extension Swiftinit.IntegralRequest
         case Swiftinit.Root.tags.id:
             endpoint = .get(tags: trunk,
                 with: .init(uri.query?.parameters,
-                    user: metadata.cookies.session?.user,
+                    //  OK to do this, if someone forges a cookie, they can see the admin
+                    //  controls, but they can't do anything with them.
+                    user: metadata.cookies.session?.account,
                     tag: tag))
 
         case Swiftinit.Root.telescope.id:

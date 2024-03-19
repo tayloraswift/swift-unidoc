@@ -80,7 +80,14 @@ extension Swiftinit.ServerLoop
 extension Swiftinit.ServerLoop
 {
     nonisolated
-    var secure:Bool { self.options.mode.secure }
+    var secure:Bool
+    {
+        switch self.options.mode
+        {
+        case .development: false
+        case .production:  true
+        }
+    }
 
     nonisolated
     var github:GitHub.Integration? { self.options.github }
@@ -99,7 +106,7 @@ extension Swiftinit.ServerLoop
         .init(
             assets: self.options.cloudfront ? .cloudfront : .local,
             locale: locale,
-            secure: self.options.mode.secure)
+            server: self.options.mode.server)
     }
 }
 
@@ -112,7 +119,7 @@ extension Swiftinit.ServerLoop
 
         //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
         //  want to be able to change it without restarting the server.
-        let _:Unidoc.Cookie = try await self.db.users.update(user: .machine(0),
+        let _:Unidoc.UserSession = try await self.db.users.update(user: .machine(0),
             with: session)
 
         _ = consume session
@@ -163,14 +170,14 @@ extension Swiftinit.ServerLoop
     private nonisolated
     func clearance(by cookies:Swiftinit.Cookies) async throws -> HTTP.ServerResponse?
     {
-        guard self.secure
+        guard case .production = self.options.mode
         else
         {
             return nil
         }
 
         guard
-        let cookie:Unidoc.Cookie = cookies.session
+        let user:Unidoc.UserSession = cookies.session
         else
         {
             return .unauthorized("")
@@ -178,7 +185,7 @@ extension Swiftinit.ServerLoop
 
         let session:Mongo.Session = try await .init(from: self.db.sessions)
 
-        switch try await self.db.users.validate(cookie: cookie, with: session)
+        switch try await self.db.users.validate(user: user, with: session)
         {
         case (_, .administratrix)?: return nil
         case (_, .machine)?:        return nil

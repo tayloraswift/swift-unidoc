@@ -5,36 +5,36 @@ import UnidocRecords
 extension Unidoc
 {
     @frozen public
-    struct Cookie:Equatable, Hashable, Sendable
+    struct UserSession:Equatable, Hashable, Sendable
     {
         public
-        let user:User.ID
-        @usableFromInline internal
+        let account:Account
+        public
         let cookie:Int64
 
-        @inlinable internal
-        init(user:User.ID, cookie:Int64)
+        @inlinable
+        init(account:Account, cookie:Int64)
         {
-            self.user = user
+            self.account = account
             self.cookie = cookie
         }
     }
 }
-extension Unidoc.Cookie:CustomStringConvertible
+extension Unidoc.UserSession:CustomStringConvertible
 {
     @inlinable public
-    var description:String { "\(self.user)_\(UInt64.init(bitPattern: self.cookie))" }
+    var description:String { "\(self.account)_\(UInt64.init(bitPattern: self.cookie))" }
 }
-extension Unidoc.Cookie:LosslessStringConvertible
+extension Unidoc.UserSession:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:some StringProtocol)
     {
         if  let colon:String.Index = description.firstIndex(of: "_"),
-            let user:Unidoc.User.ID = .init(description[..<colon]),
+            let account:Unidoc.Account = .init(description[..<colon]),
             let cookie:UInt64 = .init(description[description.index(after: colon)...])
         {
-            self.init(user: user, cookie: .init(bitPattern: cookie))
+            self.init(account: account, cookie: .init(bitPattern: cookie))
         }
         else
         {
@@ -42,7 +42,7 @@ extension Unidoc.Cookie:LosslessStringConvertible
         }
     }
 }
-extension Unidoc.Cookie:BSONDocumentDecodable
+extension Unidoc.UserSession:BSONDocumentDecodable
 {
     public
     typealias CodingKey = Unidoc.User.CodingKey
@@ -50,6 +50,6 @@ extension Unidoc.Cookie:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(user: try bson[.id].decode(), cookie: try bson[.cookie].decode())
+        self.init(account: try bson[.id].decode(), cookie: try bson[.cookie].decode())
     }
 }

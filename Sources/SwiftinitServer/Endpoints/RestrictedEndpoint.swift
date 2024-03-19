@@ -8,7 +8,7 @@ import UnidocRecords
 protocol RestrictedEndpoint:InteractiveEndpoint
 {
     static
-    func admit(user:Unidoc.User.ID, level:Unidoc.User.Level) -> Bool
+    func admit(user:Unidoc.Account, level:Unidoc.User.Level) -> Bool
 
     consuming
     func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
@@ -16,7 +16,7 @@ protocol RestrictedEndpoint:InteractiveEndpoint
 extension RestrictedEndpoint
 {
     static
-    func admit(user:Unidoc.User.ID, level:Unidoc.User.Level) -> Bool
+    func admit(user:Unidoc.Account, level:Unidoc.User.Level) -> Bool
     {
         level == .administratrix
     }
@@ -29,7 +29,7 @@ extension RestrictedEndpoint
         if  server.secure
         {
             guard
-            let cookie:Unidoc.Cookie = cookies.session
+            let user:Unidoc.UserSession = cookies.session
             else
             {
                 return .redirect(.temporary("\(Swiftinit.Root.login)"))
@@ -38,10 +38,8 @@ extension RestrictedEndpoint
             let session:Mongo.Session = try await .init(from: server.db.sessions)
 
             guard
-            let (id, level):(Unidoc.User.ID, Unidoc.User.Level) =
-                try await server.db.users.validate(
-                    cookie: cookie,
-                    with: session),
+            let (id, level):(Unidoc.Account, Unidoc.User.Level) =
+                try await server.db.users.validate(user: user, with: session),
                 Self.admit(user: id, level: level)
             else
             {

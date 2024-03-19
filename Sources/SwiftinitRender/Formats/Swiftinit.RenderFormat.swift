@@ -11,17 +11,29 @@ extension Swiftinit
         public
         var locale:HTTP.Locale?
         public
-        var secure:Bool
+        var server:Server
 
         @inlinable public
         init(
             assets:Assets,
             locale:HTTP.Locale? = nil,
-            secure:Bool = true)
+            server:Server = .swiftinit_org)
         {
             self.assets = assets
             self.locale = locale
-            self.secure = secure
+            self.server = server
+        }
+    }
+}
+extension Swiftinit.RenderFormat
+{
+    @inlinable public
+    var secure:Bool
+    {
+        switch self.server
+        {
+        case .swiftinit_org:    true
+        case .localhost:        false
         }
     }
 }
