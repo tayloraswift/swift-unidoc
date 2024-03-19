@@ -15,15 +15,19 @@ extension Unidoc
 
         public
         var github:GitHub.User.Profile?
+        public
+        var apiKey:Int64?
 
         @inlinable public
         init(id:Account,
             level:Level,
-            github:GitHub.User.Profile? = nil)
+            github:GitHub.User.Profile? = nil,
+            apiKey:Int64? = nil)
         {
             self.id = id
             self.level = level
             self.github = github
+            self.apiKey = apiKey
         }
     }
 }
@@ -59,6 +63,7 @@ extension Unidoc.User:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.level] = self.level
         bson[.github] = self.github
+        bson[.apiKey] = self.apiKey
     }
 }
 extension Unidoc.User:BSONDocumentDecodable
@@ -68,6 +73,7 @@ extension Unidoc.User:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             level: try bson[.level].decode(),
-            github: try bson[.github]?.decode())
+            github: try bson[.github]?.decode(),
+            apiKey: try bson[.apiKey]?.decode())
     }
 }

@@ -488,6 +488,18 @@ extension Swiftinit.AnyEndpoint
                         uri: form["redirect"]))
                 }
 
+            case .userConfig:
+                //  It is legal to forge the account ID, as this will be checked properly in
+                //  ``Swiftinit.UserConfigEndpoint.admit(user:level:)``.
+                if  let account:String = form["account"],
+                    let account:Unidoc.Account = .init(account),
+                    let update:Swiftinit.UserConfigEndpoint.Update = .init(from: form)
+                {
+                    return .interactive(Swiftinit.UserConfigEndpoint.init(
+                        account: account,
+                        update: update))
+                }
+
             default:
                 break
             }
@@ -586,6 +598,29 @@ extension Swiftinit.AnyEndpoint
 
             default:
                 return nil
+            }
+
+        case .userConfig:
+            let form:[String: String] = query.parameters.reduce(into: [:])
+            {
+                $0[$1.key] = $1.value
+            }
+
+            guard
+            let update:Swiftinit.UserConfigEndpoint.Update = .init(from: form)
+            else
+            {
+                return nil
+            }
+            switch update
+            {
+            case .generateKey:
+                heading = "Generate API key?"
+                prompt = """
+                This will invalidate any previously-generated API keys. \
+                You cannot undo this action!
+                """
+                button = "Generate key"
             }
 
         default:

@@ -17,7 +17,6 @@ extension Swiftinit
 
 extension Swiftinit.BuilderEndpoint:RestrictedEndpoint
 {
-    static
     func admit(user:Unidoc.Account, level:Unidoc.User.Level) -> Bool
     {
         switch level
