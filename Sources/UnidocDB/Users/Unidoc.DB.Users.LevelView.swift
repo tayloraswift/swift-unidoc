@@ -21,7 +21,6 @@ extension Unidoc.DB.Users.LevelView:BSONDocumentDecodable
 
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(id: try bson[.id].decode(),
-            level: try bson[.level].decode())
+        self.init(id: try bson[.id].decode(), level: try bson[.level].decode())
     }
 }

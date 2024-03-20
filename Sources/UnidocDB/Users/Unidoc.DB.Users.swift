@@ -17,6 +17,18 @@ extension Unidoc.DB
         }
     }
 }
+extension Unidoc.DB.Users
+{
+    public static
+    let indexRateLimit:Mongo.CollectionIndex = .init("RateLimit", unique: false)
+    {
+        $0[Unidoc.User[.apiLimitLeft]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.User[.apiKey]] { $0[.exists] = true }
+    }
+}
 extension Unidoc.DB.Users:Mongo.CollectionModel
 {
     public
@@ -26,7 +38,7 @@ extension Unidoc.DB.Users:Mongo.CollectionModel
     var name:Mongo.Collection { "Users" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [] }
+    var indexes:[Mongo.CollectionIndex] { [Self.indexRateLimit] }
 }
 extension Unidoc.DB.Users
 {
@@ -95,6 +107,8 @@ extension Unidoc.DB.Users
                     }
                     $0[.setOnInsert]
                     {
+                        $0[Element[.apiLimitLeft]] = 1_000
+
                         $0[Element[.cookie]] = Int64.random(in: .min ... .max)
                     }
                 }
@@ -148,5 +162,95 @@ extension Unidoc.DB.Users
             against: self.database)
 
         return updated
+    }
+
+    /// Resets API rate limits for up to `limit` users, returning the number of users whose
+    /// rate limits were reset.
+    public
+    func airdrop(
+        reset:Int,
+        limit:Int,
+        with session:Mongo.Session) async throws -> Int
+    {
+        let accounts:[Mongo.IdentityView<Unidoc.Account>] = try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<Mongo.IdentityView<Unidoc.Account>>>.init(
+                Self.name,
+                limit: limit)
+            {
+                $0[.hint] = Self.indexRateLimit.id
+                $0[.filter]
+                {
+                    $0[Element[.apiLimitLeft]] { $0[.lt] = reset }
+                    $0[Element[.apiKey]] { $0[.exists] = true }
+                }
+                $0[.projection] = .init
+                {
+                    $0[Element[.id]] = true
+                }
+            },
+            against: self.database)
+
+        if  accounts.isEmpty
+        {
+            return 0
+        }
+
+        let updated:Mongo.UpdateResponse<Unidoc.Account> = try await session.run(
+            command: Mongo.Update<Mongo.Many, Unidoc.Account>.init(Self.name)
+            {
+                //  Not the end of the world if this races something and we airdrop rate limit
+                //  to users that lack an API key.
+                $0
+                {
+                    $0[.multi] = true
+                    $0[.q]
+                    {
+                        $0[Element[.id]] { $0[.in] = accounts.lazy.map(\.id) }
+                    }
+                    $0[.u]
+                    {
+                        $0[.set] { $0[Element[.apiLimitLeft]] = reset }
+                    }
+                }
+            },
+            against: self.database)
+
+        return updated.selected
+    }
+
+    /// Charges the given API key by the specified amount, returning the amount of API calls
+    /// left after the charge.
+    public
+    func charge(apiKey:Int64,
+        user:Unidoc.Account,
+        cost:Int = 1,
+        with session:Mongo.Session) async throws -> Int?
+    {
+        let (user, _):(LimitView?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<LimitView>>.init(Self.name,
+                returning: .new)
+            {
+                $0[.hint]
+                {
+                    $0[Element[.id]] = (+)
+                }
+                $0[.query]
+                {
+                    $0[Element[.id]] = user
+                    $0[Element[.apiKey]] = apiKey
+                    $0[Element[.apiLimitLeft]] { $0[.gte] = cost }
+                }
+                $0[.update]
+                {
+                    $0[.inc] { $0[Element[.apiLimitLeft]] = -cost }
+                }
+                $0[.fields] = .init
+                {
+                    $0[Element[.apiLimitLeft]] = true
+                }
+            },
+            against: self.database)
+
+        return user?.apiLimitLeft
     }
 }

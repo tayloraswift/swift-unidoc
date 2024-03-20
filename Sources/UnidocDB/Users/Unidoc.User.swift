@@ -14,20 +14,25 @@ extension Unidoc
         var level:Level
 
         public
-        var github:GitHub.User.Profile?
+        var apiLimitLeft:Int
         public
         var apiKey:Int64?
+
+        public
+        var github:GitHub.User.Profile?
 
         @inlinable public
         init(id:Account,
             level:Level,
-            github:GitHub.User.Profile? = nil,
-            apiKey:Int64? = nil)
+            apiLimitLeft:Int = 0,
+            apiKey:Int64? = nil,
+            github:GitHub.User.Profile? = nil)
         {
             self.id = id
             self.level = level
-            self.github = github
+            self.apiLimitLeft = apiLimitLeft
             self.apiKey = apiKey
+            self.github = github
         }
     }
 }
@@ -45,14 +50,15 @@ extension Unidoc.User:MongoMasterCodingModel
     enum CodingKey:String, Sendable
     {
         case id = "_id"
-        case level
+        case level = "P"
 
-        case github = "github"
-
+        case apiLimitLeft = "L"
+        case apiKey = "A"
         /// The session cookie associated with this account, if logged in. This is generated
         /// randomly in ``AccountDatabase.Users.update(account:with:)``.
-        case cookie
-        case apiKey
+        case cookie = "B"
+
+        case github = "github"
     }
 }
 extension Unidoc.User:BSONDocumentEncodable
@@ -62,8 +68,11 @@ extension Unidoc.User:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.level] = self.level
-        bson[.github] = self.github
+
+        bson[.apiLimitLeft] = self.apiLimitLeft
         bson[.apiKey] = self.apiKey
+
+        bson[.github] = self.github
     }
 }
 extension Unidoc.User:BSONDocumentDecodable
@@ -73,7 +82,8 @@ extension Unidoc.User:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             level: try bson[.level].decode(),
-            github: try bson[.github]?.decode(),
-            apiKey: try bson[.apiKey]?.decode())
+            apiLimitLeft: try bson[.apiLimitLeft]?.decode() ?? 0,
+            apiKey: try bson[.apiKey]?.decode(),
+            github: try bson[.github]?.decode())
     }
 }

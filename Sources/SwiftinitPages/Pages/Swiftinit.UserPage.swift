@@ -88,6 +88,9 @@ extension Swiftinit.UserPage:Swiftinit.ApplicationPage
                 {
                     $0[.dt] = "API key"
                     $0[.dd] = String.init(UInt64.init(bitPattern: apiKey), radix: 16)
+
+                    $0[.dt] = "Rate limit remaining"
+                    $0[.dd] = "\(self.user.apiLimitLeft)"
                 }
             }
             else
