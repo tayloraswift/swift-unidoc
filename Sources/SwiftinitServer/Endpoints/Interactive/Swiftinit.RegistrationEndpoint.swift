@@ -42,7 +42,11 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
             /// r u taylor swift?
             let level:Unidoc.User.Level = user.id == 2556986 ? .administratrix : .human
             let id:Unidoc.Account = .init(type: .github, user: user.id)
-            return .init(id: id, level: level, github: user.profile)
+            return .init(id: id,
+                level: level,
+                //  This will only be written to the database if the user is new.
+                apiLimitLeft: server.db.policy.apiLimitPerReset,
+                github: user.profile)
         }
 
         let session:Mongo.Session = try await .init(from: server.db.sessions)

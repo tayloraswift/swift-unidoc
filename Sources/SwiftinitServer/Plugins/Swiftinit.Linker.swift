@@ -3,42 +3,6 @@ import S3Client
 import SwiftinitPlugins
 import UnidocDB
 
-// extension Swiftinit.PackageVisitor
-// {
-//     enum Event
-//     {
-//     }
-// }
-// extension Swiftinit
-// {
-//     struct PackageVisitor
-//     {
-//         private
-//         let status:AtomicPointer<LinkerPlugin.StatusPage>
-//         private
-//         var buffer:Unidoc.EventBuffer<Event>
-
-//         private
-//         var cursor:Unidoc.Package?
-//         private
-//         var cycle:Int
-
-//         init()
-//         {
-//             self.cursor = nil
-//             self.cycle = 0
-//         }
-//     }
-// }
-// extension Swiftinit.PackageVisitor
-// {
-//     private
-//     func publish()
-//     {
-//         status.replace(value: .init(from: self.buffer))
-//     }
-// }
-
 extension Swiftinit
 {
     struct Linker

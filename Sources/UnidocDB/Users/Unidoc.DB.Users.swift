@@ -107,7 +107,8 @@ extension Unidoc.DB.Users
                     }
                     $0[.setOnInsert]
                     {
-                        $0[Element[.apiLimitLeft]] = 1_000
+                        $0[Element[.apiLimitLeft]] = user.apiLimitLeft
+                        $0[Element[.apiKey]] = user.apiKey
 
                         $0[Element[.cookie]] = Int64.random(in: .min ... .max)
                     }
@@ -180,7 +181,7 @@ extension Unidoc.DB.Users
                 $0[.hint] = Self.indexRateLimit.id
                 $0[.filter]
                 {
-                    $0[Element[.apiLimitLeft]] { $0[.lt] = reset }
+                    $0[Element[.apiLimitLeft]] { $0[.ne] = reset }
                     $0[Element[.apiKey]] { $0[.exists] = true }
                 }
                 $0[.projection] = .init

@@ -73,7 +73,12 @@ extension Swiftinit.ServerLoop
             context: context,
             options: options,
             db: .init(sessions: mongodb,
-                unidoc: await .setup(as: "unidoc", in: mongodb)))
+                unidoc: await .setup(as: "unidoc", in: mongodb))
+            {
+                //  200 API calls per hour.
+                $0.apiLimitInterval = .seconds(3600)
+                $0.apiLimitPerReset = 200
+            })
     }
 }
 

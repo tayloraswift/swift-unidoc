@@ -73,6 +73,7 @@ extension Swiftinit.ServerOptions
         }
         else
         {
+            list.append(Swiftinit.AirdropPlugin.init())
             list.append(Swiftinit.LinkerPlugin.init(bucket: self.bucket))
         }
 
