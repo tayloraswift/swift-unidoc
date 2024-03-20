@@ -33,8 +33,6 @@ extension Unidoc
 }
 extension Unidoc.DB
 {
-    var policies:Policies { .init() }
-
     @inlinable public
     var crawlingWindows:CrawlingWindows { .init(database: self.id) }
     @inlinable public
