@@ -112,6 +112,18 @@ extension HTTP.ServerMessage
         {
             self.headers.add(name: "link", value: Authority.link(canonical, rel: .canonical))
         }
+        if  let count:Int = resource.headers.rateLimit.remaining
+        {
+            self.headers.add(name: "ratelimit-remaining", value: "\(count)")
+        }
+        if  let count:Int = resource.headers.rateLimit.limit
+        {
+            self.headers.add(name: "ratelimit-limit", value: "\(count)")
+        }
+        if  let reset:Int = resource.headers.rateLimit.reset
+        {
+            self.headers.add(name: "ratelimit-reset", value: "\(reset)")
+        }
         if  let hash:MD5 = resource.hash
         {
             self.headers.add(name: "etag", value: "\"\(hash)\"")

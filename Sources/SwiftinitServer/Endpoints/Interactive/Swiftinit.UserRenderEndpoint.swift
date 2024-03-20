@@ -33,6 +33,11 @@ extension Swiftinit.UserRenderEndpoint:PublicEndpoint
             return .resource("Inactive or nonexistent API key", status: 429)
         }
 
-        return .ok("Remaining API calls: \(remaining)")
+        return .ok(.init(
+            headers: .init(canonical: nil, rateLimit: .init(remaining: remaining)),
+            content: .binary([]),
+            type: .text(.html, charset: .utf8),
+            gzip: false,
+            hash: nil))
     }
 }
