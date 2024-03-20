@@ -11,10 +11,10 @@ extension HTML
         @usableFromInline
         let scalars:Scalars
         @usableFromInline
-        let inliner:any Swiftinit.VertexPageContext
+        let inliner:any Unidoc.VertexContext
 
         @inlinable public
-        init(_ inliner:any Swiftinit.VertexPageContext, display:Display, scalars:Scalars)
+        init(_ inliner:any Unidoc.VertexContext, display:Display, scalars:Scalars)
         {
             self.inliner = inliner
 

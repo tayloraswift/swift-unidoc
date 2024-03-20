@@ -3,16 +3,14 @@ import BSON
 extension Unidoc
 {
     public
-    typealias StatsCounters = _UnidocStatsCounters
-}
-public
-protocol _UnidocStatsCounters:ExpressibleByDictionaryLiteral where Key == Never
-{
-    associatedtype CodingKey:RawRepresentable<String>, CaseIterable
-    associatedtype Value
+    protocol StatsCounters:ExpressibleByDictionaryLiteral where Key == Never
+    {
+        associatedtype CodingKey:RawRepresentable<String>, CaseIterable
+        associatedtype Value
 
-    static
-    subscript(key:CodingKey) -> WritableKeyPath<Self, Int> { get }
+        static
+        subscript(key:CodingKey) -> WritableKeyPath<Self, Int> { get }
+    }
 }
 extension Unidoc.StatsCounters
 {

@@ -3,18 +3,15 @@ import UnidocRecords
 extension Swiftinit
 {
     public
-    typealias ApicalPage = _SwiftinitApicalPage
-}
+    protocol ApicalPage<Apex>:VertexPage
+    {
+        associatedtype Apex:Unidoc.PrincipalVertex
 
-public
-protocol _SwiftinitApicalPage<Apex>:Swiftinit.VertexPage
-{
-    associatedtype Apex:Unidoc.PrincipalVertex
+        var mesh:Mesh { get }
+        var apex:Apex { get }
 
-    var mesh:Swiftinit.Mesh { get }
-    var apex:Apex { get }
-
-    var descriptionFallback:String { get }
+        var descriptionFallback:String { get }
+    }
 }
 extension Swiftinit.ApicalPage
 {

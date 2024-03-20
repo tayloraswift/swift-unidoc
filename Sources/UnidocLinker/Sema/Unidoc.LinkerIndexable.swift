@@ -1,19 +1,18 @@
 extension Unidoc
 {
-    typealias LinkerIndexable = _UnidocLinkerIndexable
-}
-protocol _UnidocLinkerIndexable:Identifiable<Unidoc.LinkerIndex<Self>>
-{
-    associatedtype Signature:Hashable
-    associatedtype Assembled
+    protocol LinkerIndexable:Identifiable<LinkerIndex<Self>>
+    {
+        associatedtype Signature:Hashable
+        associatedtype Assembled
 
-    static
-    var type:Unidoc.GroupType { get }
+        static
+        var type:GroupType { get }
 
-    init(id:Unidoc.LinkerIndex<Self>)
+        init(id:LinkerIndex<Self>)
 
-    var isEmpty:Bool { get }
+        var isEmpty:Bool { get }
 
-    consuming
-    func assemble(signature:Signature, with linker:borrowing Unidoc.Linker) -> Assembled
+        consuming
+        func assemble(signature:Signature, with linker:borrowing Linker) -> Assembled
+    }
 }

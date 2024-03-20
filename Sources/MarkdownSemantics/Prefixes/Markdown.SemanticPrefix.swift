@@ -2,23 +2,22 @@ import MarkdownAST
 
 extension Markdown
 {
-    typealias SemanticPrefix = _MarkdownSemanticPrefix
-}
-@rethrows
-protocol _MarkdownSemanticPrefix
-{
-    /// The maximum number of top-level elements ``extract(from:)`` will
-    /// inspect for prefix patterns, including the span containing the
-    /// `:` separator. This must be at least 2 if the conforming type
-    /// accepts formatted prefixes, since the `:` separator can only
-    /// appear in unformatted text.
-    static
-    var radius:Int { get }
+    @rethrows
+    protocol SemanticPrefix
+    {
+        /// The maximum number of top-level elements ``extract(from:)`` will
+        /// inspect for prefix patterns, including the span containing the
+        /// `:` separator. This must be at least 2 if the conforming type
+        /// accepts formatted prefixes, since the `:` separator can only
+        /// appear in unformatted text.
+        static
+        var radius:Int { get }
 
-    /// Detects an instance of this pattern type from the given array of
-    /// inline block content. The array contains inline content up to, but
-    /// not including, an unformatted `:` character.
-    init?(from elements:__shared [Markdown.InlineElement]) rethrows
+        /// Detects an instance of this pattern type from the given array of
+        /// inline block content. The array contains inline content up to, but
+        /// not including, an unformatted `:` character.
+        init?(from elements:__shared [InlineElement]) rethrows
+    }
 }
 extension Markdown.SemanticPrefix
 {

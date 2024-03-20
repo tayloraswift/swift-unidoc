@@ -1,15 +1,13 @@
 extension Markdown
 {
-    typealias DefinePrefix = _MarkdownDefinePrefix
-}
+    protocol DefinePrefix:SemanticPrefix
+    {
+        /// A lowercased keyword that begins this prefix pattern.
+        static
+        var keyword:String { get }
 
-protocol _MarkdownDefinePrefix:Markdown.SemanticPrefix
-{
-    /// A lowercased keyword that begins this prefix pattern.
-    static
-    var keyword:String { get }
-
-    init(name:String, as style:Markdown.DefineStyle)
+        init(name:String, as style:DefineStyle)
+    }
 }
 extension Markdown.DefinePrefix
 {

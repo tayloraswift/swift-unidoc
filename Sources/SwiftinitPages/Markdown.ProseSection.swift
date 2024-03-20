@@ -11,12 +11,12 @@ extension Markdown
     struct ProseSection
     {
         private
-        let context:any Swiftinit.VertexPageContext
+        let context:any Unidoc.VertexContext
 
         let bytecode:Markdown.Bytecode
         let outlines:[Unidoc.Outline]
 
-        init(_ context:any Swiftinit.VertexPageContext,
+        init(_ context:any Unidoc.VertexContext,
             bytecode:Markdown.Bytecode,
             outlines:[Unidoc.Outline])
         {
@@ -29,7 +29,7 @@ extension Markdown
 }
 extension Markdown.ProseSection
 {
-    init(_ context:any Swiftinit.VertexPageContext, overview:Unidoc.Passage)
+    init(_ context:any Unidoc.VertexContext, overview:Unidoc.Passage)
     {
         self.init(context, bytecode: overview.markdown, outlines: overview.outlines)
     }

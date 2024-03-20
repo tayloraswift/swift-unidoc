@@ -1,15 +1,12 @@
 extension Swiftinit
 {
-    typealias BiasedHeading = _SwiftinitBiasedHeading
+    protocol BiasedHeading
+    {
+        static func citizens(in culture:Unidoc.Scalar) -> Self
+        static func available(in culture:Unidoc.Scalar) -> Self
+        static func `extension`(in culture:Unidoc.Scalar) -> Self
+    }
 }
-
-protocol _SwiftinitBiasedHeading
-{
-    static func citizens(in culture:Unidoc.Scalar) -> Self
-    static func available(in culture:Unidoc.Scalar) -> Self
-    static func `extension`(in culture:Unidoc.Scalar) -> Self
-}
-
 extension Swiftinit.BiasedHeading
 {
     init(culture:Unidoc.Scalar, bias:Unidoc.Bias)

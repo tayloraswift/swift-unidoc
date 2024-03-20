@@ -4,21 +4,17 @@ import MongoDB
 extension Mongo
 {
     public
-    typealias UpdateQuery = _MongoUpdateQuery
-}
+    protocol UpdateQuery<Target>:Sendable
+    {
+        /// The collection the update query operates on.
+        associatedtype Target:CollectionModel
+        associatedtype Effect:WriteEffect
 
-/// The name of this protocol is ``Mongo.PipelineQuery``.
-public
-protocol _MongoUpdateQuery<Target>:Sendable
-{
-    /// The collection the update query operates on.
-    associatedtype Target:Mongo.CollectionModel
-    associatedtype Effect:Mongo.WriteEffect
+        /// Constructs an update query by adding statements to the given encoder.
+        func build(updates:inout UpdateListEncoder<Effect>)
 
-    /// Constructs an update query by adding statements to the given encoder.
-    func build(updates:inout Mongo.UpdateListEncoder<Effect>)
-
-    var ordered:Bool { get }
+        var ordered:Bool { get }
+    }
 }
 extension Mongo.UpdateQuery
 {
