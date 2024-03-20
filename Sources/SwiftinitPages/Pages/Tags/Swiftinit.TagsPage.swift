@@ -301,17 +301,20 @@ extension Swiftinit.TagsPage
             }
         }
 
-        section[.div, { $0.class = "more" }]
+        if  self.view >= .owner
         {
-            $0[.form]
+            section[.div, { $0.class = "more" }]
             {
-                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
-                $0.method = "post"
-            } = ConfigButton.init(package: self.package.id,
-                update: "refresh",
-                value: "true",
-                label: "Refresh tags")
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
+                    $0.method = "post"
+                } = ConfigButton.init(package: self.package.id,
+                    update: "refresh",
+                    value: "true",
+                    label: "Refresh tags")
+            }
         }
 
         section[.h3] = "Names and aliases"
