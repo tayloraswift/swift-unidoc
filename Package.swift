@@ -100,6 +100,9 @@ let package:Package = .init(
             from: "0.13.1")),
         //.package(path: "../swift-mongodb"),
 
+        .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
+            from: "1.0.0")),
+
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.3.0")),
 
@@ -208,8 +211,8 @@ let package:Package = .init(
 
         .target(name: "GitHubAPI",
             dependencies: [
-                .target(name: "JSON"),
                 .target(name: "UnixTime"),
+                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "HTML",
@@ -270,37 +273,6 @@ let package:Package = .init(
         .target(name: "ISO",
             dependencies: [
                 .target(name: "IntegerEncodingMacros"),
-            ]),
-
-        .target(name: "JSONAST"),
-
-        .target(name: "JSONDecoding",
-            dependencies: [
-                .target(name: "JSONAST"),
-                .product(name: "Grammar", package: "swift-grammar"),
-            ]),
-
-        .target(name: "JSONEncoding",
-            dependencies: [
-                .target(name: "JSONAST"),
-            ]),
-
-        .target(name: "JSONLegacy",
-            dependencies: [
-                .target(name: "JSONDecoding"),
-            ]),
-
-        .target(name: "JSONParsing",
-            dependencies: [
-                .target(name: "JSONAST"),
-                .product(name: "Grammar", package: "swift-grammar"),
-            ]),
-
-        .target(name: "JSON",
-            dependencies: [
-                .target(name: "JSONDecoding"),
-                .target(name: "JSONEncoding"),
-                .target(name: "JSONParsing"),
             ]),
 
         .target(name: "LexicalPaths"),
@@ -376,8 +348,8 @@ let package:Package = .init(
 
         .target(name: "PackageMetadata",
             dependencies: [
-                .target(name: "JSON"),
                 .target(name: "PackageGraphs"),
+                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "S3",
@@ -504,7 +476,6 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphParts",
             dependencies: [
-                .target(name: "JSON"),
                 .target(name: "LexicalPaths"),
                 //  This is the point where the symbol graph compiler becomes infected with a
                 //  (non-macro) SwiftSyntax dependency.
@@ -515,6 +486,7 @@ let package:Package = .init(
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
+                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "SymbolGraphs",
@@ -549,8 +521,8 @@ let package:Package = .init(
 
         .target(name: "UnidocAPI",
             dependencies: [
-                .target(name: "JSON"),
                 .target(name: "Unidoc"),
+                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "UnidocDB",
