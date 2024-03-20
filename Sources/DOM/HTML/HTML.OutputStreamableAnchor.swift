@@ -4,14 +4,11 @@ extension HTML
     /// encoded with single-element subscript assignment. Behaves identically to an ordinary
     /// ``HTML.OutputStreamable`` value when streamed to an ``HTML.ContentEncoder``.
     public
-    typealias OutputStreamableAnchor = _HTMLOutputStreamableAnchor
+    protocol OutputStreamableAnchor:HTML.OutputStreamable, Identifiable<String>
+    {
+    }
 }
-
 /// The name of this protocol is ``HTML.OutputStreamableAnchor``.
-public
-protocol _HTMLOutputStreamableAnchor:HTML.OutputStreamable, Identifiable<String>
-{
-}
 extension HTML.OutputStreamableAnchor
 {
     /// Encodes the ``id`` property to the parent element’s `id` attribute.
