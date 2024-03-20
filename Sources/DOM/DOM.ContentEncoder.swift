@@ -1,23 +1,19 @@
 extension DOM
 {
-    @usableFromInline internal
-    typealias ContentEncoder = _DOMContentEncoder
+    @usableFromInline
+    protocol ContentEncoder:StreamingEncoder
+    {
+        associatedtype AttributeEncoder:StreamingEncoder
+
+        /// Appends a *raw* UTF-8 code unit to the output stream.
+        mutating
+        func append(escaped codeunit:UInt8)
+    }
 }
-
-@usableFromInline internal
-protocol _DOMContentEncoder:StreamingEncoder
-{
-    associatedtype AttributeEncoder:StreamingEncoder
-
-    /// Appends a *raw* UTF-8 code unit to the output stream.
-    mutating
-    func append(escaped codeunit:UInt8)
-}
-
 extension DOM.ContentEncoder
 {
     /// TODO: Profile to see if this could benefit from a dedicated witness.
-    @inlinable internal mutating
+    @inlinable mutating
     func append(escaped tag:some RawRepresentable<String>)
     {
         for byte:UInt8 in tag.rawValue.utf8
@@ -26,7 +22,7 @@ extension DOM.ContentEncoder
         }
     }
 
-    @inlinable internal mutating
+    @inlinable mutating
     func emit(opening tag:some RawRepresentable<String>,
         with yield:(inout AttributeEncoder) -> ())
     {
@@ -36,7 +32,7 @@ extension DOM.ContentEncoder
         self.append(escaped: 0x3E) // '>'
     }
 
-    @inlinable internal mutating
+    @inlinable mutating
     func emit(closing tag:some RawRepresentable<String>)
     {
         self.append(escaped: 0x3C) // '<'
