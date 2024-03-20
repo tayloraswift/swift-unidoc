@@ -1,5 +1,5 @@
 {
-  "originHash" : "b4c12cdd47ec148d0b87cff99dc64413f3f310928642fe871f0fd9e6d605b08d",
+  "originHash" : "7954e295b3d3d63f82f7264fe4196eb0ffe4ce0bdc480d565acf1456f055d4dd",
   "pins" : [
     {
       "identity" : "swift-atomics",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "94cf62b3ba8d4bed62680a282d4c25f9c63c2efb",
         "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "swift-dom",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tayloraswift/swift-dom",
+      "state" : {
+        "revision" : "399584c4c2393fbd64f48f541b5f5ce77c184ab5",
+        "version" : "0.6.1"
       }
     },
     {
@@ -69,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "b85871514cd877fd0471c257bea9c2fdb0db0c9d",
-        "version" : "0.13.1"
+        "revision" : "ebd664a26c62da944ca84815716d52d6f97cece3",
+        "version" : "0.13.2"
       }
     },
     {
