@@ -93,7 +93,7 @@ extension IdentifiablePageContext
 
     var domain:Unidoc.VolumeMetadata.Domain { .init(self.volume) }
 }
-extension IdentifiablePageContext:Swiftinit.VertexPageContext
+extension IdentifiablePageContext:Unidoc.VertexContext
 {
     @usableFromInline
     var volume:Unidoc.VolumeMetadata { self.cache.volumes.principal }

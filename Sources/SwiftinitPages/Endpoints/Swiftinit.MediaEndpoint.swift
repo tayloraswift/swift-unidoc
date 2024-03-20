@@ -8,12 +8,10 @@ import UnidocQueries
 extension Swiftinit
 {
     public
-    typealias MediaEndpoint = _SwiftinitMediaEndpoint
-}
-public
-protocol _SwiftinitMediaEndpoint:Mongo.SingleOutputEndpoint
-{
-    var type:MediaType { get }
+    protocol MediaEndpoint:Mongo.SingleOutputEndpoint
+    {
+        var type:MediaType { get }
+    }
 }
 extension Swiftinit.MediaEndpoint
     where Self:HTTP.ServerEndpoint, Query.Iteration.BatchElement == Unidoc.TextResourceOutput

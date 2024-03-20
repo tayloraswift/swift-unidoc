@@ -7,12 +7,12 @@ extension Swiftinit
 {
     struct ConstraintsList
     {
-        let context:any VertexPageContext
+        let context:any Unidoc.VertexContext
 
         private
         let constraints:[GenericConstraint<Unidoc.Scalar?>]
 
-        init?(_ context:any VertexPageContext,
+        init?(_ context:any Unidoc.VertexContext,
             constraints:[GenericConstraint<Unidoc.Scalar?>])
         {
             if  constraints.isEmpty

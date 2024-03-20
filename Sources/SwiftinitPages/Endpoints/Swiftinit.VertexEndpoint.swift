@@ -11,23 +11,19 @@ import URI
 extension Swiftinit
 {
     public
-    typealias VertexEndpoint = _SwiftinitVertexEndpoint
-}
+    protocol VertexEndpoint:Mongo.SingleOutputEndpoint
+        where Query.Iteration.BatchElement == Unidoc.VertexOutput
+    {
+        associatedtype VertexCache:Swiftinit.VertexCache = Swiftinit.Vertices
+        associatedtype VertexLayer:Swiftinit.VertexLayer
 
-/// The name of this protocol is ``Swiftinit.VertexLayer``.
-public
-protocol _SwiftinitVertexEndpoint:Mongo.SingleOutputEndpoint
-    where Query.Iteration.BatchElement == Unidoc.VertexOutput
-{
-    associatedtype VertexCache:Swiftinit.VertexCache = Swiftinit.Vertices
-    associatedtype VertexLayer:Swiftinit.VertexLayer
-
-    static
-    func response(
-        vertex:consuming Unidoc.AnyVertex,
-        groups:consuming [Unidoc.AnyGroup],
-        tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
+        static
+        func response(
+            vertex:consuming Unidoc.AnyVertex,
+            groups:consuming [Unidoc.AnyGroup],
+            tree:consuming Unidoc.TypeTree?,
+            with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
+    }
 }
 extension Swiftinit.VertexEndpoint
 {

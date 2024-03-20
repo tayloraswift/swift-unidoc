@@ -20,7 +20,7 @@ extension Swiftinit.DenseList.Iterator
 extension Swiftinit.DenseList.Iterator.Cards<Unidoc.ConformingType>
 {
     private mutating
-    func advance(with context:some Swiftinit.VertexPageContext)
+    func advance(with context:some Unidoc.VertexContext)
     {
         while   let type:Unidoc.ConformingType = self.base.next()
         {
@@ -36,7 +36,7 @@ extension Swiftinit.DenseList.Iterator.Cards<Unidoc.ConformingType>
         self.next = nil
     }
     mutating
-    func pull(with context:some Swiftinit.VertexPageContext) -> Swiftinit.DenseList.Card?
+    func pull(with context:some Unidoc.VertexContext) -> Swiftinit.DenseList.Card?
     {
         defer { self.advance(with: context) }
         return self.next
@@ -45,7 +45,7 @@ extension Swiftinit.DenseList.Iterator.Cards<Unidoc.ConformingType>
 extension Swiftinit.DenseList.Iterator.Cards<Unidoc.Scalar>
 {
     private mutating
-    func advance(with context:some Swiftinit.VertexPageContext)
+    func advance(with context:some Unidoc.VertexContext)
     {
         while   let type:Unidoc.Scalar = self.base.next()
         {
@@ -59,7 +59,7 @@ extension Swiftinit.DenseList.Iterator.Cards<Unidoc.Scalar>
         self.next = nil
     }
     mutating
-    func pull(with context:some Swiftinit.VertexPageContext) -> Swiftinit.DenseList.Card?
+    func pull(with context:some Unidoc.VertexContext) -> Swiftinit.DenseList.Card?
     {
         defer { self.advance(with: context) }
         return self.next

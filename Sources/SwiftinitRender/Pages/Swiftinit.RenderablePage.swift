@@ -5,20 +5,17 @@ import Media
 extension Swiftinit
 {
     public
-    typealias RenderablePage = _SwiftinitRenderablePage
-}
+    protocol RenderablePage
+    {
+        /// A short description of the page, suitable for use as a `<meta>` description.
+        var description:String? { get }
+        var title:String { get }
 
-public
-protocol _SwiftinitRenderablePage
-{
-    /// A short description of the page, suitable for use as a `<meta>` description.
-    var description:String? { get }
-    var title:String { get }
+        func head(augmenting head:inout HTML.ContentEncoder, format:RenderFormat)
+        func body(_          body:inout HTML.ContentEncoder, format:RenderFormat)
 
-    func head(augmenting head:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
-    func body(_          body:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
-
-    func resource(format:Swiftinit.RenderFormat) -> HTTP.Resource
+        func resource(format:RenderFormat) -> HTTP.Resource
+    }
 }
 extension Swiftinit.RenderablePage
 {

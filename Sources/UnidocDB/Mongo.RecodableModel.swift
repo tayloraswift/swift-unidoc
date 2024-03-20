@@ -12,16 +12,8 @@ extension Mongo
     /// theory, anything that supports the concept of a schema migration can conform to this
     /// protocol.
     public
-    typealias RecodableModel = _MongoRecodableModel
-}
-
-@available(*, deprecated, renamed: "Mongo.RecodableModel")
-public
-typealias RecodableCollection = Mongo.RecodableModel
-
-/// The name of this protocol is ``Mongo.RecodableModel``.
-public
-protocol _MongoRecodableModel
-{
-    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    protocol RecodableModel
+    {
+        func recode(with session:Session) async throws -> (modified:Int, of:Int)
+    }
 }

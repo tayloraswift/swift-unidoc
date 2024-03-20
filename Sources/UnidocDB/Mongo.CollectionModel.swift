@@ -6,33 +6,27 @@ import UnidocRecords
 extension Mongo
 {
     public
-    typealias CollectionModel = _MongoCollectionModel
-}
+    protocol CollectionModel<Element>
+    {
+        associatedtype Element:Identifiable, Sendable where
+            Element.ID:BSONDecodable,
+            Element.ID:BSONEncodable,
+            Element.ID:Sendable
 
-@available(*, deprecated, renamed: "Mongo.CollectionModel")
-typealias DatabaseCollection = Mongo.CollectionModel
+        associatedtype Capacity
 
-public
-protocol _MongoCollectionModel<Element>
-{
-    associatedtype Element:Identifiable, Sendable where
-        Element.ID:BSONDecodable,
-        Element.ID:BSONEncodable,
-        Element.ID:Sendable
+        static
+        var name:Collection { get }
 
-    associatedtype Capacity
+        static
+        var indexes:[CollectionIndex] { get }
 
-    static
-    var name:Mongo.Collection { get }
+        var capacity:Capacity { get }
 
-    static
-    var indexes:[Mongo.CollectionIndex] { get }
+        var database:Database { get }
 
-    var capacity:Capacity { get }
-
-    var database:Mongo.Database { get }
-
-    func setup(with session:Mongo.Session) async throws
+        func setup(with session:Session) async throws
+    }
 }
 extension Mongo.CollectionModel where Capacity == Never
 {

@@ -8,26 +8,22 @@ import UnidocRecords
 extension Unidoc
 {
     public
-    typealias AliasingQuery = _UnidocAliasingQuery
-}
+    protocol AliasingQuery<CollectionOrigin, CollectionTarget>:Mongo.PipelineQuery
+        where   CollectionOrigin.Element:MongoMasterCodingModel<AliasKey>,
+                Collation == SimpleCollation
+    {
+        override
+        associatedtype CollectionOrigin:Mongo.CollectionModel
+        associatedtype CollectionTarget:Mongo.CollectionModel
 
-/// The name of this protocol is ``Unidoc.AliasingQuery``.
-public
-protocol _UnidocAliasingQuery<CollectionOrigin, CollectionTarget>:Mongo.PipelineQuery
-    where   CollectionOrigin.Element:MongoMasterCodingModel<Unidoc.AliasKey>,
-            Collation == SimpleCollation
-{
-    override
-    associatedtype CollectionOrigin:Mongo.CollectionModel
-    associatedtype CollectionTarget:Mongo.CollectionModel
+        /// The field to store the target document (a `CollectionTarget.Element`) in.
+        static
+        var target:Mongo.AnyKeyPath { get }
 
-    /// The field to store the target document (a `CollectionTarget.Element`) in.
-    static
-    var target:Mongo.AnyKeyPath { get }
+        var symbol:CollectionOrigin.Element.ID { get }
 
-    var symbol:CollectionOrigin.Element.ID { get }
-
-    func extend(pipeline:inout Mongo.PipelineEncoder)
+        func extend(pipeline:inout Mongo.PipelineEncoder)
+    }
 }
 extension Unidoc.AliasingQuery
 {

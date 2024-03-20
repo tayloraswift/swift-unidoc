@@ -5,12 +5,12 @@ extension Swiftinit
 {
     struct DeclCard
     {
-        let context:any Swiftinit.VertexPageContext
+        let context:any Unidoc.VertexContext
 
         let vertex:Unidoc.DeclVertex
         let target:String
 
-        init(_ context:any Swiftinit.VertexPageContext,
+        init(_ context:any Unidoc.VertexContext,
             vertex:Unidoc.DeclVertex,
             target:String)
         {

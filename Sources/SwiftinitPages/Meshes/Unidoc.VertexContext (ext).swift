@@ -5,7 +5,7 @@ import MarkdownRendering
 import SwiftinitRender
 import Symbols
 
-extension Swiftinit.VertexPageContext
+extension Unidoc.VertexContext
 {
     func vector<Display, Vector>(_ vector:Vector,
         display:Display) -> HTML.VectorLink<Display, Vector>?
@@ -14,7 +14,7 @@ extension Swiftinit.VertexPageContext
         vector.isEmpty ? nil : .init(self, display: display, scalars: vector)
     }
 }
-extension Swiftinit.VertexPageContext
+extension Unidoc.VertexContext
 {
     func card(decl id:Unidoc.Scalar) -> Swiftinit.DeclCard?
     {
@@ -47,7 +47,7 @@ extension Swiftinit.VertexPageContext
         }
     }
 }
-extension Swiftinit.VertexPageContext
+extension Unidoc.VertexContext
 {
     func link(module:Unidoc.Scalar) -> HTML.Link<Symbol.Module>?
     {

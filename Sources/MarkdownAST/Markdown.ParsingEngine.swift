@@ -3,13 +3,11 @@ import Sources
 extension Markdown
 {
     public
-    typealias ParsingEngine = _MarkdownParsingEngine
-}
-public
-protocol _MarkdownParsingEngine
-{
-    func parse(_ source:borrowing Markdown.Source,
-        onError:(any Error, SourceReference<Markdown.Source>) -> ()) -> [Markdown.BlockElement]
+    protocol ParsingEngine
+    {
+        func parse(_ source:borrowing Source,
+            onError:(any Error, SourceReference<Source>) -> ()) -> [BlockElement]
+    }
 }
 extension Markdown.ParsingEngine
 {

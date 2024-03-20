@@ -5,12 +5,12 @@ extension Swiftinit
 {
     struct ProductCard
     {
-        let context:any Swiftinit.VertexPageContext
+        let context:any Unidoc.VertexContext
 
         let vertex:Unidoc.ProductVertex
         let target:String
 
-        init(_ context:any Swiftinit.VertexPageContext,
+        init(_ context:any Unidoc.VertexContext,
             vertex:Unidoc.ProductVertex,
             target:String)
         {
