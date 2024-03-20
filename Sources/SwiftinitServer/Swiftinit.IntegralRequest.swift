@@ -153,7 +153,7 @@ extension Swiftinit.IntegralRequest
 
             switch root
             {
-            case Swiftinit.Root.acct.id:
+            case Swiftinit.Root.account.id:
                 guard
                 let user:Unidoc.UserSession = metadata.cookies.session
                 else

@@ -25,7 +25,7 @@ extension Swiftinit.UserPage:Swiftinit.RenderablePage
 }
 extension Swiftinit.UserPage:Swiftinit.StaticPage
 {
-    var location:URI { Swiftinit.Root.acct.uri }
+    var location:URI { Swiftinit.Root.account.uri }
 }
 extension Swiftinit.UserPage:Swiftinit.ApplicationPage
 {

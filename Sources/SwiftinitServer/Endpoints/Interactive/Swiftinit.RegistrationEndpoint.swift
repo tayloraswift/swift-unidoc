@@ -61,7 +61,7 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
         }
         else
         {
-            target = .acct
+            target = .account
         }
 
         return .redirect(.temporary("\(target)"), // meet taylor swift

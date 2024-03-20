@@ -45,6 +45,6 @@ extension Swiftinit.UserConfigEndpoint:RestrictedEndpoint
             }
         }
 
-        return .redirect(.see(other: "\(Swiftinit.Root.acct)"))
+        return .redirect(.see(other: "\(Swiftinit.Root.account)"))
     }
 }
