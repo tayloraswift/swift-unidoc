@@ -17,6 +17,7 @@ extension Swiftinit
 
 extension Swiftinit.BuilderEndpoint:RestrictedEndpoint
 {
+    /// The builder endpoint is restricted to administratrices and machine users.
     func admit(user:Unidoc.Account, level:Unidoc.User.Level) -> Bool
     {
         switch level

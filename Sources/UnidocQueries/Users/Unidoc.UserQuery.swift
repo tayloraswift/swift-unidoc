@@ -4,6 +4,7 @@ import UnidocDB
 
 extension Unidoc
 {
+    /// Returns the user account information for the currently-authenticated user.
     @frozen public
     struct UserQuery:Sendable
     {

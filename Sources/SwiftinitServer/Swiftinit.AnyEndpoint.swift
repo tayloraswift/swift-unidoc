@@ -135,6 +135,19 @@ extension Swiftinit.AnyEndpoint
             {
                 return .interactive(Swiftinit.BuilderEndpoint.oldest(until: version))
             }
+
+        case .render:
+            if  let account:String = parameters["account"],
+                let account:Unidoc.Account = .init(account),
+                let apiKey:String = parameters["api_key"],
+                let apiKey:UInt64 = .init(apiKey, radix: 16)
+            {
+                let apiKey:Int64 = .init(bitPattern: apiKey)
+                return .interactive(Swiftinit.UserRenderEndpoint.init(
+                    request: .hello,
+                    account: account,
+                    apiKey: apiKey))
+            }
         }
 
         return nil
