@@ -2,11 +2,11 @@ extension Swiftinit
 {
     struct Permissions
     {
-        let global:Unidoc.User.Level
+        let global:Unidoc.User.Level?
         let rights:Unidoc.PackageRights
 
         private
-        init(global:Unidoc.User.Level, rights:Unidoc.PackageRights)
+        init(global:Unidoc.User.Level?, rights:Unidoc.PackageRights)
         {
             self.global = global
             self.rights = rights
@@ -38,7 +38,7 @@ extension Swiftinit.Permissions
         let user:Unidoc.User = user
         else
         {
-            self.init(global: .human, rights: .reader)
+            self.init(global: nil, rights: .reader)
             return
         }
 

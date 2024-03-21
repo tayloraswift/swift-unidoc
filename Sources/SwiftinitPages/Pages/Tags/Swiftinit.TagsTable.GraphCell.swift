@@ -85,7 +85,7 @@ extension Swiftinit.TagsTable.GraphCell:HTML.OutputStreamable
 
         } = "(\(size >> 10) kb)"
 
-        guard case .administratrix = self.view.global
+        guard case .administratrix? = self.view.global
         else
         {
             return
