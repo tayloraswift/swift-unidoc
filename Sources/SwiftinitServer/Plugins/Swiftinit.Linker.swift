@@ -8,13 +8,14 @@ extension Swiftinit
     struct Linker
     {
         private
-        let status:AtomicPointer<LinkerPlugin.StatusPage>
+        let status:AtomicPointer<Unidoc.CollectionEventsPage<Self>>
         private
         let graphs:AWS.S3.Client?
         private
-        var buffer:Swiftinit.EventBuffer<Event>
+        var buffer:Unidoc.EventBuffer<Event>
 
-        init(updating status:AtomicPointer<LinkerPlugin.StatusPage>, graphs:AWS.S3.Client?)
+        init(updating status:AtomicPointer<Unidoc.CollectionEventsPage<Self>>,
+            graphs:AWS.S3.Client?)
         {
             self.status = status
             self.graphs = graphs
@@ -22,46 +23,25 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.Linker
+extension Swiftinit.Linker:Unidoc.CollectionVisitor
 {
-    private
+    static
+    var title:String { "Linker" }
+
+    mutating
+    func publish(event:Event)
+    {
+        self.buffer.push(event: event)
+        self.publish()
+    }
+
     func publish()
     {
-        status.replace(value: .init(from: self.buffer))
+        self.status.replace(value: .init(from: self.buffer))
     }
-}
-extension Swiftinit.Linker
-{
+
     mutating
-    func watch(_ db:Swiftinit.DB) async throws
-    {
-        //  Otherwise the page will be empty until something is queued.
-        self.publish()
-
-        while true
-        {
-            //  If we caught an error, it was probably because mongod is restarting.
-            //  We should wait a little while for it to come back online.
-            async
-            let cooldown:Void = Task.sleep(for: .seconds(5))
-
-            do
-            {
-                let session:Mongo.Session = try await .init(from: db.sessions)
-                try await self.tour(watching: db, with: session)
-            }
-            catch let error
-            {
-                self.buffer.push(event: .caught(error))
-                self.publish()
-            }
-
-            try await cooldown
-        }
-    }
-
-    private mutating
-    func tour(watching db:Swiftinit.DB, with session:Mongo.Session) async throws
+    func tour(in db:Unidoc.DB, with session:Mongo.Session) async throws
     {
         while true
         {
@@ -85,10 +65,12 @@ extension Swiftinit.Linker
             try await cooldown
         }
     }
-
+}
+extension Swiftinit.Linker
+{
     private mutating
     func perform(operation:Unidoc.DB.Snapshots.QueuedOperation,
-        updating db:Swiftinit.DB,
+        updating unidoc:Unidoc.DB,
         with session:Mongo.Session) async throws
     {
         defer
@@ -103,20 +85,20 @@ extension Swiftinit.Linker
         {
         case .uplinkInitial, .uplinkRefresh:
             let status:Unidoc.UplinkStatus? = try await self.uplink(snapshot: operation.edition,
-                updating: db,
+                updating: unidoc,
                 with: session)
 
             event = status.map(Event.uplinked(_:))
 
         case .unlink:
-            let status:Unidoc.UnlinkStatus? = try await db.unidoc.unlink(operation.edition,
+            let status:Unidoc.UnlinkStatus? = try await unidoc.unlink(operation.edition,
                 with: session)
 
             event = status.map(Event.unlinked(_:))
 
         case .delete:
             //  Okay if the volume has already been unlinked, which causes this to return nil.
-            if  let unlink:Unidoc.UnlinkStatus = try await db.unidoc.unlink(operation.edition,
+            if  let unlink:Unidoc.UnlinkStatus = try await unidoc.unlink(operation.edition,
                     with: session)
             {
                 switch unlink
@@ -159,7 +141,7 @@ extension Swiftinit.Linker
                 deletedS3 = false
             }
 
-            if  try await db.snapshots.delete(id: operation.edition,  with: session)
+            if  try await unidoc.snapshots.delete(id: operation.edition,  with: session)
             {
                 event = .deleted(.deleted(operation.edition, fromS3: deletedS3))
             }
@@ -169,7 +151,7 @@ extension Swiftinit.Linker
             }
         }
 
-        try await session.update(database: db.unidoc.id,
+        try await session.update(database: unidoc.id,
             with: Unidoc.DB.Snapshots.ClearAction.one(operation.edition))
 
         if  let event:Event
@@ -184,11 +166,11 @@ extension Swiftinit.Linker
 
     private
     func uplink(snapshot id:Unidoc.Edition,
-        updating db:Swiftinit.DB,
+        updating unidoc:Unidoc.DB,
         with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
     {
         guard
-        let status:Unidoc.UplinkStatus = try await db.unidoc.uplink(id,
+        let status:Unidoc.UplinkStatus = try await unidoc.uplink(id,
             from: self.graphs,
             with: session)
         else
@@ -198,7 +180,9 @@ extension Swiftinit.Linker
 
         if !status.hidden
         {
-            _ = try await db.docsFeed.push(.init(discovered: .now(), volume: status.edition),
+            _ = try await unidoc.docsFeed.push(.init(
+                    discovered: .now(),
+                    volume: status.edition),
                 with: session)
         }
 

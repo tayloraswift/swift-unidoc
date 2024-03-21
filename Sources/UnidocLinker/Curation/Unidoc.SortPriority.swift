@@ -3,14 +3,12 @@ import Unidoc
 
 extension Unidoc
 {
-    typealias SortPriority = _UnidocSortPriority
-}
-/// The name of this protocol is ``Unidoc.SortPriority``.
-protocol _UnidocSortPriority:Comparable
-{
-    /// Get the sort-priority of a declaration.
-    static
-    func of(decl:SymbolGraph.Decl, at index:Int32) -> Self?
+    protocol SortPriority:Comparable
+    {
+        /// Get the sort-priority of a declaration.
+        static
+        func of(decl:SymbolGraph.Decl, at index:Int32) -> Self?
+    }
 }
 extension Unidoc.SortPriority
 {

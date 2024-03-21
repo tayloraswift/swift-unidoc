@@ -1,3 +1,0 @@
-extension StaticString:JSONStringEncodable
-{
-}

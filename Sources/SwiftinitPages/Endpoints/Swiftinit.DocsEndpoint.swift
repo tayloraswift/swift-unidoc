@@ -1,5 +1,6 @@
 import HTTP
 import MongoDB
+import SwiftinitRender
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -27,12 +28,13 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
     public
     typealias VertexLayer = Swiftinit.Docs
 
-    public static
-    func response(
+    public
+    func success(
         vertex apex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
+        with context:Unidoc.RelativePageContext,
+        format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
     {
         let resource:HTTP.Resource
 
@@ -40,60 +42,60 @@ extension Swiftinit.DocsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
         {
         case .article(let apex):
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
-                volume: context.page.volume,
+                volume: context.volume,
                 tree: tree)
-            let mesh:Swiftinit.Mesh = try .init(context.page, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.ArticlePage = .init(canonical: context.canonical,
+            let mesh:Swiftinit.Mesh = try .init(context, groups: groups, apex: apex)
+            let page:Swiftinit.Docs.ArticlePage = .init(
                 sidebar: sidebar,
                 mesh: mesh,
                 apex: apex)
-            resource = page.resource(format: context.format)
+            resource = page.resource(format: format)
 
         case .culture(let apex):
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
-                volume: context.page.volume,
+                volume: context.volume,
                 tree: tree)
-            let mesh:Swiftinit.Mesh = try .init(context.page, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.ModulePage = .init(canonical: context.canonical,
+            let mesh:Swiftinit.Mesh = try .init(context, groups: groups, apex: apex)
+            let page:Swiftinit.Docs.ModulePage = .init(
                 sidebar: sidebar,
                 mesh: mesh,
                 apex: apex)
-            resource = page.resource(format: context.format)
+            resource = page.resource(format: format)
 
         case .decl(let apex):
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
-                volume: context.page.volume,
+                volume: context.volume,
                 tree: tree)
-            let mesh:Swiftinit.Mesh = try .init(context.page, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.DeclPage = try .init(canonical: context.canonical,
+            let mesh:Swiftinit.Mesh = try .init(context, groups: groups, apex: apex)
+            let page:Swiftinit.Docs.DeclPage = try .init(
                 sidebar: sidebar,
                 mesh: mesh,
                 apex: apex)
-            resource = page.resource(format: context.format)
+            resource = page.resource(format: format)
 
         case .file:
             throw Unidoc.VertexTypeError.file
 
         case .product(let apex):
-            let mesh:Swiftinit.Mesh = try .init(context.page, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.ProductPage = .init(canonical: context.canonical,
+            let mesh:Swiftinit.Mesh = try .init(context, groups: groups, apex: apex)
+            let page:Swiftinit.Docs.ProductPage = .init(
                 mesh: mesh,
                 apex: apex)
-            resource = page.resource(format: context.format)
+            resource = page.resource(format: format)
 
         case .foreign(let apex):
-            let mesh:Swiftinit.Mesh = try .init(context.page, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.ForeignPage = try .init(canonical: context.canonical,
+            let mesh:Swiftinit.Mesh = try .init(context, groups: groups, apex: apex)
+            let page:Swiftinit.Docs.ForeignPage = try .init(
                 mesh: mesh,
                 apex: apex)
-            resource = page.resource(format: context.format)
+            resource = page.resource(format: format)
 
         case .global(let apex):
-            let mesh:Swiftinit.Mesh = try .init(context.page, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.PackagePage = .init(canonical: context.canonical,
+            let mesh:Swiftinit.Mesh = try .init(context, groups: groups, apex: apex)
+            let page:Swiftinit.Docs.PackagePage = .init(
                 mesh: mesh,
                 apex: apex)
-            resource = page.resource(format: context.format)
+            resource = page.resource(format: format)
         }
 
         return .ok(resource)

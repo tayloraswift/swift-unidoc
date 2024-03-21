@@ -29,7 +29,7 @@ extension Swiftinit.DenseList.Card
 {
     init?(_ type:Unidoc.Scalar,
         constraints:[GenericConstraint<Unidoc.Scalar?>] = [],
-        with context:some Swiftinit.VertexPageContext)
+        with context:some Unidoc.VertexContext)
     {
         guard
         case (let decl, let url?)? = context[decl: type],

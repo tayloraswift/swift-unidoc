@@ -153,6 +153,19 @@ extension Swiftinit.IntegralRequest
 
             switch root
             {
+            case Swiftinit.Root.account.id:
+                guard
+                let user:Unidoc.UserSession = metadata.cookies.session
+                else
+                {
+                    endpoint = .redirect("\(Swiftinit.Root.login)", permanently: false)
+                    break
+                }
+
+                endpoint = .explainable(Swiftinit.AccountEndpoint.init(
+                        query: .init(session: user)),
+                    parameters: .init(uri.query?.parameters, tag: tag))
+
             case Swiftinit.Root.admin.id:
                 endpoint = .interactive(Swiftinit.DashboardEndpoint.master)
 
@@ -223,6 +236,18 @@ extension Swiftinit.IntegralRequest
             endpoint = .get(realm: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
+        case "render":
+            guard metadata.hostSupportsPublicAPI
+            else
+            {
+                endpoint = .redirect("https://api.swiftinit.org/render")
+                break
+            }
+
+            endpoint = .interactive(Swiftinit.UserRenderEndpoint.init(volume: .init(trunk),
+                shoot: .init(path: path),
+                query: uri.query?.parameters))
+
         //  Deprecated route.
         case "sitemaps":
             endpoint = .redirect("""
@@ -236,7 +261,9 @@ extension Swiftinit.IntegralRequest
         case Swiftinit.Root.tags.id:
             endpoint = .get(tags: trunk,
                 with: .init(uri.query?.parameters,
-                    user: metadata.cookies.session?.user,
+                    //  OK to do this, if someone forges a cookie, they can see the admin
+                    //  controls, but they can't do anything with them.
+                    user: metadata.cookies.session?.account,
                     tag: tag))
 
         case Swiftinit.Root.telescope.id:

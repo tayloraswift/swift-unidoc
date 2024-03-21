@@ -4,20 +4,16 @@ import Sources
 extension Markdown
 {
     public
-    typealias BlockDirectiveType = _MarkdownBlockDirectiveType
+    protocol BlockDirectiveType:BlockElement
+    {
+        func configure(option:String, value:SourceString) throws
+        func append(_ element:BlockElement) throws
+
+        /// Associates a source location with this block. For ideal formatting, this source range
+        /// should **only** cover the block directive name.
+        var source:SourceReference<Source>? { get set }
+    }
 }
-
-public
-protocol _MarkdownBlockDirectiveType:Markdown.BlockElement
-{
-    func configure(option:String, value:Markdown.SourceString) throws
-    func append(_ element:Markdown.BlockElement) throws
-
-    /// Associates a source location with this block. For ideal formatting, this source range
-    /// should **only** cover the block directive name.
-    var source:SourceReference<Markdown.Source>? { get set }
-}
-
 extension Markdown.BlockDirectiveType where Self:Markdown.BlockContainer<Markdown.BlockElement>
 {
     public

@@ -7,37 +7,30 @@ import NIOHTTP1
 extension HTTP
 {
     public
-    typealias ServerIntegralRequest = _HTTPServerIntegralRequest
-}
+    protocol ServerIntegralRequest:Sendable
+    {
+        init?(get path:String,
+            headers:borrowing HPACKHeaders,
+            address:IP.V6,
+            service:IP.Service?)
 
-@available(*, deprecated, renamed: "HTTP.Server")
-public
-typealias HTTPServerIntegralRequest = HTTP.ServerIntegralRequest
+        init?(get path:String,
+            headers:borrowing HTTPHeaders,
+            address:IP.V6,
+            service:IP.Service?)
 
-public
-protocol _HTTPServerIntegralRequest:Sendable
-{
-    init?(get path:String,
-        headers:borrowing HPACKHeaders,
-        address:IP.V6,
-        service:IP.Service?)
+        init?(post path:String,
+            headers:borrowing HPACKHeaders,
+            address:IP.V6,
+            service:IP.Service?,
+            body:borrowing [UInt8])
 
-    init?(get path:String,
-        headers:borrowing HTTPHeaders,
-        address:IP.V6,
-        service:IP.Service?)
-
-    init?(post path:String,
-        headers:borrowing HPACKHeaders,
-        address:IP.V6,
-        service:IP.Service?,
-        body:borrowing [UInt8])
-
-    init?(post path:String,
-        headers:borrowing HTTPHeaders,
-        address:IP.V6,
-        service:IP.Service?,
-        body:consuming [UInt8])
+        init?(post path:String,
+            headers:borrowing HTTPHeaders,
+            address:IP.V6,
+            service:IP.Service?,
+            body:consuming [UInt8])
+    }
 }
 extension HTTP.ServerIntegralRequest
 {

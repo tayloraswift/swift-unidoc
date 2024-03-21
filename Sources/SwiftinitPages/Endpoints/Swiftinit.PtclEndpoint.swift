@@ -1,5 +1,6 @@
 import HTTP
 import MongoDB
+import SwiftinitRender
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -26,16 +27,15 @@ extension Swiftinit
 extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
-    typealias VertexCache = Swiftinit.SecondaryOnly
-    public
     typealias VertexLayer = Swiftinit.Ptcl
 
-    public static
-    func response(
+    public
+    func success(
         vertex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
+        with context:Unidoc.PeripheralPageContext,
+        format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
     {
         let route:Unidoc.Route
 
@@ -56,25 +56,25 @@ extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
             }
 
             let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
-                volume: context.page.volume,
+                volume: context.volume,
                 tree: tree)
 
-            let conformers:Swiftinit.ConformingTypes = try .init(context.page,
+            let conformers:Swiftinit.ConformingTypes = try .init(context,
                 groups: groups,
                 bias: vertex.culture)
 
-            let page:Swiftinit.Ptcl.ConformersPage = try .init(canonical: context.canonical,
+            let page:Swiftinit.Ptcl.ConformersPage = try .init(
                 sidebar: sidebar,
                 vertex: vertex,
                 halo: conformers)
 
-            return .ok(page.resource(format: context.format))
+            return .ok(page.resource(format: format))
 
         case .file(let vertex):
             throw Unidoc.VertexTypeError.reject(.file(vertex))
         }
 
         //  There is documentation for this vertex, but it is not a protocol.
-        return .redirect(.temporary("\(Swiftinit.Docs[context.page.volume, route])"))
+        return .redirect(.temporary("\(Swiftinit.Docs[context.volume, route])"))
     }
 }

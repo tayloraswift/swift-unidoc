@@ -3,12 +3,12 @@ extension Swiftinit.DenseList
     struct Iterator
     {
         private
-        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
+        let context:Unidoc.PeripheralPageContext
         private
         var cards:(Cards<Unidoc.Scalar>, Cards<Unidoc.ConformingType>)
 
         init(
-            context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
+            context:Unidoc.PeripheralPageContext,
             members:([Unidoc.Scalar], [Unidoc.ConformingType]))
         {
             self.context = context

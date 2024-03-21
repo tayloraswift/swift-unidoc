@@ -1,11 +1,6 @@
 import MongoDB
 import MongoQL
 
-@available(*, deprecated, renamed: "Mongo.DatabaseModel")
-public
-typealias DatabaseModel = Mongo.DatabaseModel
-
-
 extension Mongo
 {
     /// A database model is a type that hosts application-specific logic that depends on a
@@ -15,15 +10,12 @@ extension Mongo
     /// identifying a database. Therefore, it is often helpful to wrap a ``Mongo.Database``
     /// in an application-specific type to avoid cluttering ``Mongo.Database`` with extensions.
     public
-    typealias DatabaseModel = _MongoDatabaseModel
-}
-/// The name of this protocol is ``Mongo.DatabaseModel``.
-public
-protocol _MongoDatabaseModel:Identifiable<Mongo.Database>, Equatable, Sendable
-{
-    init(id:Mongo.Database)
+    protocol DatabaseModel:Identifiable<Database>, Equatable, Sendable
+    {
+        init(id:Database)
 
-    func setup(with session:Mongo.Session) async throws
+        func setup(with session:Session) async throws
+    }
 }
 extension Mongo.DatabaseModel
 {

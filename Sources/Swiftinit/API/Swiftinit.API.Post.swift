@@ -17,5 +17,7 @@ extension Swiftinit.API
         case uplink
         case unlink
         case delete
+
+        case userConfig = "user-config"
     }
 }

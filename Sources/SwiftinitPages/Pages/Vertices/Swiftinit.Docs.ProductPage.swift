@@ -7,13 +7,11 @@ extension Swiftinit.Docs
 {
     struct ProductPage
     {
-        let canonical:CanonicalVersion?
         let mesh:Swiftinit.Mesh
         let apex:Unidoc.ProductVertex
 
-        init(canonical:CanonicalVersion?, mesh:Swiftinit.Mesh, apex:Unidoc.ProductVertex)
+        init(mesh:Swiftinit.Mesh, apex:Unidoc.ProductVertex)
         {
-            self.canonical = canonical
             self.mesh = mesh
             self.apex = apex
         }
@@ -64,7 +62,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.ApicalPage
             $0[.h1] = self.apex.symbol
         }
 
-        main[.section] { $0.class = "notice canonical" } = self.canonical
+        main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
         //  Does this product contain a module with the same name as the product?
         for id:Unidoc.Scalar in self.apex.constituents

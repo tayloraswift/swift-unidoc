@@ -11,7 +11,7 @@ extension Swiftinit.Mesh
 {
     struct Halo
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
+        let context:Unidoc.RelativePageContext
 
         private
         var uncategorized:[Unidoc.Scalar]
@@ -45,7 +45,7 @@ extension Swiftinit.Mesh
         let bias:Unidoc.Bias
 
         private
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+        init(_ context:Unidoc.RelativePageContext,
             decl:Phylum.DeclFlags?,
             bias:Unidoc.Bias)
         {
@@ -71,7 +71,7 @@ extension Swiftinit.Mesh
 }
 extension Swiftinit.Mesh.Halo
 {
-    init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+    init(_ context:Unidoc.RelativePageContext,
         curated:consuming Set<Unidoc.Scalar>,
         groups:borrowing [Unidoc.AnyGroup],
         apex:borrowing Unidoc.DeclVertex) throws
@@ -87,7 +87,7 @@ extension Swiftinit.Mesh.Halo
             generics: .init(apex.signature.generics.parameters))
     }
 
-    init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+    init(_ context:Unidoc.RelativePageContext,
         curated:consuming Set<Unidoc.Scalar>,
         groups:borrowing [Unidoc.AnyGroup],
         decl:Phylum.DeclFlags? = nil,

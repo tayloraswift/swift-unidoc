@@ -5,12 +5,12 @@ extension Swiftinit
     struct IntegratedList
     {
         private
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
+        let context:Unidoc.RelativePageContext
         private
         let items:[Unidoc.Scalar]
 
         private
-        init(context:IdentifiablePageContext<Swiftinit.Vertices>, items:[Unidoc.Scalar])
+        init(context:Unidoc.RelativePageContext, items:[Unidoc.Scalar])
         {
             self.context = context
             self.items = items
@@ -19,7 +19,7 @@ extension Swiftinit
 }
 extension Swiftinit.IntegratedList
 {
-    init?(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+    init?(_ context:Unidoc.RelativePageContext,
         items:[Unidoc.Scalar])
     {
         if  items.isEmpty

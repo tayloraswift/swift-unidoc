@@ -8,12 +8,12 @@ extension Swiftinit.ServerOptions
 }
 extension Swiftinit.ServerOptions.Mode
 {
-    var secure:Bool
+    var server:Swiftinit.RenderFormat.Server
     {
         switch self
         {
-        case .development:  false
-        case .production:   true
+        case .development(_, let options):  .localhost(port: options.port)
+        case .production:                   .swiftinit_org
         }
     }
 }

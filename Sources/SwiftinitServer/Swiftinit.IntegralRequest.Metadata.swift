@@ -16,8 +16,11 @@ extension Swiftinit.IntegralRequest
 
         let version:HTTP
         let headers:HTTP.ProfileHeaders
+        /// What IP address did the request come from?
         let address:IP.V6
+        /// Who owns the IP ``address``?
         let service:IP.Service?
+        let host:String?
         let path:String
 
         private
@@ -28,6 +31,7 @@ extension Swiftinit.IntegralRequest
             headers:HTTP.ProfileHeaders,
             address:IP.V6,
             service:IP.Service?,
+            host:String?,
             path:String)
         {
             self.annotation = annotation
@@ -37,12 +41,22 @@ extension Swiftinit.IntegralRequest
             self.headers = headers
             self.address = address
             self.service = service
+            self.host = host
             self.path = path
         }
     }
 }
 extension Swiftinit.IntegralRequest.Metadata
 {
+    var hostSupportsPublicAPI:Bool
+    {
+        switch self.host
+        {
+        case "api.swiftinit.org"?:   true
+        case "localhost"?:           true
+        default:                     false
+        }
+    }
     var logged:ServerTour.Request
     {
         .init(
@@ -62,6 +76,17 @@ extension Swiftinit.IntegralRequest.Metadata
         path:String)
     {
         let cookies:[String] = headers["cookie"]
+        let host:String? = headers[":authority"].last.map
+        {
+            if  let colon:String.Index = $0.lastIndex(of: ":")
+            {
+                return String.init($0[..<colon])
+            }
+            else
+            {
+                return $0
+            }
+        }
 
         let headers:HTTP.ProfileHeaders = .init(
             acceptLanguage: headers["accept-language"].last,
@@ -75,6 +100,7 @@ extension Swiftinit.IntegralRequest.Metadata
             headers: headers,
             address: address,
             service: service,
+            host: host,
             path: path)
     }
 
@@ -84,6 +110,7 @@ extension Swiftinit.IntegralRequest.Metadata
         service:IP.Service?,
         path:String)
     {
+        let host:String? = headers["host"].last
         let headers:HTTP.ProfileHeaders = .init(
             acceptLanguage: headers["accept-language"].last,
             userAgent: headers["user-agent"].last,
@@ -98,6 +125,7 @@ extension Swiftinit.IntegralRequest.Metadata
             headers: headers,
             address: address,
             service: service,
+            host: host,
             path: path)
 
         if  case .robot(.discoursebot) = self.annotation

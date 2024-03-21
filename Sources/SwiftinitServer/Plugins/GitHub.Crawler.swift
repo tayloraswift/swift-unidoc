@@ -4,23 +4,22 @@ import MongoDB
 
 extension GitHub
 {
-    typealias Crawler = _GitHubCrawler
-}
-/// The name of this protocol is ``GitHub.Crawler``.
-protocol _GitHubCrawler
-{
-    associatedtype StatusPage:Swiftinit.RenderablePage & Sendable
+    /// The name of this protocol is ``GitHub.Crawler``.
+    protocol Crawler
+    {
+        associatedtype StatusPage:Swiftinit.RenderablePage & Sendable
 
-    var interval:Duration { get }
-    var status:StatusPage { get }
+        var interval:Duration { get }
+        var status:StatusPage { get }
 
-    init()
+        init()
 
-    mutating
-    func crawl(updating db:Swiftinit.DB,
-        over connection:GitHub.Client<GitHub.API<String>>.Connection,
-        with session:Mongo.Session) async throws
+        mutating
+        func crawl(updating db:Swiftinit.DB,
+            over connection:GitHub.Client<GitHub.API<String>>.Connection,
+            with session:Mongo.Session) async throws
 
-    /// Log an error that was not caused by a rate limit.
-    var error:(any Error)? { get set }
+        /// Log an error that was not caused by a rate limit.
+        var error:(any Error)? { get set }
+    }
 }

@@ -7,22 +7,33 @@ extension Unidoc
     /// Abstracts over all vertex types that can be returned as a principal query output.
     /// Avoid storing large buffers of existentials of this type; use ``AnyVertex`` instead.
     public
-    typealias PrincipalVertex = _UnidocPrincipalVertex
+    protocol PrincipalVertex:Identifiable<Unidoc.Scalar>
+    {
+        var overview:Passage? { get }
+        var details:Passage? { get }
+
+        var route:Route { get }
+        var shoot:Shoot { get }
+        var stem:Stem { get }
+        var hash:FNV24.Extended { get }
+
+        var bias:Bias { get }
+        var decl:Phylum.DeclFlags? { get }
+    }
 }
-/// The name of this protocol is ``Unidoc.PrincipalVertex``.
-public
-protocol _UnidocPrincipalVertex:Identifiable<Unidoc.Scalar>
+extension Unidoc.PrincipalVertex
 {
-    var overview:Unidoc.Passage? { get }
-    var details:Unidoc.Passage? { get }
-
-    var route:Unidoc.Route { get }
-    var shoot:Unidoc.Shoot { get }
-    var stem:Unidoc.Stem { get }
-    var hash:FNV24.Extended { get }
-
-    var bias:Unidoc.Bias { get }
-    var decl:Phylum.DeclFlags? { get }
+    @inlinable public
+    var outlinesConcatenated:[Unidoc.Outline]
+    {
+        switch (self.overview, self.details)
+        {
+        case (let overview?, let details?): return overview.outlines + details.outlines
+        case (let overview?, nil):          return overview.outlines
+        case (nil, let details?):           return details.outlines
+        case (nil, nil):                    return []
+        }
+    }
 }
 extension Unidoc.PrincipalVertex
 {

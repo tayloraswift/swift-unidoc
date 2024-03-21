@@ -5,12 +5,12 @@ extension Swiftinit
 {
     struct CultureCard
     {
-        let context:any Swiftinit.VertexPageContext
+        let context:any Unidoc.VertexContext
 
         let vertex:Unidoc.CultureVertex
         let target:String
 
-        init(_ context:any Swiftinit.VertexPageContext,
+        init(_ context:any Unidoc.VertexContext,
             vertex:Unidoc.CultureVertex,
             target:String)
         {

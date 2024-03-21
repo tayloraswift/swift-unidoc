@@ -5,21 +5,17 @@ extension Mongo
 {
     /// A type that expects a single batch of output documents from its ``query``.
     public
-    typealias SingleBatchEndpoint = _MongoSingleBatchEndpoint
+    protocol SingleBatchEndpoint<Query>:PipelineEndpoint
+        where   Query.Iteration.Stride == Never,
+                Query.Iteration.Batch == [Query.Iteration.BatchElement]
+    {
+        /// An **idempotent** accessor for a single batch of ``query`` outputs.
+        ///
+        /// The easiest way to implement this property is to declare a mutable stored property
+        /// matching this requirement.
+        var batch:[Query.Iteration.BatchElement] { get set }
+    }
 }
-
-public
-protocol _MongoSingleBatchEndpoint<Query>:Mongo.PipelineEndpoint
-    where   Query.Iteration.Stride == Never,
-            Query.Iteration.Batch == [Query.Iteration.BatchElement]
-{
-    /// An **idempotent** accessor for a single batch of ``query`` outputs.
-    ///
-    /// The easiest way to implement this property is to declare a mutable stored property
-    /// matching this requirement.
-    var batch:[Query.Iteration.BatchElement] { get set }
-}
-
 extension Mongo.SingleBatchEndpoint
 {
     /// Assigns the given documents transparently to the ``batch`` property.

@@ -10,18 +10,14 @@ extension Swiftinit.Docs
 {
     struct ForeignPage
     {
-        let canonical:CanonicalVersion?
         let mesh:Swiftinit.Mesh
         let apex:Unidoc.ForeignVertex
 
         private
         let stem:Unidoc.StemComponents
 
-        init(canonical:CanonicalVersion?,
-            mesh:Swiftinit.Mesh,
-            apex:Unidoc.ForeignVertex) throws
+        init(mesh:Swiftinit.Mesh, apex:Unidoc.ForeignVertex) throws
         {
-            self.canonical = canonical
             self.mesh = mesh
             self.apex = apex
 

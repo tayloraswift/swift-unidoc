@@ -11,9 +11,9 @@ extension Markdown
         private
         let scalars:[Unidoc.Scalar?]
         private
-        let context:any Swiftinit.VertexPageContext
+        let context:any Unidoc.VertexContext
 
-        init(_ context:any Swiftinit.VertexPageContext,
+        init(_ context:any Unidoc.VertexContext,
             bytecode:Markdown.Bytecode,
             scalars:[Unidoc.Scalar?])
         {
