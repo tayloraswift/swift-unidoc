@@ -215,6 +215,25 @@ extension Swiftinit.TagsPage
 
         section[.h2] = Heading.settings
 
+        if  case nil = self.view.global
+        {
+            section[.p, { $0.class = "note" }]
+            {
+                $0 += "You are not "
+                $0[.a] { $0.href = "\(Swiftinit.Root.login)" } = "logged in"
+                $0 += "!"
+            }
+        }
+        else
+        {
+            section[.p] { $0.class = "note" } = switch self.view.rights
+            {
+            case .reader:   nil as String?
+            case .editor:   "You are an editor of this package!"
+            case .owner:    "You are the owner of this package!"
+            }
+        }
+
         section[.dl]
         {
             $0[.dt] = "Realm"
@@ -247,7 +266,7 @@ extension Swiftinit.TagsPage
             {
                 $0 += self.package.hidden ? "yes" : "no"
 
-                if  case .administratrix = self.view.global
+                if  case .administratrix? = self.view.global
                 {
                     $0[.form]
                     {
@@ -354,7 +373,7 @@ extension Swiftinit.TagsPage
             }
         }
 
-        guard case .administratrix = self.view.global
+        guard case .administratrix? = self.view.global
         else
         {
             return
