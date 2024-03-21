@@ -24,6 +24,20 @@ extension Unidoc
 extension Unidoc.PrincipalVertex
 {
     @inlinable public
+    var outlinesConcatenated:[Unidoc.Outline]
+    {
+        switch (self.overview, self.details)
+        {
+        case (let overview?, let details?): return overview.outlines + details.outlines
+        case (let overview?, nil):          return overview.outlines
+        case (nil, let details?):           return details.outlines
+        case (nil, nil):                    return []
+        }
+    }
+}
+extension Unidoc.PrincipalVertex
+{
+    @inlinable public
     var route:Unidoc.Route { .init(shoot: self.shoot) }
 
     @inlinable public

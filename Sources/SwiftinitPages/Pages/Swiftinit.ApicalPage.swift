@@ -21,7 +21,7 @@ extension Swiftinit.ApicalPage
     var description:String? { self.mesh.overview?.description ?? self.descriptionFallback }
 }
 extension Swiftinit.ApicalPage
-    where Context == IdentifiablePageContext<Swiftinit.Vertices>
+    where Context == Unidoc.RelativePageContext
 {
-    var context:IdentifiablePageContext<Swiftinit.Vertices> { self.mesh.halo.context }
+    var context:Unidoc.RelativePageContext { self.mesh.halo.context }
 }

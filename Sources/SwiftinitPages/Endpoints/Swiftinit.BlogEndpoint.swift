@@ -1,6 +1,7 @@
 import HTTP
 import Media
 import MongoDB
+import SwiftinitRender
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -28,19 +29,20 @@ extension Swiftinit.BlogEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
     public
     typealias VertexLayer = Swiftinit.Blog
 
-    public static
-    func response(
+    public
+    func success(
         vertex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:IdentifiableResponseContext<VertexCache>) throws -> HTTP.ServerResponse
+        with context:Unidoc.RelativePageContext,
+        format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
     {
         switch vertex
         {
         case .article(let vertex):
-            let mesh:Swiftinit.Mesh = try .init(context.page, groups: groups, apex: vertex)
+            let mesh:Swiftinit.Mesh = try .init(context, groups: groups, apex: vertex)
             let page:Swiftinit.Blog.ArticlePage = .init(mesh: mesh, apex: vertex)
-            return .ok(page.resource(format: context.format))
+            return .ok(page.resource(format: format))
 
         case let unexpected:
             throw Unidoc.VertexTypeError.reject(unexpected)

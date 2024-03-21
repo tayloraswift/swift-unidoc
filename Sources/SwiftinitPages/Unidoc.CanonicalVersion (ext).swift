@@ -1,33 +1,9 @@
 import HTML
 import SemanticVersions
-import UnidocQueries
-import UnidocRecords
+import SwiftinitRender
 import URI
 
-@frozen public
-struct CanonicalVersion
-{
-    @usableFromInline internal
-    let relationship:Relationship
-    /// Human-oriented text to display as the name of the package.
-    @usableFromInline internal
-    let package:String
-    /// URI to the trunk page of the canonical volume.
-    @usableFromInline internal
-    let volume:URI
-    @usableFromInline internal
-    let target:Target
-
-    private
-    init(relationship:Relationship, package:String, volume:URI, target:Target)
-    {
-        self.relationship = relationship
-        self.package = package
-        self.volume = volume
-        self.target = target
-    }
-}
-extension CanonicalVersion
+extension Unidoc.CanonicalVersion
 {
     init?(principal:Unidoc.PrincipalOutput, layer:(some Swiftinit.VertexLayer).Type)
     {
@@ -103,9 +79,9 @@ extension CanonicalVersion
             target: target)
     }
 }
-extension CanonicalVersion
+extension Unidoc.CanonicalVersion
 {
-    @inlinable internal
+    @inlinable
     var uri:URI?
     {
         switch self.target
@@ -119,7 +95,7 @@ extension CanonicalVersion
         }
     }
 }
-extension CanonicalVersion:HTML.OutputStreamable
+extension Unidoc.CanonicalVersion:HTML.OutputStreamable
 {
     public static
     func += (section:inout HTML.ContentEncoder, self:Self)

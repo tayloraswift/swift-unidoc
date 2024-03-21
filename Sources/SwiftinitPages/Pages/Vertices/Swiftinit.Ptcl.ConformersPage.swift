@@ -14,7 +14,6 @@ extension Swiftinit.Ptcl
 {
     struct ConformersPage
     {
-        let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
         private
@@ -25,12 +24,10 @@ extension Swiftinit.Ptcl
         private
         let stem:Unidoc.StemComponents
 
-        init(canonical:CanonicalVersion?,
-            sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
+        init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             vertex:Unidoc.DeclVertex,
             halo:Swiftinit.ConformingTypes) throws
         {
-            self.canonical = canonical
             self.sidebar = sidebar
             self.vertex = vertex
             self.halo = halo
@@ -72,7 +69,7 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.ApplicationPage
 }
 extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
 {
-    var context:IdentifiablePageContext<Swiftinit.SecondaryOnly> { self.halo.context }
+    var context:Unidoc.PeripheralPageContext { self.halo.context }
 
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
@@ -122,7 +119,7 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
             }
         }
 
-        main[.section] { $0.class = "notice canonical" } = self.canonical
+        main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
         main += self.halo
     }

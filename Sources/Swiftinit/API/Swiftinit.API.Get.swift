@@ -5,6 +5,5 @@ extension Swiftinit.API
     {
         case build
         case oldest
-        case render
     }
 }

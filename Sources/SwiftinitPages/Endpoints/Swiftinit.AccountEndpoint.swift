@@ -7,7 +7,7 @@ import UnidocQueries
 extension Swiftinit
 {
     @frozen public
-    struct AcctEndpoint
+    struct AccountEndpoint
     {
         public
         let query:Unidoc.UserQuery
@@ -22,12 +22,12 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.AcctEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Swiftinit.AccountEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.AcctEndpoint:HTTP.ServerEndpoint
+extension Swiftinit.AccountEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse

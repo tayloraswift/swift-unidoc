@@ -158,11 +158,11 @@ extension Swiftinit.IntegralRequest
                 let user:Unidoc.UserSession = metadata.cookies.session
                 else
                 {
-                    endpoint = .redirect("\(Swiftinit.Root.login)")
+                    endpoint = .redirect("\(Swiftinit.Root.login)", permanently: false)
                     break
                 }
 
-                endpoint = .explainable(Swiftinit.AcctEndpoint.init(
+                endpoint = .explainable(Swiftinit.AccountEndpoint.init(
                         query: .init(session: user)),
                     parameters: .init(uri.query?.parameters, tag: tag))
 
@@ -235,6 +235,18 @@ extension Swiftinit.IntegralRequest
         case Swiftinit.Root.realm.id:
             endpoint = .get(realm: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
+
+        case "render":
+            guard metadata.hostSupportsPublicAPI
+            else
+            {
+                endpoint = .redirect("https://api.swiftinit.org/render")
+                break
+            }
+
+            endpoint = .interactive(Swiftinit.UserRenderEndpoint.init(volume: .init(trunk),
+                shoot: .init(path: path),
+                query: uri.query?.parameters))
 
         //  Deprecated route.
         case "sitemaps":

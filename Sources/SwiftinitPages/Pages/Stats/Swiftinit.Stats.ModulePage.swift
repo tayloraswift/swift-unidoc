@@ -9,21 +9,18 @@ extension Swiftinit.Stats
 {
     struct ModulePage
     {
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
+        let context:Unidoc.RelativePageContext
 
-        let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?
 
         private
         let vertex:Unidoc.CultureVertex
 
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
-            canonical:CanonicalVersion?,
+        init(_ context:Unidoc.RelativePageContext,
             sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?,
             vertex:Unidoc.CultureVertex)
         {
             self.context = context
-            self.canonical = canonical
             self.sidebar = sidebar
             self.vertex = vertex
         }
@@ -94,7 +91,7 @@ extension Swiftinit.Stats.ModulePage:Swiftinit.VertexPage
             }
         }
 
-        main[.section] { $0.class = "notice canonical" } = self.canonical
+        main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
         main[.section]
         {

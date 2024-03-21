@@ -3,17 +3,19 @@ import UnidocDB
 import UnidocRecords
 import URI
 
-extension IdentifiablePageContext
+extension Unidoc.IdentifiablePageContext
 {
     struct Cache
     {
-        var vertices:Vertices
-        var volumes:Swiftinit.Volumes
+        var vertices:VertexCacheType
+        var volumes:Unidoc.Volumes
 
         private
         var uris:[Unidoc.Scalar: String]
 
-        init(vertices:Vertices, volumes:Swiftinit.Volumes, uris:[Unidoc.Scalar: String] = [:])
+        init(vertices:VertexCacheType,
+            volumes:Unidoc.Volumes,
+            uris:[Unidoc.Scalar: String] = [:])
         {
             self.vertices = vertices
             self.volumes = volumes
@@ -21,7 +23,7 @@ extension IdentifiablePageContext
         }
     }
 }
-extension IdentifiablePageContext.Cache
+extension Unidoc.IdentifiablePageContext.Cache
 {
     mutating
     func load(_ id:Unidoc.Scalar, by uri:(Unidoc.VolumeMetadata) -> URI?) -> String?
@@ -46,7 +48,7 @@ extension IdentifiablePageContext.Cache
         } (&self.uris[id])
     }
 }
-extension IdentifiablePageContext.Cache
+extension Unidoc.IdentifiablePageContext.Cache
 {
     subscript(culture id:Unidoc.Scalar) -> (vertex:Unidoc.CultureVertex, url:String?)?
     {

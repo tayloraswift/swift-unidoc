@@ -6,12 +6,12 @@ extension Swiftinit
 {
     struct ConformingTypesHeader
     {
-        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
+        let context:Unidoc.PeripheralPageContext
 
         private
         let heading:ConformingTypesHeading
 
-        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
+        init(_ context:Unidoc.PeripheralPageContext,
             heading:ConformingTypesHeading)
         {
             self.context = context

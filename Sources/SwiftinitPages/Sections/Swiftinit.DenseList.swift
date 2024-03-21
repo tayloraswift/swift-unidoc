@@ -5,11 +5,11 @@ extension Swiftinit
 {
     struct DenseList
     {
-        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
+        let context:Unidoc.PeripheralPageContext
 
         let members:([Unidoc.Scalar], [Unidoc.ConformingType])
 
-        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
+        init(_ context:Unidoc.PeripheralPageContext,
             members:([Unidoc.Scalar], [Unidoc.ConformingType]))
         {
             self.context = context

@@ -1,36 +1,37 @@
 import UnidocRecords
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct SecondaryOnly
     {
         @usableFromInline
-        var secondary:[Unidoc.Scalar: Unidoc.AnyVertex]
+        var secondary:[Unidoc.Scalar: AnyVertex]
 
         private
-        init(secondary:[Unidoc.Scalar: Unidoc.AnyVertex] = [:])
+        init(secondary:[Unidoc.Scalar: AnyVertex] = [:])
         {
             self.secondary = secondary
         }
     }
 }
-extension Swiftinit.SecondaryOnly
+extension Unidoc.SecondaryOnly
 {
-    init(secondary:[Unidoc.AnyVertex])
+    public
+    init(secondary:borrowing [Unidoc.AnyVertex])
     {
         self.init(secondary: secondary.reduce(into: [:]) { $0[$1.id] = $1 })
     }
 }
-extension Swiftinit.SecondaryOnly:Identifiable
+extension Unidoc.SecondaryOnly:Identifiable
 {
     @inlinable public
     var id:Never? { nil }
 }
-extension Swiftinit.SecondaryOnly:Swiftinit.VertexCache
+extension Unidoc.SecondaryOnly:Unidoc.VertexCache
 {
     public static
-    func form(from vertices:consuming Swiftinit.Vertices) -> Self
+    func form(from vertices:consuming Unidoc.Vertices) -> Self
     {
         let principal:Unidoc.AnyVertex
         var secondary:[Unidoc.Scalar: Unidoc.AnyVertex]

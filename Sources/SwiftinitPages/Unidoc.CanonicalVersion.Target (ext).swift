@@ -1,19 +1,4 @@
-import URI
-
-extension CanonicalVersion
-{
-    @frozen @usableFromInline internal
-    enum Target
-    {
-        case article(URI?)
-        case culture(URI?)
-        case decl(URI?)
-        case product(URI?)
-        case foreign(URI?)
-        case global
-    }
-}
-extension CanonicalVersion.Target
+extension Unidoc.CanonicalVersion.Target
 {
     var indefiniteArticle:String
     {
@@ -49,19 +34,6 @@ extension CanonicalVersion.Target
         case .product:          "name"
         case .foreign:          "base declaration"
         case .global:           "identity"
-        }
-    }
-
-    var uri:URI?
-    {
-        switch self
-        {
-        case .article(let uri): uri
-        case .culture(let uri): uri
-        case .decl(let uri):    uri
-        case .product(let uri): uri
-        case .foreign(let uri): uri
-        case .global:           nil
         }
     }
 }
