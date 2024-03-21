@@ -268,7 +268,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
             {
                 $0[.p, { $0.class = "note" }]
                 {
-                    $0 += "This package vends additional manifests targeting older versions "
+                    $0 += "This package vends additional manifests targeting specific versions "
                     $0[.em] = """
                     (\(self.apex.snapshot.extraManifests.map
                     {
