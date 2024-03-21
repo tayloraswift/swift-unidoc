@@ -17,15 +17,12 @@ extension SymbolGraph
         var headline:Markdown.Bytecode
         public
         var article:Article
-        public
-        var _topics:[_Topic]
 
         @inlinable public
-        init(headline:Markdown.Bytecode, article:Article = .init(), _topics:[_Topic] = [])
+        init(headline:Markdown.Bytecode, article:Article = .init())
         {
             self.headline = headline
             self.article = article
-            self._topics = _topics
         }
     }
 }
@@ -46,7 +43,6 @@ extension SymbolGraph.ArticleNode
     {
         case headline = "H"
         case article = "B"
-        case _topics = "T"
     }
 }
 extension SymbolGraph.ArticleNode:BSONDocumentEncodable
@@ -56,7 +52,6 @@ extension SymbolGraph.ArticleNode:BSONDocumentEncodable
     {
         bson[.headline] = self.headline
         bson[.article] = self.article
-        bson[._topics] = self._topics.isEmpty ? nil : self._topics
     }
 }
 extension SymbolGraph.ArticleNode:BSONDocumentDecodable
@@ -66,7 +61,6 @@ extension SymbolGraph.ArticleNode:BSONDocumentDecodable
     {
         self.init(
             headline: try bson[.headline].decode(),
-            article: try bson[.article].decode(),
-            _topics: try bson[._topics]?.decode() ?? [])
+            article: try bson[.article].decode())
     }
 }

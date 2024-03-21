@@ -61,7 +61,9 @@ extension SymbolGraph.TableStorage:ExpressibleByArrayLiteral
         }
         else
         {
-            fatalError("SymbolGraph.TableStorage index overflow (\(arrayLiteral.count) elements)")
+            fatalError("""
+                SymbolGraph.TableStorage index overflow (\(arrayLiteral.count) elements)
+                """)
         }
     }
 }

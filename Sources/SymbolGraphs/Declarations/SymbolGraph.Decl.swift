@@ -65,9 +65,6 @@ extension SymbolGraph
         public
         var origin:Int32?
 
-        public
-        var _topics:[_Topic]
-
         @inlinable
         init(
             language:Phylum.Language,
@@ -83,8 +80,7 @@ extension SymbolGraph
             superforms:[Int32] = [],
             features:[Int32] = [],
             renamed:Int32? = nil,
-            origin:Int32? = nil,
-            _topics:[_Topic] = [])
+            origin:Int32? = nil)
         {
             self.language = language
             self.phylum = phylum
@@ -102,8 +98,6 @@ extension SymbolGraph
             self.features = features
             self.renamed = renamed
             self.origin = origin
-
-            self._topics = _topics
         }
     }
 }
@@ -159,7 +153,6 @@ extension SymbolGraph.Decl
 
         case location = "L"
         case article = "A"
-        case _topics = "T"
     }
 }
 extension SymbolGraph.Decl:BSONDocumentEncodable
@@ -207,7 +200,6 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
 
         bson[.location] = self.location
         bson[.article] = self.article
-        bson[._topics] = self._topics.isEmpty ? nil : self._topics
     }
 }
 extension SymbolGraph.Decl:BSONDocumentDecodable
@@ -249,7 +241,6 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
             features: try bson[.features]?.decode(as: SymbolGraph.Buffer.self,
                 with: \.elements) ?? [],
             renamed: try bson[.renamed]?.decode(),
-            origin: try bson[.origin]?.decode(),
-            _topics: try bson[._topics]?.decode() ?? [])
+            origin: try bson[.origin]?.decode())
     }
 }

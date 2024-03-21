@@ -60,17 +60,6 @@ extension Unidoc.Resolver
             markdown: article.details)
         return (overview, details)
     }
-
-    mutating
-    func link(
-        _topic:SymbolGraph._Topic) -> (overview:Unidoc.Passage?, members:[Unidoc.TopicMember])
-    {
-        let overview:Unidoc.Passage? = _topic.overview.isEmpty ? nil : .init(
-            outlines: _topic.outlines.map { self.expand($0) },
-            markdown: _topic.overview)
-
-        return (overview, _topic.members.map { self.resolve($0) })
-    }
 }
 extension Unidoc.Resolver
 {

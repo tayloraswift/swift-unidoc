@@ -42,7 +42,6 @@ extension SymbolGraph.Outline
         case unresolved_doc = "D"
         case unresolved_web = "W"
         case unresolved_ucf = "U"
-        case unresolved_unidocV3 = "C"
 
         case location = "L"
         case vector_self = "S"
@@ -77,7 +76,6 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
             case .doc:      bson[.unresolved_doc] = self.link
             case .web:      bson[.unresolved_web] = self.link
             case .ucf:      bson[.unresolved_ucf] = self.link
-            case .unidocV3: bson[.unresolved_unidocV3] = self.link
             }
         }
     }
@@ -122,12 +120,6 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
             let text:String = try bson[.unresolved_web]?.decode()
         {
             type = .web
-            link = text
-        }
-        else if
-            let text:String = try bson[.unresolved_unidocV3]?.decode()
-        {
-            type = .unidocV3
             link = text
         }
         else
