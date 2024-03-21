@@ -2,7 +2,7 @@
 
 <strong><em><code>unidoc</code></em></strong><br><small><code>0.9</code></small>
 
-[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/build.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/build.yml)
+[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/ci.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/ci.yml)
 
 </div>
 
@@ -16,6 +16,15 @@ Unidoc powers the [Swiftinit](https://swiftinit.org) open source package index!
 
 </div>
 
+
+## Requirements 
+
+Unidoc’s principal deployment target is Amazon Linux 2023, but the project also builds on macOS 14 with Xcode 15.3 or newer.
+
+Unidoc requires Swift 5.10.
+
+>   Note:
+    Due to a known [compiler bug](https://github.com/apple/swift/issues/71606), it is not currently possible to build Unidoc on macOS with a non-Xcode toolchain.
 
 
 ## Features

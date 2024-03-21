@@ -1,7 +1,9 @@
+import enum SystemPackage.CInterop
+
 extension FilePermissions
 {
     @frozen public
-    enum Component:UInt32
+    enum Component:CInterop.Mode
     {
         case x      = 0b001
         case w      = 0b010

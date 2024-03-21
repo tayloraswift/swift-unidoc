@@ -1,4 +1,8 @@
+#if canImport(Glibc)
 import Glibc
+#elseif canImport(Darwin)
+import Darwin
+#endif
 
 @frozen public
 enum Log

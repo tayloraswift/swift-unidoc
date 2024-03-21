@@ -1,4 +1,9 @@
+#if canImport(Darwin)
+import CNIODarwin
+#else 
 import CNIOLinux
+#endif
+
 import IP
 import NIOCore
 
@@ -14,7 +19,11 @@ extension IP.V6
             self.init(storage: (0, 0, tag.bigEndian, ip.address.sin_addr.s_addr))
 
         case .v6(let ip):
+            #if canImport(Darwin)
+            self.init(storage: ip.address.sin6_addr.__u6_addr.__u6_addr32)
+            #else 
             self.init(storage: ip.address.sin6_addr.__in6_u.__u6_addr32)
+            #endif
 
         case .unixDomainSocket:
             return nil

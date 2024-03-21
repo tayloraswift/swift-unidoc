@@ -62,7 +62,12 @@ extension SystemProcess
             }
         }
 
+        #if canImport(Darwin)
+        var actions:posix_spawn_file_actions_t? = nil
+        #elseif canImport(Glibc)
         var actions:posix_spawn_file_actions_t = .init()
+        #endif
+        
         do
         {
             posix_spawn_file_actions_init(&actions)
