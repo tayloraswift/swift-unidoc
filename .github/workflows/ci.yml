@@ -87,8 +87,9 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
-            -   name: Swift version
-                run: swift --version
-                
             -   name: Build only
-                run: swift build
+            # https://github.com/apple/swift/issues/71606
+                if: false
+                run: |
+                    swift --version
+                    swift build
