@@ -14,7 +14,6 @@ extension Swiftinit.Docs
 {
     struct DeclPage
     {
-        let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
         let mesh:Swiftinit.Mesh
         let apex:Unidoc.DeclVertex
@@ -22,12 +21,10 @@ extension Swiftinit.Docs
         private
         let stem:Unidoc.StemComponents
 
-        init(canonical:CanonicalVersion?,
-            sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
+        init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             mesh:Swiftinit.Mesh,
             apex:Unidoc.DeclVertex) throws
         {
-            self.canonical = canonical
             self.sidebar = sidebar
             self.mesh = mesh
             self.apex = apex
@@ -191,7 +188,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.ApicalPage
             }
         }
 
-        main[.section] { $0.class = "notice canonical" } = self.canonical
+        main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
         main[.section, { $0.class = "declaration" }]
         {

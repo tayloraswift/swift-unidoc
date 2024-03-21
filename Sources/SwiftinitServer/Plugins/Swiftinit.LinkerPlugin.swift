@@ -7,7 +7,7 @@ extension Swiftinit
 {
     struct LinkerPlugin:Sendable
     {
-        let status:AtomicPointer<StatusPage>
+        let status:AtomicPointer<Unidoc.CollectionEventsPage<Linker>>
         let bucket:AWS.S3.Bucket?
 
         init(bucket:AWS.S3.Bucket?)
@@ -29,6 +29,6 @@ extension Swiftinit.LinkerPlugin:Swiftinit.ServerPlugin
         {
             .init(threads: context.threads, niossl: context.niossl, bucket: $0)
         })
-        try await linker.watch(db)
+        try await linker.watch(db: db.unidoc, with: db.sessions)
     }
 }

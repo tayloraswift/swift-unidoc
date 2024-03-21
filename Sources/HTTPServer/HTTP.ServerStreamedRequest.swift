@@ -7,20 +7,12 @@ import NIOHTTP1
 extension HTTP
 {
     public
-    typealias ServerStreamedRequest = _HTTPServerStreamedRequest
-}
+    protocol ServerStreamedRequest:Sendable
+    {
+        init?(put path:String, headers:borrowing HPACKHeaders)
 
-@available(*, deprecated, renamed: "HTTP.ServerStreamedRequest")
-public
-typealias HTTPServerStreamedRequest = HTTP.ServerStreamedRequest
-
-
-public
-protocol _HTTPServerStreamedRequest:Sendable
-{
-    init?(put path:String, headers:borrowing HPACKHeaders)
-
-    init?(put path:String, headers:borrowing HTTPHeaders)
+        init?(put path:String, headers:borrowing HTTPHeaders)
+    }
 }
 extension HTTP.ServerStreamedRequest
 {

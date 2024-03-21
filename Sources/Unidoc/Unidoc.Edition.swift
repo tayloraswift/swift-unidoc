@@ -42,6 +42,11 @@ extension Unidoc.Edition:Comparable
     @inlinable public static
     func < (a:Self, b:Self) -> Bool { a.rawValue < b.rawValue }
 }
+extension Unidoc.Edition:CustomStringConvertible
+{
+    @inlinable public
+    var description:String { "\(self.package)[\(self.version)]" }
+}
 extension Unidoc.Edition
 {
     @inlinable public

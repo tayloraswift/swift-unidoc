@@ -1,13 +1,9 @@
 extension Swiftinit
 {
     public
-    typealias Method = _SwiftinitMethod
-}
-
-/// The name of this protocol is ``Swiftinit.Method``.
-public
-protocol _SwiftinitMethod:LosslessStringConvertible
-{
+    protocol Method:LosslessStringConvertible
+    {
+    }
 }
 extension Swiftinit.Method where Self:RawRepresentable<String>
 {

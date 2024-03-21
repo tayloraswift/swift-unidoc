@@ -8,12 +8,9 @@ extension Swiftinit
     /// exists to allow users to explicitly opt-in to a default implementation for
     /// ``resource(format:)``.
     public
-    typealias DynamicPage = _SwiftinitDynamicPage
-}
-
-public
-protocol _SwiftinitDynamicPage:Swiftinit.RenderablePage
-{
+    protocol DynamicPage:RenderablePage
+    {
+    }
 }
 extension Swiftinit.DynamicPage
 {

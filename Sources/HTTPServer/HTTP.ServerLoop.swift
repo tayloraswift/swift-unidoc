@@ -19,31 +19,22 @@ extension NIONegotiatedHTTPVersion:@unchecked Sendable
 extension HTTP
 {
     public
-    typealias ServerLoop = _HTTPServerLoop
+    protocol ServerLoop:Sendable
+    {
+        associatedtype StreamedRequest:HTTP.ServerStreamedRequest
+        associatedtype IntegralRequest:HTTP.ServerIntegralRequest
+
+        /// Checks whether the server should allow the request to proceed with an upload.
+        /// Returns nil if the server should accept the upload, or an error response to send
+        /// if the uploader lacks permissions.
+        func clearance(for request:StreamedRequest) async throws -> HTTP.ServerResponse?
+
+        func response(for request:StreamedRequest,
+            with body:[UInt8]) async throws -> HTTP.ServerResponse
+
+        func response(for request:IntegralRequest) async throws -> HTTP.ServerResponse
+    }
 }
-
-@available(*, deprecated, renamed: "HTTP.ServerLoop")
-public
-typealias HTTPServer = HTTP.ServerLoop
-
-/// The name of this protocol is ``HTTP.Server``.
-public
-protocol _HTTPServerLoop:Sendable
-{
-    associatedtype StreamedRequest:HTTP.ServerStreamedRequest
-    associatedtype IntegralRequest:HTTP.ServerIntegralRequest
-
-    /// Checks whether the server should allow the request to proceed with an upload.
-    /// Returns nil if the server should accept the upload, or an error response to send
-    /// if the uploader lacks permissions.
-    func clearance(for request:StreamedRequest) async throws -> HTTP.ServerResponse?
-
-    func response(for request:StreamedRequest,
-        with body:[UInt8]) async throws -> HTTP.ServerResponse
-
-    func response(for request:IntegralRequest) async throws -> HTTP.ServerResponse
-}
-
 extension HTTP.ServerLoop
 {
     public

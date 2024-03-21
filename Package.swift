@@ -8,10 +8,7 @@ let package:Package = .init(
     products: [
         .library(name: "guides", targets: ["guides"]),
 
-
-        .library(name: "DynamicLookupMacros", targets: ["DynamicLookupMacros"]),
-        .library(name: "IntegerEncodingMacros", targets: ["IntegerEncodingMacros"]),
-
+        .library(name: "CasesByIntegerEncodingMacro", targets: ["CasesByIntegerEncodingMacro"]),
 
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
@@ -23,8 +20,6 @@ let package:Package = .init(
 
         .library(name: "GitHubAPI", targets: ["GitHubAPI"]),
         .library(name: "GitHubClient", targets: ["GitHubClient"]),
-
-        .library(name: "HTML", targets: ["HTML"]),
 
         .library(name: "HTTP", targets: ["HTTP"]),
         .library(name: "HTTPClient", targets: ["HTTPClient"]),
@@ -91,14 +86,18 @@ let package:Package = .init(
         .library(name: "URI", targets: ["URI"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
+            from: "0.6.1")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.4")),
-
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.13.1")),
+            from: "0.13.2")),
         //.package(path: "../swift-mongodb"),
+
+        .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
+            from: "1.0.0")),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.3.0")),
@@ -139,19 +138,13 @@ let package:Package = .init(
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
             ],
-            path: "Plugins/UnidocMacros"),
+            path: "Macros/UnidocMacros"),
 
-        .target(name: "DynamicLookupMacros",
+        .target(name: "CasesByIntegerEncodingMacro",
             dependencies: [
                 .target(name: "UnidocMacros"),
             ],
-            path: "Macros/DynamicLookupMacros"),
-
-        .target(name: "IntegerEncodingMacros",
-            dependencies: [
-                .target(name: "UnidocMacros"),
-            ],
-            path: "Macros/IntegerEncodingMacros"),
+            path: "Macros/CasesByIntegerEncodingMacro"),
 
 
         .target(name: "_AsyncChannel",
@@ -194,6 +187,8 @@ let package:Package = .init(
                 .target(name: "Symbols"),
             ]),
 
+        .target(name: "DynamicTime"),
+
         .target(name: "FNV1"),
 
         .target(name: "GitHubClient",
@@ -206,18 +201,8 @@ let package:Package = .init(
 
         .target(name: "GitHubAPI",
             dependencies: [
-                .target(name: "JSON"),
                 .target(name: "UnixTime"),
-            ]),
-
-        .target(name: "HTML",
-            dependencies: [
-                .target(name: "DOM"),
-            ]),
-
-        .target(name: "DOM",
-            dependencies: [
-                .target(name: "DynamicLookupMacros"),
+                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "HTTP",
@@ -231,10 +216,10 @@ let package:Package = .init(
 
         .target(name: "HTTPClient",
             dependencies: [
-                .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .target(name: "Media"),
                 .target(name: "MD5"),
+                .product(name: "HTML", package: "swift-dom"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOHTTP2", package: "swift-nio-http2"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
@@ -245,11 +230,11 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "_AsyncChannel"),
 
-                .target(name: "HTML"),
                 .target(name: "HTTP"),
                 .target(name: "IP"),
                 .target(name: "UA"),
 
+                .product(name: "HTML", package: "swift-dom"),
                 .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOHTTP2", package: "swift-nio-http2"),
@@ -267,38 +252,7 @@ let package:Package = .init(
 
         .target(name: "ISO",
             dependencies: [
-                .target(name: "IntegerEncodingMacros"),
-            ]),
-
-        .target(name: "JSONAST"),
-
-        .target(name: "JSONDecoding",
-            dependencies: [
-                .target(name: "JSONAST"),
-                .product(name: "Grammar", package: "swift-grammar"),
-            ]),
-
-        .target(name: "JSONEncoding",
-            dependencies: [
-                .target(name: "JSONAST"),
-            ]),
-
-        .target(name: "JSONLegacy",
-            dependencies: [
-                .target(name: "JSONDecoding"),
-            ]),
-
-        .target(name: "JSONParsing",
-            dependencies: [
-                .target(name: "JSONAST"),
-                .product(name: "Grammar", package: "swift-grammar"),
-            ]),
-
-        .target(name: "JSON",
-            dependencies: [
-                .target(name: "JSONDecoding"),
-                .target(name: "JSONEncoding"),
-                .target(name: "JSONParsing"),
+                .target(name: "CasesByIntegerEncodingMacro"),
             ]),
 
         .target(name: "LexicalPaths"),
@@ -318,9 +272,9 @@ let package:Package = .init(
 
         .target(name: "MarkdownRendering",
             dependencies: [
-                .target(name: "HTML"),
                 .target(name: "MarkdownABI"),
                 .target(name: "URI"),
+                .product(name: "HTML", package: "swift-dom"),
             ]),
 
         .target(name: "MarkdownParsing",
@@ -374,8 +328,8 @@ let package:Package = .init(
 
         .target(name: "PackageMetadata",
             dependencies: [
-                .target(name: "JSON"),
                 .target(name: "PackageGraphs"),
+                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "S3",
@@ -408,7 +362,7 @@ let package:Package = .init(
 
         .target(name: "Sitemaps",
             dependencies: [
-                .target(name: "DOM"),
+                .product(name: "DOM", package: "swift-dom"),
             ]),
 
         .target(name: "Snippets",
@@ -431,6 +385,7 @@ let package:Package = .init(
 
         .target(name: "SwiftinitPages",
             dependencies: [
+                .target(name: "DynamicTime"),
                 .target(name: "GitHubAPI"),
                 .target(name: "SwiftinitRender"),
                 .target(name: "UnidocAPI"),
@@ -451,12 +406,12 @@ let package:Package = .init(
         .target(name: "SwiftinitRender",
             dependencies: [
                 .target(name: "HTTP"),
-                .target(name: "HTML"),
                 .target(name: "MarkdownDisplay"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "Media"),
                 .target(name: "Swiftinit"),
                 .target(name: "UnidocRecords"),
+                .product(name: "HTML", package: "swift-dom"),
             ]),
 
         .target(name: "Symbols",
@@ -501,7 +456,6 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphParts",
             dependencies: [
-                .target(name: "JSON"),
                 .target(name: "LexicalPaths"),
                 //  This is the point where the symbol graph compiler becomes infected with a
                 //  (non-macro) SwiftSyntax dependency.
@@ -512,6 +466,7 @@ let package:Package = .init(
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
+                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "SymbolGraphs",
@@ -546,8 +501,8 @@ let package:Package = .init(
 
         .target(name: "UnidocAPI",
             dependencies: [
-                .target(name: "JSON"),
                 .target(name: "Unidoc"),
+                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "UnidocDB",
@@ -725,9 +680,9 @@ let package:Package = .init(
 
         .executableTarget(name: "SymbolGraphLinkerTests",
             dependencies: [
-                .target(name: "HTML"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "SymbolGraphLinker"),
+                .product(name: "HTML", package: "swift-dom"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
 

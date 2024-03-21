@@ -27,18 +27,11 @@ extension Swiftinit
 }
 extension Swiftinit.Mesh
 {
-    init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+    init(_ context:Unidoc.RelativePageContext,
         groups:borrowing [Unidoc.AnyGroup],
         apex:__shared some Unidoc.PrincipalVertex) throws
     {
-        let outlines:[Unidoc.Outline]
-        switch (apex.overview, apex.details)
-        {
-        case (let overview?, let details?): outlines = overview.outlines + details.outlines
-        case (let overview?, nil):          outlines = overview.outlines
-        case (nil, let details?):           outlines = details.outlines
-        case (nil, nil):                    outlines = []
-        }
+        let outlines:[Unidoc.Outline] = apex.outlinesConcatenated
 
         var curated:Set<Unidoc.Scalar> = [context.id]
         if  let markdown:Markdown.Bytecode = apex.details?.markdown
@@ -90,7 +83,7 @@ extension Swiftinit.Mesh
 }
 extension Swiftinit.Mesh
 {
-    var context:IdentifiablePageContext<Swiftinit.Vertices> { self.halo.context }
+    var context:Unidoc.RelativePageContext { self.halo.context }
 
     var overview:Markdown.ProseSection?
     {

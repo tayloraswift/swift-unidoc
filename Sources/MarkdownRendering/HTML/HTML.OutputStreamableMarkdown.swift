@@ -4,33 +4,25 @@ import MarkdownABI
 extension HTML
 {
     public
-    typealias OutputStreamableMarkdown = _HTMLOutputStreamableMarkdown
-}
+    protocol OutputStreamableMarkdown:OutputStreamable
+    {
+        var bytecode:Markdown.Bytecode { get }
 
-@available(*, deprecated, renamed: "HTML.OutputStreamableMarkdown")
-public
-typealias HyperTextRenderableMarkdown = HTML.OutputStreamableMarkdown
+        /// Returns the value for an attribute identified by the given reference.
+        /// If the witness returns nil, the renderer will omit the attribute.
+        ///
+        /// The witness can change the attribute that will be rendered by modifying the argument.
+        /// This is useful for replacing ``Markdown.Bytecode.Attribute/href`` with
+        /// ``Markdown.Bytecode.Attribute/external``.
+        ///
+        /// This can be used to influence the behavior of the special syntax
+        /// highlight contexts.
+        func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
 
-/// The name of this protocol is ``HTML.OutputStreamableMarkdown``.
-public
-protocol _HTMLOutputStreamableMarkdown:HTML.OutputStreamable
-{
-    var bytecode:Markdown.Bytecode { get }
-
-    /// Returns the value for an attribute identified by the given reference.
-    /// If the witness returns nil, the renderer will omit the attribute.
-    ///
-    /// The witness can change the attribute that will be rendered by modifying the argument.
-    /// This is useful for replacing ``Markdown.Bytecode.Attribute/href`` with
-    /// ``Markdown.Bytecode.Attribute/external``.
-    ///
-    /// This can be used to influence the behavior of the special syntax
-    /// highlight contexts.
-    func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
-
-    /// Writes arbitrary content to the provided HTML output, identified by
-    /// the given reference.
-    func load(_ reference:Int, into html:inout HTML.ContentEncoder)
+        /// Writes arbitrary content to the provided HTML output, identified by
+        /// the given reference.
+        func load(_ reference:Int, into html:inout ContentEncoder)
+    }
 }
 extension HTML.OutputStreamableMarkdown
 {

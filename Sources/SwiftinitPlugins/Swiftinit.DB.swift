@@ -11,13 +11,28 @@ extension Swiftinit
         let sessions:Mongo.SessionPool
         public
         let unidoc:Unidoc.DB
+        public
+        let policy:Policy
 
         @inlinable public
-        init(sessions:Mongo.SessionPool, unidoc:Unidoc.DB)
+        init(sessions:Mongo.SessionPool, unidoc:Unidoc.DB, policy:Policy = .init())
         {
             self.sessions = sessions
             self.unidoc = unidoc
+            self.policy = policy
         }
+    }
+}
+extension Swiftinit.DB
+{
+    @inlinable public
+    init(sessions:Mongo.SessionPool,
+        unidoc:Unidoc.DB,
+        configure:(inout Policy) throws -> Void) rethrows
+    {
+        var policy:Policy = .init()
+        try configure(&policy)
+        self.init(sessions: sessions, unidoc: unidoc, policy: policy)
     }
 }
 extension Swiftinit.DB

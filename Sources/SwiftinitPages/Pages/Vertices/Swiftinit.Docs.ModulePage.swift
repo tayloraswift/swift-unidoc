@@ -9,17 +9,14 @@ extension Swiftinit.Docs
 {
     struct ModulePage
     {
-        let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
         let mesh:Swiftinit.Mesh
         let apex:Unidoc.CultureVertex
 
-        init(canonical:CanonicalVersion?,
-            sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
+        init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             mesh:Swiftinit.Mesh,
             apex:Unidoc.CultureVertex)
         {
-            self.canonical = canonical
             self.sidebar = sidebar
             self.apex = apex
             self.mesh = mesh
@@ -99,7 +96,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.ApicalPage
             }
         }
 
-        main[.section] { $0.class = "notice canonical" } = self.canonical
+        main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
         switch self.apex.module.type
         {

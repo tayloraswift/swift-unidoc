@@ -6,13 +6,13 @@ extension Swiftinit
     struct _LegacyTopic
     {
         private
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
+        let context:Unidoc.RelativePageContext
         private
         let caption:Unidoc.Passage?
         private
         let members:[Unidoc.TopicMember]
 
-        init(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+        init(_ context:Unidoc.RelativePageContext,
             caption:Unidoc.Passage? = nil,
             members:[Unidoc.TopicMember])
         {

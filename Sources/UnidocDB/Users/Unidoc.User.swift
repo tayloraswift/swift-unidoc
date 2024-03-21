@@ -12,24 +12,27 @@ extension Unidoc
         var id:Account
         public
         var level:Level
-        public
-        var realm:Unidoc.Realm?
 
         public
-        var github:GitHub.User<Void>?
+        var apiLimitLeft:Int
+        public
+        var apiKey:Int64?
+
+        public
+        var github:GitHub.User.Profile?
 
         @inlinable public
         init(id:Account,
             level:Level,
-            realm:Unidoc.Realm? = nil,
-            github:GitHub.User<Void>? = nil)
+            apiLimitLeft:Int = 0,
+            apiKey:Int64? = nil,
+            github:GitHub.User.Profile? = nil)
         {
             self.id = id
-
             self.level = level
-            self.realm = realm
-
-            self.github = nil
+            self.apiLimitLeft = apiLimitLeft
+            self.apiKey = apiKey
+            self.github = github
         }
     }
 }
@@ -47,14 +50,15 @@ extension Unidoc.User:MongoMasterCodingModel
     enum CodingKey:String, Sendable
     {
         case id = "_id"
-        case level
-        case realm
+        case level = "P"
 
-        case github = "github"
-
+        case apiLimitLeft = "L"
+        case apiKey = "A"
         /// The session cookie associated with this account, if logged in. This is generated
         /// randomly in ``AccountDatabase.Users.update(account:with:)``.
-        case cookie
+        case cookie = "B"
+
+        case github = "github"
     }
 }
 extension Unidoc.User:BSONDocumentEncodable
@@ -63,9 +67,10 @@ extension Unidoc.User:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-
         bson[.level] = self.level
-        bson[.realm] = self.realm
+
+        bson[.apiLimitLeft] = self.apiLimitLeft
+        bson[.apiKey] = self.apiKey
 
         bson[.github] = self.github
     }
@@ -77,7 +82,8 @@ extension Unidoc.User:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             level: try bson[.level].decode(),
-            realm: try bson[.realm]?.decode(),
+            apiLimitLeft: try bson[.apiLimitLeft]?.decode() ?? 0,
+            apiKey: try bson[.apiKey]?.decode(),
             github: try bson[.github]?.decode())
     }
 }

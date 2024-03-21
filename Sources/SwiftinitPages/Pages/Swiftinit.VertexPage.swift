@@ -8,23 +8,20 @@ import URI
 extension Swiftinit
 {
     public
-    typealias VertexPage = _SwiftinitVertexPage
-}
-public
-protocol _SwiftinitVertexPage:Swiftinit.ApplicationPage
-{
-    associatedtype Context:Swiftinit.VertexPageContext
-    associatedtype Sidebar:HTML.OutputStreamable
+    protocol VertexPage:ApplicationPage
+    {
+        associatedtype Context:Unidoc.VertexContext
+        associatedtype Sidebar:HTML.OutputStreamable
 
-    var canonical:CanonicalVersion? { get }
-    var sidebar:Sidebar? { get }
+        var sidebar:Sidebar? { get }
 
-    var context:Context { get }
+        var context:Context { get }
+    }
 }
 extension Swiftinit.VertexPage where Self:Swiftinit.StaticPage
 {
     @inlinable public
-    var canonicalURI:URI? { self.canonical?.uri }
+    var canonicalURI:URI? { self.context.canonical?.uri }
 }
 extension Swiftinit.VertexPage
 {

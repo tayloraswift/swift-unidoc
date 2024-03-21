@@ -7,14 +7,14 @@ extension Swiftinit
     struct ExtensionSection
     {
         private
-        let context:IdentifiablePageContext<Swiftinit.Vertices>
+        let context:Unidoc.RelativePageContext
         let heading:ExtensionHeading
         let constraints:[GenericConstraint<Unidoc.Scalar?>]
         let body:ExtensionBody
 
         private
         init(
-            context:IdentifiablePageContext<Swiftinit.Vertices>,
+            context:Unidoc.RelativePageContext,
             heading:ExtensionHeading,
             constraints:[GenericConstraint<Unidoc.Scalar?>],
             body:ExtensionBody)
@@ -28,7 +28,7 @@ extension Swiftinit
 }
 extension Swiftinit.ExtensionSection
 {
-    init?(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+    init?(_ context:Unidoc.RelativePageContext,
         group:borrowing Unidoc.ExtensionGroup,
         decl:Phylum.DeclFlags,
         bias:Unidoc.Bias)

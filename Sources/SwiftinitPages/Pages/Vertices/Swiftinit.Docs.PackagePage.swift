@@ -16,13 +16,11 @@ extension Swiftinit.Docs
 {
     struct PackagePage
     {
-        let canonical:CanonicalVersion?
         let mesh:Swiftinit.Mesh
         let apex:Unidoc.GlobalVertex
 
-        init(canonical:CanonicalVersion?, mesh:Swiftinit.Mesh, apex:Unidoc.GlobalVertex)
+        init(mesh:Swiftinit.Mesh, apex:Unidoc.GlobalVertex)
         {
-            self.canonical = canonical
             self.mesh = mesh
             self.apex = apex
         }
@@ -100,7 +98,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
             }
         }
 
-        main[.section] { $0.class = "notice canonical" } = self.canonical
+        main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
         main[.section, { $0.class = "details" }]
         {

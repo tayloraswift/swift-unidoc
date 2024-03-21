@@ -5,15 +5,13 @@ import URI
 extension Swiftinit
 {
     public
-    typealias ApplicationPage = _SwiftinitApplicationPage
-}
-public
-protocol _SwiftinitApplicationPage<Navigator>:Swiftinit.RenderablePage
-{
-    associatedtype Navigator:HTML.OutputStreamable
-    var navigator:Navigator { get }
+    protocol ApplicationPage<Navigator>:RenderablePage
+    {
+        associatedtype Navigator:HTML.OutputStreamable
+        var navigator:Navigator { get }
 
-    func main(_:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+        func main(_:inout HTML.ContentEncoder, format:RenderFormat)
+    }
 }
 extension Swiftinit.ApplicationPage<HTML.Logo>
 {

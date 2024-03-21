@@ -3,108 +3,20 @@ import JSON
 extension GitHub
 {
     @frozen public
-    struct User<ID>
+    struct User:Identifiable, Equatable, Sendable
     {
         public
-        let id:ID
-
-        /// The user’s @-name.
+        let id:UInt32
         public
-        var login:String
-        /// The user’s icon URL.
-        public
-        var icon:String
-        /// The user’s node id. This is GitHub’s analogue of a Unidoc scalar.
-        public
-        var node:String
-
-        /// The user’s location, if set.
-        public
-        var location:String?
-        /// The user’s hiring status, if set.
-        public
-        var hireable:Bool?
-        /// The user’s company name, if set.
-        public
-        var company:String?
-        /// The user’s public email address, if set.
-        public
-        var email:String?
-        /// The user’s display name, if set.
-        public
-        var name:String?
-        /// The user’s blog URL, if set.
-        public
-        var blog:String?
-        /// The user’s bio, if set.
-        public
-        var bio:String?
-        /// The user’s X account, if set.
-        public
-        var x:String?
-
-        public
-        var publicRepos:Int
-        public
-        var publicGists:Int
-        public
-        var followers:Int
-        public
-        var following:Int
-        public
-        var created:String
-        public
-        var updated:String
+        var profile:Profile
 
         @inlinable public
-        init(id:ID,
-            login:String,
-            icon:String,
-            node:String,
-            location:String? = nil,
-            hireable:Bool? = nil,
-            company:String? = nil,
-            email:String? = nil,
-            name:String? = nil,
-            blog:String? = nil,
-            bio:String? = nil,
-            x:String? = nil,
-            publicRepos:Int = 0,
-            publicGists:Int = 0,
-            followers:Int = 0,
-            following:Int = 0,
-            created:String,
-            updated:String)
+        init(id:UInt32, profile:Profile)
         {
             self.id = id
-            self.login = login
-            self.icon = icon
-            self.node = node
-            self.location = location
-            self.hireable = hireable
-            self.company = company
-            self.email = email
-            self.name = name
-            self.blog = blog
-            self.bio = bio
-            self.x = x
-            self.publicRepos = publicRepos
-            self.publicGists = publicGists
-            self.followers = followers
-            self.following = following
-            self.created = created
-            self.updated = updated
+            self.profile = profile
         }
     }
-}
-extension GitHub.User:Identifiable where ID:Hashable
-{
-}
-extension GitHub.User:Equatable where ID:Equatable
-{
-}
-extension GitHub.User:Sendable where ID:Sendable
-{
 }
 extension GitHub.User
 {
@@ -112,47 +24,47 @@ extension GitHub.User
     enum CodingKey:String, Sendable
     {
         case id
-        case login
-        case icon = "avatar_url"
-        case node = "node_id"
-        case location
-        case hireable
-        case company
-        case email
-        case name
-        case blog
-        case bio
-        case x = "twitter_username"
-        case publicRepos = "public_repos"
-        case publicGists = "public_gists"
-        case followers
-        case following
-        case created = "created_at"
-        case updated = "updated_at"
+        case profile_login = "login"
+        case profile_icon = "avatar_url"
+        case profile_node = "node_id"
+        case profile_location = "location"
+        case profile_hireable = "hireable"
+        case profile_company = "company"
+        case profile_email = "email"
+        case profile_name = "name"
+        case profile_blog = "blog"
+        case profile_bio = "bio"
+        case profile_x = "twitter_username"
+        case profile_publicRepos = "public_repos"
+        case profile_publicGists = "public_gists"
+        case profile_followers = "followers"
+        case profile_following = "following"
+        case profile_created = "created_at"
+        case profile_updated = "updated_at"
     }
 }
-extension GitHub.User<UInt32>:JSONObjectDecodable, JSONDecodable
+extension GitHub.User:JSONObjectDecodable, JSONDecodable
 {
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        self.init(id: try json[.id].decode(),
-            login: try json[.login].decode(),
-            icon: try json[.icon].decode(),
-            node: try json[.node].decode(),
-            location: try json[.location]?.decode(),
-            hireable: try json[.hireable]?.decode(),
-            company: try json[.company]?.decode(),
-            email: try json[.email]?.decode(),
-            name: try json[.name]?.decode(),
-            blog: try json[.blog]?.decode(),
-            bio: try json[.bio]?.decode(),
-            x: try json[.x]?.decode(),
-            publicRepos: try json[.publicRepos].decode(),
-            publicGists: try json[.publicGists].decode(),
-            followers: try json[.followers].decode(),
-            following: try json[.following].decode(),
-            created: try json[.created].decode(),
-            updated: try json[.updated].decode())
+        self.init(id: try json[.id].decode(), profile: .init(
+            login: try json[.profile_login].decode(),
+            icon: try json[.profile_icon].decode(),
+            node: try json[.profile_node].decode(),
+            location: try json[.profile_location]?.decode(),
+            hireable: try json[.profile_hireable]?.decode(),
+            company: try json[.profile_company]?.decode(),
+            email: try json[.profile_email]?.decode(),
+            name: try json[.profile_name]?.decode(),
+            blog: try json[.profile_blog]?.decode(),
+            bio: try json[.profile_bio]?.decode(),
+            x: try json[.profile_x]?.decode(),
+            publicRepos: try json[.profile_publicRepos].decode(),
+            publicGists: try json[.profile_publicGists].decode(),
+            followers: try json[.profile_followers].decode(),
+            following: try json[.profile_following].decode(),
+            created: try json[.profile_created].decode(),
+            updated: try json[.profile_updated].decode()))
     }
 }

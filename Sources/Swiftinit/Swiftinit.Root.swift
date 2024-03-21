@@ -5,6 +5,7 @@ extension Swiftinit
     @frozen public
     enum Root
     {
+        case account
         case admin
         case api
         case asset
@@ -49,6 +50,7 @@ extension Swiftinit.Root:Identifiable
     {
         switch self
         {
+        case .account:      "account"
         case .admin:        "admin"
         case .api:          "api"
         case .asset:        "asset"

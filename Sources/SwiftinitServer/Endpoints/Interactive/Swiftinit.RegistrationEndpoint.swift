@@ -38,16 +38,33 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
 
         let user:Unidoc.User = try await github.connect
         {
-            let user:GitHub.User<UInt32> = try await $0.get(from: "/user", with: self.token)
-            return .init(id: .init(type: .github, user: user.id),
-                level: user.id == 2556986 ? .administratrix : .human)
+            let user:GitHub.User = try await $0.get(from: "/user", with: self.token)
+            /// r u taylor swift?
+            let level:Unidoc.User.Level = user.id == 2556986 ? .administratrix : .human
+            let id:Unidoc.Account = .init(type: .github, user: user.id)
+            return .init(id: id,
+                level: level,
+                //  This will only be written to the database if the user is new.
+                apiLimitLeft: server.db.policy.apiLimitPerReset,
+                github: user.profile)
         }
 
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let cookie:Unidoc.Cookie = try await server.db.users.update(user: user,
+        let secrets:Unidoc.UserSecrets = try await server.db.users.update(user: user,
             with: session)
 
-        return .redirect(.temporary("\(Swiftinit.Root.admin)"),
-            cookies: [Swiftinit.Cookies.session: "\(cookie)"])
+        let target:Swiftinit.Root
+
+        if  case .administratrix = user.level
+        {
+            target = .admin
+        }
+        else
+        {
+            target = .account
+        }
+
+        return .redirect(.temporary("\(target)"), // meet taylor swift
+            cookies: [Swiftinit.Cookies.session: "\(secrets.session)"])
     }
 }

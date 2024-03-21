@@ -1,3 +1,0 @@
-extension Unicode.Scalar:JSONStringEncodable
-{
-}

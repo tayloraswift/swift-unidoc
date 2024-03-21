@@ -19,7 +19,7 @@ extension GitHub
         private
         var reposIndexed:Int
         private
-        var buffer:Swiftinit.EventBuffer<any Swiftinit.ServerPluginEvent>
+        var buffer:Unidoc.EventBuffer<any Swiftinit.ServerPluginEvent>
 
         var error:(any Error)?
 

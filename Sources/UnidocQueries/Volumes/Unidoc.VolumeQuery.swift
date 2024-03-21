@@ -6,39 +6,34 @@ import UnidocRecords
 extension Unidoc
 {
     public
-    typealias VolumeQuery = _UnidocVolumeQuery
-}
+    protocol VolumeQuery:Mongo.PipelineQuery<DB.Volumes> where Collation == VolumeCollation
+    {
+        associatedtype VertexPredicate:Unidoc.VertexPredicate
 
-/// The name of this protocol is ``Unidoc.VolumeQuery``.
-public
-protocol _UnidocVolumeQuery:Mongo.PipelineQuery<Unidoc.DB.Volumes>
-    where Collation == VolumeCollation
-{
-    associatedtype VertexPredicate:Unidoc.VertexPredicate
+        var volume:VolumeSelector { get }
+        var vertex:VertexPredicate { get }
 
-    var volume:Unidoc.VolumeSelector { get }
-    var vertex:VertexPredicate { get }
+        /// The field to store the ``VolumeMetadata`` of the **latest stable release**
+        /// (relative to the current volume) in.
+        ///
+        /// If nil, the query will still look up the latest stable release, but the result will
+        /// be discarded.
+        static
+        var volumeOfLatest:Mongo.AnyKeyPath? { get }
+        /// The field to store the ``VolumeMetadata`` of the **requested snapshot** in.
+        static
+        var volume:Mongo.AnyKeyPath { get }
 
-    /// The field to store the ``Unidoc.VolumeMetadata`` of the **latest stable release**
-    /// (relative to the current volume) in.
-    ///
-    /// If nil, the query will still look up the latest stable release, but the result will
-    /// be discarded.
-    static
-    var volumeOfLatest:Mongo.AnyKeyPath? { get }
-    /// The field to store the ``Unidoc.VolumeMetadata`` of the **requested snapshot** in.
-    static
-    var volume:Mongo.AnyKeyPath { get }
+        /// The field that will contain the list of matching master records, which will become
+        /// the input of the conforming type’s ``extend(pipeline:)`` witness.
+        static
+        var input:Mongo.AnyKeyPath { get }
 
-    /// The field that will contain the list of matching master records, which will become the
-    /// input of the conforming type’s ``extend(pipeline:)`` witness.
-    static
-    var input:Mongo.AnyKeyPath { get }
+        /// The fields that will be removed from all matching primary vertex documents.
+        var unset:[Mongo.AnyKeyPath] { get }
 
-    /// The fields that will be removed from all matching primary vertex documents.
-    var unset:[Mongo.AnyKeyPath] { get }
-
-    func extend(pipeline:inout Mongo.PipelineEncoder)
+        func extend(pipeline:inout Mongo.PipelineEncoder)
+    }
 }
 extension Unidoc.VolumeQuery
 {

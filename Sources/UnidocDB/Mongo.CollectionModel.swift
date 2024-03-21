@@ -6,33 +6,27 @@ import UnidocRecords
 extension Mongo
 {
     public
-    typealias CollectionModel = _MongoCollectionModel
-}
+    protocol CollectionModel<Element>
+    {
+        associatedtype Element:Identifiable, Sendable where
+            Element.ID:BSONDecodable,
+            Element.ID:BSONEncodable,
+            Element.ID:Sendable
 
-@available(*, deprecated, renamed: "Mongo.CollectionModel")
-typealias DatabaseCollection = Mongo.CollectionModel
+        associatedtype Capacity
 
-public
-protocol _MongoCollectionModel<Element>
-{
-    associatedtype Element:Identifiable, Sendable where
-        Element.ID:BSONDecodable,
-        Element.ID:BSONEncodable,
-        Element.ID:Sendable
+        static
+        var name:Collection { get }
 
-    associatedtype Capacity
+        static
+        var indexes:[CollectionIndex] { get }
 
-    static
-    var name:Mongo.Collection { get }
+        var capacity:Capacity { get }
 
-    static
-    var indexes:[Mongo.CollectionIndex] { get }
+        var database:Database { get }
 
-    var capacity:Capacity { get }
-
-    var database:Mongo.Database { get }
-
-    func setup(with session:Mongo.Session) async throws
+        func setup(with session:Session) async throws
+    }
 }
 extension Mongo.CollectionModel where Capacity == Never
 {
@@ -230,7 +224,7 @@ extension Mongo.CollectionModel where Element:BSONDocumentDecodable
 }
 extension Mongo.CollectionModel
 {
-    @inlinable internal
+    @inlinable
     func find<Decodable>(_:Decodable.Type = Decodable.self,
         by index:Mongo.AnyKeyPath,
         of key:__owned some BSONEncodable,
@@ -257,6 +251,62 @@ extension Mongo.CollectionModel
     }
 }
 
+extension Mongo.CollectionModel
+    where Element:BSONDecodable, Element.ID:BSONEncodable & Comparable
+{
+    /// Queries the **primary** replica for up to `limit` documents in this collection, ordered
+    /// by `_id`, and starting after the specified identifier if non-nil.
+    ///
+    /// This is useful for implementing application-level cursors when starting a native mongod
+    /// cursor on every application run is not desirable.
+    ///
+    /// You should **always** call this in a loop with a cooldown, to avoid spinning when the
+    /// collection is empty.
+    @inlinable public
+    func pull(_ limit:Int,
+        after cursor:inout Element.ID?,
+        with session:Mongo.Session) async throws -> [Element]
+    {
+        let elements:[Element] = try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<Element>>.init(Self.name, limit: limit)
+            {
+                $0[.filter]
+                {
+                    $0["_id"]
+                    {
+                        if  let cursor:Element.ID
+                        {
+                            $0[.gt] = cursor
+                        }
+                        else
+                        {
+                            $0[.gte] = BSON.Min.init()
+                        }
+                    }
+                }
+                $0[.sort]
+                {
+                    $0["_id"] = (+)
+                }
+                $0[.hint]
+                {
+                    $0["_id"] = (+)
+                }
+            },
+            against: self.database)
+
+        if  let last:Element = elements.last
+        {
+            cursor = last.id
+        }
+        else
+        {
+            cursor = nil
+        }
+
+        return elements
+    }
+}
 extension Mongo.CollectionModel
 {
     /// Decode and re-encode all documents in this collection using the specified master type.

@@ -4,13 +4,10 @@ import URI
 extension Swiftinit
 {
     public
-    typealias AdministrativePage = _SwiftinitAdministrativePage
-}
-
-public
-protocol _SwiftinitAdministrativePage:Swiftinit.RenderablePage
-{
-    func main(_:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    protocol AdministrativePage:RenderablePage
+    {
+        func main(_:inout HTML.ContentEncoder, format:RenderFormat)
+    }
 }
 extension Swiftinit.AdministrativePage
 {

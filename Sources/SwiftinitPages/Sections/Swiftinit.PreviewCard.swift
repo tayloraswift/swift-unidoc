@@ -3,13 +3,11 @@ import MarkdownABI
 
 extension Swiftinit
 {
-    typealias PreviewCard = _SwiftinitPreviewCard
-}
-
-protocol _SwiftinitPreviewCard:HTML.OutputStreamable
-{
-    var context:any Swiftinit.VertexPageContext { get }
-    var passage:Unidoc.Passage? { get }
+    protocol PreviewCard:HTML.OutputStreamable
+    {
+        var context:any Unidoc.VertexContext { get }
+        var passage:Unidoc.Passage? { get }
+    }
 }
 extension Swiftinit.PreviewCard
 {

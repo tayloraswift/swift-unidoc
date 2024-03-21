@@ -4,7 +4,7 @@ extension Swiftinit
 {
     struct ConformingTypes
     {
-        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
+        let context:Unidoc.PeripheralPageContext
 
         private
         let culture:Unidoc.Scalar
@@ -15,7 +15,7 @@ extension Swiftinit
         var count:Int
 
         private
-        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>, culture:Unidoc.Scalar)
+        init(_ context:Unidoc.PeripheralPageContext, culture:Unidoc.Scalar)
         {
             self.context = context
             self.culture = culture
@@ -26,7 +26,7 @@ extension Swiftinit
 }
 extension Swiftinit.ConformingTypes
 {
-    init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
+    init(_ context:Unidoc.PeripheralPageContext,
         groups:[Unidoc.AnyGroup],
         bias culture:Unidoc.Scalar) throws
     {

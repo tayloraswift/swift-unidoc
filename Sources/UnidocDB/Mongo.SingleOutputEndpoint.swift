@@ -5,21 +5,17 @@ extension Mongo
 {
     /// A type that expects a single output document from its ``query``.
     public
-    typealias SingleOutputEndpoint = _MongoSingleOutputEndpoint
+    protocol SingleOutputEndpoint<Query>:PipelineEndpoint
+        where   Query.Iteration.Stride == Never,
+                Query.Iteration.Batch == Query.Iteration.BatchElement?
+    {
+        /// An **idempotent** accessor for the singular result of the ``query``.
+        ///
+        /// The easiest way to implement this property is to declare a mutable stored property
+        /// matching this requirement.
+        var value:Query.Iteration.BatchElement? { get set }
+    }
 }
-/// The name of this protocol is ``Mongo.SingleOutputEndpoint``.
-public
-protocol _MongoSingleOutputEndpoint<Query>:Mongo.PipelineEndpoint
-    where   Query.Iteration.Stride == Never,
-            Query.Iteration.Batch == Query.Iteration.BatchElement?
-{
-    /// An **idempotent** accessor for the singular result of the ``query``.
-    ///
-    /// The easiest way to implement this property is to declare a mutable stored property
-    /// matching this requirement.
-    var value:Query.Iteration.BatchElement? { get set }
-}
-
 extension Mongo.SingleOutputEndpoint
 {
     /// Consumes the documents in the given batch as if they were iterated and

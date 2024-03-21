@@ -6,13 +6,11 @@ import URI
 extension Swiftinit
 {
     public
-    typealias StaticPage = _SwiftinitStaticPage
-}
-public
-protocol _SwiftinitStaticPage:Swiftinit.RenderablePage
-{
-    var canonicalURI:URI? { get }
-    var location:URI { get }
+    protocol StaticPage:RenderablePage
+    {
+        var canonicalURI:URI? { get }
+        var location:URI { get }
+    }
 }
 extension Swiftinit.StaticPage
 {
