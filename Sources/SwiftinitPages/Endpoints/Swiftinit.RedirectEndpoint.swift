@@ -62,7 +62,8 @@ extension Swiftinit.RedirectEndpoint:HTTP.ServerEndpoint
         }
         else
         {
-            let context:IdentifiablePageContext<Swiftinit.SecondaryOnly> = .init(cache: .init(
+            let context:Unidoc.PeripheralPageContext = .init(canonical: nil,
+                cache: .init(
                     vertices: .init(secondary: output.matches),
                     volumes: .init(principal: output.volume)),
                 repo: nil)

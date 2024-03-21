@@ -1,30 +1,29 @@
 import UnidocRecords
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct Vertices
     {
         @usableFromInline
-        let principal:Unidoc.AnyVertex
+        let principal:AnyVertex
         @usableFromInline
-        var secondary:[Unidoc.Scalar: Unidoc.AnyVertex]
+        var secondary:[Unidoc.Scalar: AnyVertex]
 
         private
         init(
-            principal:Unidoc.AnyVertex,
-            secondary:[Unidoc.Scalar: Unidoc.AnyVertex] = [:])
+            principal:AnyVertex,
+            secondary:[Unidoc.Scalar: AnyVertex] = [:])
         {
             self.principal = principal
             self.secondary = secondary
         }
     }
 }
-extension Swiftinit.Vertices
+extension Unidoc.Vertices
 {
-    init(
-        principal:Unidoc.AnyVertex,
-        secondary:[Unidoc.AnyVertex])
+    public
+    init(principal:Unidoc.AnyVertex, secondary:borrowing [Unidoc.AnyVertex])
     {
         let secondary:[Unidoc.Scalar: Unidoc.AnyVertex] = secondary.reduce(into: [:])
         {
@@ -33,15 +32,15 @@ extension Swiftinit.Vertices
         self.init(principal: principal, secondary: secondary)
     }
 }
-extension Swiftinit.Vertices:Identifiable
+extension Unidoc.Vertices:Identifiable
 {
     @inlinable public
     var id:Unidoc.Scalar { self.principal.id }
 }
-extension Swiftinit.Vertices:Swiftinit.VertexCache
+extension Unidoc.Vertices:Unidoc.VertexCache
 {
     @inlinable public static
-    func form(from self:consuming Swiftinit.Vertices) -> Self { `self` }
+    func form(from self:consuming Unidoc.Vertices) -> Self { `self` }
 
     @inlinable public
     subscript(_ vertex:Unidoc.Scalar) -> (vertex:Unidoc.AnyVertex, principal:Bool)?

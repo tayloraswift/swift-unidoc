@@ -9,17 +9,14 @@ extension Swiftinit.Docs
 {
     struct ArticlePage
     {
-        let canonical:CanonicalVersion?
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
         let mesh:Swiftinit.Mesh
         let apex:Unidoc.ArticleVertex
 
-        init(canonical:CanonicalVersion?,
-            sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
+        init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
             mesh:Swiftinit.Mesh,
             apex:Unidoc.ArticleVertex)
         {
-            self.canonical = canonical
             self.sidebar = sidebar
             self.apex = apex
             self.mesh = mesh
@@ -67,7 +64,7 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.ApicalPage
             }
         }
 
-        main[.section] { $0.class = "notice canonical" } = self.canonical
+        main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
         main[.section, { $0.class = "details literature" }] = self.mesh.details
 

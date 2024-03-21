@@ -48,6 +48,15 @@ extension Swiftinit.IntegralRequest
 }
 extension Swiftinit.IntegralRequest.Metadata
 {
+    var hostSupportsPublicAPI:Bool
+    {
+        switch self.host
+        {
+        case "api.swiftinit.org"?:   true
+        case "localhost"?:           true
+        default:                     false
+        }
+    }
     var logged:ServerTour.Request
     {
         .init(

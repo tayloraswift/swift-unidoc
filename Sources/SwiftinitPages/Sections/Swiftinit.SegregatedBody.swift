@@ -46,7 +46,7 @@ extension Swiftinit.SegregatedBody:Swiftinit.CollapsibleContent
 }
 extension Swiftinit.SegregatedBody
 {
-    init?(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+    init?(_ context:Unidoc.RelativePageContext,
         group:__shared [Unidoc.Scalar])
     {
         if  group.isEmpty

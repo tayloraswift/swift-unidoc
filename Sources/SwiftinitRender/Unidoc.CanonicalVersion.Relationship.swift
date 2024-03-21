@@ -1,6 +1,6 @@
-extension CanonicalVersion
+extension Unidoc.CanonicalVersion
 {
-    @frozen @usableFromInline internal
+    @frozen public
     enum Relationship
     {
         case earlier

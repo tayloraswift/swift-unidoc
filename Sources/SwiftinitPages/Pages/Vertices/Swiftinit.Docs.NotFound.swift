@@ -6,10 +6,10 @@ extension Swiftinit.Docs
 {
     struct NotFoundPage
     {
-        let context:IdentifiablePageContext<Swiftinit.SecondaryOnly>
+        let context:Unidoc.PeripheralPageContext
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
 
-        init(_ context:IdentifiablePageContext<Swiftinit.SecondaryOnly>,
+        init(_ context:Unidoc.PeripheralPageContext,
             sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?)
         {
             self.context = context
@@ -27,8 +27,6 @@ extension Swiftinit.Docs.NotFoundPage:Swiftinit.ApplicationPage
 }
 extension Swiftinit.Docs.NotFoundPage:Swiftinit.VertexPage
 {
-    var canonical:CanonicalVersion? { nil }
-
     func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
     {
         main[.section]

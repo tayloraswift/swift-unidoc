@@ -21,7 +21,7 @@ extension Swiftinit
         case interactive(any InteractiveEndpoint)
         case procedural(any ProceduralEndpoint)
         case stateless(any RenderablePage & Sendable)
-        case redirect(String)
+        case redirect(String, permanently:Bool = true)
         case `static`(Cache<Swiftinit.Asset>.Request)
     }
 }
@@ -134,19 +134,6 @@ extension Swiftinit.AnyEndpoint
                 let version:PatchVersion = .init(version)
             {
                 return .interactive(Swiftinit.BuilderEndpoint.oldest(until: version))
-            }
-
-        case .render:
-            if  let account:String = parameters["account"],
-                let account:Unidoc.Account = .init(account),
-                let apiKey:String = parameters["api_key"],
-                let apiKey:UInt64 = .init(apiKey, radix: 16)
-            {
-                let apiKey:Int64 = .init(bitPattern: apiKey)
-                return .interactive(Swiftinit.UserRenderEndpoint.init(
-                    request: .hello,
-                    account: account,
-                    apiKey: apiKey))
             }
         }
 

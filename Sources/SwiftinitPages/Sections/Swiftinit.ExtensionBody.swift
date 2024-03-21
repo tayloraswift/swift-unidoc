@@ -54,7 +54,7 @@ extension Swiftinit.ExtensionBody
     //     + self.lists.defaultImplementations.visible.count
     // }
 
-    init?(_ context:IdentifiablePageContext<Swiftinit.Vertices>,
+    init?(_ context:Unidoc.RelativePageContext,
         group:borrowing Unidoc.ExtensionGroup,
         decl:Phylum.DeclFlags)
     {

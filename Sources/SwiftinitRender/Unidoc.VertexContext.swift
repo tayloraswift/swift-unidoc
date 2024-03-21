@@ -11,6 +11,9 @@ extension Unidoc
     public
     protocol VertexContext:AnyObject
     {
+        init(canonical:CanonicalVersion?, vertices:Vertices, volumes:Volumes, repo:PackageRepo?)
+
+        var canonical:CanonicalVersion? { get }
         /// Returns the metadata document for the principal volume of the associated page.
         var volume:VolumeMetadata { get }
         var repo:PackageRepo? { get }
