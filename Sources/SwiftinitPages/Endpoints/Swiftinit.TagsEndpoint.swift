@@ -39,9 +39,9 @@ extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let view:Swiftinit.ViewMode = format.secure
-            ? .init(package: output.package, user: output.user)
-            : .admin
+        /// In development mode, everyone is an administratrix!
+        let view:Swiftinit.Permissions = .init(package: output.package,
+            user: format.secure ? output.user : output.user?.as(.administratrix))
 
         let tags:Swiftinit.TagsTable
 
