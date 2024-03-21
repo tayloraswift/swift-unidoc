@@ -6,12 +6,11 @@ import NIOCore
 import NIOHPACK
 import SemanticVersions
 import Symbols
-import Unidoc
 import UnidocAPI
 import UnidocRecords
 import URI
 
-extension SwiftinitClient
+extension Unidoc.Client
 {
     @frozen public
     struct Connection
@@ -30,7 +29,7 @@ extension SwiftinitClient
     }
 }
 
-extension SwiftinitClient.Connection
+extension Unidoc.Client.Connection
 {
     func oldest(until abi:PatchVersion) async throws -> [Unidoc.Edition]
     {
@@ -56,7 +55,7 @@ extension SwiftinitClient.Connection
     }
 }
 
-extension SwiftinitClient.Connection
+extension Unidoc.Client.Connection
 {
     @inlinable internal
     func headers(_ method:String, _ endpoint:String) -> HPACKHeaders
@@ -73,7 +72,7 @@ extension SwiftinitClient.Connection
         ]
     }
 }
-extension SwiftinitClient.Connection
+extension Unidoc.Client.Connection
 {
     @discardableResult
     @inlinable public
@@ -124,7 +123,7 @@ extension SwiftinitClient.Connection
         return try json.decode()
     }
 }
-extension SwiftinitClient.Connection
+extension Unidoc.Client.Connection
 {
     @inlinable internal
     func fetch(_ endpoint:String,
