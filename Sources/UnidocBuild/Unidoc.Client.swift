@@ -9,25 +9,28 @@ import UnidocAPI
 import UnidocLinker
 import UnidocRecords
 
-@frozen public
-struct SwiftinitClient
+extension Unidoc
 {
-    @usableFromInline internal
-    let http2:HTTP2Client
-    @usableFromInline internal
-    let port:Int
-    @usableFromInline internal
-    let cookie:String
-
-    @inlinable public
-    init(http2:HTTP2Client, cookie:String, port:Int)
+    @frozen public
+    struct Client
     {
-        self.http2 = http2
-        self.cookie = cookie
-        self.port = port
+        @usableFromInline internal
+        let http2:HTTP2Client
+        @usableFromInline internal
+        let port:Int
+        @usableFromInline internal
+        let cookie:String
+
+        @inlinable public
+        init(http2:HTTP2Client, cookie:String, port:Int)
+        {
+            self.http2 = http2
+            self.cookie = cookie
+            self.port = port
+        }
     }
 }
-extension SwiftinitClient
+extension Unidoc.Client
 {
     @inlinable public
     func connect<T>(with body:(Connection) async throws -> T) async throws -> T
@@ -38,7 +41,7 @@ extension SwiftinitClient
         }
     }
 }
-extension SwiftinitClient
+extension Unidoc.Client
 {
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
@@ -47,7 +50,7 @@ extension SwiftinitClient
         try await self.connect { try await $0.get(from: endpoint) }
     }
 }
-extension SwiftinitClient
+extension Unidoc.Client
 {
     func build(local symbol:Symbol.Package,
         search:FilePath?,
@@ -55,7 +58,7 @@ extension SwiftinitClient
         swift:String?) async throws
     {
         let toolchain:Toolchain = try await .detect(swift: swift ?? "swift")
-        let workspace:SPM.Workspace = try await .create(at: ".swiftinit")
+        let workspace:SPM.Workspace = try await .create(at: ".unidoc")
 
         let archive:SymbolGraphObject<Void>
         if  symbol == .swift
@@ -84,7 +87,7 @@ extension SwiftinitClient
 
         try await self.connect
         {
-            @Sendable (connection:SwiftinitClient.Connection) in
+            @Sendable (connection:Unidoc.Client.Connection) in
 
             print("Uploading symbol graph...")
 
@@ -104,7 +107,7 @@ extension SwiftinitClient
         //  connection open.
         let buildable:Unidoc.BuildArguments? = try await self.connect
         {
-            @Sendable (connection:SwiftinitClient.Connection) in
+            @Sendable (connection:Unidoc.Client.Connection) in
 
             do
             {
@@ -140,7 +143,7 @@ extension SwiftinitClient
         action:Unidoc.Snapshot.PendingAction) async throws
     {
         let toolchain:Toolchain = try await .detect()
-        let workspace:SPM.Workspace = try await .create(at: ".swiftinit")
+        let workspace:SPM.Workspace = try await .create(at: ".unidoc")
 
         guard
         let tag:String = buildable.tag
@@ -171,7 +174,7 @@ extension SwiftinitClient
 
         try await self.connect
         {
-            @Sendable (connection:SwiftinitClient.Connection) in
+            @Sendable (connection:Unidoc.Client.Connection) in
 
             print("Uploading symbol graph...")
 
@@ -181,7 +184,7 @@ extension SwiftinitClient
         }
     }
 }
-extension SwiftinitClient
+extension Unidoc.Client
 {
     func upgrade(pretty:Bool) async throws
     {
@@ -192,7 +195,7 @@ extension SwiftinitClient
         {
             let editions:[Unidoc.Edition] = try await self.connect
             {
-                @Sendable (connection:SwiftinitClient.Connection) in
+                @Sendable (connection:Unidoc.Client.Connection) in
 
                 try await connection.oldest(until: SymbolGraphABI.version)
             }
@@ -211,7 +214,7 @@ extension SwiftinitClient
                 {
                     buildable = try await self.connect
                     {
-                        @Sendable (connection:SwiftinitClient.Connection) in
+                        @Sendable (connection:Unidoc.Client.Connection) in
 
                         try await connection.build(id: edition)
                     }

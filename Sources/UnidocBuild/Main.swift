@@ -41,7 +41,7 @@ enum Main
             niossl: niossl,
             remote: options.host)
 
-        let swiftinit:SwiftinitClient = .init(http2: http2,
+        let swiftinit:Unidoc.Client = .init(http2: http2,
             cookie: options.cookie,
             port: options.port)
 

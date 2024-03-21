@@ -1,7 +1,6 @@
 import JSON
-import Unidoc
 
-extension SwiftinitClient
+extension Unidoc.Client
 {
     struct Coordinates:Sendable
     {
@@ -15,7 +14,7 @@ extension SwiftinitClient
         }
     }
 }
-extension SwiftinitClient.Coordinates:Comparable
+extension Unidoc.Client.Coordinates:Comparable
 {
     static
     func < (a:Self, b:Self) -> Bool
@@ -23,11 +22,11 @@ extension SwiftinitClient.Coordinates:Comparable
         (a.package.rawValue, a.version.bits) < (b.package.rawValue, b.version.bits)
     }
 }
-extension SwiftinitClient.Coordinates:CustomStringConvertible
+extension Unidoc.Client.Coordinates:CustomStringConvertible
 {
     var description:String { "(\(self.package), \(self.version))" }
 }
-extension SwiftinitClient.Coordinates:JSONObjectDecodable
+extension Unidoc.Client.Coordinates:JSONObjectDecodable
 {
     enum CodingKey:String, Sendable
     {
