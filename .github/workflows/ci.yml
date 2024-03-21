@@ -87,7 +87,8 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
+            -   name: Swift version
+                run: swift --version
+                
             -   name: Build only
-                run: |
-                    swift --version
-                    swift build
+                run: swift build
