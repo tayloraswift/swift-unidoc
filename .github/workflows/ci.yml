@@ -1,0 +1,95 @@
+name: ci
+
+on:
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
+
+jobs:
+    linux:
+        runs-on: ubuntu-22.04
+        name: Amazon Linux 2023
+
+        strategy:
+            matrix:
+                image:
+                -   tayloraswift/5.10.0-amazonlinux2023:latest
+
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            -   name: Set up mock deployments
+                run: |
+                    docker compose -f Guides/docs.docc/local/docker-compose.yml up -d
+
+            -   name: Initialize replica set
+                run: |
+                    timeout 60s bash -c \
+                    'until docker exec -t unidoc-mongod-container \
+                    /bin/mongosh --file /unidoc-rs-init.js; do sleep 1; done'
+
+            -   name: Run pipeline
+                run: |
+                    docker run -t --rm \
+                        --network=unidoc-test \
+                        --name swift-environment \
+                        --user root \
+                        -v $PWD:/swift/swift-unidoc \
+                        -w /swift/swift-unidoc \
+                        ${{ matrix.image }} \
+                        /bin/bash .github/pipeline
+
+    macos:
+        runs-on: macos-14
+        name: macOS
+        strategy:
+            matrix:
+                swift:
+                    -   toolchain:  5.10-RELEASE
+                        branch:     swift-5.10-release
+
+        env:
+            SWIFT_TOOLCHAIN_DIRECTORY: >-
+                /Library/Developer/Toolchains/swift-${{ matrix.swift.toolchain }}.xctoolchain
+
+        steps:
+            -   name: Cache swift toolchains
+                uses: actions/cache@v2
+                with:
+                    path: swift-${{ matrix.swift.toolchain }}.pkg
+                    key: macos:swift:${{ matrix.swift.toolchain }}
+
+            -   name: Cache status
+                id:   cache_status
+                uses: andstor/file-existence-action@v1
+                with:
+                    files: swift-${{ matrix.swift.toolchain }}.pkg
+
+            -   name: Download toolchain
+                if: steps.cache_status.outputs.files_exists == 'false'
+                run:   "curl https://download.swift.org/\
+                        ${{ matrix.swift.branch }}/xcode/\
+                        swift-${{ matrix.swift.toolchain }}/\
+                        swift-${{ matrix.swift.toolchain }}-osx.pkg \
+                        --output swift-${{ matrix.swift.toolchain }}.pkg"
+
+            -   name: Install toolchain
+                run: |
+                    sudo installer -pkg swift-${{ matrix.swift.toolchain }}.pkg -target /
+
+            -   name: Select toolchain
+                run: |
+                    echo "TOOLCHAINS=$(plutil -extract CFBundleIdentifier raw \
+                        $SWIFT_TOOLCHAIN_DIRECTORY/Info.plist)" >> $GITHUB_ENV
+
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            -   name: Build only
+            # https://github.com/apple/swift/issues/71606
+                if: false
+                run: |
+                    swift --version
+                    swift build
