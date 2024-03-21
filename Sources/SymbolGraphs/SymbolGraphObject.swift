@@ -1,10 +1,5 @@
 import BSON
 
-@available(*, deprecated, renamed: "SymbolGraphObject")
-public typealias Documentation = SymbolGraphArchive
-@available(*, deprecated, renamed: "SymbolGraphObject")
-public typealias SymbolGraphArchive = SymbolGraphObject<Void>
-
 /// A symbol graph archive is just a ``SymbolGraph`` with ``SymbolGraphMetadata``.
 ///
 /// We know that “Object” is a terrible name, but we can’t think of anything better.

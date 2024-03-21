@@ -11,7 +11,5 @@ extension SymbolGraph.Outline.Unresolved
         case web
         /// The associated text is an unresolved UCF expression.
         case ucf
-        /// The associated text is a legacy Unidoc codelink expression.
-        case unidocV3
     }
 }

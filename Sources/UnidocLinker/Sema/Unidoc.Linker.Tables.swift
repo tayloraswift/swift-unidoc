@@ -251,9 +251,6 @@ extension Unidoc.Linker.Tables
         for (namespace, culture):(SymbolGraph.NamespaceContext<Void>, SymbolGraph.Culture) in
             self.modules
         {
-            //  Create topic records for the culture.
-            self.link(_topics: culture._topics, under: namespace, owner: namespace.culture)
-
             //  Create topic records for the decls.
             for decls:SymbolGraph.Namespace in culture.namespaces
             {
@@ -344,35 +341,6 @@ extension Unidoc.Linker.Tables
                                 .append(f)
                         }
                     }
-
-                    //  Optimization
-                    if  decl._topics.isEmpty
-                    {
-                        continue
-                    }
-
-                    self.link(_topics: decl._topics,
-                        under: namespace,
-                        scope: decl.scope,
-                        owner: owner)
-                }
-            }
-            //  Create topic records for the articles.
-            if  let range:ClosedRange<Int32> = culture.articles
-            {
-                for (a, node):(Int32, SymbolGraph.ArticleNode) in zip(range,
-                    self.current.articles.nodes[range])
-                {
-                    if  node._topics.isEmpty
-                    {
-                        continue
-                    }
-
-                    let owner:Unidoc.Scalar = self.current.id + a
-
-                    self.link(_topics: node._topics,
-                        under: namespace,
-                        owner: owner)
                 }
             }
         }
@@ -425,41 +393,6 @@ extension Unidoc.Linker.Tables
         return self.modules.map
         {
             self.link(culture: $0.culture, under: $0.namespace)
-        }
-    }
-}
-extension Unidoc.Linker.Tables
-{
-    private mutating
-    func link(_topics:[SymbolGraph._Topic],
-        under namespace:SymbolGraph.NamespaceContext<Void>,
-        scope:[String] = [],
-        owner:Unidoc.Scalar)
-    {
-        for topic:SymbolGraph._Topic in _topics
-        {
-            var record:Unidoc.TopicGroup = .init(id: self.next(.topic),
-                culture: namespace.culture,
-                scope: owner)
-
-            (record.overview, record.members) = self.context.resolving(
-                namespace: namespace.module,
-                module: namespace.context,
-                scope: scope)
-            {
-                $0.link(_topic: topic)
-            }
-
-            self.groups.topics.append(record)
-
-            for case .scalar(let member) in record.members
-            {
-                //  This may replace a synthesized topic.
-                if  let local:Int32 = member - self.current.id
-                {
-                    self.group[local] = record.id
-                }
-            }
         }
     }
 }

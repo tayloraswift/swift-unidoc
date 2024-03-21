@@ -20,10 +20,6 @@ extension SymbolGraph
         public
         var article:Article?
 
-        /// Deprecated. This used to contain topics associated with the ``article`` only.
-        public
-        var _topics:[_Topic]
-
         @inlinable public
         init(module:Module)
         {
@@ -32,8 +28,6 @@ extension SymbolGraph
             self.namespaces = []
             self.articles = nil
             self.article = nil
-
-            self._topics = []
         }
     }
 }
@@ -72,8 +66,6 @@ extension SymbolGraph.Culture
         case articles_lower = "L"
         case articles_upper = "U"
         case article = "A"
-
-        case _topics = "T"
     }
 }
 extension SymbolGraph.Culture:BSONDocumentEncodable
@@ -87,8 +79,6 @@ extension SymbolGraph.Culture:BSONDocumentEncodable
         bson[.articles_lower] = self.articles?.lowerBound
         bson[.articles_upper] = self.articles?.upperBound
         bson[.article] = self.article
-
-        bson[._topics] = self._topics.isEmpty ? nil : self._topics
     }
 }
 extension SymbolGraph.Culture:BSONDocumentDecodable
@@ -107,6 +97,5 @@ extension SymbolGraph.Culture:BSONDocumentDecodable
         //  TODO: validate well-formedness of scalar ranges.
         self.namespaces = try bson[.namespaces]?.decode() ?? []
         self.article = try bson[.article]?.decode()
-        self._topics = try bson[._topics]?.decode() ?? []
     }
 }

@@ -23,16 +23,6 @@ extension Codelink
 
         case .web:
             return nil
-
-        case .unidocV3:
-            guard
-            let unidocV3:CodelinkV3 = .init(unresolved.link)
-            else
-            {
-                return nil
-            }
-
-            self.init(v3: unidocV3)
         }
     }
 
