@@ -11,14 +11,14 @@ extension Swiftinit
         let tagless:Unidoc.VersionsQuery.Tagless?
         private
         let tagged:[Unidoc.VersionsQuery.Tag]
-        let view:Swiftinit.ViewMode
+        let view:Permissions
         let more:Bool
 
         init(
             package:Symbol.Package,
             tagless:Unidoc.VersionsQuery.Tagless? = nil,
             tagged:[Unidoc.VersionsQuery.Tag],
-            view:Swiftinit.ViewMode,
+            view:Permissions,
             more:Bool)
         {
             self.package = package

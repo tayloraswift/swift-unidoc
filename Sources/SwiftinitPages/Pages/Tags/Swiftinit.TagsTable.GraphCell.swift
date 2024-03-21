@@ -10,9 +10,11 @@ extension Swiftinit.TagsTable
         let package:Symbol.Package
         private
         let graph:Unidoc.VersionsQuery.Graph
-        let view:Swiftinit.ViewMode
+        let view:Swiftinit.Permissions
 
-        init(package:Symbol.Package, graph:Unidoc.VersionsQuery.Graph, view:Swiftinit.ViewMode)
+        init(package:Symbol.Package,
+            graph:Unidoc.VersionsQuery.Graph,
+            view:Swiftinit.Permissions)
         {
             self.package = package
             self.graph = graph
@@ -83,7 +85,7 @@ extension Swiftinit.TagsTable.GraphCell:HTML.OutputStreamable
 
         } = "(\(size >> 10) kb)"
 
-        guard self.view >= .admin
+        guard case .administratrix = self.view.global
         else
         {
             return

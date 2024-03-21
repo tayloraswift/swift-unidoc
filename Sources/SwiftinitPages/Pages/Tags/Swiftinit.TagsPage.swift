@@ -42,7 +42,7 @@ extension Swiftinit
 extension Swiftinit.TagsPage
 {
     private
-    var view:Swiftinit.ViewMode { self.table.view }
+    var view:Swiftinit.Permissions { self.table.view }
 }
 extension Swiftinit.TagsPage:Swiftinit.RenderablePage
 {
@@ -247,7 +247,7 @@ extension Swiftinit.TagsPage
             {
                 $0 += self.package.hidden ? "yes" : "no"
 
-                if  self.view >= .admin
+                if  case .administratrix = self.view.global
                 {
                     $0[.form]
                     {
@@ -290,7 +290,7 @@ extension Swiftinit.TagsPage
                     }
                 }
             }
-            if  self.view >= .owner,
+            if  self.view.editor,
                 let expires:BSON.Millisecond = self.package.repo?.expires
             {
                 let dynamicInterval:Duration.DynamicFormat = .init(
@@ -301,7 +301,7 @@ extension Swiftinit.TagsPage
             }
         }
 
-        if  self.view >= .owner
+        if  self.view.editor
         {
             section[.div, { $0.class = "more" }]
             {
@@ -332,7 +332,7 @@ extension Swiftinit.TagsPage
                         $0[.span] { $0.class = "placeholder" } = "current name"
                     }
                 }
-                else if self.view >= .owner
+                else if self.view.owner
                 {
                     $0[.dd]
                     {
@@ -354,7 +354,7 @@ extension Swiftinit.TagsPage
             }
         }
 
-        guard self.view >= .admin
+        guard case .administratrix = self.view.global
         else
         {
             return
