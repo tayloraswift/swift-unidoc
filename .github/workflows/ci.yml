@@ -48,7 +48,7 @@ jobs:
         steps:
             -   uses: SwiftyLab/setup-swift@latest
                 with:
-                    swift-version: "5.10.0"
+                    swift-version: "5.10"
 
             -   name: Checkout repository
                 uses: actions/checkout@v3
