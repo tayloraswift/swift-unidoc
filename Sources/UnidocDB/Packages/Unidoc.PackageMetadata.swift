@@ -37,6 +37,11 @@ extension Unidoc
         public
         var realmAligning:Bool
 
+        public
+        var buildProgress:BuildProgress?
+        public
+        var buildRequest:BuildRequest?
+
         /// The remote git repo this package tracks.
         ///
         /// Currently only GitHub repos are supported.
@@ -49,6 +54,8 @@ extension Unidoc
             hidden:Bool = false,
             realm:Unidoc.Realm? = nil,
             realmAligning:Bool = false,
+            buildProgress:BuildProgress? = nil,
+            buildRequest:BuildRequest? = nil,
             repo:PackageRepo? = nil)
         {
             self.id = id
@@ -56,6 +63,8 @@ extension Unidoc
             self.hidden = hidden
             self.realm = realm
             self.realmAligning = realmAligning
+            self.buildProgress = buildProgress
+            self.buildRequest = buildRequest
             self.repo = repo
         }
     }
@@ -122,7 +131,8 @@ extension Unidoc.PackageMetadata:MongoMasterCodingModel
         case hidden = "H"
         case realm = "r"
         case realmAligning = "A"
-
+        case buildProgress = "B"
+        case buildRequest = "Q"
         case repo = "G"
 
         @available(*, unavailable)
@@ -144,6 +154,8 @@ extension Unidoc.PackageMetadata:BSONDocumentEncodable
         bson[.hidden] = self.hidden ? true : nil
         bson[.realm] = self.realm
         bson[.realmAligning] = self.realmAligning ? true : nil
+        bson[.buildProgress] = self.buildProgress
+        bson[.buildRequest] = self.buildRequest
         bson[.repo] = self.repo
     }
 }
@@ -157,6 +169,8 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
             hidden: try bson[.hidden]?.decode() ?? false,
             realm: try bson[.realm]?.decode(),
             realmAligning: try bson[.realmAligning]?.decode() ?? false,
+            buildProgress: try bson[.buildProgress]?.decode(),
+            buildRequest: try bson[.buildRequest]?.decode(),
             repo: try bson[.repo]?.decode())
     }
 }

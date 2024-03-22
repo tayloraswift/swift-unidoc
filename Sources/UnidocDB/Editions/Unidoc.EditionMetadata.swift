@@ -37,12 +37,16 @@ extension Unidoc
         public
         var sha1:SHA1?
 
+        public
+        var build:BuildOutcome?
+
         @inlinable public
         init(id:Edition,
             release:Bool,
             patch:PatchVersion,
             name:String,
-            sha1:SHA1?)
+            sha1:SHA1?,
+            build:BuildOutcome? = nil)
         {
             self.id = id
 
@@ -51,6 +55,8 @@ extension Unidoc
 
             self.name = name
             self.sha1 = sha1
+
+            self.build = build
         }
     }
 }
@@ -78,6 +84,8 @@ extension Unidoc.EditionMetadata:MongoMasterCodingModel
 
         case name = "T"
         case sha1 = "S"
+
+        case failure = "F"
     }
 }
 extension Unidoc.EditionMetadata:BSONDocumentEncodable
@@ -95,6 +103,12 @@ extension Unidoc.EditionMetadata:BSONDocumentEncodable
 
         bson[.name] = self.name
         bson[.sha1] = self.sha1
+
+        switch self.build
+        {
+        case .failure(let failure): bson[.failure] = failure
+        case nil:                   break
+        }
     }
 }
 extension Unidoc.EditionMetadata:BSONDocumentDecodable
@@ -107,5 +121,10 @@ extension Unidoc.EditionMetadata:BSONDocumentDecodable
             patch: try bson[.patch].decode(),
             name: try bson[.name].decode(),
             sha1: try bson[.sha1]?.decode())
+
+        if  let failure:Unidoc.BuildOutcome.Failure = try bson[.failure]?.decode()
+        {
+            self.build = .failure(failure)
+        }
     }
 }
