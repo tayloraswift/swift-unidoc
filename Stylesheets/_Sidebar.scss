@@ -1,4 +1,3 @@
-@import 'Colors';
 @import 'Typefaces';
 
 div.nountree
@@ -11,7 +10,7 @@ div.nountree
 
     > a::first-letter
     {
-        color: $light-accent-barbie-pink;
+        color: var(--fg-accent);
     }
 
     > a.text
@@ -28,12 +27,12 @@ div.nountree
 
     > a.extension.local::first-letter
     {
-        color: $light-accent-lavender;
+        color: var(--color-secondary);
     }
 
     > a.extension.foreign::first-letter
     {
-        color: $light-accent-aqua;
+        color: var(--color-tertiary);
     }
 }
 div.nountree div.indent
@@ -48,20 +47,20 @@ div.nountree
         overflow: hidden;
         white-space: nowrap;
         text-overflow: '...';
-        color: $light-foreground-semi;
+        color: var(--fg-semi);
 
     }
     a:hover
     {
         text-decoration: none;
-        color: $light-accent-barbie-pink;
+        color: var(--fg-accent);
     }
     a.extension.local:hover
     {
-        color: $light-accent-lavender;
+        color: var(--color-secondary);
     }
     a.extension.foreign:hover
     {
-        color: $light-accent-aqua;
+        color: var(--color-tertiary);
     }
 }

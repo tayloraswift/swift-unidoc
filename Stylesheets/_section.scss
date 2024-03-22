@@ -1,4 +1,3 @@
-@import 'Colors';
 @import 'Typefaces';
 
 section
@@ -26,8 +25,8 @@ section
 
         font-family: $typeface-monospace;
         font-size: 87.5%;
-        color: $light-foreground-semi;
-        text-decoration-color: $light-accent-barbie-pink;
+        color: var(--fg-semi);
+        text-decoration-color: var(--fg-accent);
 
         span.file
         {
@@ -37,7 +36,7 @@ section
         span.file,
         span.line
         {
-            color: $light-accent-barbie-pink;
+            color: var(--fg-accent);
         }
     }
 }

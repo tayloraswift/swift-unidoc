@@ -2,7 +2,7 @@ td.placeholder,
 span.placeholder,
 span.parenthetical
 {
-    color: $light-foreground-semi;
+    color: var(--fg-semi);
     font-style: italic;
 }
 

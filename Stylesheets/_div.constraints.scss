@@ -3,7 +3,7 @@ div.constraints code,
 div.constraints code
 {
     line-height: 1.6rem;
-    color: $light-swift;
+    color: var(--fg-swift);
     font-size: inherit;
 
     display: block;
@@ -12,14 +12,14 @@ div.constraints code
 
     span.xk // keyword
     {
-        color: $light-accent-comment;
+        color: var(--fg-swift-comment);
     }
 
     span.xv, // identifier
     span.xt, // type
     span.xu  // typealias
     {
-        color: $light-accent-yellow;
+        color: var(--fg-swift-type);
         font-weight: 500;
     }
     a
@@ -27,7 +27,7 @@ div.constraints code
         //  WebKit requires separate statements for dashed underline.
         text-decoration: underline;
         text-decoration-style: dashed;
-        text-decoration-color: $light-accent-yellow;
+        text-decoration-color: var(--fg-swift-type);
     }
     a:hover
     {

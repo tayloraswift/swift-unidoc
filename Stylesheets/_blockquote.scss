@@ -1,11 +1,10 @@
-@import 'Colors';
 @import 'Mixins/InlineImage';
 
 blockquote
 {
     margin: 2rem 0;
     font-style: italic;
-    color: $light-foreground-fade;
+    color: var(--fg-heavy);
 
     em
     {

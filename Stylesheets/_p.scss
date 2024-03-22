@@ -18,7 +18,7 @@ p
 
 p.note
 {
-    color: $light-foreground-semi;
+    color: var(--fg-semi);
     font-style: italic;
 
     em

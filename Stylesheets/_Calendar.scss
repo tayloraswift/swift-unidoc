@@ -1,4 +1,3 @@
-@import 'Colors';
 @import 'Typefaces';
 
 section.introduction > nav.calendar
@@ -25,12 +24,12 @@ section.introduction > nav.calendar
 
     > a
     {
-        color: $light-foreground-semi;
+        color: var(--fg-semi);
     }
     > a:hover,
     > a:focus
     {
-        color: $light-accent-barbie-pink;
+        color: var(--fg-accent);
         text-decoration: none;
     }
 }
@@ -85,7 +84,7 @@ section.details
             {
                 p
                 {
-                    color: $light-foreground-semi;
+                    color: var(--fg-semi);
                 }
             }
 
@@ -101,26 +100,26 @@ section.details
             {
                 span.m
                 {
-                    color: $light-foreground-faint;
+                    color: var(--fg-light);
                 }
                 span.d
                 {
-                    color: $light-foreground;
+                    color: var(--fg);
                 }
             }
 
             > a:hover, a:focus
             {
-                background-color: $light-background-pink;
+                background-color: var(--bg-accent);
                 text-decoration: none;
 
                 span.m
                 {
-                    color: $light-accent-barbie-pink-semi;
+                    color: var(--fg-accent-semi);
                 }
                 span.d
                 {
-                    color: $light-accent-barbie-pink;
+                    color: var(--fg-accent);
                 }
             }
 
@@ -131,7 +130,7 @@ section.details
             {
                 span.m
                 {
-                    color: $light-foreground;
+                    color: var(--fg);
                 }
             }
 
@@ -139,7 +138,7 @@ section.details
             {
                 span.m
                 {
-                    color: $light-accent-barbie-pink;
+                    color: var(--fg-accent);
                 }
             }
         }

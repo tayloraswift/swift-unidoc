@@ -55,11 +55,11 @@ ul.cards
         {
             a
             {
-                color: $light-accent-comment;
+                color: var(--fg-swift-comment);
 
                 span.xv
                 {
-                    color: $light-accent-hot-pink;
+                    color: var(--color-hot);
                 }
             }
 
@@ -124,12 +124,12 @@ ul.cards
             font-family: $typeface-monospace;
             font-size: 100%;
             opacity: 0.25;
-            color: $light-foreground-semi;
+            color: var(--fg-semi);
         }
         > a:first-child:hover::before
         {
             opacity: 1;
-            color: $light-accent-hot-pink
+            color: var(--color-hot)
         }
     }
 }
@@ -143,7 +143,7 @@ ul.cards.dense
             {
                 span.xv
                 {
-                    color: $light-accent-barbie-pink;
+                    color: var(--fg-accent);
                 }
             }
         }

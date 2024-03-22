@@ -1,8 +1,8 @@
 @import 'Mixins/BackdropBlur';
+@import 'Variables/root';
 @import 'blockquote';
 @import 'Calendar';
 @import 'Cards';
-@import 'Colors';
 @import 'code';
 @import 'div.columns';
 @import 'div.constraints';
@@ -162,11 +162,11 @@ body main
 html
 {
     font-size: 1.0rem;
-    background-color: $light-background;
+    background-color: var(--bg);
 }
 body
 {
-    color: $light-foreground;
+    color: var(--fg);
     font-family: $typeface-serif;
 
     font-variant-numeric: oldstyle-nums;
@@ -176,7 +176,7 @@ body
 
 label.checkbox
 {
-    color: $light-foreground-fade;
+    color: var(--fg-heavy);
 
     line-height: 1em;
 
@@ -200,7 +200,7 @@ input[type="checkbox"]
     place-content: center;
 
     transform: translateY(2px);
-    border: 2px solid $light-foreground-semi;
+    border: 2px solid var(--fg-semi);
     border-radius: 0.1em;
 }
 input[type="checkbox"]::before
@@ -212,8 +212,8 @@ input[type="checkbox"]::before
 }
 input[type="checkbox"]:checked
 {
-    border-color: $light-accent-barbie-pink;
-    background-color: $light-accent-barbie-pink;
+    border-color: var(--fg-accent);
+    background-color: var(--fg-accent);
 }
 input[type="checkbox"]:checked::before
 {
@@ -223,7 +223,7 @@ input[type="checkbox"]:checked::before
 
 a
 {
-    color: $light-accent-barbie-pink;
+    color: var(--fg-accent);
     text-decoration: none;
     text-underline-offset: 0.35em;
 }

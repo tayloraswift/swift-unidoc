@@ -2,11 +2,11 @@ section.introduction
 {
     margin-top: 0;
     padding: 0 0 0.75rem;
-    border-bottom: 2px solid $light-accent-barbie-pink;
+    border-bottom: 2px solid var(--fg-accent);
 
     div.eyebrows
     {
-        color: $light-foreground-semi;
+        color: var(--fg-semi);
         font-style: italic;
 
         display: flex;
@@ -52,14 +52,14 @@ section.introduction
     {
         margin-top: 2em;
 
-        color: $light-swift;
+        color: var(--fg-swift);
         font-family: $typeface-monospace;
         font-weight: 500;
         font-size: 90.625%;
 
         a:not(:hover)
         {
-            color: $light-foreground-semi;
+            color: var(--fg-semi);
             text-decoration: underline dashed;
         }
 

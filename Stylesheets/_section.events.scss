@@ -5,7 +5,7 @@ section.events
         list-style: none;
         padding: 0;
 
-        border-top: 1px solid $light-foreground-semi;
+        border-top: 1px solid var(--fg-semi);
 
         > li
         {

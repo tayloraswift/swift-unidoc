@@ -1,4 +1,3 @@
-@import 'Colors';
 @import 'Typefaces';
 
 code
@@ -12,34 +11,34 @@ code
     span.xv,    // identifier
     span.xo     // operator
     {
-        color: $light-foreground;
+        color: var(--fg);
     }
     span.xb     // binding
     {
-        color: $light-foreground;
+        color: var(--fg);
     }
     span.xa, a.xa, // attribute
     span.xr,    // directive
     span.xk,    // keyword
     span.xm     // magic
     {
-        color: $light-accent-hot-pink;
+        color: var(--fg-swift-keyword);
     }
     span.xj,    // interpolation anchor
     span.xp     // pseudo
     {
-        color: $light-accent-barbie-pink;
+        color: var(--fg-accent);
     }
     span.xn,    // numeric literal
     span.xs     // string literal
     {
-        color: $light-accent-violet;
+        color: var(--fg-swift-literal);
     }
     span.xy, a.xy,  // actor
     span.xz, a.xz,  // class
     span.xt, a.xt   // type
     {
-        color: $light-accent-yellow;
+        color: var(--fg-swift-type);
     }
     span.extendee, a.extendee
     {
@@ -47,13 +46,13 @@ code
     }
     span.xu     // typealias
     {
-        color: $light-accent-barbie-pink;
+        color: var(--fg-accent);
         font-style: italic;
     }
     span.xc,    // regular comment
     span.xd     // documentation comment
     {
-        color: $light-accent-comment;
+        color: var(--fg-swift-comment);
         font-style: italic;
     }
 }
