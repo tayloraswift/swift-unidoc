@@ -1,8 +1,8 @@
 .build
 .build.*
 .mongod/*
-.swiftinit
 .testing
+.unidoc
 .vscode
 
 Assets/secrets/
