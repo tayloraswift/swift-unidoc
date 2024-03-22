@@ -23,11 +23,14 @@ extension HTTP.ServerResponse
             default:    return \.unauthorized
             }
 
-        case .redirect(.permanent, _):
-            return \.redirectedPermanently
-
-        case .redirect(_, _):
-            return \.redirectedTemporarily
+        case .redirect(let redirect, _):
+            switch redirect.status
+            {
+            case 303:   return \.redirectedTemporarily
+            case 307:   return \.redirectedTemporarily
+            case 308:   return \.redirectedPermanently
+            default:    return \.redirectedTemporarily
+            }
         }
     }
 }

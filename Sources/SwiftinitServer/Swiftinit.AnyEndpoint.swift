@@ -21,7 +21,7 @@ extension Swiftinit
         case interactive(any InteractiveEndpoint)
         case procedural(any ProceduralEndpoint)
         case stateless(any RenderablePage & Sendable)
-        case redirect(String, permanently:Bool = true)
+        case redirect(HTTP.Redirect)
         case `static`(Cache<Swiftinit.Asset>.Request)
     }
 }

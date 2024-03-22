@@ -1,27 +1,57 @@
-@available(*, deprecated, renamed: "HTTP.Redirect")
-public
-typealias ServerRedirect = HTTP.Redirect
-
 extension HTTP
 {
     @frozen public
-    enum Redirect:Equatable, Sendable
+    struct Redirect:Equatable, Sendable
     {
-        case permanent(String)
-        case temporary(String)
-        case see(other:String)
+        public
+        let target:Target
+        @usableFromInline
+        let code:Code
+
+        @inlinable
+        init(target:Target, code:Code)
+        {
+            self.target = target
+            self.code = code
+        }
     }
 }
 extension HTTP.Redirect
 {
     @inlinable public
-    var location:String
+    var status:UInt
     {
-        switch self
+        switch self.code
         {
-        case .permanent(let location):  location
-        case .temporary(let location):  location
-        case .see(let location):        location
+        case .seeOther:  303
+        case .temporary: 307
+        case .permanent: 308
         }
+    }
+}
+extension HTTP.Redirect
+{
+    @inlinable public static
+    func permanent(external location:String) -> Self
+    {
+        .init(target: .external(location), code: .permanent)
+    }
+
+    @inlinable public static
+    func permanent(_ location:String) -> Self
+    {
+        .init(target: .domestic(location), code: .permanent)
+    }
+
+    @inlinable public static
+    func temporary(_ location:String) -> Self
+    {
+        .init(target: .domestic(location), code: .temporary)
+    }
+
+    @inlinable public static
+    func seeOther(_ location:String) -> Self
+    {
+        .init(target: .domestic(location), code: .seeOther)
     }
 }

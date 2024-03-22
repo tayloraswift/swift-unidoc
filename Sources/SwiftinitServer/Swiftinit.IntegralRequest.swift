@@ -158,7 +158,7 @@ extension Swiftinit.IntegralRequest
                 let user:Unidoc.UserSession = metadata.cookies.session
                 else
                 {
-                    endpoint = .redirect("\(Swiftinit.Root.login)", permanently: false)
+                    endpoint = .redirect(.temporary("\(Swiftinit.Root.login)"))
                     break
                 }
 
@@ -240,7 +240,7 @@ extension Swiftinit.IntegralRequest
             guard metadata.hostSupportsPublicAPI
             else
             {
-                endpoint = .redirect("https://api.swiftinit.org/render")
+                endpoint = .redirect(.permanent(external: "https://api.swiftinit.org/render"))
                 break
             }
 
@@ -250,9 +250,9 @@ extension Swiftinit.IntegralRequest
 
         //  Deprecated route.
         case "sitemaps":
-            endpoint = .redirect("""
+            endpoint = .redirect(.permanent("""
                 \(Swiftinit.Root.docs)/\(trunk.prefix { $0 != "." })/all-symbols
-                """)
+                """))
 
         case Swiftinit.Root.stats.id:
             endpoint = .get(stats: trunk, path,

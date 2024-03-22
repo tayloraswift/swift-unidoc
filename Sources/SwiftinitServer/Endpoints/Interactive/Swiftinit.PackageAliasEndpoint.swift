@@ -27,6 +27,6 @@ extension Swiftinit.PackageAliasEndpoint:RestrictedEndpoint
             of: self.package,
             with: session)
 
-        return .redirect(.see(other: "\(Swiftinit.Tags[self.alias])"))
+        return .redirect(.seeOther("\(Swiftinit.Tags[self.alias])"))
     }
 }
