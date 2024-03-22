@@ -170,7 +170,7 @@ extension Swiftinit.IntegralRequest
                 endpoint = .interactive(Swiftinit.DashboardEndpoint.master)
 
             case Swiftinit.Root.login.id:
-                endpoint = .interactive(Swiftinit.BounceEndpoint.init())
+                endpoint = .interactive(Swiftinit.LoginEndpoint.init())
 
             case "robots.txt":
                 let parameters:Swiftinit.PipelineParameters = .init(uri.query?.parameters,
@@ -305,8 +305,7 @@ extension Swiftinit.IntegralRequest
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
 
         guard
-        let root:String = path.popFirst(),
-        let trunk:String = path.popFirst()
+        let root:String = path.popFirst()
         else
         {
             return nil
@@ -314,18 +313,32 @@ extension Swiftinit.IntegralRequest
 
         let endpoint:Swiftinit.AnyEndpoint?
 
-        switch root
+        if  let trunk:String = path.popFirst()
         {
-        case Swiftinit.Root.admin.id:
-            endpoint = try? .post(admin: trunk, path, body: body, type: type)
+            switch root
+            {
+            case Swiftinit.Root.admin.id:
+                endpoint = try? .post(admin: trunk, path, body: body, type: type)
 
-        case Swiftinit.Root.api.id:
-            endpoint = try? .post(api: trunk, body: body, type: type)
+            case Swiftinit.Root.api.id:
+                endpoint = try? .post(api: trunk, body: body, type: type)
 
-        case Swiftinit.Root.really.id:
-            endpoint = try? .post(really: trunk, body: body, type: type)
 
-        case _:
+            case Swiftinit.Root.really.id:
+                endpoint = try? .post(really: trunk, body: body, type: type)
+
+            case _:
+                return nil
+            }
+        }
+        else if Swiftinit.Root.login.id == root,
+            let query:URI.Query = try? .parse(parameters: body),
+            let path:String = query.parameters.first?.value
+        {
+            endpoint = .interactive(Swiftinit.LoginEndpoint.init(from: path))
+        }
+        else
+        {
             return nil
         }
 

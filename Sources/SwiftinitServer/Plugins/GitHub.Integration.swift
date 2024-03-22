@@ -20,12 +20,23 @@ extension GitHub
 extension GitHub.Integration
 {
     static
-    func load(secrets:FilePath) throws -> Self
+    func load(secrets:FilePath, localhost:Bool = false) throws -> Self
     {
-        .init(
-            oauth: .init(
+        let oauth:GitHub.OAuth
+        if  localhost
+        {
+            oauth = .init(
+                client: try (secrets / "localhost" / "github-oauth-client").readLine(),
+                secret: try (secrets / "localhost" / "github-oauth-secret").readLine())
+        }
+        else
+        {
+            oauth = .init(
                 client: "2378cacaed3ace362867",
-                secret: try (secrets / "github-oauth-secret").readLine()),
+                secret: try (secrets / "github-oauth-secret").readLine())
+        }
+
+        return .init(oauth: oauth,
             app: .init(383005,
                 client: "Iv1.dba609d35c70bf57",
                 secret: try (secrets / "github-app-secret").readLine()),

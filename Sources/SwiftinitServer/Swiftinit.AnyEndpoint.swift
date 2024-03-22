@@ -154,9 +154,12 @@ extension Swiftinit.AnyEndpoint
         {
         case "github":
             if  let state:String = parameters.state,
-                let code:String = parameters.code
+                let code:String = parameters.code,
+                let from:String = parameters.from
             {
-                return .interactive(Swiftinit.LoginEndpoint.init(state: state, code: code))
+                return .interactive(Swiftinit.AuthEndpoint.init(state: state,
+                    code: code,
+                    from: from))
             }
 
         case "register":

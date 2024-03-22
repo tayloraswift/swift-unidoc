@@ -10,10 +10,12 @@ extension Swiftinit
     struct RegistrationEndpoint:Sendable
     {
         let token:String
+        let from:String
 
-        init(token:String)
+        init(token:String, from:String = "\(Swiftinit.Root.account)")
         {
             self.token = token
+            self.from = from
         }
     }
 }
@@ -53,18 +55,7 @@ extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
         let secrets:Unidoc.UserSecrets = try await server.db.users.update(user: user,
             with: session)
 
-        let target:Swiftinit.Root
-
-        if  case .administratrix = user.level
-        {
-            target = .admin
-        }
-        else
-        {
-            target = .account
-        }
-
-        return .redirect(.temporary("\(target)"), // meet taylor swift
+        return .redirect(.temporary(self.from), // meet taylor swift
             cookies: [Swiftinit.Cookies.session: "\(secrets.session)"])
     }
 }
