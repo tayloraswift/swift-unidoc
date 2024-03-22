@@ -59,7 +59,7 @@ section.details
                 flex-direction: column;
                 justify-content: space-between;
 
-                background-color: rgb(233, 233, 233);
+                background-color: var(--bg-codewell);
 
                 @media only screen and (min-width: 50rem)
                 {

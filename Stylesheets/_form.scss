@@ -26,4 +26,28 @@ form
         box-shadow: none;
         transform: translateY(0.2rem);
     }
+
+    fieldset
+    {
+        border: 2px var(--fg-light) solid;
+    }
+}
+form.sort-controls
+{
+    fieldset
+    {
+        display: flex;
+        gap: 1rem;
+
+        > label
+        {
+            display: flex;
+            align-items: center;
+
+            > input
+            {
+                margin-right: 0.5em;
+            }
+        }
+    }
 }

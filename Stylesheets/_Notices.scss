@@ -53,8 +53,8 @@ section.signage::before
 section.signage.spi::before
 {
     font-size: 125%;
-    background-color: var(--color-accent);
-    box-shadow: 0 0.25rem 0 0 var(--color-accent-dark);
+    background-color: var(--bg-warn);
+    box-shadow: 0 0.25rem 0 0 var(--bg-warn-shadow);
     content: '@';
 }
 section.signage.deprecation::before
@@ -67,8 +67,8 @@ section.signage.deprecation::before
 }
 section.signage.deprecation.renamed::before
 {
-    background-color: var(--color-tertiary);
-    box-shadow: 0 0.25rem 0 0 --color-tertiary-dark;
+    background-color: var(--bg-aqua);
+    box-shadow: 0 0.25rem 0 0 var(--bg-aqua-shadow);
     content: '→';
 }
 section.signage > p

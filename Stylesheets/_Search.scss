@@ -49,7 +49,7 @@ div.searchbar
 div.searchbar,
 #search-results li:last-child
 {
-    box-shadow: 0 0.25rem 0 var(--fg-accent);
+    box-shadow: 0 0.25rem 0 var(--bg-accent-shadow);
 }
 
 #search-input::placeholder
