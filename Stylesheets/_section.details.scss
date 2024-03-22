@@ -75,10 +75,10 @@ section.details
         margin-top: 1rem;
         margin-bottom: 0;
 
-        //background-color: $light-code-well;
+        //background-color: var(--bg-codewell);
         font-family: $typeface-monospace;
         font-weight: 700;
-        color: $light-foreground-fade;
+        color: var(--fg-heavy);
     }
     pre.title + pre
     {

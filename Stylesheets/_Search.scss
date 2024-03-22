@@ -49,12 +49,12 @@ div.searchbar
 div.searchbar,
 #search-results li:last-child
 {
-    box-shadow: 0 0.25rem 0 $light-accent-barbie-pink;
+    box-shadow: 0 0.25rem 0 var(--fg-accent);
 }
 
 #search-input::placeholder
 {
-    color: $light-accent-barbie-pink;
+    color: var(--fg-accent);
     opacity: 1;
 }
 #search-input
@@ -65,7 +65,7 @@ div.searchbar,
     outline: none;
     background: none;
 
-    color: $light-accent-hot-pink;
+    color: var(--color-hot);
     font-family: $typeface-monospace;
     font-size: 100%;
 }
@@ -87,7 +87,7 @@ div.searchbar,
             display: flex;
             justify-content: space-between;
 
-            color: $light-accent-barbie-pink;
+            color: var(--fg-accent);
             -webkit-tap-highlight-color: transparent;
 
             > span:first-child
@@ -142,12 +142,12 @@ div.searchbar,
 
     li:hover
     {
-        background-color: $light-accent-barbie-pink;
+        background-color: var(--fg-accent);
     }
     li:focus,
     li.selected
     {
-        background-color: $light-accent-hot-pink;
+        background-color: var(--color-hot);
     }
     li:hover,
     li:focus,
@@ -175,14 +175,14 @@ div.searchbar,
 }
 #search-results
 {
-    background-color: $light-background-pink;
+    background-color: var(--bg-accent);
 
     //  Backdrop filter on iOS Safari is broken, it only works for elements that are visible
     //  on page load. The search results list is not visible unless it contains at least one
     //  list item, so we have to use an opaque background instead.
     @supports (backdrop-filter: blur(10px) saturate(180%))
     {
-        background-color: $light-background-pink-translucent;
+        background-color: var(--bg-accent-translucent);
         backdrop-filter: blur(10px) saturate(180%);
     }
 }

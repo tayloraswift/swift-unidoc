@@ -1,6 +1,6 @@
 @mixin inline-code
 {
-    background-color: $light-code-well;
+    background-color: var(--bg-codewell);
     font-size: 90.625%;
 
     padding: 0.2rem 0.5rem 0.25rem;

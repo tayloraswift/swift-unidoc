@@ -38,7 +38,7 @@ h6[id], h6[name]
             font-family: $typeface-monospace;
             font-size: 92.5%;
 
-            color: $light-foreground-semi;
+            color: var(--fg-semi);
             opacity: 0.5;
         }
 

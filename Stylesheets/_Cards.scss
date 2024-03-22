@@ -1,4 +1,3 @@
-@import 'Colors';
 @import 'Typefaces';
 
 p.chyron
@@ -7,7 +6,7 @@ p.chyron
     flex-direction: row;
     justify-content: space-between;
 
-    color: $light-foreground-semi;
+    color: var(--fg-semi);
 
     > span.release
     {
@@ -26,7 +25,7 @@ p.chyron
         span.stars::before
         {
             content: '★ ';
-            color: $light-accent-yellow;
+            color: var(--fg-swift-type);
         }
     }
 }
@@ -65,7 +64,7 @@ ol.packages
         > p:first-child
         {
             margin-top: 0.5rem;
-            border-top: 2px solid $light-foreground-elevated;
+            border-top: 2px solid var(--bg-elevated);
 
             a
             {
@@ -73,11 +72,11 @@ ol.packages
             }
             a.dead
             {
-                color: $light-foreground-semi;
+                color: var(--fg-semi);
             }
             span.owner
             {
-                color: $light-foreground-semi;
+                color: var(--fg-semi);
             }
             span.owner::before
             {

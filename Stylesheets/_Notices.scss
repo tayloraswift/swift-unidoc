@@ -11,7 +11,7 @@ section.signage
 section.notice
 {
     font-style: italic;
-    color: $light-accent-barbie-pink;
+    color: var(--fg-accent);
 
     code
     {
@@ -53,22 +53,22 @@ section.signage::before
 section.signage.spi::before
 {
     font-size: 125%;
-    background-color: $light-accent-barbie-pink;
-    box-shadow: 0 0.25rem 0 0 $light-accent-barbie-pink-shadow;
+    background-color: var(--color-accent);
+    box-shadow: 0 0.25rem 0 0 var(--color-accent-dark);
     content: '@';
 }
 section.signage.deprecation::before
 {
     font-size: 150%;
     font-family: $typeface-monospace;
-    background-color: $light-coral-elevated;
-    box-shadow: 0 0.25rem 0 0 $light-coral-elevated-shadow;
+    background-color: var(--bg-alert);
+    box-shadow: 0 0.25rem 0 0 var(--bg-alert-shadow);
     content: '!';
 }
 section.signage.deprecation.renamed::before
 {
-    background-color: $light-accent-aqua;
-    box-shadow: 0 0.25rem 0 0 $light-accent-aqua-shadow;
+    background-color: var(--color-tertiary);
+    box-shadow: 0 0.25rem 0 0 --color-tertiary-dark;
     content: '→';
 }
 section.signage > p
@@ -78,7 +78,7 @@ section.signage > p
 
     font-family: $typeface-monospace;
 
-    background-color: $light-foreground-elevated;
+    background-color: var(--bg-elevated);
     border-radius: 0 0.5rem 0.5rem 0;
-    box-shadow: 0 0.25rem 0 0 $light-foreground-elevated-shadow;
+    box-shadow: 0 0.25rem 0 0 var(--bg-elevated-shadow);
 }

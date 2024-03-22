@@ -3,8 +3,8 @@ form
     button
     {
         display: inline-block;
-        background: $light-accent-barbie-pink;
-        box-shadow: 0 0.2rem 0 0 $light-accent-barbie-pink-semi;
+        background: var(--fg-accent);
+        box-shadow: 0 0.2rem 0 0 var(--fg-accent-semi);
         border: none;
         border-radius: 0.25rem;
 
@@ -19,7 +19,7 @@ form
     button:hover,
     button:focus
     {
-        box-shadow: 0 0.2rem 0 0 $light-accent-barbie-pink-faint;
+        box-shadow: 0 0.2rem 0 0 var(--fg-accent-light);
     }
     button:active
     {

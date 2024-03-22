@@ -13,22 +13,22 @@ section.literature
             padding: 0.5rem 0;
             font-size: inherit;
 
-            color: $light-foreground-semi;
-            border-bottom: 2px solid $light-foreground-semi;
+            color: var(--fg-semi);
+            border-bottom: 2px solid var(--fg-semi);
         }
 
-        border-bottom: 2px solid $light-foreground-semi;
+        border-bottom: 2px solid var(--fg-semi);
     }
     aside.important,
     aside.warning
     {
         h3
         {
-            color: $light-accent-hot-pink;
-            border-color: $light-accent-hot-pink;
+            color: var(--color-hot);
+            border-color: var(--color-hot);
         }
 
-        border-color: $light-accent-hot-pink;
+        border-color: var(--color-hot);
     }
 
     aside:last-child
@@ -62,7 +62,7 @@ section.literature
             content: '$';
             display: inline-block;
             min-width: 3rem;
-            color: $light-snippet-line-number;
+            color: var(--fg-snippet-line-number);
             font-weight: normal;
         }
 

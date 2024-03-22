@@ -75,7 +75,7 @@ main.home
             margin: 0;
             padding: 0;
             font-size: 112.5%;
-            color: $light-foreground;
+            color: var(--fg);
         }
         ol
         {
@@ -94,7 +94,7 @@ main.home
 
                     > span:first-child
                     {
-                        color: $light-foreground-fade;
+                        color: var(--fg-heavy);
                     }
                     > *:first-child
                     {
@@ -111,7 +111,7 @@ main.home
                 {
                     margin: 0;
                     font-size: 87.5%;
-                    color: $light-foreground-semi;
+                    color: var(--fg-semi);
                 }
             }
         }

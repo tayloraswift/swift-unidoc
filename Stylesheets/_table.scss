@@ -6,8 +6,8 @@ table
         font-family: $typeface-sans;
         padding-bottom: 0.5rem;
 
-        color: $light-foreground-semi;
-        border-bottom: 2px solid $light-swift;
+        color: var(--fg-semi);
+        border-bottom: 2px solid var(--fg-swift);
     }
     tbody tr:first-child td
     {

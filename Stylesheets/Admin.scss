@@ -1,5 +1,4 @@
-@import '_Colors';
-@import '_Typefaces';
+@import 'Typefaces';
 
 nav.admin
 {
@@ -14,7 +13,7 @@ nav.admin
 
             a
             {
-                color: $light-accent-barbie-pink;
+                color: var(--fg-accent);
                 font-family: $typeface-sans;
                 font-weight: 700;
             }
@@ -25,7 +24,7 @@ nav.admin
             padding: 0 1em;
             font-size: 75%;
             content: '❤';
-            color: $light-accent-barbie-pink;
+            color: var(--fg-accent);
         }
     }
 }
@@ -220,11 +219,11 @@ figure.status div.pie-color > svg g
     }
     > *.not-modified
     {
-        fill: $light-accent-hot-pink;
+        fill: rgb(253, 39, 110);
     }
     > *.ok
     {
-        fill: $light-accent-barbie-pink;
+        fill: var(--fg-accent);
     }
     > *.redirected-permanently
     {

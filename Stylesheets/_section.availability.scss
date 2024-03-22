@@ -13,7 +13,7 @@ section.availability
         dt, dd
         {
             display: inline-block;
-            background: $light-accent-barbie-pink;
+            background: var(--fg-accent);
             color: white;
         }
         dt:first-child

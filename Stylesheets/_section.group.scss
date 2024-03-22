@@ -36,7 +36,7 @@ section.group
             {
                 margin-top: 0.5rem;
                 font-style: italic;
-                color: $light-foreground-semi;
+                color: var(--fg-semi);
 
                 span.count
                 {
@@ -60,7 +60,7 @@ section.group
         {
             p.view, p.hide
             {
-                color: $light-foreground-semi;
+                color: var(--fg-semi);
                 font-size: 1rem;
             }
         }
@@ -94,23 +94,23 @@ section.group
     > div.constraints + h3
     {
         margin-top: 1rem;
-        border-top: solid 1px $light-accent-yellow;
+        border-top: solid 1px var(--fg-swift-type);
     }
 
     > h2 + h3
     {
         margin-top: 1rem;
-        border-top: solid 1px $light-foreground-faint;
+        border-top: solid 1px var(--fg-light);
     }
 
     > h3,
     > details > h3
     {
         margin-top: 1rem;
-        border-top: dashed 1px $light-foreground-semi;
+        border-top: dashed 1px var(--fg-semi);
         padding-top: 0.75rem;
 
         font-weight: 600;
-        color: $light-foreground-semi;
+        color: var(--fg-semi);
     }
 }

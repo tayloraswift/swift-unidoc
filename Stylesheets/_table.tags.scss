@@ -10,7 +10,7 @@ table.tags
     td.graph
     {
         font-weight: 700;
-        color: $light-foreground-semi;
+        color: var(--fg-semi);
 
         span.kb
         {
@@ -27,13 +27,13 @@ table.tags
     td.graph > span:first-child::before
     {
         content: '✗';
-        color: $light-foreground-semi;
+        color: var(--fg-semi);
         margin-right: 0.5rem;
     }
     td.graph > .abi:first-child::before
     {
         content: '✓';
-        color: $light-accent-barbie-pink;
+        color: var(--fg-accent);
         margin-right: 0.5rem;
     }
     td.graph > .abi.uplinking:first-child::before

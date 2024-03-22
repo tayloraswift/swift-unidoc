@@ -1,0 +1,48 @@
+:root
+{
+    --color-accent-light: rgb(255, 172, 200);
+    --color-accent-semi: rgb(255, 136, 176);
+    --color-accent: rgb(255, 86, 158);
+    --color-accent-dark: rgb(209, 23, 104);
+
+    --color-hot: rgb(253, 39, 110);
+    --color-secondary: rgb(189, 108, 255);
+    --color-secondary-dark: rgb(150, 80, 255);
+    --color-tertiary: rgb(0, 193, 207);
+    --color-tertiary-dark: rgb(0, 162, 173);
+}
+:root
+{
+    --bg: rgb(240, 240, 240);
+    --bg-translucent: rgba(240, 240, 240, 0.5);
+
+    --bg-codewell: rgb(233, 233, 233);
+    --bg-elevated: rgb(223, 223, 223);
+    --bg-elevated-shadow: rgb(172, 172, 172);
+
+    --bg-alert: rgb(255, 103, 103);
+    --bg-alert-shadow: rgb(235, 75, 75);
+
+    --bg-accent: rgb(255, 224, 239);
+    --bg-accent-translucent: rgba(255, 224, 239, 0.5);
+
+    --fg: rgb(22, 22, 22);
+    --fg-heavy: rgb(50, 50, 50);
+    --fg-semi: rgb(109, 109, 109);
+    --fg-light: rgb(172, 172, 172);
+    --fg-snippet-line-number: rgb(192, 192, 192);
+
+    --fg-accent: var(--color-accent);
+    --fg-accent-semi: var(--color-accent-semi);
+    --fg-accent-light: var(--color-accent-light);
+
+    --fg-swift: rgb(134, 134, 134);
+    --fg-swift-comment: rgb(109, 109, 109);
+    --fg-swift-keyword: rgb(253, 39, 110);
+    --fg-swift-literal: rgb(141, 61, 231);
+    --fg-swift-type: rgb(255, 123, 0);
+
+    --fg-diff-insert: rgba(0, 255, 255, 0.3);
+    --fg-diff-delete: rgba(255, 72, 0, 0.3);
+    --fg-diff-update: rgba(255, 0, 212, 0.3);
+}

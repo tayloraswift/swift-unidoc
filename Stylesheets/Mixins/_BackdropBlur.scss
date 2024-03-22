@@ -1,23 +1,23 @@
 @mixin backdrop-blur
 {
-    background-color: $light-background;
+    background-color: var(--bg);
 
     @supports (backdrop-filter: blur(10px) saturate(180%)) or
         (-webkit-backdrop-filter: blur(10px) saturate(180%))
     {
-        background-color: $light-background-translucent;
+        background-color: var(--bg-translucent);
         backdrop-filter: blur(10px) saturate(180%);
         -webkit-backdrop-filter: blur(10px) saturate(180%);
     }
 }
 @mixin backdrop-blur-pink
 {
-    background-color: $light-background-pink;
+    background-color: var(--bg-accent);
 
     @supports (backdrop-filter: blur(10px) saturate(180%)) or
         (-webkit-backdrop-filter: blur(10px) saturate(180%))
     {
-        background-color: $light-background-pink-translucent;
+        background-color: var(--bg-accent-translucent);
         backdrop-filter: blur(10px) saturate(180%);
         -webkit-backdrop-filter: blur(10px) saturate(180%);
     }
