@@ -38,17 +38,17 @@ pre.snippet
         //  diffs
         ins
         {
-            background-color: var(--fg-diff-insert);
+            background-color: var(--bg-diff-insert);
             text-decoration: inherit;
         }
         del
         {
-            background-color: var(--fg-diff-delete);
+            background-color: var(--bg-diff-delete);
             text-decoration: inherit;
         }
         mark
         {
-            background-color: var(--fg-diff-update);
+            background-color: var(--bg-diff-update);
             text-decoration: inherit;
         }
     }

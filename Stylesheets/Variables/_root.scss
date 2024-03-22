@@ -36,6 +36,11 @@
     --bg-accent-translucent: rgba(255, 224, 239, 0.5);
     --bg-accent-shadow: var(--color-accent);
 
+    --bg-highlight: rgba(255, 238, 0, 0.25);
+    --bg-diff-insert: rgba(0, 255, 255, 0.3);
+    --bg-diff-delete: rgba(255, 72, 0, 0.3);
+    --bg-diff-update: rgba(255, 0, 212, 0.3);
+
     --fg: rgb(22, 22, 22);
     --fg-heavy: rgb(50, 50, 50);
     --fg-semi: rgb(109, 109, 109);
@@ -51,10 +56,6 @@
     --fg-swift-keyword: rgb(253, 39, 110);
     --fg-swift-literal: rgb(141, 61, 231);
     --fg-swift-type: rgb(255, 123, 0);
-
-    --fg-diff-insert: rgba(0, 255, 255, 0.3);
-    --fg-diff-delete: rgba(255, 72, 0, 0.3);
-    --fg-diff-update: rgba(255, 0, 212, 0.3);
 }
 
 @media (prefers-color-scheme: dark)
@@ -94,6 +95,11 @@
         --bg-aqua: rgb(0, 133, 167);
         --bg-aqua-shadow: rgb(0, 96, 121);
 
+        --bg-highlight: rgba(255, 184, 31, 0.15);
+        --bg-diff-insert: rgba(0, 183, 255, 0.2);
+        --bg-diff-delete: rgba(255, 72, 0, 0.2);
+        --bg-diff-update: rgba(255, 0, 212, 0.2);
+
         --fg: rgb(211, 211, 211);
         --fg-heavy: rgb(192, 192, 192);
         --fg-semi: rgb(129, 129, 129);
@@ -105,10 +111,6 @@
         --fg-swift-keyword: rgb(255, 53, 97);
         --fg-swift-literal: rgb(195, 143, 255);
         --fg-swift-type: rgb(255, 161, 37);
-
-        --fg-diff-insert: rgba(0, 255, 255, 0.3);
-        --fg-diff-delete: rgba(255, 72, 0, 0.3);
-        --fg-diff-update: rgba(255, 0, 212, 0.3);
     }
 }
 

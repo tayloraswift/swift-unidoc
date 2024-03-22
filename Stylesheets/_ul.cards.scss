@@ -103,7 +103,7 @@ ul.cards
     {
         > code a
         {
-            background-color: rgba(255, 238, 0, 0.25);
+            background-color: var(--bg-highlight);
         }
     }
 
