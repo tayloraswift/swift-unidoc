@@ -159,12 +159,13 @@ extension Main
 
         let authority:any ServerAuthority = self.authority.init(
             tls: try .init(configuration: configuration))
+        let localhost:Bool = self.authority is Localhost.Type
 
         let assets:FilePath = "Assets"
         let github:GitHub.Integration?
         do
         {
-            github = try .load(secrets: assets / "secrets")
+            github = try .load(secrets: assets / "secrets", localhost: localhost)
         }
         catch let error
         {
@@ -173,7 +174,7 @@ extension Main
             github = nil
         }
 
-        if  self.authority is Localhost.Type
+        if  localhost
         {
             return .init(authority: authority,
                 github: github,

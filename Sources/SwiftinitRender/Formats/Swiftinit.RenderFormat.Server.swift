@@ -7,15 +7,15 @@ extension Swiftinit.RenderFormat
         case localhost(port:Int)
     }
 }
-extension Swiftinit.RenderFormat.Server
+extension Swiftinit.RenderFormat.Server:CustomStringConvertible
 {
     @inlinable public
-    var loopback:String?
+    var description:String
     {
         switch self
         {
-        case .swiftinit_org:        nil
-        case .localhost(let port):  "http://127.0.0.1:\(port)"
+        case .swiftinit_org:        "https://swiftinit.org"
+        case .localhost(let port):  "https://localhost:\(port)"
         }
     }
 }

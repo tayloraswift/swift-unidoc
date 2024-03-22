@@ -217,12 +217,7 @@ extension Swiftinit.TagsPage
 
         if  case nil = self.view.global
         {
-            section[.p, { $0.class = "note" }]
-            {
-                $0 += "You are not "
-                $0[.a] { $0.href = "\(Swiftinit.Root.login)" } = "logged in"
-                $0 += "!"
-            }
+            section[.p] { $0.class = "note" } = "You are not logged in!"
         }
         else
         {
@@ -333,6 +328,29 @@ extension Swiftinit.TagsPage
                     update: "refresh",
                     value: "true",
                     label: "Refresh tags")
+            }
+        }
+        else if case nil = self.view.global
+        {
+            section[.div, { $0.class = "more" }]
+            {
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Swiftinit.Root.login)"
+                    $0.method = "post"
+                }
+                    content:
+                {
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "from"
+                        $0.value = "\(self.location)"
+                    }
+
+                    $0[.button] { $0.type = "submit" } = "Log in"
+                }
             }
         }
 

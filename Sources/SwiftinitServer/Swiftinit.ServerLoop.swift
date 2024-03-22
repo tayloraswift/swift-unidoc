@@ -320,8 +320,9 @@ extension Swiftinit.ServerLoop
 
         //  Don’t count login requests.
         if  endpoint is Swiftinit.DashboardEndpoint ||
-            endpoint is Swiftinit.BounceEndpoint ||
-            endpoint is Swiftinit.LoginEndpoint
+            endpoint is Swiftinit.LoginEndpoint ||
+            endpoint is Swiftinit.AuthEndpoint ||
+            endpoint is Swiftinit.UserConfigEndpoint
         {
             return response
         }
