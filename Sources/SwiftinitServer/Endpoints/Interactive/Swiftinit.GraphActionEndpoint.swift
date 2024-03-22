@@ -26,6 +26,6 @@ extension Swiftinit.GraphActionEndpoint:RestrictedEndpoint
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
         try await session.update(database: server.db.unidoc.id, with: self.queue)
-        return .redirect(.see(other: self.uri ?? "/admin"))
+        return .redirect(.seeOther(self.uri ?? "/admin"))
     }
 }

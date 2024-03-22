@@ -278,11 +278,8 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
         case .stateless(let stateless):
             return .ok(stateless.resource(format: self.format))
 
-        case .redirect(let target, permanently: false):
-            return .redirect(.temporary(target))
-
-        case .redirect(let target, permanently: true):
-            return .redirect(.permanent(target))
+        case .redirect(let redirect):
+            return .redirect(redirect)
 
         case .static(let request):
             guard case .development(let cache, _) = self.options.mode

@@ -19,7 +19,7 @@ extension Swiftinit.PackageAlignEndpoint.Status:HTTP.ServerEndpoint
         switch self
         {
         case .align(let package, to: _):
-            .redirect(.see(other: "\(Swiftinit.Tags[package.symbol])"))
+            .redirect(.seeOther("\(Swiftinit.Tags[package.symbol])"))
 
         case .noSuchPackage:
             .notFound("No such package")

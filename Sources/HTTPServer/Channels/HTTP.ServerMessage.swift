@@ -57,14 +57,18 @@ extension HTTP.ServerMessage
     private
     init(redirect:HTTP.Redirect, cookies:[HTTP.Cookie])
     {
-        switch redirect
-        {
-        case .see:          self.init(303)
-        case .temporary:    self.init(307)
-        case .permanent:    self.init(308)
-        }
+        self.init(redirect.status)
 
-        self.headers.add(name: "location", value: Authority.url(redirect.location))
+        switch redirect.target
+        {
+        case .domestic(let location):
+            self.headers.add(name: "location", value: Authority.url(location))
+
+        case .external(let location):
+            self.headers.add(name: "location", value: location)
+            //  We should not set cookies on external redirects.
+            return
+        }
 
         for cookie:HTTP.Cookie in cookies
         {

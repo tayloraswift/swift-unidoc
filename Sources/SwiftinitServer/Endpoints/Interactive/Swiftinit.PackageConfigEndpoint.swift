@@ -64,6 +64,6 @@ extension Swiftinit.PackageConfigEndpoint:RestrictedEndpoint
             try await server.db.unidoc.rebuildPackageList(with: session)
         }
 
-        return .redirect(.see(other: "\(Swiftinit.Tags[updated])"))
+        return .redirect(.seeOther("\(Swiftinit.Tags[updated])"))
     }
 }

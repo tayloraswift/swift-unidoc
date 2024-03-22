@@ -26,6 +26,6 @@ extension Swiftinit.TextUpdateEndpoint:BlockingEndpoint
             $0.upsert(self.text)
         }
 
-        return .redirect(.see(other: "/robots.txt"))
+        return .redirect(.seeOther("/robots.txt"))
     }
 }
