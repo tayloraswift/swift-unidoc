@@ -131,14 +131,11 @@ extension Swiftinit.TagsPage
 
         section[.table] { $0.class = "tags" } = self.table
 
-        section[.div, { $0.class = "more" }]
+        section[.a]
         {
-            $0[.a]
-            {
-                $0.class = "button"
-                $0.href = "\(Swiftinit.Tags[self.package.symbol])"
-            } = "Back to repo details"
-        }
+            $0.class = "area"
+            $0.href = "\(Swiftinit.Tags[self.package.symbol])"
+        } = "Back to repo details"
     }
 
     private
@@ -203,14 +200,11 @@ extension Swiftinit.TagsPage
 
         if  self.table.more
         {
-            section[.div, { $0.class = "more" }]
+            section[.a]
             {
-                $0[.a]
-                {
-                    $0.class = "button"
-                    $0.href = "\(Swiftinit.Tags[self.package.symbol, page: 0])"
-                } = "Browse more tags"
-            }
+                $0.class = "area"
+                $0.href = "\(Swiftinit.Tags[self.package.symbol, page: 0])"
+            } = "Browse more tags"
         }
 
         section[.h2] = Heading.settings
@@ -271,7 +265,8 @@ extension Swiftinit.TagsPage
                     } = ConfigButton.init(package: self.package.id,
                         update: "hidden",
                         value: self.package.hidden ? "false" : "true",
-                        label: self.package.hidden ? "Unhide Package" : "Hide Package")
+                        label: self.package.hidden ? "unhide package" : "hide package",
+                        area: false)
                 }
             }
 
@@ -317,39 +312,67 @@ extension Swiftinit.TagsPage
 
         if  self.view.editor
         {
-            section[.div, { $0.class = "more" }]
+            section[.form]
             {
-                $0[.form]
-                {
-                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
-                    $0.method = "post"
-                } = ConfigButton.init(package: self.package.id,
-                    update: "refresh",
-                    value: "true",
-                    label: "Refresh tags")
-            }
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
+                $0.method = "post"
+            } = ConfigButton.init(package: self.package.id,
+                update: "refresh",
+                value: "true",
+                label: "Refresh tags")
         }
         else if case nil = self.view.global
         {
-            section[.div, { $0.class = "more" }]
+            section[.form]
             {
-                $0[.form]
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Swiftinit.Root.login)"
+                $0.method = "post"
+            }
+                content:
+            {
+                $0[.input]
                 {
-                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Swiftinit.Root.login)"
-                    $0.method = "post"
+                    $0.type = "hidden"
+                    $0.name = "from"
+                    $0.value = "\(self.location)"
                 }
-                    content:
-                {
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
-                        $0.name = "from"
-                        $0.value = "\(self.location)"
-                    }
 
-                    $0[.button] { $0.type = "submit" } = "Log in"
+                $0[.button] { $0.class = "area" ; $0.type = "submit" } = "Log in"
+            }
+        }
+
+        if  case .administratrix? = self.view.global
+        {
+            section[.div, { $0.class = "build-pipeline" }]
+            {
+                if  case _? = self.package.buildProgress
+                {
+                    $0[.div] = "Request build"
+                    $0[.div] = "Queued"
+                    $0[.div] { $0.class = "phase" } = "Started"
+                }
+                else if case _? = self.package.buildRequest
+                {
+                    $0[.div] = "Request build"
+                    $0[.div] { $0.class = "phase" } = "Queued"
+                    $0[.div]
+                }
+                else
+                {
+                    $0[.form]
+                    {
+                        $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                        $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
+                        $0.method = "post"
+                    } = ConfigButton.init(package: self.package.id,
+                        update: "rebuild",
+                        value: "true",
+                        label: "Request build")
+
+                    $0[.div]
+                    $0[.div]
                 }
             }
         }
@@ -376,12 +399,13 @@ extension Swiftinit.TagsPage
                         $0[.form]
                         {
                             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                            $0.action = "\(Swiftinit.API[.packageConfig])"
+                            $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
                             $0.method = "post"
                         } = ConfigButton.init(package: self.package.id,
                             update: "symbol",
                             value: "\(symbol)",
-                            label: "Rename package")
+                            label: "rename package",
+                            area: false)
                     }
                 }
                 else
