@@ -41,7 +41,7 @@ extension Unidoc.DB.Packages
     }
         where:
     {
-        $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = false }
+        $0[Unidoc.PackageMetadata[.buildRequest]] { $0[.exists] = true }
     }
 
     public static
@@ -280,13 +280,20 @@ extension Unidoc.DB.Packages
             command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(Self.name,
                 returning: .new)
             {
+                $0[.hint] = Self.indexBuildQueue.id
                 $0[.query]
                 {
                     $0[Unidoc.PackageMetadata[.id]] = edition.package
+                    $0[Unidoc.PackageMetadata[.buildRequest]] { $0[.exists] = true }
+
                     $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = false }
                 }
                 $0[.update]
                 {
+                    $0[.unset]
+                    {
+                        $0[Unidoc.PackageMetadata[.buildRequest]] = ()
+                    }
                     $0[.set]
                     {
                         $0[Unidoc.PackageMetadata[.buildProgress]] = Unidoc.BuildProgress.init(
@@ -317,7 +324,6 @@ extension Unidoc.DB.Packages
                     $0[.unset]
                     {
                         $0[Unidoc.PackageMetadata[.buildProgress]] = ()
-                        $0[Unidoc.PackageMetadata[.buildRequest]] = ()
                     }
                 }
             },
@@ -346,7 +352,6 @@ extension Unidoc.DB.Packages
                     $0[.unset]
                     {
                         $0[Unidoc.PackageMetadata[.buildProgress]] = ()
-                        $0[Unidoc.PackageMetadata[.buildRequest]] = ()
                     }
                 }
             },
