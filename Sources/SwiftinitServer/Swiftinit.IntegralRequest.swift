@@ -321,8 +321,10 @@ extension Swiftinit.IntegralRequest
                 endpoint = try? .post(admin: trunk, path, body: body, type: type)
 
             case Swiftinit.Root.api.id:
-                endpoint = try? .post(api: trunk, body: body, type: type)
-
+                endpoint = try? .post(api: trunk,
+                    body: body,
+                    type: type,
+                    user: metadata.cookies.session?.account)
 
             case Swiftinit.Root.really.id:
                 endpoint = try? .post(really: trunk, body: body, type: type)

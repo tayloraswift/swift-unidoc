@@ -7,21 +7,56 @@ extension Swiftinit
 {
     struct PackageConfigEndpoint:Sendable
     {
+        let account:Unidoc.Account
         let package:Unidoc.Package
         let update:Update
 
-        init(package:Unidoc.Package, update:Update)
+        private
+        var rightsRequired:Unidoc.PackageRights
+
+        init(account:Unidoc.Account, package:Unidoc.Package, update:Update)
         {
+            self.account = account
             self.package = package
             self.update = update
+
+            self.rightsRequired = .editor
         }
     }
 }
-extension Swiftinit.PackageConfigEndpoint:RestrictedEndpoint
+extension Swiftinit.PackageConfigEndpoint:Swiftinit.RestrictedEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    /// Everyone can use this endpoint, as long as they are authenticated. The user’s
+    /// relationship to the package will be checked later.
+    mutating
+    func admit(level:Unidoc.User.Level) -> Bool
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
+        if  case .administratrix = level
+        {
+            self.rightsRequired = .reader
+        }
+
+        return true
+    }
+
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+    {
+        guard
+        let rights:Unidoc.PackageRights = try await server.db.unidoc.rights(
+            account: self.account,
+            package: self.package,
+            with: session)
+        else
+        {
+            return .notFound("No such package")
+        }
+
+        if  rights < self.rightsRequired
+        {
+            return .forbidden("You are not authorized to edit this package!")
+        }
+
         let updated:Symbol.Package?
         let rebuildPackageList:Bool
         switch self.update
@@ -56,6 +91,7 @@ extension Swiftinit.PackageConfigEndpoint:RestrictedEndpoint
         let updated:Symbol.Package
         else
         {
+            //  Not completely unreachable, due to race conditions.
             return .notFound("No such package")
         }
 

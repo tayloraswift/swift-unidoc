@@ -16,22 +16,15 @@ extension Swiftinit
     }
 }
 
-extension Swiftinit.UserConfigEndpoint:RestrictedEndpoint
+extension Swiftinit.UserConfigEndpoint:Swiftinit.RestrictedEndpoint
 {
-    func admit(user:Unidoc.Account, level:Unidoc.User.Level) -> Bool
-    {
-        switch level
-        {
-        case .administratrix:   true
-        case .machine:          true
-        case .human:            self.account == user
-        }
-    }
+    /// Everyone can use this endpoint, as long as they are authenticated. This endpoint can
+    /// only modify the currently authenticated user.
+    func admit(level:Unidoc.User.Level) -> Bool { true }
 
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
-
         switch self.update
         {
         case .generateKey:

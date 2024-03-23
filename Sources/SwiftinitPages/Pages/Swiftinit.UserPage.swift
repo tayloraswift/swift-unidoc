@@ -113,13 +113,6 @@ extension Swiftinit.UserPage:Swiftinit.ApplicationPage
                     $0[.input]
                     {
                         $0.type = "hidden"
-                        $0.name = "account"
-                        $0.value = "\(self.user.id)"
-                    }
-
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
                         $0.name = "generate"
                         $0.value = "api-key"
                     }

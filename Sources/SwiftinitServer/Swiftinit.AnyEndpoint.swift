@@ -351,7 +351,7 @@ extension Swiftinit.AnyEndpoint
             case  .multipart(.form_data(boundary: let boundary?)) = type
         {
             let form:MultipartForm = try .init(splitting: body, on: boundary)
-            return .interactive(Swiftinit.AdminEndpoint.perform(action, form))
+            return .interactive(Swiftinit.SiteConfigEndpoint.perform(action, form))
         }
 
         switch action
@@ -360,7 +360,7 @@ extension Swiftinit.AnyEndpoint
             if  let target:String = rest.first,
                 let target:Swiftinit.AdminPage.Recode.Target = .init(rawValue: target)
             {
-                return .interactive(Swiftinit.AdminEndpoint.recode(target))
+                return .interactive(Swiftinit.SiteConfigEndpoint.recode(target))
             }
 
         case Swiftinit.CookiePage.name:
@@ -376,7 +376,8 @@ extension Swiftinit.AnyEndpoint
     static
     func post(api trunk:String,
         body:consuming [UInt8],
-        type:ContentType) throws -> Self?
+        type:ContentType,
+        user account:Unidoc.Account?) throws -> Self?
     {
         guard
         let trunk:Swiftinit.API.Post = .init(trunk)
@@ -417,11 +418,13 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .packageConfig:
-                if  let package:String = form["package"],
+                if  let account:Unidoc.Account,
+                    let package:String = form["package"],
                     let package:Unidoc.Package = .init(package),
                     let update:Swiftinit.PackageConfigEndpoint.Update = .init(from: form)
                 {
                     return .interactive(Swiftinit.PackageConfigEndpoint.init(
+                        account: account,
                         package: package,
                         update: update))
                 }
@@ -449,7 +452,7 @@ extension Swiftinit.AnyEndpoint
                 if  let days:String = form["days"],
                     let days:Int = .init(days)
                 {
-                    return .interactive(Swiftinit.AdminEndpoint.telescope(days: days))
+                    return .interactive(Swiftinit.SiteConfigEndpoint.telescope(days: days))
                 }
 
             case .uplinkAll:
@@ -492,10 +495,7 @@ extension Swiftinit.AnyEndpoint
                 }
 
             case .userConfig:
-                //  It is legal to forge the account ID, as this will be checked properly in
-                //  ``Swiftinit.UserConfigEndpoint.admit(user:level:)``.
-                if  let account:String = form["account"],
-                    let account:Unidoc.Account = .init(account),
+                if  let account:Unidoc.Account,
                     let update:Swiftinit.UserConfigEndpoint.Update = .init(from: form)
                 {
                     return .interactive(Swiftinit.UserConfigEndpoint.init(

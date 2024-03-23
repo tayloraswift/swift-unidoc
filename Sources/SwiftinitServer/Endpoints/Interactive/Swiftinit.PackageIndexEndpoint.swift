@@ -21,9 +21,10 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackageIndexEndpoint:RestrictedEndpoint
+extension Swiftinit.PackageIndexEndpoint:Swiftinit.AdministrativeEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         let github:GitHub.Client<GitHub.API<String>>
         if  let api:GitHub.API<String> = server.github?.api
@@ -58,7 +59,6 @@ extension Swiftinit.PackageIndexEndpoint:RestrictedEndpoint
 
         // let symbol:Symbol.Package = .init("\(repo.owner.login).\(repo.name)")
         let symbol:Symbol.Package = .init(repo.name)
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         let (package, new):(Unidoc.PackageMetadata, Bool) = try await server.db.unidoc.index(
             package: symbol,
