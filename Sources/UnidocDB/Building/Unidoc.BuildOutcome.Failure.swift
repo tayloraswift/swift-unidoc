@@ -9,6 +9,11 @@ extension Unidoc.BuildOutcome
     {
         public
         var timeoutAfter:Milliseconds?
+
+        init(timeoutAfter:Milliseconds?)
+        {
+            self.timeoutAfter = timeoutAfter
+        }
     }
 }
 extension Unidoc.BuildOutcome.Failure:MongoMasterCodingModel

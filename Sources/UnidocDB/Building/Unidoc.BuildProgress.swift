@@ -10,12 +10,15 @@ extension Unidoc
         public
         var started:BSON.Millisecond
         public
-        var builder:Unidoc.Account
+        var edition:Edition
+        public
+        var builder:Account
 
         @inlinable public
-        init(started:BSON.Millisecond, builder:Unidoc.Account)
+        init(started:BSON.Millisecond, edition:Edition, builder:Account)
         {
             self.started = started
+            self.edition = edition
             self.builder = builder
         }
     }
@@ -26,7 +29,8 @@ extension Unidoc.BuildProgress:MongoMasterCodingModel
     enum CodingKey:String, Sendable
     {
         case started = "S"
-        case builder = "B"
+        case edition = "e"
+        case builder = "b"
     }
 }
 extension Unidoc.BuildProgress:BSONDocumentEncodable
@@ -35,6 +39,7 @@ extension Unidoc.BuildProgress:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.started] = self.started
+        bson[.edition] = self.edition
         bson[.builder] = self.builder
     }
 }
@@ -45,6 +50,7 @@ extension Unidoc.BuildProgress:BSONDocumentDecodable
     {
         self.init(
             started: try bson[.started].decode(),
+            edition: try bson[.edition].decode(),
             builder: try bson[.builder].decode())
     }
 }
