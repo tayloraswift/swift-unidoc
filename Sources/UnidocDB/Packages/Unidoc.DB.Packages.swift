@@ -272,6 +272,91 @@ extension Unidoc.DB.Packages
 }
 extension Unidoc.DB.Packages
 {
+    func assignBuild(of edition:Unidoc.Edition,
+        to builder:Unidoc.Account,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(Self.name,
+                returning: .new)
+            {
+                $0[.query]
+                {
+                    $0[Unidoc.PackageMetadata[.id]] = edition.package
+                    $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = false }
+                }
+                $0[.update]
+                {
+                    $0[.set]
+                    {
+                        $0[Unidoc.PackageMetadata[.buildProgress]] = Unidoc.BuildProgress.init(
+                            started: .now(),
+                            edition: edition,
+                            builder: builder)
+                    }
+                }
+            },
+            against: self.database)
+
+        return package
+    }
+
+    func finishBuild(of package:Unidoc.Package,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(Self.name,
+                returning: .old)
+            {
+                $0[.query]
+                {
+                    $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = true }
+                }
+                $0[.update]
+                {
+                    $0[.unset]
+                    {
+                        $0[Unidoc.PackageMetadata[.buildProgress]] = ()
+                        $0[Unidoc.PackageMetadata[.buildRequest]] = ()
+                    }
+                }
+            },
+            against: self.database)
+
+        return package
+    }
+
+    func lintBuild(startedBefore:BSON.Millisecond,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(Self.name,
+                returning: .old)
+            {
+                $0[.query]
+                {
+                    $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = true }
+                    $0[Unidoc.PackageMetadata[.buildProgress] / Unidoc.BuildProgress[.started]]
+                    {
+                        $0[.lt] = startedBefore
+                    }
+                }
+                $0[.update]
+                {
+                    $0[.unset]
+                    {
+                        $0[Unidoc.PackageMetadata[.buildProgress]] = ()
+                        $0[Unidoc.PackageMetadata[.buildRequest]] = ()
+                    }
+                }
+            },
+            against: self.database)
+
+        return package
+    }
+}
+extension Unidoc.DB.Packages
+{
     func scan(
         with session:Mongo.Session) async throws -> Unidoc.TextResource<Unidoc.DB.Metadata.Key>
     {
