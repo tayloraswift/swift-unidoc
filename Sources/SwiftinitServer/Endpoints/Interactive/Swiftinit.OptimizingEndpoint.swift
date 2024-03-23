@@ -28,7 +28,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.OptimizingEndpoint:PublicEndpoint
+extension Swiftinit.OptimizingEndpoint:Swiftinit.PublicEndpoint
 {
     consuming
     func load(from server:borrowing Swiftinit.Server,
