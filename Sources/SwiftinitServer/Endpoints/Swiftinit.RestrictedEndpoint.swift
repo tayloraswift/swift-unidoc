@@ -56,6 +56,8 @@ extension Swiftinit.RestrictedEndpoint
         else
         {
             let session:Mongo.Session = try await .init(from: server.db.sessions)
+            //  Yes, we need to call this, even though we ignore the result.
+            let _:Bool = self.admit(level: .administratrix)
             return try await self.load(from: server, with: session)
         }
     }

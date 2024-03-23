@@ -599,8 +599,27 @@ extension Swiftinit.AnyEndpoint
                 """
                 button = "Refresh tags"
 
-            default:
-                return nil
+            case .hidden(true):
+                heading = "Hide package?"
+                prompt = """
+                The package will no longer appear in search, or in the activity feed. \
+                This will not affect the package’s documentation.
+                """
+                button = "Hide package"
+
+            case .hidden(false):
+                heading = "Unhide package?"
+                prompt = """
+                The package will appear in search, and in the activity feed.
+                """
+                button = "Unhide package"
+
+            case .symbol:
+                heading = "Rename package?"
+                prompt = """
+                This will not affect documentation that has already been generated.
+                """
+                button = "Rename package"
             }
 
         case .userConfig:

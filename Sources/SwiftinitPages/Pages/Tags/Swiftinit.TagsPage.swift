@@ -260,7 +260,7 @@ extension Swiftinit.TagsPage
                     $0[.form]
                     {
                         $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Swiftinit.API[.packageConfig])"
+                        $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
                         $0.method = "post"
                     } = ConfigButton.init(package: self.package.id,
                         update: "hidden",
