@@ -17,7 +17,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ExplanatoryEndpoint:PublicEndpoint
+extension Swiftinit.ExplanatoryEndpoint:Swiftinit.PublicEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
         as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
