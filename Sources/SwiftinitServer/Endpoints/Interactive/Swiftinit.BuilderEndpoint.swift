@@ -15,10 +15,10 @@ extension Swiftinit
     }
 }
 
-extension Swiftinit.BuilderEndpoint:RestrictedEndpoint
+extension Swiftinit.BuilderEndpoint:Swiftinit.RestrictedEndpoint
 {
     /// The builder endpoint is restricted to administratrices and machine users.
-    func admit(user:Unidoc.Account, level:Unidoc.User.Level) -> Bool
+    func admit(level:Unidoc.User.Level) -> Bool
     {
         switch level
         {
@@ -28,9 +28,9 @@ extension Swiftinit.BuilderEndpoint:RestrictedEndpoint
         }
     }
 
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
         let json:JSON
 
         switch self

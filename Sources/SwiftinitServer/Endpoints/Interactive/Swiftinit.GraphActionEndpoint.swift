@@ -20,11 +20,11 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.GraphActionEndpoint:RestrictedEndpoint
+extension Swiftinit.GraphActionEndpoint:Swiftinit.AdministrativeEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
         try await session.update(database: server.db.unidoc.id, with: self.queue)
         return .redirect(.seeOther(self.uri ?? "/admin"))
     }

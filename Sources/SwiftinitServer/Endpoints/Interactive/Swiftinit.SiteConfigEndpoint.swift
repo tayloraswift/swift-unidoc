@@ -9,18 +9,18 @@ import UnidocDB
 
 extension Swiftinit
 {
-    enum AdminEndpoint
+    enum SiteConfigEndpoint
     {
         case perform(Swiftinit.AdminPage.Action, MultipartForm?)
         case recode(Swiftinit.AdminPage.Recode.Target)
         case telescope(days:Int)
     }
 }
-extension Swiftinit.AdminEndpoint:RestrictedEndpoint
+extension Swiftinit.SiteConfigEndpoint:Swiftinit.AdministrativeEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
         let page:Swiftinit.AdminPage.Action.Complete
 
         switch self

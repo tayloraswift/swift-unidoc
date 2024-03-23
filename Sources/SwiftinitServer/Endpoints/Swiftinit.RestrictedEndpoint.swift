@@ -4,21 +4,23 @@ import SwiftinitPages
 import UnidocDB
 import UnidocRecords
 
-/// Endpoints that require privileged access.
-protocol RestrictedEndpoint:InteractiveEndpoint
+extension Swiftinit
 {
-    func admit(user:Unidoc.Account, level:Unidoc.User.Level) -> Bool
-
-    consuming
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
-}
-extension RestrictedEndpoint
-{
-    func admit(user:Unidoc.Account, level:Unidoc.User.Level) -> Bool
+    /// An endpoint that requires authentication, and possibly authorization.
+    protocol RestrictedEndpoint:InteractiveEndpoint
     {
-        level == .administratrix
-    }
+        mutating
+        func admit(level:Unidoc.User.Level) -> Bool
 
+        /// Obtains the response for this endpoint. The provided session is sequentially
+        /// consistent with any authentication that took place before calling this witness.
+        consuming
+        func load(from server:borrowing Swiftinit.Server,
+            with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+    }
+}
+extension Swiftinit.RestrictedEndpoint
+{
     consuming
     func load(from server:borrowing Swiftinit.Server,
         with cookies:Swiftinit.Cookies,
@@ -43,13 +45,18 @@ extension RestrictedEndpoint
                 return .notFound("No such user")
             }
 
-            guard self.admit(user: user.account, level: level)
+            guard self.admit(level: level)
             else
             {
                 return .forbidden("Regrettably, you are not a mighty It Girl.")
             }
-        }
 
-        return try await self.load(from: server)
+            return try await self.load(from: server, with: session)
+        }
+        else
+        {
+            let session:Mongo.Session = try await .init(from: server.db.sessions)
+            return try await self.load(from: server, with: session)
+        }
     }
 }

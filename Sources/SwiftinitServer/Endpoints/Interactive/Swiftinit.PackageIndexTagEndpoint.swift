@@ -21,9 +21,10 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackageIndexTagEndpoint:RestrictedEndpoint
+extension Swiftinit.PackageIndexTagEndpoint:Swiftinit.AdministrativeEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         let github:GitHub.Client<GitHub.API<String>>
         if  let api:GitHub.API<String> = server.github?.api
@@ -36,8 +37,6 @@ extension Swiftinit.PackageIndexTagEndpoint:RestrictedEndpoint
         {
             return nil
         }
-
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         guard
         let package:Unidoc.PackageMetadata = try await server.db.packages.find(id: self.package,

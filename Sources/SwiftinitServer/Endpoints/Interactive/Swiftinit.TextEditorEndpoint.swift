@@ -14,9 +14,10 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.TextEditorEndpoint:RestrictedEndpoint
+extension Swiftinit.TextEditorEndpoint:Swiftinit.AdministrativeEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         let action:Swiftinit.API.Post
         switch self.id
@@ -27,8 +28,6 @@ extension Swiftinit.TextEditorEndpoint:RestrictedEndpoint
         default:
             return nil
         }
-
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
 
         let text:Unidoc.TextResource<Unidoc.DB.Metadata.Key>? =
             try await server.db.metadata.find(id: .robots_txt, with: session)

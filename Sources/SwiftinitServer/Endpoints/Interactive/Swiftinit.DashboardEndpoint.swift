@@ -12,14 +12,14 @@ extension Swiftinit
         case replicaSet
     }
 }
-extension Swiftinit.DashboardEndpoint:RestrictedEndpoint
+extension Swiftinit.DashboardEndpoint:Swiftinit.AdministrativeEndpoint
 {
-    func load(from server:borrowing Swiftinit.Server) async throws -> HTTP.ServerResponse?
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         switch self
         {
         case .cookie(scramble: let scramble):
-            let session:Mongo.Session = try await .init(from: server.db.sessions)
             let secrets:Unidoc.UserSecrets
 
             switch scramble
@@ -73,7 +73,7 @@ extension Swiftinit.DashboardEndpoint:RestrictedEndpoint
             return .ok(page.resource(format: server.format))
 
         case .replicaSet:
-            let configuration:Mongo.ReplicaSetConfiguration = try await server.db.sessions.run(
+            let configuration:Mongo.ReplicaSetConfiguration = try await session.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin)
 

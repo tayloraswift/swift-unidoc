@@ -1,7 +1,7 @@
 extension Unidoc
 {
     @frozen public
-    enum PackageRights:Comparable
+    enum PackageRights:Comparable, Sendable
     {
         case reader
         case editor
