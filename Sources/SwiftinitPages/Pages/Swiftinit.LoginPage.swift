@@ -48,39 +48,36 @@ extension Swiftinit.LoginPage:Swiftinit.ApplicationPage
             $0[.p] = "Authenticate with GitHub to manage package documentation."
         }
 
-        main[.div, { $0.class = "more" }]
+        main[.form]
         {
-            $0[.form]
+            $0.id = "login"
+            $0.method = "get"
+            $0.action = "https://github.com/login/oauth/authorize"
+        }
+            content:
+        {
+            $0[.input]
             {
-                $0.id = "login"
-                $0.method = "get"
-                $0.action = "https://github.com/login/oauth/authorize"
+                $0.type = "hidden"
+                $0.name = "client_id"
+                $0.value = self.oauth.client
             }
-                content:
+
+            $0[.input]
             {
-                $0[.input]
-                {
-                    $0.type = "hidden"
-                    $0.name = "client_id"
-                    $0.value = self.oauth.client
-                }
-
-                $0[.input]
-                {
-                    $0.type = "hidden"
-                    $0.name = "redirect_uri"
-                    $0.value = "\(format.server)/auth/github?from=\(self.path)"
-                }
-
-                //  Note, for some reason, setting the `redirect_uri` to 127.0.0.1 does not work,
-                //  even though the GitHub OAuth documentation suggests it should.
-                //  https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#loopback-redirect-urls
-
-                //  Don’t actually need this yet.
-                // $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "user:email" }
-
-                $0[.button] { $0.type = "submit" } = "Authenticate with GitHub"
+                $0.type = "hidden"
+                $0.name = "redirect_uri"
+                $0.value = "\(format.server)/auth/github?from=\(self.path)"
             }
+
+            //  Note, for some reason, setting the `redirect_uri` to 127.0.0.1 does not work,
+            //  even though the GitHub OAuth documentation suggests it should.
+            //  https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#loopback-redirect-urls
+
+            //  Don’t actually need this yet.
+            // $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "user:email" }
+
+            $0[.button] { $0.class = "area" ; $0.type = "submit" } = "Authenticate with GitHub"
         }
     }
 }

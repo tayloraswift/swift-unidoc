@@ -1,0 +1,25 @@
+@import 'Mixins/ControlArea';
+@import 'Typefaces';
+
+a
+{
+    color: var(--fg-accent);
+    text-decoration: none;
+    text-underline-offset: 0.35em;
+}
+a:hover, a:focus
+{
+    text-decoration: underline;
+}
+
+a.area
+{
+    margin: 1.5rem 0;
+
+    @include control-area;
+}
+a.area:hover,
+a.area:focus
+{
+    border-color: var(--fg-accent);
+}

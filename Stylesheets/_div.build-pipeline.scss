@@ -1,0 +1,34 @@
+div.build-pipeline
+{
+    display: flex;
+    gap: 1rem;
+
+    button.area
+    {
+        margin: 0;
+        height: 100%;
+    }
+
+    > *
+    {
+        flex: 1;
+        height: 5rem;
+    }
+
+    > div
+    {
+        @include dashed-area(var(--fg-light));
+
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        color: var(--fg-light);
+    }
+    > div.phase
+    {
+        border-color: var(--fg-semi);
+        color: var(--fg);
+    }
+}
