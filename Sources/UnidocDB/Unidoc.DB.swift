@@ -49,6 +49,8 @@ extension Unidoc.DB
     @inlinable public
     var packageAliases:PackageAliases { .init(database: self.id) }
     @inlinable public
+    var packageBuilds:PackageBuilds { .init(database: self.id) }
+    @inlinable public
     var packages:Packages { .init(database: self.id) }
     @inlinable public
     var editions:Editions { .init(database: self.id) }
@@ -82,6 +84,7 @@ extension Unidoc.DB:Mongo.DatabaseModel
         try await self.realmAliases.setup(with: session)
         try await self.realms.setup(with: session)
         try await self.packageAliases.setup(with: session)
+        try await self.packageBuilds.setup(with: session)
         try await self.packages.setup(with: session)
         try await self.editions.setup(with: session)
         try await self.snapshots.setup(with: session)
@@ -742,31 +745,6 @@ extension Unidoc.DB
         let index:Unidoc.TextResource<Unidoc.DB.Metadata.Key> = try await self.packages.scan(
             with: session)
         try await self.metadata.upsert(some: index, with: session)
-    }
-
-    public
-    func lintPackageBuild(after timeout:Duration,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
-    {
-        let now:UnixInstant = .now()
-        let horizon:BSON.Millisecond = .init(now - timeout)
-
-        guard
-        let packageBefore:Unidoc.PackageMetadata = try await self.packages.lintBuild(
-            startedBefore: horizon,
-            with: session),
-        let build:Unidoc.BuildProgress = packageBefore.buildProgress
-        else
-        {
-            return nil
-        }
-
-        try await self.editions.update(field: .failure,
-            of: build.edition,
-            to: Unidoc.BuildOutcome.Failure.init(timeoutAfter: .init(truncating: timeout)),
-            with: session)
-
-        return packageBefore
     }
 
     public

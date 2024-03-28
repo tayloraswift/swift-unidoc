@@ -27,7 +27,7 @@ extension PackageSubscription
         }
     }
 }
-extension PackageSubscription.ID:MongoMasterCodingModel
+extension PackageSubscription.ID:Mongo.MasterCodingModel
 {
     /// At first-glance, encoding the `_id` as three broken-down components is inefficient,
     /// but it means we can build sub-indexes on the individual components instead of having

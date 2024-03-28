@@ -2,17 +2,20 @@ import HTTP
 import MongoDB
 import UnidocDB
 
-protocol BlockingEndpoint:ProceduralEndpoint
+extension Swiftinit
 {
-    func perform(on server:borrowing Swiftinit.Server,
-        payload:consuming [UInt8],
-        session:Mongo.Session) async throws -> HTTP.ServerResponse
+    protocol BlockingEndpoint:ProceduralEndpoint
+    {
+        func perform(on server:borrowing Server,
+            payload:consuming [UInt8],
+            session:Mongo.Session) async throws -> HTTP.ServerResponse
+    }
 }
-extension BlockingEndpoint
+extension Swiftinit.BlockingEndpoint
 {
     func perform(on server:borrowing Swiftinit.Server,
         payload:consuming [UInt8],
-        request:CheckedContinuation<HTTP.ServerResponse, any Error>) async
+        request:Swiftinit.ServerLoop.Promise) async
     {
         do
         {
@@ -23,7 +26,7 @@ extension BlockingEndpoint
         }
         catch
         {
-            request.resume(throwing: error)
+            request.resume(rendering: error, as: server.format)
         }
     }
 }

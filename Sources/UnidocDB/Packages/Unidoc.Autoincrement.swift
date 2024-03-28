@@ -20,7 +20,7 @@ extension Unidoc.Autoincrement where Document.ID:ExpressibleByIntegerLiteral
     static
     var first:Self { .new(0) }
 }
-extension Unidoc.Autoincrement:MongoMasterCodingModel
+extension Unidoc.Autoincrement:Mongo.MasterCodingModel
 {
     enum CodingKey:String, Sendable
     {

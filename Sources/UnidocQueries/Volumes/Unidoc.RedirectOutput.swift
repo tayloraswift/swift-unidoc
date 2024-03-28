@@ -20,7 +20,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.RedirectOutput:MongoMasterCodingModel
+extension Unidoc.RedirectOutput:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, CaseIterable, Sendable

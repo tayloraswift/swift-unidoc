@@ -11,50 +11,46 @@ extension Unidoc.VersionsQuery
     struct Output:Sendable
     {
         public
-        var prereleases:[Tag]
-        public
-        var releases:[Tag]
-        public
-        var tagless:Tagless?
+        var versions:Unidoc.Versions
         public
         var aliases:[Symbol.Package]
         public
         var package:Unidoc.PackageMetadata
+        public
+        var build:Unidoc.BuildMetadata?
         public
         var realm:Unidoc.RealmMetadata?
         public
         var user:Unidoc.User?
 
         @inlinable public
-        init(prereleases:[Tag],
-            releases:[Tag],
-            tagless:Tagless?,
+        init(versions:Unidoc.Versions,
             aliases:[Symbol.Package],
             package:Unidoc.PackageMetadata,
+            build:Unidoc.BuildMetadata?,
             realm:Unidoc.RealmMetadata?,
             user:Unidoc.User?)
         {
-            self.prereleases = prereleases
-            self.releases = releases
-            self.tagless = tagless
+            self.versions = versions
             self.aliases = aliases
             self.package = package
+            self.build = build
             self.realm = realm
             self.user = user
         }
     }
 }
-extension Unidoc.VersionsQuery.Output:MongoMasterCodingModel
+extension Unidoc.VersionsQuery.Output:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case prereleases
-        case releases
-        case tagless_volume
-        case tagless_graph
+        case versions_prereleases
+        case versions_releases
+        case versions_top
         case aliases
         case package
+        case build
         case realm
         case user
     }
@@ -64,16 +60,13 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        let tagless:Unidoc.VersionsQuery.Graph? = try bson[.tagless_graph]?.decode()
-        self.init(
-            prereleases: try bson[.prereleases]?.decode() ?? [],
-            releases: try bson[.releases]?.decode() ?? [],
-            tagless: try tagless.map
-            {
-                .init(volume: try bson[.tagless_volume]?.decode(), graph: $0)
-            },
+        self.init(versions: .init(
+                prereleases: try bson[.versions_prereleases]?.decode() ?? [],
+                releases: try bson[.versions_releases]?.decode() ?? [],
+                top: try bson[.versions_top]?.decode()),
             aliases: try bson[.aliases]?.decode() ?? [],
             package: try bson[.package].decode(),
+            build: try bson[.build]?.decode(),
             realm: try bson[.realm]?.decode(),
             user: try bson[.user]?.decode())
     }

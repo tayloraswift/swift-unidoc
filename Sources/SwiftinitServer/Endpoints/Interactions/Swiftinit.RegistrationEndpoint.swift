@@ -19,7 +19,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.RegistrationEndpoint:InteractiveEndpoint
+extension Swiftinit.RegistrationEndpoint:Swiftinit.InteractiveEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
         with _:Swiftinit.Cookies,

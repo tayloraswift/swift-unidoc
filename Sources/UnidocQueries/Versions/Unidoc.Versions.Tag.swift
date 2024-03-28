@@ -1,9 +1,16 @@
 import BSON
 import MongoQL
+import UnidocAPI
 import UnidocDB
 import UnidocRecords
 
 extension Unidoc.VersionsQuery
+{
+    @available(*, deprecated)
+    public
+    typealias Tag = Unidoc.Versions.Tag
+}
+extension Unidoc.Versions
 {
     @frozen public
     struct Tag:Equatable, Sendable
@@ -27,7 +34,7 @@ extension Unidoc.VersionsQuery
         }
     }
 }
-extension Unidoc.VersionsQuery.Tag:MongoMasterCodingModel
+extension Unidoc.Versions.Tag:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
@@ -37,7 +44,7 @@ extension Unidoc.VersionsQuery.Tag:MongoMasterCodingModel
         case graph
     }
 }
-extension Unidoc.VersionsQuery.Tag:BSONDocumentDecodable
+extension Unidoc.Versions.Tag:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

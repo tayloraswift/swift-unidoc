@@ -35,26 +35,6 @@ extension Unidoc.DB.Packages
     }
 
     public static
-    let indexBuildQueue:Mongo.CollectionIndex = .init("BuildQueue", unique: false)
-    {
-        $0[Unidoc.PackageMetadata[.buildRequest]] = (+)
-    }
-        where:
-    {
-        $0[Unidoc.PackageMetadata[.buildRequest]] { $0[.exists] = true }
-    }
-
-    public static
-    let indexBuildStarted:Mongo.CollectionIndex = .init("BuildStarted", unique: false)
-    {
-        $0[Unidoc.PackageMetadata[.buildProgress] / Unidoc.BuildProgress[.started]] = (+)
-    }
-        where:
-    {
-        $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = true }
-    }
-
-    public static
     let indexExpiration:Mongo.CollectionIndex = .init("RepoExpires", unique: false)
     {
         $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = (+)
@@ -115,8 +95,6 @@ extension Unidoc.DB.Packages:Mongo.CollectionModel
     {
         [
             Self.indexAccount,
-            Self.indexBuildQueue,
-            Self.indexBuildStarted,
             Self.indexExpiration,
             Self.indexRepoCreated,
             Self.indexRepoGitHub,
@@ -268,96 +246,6 @@ extension Unidoc.DB.Packages
         }
 
         return try await session.run(command: command, against: self.database)
-    }
-}
-extension Unidoc.DB.Packages
-{
-    func assignBuild(of edition:Unidoc.Edition,
-        to builder:Unidoc.Account,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
-    {
-        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(Self.name,
-                returning: .new)
-            {
-                $0[.hint] = Self.indexBuildQueue.id
-                $0[.query]
-                {
-                    $0[Unidoc.PackageMetadata[.id]] = edition.package
-                    $0[Unidoc.PackageMetadata[.buildRequest]] { $0[.exists] = true }
-
-                    $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = false }
-                }
-                $0[.update]
-                {
-                    $0[.unset]
-                    {
-                        $0[Unidoc.PackageMetadata[.buildRequest]] = ()
-                    }
-                    $0[.set]
-                    {
-                        $0[Unidoc.PackageMetadata[.buildProgress]] = Unidoc.BuildProgress.init(
-                            started: .now(),
-                            edition: edition,
-                            builder: builder)
-                    }
-                }
-            },
-            against: self.database)
-
-        return package
-    }
-
-    func finishBuild(of package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
-    {
-        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(Self.name,
-                returning: .old)
-            {
-                $0[.query]
-                {
-                    $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = true }
-                }
-                $0[.update]
-                {
-                    $0[.unset]
-                    {
-                        $0[Unidoc.PackageMetadata[.buildProgress]] = ()
-                    }
-                }
-            },
-            against: self.database)
-
-        return package
-    }
-
-    func lintBuild(startedBefore:BSON.Millisecond,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
-    {
-        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(Self.name,
-                returning: .old)
-            {
-                $0[.query]
-                {
-                    $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = true }
-                    $0[Unidoc.PackageMetadata[.buildProgress] / Unidoc.BuildProgress[.started]]
-                    {
-                        $0[.lt] = startedBefore
-                    }
-                }
-                $0[.update]
-                {
-                    $0[.unset]
-                    {
-                        $0[Unidoc.PackageMetadata[.buildProgress]] = ()
-                    }
-                }
-            },
-            against: self.database)
-
-        return package
     }
 }
 extension Unidoc.DB.Packages

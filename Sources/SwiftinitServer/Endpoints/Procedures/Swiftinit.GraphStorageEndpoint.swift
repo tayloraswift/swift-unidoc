@@ -17,7 +17,7 @@ extension Swiftinit
         case object
     }
 }
-extension Swiftinit.GraphStorageEndpoint:BlockingEndpoint
+extension Swiftinit.GraphStorageEndpoint:Swiftinit.BlockingEndpoint
 {
     func perform(on server:borrowing Swiftinit.Server,
         payload:consuming [UInt8],

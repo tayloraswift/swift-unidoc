@@ -41,10 +41,10 @@ extension Unidoc.Client.Connection
         try await self.get(from: "/api/build?package=\(id.package)&version=\(id.version)")
     }
 
-    func latest(_ force:Unidoc.BuildLatest?,
+    func latest(_ force:Unidoc.VersionSeries?,
         of package:Symbol.Package) async throws -> Unidoc.BuildArguments
     {
-        if  let force:Unidoc.BuildLatest
+        if  let force:Unidoc.VersionSeries
         {
             try await self.get(from: "/api/build/\(package)?force=\(force)")
         }

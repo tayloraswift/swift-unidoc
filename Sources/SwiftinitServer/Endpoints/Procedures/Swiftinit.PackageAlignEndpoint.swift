@@ -22,7 +22,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackageAlignEndpoint:NonblockingEndpoint
+extension Swiftinit.PackageAlignEndpoint:Swiftinit.NonblockingEndpoint
 {
     func enqueue(on server:borrowing Swiftinit.Server,
         payload:consuming [UInt8],

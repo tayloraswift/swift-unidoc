@@ -173,8 +173,8 @@ extension Unidoc.DB.Users
         limit:Int,
         with session:Mongo.Session) async throws -> Int
     {
-        let accounts:[Mongo.IdentityView<Unidoc.Account>] = try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<Mongo.IdentityView<Unidoc.Account>>>.init(
+        let accounts:[Mongo.IdentityDocument<Unidoc.Account>] = try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<Mongo.IdentityDocument<Unidoc.Account>>>.init(
                 Self.name,
                 limit: limit)
             {

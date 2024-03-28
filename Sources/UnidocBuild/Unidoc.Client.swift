@@ -100,7 +100,7 @@ extension Unidoc.Client
 
     func build(remote symbol:Symbol.Package,
         pretty:Bool,
-        force:Unidoc.BuildLatest?) async throws
+        force:Unidoc.VersionSeries?) async throws
     {
         //  Building the package might take a long time, and the server might close the
         //  connection before the build is finished. So we do not try to keep this

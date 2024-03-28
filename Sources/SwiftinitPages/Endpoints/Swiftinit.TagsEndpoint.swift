@@ -47,8 +47,13 @@ extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
 
         switch self.query.filter
         {
-        case .tags(limit: let limit, page: _, beta: let beta):
-            let list:[Unidoc.VersionsQuery.Tag] = beta ? output.prereleases : output.releases
+        case .tags(limit: let limit, page: _, series: let series):
+            let list:[Unidoc.Versions.Tag]
+            switch series
+            {
+            case .release:      list = output.versions.releases
+            case .prerelease:   list = output.versions.prereleases
+            }
 
             tags = .init(
                 package: output.package.symbol,
@@ -57,15 +62,15 @@ extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
                 more: list.count == limit)
 
         case .none(limit: let limit):
-            var prereleases:ArraySlice<Unidoc.VersionsQuery.Tag> = output.prereleases[...]
-            var releases:ArraySlice<Unidoc.VersionsQuery.Tag> = output.releases[...]
+            var prereleases:ArraySlice<Unidoc.Versions.Tag> = output.versions.prereleases[...]
+            var releases:ArraySlice<Unidoc.Versions.Tag> = output.versions.releases[...]
 
             //  Merge the two pre-sorted arrays into a single sorted array.
-            var list:[Unidoc.VersionsQuery.Tag] = []
+            var list:[Unidoc.Versions.Tag] = []
                 list.reserveCapacity(prereleases.count + releases.count)
             while
-                let prerelease:Unidoc.VersionsQuery.Tag = prereleases.first,
-                let release:Unidoc.VersionsQuery.Tag = releases.first
+                let prerelease:Unidoc.Versions.Tag = prereleases.first,
+                let release:Unidoc.Versions.Tag = releases.first
             {
                 if  release.edition.patch < prerelease.edition.patch
                 {
@@ -85,10 +90,10 @@ extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
 
             tags = .init(
                 package: output.package.symbol,
-                tagless: output.tagless,
+                tagless: output.versions.top,
                 tagged: list,
                 view: view,
-                more: output.releases.count == limit)
+                more: output.versions.releases.count == limit)
         }
 
         let page:Swiftinit.TagsPage = .init(package: output.package,

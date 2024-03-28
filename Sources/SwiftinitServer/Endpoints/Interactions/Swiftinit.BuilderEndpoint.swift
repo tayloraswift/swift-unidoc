@@ -11,7 +11,7 @@ extension Swiftinit
     {
         case oldest(until:PatchVersion)
         case edition(Unidoc.Edition)
-        case _latest(Unidoc.BuildLatest?, of:Symbol.Package)
+        case request(Unidoc.BuildRequest, of:Symbol.Package)
     }
 }
 
@@ -49,13 +49,13 @@ extension Swiftinit.BuilderEndpoint:Swiftinit.RestrictedEndpoint
             }
 
         case .edition(let id):
-            var endpoint:Mongo.SingleOutputFromPrimary<Unidoc.BuilderQuery> = .init(
+            var endpoint:Mongo.SingleOutputFromPrimary<Unidoc.BuildEditionQuery> = .init(
                 query: .init(edition: id))
 
             try await endpoint.pull(from: server.db.unidoc.id, with: session)
 
             guard
-            let output:Unidoc.BuilderQuery.Output = endpoint.value,
+            let output:Unidoc.BuildEditionQuery.Output = endpoint.value,
             let repo:Unidoc.PackageRepo = output.package.repo
             else
             {
@@ -69,23 +69,23 @@ extension Swiftinit.BuilderEndpoint:Swiftinit.RestrictedEndpoint
 
             json = .object(with: build.encode(to:))
 
-        case ._latest(let subject, let package):
-            let filter:Unidoc.VersionsPredicate
+        case .request(let subject, let package):
+            let filter:Unidoc.VersionsQuery.Predicate
 
             switch subject
             {
-            case nil:           filter = .tags(limit: 1, beta: false)
-            case .release?:     filter = .tags(limit: 1, beta: false)
-            case .prerelease?:  filter = .tags(limit: 1, beta: true)
+            case .auto:         filter = .tags(limit: 1, series: .release)
+            case .release:      filter = .tags(limit: 1, series: .release)
+            case .prerelease:   filter = .tags(limit: 1, series: .prerelease)
             }
 
-            var endpoint:Mongo.SingleOutputFromPrimary<Unidoc.VersionsQuery> = .init(
+            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.VersionsQuery> = .init(
                 query: .init(symbol: package, filter: filter))
 
-            try await endpoint.pull(from: server.db.unidoc.id, with: session)
+            try await pipeline.pull(from: server.db.unidoc.id, with: session)
 
             guard
-            let output:Unidoc.VersionsQuery.Output = endpoint.value,
+            let output:Unidoc.VersionsQuery.Output = pipeline.value,
             let repo:Unidoc.PackageRepo = output.package.repo
             else
             {
@@ -96,9 +96,9 @@ extension Swiftinit.BuilderEndpoint:Swiftinit.RestrictedEndpoint
 
             switch subject
             {
-            case nil:
+            case .auto:
                 guard
-                let release:Unidoc.VersionsQuery.Tag = output.releases.first
+                let release:Unidoc.Versions.Tag = output.versions.releases.first
                 else
                 {
                     return nil
@@ -109,9 +109,9 @@ extension Swiftinit.BuilderEndpoint:Swiftinit.RestrictedEndpoint
                     repo: repo.origin.https,
                     tag: release.graph == nil ? release.edition.name : nil)
 
-            case .release?:
+            case .release:
                 guard
-                let release:Unidoc.VersionsQuery.Tag = output.releases.first
+                let release:Unidoc.Versions.Tag = output.versions.releases.first
                 else
                 {
                     return nil
@@ -122,9 +122,9 @@ extension Swiftinit.BuilderEndpoint:Swiftinit.RestrictedEndpoint
                     repo: repo.origin.https,
                     tag: release.edition.name)
 
-            case .prerelease?:
+            case .prerelease:
                 guard
-                let prerelease:Unidoc.VersionsQuery.Tag = output.prereleases.first
+                let prerelease:Unidoc.Versions.Tag = output.versions.prereleases.first
                 else
                 {
                     return nil
