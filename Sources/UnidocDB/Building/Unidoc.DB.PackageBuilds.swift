@@ -142,11 +142,14 @@ extension Unidoc.DB.PackageBuilds
                 },
                 against: self.database)
         }
-        catch let error
+        catch let error as Mongo.ServerError
         {
-            //  TODO: catch duplicate key error
-            print(error)
-            return
+            //  Duplicate key error
+            guard case 11000 = error.code
+            else
+            {
+                throw error
+            }
         }
     }
 
