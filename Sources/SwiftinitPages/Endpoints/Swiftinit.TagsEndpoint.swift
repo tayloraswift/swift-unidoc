@@ -98,6 +98,7 @@ extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
 
         let page:Swiftinit.TagsPage = .init(package: output.package,
             aliases: output.aliases,
+            build: output.build,
             realm: output.realm,
             table: tags,
             shown: self.query.filter)
