@@ -204,9 +204,9 @@ extension Unidoc.DB.Snapshots
         until version:PatchVersion,
         with session:Mongo.Session) async throws -> [Unidoc.Edition]
     {
-        let editions:[Mongo.IdentityView<Unidoc.Edition>] = try await session.run(
+        let editions:[Mongo.IdentityDocument<Unidoc.Edition>] = try await session.run(
             command: Mongo.Find<
-                Mongo.SingleBatch<Mongo.IdentityView<Unidoc.Edition>>>.init(Self.name,
+                Mongo.SingleBatch<Mongo.IdentityDocument<Unidoc.Edition>>>.init(Self.name,
                 limit: limit)
             {
                 $0[.filter]

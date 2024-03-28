@@ -19,7 +19,7 @@ extension Symbol
 extension Symbol.PackageDependency:Sendable where Version:Sendable
 {
 }
-extension Symbol.PackageDependency:MongoMasterCodingModel
+extension Symbol.PackageDependency:Mongo.MasterCodingModel
 {
     enum CodingKey:String, Sendable
     {

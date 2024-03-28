@@ -3,45 +3,6 @@ div.more
     margin: 1.5rem 0;
     text-align: center;
 
-    > a.button,
-    > form button
-    {
-        display: block;
-        padding: 0.5rem 0;
-        border: 2px dashed var(--fg-accent-semi);
-        text-decoration: none;
-    }
-    > a.button:hover,
-    > a.button:focus,
-    > form button:hover,
-    > form button:focus
-    {
-        border-color: var(--fg-accent);
-    }
-
-    > a,
-    > form button
-    {
-        font-family: $typeface-sans;
-        font-weight: 700;
-        font-size: 120%;
-    }
-
-    > form button
-    {
-        width: 100%;
-        background: none;
-        box-shadow: none;
-        border-radius: 0;
-        color: var(--fg-accent);
-    }
-
-    > form button:active
-    {
-        box-shadow: none;
-        transform: none;
-    }
-
     > div.charts
     {
         display: flex;
@@ -70,4 +31,3 @@ div.more
         }
     }
 }
-

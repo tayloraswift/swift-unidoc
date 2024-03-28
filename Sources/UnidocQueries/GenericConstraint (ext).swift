@@ -1,6 +1,6 @@
 import MongoQL
 import Signatures
 
-extension GenericConstraint:MongoMasterCodingModel
+extension GenericConstraint:Mongo.MasterCodingModel
 {
 }

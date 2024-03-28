@@ -2,7 +2,7 @@ import MongoQL
 import Symbols
 import UnidocRecords
 
-extension Unidoc.Snapshot:MongoMasterCodingModel
+extension Unidoc.Snapshot:Mongo.MasterCodingModel
 {
 }
 extension Unidoc.Snapshot

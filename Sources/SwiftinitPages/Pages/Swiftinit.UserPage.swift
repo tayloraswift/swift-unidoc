@@ -100,32 +100,22 @@ extension Swiftinit.UserPage:Swiftinit.ApplicationPage
                 $0[.p] = "You have not generated an API key yet."
             }
 
-            $0[.div, { $0.class = "more" }]
+            $0[.form]
             {
-                $0[.form]
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Swiftinit.API[.userConfig, really: false])"
+                $0.method = "post"
+            }
+                content:
+            {
+                $0[.input]
                 {
-                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Swiftinit.API[.userConfig, really: false])"
-                    $0.method = "post"
+                    $0.type = "hidden"
+                    $0.name = "generate"
+                    $0.value = "api-key"
                 }
-                    content:
-                {
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
-                        $0.name = "account"
-                        $0.value = "\(self.user.id)"
-                    }
 
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
-                        $0.name = "generate"
-                        $0.value = "api-key"
-                    }
-
-                    $0[.button] { $0.type = "submit" } = button
-                }
+                $0[.button] { $0.class = "area" ; $0.type = "submit" } = button
             }
         }
     }

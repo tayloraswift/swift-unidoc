@@ -30,7 +30,7 @@ extension Swiftinit.TagsTable.Row
         volume:Unidoc.VolumeMetadata?,
         tagged:Tagged?,
         package:Symbol.Package,
-        graph:Unidoc.VersionsQuery.Graph?,
+        graph:Unidoc.Versions.Graph?,
         view:Swiftinit.Permissions)
     {
         self.init(

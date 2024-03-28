@@ -35,26 +35,6 @@ extension Unidoc.DB.Packages
     }
 
     public static
-    let indexBuildQueue:Mongo.CollectionIndex = .init("BuildQueue", unique: false)
-    {
-        $0[Unidoc.PackageMetadata[.buildRequest]] = (+)
-    }
-        where:
-    {
-        $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = false }
-    }
-
-    public static
-    let indexBuildStarted:Mongo.CollectionIndex = .init("BuildStarted", unique: false)
-    {
-        $0[Unidoc.PackageMetadata[.buildProgress] / Unidoc.BuildProgress[.started]] = (+)
-    }
-        where:
-    {
-        $0[Unidoc.PackageMetadata[.buildProgress]] { $0[.exists] = true }
-    }
-
-    public static
     let indexExpiration:Mongo.CollectionIndex = .init("RepoExpires", unique: false)
     {
         $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = (+)
@@ -115,8 +95,6 @@ extension Unidoc.DB.Packages:Mongo.CollectionModel
     {
         [
             Self.indexAccount,
-            Self.indexBuildQueue,
-            Self.indexBuildStarted,
             Self.indexExpiration,
             Self.indexRepoCreated,
             Self.indexRepoGitHub,

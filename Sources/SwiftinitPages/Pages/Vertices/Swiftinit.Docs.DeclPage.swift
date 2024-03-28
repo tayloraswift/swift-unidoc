@@ -252,14 +252,11 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.ApicalPage
         {
             if  case .protocol = self.apex.phylum
             {
-                $0[.div, { $0.class = "more" }]
+                $0[.a]
                 {
-                    $0[.a]
-                    {
-                        $0.class = "button"
-                        $0.href = "\(Swiftinit.Ptcl[self.volume, self.apex.route])"
-                    } = "Browse conforming types"
-                }
+                    $0.class = "area"
+                    $0.href = "\(Swiftinit.Ptcl[self.volume, self.apex.route])"
+                } = "Browse conforming types"
             }
 
             $0 ?= self.mesh.details
