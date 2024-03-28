@@ -17,10 +17,10 @@ extension Unidoc.Versions
         public
         var volume:Unidoc.VolumeMetadata?
         public
-        var graph:Graph
+        var graph:Graph?
 
         @inlinable public
-        init(volume:Unidoc.VolumeMetadata?, graph:Graph)
+        init(volume:Unidoc.VolumeMetadata?, graph:Graph?)
         {
             self.volume = volume
             self.graph = graph
@@ -37,6 +37,6 @@ extension Unidoc.Versions.TopOfTree:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(volume: try bson[.volume]?.decode(), graph: try bson[.graph].decode())
+        self.init(volume: try bson[.volume]?.decode(), graph: try bson[.graph]?.decode())
     }
 }

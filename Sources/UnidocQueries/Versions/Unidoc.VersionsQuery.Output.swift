@@ -60,10 +60,19 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
+        var top:Unidoc.Versions.TopOfTree? = try bson[.versions_top]?.decode()
+
+        if  let container:Unidoc.Versions.TopOfTree = top,
+            case nil = container.graph,
+            case nil = container.volume
+        {
+            top = nil
+        }
+
         self.init(versions: .init(
                 prereleases: try bson[.versions_prereleases]?.decode() ?? [],
                 releases: try bson[.versions_releases]?.decode() ?? [],
-                top: try bson[.versions_top]?.decode()),
+                top: top),
             aliases: try bson[.aliases]?.decode() ?? [],
             package: try bson[.package].decode(),
             build: try bson[.build]?.decode(),
