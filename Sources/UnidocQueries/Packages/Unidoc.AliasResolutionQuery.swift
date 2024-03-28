@@ -7,7 +7,7 @@ extension Unidoc
 {
     struct AliasResolutionQuery<Aliases, Targets>:Sendable
         where   Aliases:Mongo.CollectionModel,
-                Aliases.Element:MongoMasterCodingModel<Unidoc.AliasKey>,
+                Aliases.Element:Mongo.MasterCodingModel<Unidoc.AliasKey>,
                 Targets:Mongo.CollectionModel,
                 Targets.Element:BSONDecodable
     {

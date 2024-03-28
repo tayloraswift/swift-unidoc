@@ -20,7 +20,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackageOutput:MongoMasterCodingModel
+extension Unidoc.PackageOutput:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable

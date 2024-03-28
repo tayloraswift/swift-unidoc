@@ -2,7 +2,7 @@ import BSON
 import MongoQL
 import UnidocDB
 
-extension Unidoc.BuilderQuery
+extension Unidoc.BuildTagQuery
 {
     @frozen public
     struct Output:Sendable
@@ -10,32 +10,32 @@ extension Unidoc.BuilderQuery
         public
         let package:Unidoc.PackageMetadata
         public
-        let edition:Unidoc.EditionMetadata
+        let version:Unidoc.Versions.Tag
 
         @inlinable
-        init(package:Unidoc.PackageMetadata, edition:Unidoc.EditionMetadata)
+        init(package:Unidoc.PackageMetadata, version:Unidoc.Versions.Tag)
         {
             self.package = package
-            self.edition = edition
+            self.version = version
         }
     }
 }
-extension Unidoc.BuilderQuery.Output:MongoMasterCodingModel
+extension Unidoc.BuildTagQuery.Output:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
     {
         case package
-        case edition
+        case version
     }
 }
-extension Unidoc.BuilderQuery.Output:BSONDocumentDecodable
+extension Unidoc.BuildTagQuery.Output:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
             package: try bson[.package].decode(),
-            edition: try bson[.edition].decode())
+            version: try bson[.version].decode())
     }
 }

@@ -32,8 +32,8 @@ extension Mongo.PipelineQuery
     func command(stride:Iteration.Stride?) -> Mongo.Aggregate<Iteration>
     {
         .init(CollectionOrigin.name,
-            pipeline: .init(with: self.build(pipeline:)),
-            stride: stride)
+            stride: stride,
+            pipeline: self.build(pipeline:))
         {
             $0[.collation] = Collation.spec
             $0[.hint] = self.hint?.id

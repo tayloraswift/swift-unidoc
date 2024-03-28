@@ -19,20 +19,24 @@ extension Swiftinit
         private
         let aliases:[Symbol.Package]
         private
+        let build:Unidoc.BuildMetadata?
+        private
         let realm:Unidoc.RealmMetadata?
         private
         let table:TagsTable
         private
-        let shown:Unidoc.VersionsPredicate
+        let shown:Unidoc.VersionsQuery.Predicate
 
         init(package:Unidoc.PackageMetadata,
             aliases:[Symbol.Package] = [],
+            build:Unidoc.BuildMetadata? = nil,
             realm:Unidoc.RealmMetadata? = nil,
             table:TagsTable,
-            shown:Unidoc.VersionsPredicate)
+            shown:Unidoc.VersionsQuery.Predicate)
         {
             self.package = package
             self.aliases = aliases
+            self.build = build
             self.realm = realm
             self.table = table
             self.shown = shown
@@ -57,8 +61,8 @@ extension Swiftinit.TagsPage:Swiftinit.StaticPage
         case .none:
             Swiftinit.Tags[self.package.symbol]
 
-        case .tags(_, page: let index, beta: let beta):
-            Swiftinit.Tags[self.package.symbol, page: index, beta: beta]
+        case .tags(_, page: let index, series: let series):
+            Swiftinit.Tags[self.package.symbol, page: index, beta: series == .prerelease]
         }
     }
 }
@@ -85,8 +89,8 @@ extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
             case .none:
                 self.section(tags: &$0, now: now)
 
-            case .tags(limit: _, page: let index, beta: let beta):
-                self.section(tags: &$0, page: index, beta: beta)
+            case .tags(limit: _, page: let index, series: let series):
+                self.section(tags: &$0, page: index, beta: series == .prerelease)
             }
         }
     }
@@ -107,11 +111,11 @@ extension Swiftinit.TagsPage
                     $0.href = """
                     \(Swiftinit.Tags[self.package.symbol, page: page - 1, beta: beta])
                     """
-                } = "◀"
+                } = "◀ prev"
             }
             else
             {
-                $0[.span] = "◀"
+                $0[.span] = "◀ prev"
             }
 
             if  self.table.more
@@ -121,11 +125,11 @@ extension Swiftinit.TagsPage
                     $0.href = """
                     \(Swiftinit.Tags[self.package.symbol, page: page + 1, beta: beta])
                     """
-                } = "▶"
+                } = "next ▶"
             }
             else
             {
-                $0[.span] = "▶"
+                $0[.span] = "next ▶"
             }
         }
 
@@ -347,13 +351,14 @@ extension Swiftinit.TagsPage
         {
             section[.div, { $0.class = "build-pipeline" }]
             {
-                if  case _? = self.package.buildProgress
+                if  case _? = self.build?.progress
                 {
                     $0[.div] = "Request build"
                     $0[.div] = "Queued"
                     $0[.div] { $0.class = "phase" } = "Started"
                 }
-                else if case _? = self.package.buildRequest
+                else if
+                    case _? = self.build?.request
                 {
                     $0[.div] = "Request build"
                     $0[.div] { $0.class = "phase" } = "Queued"
@@ -369,7 +374,8 @@ extension Swiftinit.TagsPage
                     } = ConfigButton.init(package: self.package.id,
                         update: "rebuild",
                         value: "true",
-                        label: "Request build")
+                        label: "Request build",
+                        from: self.location)
 
                     $0[.div]
                     $0[.div]

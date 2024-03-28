@@ -11,12 +11,12 @@ extension Swiftinit
     struct GraphActionEndpoint:Sendable
     {
         let queue:Unidoc.DB.Snapshots.QueueAction
-        let uri:String?
+        let from:String?
 
-        init(queue:Unidoc.DB.Snapshots.QueueAction, uri:String? = nil)
+        init(queue:Unidoc.DB.Snapshots.QueueAction, from:String? = nil)
         {
             self.queue = queue
-            self.uri = uri
+            self.from = from
         }
     }
 }
@@ -26,6 +26,6 @@ extension Swiftinit.GraphActionEndpoint:Swiftinit.AdministrativeEndpoint
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         try await session.update(database: server.db.unidoc.id, with: self.queue)
-        return .redirect(.seeOther(self.uri ?? "/admin"))
+        return .redirect(.seeOther(self.from ?? "/admin"))
     }
 }

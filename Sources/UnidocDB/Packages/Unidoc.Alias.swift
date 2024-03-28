@@ -41,7 +41,7 @@ extension Unidoc
         case coordinate = "p"
     }
 }
-extension Unidoc.Alias:MongoMasterCodingModel
+extension Unidoc.Alias:Mongo.MasterCodingModel
 {
     public
     typealias CodingKey = Unidoc.AliasKey

@@ -15,11 +15,10 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.TextUpdateEndpoint:BlockingEndpoint
+extension Swiftinit.TextUpdateEndpoint:Swiftinit.AdministrativeEndpoint
 {
-    func perform(on server:borrowing Swiftinit.Server,
-        payload:consuming [UInt8],
-        session:Mongo.Session) async throws -> HTTP.ServerResponse
+    func load(from server:borrowing Swiftinit.Server,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         let _:Bool? = try await server.db.metadata.update(with: session)
         {

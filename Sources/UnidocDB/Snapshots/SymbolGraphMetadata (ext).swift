@@ -1,6 +1,6 @@
 import MongoQL
 import SymbolGraphs
 
-extension SymbolGraphMetadata:MongoMasterCodingModel
+extension SymbolGraphMetadata:Mongo.MasterCodingModel
 {
 }

@@ -8,7 +8,7 @@ extension Unidoc
     /// branching from an existing alias. If the alias already exists, the query does nothing.
     struct AliasQuery<Aliases>:Sendable
         where   Aliases:Mongo.CollectionModel,
-                Aliases.Element:MongoMasterCodingModel<Unidoc.AliasKey>
+                Aliases.Element:Mongo.MasterCodingModel<Unidoc.AliasKey>
     {
         private
         let symbol:Aliases.Element.ID

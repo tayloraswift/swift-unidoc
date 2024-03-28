@@ -10,15 +10,17 @@ extension Swiftinit
         let account:Unidoc.Account
         let package:Unidoc.Package
         let update:Update
+        let from:String?
 
         private
         var rightsRequired:Unidoc.PackageRights
 
-        init(account:Unidoc.Account, package:Unidoc.Package, update:Update)
+        init(account:Unidoc.Account, package:Unidoc.Package, update:Update, from:String? = nil)
         {
             self.account = account
             self.package = package
             self.update = update
+            self.from = from
 
             self.rightsRequired = .editor
         }
@@ -67,7 +69,7 @@ extension Swiftinit.PackageConfigEndpoint:Swiftinit.RestrictedEndpoint
                 hidden: hidden,
                 with: session)
             updated = package?.symbol
-            rebuildPackageList = true
+            rebuildPackageList = updated != nil
 
         case .expires(let when):
             let package:Unidoc.PackageMetadata? = try await server.db.packages.update(
@@ -78,21 +80,21 @@ extension Swiftinit.PackageConfigEndpoint:Swiftinit.RestrictedEndpoint
             rebuildPackageList = false
 
         case .symbol(let symbol):
-            let package:Bool? = try await server.db.packages.update(
+            let changed:Bool? = try await server.db.packages.update(
                 package: self.package,
                 symbol: symbol,
                 with: session)
 
-            updated = package != nil ? symbol : nil
-            rebuildPackageList = true
-        }
+            updated = changed != nil ? symbol : nil
+            rebuildPackageList = changed ?? false
 
-        guard
-        let updated:Symbol.Package
-        else
-        {
-            //  Not completely unreachable, due to race conditions.
-            return .notFound("No such package")
+        case .build(let request):
+            try await server.db.packageBuilds.submitBuild(request: request,
+                package: self.package,
+                with: session)
+
+            updated = nil
+            rebuildPackageList = false
         }
 
         if  rebuildPackageList
@@ -100,6 +102,19 @@ extension Swiftinit.PackageConfigEndpoint:Swiftinit.RestrictedEndpoint
             try await server.db.unidoc.rebuildPackageList(with: session)
         }
 
-        return .redirect(.seeOther("\(Swiftinit.Tags[updated])"))
+        if  let updated:Symbol.Package
+        {
+            return .redirect(.seeOther("\(Swiftinit.Tags[updated])"))
+        }
+        else if
+            let back:String = self.from
+        {
+            return .redirect(.seeOther(back))
+        }
+        else
+        {
+            //  Not completely unreachable, due to race conditions.
+            return .notFound("No such package")
+        }
     }
 }

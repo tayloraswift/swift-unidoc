@@ -5,7 +5,7 @@ import MongoQL
 import UnidocRecords
 import UnixTime
 
-extension Unidoc.PackageRepo:MongoMasterCodingModel
+extension Unidoc.PackageRepo:Mongo.MasterCodingModel
 {
 }
 extension Unidoc.PackageRepo

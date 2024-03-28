@@ -25,7 +25,7 @@ extension Unidoc.RealmQuery
         }
     }
 }
-extension Unidoc.RealmQuery.Output:MongoMasterCodingModel
+extension Unidoc.RealmQuery.Output:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable

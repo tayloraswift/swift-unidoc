@@ -51,7 +51,7 @@ extension Unidoc.User
         return self
     }
 }
-extension Unidoc.User:MongoMasterCodingModel
+extension Unidoc.User:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable

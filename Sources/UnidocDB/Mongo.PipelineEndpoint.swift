@@ -54,7 +54,8 @@ extension Mongo.PipelineEndpoint where Query.Iteration.Stride == Never
     var stride:Never { [][0] }
 }
 extension Mongo.PipelineEndpoint
-    where   Query.Iteration.Stride == Int,
+    where   Query.Iteration.Tailing == Mongo.Tailing,
+            Query.Iteration.Stride == Int,
             Query.Iteration.Batch == Mongo.CursorBatch<Query.Iteration.BatchElement>
 {
     @inlinable public mutating

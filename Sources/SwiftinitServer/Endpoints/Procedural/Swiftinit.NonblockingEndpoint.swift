@@ -3,23 +3,26 @@ import Media
 import MongoDB
 import SwiftinitPages
 
-protocol NonblockingEndpoint:ProceduralEndpoint
+extension Swiftinit
 {
-    associatedtype Status:HTTP.ServerEndpoint<Swiftinit.RenderFormat>
+    protocol NonblockingEndpoint:ProceduralEndpoint
+    {
+        associatedtype Status:HTTP.ServerEndpoint<RenderFormat>
 
-    func enqueue(on server:borrowing Swiftinit.Server,
-        payload:consuming [UInt8],
-        session:Mongo.Session) async throws -> Status
+        func enqueue(on server:borrowing Server,
+            payload:consuming [UInt8],
+            session:Mongo.Session) async throws -> Status
 
-    func perform(on server:borrowing Swiftinit.Server,
-        session:Mongo.Session,
-        status:Status) async
+        func perform(on server:borrowing Server,
+            session:Mongo.Session,
+            status:Status) async
+    }
 }
-extension NonblockingEndpoint
+extension Swiftinit.NonblockingEndpoint
 {
     func perform(on server:borrowing Swiftinit.Server,
         payload:consuming [UInt8],
-        request:CheckedContinuation<HTTP.ServerResponse, any Error>) async
+        request:Swiftinit.ServerLoop.Promise) async
     {
         let session:Mongo.Session
         let status:Status
@@ -31,9 +34,9 @@ extension NonblockingEndpoint
                 session: session)
             request.resume(returning: try status.response(as: server.format))
         }
-        catch
+        catch let error
         {
-            request.resume(throwing: error)
+            request.resume(rendering: error, as: server.format)
             return
         }
 

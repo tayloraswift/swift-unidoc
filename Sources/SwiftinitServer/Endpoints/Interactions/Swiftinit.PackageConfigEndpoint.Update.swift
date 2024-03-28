@@ -8,6 +8,7 @@ extension Swiftinit.PackageConfigEndpoint
         case hidden(Bool)
         case symbol(Symbol.Package)
         case expires(BSON.Millisecond)
+        case build(Unidoc.BuildRequest)
     }
 }
 extension Swiftinit.PackageConfigEndpoint.Update
@@ -33,6 +34,11 @@ extension Swiftinit.PackageConfigEndpoint.Update
             let later:BSON.Millisecond = .init(now.value + 1_000)
 
             self = .expires(later)
+        }
+        else if
+            case "true" = form["rebuild"]
+        {
+            self = .build(.auto)
         }
         else
         {

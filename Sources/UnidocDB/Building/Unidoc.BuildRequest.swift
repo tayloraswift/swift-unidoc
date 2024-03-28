@@ -6,7 +6,7 @@ extension Unidoc
     @frozen public
     enum BuildRequest:Int32, Equatable, Sendable
     {
-        case generic = 0
+        case auto = 0
         case release = 1
         case prerelease = 2
     }
@@ -14,27 +14,34 @@ extension Unidoc
 extension Unidoc.BuildRequest
 {
     @inlinable public static
-    func force(_ value:Unidoc.BuildLatest?) -> Self
+    func force(_ value:Unidoc.VersionSeries) -> Self
     {
         switch value
         {
-        case .prerelease?:  .prerelease
-        case .release?:     .release
-        case nil:           .generic
+        case .prerelease:   .prerelease
+        case .release:      .release
         }
     }
 
     @inlinable public
-    var forced:Unidoc.BuildLatest?
+    var forced:Unidoc.VersionSeries?
     {
         switch self
         {
-        case .generic:
-            return nil
-        case .release:
-            return .release
-        case .prerelease:
-            return .prerelease
+        case .auto:         nil
+        case .release:      .release
+        case .prerelease:   .prerelease
+        }
+    }
+
+    @inlinable public
+    var series:Unidoc.VersionSeries
+    {
+        switch self
+        {
+        case .auto:         .release
+        case .release:      .release
+        case .prerelease:   .prerelease
         }
     }
 }

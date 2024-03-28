@@ -14,18 +14,22 @@ import UnidocRecords
 import UnixTime
 import URI
 
-extension Swiftinit
+extension Swiftinit.IntegralRequest
 {
-    enum AnyEndpoint:Sendable
+    enum Ordering:Sendable
     {
-        case interactive(any InteractiveEndpoint)
-        case procedural(any ProceduralEndpoint)
-        case stateless(any RenderablePage & Sendable)
-        case redirect(HTTP.Redirect)
-        case `static`(Cache<Swiftinit.Asset>.Request)
+        /// Runs directly on the actor, which provides no ordering guarantees. Suspensions while
+        /// serving the request might interleave with other requests.
+        case actor(any Swiftinit.InteractiveEndpoint)
+        /// Runs on the update loop, which is ordered with respect to other updates.
+        case update(any Swiftinit.ProceduralEndpoint)
+
+        case syncResource(any Swiftinit.RenderablePage & Sendable)
+        case syncRedirect(HTTP.Redirect)
+        case syncLoad(Cache<Swiftinit.Asset>.Request)
     }
 }
-extension Swiftinit.AnyEndpoint
+extension Swiftinit.IntegralRequest.Ordering
 {
     static
     func explainable<Base>(_ endpoint:Base,
@@ -36,20 +40,20 @@ extension Swiftinit.AnyEndpoint
                 Base:Sendable
     {
         parameters.explain
-        ? .interactive(Swiftinit.ExplanatoryEndpoint<Base.Query>.init(query: endpoint.query))
-        : .interactive(Swiftinit.OptimizingEndpoint<Base>.init(base: endpoint,
+        ? .actor(Swiftinit.ExplanatoryEndpoint<Base.Query>.init(query: endpoint.query))
+        : .actor(Swiftinit.OptimizingEndpoint<Base>.init(base: endpoint,
             etag: parameters.tag))
     }
 }
 //  GET endpoints
-extension Swiftinit.AnyEndpoint
+extension Swiftinit.IntegralRequest.Ordering
 {
     static
     func get(admin trunk:String, _ stem:ArraySlice<String>, tag:MD5?) -> Self?
     {
         if  let action:Swiftinit.AdminPage.Action = .init(rawValue: trunk)
         {
-            return .stateless(action)
+            return .syncResource(action)
         }
 
         switch trunk
@@ -59,12 +63,12 @@ extension Swiftinit.AnyEndpoint
             let target:String = stem.first
             else
             {
-                return .stateless(Swiftinit.AdminPage.Recode.init())
+                return .syncResource(Swiftinit.AdminPage.Recode.init())
             }
 
             if  let target:Swiftinit.AdminPage.Recode.Target = .init(rawValue: target)
             {
-                return .stateless(target)
+                return .syncResource(target)
             }
             else
             {
@@ -72,13 +76,13 @@ extension Swiftinit.AnyEndpoint
             }
 
         case Swiftinit.ReplicaSetPage.name:
-            return .interactive(Swiftinit.DashboardEndpoint.replicaSet)
+            return .actor(Swiftinit.DashboardEndpoint.replicaSet)
 
         case Swiftinit.CookiePage.name:
-            return .interactive(Swiftinit.DashboardEndpoint.cookie(scramble: false))
+            return .actor(Swiftinit.DashboardEndpoint.cookie(scramble: false))
 
         case "robots":
-            return .interactive(Swiftinit.TextEditorEndpoint.init(id: .robots_txt))
+            return .actor(Swiftinit.TextEditorEndpoint.init(id: .robots_txt))
 
         case _:
             return nil
@@ -105,18 +109,19 @@ extension Swiftinit.AnyEndpoint
             if  let package:String = stem.first
             {
                 let package:Symbol.Package = .init(package)
-                let subject:Unidoc.BuildLatest?
+                let subject:Unidoc.BuildRequest
 
-                if  let force:String = parameters["force"]
+                if  let force:String = parameters["force"],
+                    let force:Unidoc.VersionSeries = .init(force)
                 {
-                    subject = .init(force)
+                    subject = .force(force)
                 }
                 else
                 {
-                    subject = nil
+                    subject = .auto
                 }
 
-                return .interactive(Swiftinit.BuilderEndpoint._latest(subject, of: package))
+                return .actor(Swiftinit.BuilderEndpoint.request(subject, of: package))
             }
             else if
                 let package:String = parameters["package"],
@@ -124,7 +129,7 @@ extension Swiftinit.AnyEndpoint
                 let version:String = parameters["version"],
                 let version:Unidoc.Version = .init(version)
             {
-                return .interactive(Swiftinit.BuilderEndpoint.edition(.init(
+                return .actor(Swiftinit.BuilderEndpoint.edition(.init(
                     package: package,
                     version: version)))
             }
@@ -133,7 +138,7 @@ extension Swiftinit.AnyEndpoint
             if  let version:String = parameters["until"],
                 let version:PatchVersion = .init(version)
             {
-                return .interactive(Swiftinit.BuilderEndpoint.oldest(until: version))
+                return .actor(Swiftinit.BuilderEndpoint.oldest(until: version))
             }
         }
 
@@ -144,7 +149,7 @@ extension Swiftinit.AnyEndpoint
     func get(asset trunk:String, tag:MD5?) -> Self?
     {
         let asset:Swiftinit.Asset? = .init(trunk)
-        return asset.map { .static(.init($0, tag: tag)) }
+        return asset.map { .syncLoad(.init($0, tag: tag)) }
     }
 
     static
@@ -157,7 +162,7 @@ extension Swiftinit.AnyEndpoint
                 let code:String = parameters.code,
                 let from:String = parameters.from
             {
-                return .interactive(Swiftinit.AuthEndpoint.init(state: state,
+                return .actor(Swiftinit.AuthEndpoint.init(state: state,
                     code: code,
                     from: from))
             }
@@ -165,7 +170,7 @@ extension Swiftinit.AnyEndpoint
         case "register":
             if  let token:String = parameters.token
             {
-                return .interactive(Swiftinit.RegistrationEndpoint.init(token: token))
+                return .actor(Swiftinit.RegistrationEndpoint.init(token: token))
             }
 
         case _:
@@ -275,11 +280,13 @@ extension Swiftinit.AnyEndpoint
     static
     func get(tags trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        let filter:Unidoc.VersionsPredicate
+        let filter:Unidoc.VersionsQuery.Predicate
 
         if  let page:Int = parameters.page
         {
-            filter = .tags(limit: 20, page: page, beta: parameters.beta)
+            filter = .tags(limit: 20,
+                page: page,
+                series: parameters.beta ? .prerelease : .release)
         }
         else
         {
@@ -340,7 +347,7 @@ extension Swiftinit.AnyEndpoint
 }
 
 //  POST endpoints
-extension Swiftinit.AnyEndpoint
+extension Swiftinit.IntegralRequest.Ordering
 {
     static
     func post(admin action:String, _ rest:ArraySlice<String>,
@@ -351,7 +358,7 @@ extension Swiftinit.AnyEndpoint
             case  .multipart(.form_data(boundary: let boundary?)) = type
         {
             let form:MultipartForm = try .init(splitting: body, on: boundary)
-            return .interactive(Swiftinit.SiteConfigEndpoint.perform(action, form))
+            return .actor(Swiftinit.SiteConfigEndpoint.perform(action, form))
         }
 
         switch action
@@ -360,11 +367,11 @@ extension Swiftinit.AnyEndpoint
             if  let target:String = rest.first,
                 let target:Swiftinit.AdminPage.Recode.Target = .init(rawValue: target)
             {
-                return .interactive(Swiftinit.SiteConfigEndpoint.recode(target))
+                return .actor(Swiftinit.SiteConfigEndpoint.recode(target))
             }
 
         case Swiftinit.CookiePage.name:
-            return .interactive(Swiftinit.DashboardEndpoint.cookie(scramble: true))
+            return .actor(Swiftinit.DashboardEndpoint.cookie(scramble: true))
 
         case _:
             break
@@ -402,7 +409,7 @@ extension Swiftinit.AnyEndpoint
                     let package:Unidoc.Package = .init(package),
                     let alias:String = form["alias"]
                 {
-                    return .interactive(Swiftinit.PackageAliasEndpoint.init(
+                    return .actor(Swiftinit.PackageAliasEndpoint.init(
                         package: package,
                         alias: .init(alias)))
                 }
@@ -411,7 +418,7 @@ extension Swiftinit.AnyEndpoint
                 if  let package:String = form["package"],
                     let package:Unidoc.Package = .init(package)
                 {
-                    return .procedural(Swiftinit.PackageAlignEndpoint.init(
+                    return .update(Swiftinit.PackageAlignEndpoint.init(
                         package: package,
                         realm: form["realm"],
                         force: form["force"] == "true"))
@@ -423,17 +430,20 @@ extension Swiftinit.AnyEndpoint
                     let package:Unidoc.Package = .init(package),
                     let update:Swiftinit.PackageConfigEndpoint.Update = .init(from: form)
                 {
-                    return .interactive(Swiftinit.PackageConfigEndpoint.init(
+                    let endpoint:Swiftinit.PackageConfigEndpoint = .init(
                         account: account,
                         package: package,
-                        update: update))
+                        update: update,
+                        from: form["from"])
+
+                    return .actor(endpoint)
                 }
 
             case .packageIndex:
                 if  let owner:String = form["owner"],
                     let repo:String = form["repo"]
                 {
-                    return .interactive(Swiftinit.PackageIndexEndpoint.init(
+                    return .actor(Swiftinit.PackageIndexEndpoint.init(
                         owner: owner,
                         repo: repo))
                 }
@@ -443,7 +453,7 @@ extension Swiftinit.AnyEndpoint
                     let package:Unidoc.Package = .init(package),
                     let tag:String = form["tag"]
                 {
-                    return .interactive(Swiftinit.PackageIndexTagEndpoint.init(
+                    return .actor(Swiftinit.PackageIndexTagEndpoint.init(
                         package: package,
                         tag: tag))
                 }
@@ -452,11 +462,11 @@ extension Swiftinit.AnyEndpoint
                 if  let days:String = form["days"],
                     let days:Int = .init(days)
                 {
-                    return .interactive(Swiftinit.SiteConfigEndpoint.telescope(days: days))
+                    return .actor(Swiftinit.SiteConfigEndpoint.telescope(days: days))
                 }
 
             case .uplinkAll:
-                return .interactive(Swiftinit.GraphActionEndpoint.init(queue: .all))
+                return .actor(Swiftinit.GraphActionEndpoint.init(queue: .all))
 
             case .uplink:
                 if  let package:String = form["package"],
@@ -464,10 +474,10 @@ extension Swiftinit.AnyEndpoint
                     let version:String = form["version"],
                     let version:Unidoc.Version = .init(version)
                 {
-                    return .interactive(Swiftinit.GraphActionEndpoint.init(
+                    return .actor(Swiftinit.GraphActionEndpoint.init(
                         queue: .one(.init(package: package, version: version),
                             action: .uplinkRefresh),
-                        uri: form["redirect"]))
+                        from: form["from"]))
                 }
 
             case .unlink:
@@ -476,10 +486,10 @@ extension Swiftinit.AnyEndpoint
                     let version:String = form["version"],
                     let version:Unidoc.Version = .init(version)
                 {
-                    return .interactive(Swiftinit.GraphActionEndpoint.init(
+                    return .actor(Swiftinit.GraphActionEndpoint.init(
                         queue: .one(.init(package: package, version: version),
                             action: .unlink),
-                        uri: form["redirect"]))
+                        from: form["from"]))
                 }
 
             case .delete:
@@ -488,17 +498,17 @@ extension Swiftinit.AnyEndpoint
                     let version:String = form["version"],
                     let version:Unidoc.Version = .init(version)
                 {
-                    return .interactive(Swiftinit.GraphActionEndpoint.init(
+                    return .actor(Swiftinit.GraphActionEndpoint.init(
                         queue: .one(.init(package: package, version: version),
                             action: .delete),
-                        uri: form["redirect"]))
+                        from: form["from"]))
                 }
 
             case .userConfig:
                 if  let account:Unidoc.Account,
                     let update:Swiftinit.UserConfigEndpoint.Update = .init(from: form)
                 {
-                    return .interactive(Swiftinit.UserConfigEndpoint.init(
+                    return .actor(Swiftinit.UserConfigEndpoint.init(
                         account: account,
                         update: update))
                 }
@@ -518,8 +528,8 @@ extension Swiftinit.AnyEndpoint
                 if  let item:MultipartForm.Item = form.first(
                         where: { $0.header.name == "text" })
                 {
-                    return .procedural(Swiftinit.TextUpdateEndpoint.init(
-                        text: .init(id: .robots_txt, text: .utf8(item.value))))
+                    return .actor(Swiftinit.TextUpdateEndpoint.init(text: .init(id: .robots_txt,
+                        text: .utf8(item.value))))
                 }
 
             default:
@@ -620,6 +630,13 @@ extension Swiftinit.AnyEndpoint
                 This will not affect documentation that has already been generated.
                 """
                 button = "Rename package"
+
+            case .build:
+                heading = "Build package?"
+                prompt = """
+                This will add the package to the build queue.
+                """
+                button = "Build package"
             }
 
         case .userConfig:
@@ -654,33 +671,6 @@ extension Swiftinit.AnyEndpoint
             button: button,
             action: .init(path: Swiftinit.API[trunk].path, query: query))
 
-        return .stateless(really)
-    }
-}
-
-//  PUT endpoints
-extension Swiftinit.AnyEndpoint
-{
-    static
-    func put(api trunk:String, type:ContentType) throws -> Self?
-    {
-        guard
-        let trunk:Swiftinit.API.Put = .init(trunk)
-        else
-        {
-            return nil
-        }
-
-        switch (trunk, type)
-        {
-        case (.snapshot, .media(.application(.bson, charset: nil))):
-            return .procedural(Swiftinit.GraphStorageEndpoint.placed)
-
-        case (.graph, .media(.application(.bson, charset: nil))):
-            return .procedural(Swiftinit.GraphStorageEndpoint.object)
-
-        case (_, _):
-            return nil
-        }
+        return .syncResource(really)
     }
 }

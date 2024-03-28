@@ -1,7 +1,7 @@
 import MongoQL
 import UnidocRecords
 
-extension Unidoc.VolumeMetadata:MongoMasterCodingModel
+extension Unidoc.VolumeMetadata:Mongo.MasterCodingModel
 {
 }
 extension Unidoc.VolumeMetadata

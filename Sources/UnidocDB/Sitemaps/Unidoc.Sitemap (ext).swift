@@ -1,6 +1,6 @@
 import MongoQL
 import UnidocRecords
 
-extension Unidoc.Sitemap:MongoMasterCodingModel
+extension Unidoc.Sitemap:Mongo.MasterCodingModel
 {
 }

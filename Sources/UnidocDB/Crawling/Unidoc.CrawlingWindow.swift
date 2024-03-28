@@ -24,7 +24,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.CrawlingWindow:MongoMasterCodingModel
+extension Unidoc.CrawlingWindow:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable

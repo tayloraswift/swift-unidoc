@@ -37,7 +37,7 @@ extension Swiftinit.TagsTable.GraphCell.Tool:HTML.OutputStreamable
         form[.input]
         {
             $0.type = "hidden"
-            $0.name = "redirect"
+            $0.name = "from"
             $0.value = "\(Swiftinit.Tags[self.package])"
         }
 

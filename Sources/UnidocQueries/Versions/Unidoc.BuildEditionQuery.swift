@@ -5,7 +5,7 @@ import UnidocDB
 extension Unidoc
 {
     @frozen public
-    struct BuilderQuery
+    struct BuildEditionQuery
     {
         @usableFromInline
         let edition:Unidoc.Edition
@@ -17,7 +17,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.BuilderQuery:Mongo.PipelineQuery
+extension Unidoc.BuildEditionQuery:Mongo.PipelineQuery
 {
     public
     typealias CollectionOrigin = Unidoc.DB.Packages

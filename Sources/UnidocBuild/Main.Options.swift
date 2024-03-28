@@ -13,7 +13,7 @@ extension Main
 
         var pretty:Bool
         var swift:String?
-        var force:Unidoc.BuildLatest?
+        var force:Unidoc.VersionSeries?
         var input:String?
 
         var tool:Tool
