@@ -36,23 +36,3 @@ extension Swiftinit.ServerLoop.Promise
     //         gzip: false)))
     // }
 }
-
-extension Swiftinit.ServerLoop
-{
-    struct Event
-    {
-        let metadata:Swiftinit.IntegralRequest.Metadata
-        let endpoint:any Swiftinit.InteractiveEndpoint
-        let promise:Promise
-
-        init(
-            metadata:Swiftinit.IntegralRequest.Metadata,
-            endpoint:any Swiftinit.InteractiveEndpoint,
-            promise:Promise)
-        {
-            self.metadata = metadata
-            self.endpoint = endpoint
-            self.promise = promise
-        }
-    }
-}
