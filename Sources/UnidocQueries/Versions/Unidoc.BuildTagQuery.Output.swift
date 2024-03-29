@@ -4,15 +4,11 @@ import UnidocDB
 
 extension Unidoc.BuildTagQuery
 {
-    @frozen public
     struct Output:Sendable
     {
-        public
         let package:Unidoc.PackageMetadata
-        public
         let version:Unidoc.Versions.Tag
 
-        @inlinable
         init(package:Unidoc.PackageMetadata, version:Unidoc.Versions.Tag)
         {
             self.package = package
@@ -22,7 +18,6 @@ extension Unidoc.BuildTagQuery
 }
 extension Unidoc.BuildTagQuery.Output:Mongo.MasterCodingModel
 {
-    public
     enum CodingKey:String, Sendable
     {
         case package
@@ -31,7 +26,6 @@ extension Unidoc.BuildTagQuery.Output:Mongo.MasterCodingModel
 }
 extension Unidoc.BuildTagQuery.Output:BSONDocumentDecodable
 {
-    @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(

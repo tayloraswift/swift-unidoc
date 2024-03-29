@@ -8,7 +8,7 @@ extension Swiftinit.PackageConfigEndpoint
         case hidden(Bool)
         case symbol(Symbol.Package)
         case expires(BSON.Millisecond)
-        case build(Unidoc.BuildRequest)
+        case build(Unidoc.BuildRequest?)
     }
 }
 extension Swiftinit.PackageConfigEndpoint.Update
@@ -36,9 +36,14 @@ extension Swiftinit.PackageConfigEndpoint.Update
             self = .expires(later)
         }
         else if
-            case "true" = form["rebuild"]
+            case "rebuild" = form["build"]
         {
             self = .build(.auto)
+        }
+        else if
+            case "cancel" = form["build"]
+        {
+            self = .build(nil)
         }
         else
         {

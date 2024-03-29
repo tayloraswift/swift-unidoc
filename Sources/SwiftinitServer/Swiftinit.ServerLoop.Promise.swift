@@ -26,13 +26,4 @@ extension Swiftinit.ServerLoop.Promise
         let page:Swiftinit.ServerErrorPage = .init(error: error)
         self.resume(returning: .error(page.resource(format: format)))
     }
-
-    // func resume(with arguments:Unidoc.BuildArguments)
-    // {
-    //     let json:JSON = .object(with: arguments.encode(to:))
-
-    //     self.resume(returning: .ok(.init(content: .binary(json.utf8),
-    //         type: .application(.json, charset: .utf8),
-    //         gzip: false)))
-    // }
 }

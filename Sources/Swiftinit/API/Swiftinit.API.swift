@@ -10,9 +10,6 @@ extension Swiftinit
 extension Swiftinit.API
 {
     @inlinable public static
-    subscript(get:Get) -> URI { Swiftinit.Root.api / "\(get)" }
-
-    @inlinable public static
     subscript(put:Put) -> URI { Swiftinit.Root.api / "\(put)" }
 
     @inlinable public static

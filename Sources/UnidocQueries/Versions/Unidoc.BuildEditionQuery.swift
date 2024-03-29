@@ -4,13 +4,10 @@ import UnidocDB
 
 extension Unidoc
 {
-    @frozen public
     struct BuildEditionQuery
     {
-        @usableFromInline
         let edition:Unidoc.Edition
 
-        @inlinable public
         init(edition:Unidoc.Edition)
         {
             self.edition = edition
@@ -19,17 +16,12 @@ extension Unidoc
 }
 extension Unidoc.BuildEditionQuery:Mongo.PipelineQuery
 {
-    public
     typealias CollectionOrigin = Unidoc.DB.Packages
-    public
     typealias Collation = SimpleCollation
-    public
     typealias Iteration = Mongo.Single<Output>
 
-    public
     var hint:Mongo.CollectionIndex? { nil }
 
-    public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
         pipeline[stage: .match] = .init

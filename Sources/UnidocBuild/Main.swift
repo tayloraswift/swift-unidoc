@@ -47,6 +47,9 @@ enum Main
 
         switch options.tool
         {
+        case .builder:
+            try await swiftinit.builder()
+
         case .upgrade:
             try await swiftinit.upgrade(pretty: options.pretty)
 

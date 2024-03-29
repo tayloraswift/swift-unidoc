@@ -105,7 +105,7 @@ extension Unidoc.Client
         //  Building the package might take a long time, and the server might close the
         //  connection before the build is finished. So we do not try to keep this
         //  connection open.
-        let buildable:Unidoc.BuildArguments? = try await self.connect
+        let buildable:Unidoc.BuildSpecification? = try await self.connect
         {
             @Sendable (connection:Unidoc.Client.Connection) in
 
@@ -125,7 +125,7 @@ extension Unidoc.Client
                 return nil
             }
         }
-        if  let buildable:Unidoc.BuildArguments
+        if  let buildable:Unidoc.BuildSpecification
         {
             try await self.build(buildable,
                 pretty: pretty,
@@ -138,7 +138,7 @@ extension Unidoc.Client
     }
 
     private
-    func build(_ buildable:Unidoc.BuildArguments,
+    func build(_ buildable:Unidoc.BuildSpecification,
         pretty:Bool,
         action:Unidoc.Snapshot.PendingAction) async throws
     {
@@ -186,6 +186,24 @@ extension Unidoc.Client
 }
 extension Unidoc.Client
 {
+    func builder() async throws
+    {
+        building:
+        do
+        {
+            let buildable:Unidoc.BuildSpecification = try await self.connect
+            {
+                @Sendable (connection:Unidoc.Client.Connection) in
+
+                try await connection.get(from: "/ssgc/poll")
+            }
+
+            print(buildable)
+
+            continue building
+        }
+    }
+
     func upgrade(pretty:Bool) async throws
     {
         var unbuildable:[Unidoc.Edition: ()] = [:]
@@ -209,7 +227,7 @@ extension Unidoc.Client
                     continue
                 }
 
-                let buildable:Unidoc.BuildArguments
+                let buildable:Unidoc.BuildSpecification
                 do
                 {
                     buildable = try await self.connect

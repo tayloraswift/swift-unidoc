@@ -184,6 +184,17 @@ extension Swiftinit.IntegralRequest
             case "sitemap.xml":
                 ordering = .actor(Swiftinit.SitemapIndexEndpoint.init(tag: tag))
 
+            case Swiftinit.Root.ssgc.id:
+                guard
+                let query:URI.Query = uri.query,
+                let build:Unidoc.BuildPrompt = .init(query: query)
+                else
+                {
+                    return nil
+                }
+
+                ordering = .actor(Swiftinit.BuildPromptEndpoint.init(prompt: build))
+
             case _:
                 return nil
             }
@@ -196,9 +207,6 @@ extension Swiftinit.IntegralRequest
 
         switch root
         {
-        case Swiftinit.Root.api.id:
-            ordering = .get(api: trunk, path, with: uri.query?.parameters ?? [])
-
         case Swiftinit.Root.admin.id:
             ordering = .get(admin: trunk, path, tag: tag)
 
@@ -240,7 +248,8 @@ extension Swiftinit.IntegralRequest
             guard metadata.hostSupportsPublicAPI
             else
             {
-                ordering = .syncRedirect(.permanent(external: "https://api.swiftinit.org/render"))
+                ordering = .syncRedirect(.permanent(
+                    external: "https://api.swiftinit.org/render"))
                 break
             }
 
@@ -253,6 +262,16 @@ extension Swiftinit.IntegralRequest
             ordering = .syncRedirect(.permanent("""
                 \(Swiftinit.Root.docs)/\(trunk.prefix { $0 != "." })/all-symbols
                 """))
+
+        case Swiftinit.Root.ssgc.id:
+            guard trunk == "poll",
+            let user:Unidoc.UserSession = metadata.cookies.session
+            else
+            {
+                return nil
+            }
+
+            ordering = .actor(Swiftinit.BuilderPollEndpoint.init(id: user.account))
 
         case Swiftinit.Root.stats.id:
             ordering = .get(stats: trunk, path,

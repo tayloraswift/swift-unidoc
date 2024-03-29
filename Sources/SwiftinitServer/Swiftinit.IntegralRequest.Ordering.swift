@@ -90,62 +90,6 @@ extension Swiftinit.IntegralRequest.Ordering
     }
 
     static
-    func get(api trunk:String,
-        _ stem:ArraySlice<String>,
-        with parameters:[(key:String, value:String)]) -> Self?
-    {
-        guard
-        let trunk:Swiftinit.API.Get = .init(trunk)
-        else
-        {
-            return nil
-        }
-
-        let parameters:[String: String] = parameters.reduce(into: [:]) { $0[$1.key] = $1.value }
-
-        switch trunk
-        {
-        case .build:
-            if  let package:String = stem.first
-            {
-                let package:Symbol.Package = .init(package)
-                let subject:Unidoc.BuildRequest
-
-                if  let force:String = parameters["force"],
-                    let force:Unidoc.VersionSeries = .init(force)
-                {
-                    subject = .force(force)
-                }
-                else
-                {
-                    subject = .auto
-                }
-
-                return .actor(Swiftinit.BuilderEndpoint.request(subject, of: package))
-            }
-            else if
-                let package:String = parameters["package"],
-                let package:Unidoc.Package = .init(package),
-                let version:String = parameters["version"],
-                let version:Unidoc.Version = .init(version)
-            {
-                return .actor(Swiftinit.BuilderEndpoint.edition(.init(
-                    package: package,
-                    version: version)))
-            }
-
-        case .oldest:
-            if  let version:String = parameters["until"],
-                let version:PatchVersion = .init(version)
-            {
-                return .actor(Swiftinit.BuilderEndpoint.oldest(until: version))
-            }
-        }
-
-        return nil
-    }
-
-    static
     func get(asset trunk:String, tag:MD5?) -> Self?
     {
         let asset:Swiftinit.Asset? = .init(trunk)
@@ -631,12 +575,21 @@ extension Swiftinit.IntegralRequest.Ordering
                 """
                 button = "Rename package"
 
-            case .build:
+            case .build(_?):
                 heading = "Build package?"
                 prompt = """
-                This will add the package to the build queue.
+                A builder will select a recent version of the package once one becomes \
+                available. If you tag a new release in the meantime, it might build that \
+                instead.
                 """
                 button = "Build package"
+
+            case .build(nil):
+                heading = "Cancel build?"
+                prompt = """
+                You can cancel a build if it has not started yet.
+                """
+                button = "Cancel build"
             }
 
         case .userConfig:
