@@ -263,36 +263,41 @@ extension Unidoc.DB.PackageBuilds
     }
 
     public
-    func lintBuild(startedBefore:BSON.Millisecond,
-        with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
+    func lintBuilds(startedBefore:BSON.Millisecond,
+        with session:Mongo.Session) async throws -> Int
     {
-        let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.BuildMetadata>>.init(Self.name,
-                returning: .old)
+        let failure:Unidoc.BuildOutcome.Failure = Unidoc.BuildOutcome.Failure.init(
+            reason: .timeout)
+        let response:Mongo.UpdateResponse = try await session.run(
+            command: Mongo.Update<Mongo.Many, Unidoc.Package>.init(Self.name)
             {
-                $0[.query]
+                $0
                 {
-                    $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
-                    $0[Unidoc.BuildMetadata[.progress] / Unidoc.BuildProgress[.started]]
+                    $0[.multi] = true
+                    $0[.q]
                     {
-                        $0[.lt] = startedBefore
+                        $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
+                        $0[Unidoc.BuildMetadata[.progress] / Unidoc.BuildProgress[.started]]
+                        {
+                            $0[.lt] = startedBefore
+                        }
                     }
-                }
-                $0[.update]
-                {
-                    $0[.unset]
+                    $0[.u]
                     {
-                        $0[Unidoc.BuildMetadata[.progress]] = ()
-                    }
-                    $0[.set]
-                    {
-                        $0[Unidoc.BuildMetadata[.failure]] = Unidoc.BuildOutcome.Failure.init(
-                            reason: .timeout)
+                        $0[.unset]
+                        {
+                            $0[Unidoc.BuildMetadata[.progress]] = ()
+                        }
+                        $0[.set]
+                        {
+                            $0[Unidoc.BuildMetadata[.failure]] = failure
+                        }
                     }
                 }
             },
             against: self.database)
 
-        return status
+        let updates:Mongo.Updates = try response.updates()
+        return updates.selected
     }
 }
