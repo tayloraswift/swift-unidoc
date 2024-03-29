@@ -57,9 +57,10 @@ extension HTTP2Client.Connection
         try await self.fetch(.init(headers: request, body: nil))
     }
     public
-    func fetch(_ request:__owned HTTP2Client.Request) async throws -> HTTP2Client.Facet
+    func fetch(_ request:__owned HTTP2Client.Request,
+        timeout:Duration = .seconds(15)) async throws -> HTTP2Client.Facet
     {
-        try await self.fetch(reducing: [request], into: .init()) { $0 = $1 }
+        try await self.fetch(reducing: [request], into: .init(), timeout: timeout) { $0 = $1 }
     }
 
     public
@@ -71,6 +72,7 @@ extension HTTP2Client.Connection
     @inlinable public
     func fetch<Response>(reducing batch:__owned [HTTP2Client.Request],
         into initial:__owned Response,
+        timeout:Duration = .seconds(15),
         with combine:(inout Response, HTTP2Client.Facet) throws -> ()) async throws -> Response
     {
         if  batch.isEmpty
@@ -90,7 +92,7 @@ extension HTTP2Client.Connection
             async
             let _:Void =
             {
-                try await Task.sleep(for: .seconds(15))
+                try await Task.sleep(for: timeout)
                 source.finish(throwing: HTTP.RequestTimeoutError.init())
             }()
 

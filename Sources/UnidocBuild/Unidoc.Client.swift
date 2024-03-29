@@ -43,15 +43,6 @@ extension Unidoc.Client
 }
 extension Unidoc.Client
 {
-    @inlinable public
-    func get<Response>(_:Response.Type = Response.self,
-        from endpoint:String) async throws -> Response where Response:JSONDecodable
-    {
-        try await self.connect { try await $0.get(from: endpoint) }
-    }
-}
-extension Unidoc.Client
-{
     func build(local symbol:Symbol.Package,
         search:FilePath?,
         pretty:Bool,
@@ -195,7 +186,7 @@ extension Unidoc.Client
             {
                 @Sendable (connection:Unidoc.Client.Connection) in
 
-                try await connection.get(from: "/ssgc/poll")
+                try await connection.get(from: "/ssgc/poll", timeout: .seconds(60 * 60))
             }
 
             print(buildable)

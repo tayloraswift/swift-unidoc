@@ -34,20 +34,20 @@ extension Unidoc.Client.Connection
     func oldest(until abi:PatchVersion) async throws -> [Unidoc.Edition]
     {
         let prompt:Unidoc.BuildPrompt = ._allSymbolGraphs(upTo: abi, limit: 16)
-        return try await self.get(from: "/ssgc\(prompt.query)")
+        return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
     }
 
     func build(id:Unidoc.Edition) async throws -> Unidoc.BuildSpecification
     {
         let prompt:Unidoc.BuildPrompt = .edition(id)
-        return try await self.get(from: "/ssgc\(prompt.query)")
+        return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
     }
 
     func latest(_ force:Unidoc.VersionSeries?,
         of package:Symbol.Package) async throws -> Unidoc.BuildSpecification
     {
         let prompt:Unidoc.BuildPrompt = .packageNamed(package, series: force)
-        return try await self.get(from: "/ssgc\(prompt.query)")
+        return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
     }
 }
 
@@ -106,12 +106,13 @@ extension Unidoc.Client.Connection
 
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
-        from endpoint:String) async throws -> Response
+        from endpoint:String,
+        timeout:Duration) async throws -> Response
         where Response:JSONDecodable
     {
         var json:JSON = .init(utf8: [])
 
-        for buffer:ByteBuffer in try await self.fetch(endpoint, method: "GET")
+        for buffer:ByteBuffer in try await self.fetch(endpoint, method: "GET", timeout: timeout)
         {
             json.utf8 += buffer.readableBytesView
         }
@@ -125,7 +126,8 @@ extension Unidoc.Client.Connection
     func fetch(_ endpoint:String,
         method:String,
         body:ByteBuffer? = nil,
-        type:MediaType? = nil) async throws -> [ByteBuffer]
+        type:MediaType? = nil,
+        timeout:Duration = .seconds(15)) async throws -> [ByteBuffer]
     {
         var endpoint:String = endpoint
         var message:String = ""
@@ -145,8 +147,9 @@ extension Unidoc.Client.Connection
             }
 
             let response:HTTP2Client.Facet = try await self.http2.fetch(.init(
-                headers: headers,
-                body: body))
+                    headers: headers,
+                    body: body),
+                timeout: timeout)
 
             switch response.status
             {

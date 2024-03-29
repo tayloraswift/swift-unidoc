@@ -38,5 +38,8 @@ extension Unidoc.BuildTagQuery:Mongo.PipelineQuery
         pipeline.loadTags(series: self.version,
             from: Output[.package],
             into: Output[.version])
+
+        //  Unbox single-element array.
+        pipeline[stage: .unwind] = Output[.version]
     }
 }
