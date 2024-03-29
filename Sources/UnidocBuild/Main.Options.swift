@@ -78,7 +78,10 @@ extension Main.Options
             case "--force-prerelease", "-e":
                 options.force = .prerelease
 
-            case "--upgrade":
+            case "--builder", "-b":
+                options.tool = .builder
+
+            case "--upgrade", "-a":
                 options.tool = .upgrade
 
             case let option:

@@ -33,25 +33,21 @@ extension Unidoc.Client.Connection
 {
     func oldest(until abi:PatchVersion) async throws -> [Unidoc.Edition]
     {
-        try await self.get(from: "/api/oldest?until=\(abi)")
+        let prompt:Unidoc.BuildPrompt = ._allSymbolGraphs(upTo: abi, limit: 16)
+        return try await self.get(from: "/ssgc\(prompt.query)")
     }
 
-    func build(id:Unidoc.Edition) async throws -> Unidoc.BuildArguments
+    func build(id:Unidoc.Edition) async throws -> Unidoc.BuildSpecification
     {
-        try await self.get(from: "/api/build?package=\(id.package)&version=\(id.version)")
+        let prompt:Unidoc.BuildPrompt = .edition(id)
+        return try await self.get(from: "/ssgc\(prompt.query)")
     }
 
     func latest(_ force:Unidoc.VersionSeries?,
-        of package:Symbol.Package) async throws -> Unidoc.BuildArguments
+        of package:Symbol.Package) async throws -> Unidoc.BuildSpecification
     {
-        if  let force:Unidoc.VersionSeries
-        {
-            try await self.get(from: "/api/build/\(package)?force=\(force)")
-        }
-        else
-        {
-            try await self.get(from: "/api/build/\(package)")
-        }
+        let prompt:Unidoc.BuildPrompt = .packageNamed(package, series: force)
+        return try await self.get(from: "/ssgc\(prompt.query)")
     }
 }
 

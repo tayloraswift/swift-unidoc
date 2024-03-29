@@ -59,8 +59,11 @@ extension Unidoc.DB.PackageBuilds:Mongo.CollectionModel
 extension Unidoc.DB.PackageBuilds
 {
     public
-    func selectBuild(with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
+    func selectBuild(await awaits:Bool,
+        with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
     {
+        print("Selecting build...")
+
         //  Find a build, any build...
         if  let build:Unidoc.BuildMetadata = try await session.run(
             command: Mongo.Find<Mongo.Single<Unidoc.BuildMetadata>>.init(Self.name, limit: 1)
@@ -74,6 +77,12 @@ extension Unidoc.DB.PackageBuilds
             against: self.database)
         {
             return build
+        }
+
+        guard awaits
+        else
+        {
+            return nil
         }
 
         let startTime:BSON.Timestamp? = session.preconditionTime
@@ -103,6 +112,7 @@ extension Unidoc.DB.PackageBuilds
         {
             for try await events:[ChangeEvent] in $0
             {
+                print(events)
                 for event:ChangeEvent in events
                 {
                     switch event.operation
@@ -122,7 +132,7 @@ extension Unidoc.DB.PackageBuilds
     func submitBuild(
         request:Unidoc.BuildRequest,
         package:Unidoc.Package,
-        with session:Mongo.Session) async throws
+        with session:Mongo.Session) async throws -> Bool
     {
         do
         {
@@ -141,6 +151,8 @@ extension Unidoc.DB.PackageBuilds
                     $0[.update] = Unidoc.BuildMetadata.init(id: package, request: request)
                 },
                 against: self.database)
+
+            return true
         }
         catch let error as Mongo.ServerError
         {
@@ -150,7 +162,33 @@ extension Unidoc.DB.PackageBuilds
             {
                 throw error
             }
+
+            return false
         }
+    }
+
+    public
+    func cancelBuild(
+        package:Unidoc.Package,
+        with session:Mongo.Session) async throws -> Bool
+    {
+        let deleted:Mongo.DeleteResponse = try await session.run(
+            command: Mongo.Delete<Mongo.One>.init(Self.name)
+            {
+                $0
+                {
+                    $0[.q]
+                    {
+                        $0[Unidoc.BuildMetadata[.id]] = package
+                        $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = false }
+                    }
+                    $0[.limit] = .one
+                }
+            },
+            against: self.database)
+
+        let deletions:Mongo.Deletions = try deleted.deletions()
+        return deletions.deleted != 0
     }
 
     public
@@ -192,24 +230,44 @@ extension Unidoc.DB.PackageBuilds
     public
     func finishBuild(
         package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Mongo.Deletions?
+        failure:Unidoc.BuildOutcome.Failure?,
+        with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
     {
-        let deleted:Mongo.DeleteResponse = try await session.run(
-            command: Mongo.Delete<Mongo.One>.init(Self.name)
+        let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.BuildMetadata>>.init(Self.name,
+                returning: .old)
             {
-                $0
+                $0[.query]
                 {
-                    $0[.q]
+                    $0[Unidoc.BuildMetadata[.id]] = package
+                    $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
+                }
+                $0[.update]
+                {
+                    if  let failure:Unidoc.BuildOutcome.Failure = failure
                     {
-                        $0[Unidoc.BuildMetadata[.id]] = package
-                        $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
+                        $0[.set]
+                        {
+                            $0[Unidoc.BuildMetadata[.failure]] = failure
+                        }
+                        $0[.unset]
+                        {
+                            $0[Unidoc.BuildMetadata[.progress]] = ()
+                        }
                     }
-                    $0[.limit] = .one
+                    else
+                    {
+                        $0[.unset]
+                        {
+                            $0[Unidoc.BuildMetadata[.progress]] = ()
+                            $0[Unidoc.BuildMetadata[.failure]] = ()
+                        }
+                    }
                 }
             },
             against: self.database)
 
-        return try deleted.deletions()
+        return status
     }
 
     public

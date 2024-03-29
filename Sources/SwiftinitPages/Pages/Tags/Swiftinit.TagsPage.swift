@@ -353,14 +353,27 @@ extension Swiftinit.TagsPage
             {
                 if  case _? = self.build?.progress
                 {
-                    $0[.div] = "Request build"
+                    $0[.div]
+                    {
+                        $0.title = "You cannot cancel a build that has already started!"
+                    } = "Cancel build"
                     $0[.div] = "Queued"
                     $0[.div] { $0.class = "phase" } = "Started"
                 }
                 else if
                     case _? = self.build?.request
                 {
-                    $0[.div] = "Request build"
+                    $0[.form]
+                    {
+                        $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                        $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
+                        $0.method = "post"
+                    } = ConfigButton.init(package: self.package.id,
+                        update: "build",
+                        value: "cancel",
+                        label: "Cancel build",
+                        from: self.location)
+
                     $0[.div] { $0.class = "phase" } = "Queued"
                     $0[.div]
                 }
@@ -372,8 +385,8 @@ extension Swiftinit.TagsPage
                         $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
                         $0.method = "post"
                     } = ConfigButton.init(package: self.package.id,
-                        update: "rebuild",
-                        value: "true",
+                        update: "build",
+                        value: "rebuild",
                         label: "Request build",
                         from: self.location)
 

@@ -88,10 +88,21 @@ extension Swiftinit.PackageConfigEndpoint:Swiftinit.RestrictedEndpoint
             updated = changed != nil ? symbol : nil
             rebuildPackageList = changed ?? false
 
-        case .build(let request):
-            try await server.db.packageBuilds.submitBuild(request: request,
+        case .build(let request?):
+            _ = try await server.db.packageBuilds.submitBuild(request: request,
                 package: self.package,
                 with: session)
+
+            updated = nil
+            rebuildPackageList = false
+
+        case .build(nil):
+            guard try await server.db.packageBuilds.cancelBuild(package: self.package,
+                with: session)
+            else
+            {
+                return .resource("Cannot cancel a build that has already started", status: 409)
+            }
 
             updated = nil
             rebuildPackageList = false
