@@ -62,8 +62,6 @@ extension Unidoc.DB.PackageBuilds
     func selectBuild(await awaits:Bool,
         with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
     {
-        print("Selecting build...")
-
         //  Find a build, any build...
         if  let build:Unidoc.BuildMetadata = try await session.run(
             command: Mongo.Find<Mongo.Single<Unidoc.BuildMetadata>>.init(Self.name, limit: 1)
@@ -91,14 +89,9 @@ extension Unidoc.DB.PackageBuilds
         typealias ChangeEvent = Mongo.ChangeEvent<Unidoc.BuildMetadata,
             Mongo.ChangeUpdate<Unidoc.BuildMetadataDelta, Unidoc.Package>>
 
-        defer
-        {
-            print("Cancelling change stream...")
-        }
-
         return try await session.run(
             command: Mongo.Aggregate<Mongo.Cursor<ChangeEvent>>.init(Self.name,
-                tailing: .init(timeout: 5_000, awaits: true))
+                tailing: .init(timeout: 30_000, awaits: true))
             {
                 $0[stage: .changeStream]
                 {
@@ -112,7 +105,6 @@ extension Unidoc.DB.PackageBuilds
         {
             for try await events:[ChangeEvent] in $0
             {
-                print(events)
                 for event:ChangeEvent in events
                 {
                     switch event.operation

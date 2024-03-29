@@ -240,7 +240,7 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
         switch request.ordering
         {
         case .actor(let interactive):
-            return await self.response(metadata: request.metadata, endpoint: interactive)
+            return try await self.response(metadata: request.metadata, endpoint: interactive)
 
         case .update(let procedural):
             if  let failure:HTTP.ServerResponse = try await self.clearance(
@@ -288,10 +288,12 @@ extension Swiftinit.ServerLoop
         }
     }
 
+    /// As this function participates in cooperative cancellation, it can throw, and the only
+    /// error it can throw is a ``CancellationError``.
     private
     func response(
         metadata:Swiftinit.IntegralRequest.Metadata,
-        endpoint:any Swiftinit.InteractiveEndpoint) async -> HTTP.ServerResponse
+        endpoint:any Swiftinit.InteractiveEndpoint) async throws -> HTTP.ServerResponse
     {
         let response:HTTP.ServerResponse
         let duration:Duration
@@ -312,6 +314,10 @@ extension Swiftinit.ServerLoop
                     gzip: false))
 
             duration = .now - initiated
+        }
+        catch let error as CancellationError
+        {
+            throw error
         }
         catch let error
         {

@@ -361,19 +361,31 @@ extension HTTP.ServerLoop
                 try await stream.frames.executeThenClose
                 {
                     (
-                        remote:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
-                        writer:NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
+                        inbound:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
+                        outbound:NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
                     )   in
+
+                    let request:Task<HTTP.ServerResponse, any Error> = .init
+                    {
+                        try await self.respond(to: inbound,
+                                address: address,
+                                service: service,
+                                as: Authority.self)
+                    }
+                    stream.frames.channel.closeFuture.whenComplete
+                    {
+                        _ in request.cancel()
+                    }
 
                     let message:HTTP.ServerMessage<Authority, HPACKHeaders>
                     do
                     {
-                        message = .init(
-                            response: try await self.respond(to: remote,
-                                address: address,
-                                service: service,
-                                as: Authority.self),
+                        message = .init(response: try await request.value,
                             using: stream.frames.channel.allocator)
+                    }
+                    catch is CancellationError
+                    {
+                        return
                     }
                     catch let error
                     {
@@ -384,7 +396,7 @@ extension HTTP.ServerLoop
                             using: stream.frames.channel.allocator)
                     }
 
-                    try await writer.send(message)
+                    try await outbound.send(message)
                 }
 
             case .quiesce:
