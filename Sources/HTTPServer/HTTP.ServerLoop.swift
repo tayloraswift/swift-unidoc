@@ -30,7 +30,7 @@ extension HTTP
         func clearance(for request:StreamedRequest) async throws -> HTTP.ServerResponse?
 
         func response(for request:StreamedRequest,
-            with body:consuming [UInt8]) async throws -> HTTP.ServerResponse
+            with body:/* consuming */ [UInt8]) async throws -> HTTP.ServerResponse
 
         func response(for request:IntegralRequest) async throws -> HTTP.ServerResponse
     }
