@@ -24,7 +24,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.SitemapIndexEntry:MongoMasterCodingModel
+extension Unidoc.SitemapIndexEntry:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable

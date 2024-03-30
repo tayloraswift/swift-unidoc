@@ -5,6 +5,7 @@ import Media
 import NIOCore
 import NIOHPACK
 import SemanticVersions
+import SymbolGraphs
 import Symbols
 import UnidocAPI
 import UnidocRecords
@@ -33,25 +34,57 @@ extension Unidoc.Client.Connection
 {
     func oldest(until abi:PatchVersion) async throws -> [Unidoc.Edition]
     {
-        try await self.get(from: "/api/oldest?until=\(abi)")
+        let prompt:Unidoc.BuildLabelsPrompt = ._allSymbolGraphs(upTo: abi, limit: 16)
+        return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
     }
 
-    func build(id:Unidoc.Edition) async throws -> Unidoc.BuildArguments
+    func build(id:Unidoc.Edition) async throws -> Unidoc.BuildLabels
     {
-        try await self.get(from: "/api/build?package=\(id.package)&version=\(id.version)")
+        let prompt:Unidoc.BuildLabelsPrompt = .edition(id)
+        return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
     }
 
-    func latest(_ force:Unidoc.BuildLatest?,
-        of package:Symbol.Package) async throws -> Unidoc.BuildArguments
+    func latest(_ force:Unidoc.VersionSeries?,
+        of package:Symbol.Package) async throws -> Unidoc.BuildLabels
     {
-        if  let force:Unidoc.BuildLatest
-        {
-            try await self.get(from: "/api/build/\(package)?force=\(force)")
-        }
-        else
-        {
-            try await self.get(from: "/api/build/\(package)")
-        }
+        let prompt:Unidoc.BuildLabelsPrompt = .packageNamed(package, series: force)
+        return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
+    }
+
+    func upload(_ unlabeled:consuming SymbolGraphObject<Void>) async throws
+    {
+        let bson:BSON.Document = .init(encoding: unlabeled)
+
+        print("Uploading unlabeled symbol graph...")
+
+        let _:Unidoc.UploadStatus = try await self.put(bson: bson,
+            to: "/ssgc/\(Unidoc.BuildOutcome.successUnlabeled)")
+
+        print("Successfully uploaded symbol graph!")
+    }
+
+    func upload(_ labeled:consuming Unidoc.Snapshot) async throws
+    {
+        let bson:BSON.Document = .init(encoding: labeled)
+
+        print("Uploading labeled symbol graph...")
+
+        let _:Unidoc.UploadStatus = try await self.put(bson: bson,
+            to: "/ssgc/\(Unidoc.BuildOutcome.success)")
+
+        print("Successfully uploaded symbol graph!")
+    }
+
+    func upload(_ report:consuming Unidoc.BuildFailureReport) async throws
+    {
+        let bson:BSON.Document = .init(encoding: report)
+
+        print("Uploading build failure report...")
+
+        let _:Unidoc.UploadStatus = try await self.put(bson: bson,
+            to: "/ssgc/\(Unidoc.BuildOutcome.failure)")
+
+        print("Successfully uploaded build failure report!")
     }
 }
 
@@ -110,12 +143,13 @@ extension Unidoc.Client.Connection
 
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
-        from endpoint:String) async throws -> Response
+        from endpoint:String,
+        timeout:Duration) async throws -> Response
         where Response:JSONDecodable
     {
         var json:JSON = .init(utf8: [])
 
-        for buffer:ByteBuffer in try await self.fetch(endpoint, method: "GET")
+        for buffer:ByteBuffer in try await self.fetch(endpoint, method: "GET", timeout: timeout)
         {
             json.utf8 += buffer.readableBytesView
         }
@@ -129,7 +163,8 @@ extension Unidoc.Client.Connection
     func fetch(_ endpoint:String,
         method:String,
         body:ByteBuffer? = nil,
-        type:MediaType? = nil) async throws -> [ByteBuffer]
+        type:MediaType? = nil,
+        timeout:Duration = .seconds(15)) async throws -> [ByteBuffer]
     {
         var endpoint:String = endpoint
         var message:String = ""
@@ -149,8 +184,9 @@ extension Unidoc.Client.Connection
             }
 
             let response:HTTP2Client.Facet = try await self.http2.fetch(.init(
-                headers: headers,
-                body: body))
+                    headers: headers,
+                    body: body),
+                timeout: timeout)
 
             switch response.status
             {

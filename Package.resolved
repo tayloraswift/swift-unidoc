@@ -1,5 +1,5 @@
 {
-  "originHash" : "7954e295b3d3d63f82f7264fe4196eb0ffe4ce0bdc480d565acf1456f055d4dd",
+  "originHash" : "bcaa8143aaee6f5fcf364578c633da2d904aaec5deff8f23f5a36ad5285c399b",
   "pins" : [
     {
       "identity" : "swift-atomics",
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "ebd664a26c62da944ca84815716d52d6f97cece3",
-        "version" : "0.13.2"
+        "revision" : "f9abb5a43b2d05b06dc8f30a8f8fc36e78e22fe1",
+        "version" : "0.14.0"
       }
     },
     {

@@ -1,3 +1,4 @@
+import BSON
 import FNV1
 import GitHubAPI
 import MongoDB
@@ -11,6 +12,7 @@ import SourceDiagnostics
 import UnidocLinker
 @_spi(testable)
 import UnidocRecords
+import UnixTime
 
 @available(*, deprecated, renamed: "Unidoc.DB")
 public
@@ -47,6 +49,8 @@ extension Unidoc.DB
     @inlinable public
     var packageAliases:PackageAliases { .init(database: self.id) }
     @inlinable public
+    var packageBuilds:PackageBuilds { .init(database: self.id) }
+    @inlinable public
     var packages:Packages { .init(database: self.id) }
     @inlinable public
     var editions:Editions { .init(database: self.id) }
@@ -80,6 +84,7 @@ extension Unidoc.DB:Mongo.DatabaseModel
         try await self.realmAliases.setup(with: session)
         try await self.realms.setup(with: session)
         try await self.packageAliases.setup(with: session)
+        try await self.packageBuilds.setup(with: session)
         try await self.packages.setup(with: session)
         try await self.editions.setup(with: session)
         try await self.snapshots.setup(with: session)
@@ -701,6 +706,34 @@ extension Unidoc.DB
             trees: mesh.trees)
 
         return volume
+    }
+}
+extension Unidoc.DB
+{
+    public
+    func rights(
+        account:Unidoc.Account,
+        package:Unidoc.Package,
+        with session:Mongo.Session) async throws -> Unidoc.PackageRights?
+    {
+        //  Don’t really have a smarter way to check this except loading the entire package
+        //  metadata.
+        guard
+        let package:Unidoc.PackageMetadata = try await self.packages.find(id: package,
+            with: session)
+        else
+        {
+            return nil
+        }
+
+        if  case account? = package.repo?.account
+        {
+            return .owner
+        }
+        else
+        {
+            return .reader
+        }
     }
 }
 extension Unidoc.DB

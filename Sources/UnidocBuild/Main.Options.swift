@@ -13,7 +13,7 @@ extension Main
 
         var pretty:Bool
         var swift:String?
-        var force:Unidoc.BuildLatest?
+        var force:Unidoc.VersionSeries?
         var input:String?
 
         var tool:Tool
@@ -78,7 +78,10 @@ extension Main.Options
             case "--force-prerelease", "-e":
                 options.force = .prerelease
 
-            case "--upgrade":
+            case "--builder", "-b":
+                options.tool = .builder
+
+            case "--upgrade", "-a":
                 options.tool = .upgrade
 
             case let option:

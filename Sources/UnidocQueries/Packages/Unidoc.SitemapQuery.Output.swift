@@ -22,7 +22,7 @@ extension Unidoc.SitemapQuery
         }
     }
 }
-extension Unidoc.SitemapQuery.Output:MongoMasterCodingModel
+extension Unidoc.SitemapQuery.Output:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable

@@ -22,7 +22,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.RealmMetadata:MongoMasterCodingModel
+extension Unidoc.RealmMetadata:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable

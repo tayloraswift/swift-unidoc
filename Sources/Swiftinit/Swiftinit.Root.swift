@@ -21,6 +21,7 @@ extension Swiftinit
         case pdct
         case realm
         case really
+        case ssgc
         case stats
         case tags
         case telescope
@@ -66,6 +67,7 @@ extension Swiftinit.Root:Identifiable
         case .pdct:         "pdct"
         case .realm:        "realm"
         case .really:       "really"
+        case .ssgc:         "ssgc"
         case .stats:        "stats"
         case .tags:         "tags"
         case .telescope:    "telescope"

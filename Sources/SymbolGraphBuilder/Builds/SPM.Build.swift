@@ -206,7 +206,8 @@ extension SPM.Build:DocumentationBuild
 
         let manifestVersions:[MinorVersion] = try self.listExtraManifests()
         var manifest:SPM.Manifest = try await swift.manifest(package: self.root,
-            json: self.artifacts.path / "\(self.id.package).package.json")
+            json: self.artifacts.path / "\(self.id.package).package.json",
+            leaf: true)
 
         print("""
             Resolving dependencies for '\(self.id.package)' \
@@ -222,8 +223,16 @@ extension SPM.Build:DocumentationBuild
             self.artifacts.path / "build.log"
         )
 
-        let pins:[SPM.DependencyPin] = try await swift.resolve(package: self.root,
-            log: log.resolution)
+        let pins:[SPM.DependencyPin]
+
+        do
+        {
+            pins = try await swift.resolve(package: self.root, log: log.resolution)
+        }
+        catch SystemProcessError.exit(let code, _)
+        {
+            throw SPM.BuildError.swift_package_update(code)
+        }
 
         let scratch:SPM.BuildDirectory
         do
@@ -253,7 +262,8 @@ extension SPM.Build:DocumentationBuild
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
 
             let manifest:SPM.Manifest = try await swift.manifest(package: checkout,
-                json: self.artifacts.path / "\(pin.identity).package.json")
+                json: self.artifacts.path / "\(pin.identity).package.json",
+                leaf: false)
 
             for product:SPM.Manifest.Product in manifest.products
             {

@@ -9,7 +9,7 @@ extension Unidoc
 {
     public
     protocol AliasingQuery<CollectionOrigin, CollectionTarget>:Mongo.PipelineQuery
-        where   CollectionOrigin.Element:MongoMasterCodingModel<AliasKey>,
+        where   CollectionOrigin.Element:Mongo.MasterCodingModel<AliasKey>,
                 Collation == SimpleCollation
     {
         override

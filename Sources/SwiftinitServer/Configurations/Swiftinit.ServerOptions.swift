@@ -75,6 +75,7 @@ extension Swiftinit.ServerOptions
         {
             list.append(Swiftinit.AirdropPlugin.init())
             list.append(Swiftinit.LinkerPlugin.init(bucket: self.bucket))
+            list.append(Swiftinit.LinterPlugin.init())
         }
 
         guard

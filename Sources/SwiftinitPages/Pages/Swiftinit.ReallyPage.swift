@@ -57,7 +57,7 @@ extension Swiftinit.ReallyPage:Swiftinit.ApplicationPage
                 $0[.p] = self.prompt
                 $0[.p]
                 {
-                    $0[.button] { $0.type = "submit" } = self.button
+                    $0[.button] { $0.class = "area" ; $0.type = "submit" } = self.button
                 }
 
                 guard

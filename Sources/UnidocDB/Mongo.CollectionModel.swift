@@ -542,7 +542,7 @@ extension Mongo.CollectionModel
     }
 }
 
-extension Mongo.CollectionModel where Element:MongoMasterCodingModel
+extension Mongo.CollectionModel where Element:Mongo.MasterCodingModel
 {
     @discardableResult
     func update(field:Element.CodingKey,

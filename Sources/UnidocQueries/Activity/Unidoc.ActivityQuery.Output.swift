@@ -23,7 +23,7 @@ extension Unidoc.ActivityQuery
         }
     }
 }
-extension Unidoc.ActivityQuery.Output:MongoMasterCodingModel
+extension Unidoc.ActivityQuery.Output:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable

@@ -135,14 +135,11 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
                     }
                 }
 
-                $0[.div, { $0.class = "more" }]
+                $0[.a]
                 {
-                    $0[.a]
-                    {
-                        $0.class = "button"
-                        $0.href = "\(Swiftinit.Tags[self.volume.symbol.package])"
-                    } = "Repo details and more versions"
-                }
+                    $0.class = "area"
+                    $0.href = "\(Swiftinit.Tags[self.volume.symbol.package])"
+                } = "Repo details and more versions"
             }
 
             if !self.volume.dependencies.isEmpty

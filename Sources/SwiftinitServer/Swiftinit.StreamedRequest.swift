@@ -10,10 +10,10 @@ extension Swiftinit
 {
     struct StreamedRequest:Sendable
     {
-        let endpoint:Swiftinit.AnyEndpoint
+        let endpoint:any ProceduralEndpoint
         let cookies:Swiftinit.Cookies
 
-        init(endpoint:Swiftinit.AnyEndpoint, cookies:Swiftinit.Cookies)
+        init(endpoint:any ProceduralEndpoint, cookies:Swiftinit.Cookies)
         {
             self.endpoint = endpoint
             self.cookies = cookies
@@ -33,35 +33,26 @@ extension Swiftinit.StreamedRequest:HTTP.ServerStreamedRequest
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
 
         guard
-        let root:String = path.popFirst(),
-        let trunk:String = path.popFirst(),
+        case Swiftinit.Root.ssgc.id? = path.popFirst(),
+        let outcome:String = path.popFirst(),
+        let outcome:Unidoc.BuildOutcome = .init(outcome)
+        else
+        {
+            return nil
+        }
+
+        //  Validate content type.
+        guard
         let type:String = headers["content-type"].first,
-        let type:ContentType = .init(type)
+        let type:ContentType = .init(type),
+        case .media(.application(.bson, charset: nil)) = type
         else
         {
             return nil
         }
 
-        let cookies:Swiftinit.Cookies = .init(header: headers["cookie"])
-
-        let endpoint:Swiftinit.AnyEndpoint?
-
-        switch root
-        {
-        case Swiftinit.Root.api.id:
-            endpoint = try? .put(api: trunk, type: type)
-
-        case _:
-            return nil
-        }
-
-        if  let endpoint:Swiftinit.AnyEndpoint
-        {
-            self.init(endpoint: endpoint, cookies: cookies)
-        }
-        else
-        {
-            return nil
-        }
+        self.init(
+            endpoint: Swiftinit.BuilderUploadEndpoint.init(outcome: outcome),
+            cookies: .init(header: headers["cookie"]))
     }
 }

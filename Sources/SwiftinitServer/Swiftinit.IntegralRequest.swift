@@ -15,13 +15,13 @@ extension Swiftinit
 {
     struct IntegralRequest:Sendable
     {
-        let endpoint:AnyEndpoint
         let metadata:Metadata
+        let ordering:Ordering
 
-        init(endpoint:AnyEndpoint, metadata:Metadata)
+        init(metadata:Metadata, ordering:Ordering)
         {
-            self.endpoint = endpoint
             self.metadata = metadata
+            self.ordering = ordering
         }
     }
 }
@@ -138,9 +138,9 @@ extension Swiftinit.IntegralRequest
             let parameters:Swiftinit.PipelineParameters = .init(uri.query?.parameters)
 
             self.init(
-                endpoint: .explainable(Swiftinit.HomeEndpoint.init(query: .init(limit: 16)),
-                    parameters: parameters),
-                metadata: metadata)
+                metadata: metadata,
+                ordering: .explainable(Swiftinit.HomeEndpoint.init(query: .init(limit: 16)),
+                    parameters: parameters))
 
             return
         }
@@ -149,7 +149,7 @@ extension Swiftinit.IntegralRequest
         let trunk:String = path.popFirst()
         else
         {
-            let endpoint:Swiftinit.AnyEndpoint
+            let ordering:Ordering
 
             switch root
             {
@@ -158,108 +158,127 @@ extension Swiftinit.IntegralRequest
                 let user:Unidoc.UserSession = metadata.cookies.session
                 else
                 {
-                    endpoint = .redirect(.temporary("\(Swiftinit.Root.login)"))
+                    ordering = .syncRedirect(.temporary("\(Swiftinit.Root.login)"))
                     break
                 }
 
-                endpoint = .explainable(Swiftinit.AccountEndpoint.init(
+                ordering = .explainable(Swiftinit.AccountEndpoint.init(
                         query: .init(session: user)),
                     parameters: .init(uri.query?.parameters, tag: tag))
 
             case Swiftinit.Root.admin.id:
-                endpoint = .interactive(Swiftinit.DashboardEndpoint.master)
+                ordering = .actor(Swiftinit.DashboardEndpoint.master)
 
             case Swiftinit.Root.login.id:
-                endpoint = .interactive(Swiftinit.LoginEndpoint.init())
+                ordering = .actor(Swiftinit.LoginEndpoint.init())
 
             case "robots.txt":
                 let parameters:Swiftinit.PipelineParameters = .init(uri.query?.parameters,
                     tag: tag)
 
-                endpoint = .explainable(Swiftinit.TextEndpoint.init(query: .init(
+                ordering = .explainable(Swiftinit.TextEndpoint.init(query: .init(
                         tag: parameters.tag,
                         id: .robots_txt)),
                     parameters: parameters)
 
             case "sitemap.xml":
-                endpoint = .interactive(Swiftinit.SitemapIndexEndpoint.init(tag: tag))
+                ordering = .actor(Swiftinit.SitemapIndexEndpoint.init(tag: tag))
+
+            case Swiftinit.Root.ssgc.id:
+                guard
+                let query:URI.Query = uri.query,
+                let build:Unidoc.BuildLabelsPrompt = .init(query: query)
+                else
+                {
+                    return nil
+                }
+
+                ordering = .actor(Swiftinit.BuilderLabelEndpoint.init(prompt: build))
 
             case _:
                 return nil
             }
 
-            self.init(endpoint: endpoint, metadata: metadata)
+            self.init(metadata: metadata, ordering: ordering)
             return
         }
 
-        let endpoint:Swiftinit.AnyEndpoint?
+        let ordering:Ordering?
 
         switch root
         {
-        case Swiftinit.Root.api.id:
-            endpoint = .get(api: trunk, path, with: uri.query?.parameters ?? [])
-
         case Swiftinit.Root.admin.id:
-            endpoint = .get(admin: trunk, path, tag: tag)
+            ordering = .get(admin: trunk, path, tag: tag)
 
         case Swiftinit.Root.asset.id:
-            endpoint = .get(asset: trunk, tag: tag)
+            ordering = .get(asset: trunk, tag: tag)
 
         case "auth":
-            endpoint = .get(auth: trunk,
+            ordering = .get(auth: trunk,
                 with: .init(uri.query?.parameters))
 
         case Swiftinit.Root.blog.id:
-            endpoint = .get(blog: "Articles", trunk,
+            ordering = .get(blog: "Articles", trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case Swiftinit.Root.docs.id, Swiftinit.Root.docc.id, Swiftinit.Root.hist.id:
-            endpoint = .get(docs: trunk, path,
+            ordering = .get(docs: trunk, path,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case Swiftinit.Root.help.id:
-            endpoint = .get(blog: "Help", trunk,
+            ordering = .get(blog: "Help", trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case Swiftinit.Root.lunr.id:
-            endpoint = .get(lunr: trunk,
+            ordering = .get(lunr: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case Swiftinit.Root.plugin.id:
-            endpoint = .interactive(Swiftinit.DashboardEndpoint.plugin(trunk))
+            ordering = .actor(Swiftinit.DashboardEndpoint.plugin(trunk))
 
         case Swiftinit.Root.ptcl.id:
-            endpoint = .get(ptcl: trunk, path,
+            ordering = .get(ptcl: trunk, path,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case Swiftinit.Root.realm.id:
-            endpoint = .get(realm: trunk,
+            ordering = .get(realm: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case "render":
             guard metadata.hostSupportsPublicAPI
             else
             {
-                endpoint = .redirect(.permanent(external: "https://api.swiftinit.org/render"))
+                ordering = .syncRedirect(.permanent(
+                    external: "https://api.swiftinit.org/render"))
                 break
             }
 
-            endpoint = .interactive(Swiftinit.UserRenderEndpoint.init(volume: .init(trunk),
+            ordering = .actor(Swiftinit.UserRenderEndpoint.init(volume: .init(trunk),
                 shoot: .init(path: path),
                 query: uri.query?.parameters))
 
         //  Deprecated route.
         case "sitemaps":
-            endpoint = .redirect(.permanent("""
+            ordering = .syncRedirect(.permanent("""
                 \(Swiftinit.Root.docs)/\(trunk.prefix { $0 != "." })/all-symbols
                 """))
 
+        case Swiftinit.Root.ssgc.id:
+            guard trunk == "poll",
+            let user:Unidoc.UserSession = metadata.cookies.session
+            else
+            {
+                return nil
+            }
+
+            ordering = .actor(Swiftinit.BuilderPollEndpoint.init(id: user.account))
+
         case Swiftinit.Root.stats.id:
-            endpoint = .get(stats: trunk, path,
+            ordering = .get(stats: trunk, path,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case Swiftinit.Root.tags.id:
-            endpoint = .get(tags: trunk,
+            ordering = .get(tags: trunk,
                 with: .init(uri.query?.parameters,
                     //  OK to do this, if someone forges a cookie, they can see the admin
                     //  controls, but they can't do anything with them.
@@ -267,24 +286,24 @@ extension Swiftinit.IntegralRequest
                     tag: tag))
 
         case Swiftinit.Root.telescope.id:
-            endpoint = .get(telescope: trunk,
+            ordering = .get(telescope: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case "reference":
-            endpoint = .get(legacy: trunk, path,
+            ordering = .get(legacy: trunk, path,
                 with: .init(uri.query?.parameters))
 
         case "learn":
-            endpoint = .get(legacy: trunk, path,
+            ordering = .get(legacy: trunk, path,
                 with: .init(uri.query?.parameters))
 
         case _:
             return nil
         }
 
-        if  let endpoint:Swiftinit.AnyEndpoint
+        if  let ordering:Ordering
         {
-            self.init(endpoint: endpoint, metadata: metadata)
+            self.init(metadata: metadata, ordering: ordering)
         }
         else
         {
@@ -311,21 +330,23 @@ extension Swiftinit.IntegralRequest
             return nil
         }
 
-        let endpoint:Swiftinit.AnyEndpoint?
+        let ordering:Swiftinit.IntegralRequest.Ordering?
 
         if  let trunk:String = path.popFirst()
         {
             switch root
             {
             case Swiftinit.Root.admin.id:
-                endpoint = try? .post(admin: trunk, path, body: body, type: type)
+                ordering = try? .post(admin: trunk, path, body: body, type: type)
 
             case Swiftinit.Root.api.id:
-                endpoint = try? .post(api: trunk, body: body, type: type)
-
+                ordering = try? .post(api: trunk,
+                    body: body,
+                    type: type,
+                    user: metadata.cookies.session?.account)
 
             case Swiftinit.Root.really.id:
-                endpoint = try? .post(really: trunk, body: body, type: type)
+                ordering = try? .post(really: trunk, body: body, type: type)
 
             case _:
                 return nil
@@ -335,16 +356,16 @@ extension Swiftinit.IntegralRequest
             let query:URI.Query = try? .parse(parameters: body),
             let path:String = query.parameters.first?.value
         {
-            endpoint = .interactive(Swiftinit.LoginEndpoint.init(from: path))
+            ordering = .actor(Swiftinit.LoginEndpoint.init(from: path))
         }
         else
         {
             return nil
         }
 
-        if  let endpoint:Swiftinit.AnyEndpoint
+        if  let ordering:Ordering
         {
-            self.init(endpoint: endpoint, metadata: metadata)
+            self.init(metadata: metadata, ordering: ordering)
         }
         else
         {

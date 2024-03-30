@@ -24,12 +24,11 @@ extension URI.Query:ExpressibleByDictionaryLiteral
         self.init(dictionaryLiteral)
     }
 }
-extension URI.Query:CustomStringConvertible
+extension URI.Query
 {
-    public
-    var description:String
+    static
+    func += (string:inout String, self:Self)
     {
-        var string:String = "?"
         var first:Bool = true
         for (key, value):(String, String) in self.parameters
         {
@@ -44,6 +43,33 @@ extension URI.Query:CustomStringConvertible
 
             string += "\(key)=\(EncodingSet.encode(value))"
         }
+    }
+
+    /// Formats the query parameters as a string without a leading question mark (`?`). This
+    /// property uses `&` to separate parameters.
+    ///
+    /// This property percent-encodes the query values as needed. It does not percent-encode
+    /// the query keys.
+    public
+    var encoded:String
+    {
+        var string:String = ""
+            string += self
+        return string
+    }
+}
+extension URI.Query:CustomStringConvertible
+{
+    /// Formats the query parameters as a string with a leading question mark (`?`). This
+    /// property uses `&` to separate parameters.
+    ///
+    /// This property percent-encodes the query values as needed. It does not percent-encode
+    /// the query keys.
+    public
+    var description:String
+    {
+        var string:String = "?"
+            string += self
         return string
     }
 }
