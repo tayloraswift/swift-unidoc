@@ -1,1 +1,1 @@
-swift run -c release UnidocBuild swift
+swift run -c release ssgc swift
