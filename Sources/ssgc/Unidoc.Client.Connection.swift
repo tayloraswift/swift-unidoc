@@ -190,7 +190,7 @@ extension Unidoc.Client.Connection
 
             switch response.status
             {
-            case 200?:
+            case 200?, 201?, 202?, 203?, 204?:
                 return response.buffers
 
             case 301?:
