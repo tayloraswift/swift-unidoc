@@ -1,7 +1,7 @@
 extension SSGC
 {
     @frozen public
-    enum AppleSDK
+    enum AppleSDK:Equatable, Sendable
     {
         case driverKit
         case iOS

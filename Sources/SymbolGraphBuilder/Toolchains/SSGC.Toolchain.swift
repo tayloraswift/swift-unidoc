@@ -12,34 +12,39 @@ extension SSGC
     @frozen public
     struct Toolchain
     {
+        /// The `swift` command, which might be a path to a specific Swift toolchain, or just the
+        /// string `"swift"`.
+        private
+        let swiftPath:String
+        private
+        let swiftSDK:AppleSDK?
+
         public
         let version:SwiftVersion
         public
         let commit:SymbolGraphMetadata.Commit?
         public
         let triple:Triple
-        /// The `swift` command, which might be a path to a specific Swift toolchain, or just the
-        /// string `"swift"`.
-        private
-        let swift:String
 
         private
-        init(version:SwiftVersion,
+        init(swiftPath:String,
+            swiftSDK:AppleSDK?,
+            version:SwiftVersion,
             commit:SymbolGraphMetadata.Commit?,
-            triple:Triple,
-            swift:String)
+            triple:Triple)
         {
+            self.swiftPath = swiftPath
+            self.swiftSDK = swiftSDK
             self.version = version
             self.commit = commit
             self.triple = triple
-            self.swift = swift
         }
     }
 }
 extension SSGC.Toolchain
 {
     public
-    init(parsing splash:String, swift command:String) throws
+    init(parsing splash:String, swiftPath:String, swiftSDK:SSGC.AppleSDK? = nil) throws
     {
         //  Splash should consist of two complete lines and a final newline. If the final
         //  newline isn’t present, the output was clipped.
@@ -105,11 +110,16 @@ extension SSGC.Toolchain
             commit = nil
         }
 
-        self.init(version: swift, commit: commit, triple: triple, swift: command)
+        self.init(
+            swiftPath: swiftPath,
+            swiftSDK: swiftSDK,
+            version: swift,
+            commit: commit,
+            triple: triple)
     }
 
     public static
-    func detect(swift:String = "swift") async throws -> Self
+    func detect(swiftPath:String = "swift", swiftSDK:SSGC.AppleSDK? = nil) async throws -> Self
     {
         let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
 
@@ -119,8 +129,10 @@ extension SSGC.Toolchain
             try? readable.close()
         }
 
-        try await SystemProcess.init(command: swift, "--version", stdout: writable)()
-        return try .init(parsing: try readable.read(buffering: 1024), swift: swift)
+        try await SystemProcess.init(command: swiftPath, "--version", stdout: writable)()
+        return try .init(parsing: try readable.read(buffering: 1024),
+            swiftPath: swiftPath,
+            swiftSDK: swiftSDK)
     }
 }
 extension SSGC.Toolchain
@@ -172,7 +184,7 @@ extension SSGC.Toolchain
                 permissions: (.rw, .r, .r),
                 options: [.create, .truncate])
             {
-                let dump:SystemProcess = try .init(command: self.swift,
+                let dump:SystemProcess = try .init(command: self.swiftPath,
                     "package", "dump-package",
                     "--package-path", "\(package)",
                     stdout: $0)
@@ -199,7 +211,7 @@ extension SSGC.Toolchain
             options: [.create, .truncate])
         {
             //  This command only prints to stderr, for some reason.
-            try await SystemProcess.init(command: self.swift,
+            try await SystemProcess.init(command: self.swiftPath,
                 "package",
                 "update",
                 "--package-path", "\(package)",
@@ -232,7 +244,7 @@ extension SSGC.Toolchain
             permissions: (.rw, .r, .r),
             options: [.create, .truncate])
         {
-            try await SystemProcess.init(command: self.swift,
+            try await SystemProcess.init(command: self.swiftPath,
                 "build",
                 "--configuration", release ? "release" : "debug",
                 "--package-path", "\(package)",
@@ -314,6 +326,12 @@ extension SSGC.Toolchain
                 "-skip-inherited-docs",
             ]
 
+            if  let swiftSDK:SSGC.AppleSDK = self.swiftSDK
+            {
+                arguments.append("-sdk")
+                arguments.append(swiftSDK.path)
+            }
+
             if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
             {
                 switch module
@@ -346,7 +364,7 @@ extension SSGC.Toolchain
                 {
                     $0["SWIFT_BACKTRACE"] = "enable=no"
                 }
-                let extractor:SystemProcess = try .init(command: self.swift,
+                let extractor:SystemProcess = try .init(command: self.swiftPath,
                     arguments: arguments,
                     stderr: $0,
                     with: environment)
