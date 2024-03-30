@@ -176,7 +176,7 @@ extension Swiftinit.ServerLoop
             let promise:Promise = update.promise
             let payload:[UInt8] = update.payload
 
-            await (consume update).endpoint.perform(on: .init(self, tour: self.tour),
+            await (/* consume */ update).endpoint.perform(on: .init(self, tour: self.tour),
                 payload: payload,
                 request: promise)
         }
@@ -229,7 +229,7 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
 
     nonisolated
     func response(for request:Swiftinit.StreamedRequest,
-        with body:consuming [UInt8]) async -> HTTP.ServerResponse
+        with body:__owned [UInt8]) async -> HTTP.ServerResponse
     {
         await self.submit(update: request.endpoint, with: body)
     }
@@ -273,7 +273,7 @@ extension Swiftinit.ServerLoop
 {
     private nonisolated
     func submit(update endpoint:any Swiftinit.ProceduralEndpoint,
-        with body:consuming [UInt8] = []) async -> HTTP.ServerResponse
+        with body:__owned [UInt8] = []) async -> HTTP.ServerResponse
     {
         await withCheckedContinuation
         {
