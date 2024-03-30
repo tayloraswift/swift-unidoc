@@ -239,16 +239,21 @@ extension Unidoc.Client
 {
     func builder() async throws
     {
-        building:
-        do
+        while true
         {
-            try await self.buildAndUploadQueued()
-            continue building
-        }
-        catch let error
-        {
-            print("Error: \(error)")
-            continue building
+            //  Don’t run too hot if the network is down.
+            async
+            let cooldown:Void = try await Task.sleep(for: .seconds(5))
+            do
+            {
+                try await self.buildAndUploadQueued()
+                try await cooldown
+            }
+            catch let error
+            {
+                print("Error: \(error)")
+                try await cooldown
+            }
         }
     }
 
