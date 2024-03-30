@@ -202,6 +202,7 @@ let package:Package = .init(
         .target(name: "GitHubAPI",
             dependencies: [
                 .target(name: "UnixTime"),
+                .target(name: "SHA1"),
                 .product(name: "JSON", package: "swift-json"),
             ]),
 
