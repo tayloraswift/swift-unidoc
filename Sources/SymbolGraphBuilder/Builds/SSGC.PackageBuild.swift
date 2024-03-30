@@ -192,7 +192,8 @@ extension SSGC.PackageBuild
 extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     mutating
-    func compile(with swift:SSGC.Toolchain) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
+    func compile(
+        with swift:SSGC.Toolchain) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         switch self.id
         {
@@ -229,9 +230,9 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         {
             pins = try await swift.resolve(package: self.root, log: log.resolution)
         }
-        catch SystemProcessError.exit(let code, _)
+        catch SystemProcessError.exit(let code, let invocation)
         {
-            throw SSGC.PackageBuildError.swift_package_update(code)
+            throw SSGC.PackageBuildError.swift_package_update(code, invocation)
         }
 
         let scratch:SSGC.PackageBuildDirectory
@@ -240,9 +241,9 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
             scratch = try await swift.build(package: self.root,
                 log: log.build)
         }
-        catch SystemProcessError.exit(let code, _)
+        catch SystemProcessError.exit(let code, let invocation)
         {
-            throw SSGC.PackageBuildError.swift_build(code)
+            throw SSGC.PackageBuildError.swift_build(code, invocation)
         }
 
         let platform:SymbolGraphMetadata.Platform = try swift.platform()

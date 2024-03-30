@@ -383,6 +383,10 @@ extension SSGC.Toolchain
 
                     return
                 }
+                catch SystemProcessError.exit(let code, let invocation)
+                {
+                    throw SSGC.PackageBuildError.swift_symbolgraph_extract(code, invocation)
+                }
             }
         }
 
