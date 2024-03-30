@@ -41,17 +41,17 @@ enum Main
             niossl: niossl,
             remote: options.host)
 
-        let swiftinit:Unidoc.Client = .init(http2: http2,
+        let unidoc:Unidoc.Client = .init(http2: http2,
             cookie: options.cookie,
             port: options.port)
 
         switch options.tool
         {
         case .builder:
-            try await swiftinit.builder()
+            try await unidoc.builder()
 
         case .upgrade:
-            try await swiftinit.upgrade(pretty: options.pretty)
+            try await unidoc.upgrade(pretty: options.pretty)
 
         case .latest:
             guard
@@ -64,13 +64,13 @@ enum Main
             if  package != .swift,
                 options.input == nil
             {
-                try await swiftinit.build(remote: package,
+                try await unidoc.buildAndUpload(remote: package,
                     pretty: options.pretty,
                     force: options.force)
             }
             else
             {
-                try await swiftinit.build(local: package,
+                try await unidoc.buildAndUpload(local: package,
                     search: options.input.map(FilePath.init(_:)),
                     pretty: options.pretty,
                     swift: options.swift)

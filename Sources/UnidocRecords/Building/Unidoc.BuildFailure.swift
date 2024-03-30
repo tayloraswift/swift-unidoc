@@ -1,22 +1,21 @@
 import BSON
-import MongoQL
 
-extension Unidoc.BuildOutcome
+extension Unidoc
 {
     @frozen public
-    struct Failure:Equatable, Sendable
+    struct BuildFailure:Equatable, Sendable
     {
         public
-        let reason:FailureReason
+        let reason:Reason
 
         @inlinable public
-        init(reason:FailureReason)
+        init(reason:Reason)
         {
             self.reason = reason
         }
     }
 }
-extension Unidoc.BuildOutcome.Failure:Mongo.MasterCodingModel
+extension Unidoc.BuildFailure
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -24,7 +23,7 @@ extension Unidoc.BuildOutcome.Failure:Mongo.MasterCodingModel
         case reason = "T"
     }
 }
-extension Unidoc.BuildOutcome.Failure:BSONDocumentEncodable
+extension Unidoc.BuildFailure:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -32,7 +31,7 @@ extension Unidoc.BuildOutcome.Failure:BSONDocumentEncodable
         bson[.reason] = self.reason
     }
 }
-extension Unidoc.BuildOutcome.Failure:BSONDocumentDecodable
+extension Unidoc.BuildFailure:BSONDocumentDecodable
 {
     public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

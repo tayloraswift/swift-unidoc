@@ -187,13 +187,13 @@ extension Swiftinit.IntegralRequest
             case Swiftinit.Root.ssgc.id:
                 guard
                 let query:URI.Query = uri.query,
-                let build:Unidoc.BuildPrompt = .init(query: query)
+                let build:Unidoc.BuildLabelsPrompt = .init(query: query)
                 else
                 {
                     return nil
                 }
 
-                ordering = .actor(Swiftinit.BuildPromptEndpoint.init(prompt: build))
+                ordering = .actor(Swiftinit.BuilderLabelEndpoint.init(prompt: build))
 
             case _:
                 return nil

@@ -222,7 +222,7 @@ extension Unidoc.DB.PackageBuilds
     public
     func finishBuild(
         package:Unidoc.Package,
-        failure:Unidoc.BuildOutcome.Failure?,
+        failure:Unidoc.BuildFailure?,
         with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
     {
         let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
@@ -236,7 +236,7 @@ extension Unidoc.DB.PackageBuilds
                 }
                 $0[.update]
                 {
-                    if  let failure:Unidoc.BuildOutcome.Failure = failure
+                    if  let failure:Unidoc.BuildFailure = failure
                     {
                         $0[.set]
                         {
@@ -266,7 +266,7 @@ extension Unidoc.DB.PackageBuilds
     func lintBuilds(startedBefore:BSON.Millisecond,
         with session:Mongo.Session) async throws -> Int
     {
-        let failure:Unidoc.BuildOutcome.Failure = Unidoc.BuildOutcome.Failure.init(
+        let failure:Unidoc.BuildFailure = Unidoc.BuildFailure.init(
             reason: .timeout)
         let response:Mongo.UpdateResponse = try await session.run(
             command: Mongo.Update<Mongo.Many, Unidoc.Package>.init(Self.name)

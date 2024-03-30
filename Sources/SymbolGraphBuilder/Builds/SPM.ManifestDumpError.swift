@@ -11,12 +11,15 @@ extension SPM
         let underlying:any Error
         public
         let root:FilePath
+        public
+        let leaf:Bool
 
         public
-        init(underlying:any Error, root:FilePath)
+        init(underlying:any Error, root:FilePath, leaf:Bool)
         {
             self.underlying = underlying
             self.root = root
+            self.leaf = leaf
         }
     }
 }

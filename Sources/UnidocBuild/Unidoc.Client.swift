@@ -43,7 +43,7 @@ extension Unidoc.Client
 }
 extension Unidoc.Client
 {
-    func build(local symbol:Symbol.Package,
+    func buildAndUpload(local symbol:Symbol.Package,
         search:FilePath?,
         pretty:Bool,
         swift:String?) async throws
@@ -51,13 +51,13 @@ extension Unidoc.Client
         let toolchain:Toolchain = try await .detect(swift: swift ?? "swift")
         let workspace:SPM.Workspace = try await .create(at: ".unidoc")
 
-        let archive:SymbolGraphObject<Void>
+        let object:SymbolGraphObject<Void>
         if  symbol == .swift
         {
             let build:Toolchain.Build = try await .swift(in: workspace,
                 clean: true)
 
-            archive = try await .init(building: build, with: toolchain, pretty: pretty)
+            object = try await .init(building: build, with: toolchain, pretty: pretty)
         }
         else if
             let search:FilePath
@@ -67,36 +67,29 @@ extension Unidoc.Client
                 in: workspace,
                 clean: true)
 
-            archive = try await .init(building: build, with: toolchain, pretty: pretty)
+            object = try await .init(building: build, with: toolchain, pretty: pretty)
         }
         else
         {
             fatalError("No package search path specified.")
         }
-        //  https://github.com/apple/swift/issues/71607
-        let bson:BSON.Document = .init(encoding: /* consume */ archive)
 
         try await self.connect
         {
             @Sendable (connection:Unidoc.Client.Connection) in
 
-            print("Uploading symbol graph...")
-
-            let _:Unidoc.UploadStatus = try await connection.put(bson: bson,
-                to: "/api/symbolgraph")
-
-            print("Successfully uploaded symbol graph!")
+            try await connection.upload(object)
         }
     }
 
-    func build(remote symbol:Symbol.Package,
+    func buildAndUpload(remote symbol:Symbol.Package,
         pretty:Bool,
         force:Unidoc.VersionSeries?) async throws
     {
         //  Building the package might take a long time, and the server might close the
         //  connection before the build is finished. So we do not try to keep this
         //  connection open.
-        let buildable:Unidoc.BuildSpecification? = try await self.connect
+        let labels:Unidoc.BuildLabels? = try await self.connect
         {
             @Sendable (connection:Unidoc.Client.Connection) in
 
@@ -116,62 +109,129 @@ extension Unidoc.Client
                 return nil
             }
         }
-        if  let buildable:Unidoc.BuildSpecification
-        {
-            try await self.build(buildable,
-                pretty: pretty,
-                action: force != nil ? .uplinkRefresh : .uplinkInitial)
-        }
+
+        guard
+        let labels:Unidoc.BuildLabels
         else
         {
             print("Not a buildable package.")
+            return
+        }
+
+        let result:Result<Unidoc.Snapshot, Unidoc.BuildFailure> = try await self.build(labels,
+            action: force != nil ? .uplinkRefresh : .uplinkInitial,
+            pretty: pretty)
+
+
+        try await self.connect
+        {
+            @Sendable (connection:Unidoc.Client.Connection) in
+
+            switch result
+            {
+            case .success(let labeled):
+                try await connection.upload(labeled)
+
+            case .failure(let failure):
+                try await connection.upload(.init(
+                    package: labels.coordinate.package,
+                    failure: failure))
+            }
         }
     }
 
     private
-    func build(_ buildable:Unidoc.BuildSpecification,
-        pretty:Bool,
-        action:Unidoc.Snapshot.PendingAction) async throws
+    func buildAndUploadQueued() async throws
+    {
+        let labels:Unidoc.BuildLabels = try await self.connect
+        {
+            @Sendable (connection:Unidoc.Client.Connection) in
+
+            try await connection.get(from: "/ssgc/poll", timeout: .seconds(60 * 60))
+        }
+
+        print("""
+            Building package '\(labels.package)' at '\(labels.tag ?? "?")' \
+            (\(labels.coordinate))
+            """)
+
+        let result:Result<Unidoc.Snapshot, Unidoc.BuildFailure> = try await self.build(labels,
+            action: .uplinkRefresh,
+            pretty: false)
+
+        try await self.connect
+        {
+            @Sendable (connection:Unidoc.Client.Connection) in
+
+            switch result
+            {
+            case .success(let labeled):
+                try await connection.upload(labeled)
+
+            case .failure(let failure):
+                try await connection.upload(.init(
+                    package: labels.coordinate.package,
+                    failure: failure))
+            }
+        }
+    }
+
+    private
+    func build(_ labels:Unidoc.BuildLabels,
+        action:Unidoc.Snapshot.PendingAction,
+        pretty:Bool) async throws -> Result<Unidoc.Snapshot, Unidoc.BuildFailure>
     {
         let toolchain:Toolchain = try await .detect()
         let workspace:SPM.Workspace = try await .create(at: ".unidoc")
 
         guard
-        let tag:String = buildable.tag
+        let tag:String = labels.tag
         else
         {
             print("""
                 No new documentation to build, run with -f or -e to build the latest release
                 or prerelease anyway.
                 """)
-            return
+
+            return .failure(.init(reason: .noValidVersion))
         }
 
-        let build:SPM.Build = try await .remote(
-            package: buildable.package,
-            from: buildable.repo,
+        guard
+        let build:SPM.Build = try? await .remote(
+            package: labels.package,
+            from: labels.repo,
             at: tag,
             in: workspace,
             clean: [.artifacts])
-
-        let archive:SymbolGraphObject<Void> = try await .init(building: build,
-            with: toolchain,
-            pretty: pretty)
-
-        let bson:BSON.Document = .init(encoding: Unidoc.Snapshot.init(id: buildable.coordinate,
-            metadata: archive.metadata,
-            inline: archive.graph,
-            action: action))
-
-        try await self.connect
+        else
         {
-            @Sendable (connection:Unidoc.Client.Connection) in
+            return .failure(.init(reason: .failedToCloneRepository))
+        }
 
-            print("Uploading symbol graph...")
+        do
+        {
+            let archive:SymbolGraphObject<Void> = try await .init(building: build,
+                with: toolchain,
+                pretty: pretty)
 
-            try await connection.put(bson: bson, to: "/api/snapshot")
-
-            print("Successfully uploaded symbol graph!")
+            return .success(Unidoc.Snapshot.init(id: labels.coordinate,
+                metadata: archive.metadata,
+                inline: archive.graph,
+                action: action))
+        }
+        catch let error as SPM.ManifestDumpError
+        {
+            return .failure(.init(reason: error.leaf ?
+                    .failedToReadManifest :
+                    .failedToReadManifestForDependency))
+        }
+        catch SPM.BuildError.swift_package_update
+        {
+            return .failure(.init(reason: .failedToResolveDependencies))
+        }
+        catch SPM.BuildError.swift_build
+        {
+            return .failure(.init(reason: .failedToCompile))
         }
     }
 }
@@ -182,15 +242,12 @@ extension Unidoc.Client
         building:
         do
         {
-            let buildable:Unidoc.BuildSpecification = try await self.connect
-            {
-                @Sendable (connection:Unidoc.Client.Connection) in
-
-                try await connection.get(from: "/ssgc/poll", timeout: .seconds(60 * 60))
-            }
-
-            print(buildable)
-
+            try await self.buildAndUploadQueued()
+            continue building
+        }
+        catch let error
+        {
+            print("Error: \(error)")
             continue building
         }
     }
@@ -218,7 +275,7 @@ extension Unidoc.Client
                     continue
                 }
 
-                let buildable:Unidoc.BuildSpecification
+                let buildable:Unidoc.BuildLabels
                 do
                 {
                     buildable = try await self.connect
@@ -248,15 +305,20 @@ extension Unidoc.Client
                     continue
                 }
 
-                do
+                if  case .success(let snapshot) = try await self.build(buildable,
+                        action: .uplinkRefresh,
+                        pretty: pretty)
                 {
-                    try await self.build(buildable,
-                        pretty: pretty,
-                        action: .uplinkRefresh)
+                    try await self.connect
+                    {
+                        @Sendable (connection:Unidoc.Client.Connection) in
+
+                        try await connection.upload(snapshot)
+                    }
 
                     upgraded += 1
                 }
-                catch SPM.BuildError.swift_build
+                else
                 {
                     print("Failed to build \(buildable.package) \(buildable.tag ?? "?")")
                     unbuildable[edition] = ()

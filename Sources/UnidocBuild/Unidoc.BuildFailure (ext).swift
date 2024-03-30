@@ -1,0 +1,3 @@
+extension Unidoc.BuildFailure:Error
+{
+}
