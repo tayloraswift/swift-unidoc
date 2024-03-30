@@ -347,7 +347,7 @@ extension Swiftinit.TagsPage
             }
         }
 
-        if  case .administratrix? = self.view.global
+        if  self.view.editor
         {
             section[.div, { $0.class = "build-pipeline" }]
             {
