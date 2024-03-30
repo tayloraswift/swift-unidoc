@@ -501,6 +501,7 @@ let package:Package = .init(
 
         .target(name: "UnidocAPI",
             dependencies: [
+                .target(name: "Symbols"),
                 .target(name: "Unidoc"),
                 .target(name: "URI"),
                 .product(name: "JSON", package: "swift-json"),
