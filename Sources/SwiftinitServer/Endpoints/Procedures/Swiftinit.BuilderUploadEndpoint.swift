@@ -11,23 +11,40 @@ import UnidocRecords
 
 extension Swiftinit
 {
-    enum GraphStorageEndpoint:Sendable
+    struct BuilderUploadEndpoint:Sendable
     {
-        case placed
-        case object
+        let outcome:Unidoc.BuildOutcome
+
+        init(outcome:Unidoc.BuildOutcome)
+        {
+            self.outcome = outcome
+        }
     }
 }
-extension Swiftinit.GraphStorageEndpoint:Swiftinit.BlockingEndpoint
+extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 {
     func perform(on server:borrowing Swiftinit.Server,
         payload:consuming [UInt8],
         session:Mongo.Session) async throws -> HTTP.ServerResponse
     {
-        switch self
+        let bson:BSON.Document = .init(bytes: (consume payload)[...])
+        let json:JSON?
+
+        let package:Unidoc.Package
+        let failure:Unidoc.BuildFailure?
+
+        switch self.outcome
         {
-        case .placed:
-            var snapshot:Unidoc.Snapshot = try .init(
-                bson: BSON.Document.init(bytes: payload[...]))
+        case .failure:
+            let report:Unidoc.BuildFailureReport = try .init(bson: consume bson)
+
+            package = report.package
+            failure = report.failure
+
+            json = nil
+
+        case .success:
+            var snapshot:Unidoc.Snapshot = try .init(bson: consume bson)
 
             if  let bucket:AWS.S3.Bucket = server.bucket
             {
@@ -42,11 +59,13 @@ extension Swiftinit.GraphStorageEndpoint:Swiftinit.BlockingEndpoint
                 snapshot: snapshot,
                 with: session)
 
-            return .ok(uploaded.updated ? "Updated" : "Inserted")
+            package = uploaded.package
+            failure = nil
 
-        case .object:
-            let documentation:SymbolGraphObject<Void> = try .init(
-                bson: BSON.Document.init(bytes: payload[...]))
+            json = .encode(uploaded)
+
+        case .successUnlabeled:
+            let documentation:SymbolGraphObject<Void> = try .init(bson: consume bson)
 
             var (snapshot, _):(Unidoc.Snapshot, _?) = try await server.db.unidoc.label(
                 documentation: documentation,
@@ -68,11 +87,26 @@ extension Swiftinit.GraphStorageEndpoint:Swiftinit.BlockingEndpoint
                 snapshot: snapshot,
                 with: session)
 
-            let json:JSON = .encode(uploaded)
+            package = uploaded.package
+            failure = nil
 
+            json = .encode(uploaded)
+        }
+
+        let _:Unidoc.BuildMetadata? = try await server.db.packageBuilds.finishBuild(
+            package: package,
+            failure: failure,
+            with: session)
+
+        if  let json:JSON = json
+        {
             return .ok(.init(content: .binary(json.utf8),
                 type: .application(.json, charset: .utf8),
                 gzip: false))
+        }
+        else
+        {
+            return .noContent
         }
     }
 }

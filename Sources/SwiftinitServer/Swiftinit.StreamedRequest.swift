@@ -33,31 +33,26 @@ extension Swiftinit.StreamedRequest:HTTP.ServerStreamedRequest
         var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
 
         guard
-        case Swiftinit.Root.api.id? = path.popFirst(),
-        let trunk:String = path.popFirst(),
-        let trunk:Swiftinit.API.Put = .init(trunk),
-        let type:String = headers["content-type"].first,
-        let type:ContentType = .init(type)
+        case Swiftinit.Root.ssgc.id? = path.popFirst(),
+        let outcome:String = path.popFirst(),
+        let outcome:Unidoc.BuildOutcome = .init(outcome)
         else
         {
             return nil
         }
 
-        let cookies:Swiftinit.Cookies = .init(header: headers["cookie"])
-
-        let endpoint:any Swiftinit.ProceduralEndpoint
-        switch (trunk, type)
+        //  Validate content type.
+        guard
+        let type:String = headers["content-type"].first,
+        let type:ContentType = .init(type),
+        case .media(.application(.bson, charset: nil)) = type
+        else
         {
-        case (.snapshot, .media(.application(.bson, charset: nil))):
-            endpoint = Swiftinit.GraphStorageEndpoint.placed
-
-        case (.graph, .media(.application(.bson, charset: nil))):
-            endpoint = Swiftinit.GraphStorageEndpoint.object
-
-        case (_, _):
             return nil
         }
 
-        self.init(endpoint: endpoint, cookies: cookies)
+        self.init(
+            endpoint: Swiftinit.BuilderUploadEndpoint.init(outcome: outcome),
+            cookies: .init(header: headers["cookie"]))
     }
 }

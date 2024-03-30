@@ -15,17 +15,18 @@ extension Unidoc
         public
         var request:BuildRequest?
         public
-        var outcome:BuildOutcome?
+        var failure:BuildFailure?
 
         @inlinable public
         init(id:Unidoc.Package,
             progress:Unidoc.BuildProgress? = nil,
             request:Unidoc.BuildRequest? = nil,
-            outcome:Unidoc.BuildOutcome? = nil)
+            failure:Unidoc.BuildFailure? = nil)
         {
             self.id = id
             self.progress = progress
             self.request = request
+            self.failure = failure
         }
     }
 }
@@ -48,12 +49,7 @@ extension Unidoc.BuildMetadata:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.progress] = self.progress
         bson[.request] = self.request
-
-        switch self.outcome
-        {
-        case .failure(let failure)?:    bson[.failure] = failure
-        case .none:                     break
-        }
+        bson[.failure] = self.failure
     }
 }
 extension Unidoc.BuildMetadata:BSONDocumentDecodable
@@ -63,11 +59,7 @@ extension Unidoc.BuildMetadata:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             progress: try bson[.progress]?.decode(),
-            request: try bson[.request]?.decode())
-
-        if  let failure:Unidoc.BuildOutcome.Failure = try bson[.failure]?.decode()
-        {
-            self.outcome = .failure(failure)
-        }
+            request: try bson[.request]?.decode(),
+            failure: try bson[.failure]?.decode())
     }
 }

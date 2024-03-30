@@ -43,7 +43,7 @@ extension Swiftinit.BuilderPollEndpoint:Swiftinit.MachineEndpoint
                 continue polling
             }
 
-            let prompt:Unidoc.BuildPrompt = .package(build.id, series: type.forced)
+            let prompt:Unidoc.BuildLabelsPrompt = .package(build.id, series: type.forced)
 
             if  let json:JSON = try await server.db.unidoc.answer(prompt: prompt, with: session)
             {

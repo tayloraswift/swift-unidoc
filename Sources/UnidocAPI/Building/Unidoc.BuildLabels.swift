@@ -4,7 +4,7 @@ import JSON
 extension Unidoc
 {
     @frozen public
-    struct BuildSpecification
+    struct BuildLabels
     {
         public
         let coordinate:Edition
@@ -25,7 +25,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.BuildSpecification
+extension Unidoc.BuildLabels
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -36,7 +36,7 @@ extension Unidoc.BuildSpecification
         case tag
     }
 }
-extension Unidoc.BuildSpecification:JSONObjectEncodable
+extension Unidoc.BuildLabels:JSONObjectEncodable
 {
     public
     func encode(to json:inout JSON.ObjectEncoder<CodingKey>)
@@ -47,7 +47,7 @@ extension Unidoc.BuildSpecification:JSONObjectEncodable
         json[.tag] = self.tag
     }
 }
-extension Unidoc.BuildSpecification:JSONObjectDecodable
+extension Unidoc.BuildLabels:JSONObjectDecodable
 {
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws

@@ -5,6 +5,7 @@ import Media
 import NIOCore
 import NIOHPACK
 import SemanticVersions
+import SymbolGraphs
 import Symbols
 import UnidocAPI
 import UnidocRecords
@@ -33,21 +34,57 @@ extension Unidoc.Client.Connection
 {
     func oldest(until abi:PatchVersion) async throws -> [Unidoc.Edition]
     {
-        let prompt:Unidoc.BuildPrompt = ._allSymbolGraphs(upTo: abi, limit: 16)
+        let prompt:Unidoc.BuildLabelsPrompt = ._allSymbolGraphs(upTo: abi, limit: 16)
         return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
     }
 
-    func build(id:Unidoc.Edition) async throws -> Unidoc.BuildSpecification
+    func build(id:Unidoc.Edition) async throws -> Unidoc.BuildLabels
     {
-        let prompt:Unidoc.BuildPrompt = .edition(id)
+        let prompt:Unidoc.BuildLabelsPrompt = .edition(id)
         return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
     }
 
     func latest(_ force:Unidoc.VersionSeries?,
-        of package:Symbol.Package) async throws -> Unidoc.BuildSpecification
+        of package:Symbol.Package) async throws -> Unidoc.BuildLabels
     {
-        let prompt:Unidoc.BuildPrompt = .packageNamed(package, series: force)
+        let prompt:Unidoc.BuildLabelsPrompt = .packageNamed(package, series: force)
         return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
+    }
+
+    func upload(_ unlabeled:consuming SymbolGraphObject<Void>) async throws
+    {
+        let bson:BSON.Document = .init(encoding: unlabeled)
+
+        print("Uploading unlabeled symbol graph...")
+
+        let _:Unidoc.UploadStatus = try await self.put(bson: bson,
+            to: "/ssgc/\(Unidoc.BuildOutcome.successUnlabeled)")
+
+        print("Successfully uploaded symbol graph!")
+    }
+
+    func upload(_ labeled:consuming Unidoc.Snapshot) async throws
+    {
+        let bson:BSON.Document = .init(encoding: labeled)
+
+        print("Uploading labeled symbol graph...")
+
+        let _:Unidoc.UploadStatus = try await self.put(bson: bson,
+            to: "/ssgc/\(Unidoc.BuildOutcome.success)")
+
+        print("Successfully uploaded symbol graph!")
+    }
+
+    func upload(_ report:consuming Unidoc.BuildFailureReport) async throws
+    {
+        let bson:BSON.Document = .init(encoding: report)
+
+        print("Uploading build failure report...")
+
+        let _:Unidoc.UploadStatus = try await self.put(bson: bson,
+            to: "/ssgc/\(Unidoc.BuildOutcome.failure)")
+
+        print("Successfully uploaded build failure report!")
     }
 }
 

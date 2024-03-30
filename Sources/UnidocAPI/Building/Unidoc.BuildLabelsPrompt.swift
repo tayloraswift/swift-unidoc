@@ -5,7 +5,7 @@ import URI
 extension Unidoc
 {
     @frozen public
-    enum BuildPrompt:Sendable
+    enum BuildLabelsPrompt:Sendable
     {
         /// Get a list of obsolete symbol graphs.
         case _allSymbolGraphs(upTo:PatchVersion, limit:Int?)
@@ -18,7 +18,7 @@ extension Unidoc
         case packageNamed(Symbol.Package, series:VersionSeries?)
     }
 }
-extension Unidoc.BuildPrompt
+extension Unidoc.BuildLabelsPrompt
 {
     public
     init?(query:borrowing URI.Query)

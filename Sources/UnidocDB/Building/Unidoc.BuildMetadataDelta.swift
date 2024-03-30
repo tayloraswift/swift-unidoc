@@ -7,11 +7,11 @@ extension Unidoc
     {
         var progress:BuildProgress?
         var request:BuildRequest?
-        var failure:BuildOutcome.Failure?
+        var failure:BuildFailure?
 
         init(progress:BuildProgress? = nil,
             request:BuildRequest? = nil,
-            failure:BuildOutcome.Failure? = nil)
+            failure:BuildFailure? = nil)
         {
             self.progress = progress
             self.request = request

@@ -28,8 +28,12 @@ extension Unidoc.DB
 }
 extension Unidoc.DB
 {
+    //  TODO: we want this to return ``Unidoc.BuildLabels``, but the `_allSymbolGraphs` case
+    //  is preventing us from doing so. This means we can’t guarantee on the server side yet
+    //  that the labels contain a buildable tag.
     public
-    func answer(prompt:Unidoc.BuildPrompt, with session:Mongo.Session) async throws -> JSON?
+    func answer(prompt:Unidoc.BuildLabelsPrompt,
+        with session:Mongo.Session) async throws -> JSON?
     {
         switch prompt
         {
@@ -60,7 +64,7 @@ extension Unidoc.DB
                 return nil
             }
 
-            let build:Unidoc.BuildSpecification = .init(coordinate: id,
+            let build:Unidoc.BuildLabels = .init(coordinate: id,
                 package: output.package.symbol,
                 repo: repo.origin.https,
                 tag: output.edition.name)
@@ -81,7 +85,7 @@ extension Unidoc.DB
                 return nil
             }
 
-            let build:Unidoc.BuildSpecification
+            let build:Unidoc.BuildLabels
 
             if  case _? = series
             {
@@ -123,7 +127,7 @@ extension Unidoc.DB
                 return nil
             }
 
-            let build:Unidoc.BuildSpecification
+            let build:Unidoc.BuildLabels
 
             if  let series:Unidoc.VersionSeries
             {

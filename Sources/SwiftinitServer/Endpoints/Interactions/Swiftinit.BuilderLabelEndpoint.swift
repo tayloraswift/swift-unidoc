@@ -4,17 +4,17 @@ import UnidocDB
 
 extension Swiftinit
 {
-    struct BuildPromptEndpoint:Sendable
+    struct BuilderLabelEndpoint:Sendable
     {
-        let prompt:Unidoc.BuildPrompt
+        let prompt:Unidoc.BuildLabelsPrompt
 
-        init(prompt:Unidoc.BuildPrompt)
+        init(prompt:Unidoc.BuildLabelsPrompt)
         {
             self.prompt = prompt
         }
     }
 }
-extension Swiftinit.BuildPromptEndpoint:Swiftinit.MachineEndpoint
+extension Swiftinit.BuilderLabelEndpoint:Swiftinit.MachineEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
         with session:Mongo.Session) async throws -> JSON?
