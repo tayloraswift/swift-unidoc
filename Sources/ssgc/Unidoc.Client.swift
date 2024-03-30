@@ -227,13 +227,20 @@ extension Unidoc.Client
                     .failedToReadManifest :
                     .failedToReadManifestForDependency))
         }
-        catch SSGC.PackageBuildError.swift_package_update
+        catch let error as SSGC.PackageBuildError
         {
-            return .failure(.init(reason: .failedToResolveDependencies))
-        }
-        catch SSGC.PackageBuildError.swift_build
-        {
-            return .failure(.init(reason: .failedToCompile))
+            print("Error: \(error)")
+
+            let reason:Unidoc.BuildFailure.Reason
+
+            switch error
+            {
+            case .swift_package_update:         reason = .failedToResolveDependencies
+            case .swift_build:                  reason = .failedToCompile
+            case .swift_symbolgraph_extract:    reason = .failedToCompile
+            }
+
+            return .failure(.init(reason: reason))
         }
     }
 }
