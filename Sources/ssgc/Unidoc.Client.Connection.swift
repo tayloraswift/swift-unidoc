@@ -77,12 +77,24 @@ extension Unidoc.Client.Connection
 
     func upload(_ report:consuming Unidoc.BuildFailureReport) async throws
     {
-        let bson:BSON.Document = .init(encoding: report)
+        let bson:BSON.Document = .init(encoding: consume report)
 
         print("Uploading build failure report...")
 
-        let _:Unidoc.UploadStatus = try await self.put(bson: bson,
-            to: "/ssgc/\(Unidoc.BuildOutcome.failure)")
+        do
+        {
+            let _:Never = try await self.put(bson: bson,
+                to: "/ssgc/\(Unidoc.BuildOutcome.failure)")
+        }
+        catch let error as HTTP.StatusError
+        {
+            guard
+            case 204? = error.code
+            else
+            {
+                throw error
+            }
+        }
 
         print("Successfully uploaded build failure report!")
     }
@@ -190,7 +202,7 @@ extension Unidoc.Client.Connection
 
             switch response.status
             {
-            case 200?, 201?, 202?, 203?, 204?:
+            case 200?, 201?, 202?, 203?:
                 return response.buffers
 
             case 301?:
