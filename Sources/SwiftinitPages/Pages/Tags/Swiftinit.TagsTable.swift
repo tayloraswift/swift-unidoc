@@ -8,16 +8,16 @@ extension Swiftinit
         private
         let package:Symbol.Package
         private
-        let tagless:Unidoc.VersionsQuery.Tagless?
+        let tagless:Unidoc.Versions.TopOfTree?
         private
-        let tagged:[Unidoc.VersionsQuery.Tag]
+        let tagged:[Unidoc.Versions.Tag]
         let view:Permissions
         let more:Bool
 
         init(
             package:Symbol.Package,
-            tagless:Unidoc.VersionsQuery.Tagless? = nil,
-            tagged:[Unidoc.VersionsQuery.Tag],
+            tagless:Unidoc.Versions.TopOfTree? = nil,
+            tagged:[Unidoc.Versions.Tag],
             view:Permissions,
             more:Bool)
         {
@@ -47,7 +47,7 @@ extension Swiftinit.TagsTable:HTML.OutputStreamable
 
         table[.tbody]
         {
-            if  let tagless:Unidoc.VersionsQuery.Tagless = self.tagless
+            if  let tagless:Unidoc.Versions.TopOfTree = self.tagless
             {
                 $0[.tr] { $0.class = "tagless" } = Row.init(
                     volume: tagless.volume,
@@ -58,7 +58,7 @@ extension Swiftinit.TagsTable:HTML.OutputStreamable
             }
 
             var modern:(prerelease:Bool, release:Bool) = (true, true)
-            for tagged:Unidoc.VersionsQuery.Tag in self.tagged
+            for tagged:Unidoc.Versions.Tag in self.tagged
             {
                 let row:Row = .init(
                     volume: tagged.volume,

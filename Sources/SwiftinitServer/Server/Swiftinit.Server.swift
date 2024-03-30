@@ -1,6 +1,9 @@
 import GitHubAPI
 import HTTP
+import JSON
+import MongoDB
 import S3
+import Symbols
 import UnidocProfiling
 
 extension Swiftinit

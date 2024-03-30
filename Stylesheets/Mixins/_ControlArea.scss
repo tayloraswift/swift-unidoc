@@ -1,0 +1,18 @@
+@mixin control-area
+{
+    @include dashed-area($border-color: var(--fg-accent-semi));
+    display: block;
+    padding: 0.5rem 0;
+    text-align: center;
+}
+
+@mixin dashed-area($border-color)
+{
+    border: 2px dashed $border-color;
+
+    text-decoration: none;
+
+    font-family: $typeface-sans;
+    font-weight: 700;
+    font-size: 120%;
+}

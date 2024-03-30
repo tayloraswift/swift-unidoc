@@ -163,7 +163,7 @@ extension Toolchain
 
 extension Toolchain
 {
-    func manifest(package:FilePath, json file:FilePath) async throws -> SPM.Manifest
+    func manifest(package:FilePath, json file:FilePath, leaf:Bool) async throws -> SPM.Manifest
     {
         //  The manifest can be very large, possibly larger than the 64 KB pipe buffer
         //  limit. So instead of getting the `dump-package` output from a pipe, we
@@ -187,7 +187,7 @@ extension Toolchain
         }
         catch let error
         {
-            throw SPM.ManifestDumpError.init(underlying: error, root: package)
+            throw SPM.ManifestDumpError.init(underlying: error, root: package, leaf: leaf)
         }
 
         return try json.decode()

@@ -140,9 +140,9 @@ struct PackageQueries:UnidocDatabaseTestBattery
                         return
                     }
 
-                    tests.expect(value: output.tagless?.graph)
-                    tests.expect(output.prereleases ..? [])
-                    tests.expect(output.releases ..? [])
+                    tests.expect(value: output.versions.top?.graph)
+                    tests.expect(output.versions.prereleases ..? [])
+                    tests.expect(output.versions.releases ..? [])
                     tests.expect(output.package.id ==? status.debut.package)
                 }
             }
@@ -161,18 +161,20 @@ struct PackageQueries:UnidocDatabaseTestBattery
                         return
                     }
 
-                    tests.expect(nil: output.tagless?.graph)
-                    tests.expect(output.prereleases ..? [])
+                    tests.expect(nil: output.versions.top?.graph)
+                    tests.expect(output.versions.prereleases ..? [])
 
-                    guard tests.expect(output.releases.count ==? 2)
+                    guard tests.expect(output.versions.releases.count ==? 2)
                     else
                     {
                         return
                     }
 
                     //  Reverse chronological order!
-                    tests.expect(output.releases[0].edition.id ==? status.fearless.1.edition)
-                    tests.expect(output.releases[1].edition.id ==? status.fearless.0.edition)
+                    tests.expect(output.versions.releases[0].edition.id ==?
+                        status.fearless.1.edition)
+                    tests.expect(output.versions.releases[1].edition.id ==?
+                        status.fearless.0.edition)
                 }
             }
             if  let tests:TestGroup = tests / "SpeakNow"
@@ -190,16 +192,17 @@ struct PackageQueries:UnidocDatabaseTestBattery
                         return
                     }
 
-                    tests.expect(value: output.tagless?.graph)
-                    tests.expect(output.prereleases ..? [])
+                    tests.expect(value: output.versions.top?.graph)
+                    tests.expect(output.versions.prereleases ..? [])
 
-                    guard tests.expect(output.releases.count ==? 1)
+                    guard tests.expect(output.versions.releases.count ==? 1)
                     else
                     {
                         return
                     }
 
-                    tests.expect(output.releases[0].edition.id ==? status.speakNow.1.edition)
+                    tests.expect(output.versions.releases[0].edition.id ==?
+                        status.speakNow.1.edition)
                 }
             }
             if  let tests:TestGroup = tests / "Red"
@@ -217,16 +220,16 @@ struct PackageQueries:UnidocDatabaseTestBattery
                         return
                     }
 
-                    tests.expect(nil: output.tagless?.graph)
-                    tests.expect(output.prereleases ..? [])
+                    tests.expect(nil: output.versions.top?.graph)
+                    tests.expect(output.versions.prereleases ..? [])
 
-                    guard tests.expect(output.releases.count ==? 1)
+                    guard tests.expect(output.versions.releases.count ==? 1)
                     else
                     {
                         return
                     }
 
-                    tests.expect(output.releases[0].edition.id ==? status.red.edition)
+                    tests.expect(output.versions.releases[0].edition.id ==? status.red.edition)
                 }
             }
         }

@@ -25,7 +25,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.VertexOutput:MongoMasterCodingModel
+extension Unidoc.VertexOutput:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable

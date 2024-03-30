@@ -27,7 +27,7 @@ struct UnixInstant:Equatable, Hashable, Sendable
     public
     let nanoseconds:Int64
 
-    @inlinable internal
+    @inlinable
     init(second:Int64, nanoseconds:Int64)
     {
         self.second = second
@@ -156,6 +156,50 @@ extension UnixInstant
         return .init(
             secondsComponent: seconds,
             attosecondsComponent: 1_000_000_000 * nanoseconds)
+    }
+}
+extension UnixInstant
+{
+    @inlinable public static
+    func += (self:inout Self, duration:Duration)
+    {
+        self = self + duration
+    }
+
+    @inlinable public static
+    func + (self:Self, duration:Duration) -> Self
+    {
+        let second:Int64 = self.second + duration.components.seconds
+        let n:Int64 = self.nanoseconds + duration.components.attoseconds / 1_000_000_000
+        if  n < 1_000_000_000
+        {
+            return .init(second: second, nanoseconds: n)
+        }
+        else
+        {
+            return .init(second: second + 1, nanoseconds: n - 1_000_000_000)
+        }
+    }
+
+    @inlinable public static
+    func -= (self:inout Self, duration:Duration)
+    {
+        self = self - duration
+    }
+
+    @inlinable public static
+    func - (self:Self, duration:Duration) -> Self
+    {
+        let second:Int64 = self.second - duration.components.seconds
+        let n:Int64 = self.nanoseconds - duration.components.attoseconds / 1_000_000_000
+        if  n < 0
+        {
+            return .init(second: second - 1, nanoseconds: n + 1_000_000_000)
+        }
+        else
+        {
+            return .init(second: second, nanoseconds: n)
+        }
     }
 }
 extension UnixInstant

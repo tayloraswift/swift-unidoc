@@ -26,7 +26,7 @@ struct PackageSubscription
         self.till = till
     }
 }
-extension PackageSubscription:MongoMasterCodingModel
+extension PackageSubscription:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable

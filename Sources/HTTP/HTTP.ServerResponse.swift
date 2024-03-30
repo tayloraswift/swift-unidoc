@@ -22,6 +22,12 @@ extension HTTP.ServerResponse
     }
 
     @inlinable public static
+    var noContent:Self
+    {
+        .resource("", status: 204)
+    }
+
+    @inlinable public static
     func multiple(_ resource:HTTP.Resource) -> Self
     {
         .resource(resource, status: 300)
@@ -49,6 +55,12 @@ extension HTTP.ServerResponse
     func gone(_ resource:HTTP.Resource) -> Self
     {
         .resource(resource, status: 410)
+    }
+
+    @inlinable public static
+    func unsupportedMediaType(_ resource:HTTP.Resource) -> Self
+    {
+        .resource(resource, status: 415)
     }
 
     @inlinable public static

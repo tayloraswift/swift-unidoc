@@ -17,7 +17,7 @@ extension Unidoc.EditionPlacement
     static
     var first:Self { .new(0) }
 }
-extension Unidoc.EditionPlacement:MongoMasterCodingModel
+extension Unidoc.EditionPlacement:Mongo.MasterCodingModel
 {
     enum CodingKey:String, Sendable
     {

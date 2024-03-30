@@ -27,15 +27,15 @@ extension Swiftinit
         let context:ServerPluginContext
         nonisolated
         let plugins:[String: any Swiftinit.ServerPlugin]
+        private nonisolated
+        let options:ServerOptions
         nonisolated
         let db:DB
 
         private nonisolated
-        let updater:AsyncStream<Update>.Continuation,
+        let updateQueue:AsyncStream<Update>.Continuation,
             updates:AsyncStream<Update>
 
-        private nonisolated
-        let options:ServerOptions
         private
         var tour:ServerTour
 
@@ -47,17 +47,13 @@ extension Swiftinit
         {
             self.plugins = plugins
             self.context = context
+            self.options = options
             self.db = db
 
-            var continuation:AsyncStream<Update>.Continuation? = nil
-            self.updates = .init(bufferingPolicy: .bufferingOldest(16))
-            {
-                continuation = $0
-            }
-            self.updater = continuation!
-
-            self.options = options
             self.tour = .init()
+
+            (self.updates, self.updateQueue) = AsyncStream<Update>.makeStream(
+                bufferingPolicy: .bufferingOldest(16))
         }
     }
 }
@@ -169,6 +165,22 @@ extension Swiftinit.ServerLoop
             }
         }
     }
+
+    private
+    func update() async throws
+    {
+        for await update:Update in self.updates
+        {
+            try Task.checkCancellation()
+
+            let promise:Promise = update.promise
+            let payload:[UInt8] = update.payload
+
+            await (/* consume */ update).endpoint.perform(on: .init(self, tour: self.tour),
+                payload: payload,
+                request: promise)
+        }
+    }
 }
 extension Swiftinit.ServerLoop
 {
@@ -190,11 +202,19 @@ extension Swiftinit.ServerLoop
 
         let session:Mongo.Session = try await .init(from: self.db.sessions)
 
-        switch try await self.db.users.validate(user: user, with: session)
+        guard
+        let level:Unidoc.User.Level = try await self.db.users.validate(user: user,
+            with: session)
+        else
         {
-        case .administratrix?:  return nil
-        case .machine?:         return nil
-        default:                return .forbidden("")
+            return .notFound("No such user")
+        }
+
+        switch level
+        {
+        case .administratrix:   return nil
+        case .machine:          return nil
+        case .human:            return .forbidden("")
         }
     }
 }
@@ -209,79 +229,35 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
 
     nonisolated
     func response(for request:Swiftinit.StreamedRequest,
-        with body:[UInt8]) async throws -> HTTP.ServerResponse
+        with body:__owned [UInt8]) async -> HTTP.ServerResponse
     {
-        guard case .procedural(let procedural) = request.endpoint
-        else
-        {
-            return .notFound("")
-        }
-
-        return try await withCheckedThrowingContinuation
-        {
-            guard case .enqueued = self.updater.yield(.init(endpoint: procedural,
-                payload: body,
-                promise: $0))
-            else
-            {
-                fatalError("unimplemented")
-            }
-        }
+        await self.submit(update: request.endpoint, with: body)
     }
 
     nonisolated
     func response(for request:Swiftinit.IntegralRequest) async throws -> HTTP.ServerResponse
     {
-        switch request.endpoint
+        switch request.ordering
         {
-        case .interactive(let endpoint):
-            return await
-            {
-                (self:isolated Swiftinit.ServerLoop) in
+        case .actor(let interactive):
+            return try await self.response(metadata: request.metadata, endpoint: interactive)
 
-                do
-                {
-                    return try await self.response(endpoint: endpoint,
-                        metadata: request.metadata)
-                }
-                catch let error
-                {
-                    self.tour.errors += 1
-
-                    Log[.error] = "\(error)"
-                    Log[.error] = "request = \(request.metadata.path)"
-
-                    let page:Swiftinit.ServerErrorPage = .init(error: error)
-                    return .error(page.resource(format: self.format))
-                }
-            } (self)
-
-        case .procedural(let procedural):
+        case .update(let procedural):
             if  let failure:HTTP.ServerResponse = try await self.clearance(
                     by: request.metadata.cookies)
             {
                 return failure
             }
-            return try await withCheckedThrowingContinuation
-            {
-                Log[.debug] = "enqueued procedural request"
 
-                guard case .enqueued = self.updater.yield(.init(endpoint: procedural,
-                    payload: [],
-                    promise: $0))
-                else
-                {
-                    fatalError("unimplemented")
-                }
-            }
+            return await self.submit(update: procedural)
 
-        case .stateless(let stateless):
-            return .ok(stateless.resource(format: self.format))
+        case .syncResource(let renderable):
+            return .ok(renderable.resource(format: self.format))
 
-        case .redirect(let redirect):
-            return .redirect(redirect)
+        case .syncRedirect(let target):
+            return .redirect(target)
 
-        case .static(let request):
+        case .syncLoad(let request):
             guard case .development(let cache, _) = self.options.mode
             else
             {
@@ -295,25 +271,64 @@ extension Swiftinit.ServerLoop:HTTP.ServerLoop
 }
 extension Swiftinit.ServerLoop
 {
+    private nonisolated
+    func submit(update endpoint:any Swiftinit.ProceduralEndpoint,
+        with body:__owned [UInt8] = []) async -> HTTP.ServerResponse
+    {
+        await withCheckedContinuation
+        {
+            guard case .enqueued = self.updateQueue.yield(.init(endpoint: endpoint,
+                payload: body,
+                promise: .init($0)))
+            else
+            {
+                $0.resume(returning: .resource("", status: 503))
+                return
+            }
+        }
+    }
+
+    /// As this function participates in cooperative cancellation, it can throw, and the only
+    /// error it can throw is a ``CancellationError``.
     private
     func response(
-        endpoint:any InteractiveEndpoint,
-        metadata:Swiftinit.IntegralRequest.Metadata) async throws -> HTTP.ServerResponse
+        metadata:Swiftinit.IntegralRequest.Metadata,
+        endpoint:any Swiftinit.InteractiveEndpoint) async throws -> HTTP.ServerResponse
     {
-        try Task.checkCancellation()
+        let response:HTTP.ServerResponse
+        let duration:Duration
 
-        let initiated:ContinuousClock.Instant = .now
+        do
+        {
+            try Task.checkCancellation()
 
-        let response:HTTP.ServerResponse = try await endpoint.load(
-            from: .init(self, tour: self.tour),
-            with: metadata.cookies,
-            as: self.format(locale: metadata.annotation.locale))
-            ?? .notFound(.init(
-                content: .string("not found"),
-                type: .text(.plain, charset: .utf8),
-                gzip: false))
+            let initiated:ContinuousClock.Instant = .now
 
-        let duration:Duration = .now - initiated
+            response = try await endpoint.load(
+                from: .init(self, tour: self.tour),
+                with: metadata.cookies,
+                as: self.format(locale: metadata.annotation.locale))
+                ?? .notFound(.init(
+                    content: .string("not found"),
+                    type: .text(.plain, charset: .utf8),
+                    gzip: false))
+
+            duration = .now - initiated
+        }
+        catch let error as CancellationError
+        {
+            throw error
+        }
+        catch let error
+        {
+            self.tour.errors += 1
+
+            Log[.error] = "\(error)"
+            Log[.error] = "request = \(metadata.path)"
+
+            let page:Swiftinit.ServerErrorPage = .init(error: error)
+            return .error(page.resource(format: self.format))
+        }
 
         //  Don’t count login requests.
         if  endpoint is Swiftinit.DashboardEndpoint ||
@@ -387,21 +402,5 @@ extension Swiftinit.ServerLoop
         self.tour.lastRequest = metadata.logged
 
         return response
-    }
-
-    private
-    func update() async throws
-    {
-        for await update:Update in self.updates
-        {
-            try Task.checkCancellation()
-
-            let promise:CheckedContinuation<HTTP.ServerResponse, any Error> = update.promise
-            let payload:[UInt8] = update.payload
-
-            await (consume update).endpoint.perform(on: .init(self, tour: self.tour),
-                payload: payload,
-                request: promise)
-        }
     }
 }

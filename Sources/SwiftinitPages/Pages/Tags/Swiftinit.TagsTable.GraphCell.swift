@@ -9,11 +9,11 @@ extension Swiftinit.TagsTable
         private
         let package:Symbol.Package
         private
-        let graph:Unidoc.VersionsQuery.Graph
+        let graph:Unidoc.Versions.Graph
         let view:Swiftinit.Permissions
 
         init(package:Symbol.Package,
-            graph:Unidoc.VersionsQuery.Graph,
+            graph:Unidoc.Versions.Graph,
             view:Swiftinit.Permissions)
         {
             self.package = package

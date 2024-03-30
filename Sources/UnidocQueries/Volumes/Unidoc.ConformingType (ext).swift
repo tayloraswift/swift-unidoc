@@ -1,5 +1,5 @@
 import MongoQL
 
-extension Unidoc.ConformingType:MongoMasterCodingModel
+extension Unidoc.ConformingType:Mongo.MasterCodingModel
 {
 }

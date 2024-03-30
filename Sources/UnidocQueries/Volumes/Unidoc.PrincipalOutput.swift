@@ -59,7 +59,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PrincipalOutput:MongoMasterCodingModel
+extension Unidoc.PrincipalOutput:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, CaseIterable, Sendable

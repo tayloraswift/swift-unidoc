@@ -1,4 +1,5 @@
 import HTML
+import URI
 
 extension Swiftinit.TagsPage
 {
@@ -8,13 +9,22 @@ extension Swiftinit.TagsPage
         let update:String
         let value:String
         let label:String
+        let from:URI?
+        let area:Bool
 
-        init(package:Unidoc.Package, update:String, value:String, label:String)
+        init(package:Unidoc.Package,
+            update:String,
+            value:String,
+            label:String,
+            from:URI? = nil,
+            area:Bool = true)
         {
             self.package = package
             self.update = update
             self.value = value
             self.label = label
+            self.from = from
+            self.area = area
         }
     }
 }
@@ -23,6 +33,16 @@ extension Swiftinit.TagsPage.ConfigButton:HTML.OutputStreamable
     static
     func += (form:inout HTML.ContentEncoder, self:Self)
     {
+        if  let from:URI = self.from
+        {
+            form[.input]
+            {
+                $0.type = "hidden"
+                $0.name = "from"
+                $0.value = "\(from)"
+            }
+        }
+
         form[.input]
         {
             $0.type = "hidden"
@@ -36,6 +56,10 @@ extension Swiftinit.TagsPage.ConfigButton:HTML.OutputStreamable
             $0.value = self.value
         }
 
-        form[.button] { $0.type = "submit" } = self.label
+        form[.button]
+        {
+            $0.class = self.area ? "area" : "text"
+            $0.type = "submit"
+        } = self.label
     }
 }

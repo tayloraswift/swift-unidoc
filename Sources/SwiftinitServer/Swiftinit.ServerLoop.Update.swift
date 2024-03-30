@@ -4,13 +4,13 @@ extension Swiftinit.ServerLoop
 {
     struct Update:Sendable
     {
-        let endpoint:any ProceduralEndpoint
+        let endpoint:any Swiftinit.ProceduralEndpoint
         let payload:[UInt8]
-        let promise:CheckedContinuation<HTTP.ServerResponse, any Error>
+        let promise:Promise
 
-        init(endpoint:any ProceduralEndpoint,
+        init(endpoint:any Swiftinit.ProceduralEndpoint,
             payload:[UInt8] = [],
-            promise:CheckedContinuation<HTTP.ServerResponse, any Error>)
+            promise:Promise)
         {
             self.endpoint = endpoint
             self.payload = payload

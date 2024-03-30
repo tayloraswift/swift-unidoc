@@ -20,7 +20,7 @@ extension Unidoc.PackagesCrawledQuery
         }
     }
 }
-extension Unidoc.PackagesCrawledQuery.Date:MongoMasterCodingModel
+extension Unidoc.PackagesCrawledQuery.Date:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable

@@ -28,7 +28,7 @@ extension Unidoc.DB.RepoFeed
         }
     }
 }
-extension Unidoc.DB.RepoFeed.Activity:MongoMasterCodingModel
+extension Unidoc.DB.RepoFeed.Activity:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
