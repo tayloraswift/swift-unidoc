@@ -1,10 +1,10 @@
 import System
 
-@available(*, deprecated, renamed: "SPM.Workspace")
+@available(*, deprecated, renamed: "SSGC.Workspace")
 public
-typealias Workspace = SPM.Workspace
+typealias Workspace = SSGC.Workspace
 
-extension SPM
+extension SSGC
 {
     @frozen public
     struct Workspace:SystemWorkspace, Equatable

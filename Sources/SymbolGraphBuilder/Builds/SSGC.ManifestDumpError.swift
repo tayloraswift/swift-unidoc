@@ -2,7 +2,7 @@ import PackageMetadata
 import System
 import TraceableErrors
 
-extension SPM
+extension SSGC
 {
     public
     struct ManifestDumpError:Error
@@ -23,7 +23,7 @@ extension SPM
         }
     }
 }
-extension SPM.ManifestDumpError:TraceableError
+extension SSGC.ManifestDumpError:TraceableError
 {
     public
     var notes:[String]

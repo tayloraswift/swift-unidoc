@@ -1,7 +1,7 @@
 import System
 import Symbols
 
-extension SPM
+extension SSGC
 {
     struct PackageRoot
     {
@@ -14,7 +14,7 @@ extension SPM
         }
     }
 }
-extension SPM.PackageRoot
+extension SSGC.PackageRoot
 {
     init(normalizing path:FilePath)
     {
@@ -26,7 +26,7 @@ extension SPM.PackageRoot
         self.init(normalizing: FilePath.init(root.path))
     }
 }
-extension SPM.PackageRoot
+extension SSGC.PackageRoot
 {
     func rebase(_ path:FilePath) -> Symbol.File
     {

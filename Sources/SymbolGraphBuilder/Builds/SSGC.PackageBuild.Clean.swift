@@ -1,4 +1,4 @@
-extension SPM.Build
+extension SSGC.PackageBuild
 {
     public
     enum Clean:Equatable, Hashable, Sendable

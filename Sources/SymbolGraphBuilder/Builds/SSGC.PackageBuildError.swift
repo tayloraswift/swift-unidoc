@@ -1,7 +1,7 @@
-extension SPM
+extension SSGC
 {
     @frozen public
-    enum BuildError:Error
+    enum PackageBuildError:Error
     {
         case swift_package_update(Int32)
         case swift_build(Int32)

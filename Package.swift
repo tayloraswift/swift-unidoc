@@ -6,6 +6,9 @@ let package:Package = .init(
     name: "swift-unidoc",
     platforms: [.macOS(.v14)],
     products: [
+        .executable(name: "ssgc", targets: ["ssgc"]),
+        .executable(name: "SwiftinitServer", targets: ["SwiftinitServer"]),
+
         .library(name: "guides", targets: ["guides"]),
 
         .library(name: "CasesByIntegerEncodingMacro", targets: ["CasesByIntegerEncodingMacro"]),
@@ -62,8 +65,6 @@ let package:Package = .init(
         .library(name: "SwiftinitPlugins", targets: ["SwiftinitPlugins"]),
         .library(name: "SwiftinitRender", targets: ["SwiftinitRender"]),
 
-        .executable(name: "SwiftinitServer", targets: ["SwiftinitServer"]),
-
         .library(name: "SymbolGraphBuilder", targets: ["SymbolGraphBuilder"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
         .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
@@ -80,8 +81,6 @@ let package:Package = .init(
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
-
-        .executable(name: "UnidocBuild", targets: ["UnidocBuild"]),
 
         .library(name: "URI", targets: ["URI"]),
     ],
@@ -574,7 +573,7 @@ let package:Package = .init(
                 .target(name: "SwiftinitAssets"),
             ]),
 
-        .executableTarget(name: "UnidocBuild",
+        .executableTarget(name: "ssgc",
             dependencies: [
                 .target(name: "ArgumentParsing"),
                 .target(name: "HTTPClient"),

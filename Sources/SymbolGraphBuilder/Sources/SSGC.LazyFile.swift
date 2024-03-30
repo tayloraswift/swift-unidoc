@@ -3,10 +3,10 @@ import Symbols
 import System
 import URI
 
-extension SPM
+extension SSGC
 {
     final
-    class ResourceFile
+    class LazyFile
     {
         /// The amount of time it took to load this file from disk.
         private(set)
@@ -29,7 +29,7 @@ extension SPM
         }
     }
 }
-extension SPM.ResourceFile
+extension SSGC.LazyFile
 {
     convenience
     init(location:FilePath, path:Symbol.File)
@@ -45,7 +45,7 @@ extension SPM.ResourceFile
     /// This identity is only unique within a single module, and only within a single
     /// file type.
     convenience
-    init(location:FilePath, root:borrowing SPM.PackageRoot)
+    init(location:FilePath, root:borrowing SSGC.PackageRoot)
     {
         let path:Symbol.File = root.rebase(location)
         let stem:Substring = path.last.prefix { $0 != "." }
@@ -68,7 +68,7 @@ extension SPM.ResourceFile
         return try body()
     }
 }
-extension SPM.ResourceFile:SSGC.ResourceFile
+extension SSGC.LazyFile:SSGC.ResourceFile
 {
     func read(as _:[UInt8].Type = [UInt8].self) throws -> [UInt8]
     {

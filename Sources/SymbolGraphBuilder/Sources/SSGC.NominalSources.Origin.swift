@@ -1,6 +1,6 @@
 import System
 
-extension SPM.NominalSources
+extension SSGC.NominalSources
 {
     enum Origin
     {
