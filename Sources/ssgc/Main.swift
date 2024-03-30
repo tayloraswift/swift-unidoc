@@ -19,7 +19,9 @@ enum Main
     func _main() async throws
     {
         let options:Options = try .parse()
-
+        let toolchain:SSGC.Toolchain = try await .detect(
+            swiftPath: options.swift ?? "swift",
+            swiftSDK: options.swiftSDK)
 
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
 
@@ -45,13 +47,14 @@ enum Main
             cookie: options.cookie,
             port: options.port)
 
+
         switch options.tool
         {
         case .builder:
-            try await unidoc.builder()
+            try await unidoc.builder(toolchain: toolchain)
 
         case .upgrade:
-            try await unidoc.upgrade(pretty: options.pretty)
+            try await unidoc.upgrade(toolchain: toolchain, pretty: options.pretty)
 
         case .latest:
             guard
@@ -66,14 +69,15 @@ enum Main
             {
                 try await unidoc.buildAndUpload(remote: package,
                     pretty: options.pretty,
-                    force: options.force)
+                    force: options.force,
+                    toolchain: toolchain)
             }
             else
             {
                 try await unidoc.buildAndUpload(local: package,
                     search: options.input.map(FilePath.init(_:)),
                     pretty: options.pretty,
-                    swift: options.swift)
+                    toolchain: toolchain)
             }
         }
     }

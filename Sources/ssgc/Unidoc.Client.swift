@@ -46,9 +46,8 @@ extension Unidoc.Client
     func buildAndUpload(local symbol:Symbol.Package,
         search:FilePath?,
         pretty:Bool,
-        swift:String?) async throws
+        toolchain:SSGC.Toolchain) async throws
     {
-        let toolchain:SSGC.Toolchain = try await .detect(swift: swift ?? "swift")
         let workspace:SSGC.Workspace = try await .create(at: ".unidoc")
 
         let object:SymbolGraphObject<Void>
@@ -84,7 +83,8 @@ extension Unidoc.Client
 
     func buildAndUpload(remote symbol:Symbol.Package,
         pretty:Bool,
-        force:Unidoc.VersionSeries?) async throws
+        force:Unidoc.VersionSeries?,
+        toolchain:SSGC.Toolchain) async throws
     {
         //  Building the package might take a long time, and the server might close the
         //  connection before the build is finished. So we do not try to keep this
@@ -120,7 +120,8 @@ extension Unidoc.Client
 
         let result:Result<Unidoc.Snapshot, Unidoc.BuildFailure> = try await self.build(labels,
             action: force != nil ? .uplinkRefresh : .uplinkInitial,
-            pretty: pretty)
+            pretty: pretty,
+            toolchain: toolchain)
 
 
         try await self.connect
@@ -141,7 +142,7 @@ extension Unidoc.Client
     }
 
     private
-    func buildAndUploadQueued() async throws
+    func buildAndUploadQueued(toolchain:SSGC.Toolchain) async throws
     {
         let labels:Unidoc.BuildLabels = try await self.connect
         {
@@ -157,7 +158,8 @@ extension Unidoc.Client
 
         let result:Result<Unidoc.Snapshot, Unidoc.BuildFailure> = try await self.build(labels,
             action: .uplinkRefresh,
-            pretty: false)
+            pretty: false,
+            toolchain: toolchain)
 
         try await self.connect
         {
@@ -179,9 +181,9 @@ extension Unidoc.Client
     private
     func build(_ labels:Unidoc.BuildLabels,
         action:Unidoc.Snapshot.PendingAction,
-        pretty:Bool) async throws -> Result<Unidoc.Snapshot, Unidoc.BuildFailure>
+        pretty:Bool,
+        toolchain:SSGC.Toolchain) async throws -> Result<Unidoc.Snapshot, Unidoc.BuildFailure>
     {
-        let toolchain:SSGC.Toolchain = try await .detect()
         let workspace:SSGC.Workspace = try await .create(at: ".unidoc")
 
         guard
@@ -237,7 +239,7 @@ extension Unidoc.Client
 }
 extension Unidoc.Client
 {
-    func builder() async throws
+    func builder(toolchain:SSGC.Toolchain) async throws
     {
         while true
         {
@@ -246,7 +248,7 @@ extension Unidoc.Client
             let cooldown:Void = try await Task.sleep(for: .seconds(5))
             do
             {
-                try await self.buildAndUploadQueued()
+                try await self.buildAndUploadQueued(toolchain: toolchain)
                 try await cooldown
             }
             catch let error
@@ -257,7 +259,7 @@ extension Unidoc.Client
         }
     }
 
-    func upgrade(pretty:Bool) async throws
+    func upgrade(toolchain:SSGC.Toolchain, pretty:Bool) async throws
     {
         var unbuildable:[Unidoc.Edition: ()] = [:]
 
@@ -312,7 +314,8 @@ extension Unidoc.Client
 
                 if  case .success(let snapshot) = try await self.build(buildable,
                         action: .uplinkRefresh,
-                        pretty: pretty)
+                        pretty: pretty,
+                        toolchain: toolchain)
                 {
                     try await self.connect
                     {

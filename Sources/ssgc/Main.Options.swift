@@ -13,6 +13,7 @@ extension Main
 
         var pretty:Bool
         var swift:String?
+        var swiftSDK:SSGC.AppleSDK?
         var force:Unidoc.VersionSeries?
         var input:String?
 
@@ -28,6 +29,7 @@ extension Main
 
             self.pretty = false
             self.swift = nil
+            self.swiftSDK = nil
             self.force = nil
             self.input = nil
 
@@ -68,6 +70,9 @@ extension Main.Options
 
             case "--swift", "-s":
                 options.swift = try arguments.next(for: option)
+
+            case "--swift-sdk", "-k":
+                options.swiftSDK = try arguments.next(for: option)
 
             case "--input", "-I":
                 options.input = try arguments.next(for: option)
