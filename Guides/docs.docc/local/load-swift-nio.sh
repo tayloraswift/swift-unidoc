@@ -1,1 +1,1 @@
-swift run -c release UnidocBuild swift-nio -I /swift
+swift run -c release ssgc swift-nio -I /swift

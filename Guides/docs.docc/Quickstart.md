@@ -87,7 +87,7 @@ A fresh Unidoc database contains no documentation. Let’s build some now.
 
 The documentation compiler lives in this repository, and is packaged as a normal SwiftPM executable target.
 
-To invoke the compiler, run the `UnidocBuild` tool and pass it a single argument, which is the name of the package you want to build documentation for. In our case, the “package” is `swift`, which is a special name identifying the standard library itself.
+To invoke the compiler, run the `ssgc` tool and pass it a single argument, which is the name of the package you want to build documentation for. In our case, the “package” is `swift`, which is a special name identifying the standard library itself.
 
 @Code(file: load-standard-library.sh, title: load-standard-library.sh)
 
@@ -123,7 +123,7 @@ git clone https://github.com/apple/swift-nio
 
 **Where** you clone the repository is important, because you will need to tell Unidoc where to find the project. In this example, we cloned the repository inside a directory called `/swift`, which is a plausible place to store Git repositories in a devcontainer.
 
-Next, you can try building `swift-nio` with `UnidocBuild`, specifying the path to the search directory (`/swift`) with the `-I` option.
+Next, you can try building `swift-nio` with `ssgc`, specifying the path to the search directory (`/swift`) with the `-I` option.
 
 @Code(file: load-swift-nio.sh, title: load-swift-nio.sh)
 
