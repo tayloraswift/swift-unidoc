@@ -1,6 +1,6 @@
 <div align="center">
 
-<strong><em><code>unidoc</code></em></strong><br><small><code>0.9</code></small>
+<strong><em><code>unidoc</code></em></strong><br><small><code>0.10</code></small>
 
 [![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/ci.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/ci.yml)
 
@@ -17,7 +17,7 @@ Unidoc powers the [Swiftinit](https://swiftinit.org) open source package index!
 </div>
 
 
-## Requirements 
+## Requirements
 
 Unidoc’s principal deployment target is Amazon Linux 2023, but the project also builds on macOS 14 with Xcode 15.3 or newer.
 
