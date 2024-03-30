@@ -32,15 +32,12 @@ struct Toolchain
 }
 extension Toolchain
 {
-    private
+    public
     init(parsing splash:String, swift command:String) throws
     {
-        //  Splash should consist of two complete lines of the form
-        //
-        //  Swift version 5.8 (swift-5.8-RELEASE)
-        //  Target: x86_64-unknown-linux-gnu
+        //  Splash should consist of two complete lines and a final newline. If the final
+        //  newline isn’t present, the output was clipped.
         let lines:[Substring] = splash.split(separator: "\n", omittingEmptySubsequences: false)
-        //  if the final newline isn’t present, the output was clipped.
         guard lines.count == 3
         else
         {
@@ -51,54 +48,37 @@ extension Toolchain
         let triple:[Substring] = lines[1].split(separator: " ")
 
         guard
-            toolchain.count >= 4,
-            toolchain[0 ... 1] == ["Swift", "version"],
             triple.count == 2,
-            triple[0] == "Target:"
+            triple[0] == "Target:",
+        let triple:Triple = .init(triple[1])
         else
         {
             throw ToolchainError.malformedSplash
         }
-        guard
-        let triple:Triple = .init(triple[1])
-        else
+
+        var k:Int = toolchain.endIndex
+        for (i, j):(Int, Int) in zip(toolchain.indices, toolchain.indices.dropFirst())
         {
-            throw ToolchainError.malformedTriple
+            if  toolchain[i ... j] == ["Swift", "version"]
+            {
+                k = toolchain.index(after: j)
+                break
+            }
+        }
+        if  k == toolchain.endIndex
+        {
+            throw ToolchainError.malformedSplash
         }
 
-        let commit:SymbolGraphMetadata.Commit?
         let swift:SwiftVersion
-        if  toolchain.count == 4,
-            let version:NumericVersion = .init(toolchain[2])
+        if  let version:NumericVersion = .init(toolchain[k])
         {
-            let parenthesized:Substring = toolchain[3]
-
-            guard parenthesized.startIndex < parenthesized.endIndex
-            else
-            {
-                throw ToolchainError.malformedSplash
-            }
-
-            let i:String.Index = parenthesized.index(after: parenthesized.startIndex)
-            let j:String.Index = parenthesized.index(before: parenthesized.endIndex)
-
-            guard i < j,
-            case ("(", ")") = (parenthesized[parenthesized.startIndex], parenthesized[j])
-            else
-            {
-                throw ToolchainError.malformedSplash
-            }
-
-            commit = .init(name: String.init(parenthesized[i ..< j]), sha1: nil)
             swift = .init(version: PatchVersion.init(padding: version))
         }
-        //  Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
-        //  Target: x86_64-unknown-linux-gnu
+
         else if
-            toolchain.count == 7,
-            let version:MinorVersion = .init(toolchain[2].prefix { $0 != "-" })
+            let version:MinorVersion = .init(toolchain[k].prefix { $0 != "-" })
         {
-            commit = nil
             swift = .init(
                 version: .v(version.components.major, version.components.minor, 0),
                 nightly: .DEVELOPMENT_SNAPSHOT)
@@ -106,6 +86,17 @@ extension Toolchain
         else
         {
             throw ToolchainError.malformedSwiftVersion
+        }
+
+        let commit:SymbolGraphMetadata.Commit?
+        if  case nil = swift.nightly,
+            let word:Substring = toolchain[toolchain.index(after: k)...].first
+        {
+            commit = .parenthesizedSwiftRelease(word)
+        }
+        else
+        {
+            commit = nil
         }
 
         self.init(version: swift, commit: commit, triple: triple, swift: command)
