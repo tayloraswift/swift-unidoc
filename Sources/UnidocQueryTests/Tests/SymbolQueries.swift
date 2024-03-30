@@ -19,8 +19,8 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         pool:Mongo.SessionPool,
         unidoc:Unidoc.DB) async throws
     {
-        let workspace:SPM.Workspace = try await .create(at: ".testing")
-        let toolchain:Toolchain = try await .detect()
+        let workspace:SSGC.Workspace = try await .create(at: ".testing")
+        let toolchain:SSGC.Toolchain = try await .detect()
 
         let example:SymbolGraphObject<Void> = try await .init(building: try await .local(
                 package: "swift-malibu",

@@ -1,9 +1,9 @@
 import System
 
-extension SPM
+extension SSGC
 {
     /// An SPM build directory. It is usually, but not always, named `.build`.
-    struct BuildDirectory
+    struct PackageBuildDirectory
     {
         let path:FilePath
     }

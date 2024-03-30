@@ -6,10 +6,10 @@ import SymbolGraphs
 import Symbols
 import System
 
-extension SPM
+extension SSGC
 {
     public
-    struct Build
+    struct PackageBuild
     {
         /// What is being built.
         let id:ID
@@ -28,12 +28,12 @@ extension SPM
         }
     }
 }
-extension SPM.Build
+extension SSGC.PackageBuild
 {
     /// Always returns ``Configuration/debug``.
     var configuration:Configuration { .debug }
 }
-extension SPM.Build
+extension SSGC.PackageBuild
 {
     func listExtraManifests() throws -> [MinorVersion]
     {
@@ -60,7 +60,7 @@ extension SPM.Build
         return versions
     }
 }
-extension SPM.Build
+extension SSGC.PackageBuild
 {
     /// Creates a build setup by attaching a package located in a directory of the
     /// same name in the specified location.
@@ -77,10 +77,10 @@ extension SPM.Build
     public static
     func local(package:Symbol.Package,
         from packages:FilePath,
-        in shared:SPM.Workspace,
+        in shared:SSGC.Workspace,
         clean:Bool = false) async throws -> Self
     {
-        let container:SPM.Workspace = try await shared.create("\(package)", clean: clean)
+        let container:SSGC.Workspace = try await shared.create("\(package)", clean: clean)
 
         return .init(id: .unversioned(package),
             // https://github.com/apple/swift/issues/71602
@@ -106,7 +106,7 @@ extension SPM.Build
     func remote(package:Symbol.Package,
         from repository:String,
         at refname:String,
-        in shared:SPM.Workspace,
+        in shared:SSGC.Workspace,
         clean:Set<Clean> = []) async throws -> Self
     {
         let version:AnyVersion = .init(refname)
@@ -127,10 +127,10 @@ extension SPM.Build
         //              ├── Package.swift
         //              └── ...
 
-        let container:SPM.Workspace = try await shared.create("\(package)")
-        let checkouts:SPM.CheckoutDirectory = try await container.create("checkouts",
+        let container:SSGC.Workspace = try await shared.create("\(package)")
+        let checkouts:SSGC.CheckoutDirectory = try await container.create("checkouts",
             clean: clean.contains(.checkouts),
-            as: SPM.CheckoutDirectory.self) // https://github.com/apple/swift/issues/71602
+            as: SSGC.CheckoutDirectory.self) // https://github.com/apple/swift/issues/71602
         let artifacts:ArtifactsDirectory = try await container.create("artifacts@\(refname)",
             clean: clean.contains(.artifacts),
             as: ArtifactsDirectory.self)    // ditto
@@ -189,10 +189,10 @@ extension SPM.Build
         }
     }
 }
-extension SPM.Build:DocumentationBuild
+extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     mutating
-    func compile(with swift:Toolchain) async throws -> (SymbolGraphMetadata, SPM.PackageSources)
+    func compile(with swift:SSGC.Toolchain) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         switch self.id
         {
@@ -231,10 +231,10 @@ extension SPM.Build:DocumentationBuild
         }
         catch SystemProcessError.exit(let code, _)
         {
-            throw SPM.BuildError.swift_package_update(code)
+            throw SSGC.PackageBuildError.swift_package_update(code)
         }
 
-        let scratch:SPM.BuildDirectory
+        let scratch:SSGC.PackageBuildDirectory
         do
         {
             scratch = try await swift.build(package: self.root,
@@ -242,7 +242,7 @@ extension SPM.Build:DocumentationBuild
         }
         catch SystemProcessError.exit(let code, _)
         {
-            throw SPM.BuildError.swift_build(code)
+            throw SSGC.PackageBuildError.swift_build(code)
         }
 
         let platform:SymbolGraphMetadata.Platform = try swift.platform()
@@ -282,7 +282,7 @@ extension SPM.Build:DocumentationBuild
                 on: platform,
                 as: pin.identity)
 
-            let sources:SPM.PackageSources = try .init(scanning: dependency)
+            let sources:SSGC.PackageSources = try .init(scanning: dependency)
 
             dependencies.append(dependency)
             include += sources.include

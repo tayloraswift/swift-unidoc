@@ -7,30 +7,36 @@ import SymbolGraphs
 import Symbols
 import System
 
-@frozen public
-struct Toolchain
+extension SSGC
 {
-    public
-    let version:SwiftVersion
-    public
-    let commit:SymbolGraphMetadata.Commit?
-    public
-    let triple:Triple
-    /// The `swift` command, which might be a path to a specific Swift toolchain, or just the
-    /// string `"swift"`.
-    private
-    let swift:String
-
-    private
-    init(version:SwiftVersion, commit:SymbolGraphMetadata.Commit?, triple:Triple, swift:String)
+    @frozen public
+    struct Toolchain
     {
-        self.version = version
-        self.commit = commit
-        self.triple = triple
-        self.swift = swift
+        public
+        let version:SwiftVersion
+        public
+        let commit:SymbolGraphMetadata.Commit?
+        public
+        let triple:Triple
+        /// The `swift` command, which might be a path to a specific Swift toolchain, or just the
+        /// string `"swift"`.
+        private
+        let swift:String
+
+        private
+        init(version:SwiftVersion,
+            commit:SymbolGraphMetadata.Commit?,
+            triple:Triple,
+            swift:String)
+        {
+            self.version = version
+            self.commit = commit
+            self.triple = triple
+            self.swift = swift
+        }
     }
 }
-extension Toolchain
+extension SSGC.Toolchain
 {
     public
     init(parsing splash:String, swift command:String) throws
@@ -41,7 +47,7 @@ extension Toolchain
         guard lines.count == 3
         else
         {
-            throw ToolchainError.malformedSplash
+            throw SSGC.ToolchainError.malformedSplash
         }
 
         let toolchain:[Substring] = lines[0].split(separator: " ")
@@ -53,7 +59,7 @@ extension Toolchain
         let triple:Triple = .init(triple[1])
         else
         {
-            throw ToolchainError.malformedSplash
+            throw SSGC.ToolchainError.malformedSplash
         }
 
         var k:Int = toolchain.endIndex
@@ -67,7 +73,7 @@ extension Toolchain
         }
         if  k == toolchain.endIndex
         {
-            throw ToolchainError.malformedSplash
+            throw SSGC.ToolchainError.malformedSplash
         }
 
         let swift:SwiftVersion
@@ -85,7 +91,7 @@ extension Toolchain
         }
         else
         {
-            throw ToolchainError.malformedSwiftVersion
+            throw SSGC.ToolchainError.malformedSwiftVersion
         }
 
         let commit:SymbolGraphMetadata.Commit?
@@ -117,7 +123,7 @@ extension Toolchain
         return try .init(parsing: try readable.read(buffering: 1024), swift: swift)
     }
 }
-extension Toolchain
+extension SSGC.Toolchain
 {
     func platform() throws -> SymbolGraphMetadata.Platform
     {
@@ -147,12 +153,12 @@ extension Toolchain
         }
         else
         {
-            throw ToolchainError.unsupportedTriple(self.triple)
+            throw SSGC.ToolchainError.unsupportedTriple(self.triple)
         }
     }
 }
 
-extension Toolchain
+extension SSGC.Toolchain
 {
     func manifest(package:FilePath, json file:FilePath, leaf:Bool) async throws -> SPM.Manifest
     {
@@ -178,7 +184,7 @@ extension Toolchain
         }
         catch let error
         {
-            throw SPM.ManifestDumpError.init(underlying: error, root: package, leaf: leaf)
+            throw SSGC.ManifestDumpError.init(underlying: error, root: package, leaf: leaf)
         }
 
         return try json.decode()
@@ -216,11 +222,11 @@ extension Toolchain
     func build(
         package:FilePath,
         release:Bool = false,
-        log:FilePath) async throws -> SPM.BuildDirectory
+        log:FilePath) async throws -> SSGC.PackageBuildDirectory
     {
         print("Streaming 'swift build' output to: \(log)")
 
-        let scratch:SPM.BuildDirectory = .init(path: package / ".build.unidoc")
+        let scratch:SSGC.PackageBuildDirectory = .init(path: package / ".build.unidoc")
 
         try await log.open(.writeOnly,
             permissions: (.rw, .r, .r),
@@ -237,16 +243,16 @@ extension Toolchain
         return scratch
     }
 }
-extension Toolchain
+extension SSGC.Toolchain
 {
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
-    func dump(modules:[SPM.NominalSources],
+    func dump(modules:[SSGC.NominalSources],
         include:[FilePath],
         output:ArtifactsDirectory,
         pretty:Bool) async throws -> [Artifacts]
     {
-        for sources:SPM.NominalSources in modules
+        for sources:SSGC.NominalSources in modules
         {
             let label:String
             if  case .toolchain? = sources.origin

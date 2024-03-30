@@ -1,14 +1,17 @@
 import SymbolGraphs
 
-public
-enum ToolchainError:Error, Equatable, Sendable
+extension SSGC
 {
-    case malformedSwiftVersion
-    case malformedSplash
-    case malformedTriple
-    case unsupportedTriple(Triple)
+    public
+    enum ToolchainError:Error, Equatable, Sendable
+    {
+        case malformedSwiftVersion
+        case malformedSplash
+        case malformedTriple
+        case unsupportedTriple(Triple)
+    }
 }
-extension ToolchainError:CustomStringConvertible
+extension SSGC.ToolchainError:CustomStringConvertible
 {
     public
     var description:String

@@ -2,23 +2,23 @@ import MarkdownABI
 import PackageGraphs
 import System
 
-extension SPM
+extension SSGC
 {
     /// Stores information about the source files for a package.
     struct PackageSources
     {
         var cultures:[NominalSources]
-        var snippets:[ResourceFile]
+        var snippets:[LazyFile]
 
         var include:[FilePath]
 
-        let root:SPM.PackageRoot?
+        let root:PackageRoot?
 
         init(
             cultures:[NominalSources] = [],
-            snippets:[ResourceFile] = [],
+            snippets:[LazyFile] = [],
             include:[FilePath] = [],
-            root:SPM.PackageRoot? = nil)
+            root:PackageRoot? = nil)
         {
             self.cultures = cultures
             self.snippets = snippets
@@ -29,11 +29,11 @@ extension SPM
         }
     }
 }
-extension SPM.PackageSources
+extension SSGC.PackageSources
 {
     init(scanning package:borrowing PackageNode, include:consuming [FilePath] = []) throws
     {
-        let root:SPM.PackageRoot = .init(normalizing: package.root)
+        let root:SSGC.PackageRoot = .init(normalizing: package.root)
 
         self.init(include: include, root: root)
 
@@ -50,7 +50,7 @@ extension SPM.PackageSources
         let snippetsDirectory:FilePath.Component = .init(package.snippets)
         else
         {
-            throw SPM.SnippetDirectoryError.invalid(package.snippets)
+            throw SSGC.SnippetDirectoryError.invalid(package.snippets)
         }
 
         let snippets:FilePath = root.path.appending(snippetsDirectory)
@@ -77,7 +77,7 @@ extension SPM.PackageSources
             if  file.extension == "swift"
             {
                 //  Should we be mangling URL-unsafe characters?
-                let snippet:SPM.ResourceFile = .init(location: file.path,
+                let snippet:SSGC.LazyFile = .init(location: file.path,
                     path: root.rebase(file.path),
                     name: $1.stem)
 

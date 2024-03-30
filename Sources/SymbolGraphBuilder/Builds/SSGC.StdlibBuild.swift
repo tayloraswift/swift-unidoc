@@ -1,10 +1,10 @@
 import SymbolGraphs
 import System
 
-extension Toolchain
+extension SSGC
 {
     public
-    struct Build
+    struct StdlibBuild
     {
         /// Where to emit documentation artifacts to.
         let artifacts:ArtifactsDirectory
@@ -16,22 +16,22 @@ extension Toolchain
         }
     }
 }
-extension Toolchain.Build
+extension SSGC.StdlibBuild
 {
     public static
-    func swift(in shared:SPM.Workspace, clean:Bool = false) async throws -> Self
+    func swift(in shared:SSGC.Workspace, clean:Bool = false) async throws -> Self
     {
-        let container:SPM.Workspace = try await shared.create("swift", clean: clean)
+        let container:SSGC.Workspace = try await shared.create("swift", clean: clean)
         return .init(artifacts: try await container.create("artifacts", clean: clean,
             as: ArtifactsDirectory.self)) // https://github.com/apple/swift/issues/71602
     }
 }
-extension Toolchain.Build:DocumentationBuild
+extension SSGC.StdlibBuild:SSGC.DocumentationBuild
 {
-    func compile(with swift:Toolchain) async throws -> (SymbolGraphMetadata, SPM.PackageSources)
+    func compile(with swift:SSGC.Toolchain) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
-        let sources:[SPM.NominalSources] =
+        let sources:[SSGC.NominalSources] =
         [
             //  0:
             .toolchain(module: "Swift"),

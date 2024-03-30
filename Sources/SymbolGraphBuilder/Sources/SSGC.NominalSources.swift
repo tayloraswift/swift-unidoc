@@ -3,17 +3,17 @@ import SymbolGraphs
 import Symbols
 import System
 
-extension SPM
+extension SSGC
 {
     /// Stores information about the source files for a module.
     struct NominalSources
     {
         private(set)
-        var resources:[ResourceFile]
+        var resources:[LazyFile]
         /// Absolute paths to all (non-excluded) markdown articles discovered
         /// in the relevant target’s sources directory.
         private(set)
-        var markdown:[ResourceFile]
+        var markdown:[LazyFile]
 
         private(set)
         var module:SymbolGraph.Module
@@ -32,11 +32,11 @@ extension SPM
         }
     }
 }
-extension SPM.NominalSources
+extension SSGC.NominalSources
 {
     init(include:inout [FilePath],
         exclude:borrowing [String],
-        package:borrowing SPM.PackageRoot,
+        package:borrowing SSGC.PackageRoot,
         module:consuming SymbolGraph.Module) throws
     {
         self.init(module)
@@ -76,10 +76,10 @@ extension SPM.NominalSources
             origin: .toolchain)
     }
 }
-extension SPM.NominalSources
+extension SSGC.NominalSources
 {
     private mutating
-    func scan(include:inout [FilePath], exclude:[String], package root:SPM.PackageRoot) throws
+    func scan(include:inout [FilePath], exclude:[String], package root:SSGC.PackageRoot) throws
     {
         guard
         case .sources(let path) = self.origin
@@ -119,7 +119,7 @@ extension SPM.NominalSources
             if  file.extension == "md"
             {
                 //  It’s common to list markdown files under exclude paths.
-                let supplement:SPM.ResourceFile = .init(location: file.path, root: root)
+                let supplement:SSGC.LazyFile = .init(location: file.path, root: root)
                 self.markdown.append(supplement)
                 return
             }
@@ -148,13 +148,13 @@ extension SPM.NominalSources
                 switch file.extension
                 {
                 case "tutorial":
-                    let tutorial:SPM.ResourceFile = .init(location: file.path, root: root)
+                    let tutorial:SSGC.LazyFile = .init(location: file.path, root: root)
                     self.markdown.append(tutorial)
 
                 default:
                     //  Inside a *.docc directory, everything that is not markdown or a tutorial
                     //  is a resource.
-                    let resource:SPM.ResourceFile = .init(location: file.path,
+                    let resource:SSGC.LazyFile = .init(location: file.path,
                         path: root.rebase(file.path))
 
                     self.resources.append(resource)

@@ -12,7 +12,7 @@ import SourceDiagnostics
 extension SymbolGraph
 {
     static
-    func build(package:SPM.PackageSources, from artifacts:[Artifacts]) async throws -> Self
+    func build(package:SSGC.PackageSources, from artifacts:[Artifacts]) async throws -> Self
     {
         precondition(package.cultures.count == artifacts.count,
             "Mismatched cultures and artifacts!")
@@ -27,7 +27,7 @@ extension SymbolGraph
         {
             var checker:SSGC.TypeChecker = .init(root: root)
 
-            for (culture, artifacts):(SPM.NominalSources, Artifacts) in zip(
+            for (culture, artifacts):(SSGC.NominalSources, Artifacts) in zip(
                 package.cultures,
                 artifacts)
             {
@@ -76,9 +76,9 @@ extension SymbolGraph
                 linker.allocate(extensions: extensions)
             }
 
-            let resources:[[SPM.ResourceFile]] = package.cultures.map(\.resources)
-            let markdown:[[SPM.ResourceFile]] = package.cultures.map(\.markdown)
-            let snippets:[SPM.ResourceFile] = package.snippets
+            let resources:[[SSGC.LazyFile]] = package.cultures.map(\.resources)
+            let markdown:[[SSGC.LazyFile]] = package.cultures.map(\.markdown)
+            let snippets:[SSGC.LazyFile] = package.snippets
 
             let articles:[[SSGC.Article]] = try profiler.measure(\.linking)
             {
@@ -88,17 +88,17 @@ extension SymbolGraph
                     markdown: markdown)
             }
 
-            for resource:SPM.ResourceFile in (consume resources).joined()
+            for resource:SSGC.LazyFile in (consume resources).joined()
             {
                 profiler.loadingSources += resource.loadingTime
                 profiler.linking -= resource.loadingTime
             }
-            for markdown:SPM.ResourceFile in (consume markdown).joined()
+            for markdown:SSGC.LazyFile in (consume markdown).joined()
             {
                 profiler.loadingSources += markdown.loadingTime
                 profiler.linking -= markdown.loadingTime
             }
-            for snippet:SPM.ResourceFile in (consume snippets)
+            for snippet:SSGC.LazyFile in (consume snippets)
             {
                 profiler.loadingSources += snippet.loadingTime
                 profiler.linking -= snippet.loadingTime

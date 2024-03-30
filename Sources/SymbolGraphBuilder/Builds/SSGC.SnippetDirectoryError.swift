@@ -1,4 +1,4 @@
-extension SPM
+extension SSGC
 {
     enum SnippetDirectoryError:Error
     {

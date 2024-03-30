@@ -48,13 +48,13 @@ extension Unidoc.Client
         pretty:Bool,
         swift:String?) async throws
     {
-        let toolchain:Toolchain = try await .detect(swift: swift ?? "swift")
-        let workspace:SPM.Workspace = try await .create(at: ".unidoc")
+        let toolchain:SSGC.Toolchain = try await .detect(swift: swift ?? "swift")
+        let workspace:SSGC.Workspace = try await .create(at: ".unidoc")
 
         let object:SymbolGraphObject<Void>
         if  symbol == .swift
         {
-            let build:Toolchain.Build = try await .swift(in: workspace,
+            let build:SSGC.StdlibBuild = try await .swift(in: workspace,
                 clean: true)
 
             object = try await .init(building: build, with: toolchain, pretty: pretty)
@@ -62,7 +62,7 @@ extension Unidoc.Client
         else if
             let search:FilePath
         {
-            let build:SPM.Build = try await .local(package: symbol,
+            let build:SSGC.PackageBuild = try await .local(package: symbol,
                 from: search,
                 in: workspace,
                 clean: true)
@@ -181,8 +181,8 @@ extension Unidoc.Client
         action:Unidoc.Snapshot.PendingAction,
         pretty:Bool) async throws -> Result<Unidoc.Snapshot, Unidoc.BuildFailure>
     {
-        let toolchain:Toolchain = try await .detect()
-        let workspace:SPM.Workspace = try await .create(at: ".unidoc")
+        let toolchain:SSGC.Toolchain = try await .detect()
+        let workspace:SSGC.Workspace = try await .create(at: ".unidoc")
 
         guard
         let tag:String = labels.tag
@@ -197,7 +197,7 @@ extension Unidoc.Client
         }
 
         guard
-        let build:SPM.Build = try? await .remote(
+        let build:SSGC.PackageBuild = try? await .remote(
             package: labels.package,
             from: labels.repo,
             at: tag,
@@ -219,17 +219,17 @@ extension Unidoc.Client
                 inline: archive.graph,
                 action: action))
         }
-        catch let error as SPM.ManifestDumpError
+        catch let error as SSGC.ManifestDumpError
         {
             return .failure(.init(reason: error.leaf ?
                     .failedToReadManifest :
                     .failedToReadManifestForDependency))
         }
-        catch SPM.BuildError.swift_package_update
+        catch SSGC.PackageBuildError.swift_package_update
         {
             return .failure(.init(reason: .failedToResolveDependencies))
         }
-        catch SPM.BuildError.swift_build
+        catch SSGC.PackageBuildError.swift_build
         {
             return .failure(.init(reason: .failedToCompile))
         }

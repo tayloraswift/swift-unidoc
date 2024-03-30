@@ -17,7 +17,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
         pool:Mongo.SessionPool,
         unidoc:Unidoc.DB) async throws
     {
-        let toolchain:Toolchain = try await .detect()
+        let toolchain:SSGC.Toolchain = try await .detect()
         let session:Mongo.Session = try await .init(from: pool)
 
         let empty:SymbolGraph = .init(modules: [])

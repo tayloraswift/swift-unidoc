@@ -1,7 +1,7 @@
 import PackageMetadata
 import Symbols
 
-extension SPM.Build
+extension SSGC.PackageBuild
 {
     @frozen public
     enum ID:Hashable, Sendable
@@ -14,7 +14,7 @@ extension SPM.Build
         case upstream(SPM.DependencyPin)
     }
 }
-extension SPM.Build.ID
+extension SSGC.PackageBuild.ID
 {
     var package:Symbol.Package
     {
