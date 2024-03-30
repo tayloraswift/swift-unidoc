@@ -24,10 +24,10 @@ extension Swiftinit
 extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 {
     func perform(on server:borrowing Swiftinit.Server,
-        payload:consuming [UInt8],
+        payload:__owned [UInt8],
         session:Mongo.Session) async throws -> HTTP.ServerResponse
     {
-        let bson:BSON.Document = .init(bytes: (consume payload)[...])
+        let bson:BSON.Document = .init(bytes: payload[...])
         let json:JSON?
 
         let package:Unidoc.Package
@@ -36,7 +36,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
         switch self.outcome
         {
         case .failure:
-            let report:Unidoc.BuildFailureReport = try .init(bson: consume bson)
+            let report:Unidoc.BuildFailureReport = try .init(bson: bson)
 
             package = report.package
             failure = report.failure
@@ -44,7 +44,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
             json = nil
 
         case .success:
-            var snapshot:Unidoc.Snapshot = try .init(bson: consume bson)
+            var snapshot:Unidoc.Snapshot = try .init(bson: bson)
 
             if  let bucket:AWS.S3.Bucket = server.bucket
             {
@@ -65,7 +65,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
             json = .encode(uploaded)
 
         case .successUnlabeled:
-            let documentation:SymbolGraphObject<Void> = try .init(bson: consume bson)
+            let documentation:SymbolGraphObject<Void> = try .init(bson: bson)
 
             var (snapshot, _):(Unidoc.Snapshot, _?) = try await server.db.unidoc.label(
                 documentation: documentation,
