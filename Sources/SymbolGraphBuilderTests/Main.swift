@@ -11,6 +11,45 @@ enum Main:TestMain, TestBattery
     static
     func run(tests:TestGroup) async
     {
+        if  let tests:TestGroup = tests / "SplashParsing"
+        {
+            if  let tests:TestGroup = tests / "LinuxNightly",
+                let swift:Toolchain = tests.expect(value: try? .init(parsing: """
+                    Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
+                    Target: x86_64-unknown-linux-gnu
+
+                    """,
+                    swift: "/usr/bin/swift"))
+            {
+                tests.expect(swift.version ==? .init(version: .v(5, 8, 0),
+                    nightly: .DEVELOPMENT_SNAPSHOT))
+                tests.expect(swift.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
+            }
+            if  let tests:TestGroup = tests / "Linux",
+                let swift:Toolchain = tests.expect(value: try? .init(parsing: """
+                    Swift version 5.10 (swift-5.10-RELEASE)
+                    Target: x86_64-unknown-linux-gnu
+
+                    """,
+                    swift: "/usr/bin/swift"))
+            {
+                tests.expect(swift.version ==? .init(version: .v(5, 10, 0), nightly: nil))
+                tests.expect(swift.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
+            }
+            if  let tests:TestGroup = tests / "Xcode",
+                let swift:Toolchain = tests.expect(value: try? .init(parsing: """
+                    swift-driver version: 1.90.11.1 \
+                    Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
+                    Target: arm64-apple-macosx14.0
+
+                    """,
+                    swift: "/usr/bin/swift"))
+            {
+                tests.expect(swift.version ==? .init(version: .v(5, 10, 0), nightly: nil))
+                tests.expect(swift.triple ==? .init("arm64", "apple", "macosx14.0", nil))
+            }
+        }
+
         guard
         let workspace:SPM.Workspace =
             await (tests ! "workspace").do({ try await .create(at: ".testing") }),
