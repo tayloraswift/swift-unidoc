@@ -102,7 +102,7 @@ extension Swiftinit.TagsPage
     {
         section[.h2] = beta ? Heading.prereleases : Heading.releases
 
-        section[.nav, { $0.class = "pagniator" }]
+        section[.nav, { $0.class = "paginator" }]
         {
             if  page > 0
             {
@@ -111,11 +111,11 @@ extension Swiftinit.TagsPage
                     $0.href = """
                     \(Swiftinit.Tags[self.package.symbol, page: page - 1, beta: beta])
                     """
-                } = "◀ prev"
+                } = "prev"
             }
             else
             {
-                $0[.span] = "◀ prev"
+                $0[.span] = "prev"
             }
 
             if  self.table.more
@@ -125,11 +125,11 @@ extension Swiftinit.TagsPage
                     $0.href = """
                     \(Swiftinit.Tags[self.package.symbol, page: page + 1, beta: beta])
                     """
-                } = "next ▶"
+                } = "next"
             }
             else
             {
-                $0[.span] = "next ▶"
+                $0[.span] = "next"
             }
         }
 
