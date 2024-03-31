@@ -59,6 +59,10 @@ form.config
     {
         background: var(--bg-codewell-gloss);
     }
+    input[type="text"]:invalid
+    {
+        color: var(--fg-accent);
+    }
 }
 form.sort-controls
 {
