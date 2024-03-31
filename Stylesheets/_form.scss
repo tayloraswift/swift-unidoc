@@ -49,7 +49,8 @@ form.config
         font-style: italic;
         font-size: inherit;
     }
-    input[type="text"][disabled]
+    input[type="text"][disabled],
+    input[type="text"][readonly]
     {
         background: none;
         color: var(--fg-semi);
