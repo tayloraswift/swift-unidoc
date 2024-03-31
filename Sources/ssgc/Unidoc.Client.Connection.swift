@@ -58,7 +58,8 @@ extension Unidoc.Client.Connection
         print("Uploading unlabeled symbol graph...")
 
         let _:Unidoc.UploadStatus = try await self.put(bson: bson,
-            to: "/ssgc/\(Unidoc.BuildOutcome.successUnlabeled)")
+            to: "/ssgc/\(Unidoc.BuildOutcome.successUnlabeled)",
+            timeout: .seconds(60))
 
         print("Successfully uploaded symbol graph!")
     }
@@ -70,7 +71,8 @@ extension Unidoc.Client.Connection
         print("Uploading labeled symbol graph...")
 
         let _:Unidoc.UploadStatus = try await self.put(bson: bson,
-            to: "/ssgc/\(Unidoc.BuildOutcome.success)")
+            to: "/ssgc/\(Unidoc.BuildOutcome.success)",
+            timeout: .seconds(60))
 
         print("Successfully uploaded symbol graph!")
     }
@@ -130,22 +132,27 @@ extension Unidoc.Client.Connection
 
     @discardableResult
     @inlinable public
-    func put(bson:consuming BSON.Document, to endpoint:String) async throws -> [ByteBuffer]
+    func put(bson:consuming BSON.Document,
+        to endpoint:String,
+        timeout:Duration = .seconds(15)) async throws -> [ByteBuffer]
     {
-        try await self.fetch(endpoint, method: "PUT",
+        try await self.fetch(endpoint,
+            method: "PUT",
             body: self.http2.buffer(bytes: (consume bson).bytes),
-            type: .application(.bson))
+            type: .application(.bson),
+            timeout: timeout)
     }
 
     @inlinable public
     func put<Response>(bson:consuming BSON.Document,
         to endpoint:String,
+        timeout:Duration = .seconds(15),
         expecting _:Response.Type = Response.self) async throws -> Response
         where Response:JSONDecodable
     {
         var json:JSON = .init(utf8: [])
 
-        for buffer:ByteBuffer in try await self.put(bson: bson, to: endpoint)
+        for buffer:ByteBuffer in try await self.put(bson: bson, to: endpoint, timeout: timeout)
         {
             json.utf8 += buffer.readableBytesView
         }
