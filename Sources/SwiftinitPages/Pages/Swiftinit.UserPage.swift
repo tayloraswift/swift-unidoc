@@ -100,7 +100,7 @@ extension Swiftinit.UserPage:Swiftinit.ApplicationPage
 
                                 if  case .human = self.user.level
                                 {
-                                    $0.disabled = true
+                                    $0.readonly = true
                                 }
                                 else
                                 {
