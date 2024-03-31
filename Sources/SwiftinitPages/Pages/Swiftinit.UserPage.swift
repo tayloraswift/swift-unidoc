@@ -117,6 +117,8 @@ extension Swiftinit.UserPage:Swiftinit.ApplicationPage
                                 $0.type = "text"
                                 $0.name = "repo"
                                 $0.required = true
+
+                                $0.pattern = #"^[a-zA-Z0-9_\-\.]+$"#
                             }
                         }
                     }
