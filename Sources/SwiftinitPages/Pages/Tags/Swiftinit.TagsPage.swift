@@ -147,7 +147,7 @@ extension Swiftinit.TagsPage
     {
         if  let repo:Unidoc.PackageRepo = self.package.repo
         {
-            section[.h2] = "Package Repository"
+            section[.h2] = "Package repository"
 
             section[.dl]
             {

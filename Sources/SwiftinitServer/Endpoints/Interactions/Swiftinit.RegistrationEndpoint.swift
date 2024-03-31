@@ -22,7 +22,7 @@ extension Swiftinit
 extension Swiftinit.RegistrationEndpoint:Swiftinit.InteractiveEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
-        with _:Swiftinit.Cookies,
+        with _:Swiftinit.Credentials,
         as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let github:GitHub.Client<GitHub.API<Void>>

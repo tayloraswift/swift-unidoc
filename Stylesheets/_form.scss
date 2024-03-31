@@ -32,6 +32,34 @@ form
         border: 2px var(--fg-light) solid;
     }
 }
+form.config
+{
+    input[type="text"]
+    {
+        outline: none;
+        background: var(--bg-codewell);
+
+        margin-bottom: 0.5em;
+        padding: 0.1rem 0.5rem;
+        border-radius: 0.25rem;
+        border: none;
+
+        color: var(--fg);
+        font-family: $typeface-serif;
+        font-style: italic;
+        font-size: inherit;
+    }
+    input[type="text"][disabled]
+    {
+        background: none;
+        color: var(--fg-semi);
+    }
+    input:not([disabled])[type="text"]:hover,
+    input:not([disabled])[type="text"]:focus
+    {
+        background: var(--bg-codewell-gloss);
+    }
+}
 form.sort-controls
 {
     fieldset

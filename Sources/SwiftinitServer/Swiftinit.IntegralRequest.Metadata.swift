@@ -66,6 +66,11 @@ extension Swiftinit.IntegralRequest.Metadata
             service: self.service,
             path: self.path)
     }
+
+    var credentials:Swiftinit.Credentials
+    {
+        .init(cookies: self.cookies, request: self.path)
+    }
 }
 extension Swiftinit.IntegralRequest.Metadata
 {

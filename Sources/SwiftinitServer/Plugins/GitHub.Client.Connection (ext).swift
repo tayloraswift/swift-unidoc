@@ -24,7 +24,7 @@ extension GitHub.Client<GitHub.API<String>>.Connection
         return try await self.post(query: "\(query)")
     }
 
-    func crawl(owner:String, repo:String) async throws -> GitHub.RepoMonitorResponse
+    func crawl(owner:String, repo:String, tags:Int) async throws -> GitHub.RepoMonitorResponse
     {
         let query:JSON = .object
         {
@@ -65,7 +65,7 @@ extension GitHub.Client<GitHub.API<String>>.Connection
                     updated: updatedAt
                     pushed: pushedAt
 
-                    refs(last: 10,
+                    refs(last: \(tags),
                         refPrefix: "refs/tags/",
                         orderBy: {field: TAG_COMMIT_DATE, direction: ASC})
                     {

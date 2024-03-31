@@ -81,43 +81,6 @@ extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
 
         main[.form]
         {
-            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.packageIndex])"
-            $0.method = "post"
-        }
-            content:
-        {
-            $0[.p]
-            {
-                $0[.code] = "https://github.com/"
-
-                $0[.input]
-                {
-                    $0.type = "text"
-                    $0.name = "owner"
-                    $0.placeholder = "owner"
-                }
-
-                $0[.code] = "/"
-
-                $0[.input]
-                {
-                    $0.type = "text"
-                    $0.name = "repo"
-                    $0.placeholder = "repo"
-                }
-            }
-            $0[.p]
-            {
-                $0[.button] { $0.type = "submit" } = "Index GitHub Repository"
-            }
-        }
-
-
-        main[.hr]
-
-        main[.form]
-        {
             $0.enctype = "\(MultipartType.form_data)"
             $0.action = "\(Self[.upload])"
             $0.method = "post"

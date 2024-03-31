@@ -10,6 +10,7 @@ extension Swiftinit.Asset
         switch self
         {
         case .error404_jpg:     ["icons", "error404.jpg"]
+        case .error4xx_jpg:     ["icons", "error4xx.jpg"]
         case .error500_jpg:     ["icons", "error500.jpg"]
         case .favicon_ico:      ["icons", "favicon.ico"]
         case .favicon_png:      ["icons", "favicon.png"]
@@ -32,6 +33,7 @@ extension Swiftinit.Asset
         switch self
         {
         case .error404_jpg:     .image(.jpeg)
+        case .error4xx_jpg:     .image(.jpeg)
         case .error500_jpg:     .image(.jpeg)
         case .favicon_ico:      .image(.x_icon)
         case .favicon_png:      .image(.png)

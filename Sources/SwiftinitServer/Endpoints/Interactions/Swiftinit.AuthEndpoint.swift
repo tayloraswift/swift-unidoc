@@ -23,7 +23,7 @@ extension Swiftinit
 extension Swiftinit.AuthEndpoint:Swiftinit.InteractiveEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
-        with cookies:Swiftinit.Cookies,
+        with credentials:Swiftinit.Credentials,
         as format:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let github:GitHub.Client<GitHub.OAuth>
@@ -38,7 +38,7 @@ extension Swiftinit.AuthEndpoint:Swiftinit.InteractiveEndpoint
             return nil
         }
 
-        guard case self.state? = cookies.login
+        guard case self.state? = credentials.cookies.login
         else
         {
             return .resource("Authentication failed: state mismatch", status: 400)
@@ -59,6 +59,6 @@ extension Swiftinit.AuthEndpoint:Swiftinit.InteractiveEndpoint
             throw error
         }
 
-        return try await registration.load(from: server, with: cookies, as: format)
+        return try await registration.load(from: server, with: credentials, as: format)
     }
 }

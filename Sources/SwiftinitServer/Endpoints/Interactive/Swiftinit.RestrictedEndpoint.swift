@@ -1,3 +1,4 @@
+import GitHubAPI
 import HTTP
 import MongoDB
 import SwiftinitPages
@@ -23,16 +24,26 @@ extension Swiftinit.RestrictedEndpoint
 {
     consuming
     func load(from server:borrowing Swiftinit.Server,
-        with cookies:Swiftinit.Cookies,
+        with credentials:Swiftinit.Credentials,
         as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         if  server.secure
         {
             guard
-            let user:Unidoc.UserSession = cookies.session
+            let user:Unidoc.UserSession = credentials.cookies.session
             else
             {
-                return .redirect(.temporary("\(Swiftinit.Root.login)"))
+                if  let oauth:GitHub.OAuth = server.github?.oauth
+                {
+                    let login:Swiftinit.LoginPage = .init(oauth: oauth,
+                        from: credentials.request)
+                    return .ok(login.resource(format: server.format))
+                }
+                else
+                {
+                    //  Somehow we are running in secure mode without any OAuth capability.
+                    return nil
+                }
             }
 
             let session:Mongo.Session = try await .init(from: server.db.sessions)

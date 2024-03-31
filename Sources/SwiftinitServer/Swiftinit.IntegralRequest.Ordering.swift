@@ -384,12 +384,15 @@ extension Swiftinit.IntegralRequest.Ordering
                 }
 
             case .packageIndex:
-                if  let owner:String = form["owner"],
+                if  let account:Unidoc.Account,
+                    let owner:String = form["owner"],
                     let repo:String = form["repo"]
                 {
                     return .actor(Swiftinit.PackageIndexEndpoint.init(
+                        account: account,
                         owner: owner,
-                        repo: repo))
+                        repo: repo,
+                        from: form["from"]))
                 }
 
             case .packageIndexTag:
