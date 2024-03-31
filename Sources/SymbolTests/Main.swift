@@ -72,6 +72,21 @@ enum Main:TestMain, TestBattery
             }
         }
 
+        if  let tests:TestGroup = tests / "ObjectiveC"
+        {
+            if  let usr:Symbol.USR = tests.expect(value: .init("""
+                    c:@CM@Alamofire@objc(cs)SessionDelegate(im)URLSession\
+                    :webSocketTask:didOpenWithProtocol:
+                    """))
+            {
+                tests.expect(usr ==? .scalar(.init(.c,
+                    ascii: """
+                    @CM@Alamofire@objc(cs)SessionDelegate(im)URLSession\
+                    :webSocketTask:didOpenWithProtocol:
+                    """)))
+            }
+        }
+
         if  let tests:TestGroup = tests / "Block" / "FirstMember"
         {
             if  let usr:Symbol.USR = tests.expect(value: .init(
