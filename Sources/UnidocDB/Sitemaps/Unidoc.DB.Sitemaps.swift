@@ -49,10 +49,9 @@ extension Unidoc.DB.Sitemaps
         }
     }
 
-    func update(_ sitemap:consuming Unidoc.Sitemap,
+    func diff(new:inout Unidoc.Sitemap,
         with session:Mongo.Session) async throws -> Unidoc.SitemapDelta?
     {
-        var new:Unidoc.Sitemap = sitemap
         let old:Unidoc.Sitemap? = try await self.find(id: new.id, with: session)
 
         let update:Unidoc.SitemapDelta?
@@ -90,7 +89,6 @@ extension Unidoc.DB.Sitemaps
             update = nil
         }
 
-        try await self.upsert(some: new, with: session)
         return update
     }
 }
