@@ -29,9 +29,9 @@ extension Unidoc
         public
         var patch:PatchVersion?
 
-        /// Contains a tree of the cultures in this volume.
         public
         var products:[Noun]
+        /// Contains a tree of the cultures in this volume.
         public
         var cultures:[Noun]
 

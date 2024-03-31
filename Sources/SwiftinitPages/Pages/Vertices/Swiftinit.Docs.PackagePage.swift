@@ -250,9 +250,8 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
 
             $0[.dl]
             {
-                //  All packages on Swiftinit support Linux.
-                $0[.dt] = "Supports Linux?"
-                $0[.dd] = "yes"
+                //  $0[.dt] = "Supports Linux?"
+                //  $0[.dd] = "yes"
 
                 if  let version:PatchVersion = self.apex.snapshot.latestManifest
                 {
