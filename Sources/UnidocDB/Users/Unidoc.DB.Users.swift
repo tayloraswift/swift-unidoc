@@ -20,13 +20,9 @@ extension Unidoc.DB
 extension Unidoc.DB.Users
 {
     public static
-    let indexRateLimit:Mongo.CollectionIndex = .init("RateLimit", unique: false)
+    let indexRateLimit:Mongo.CollectionIndex = .init("RateLimit/2", unique: false)
     {
         $0[Unidoc.User[.apiLimitLeft]] = (+)
-    }
-        where:
-    {
-        $0[Unidoc.User[.apiKey]] { $0[.exists] = true }
     }
 }
 extension Unidoc.DB.Users:Mongo.CollectionModel
@@ -182,7 +178,6 @@ extension Unidoc.DB.Users
                 $0[.filter]
                 {
                     $0[Element[.apiLimitLeft]] { $0[.ne] = reset }
-                    $0[Element[.apiKey]] { $0[.exists] = true }
                 }
                 $0[.projection] = .init
                 {
