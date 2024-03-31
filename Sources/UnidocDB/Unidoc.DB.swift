@@ -318,6 +318,7 @@ extension Unidoc.DB
             volume: symbol,
             hidden: true,
             delta: try await self.fill(volume: consume volume,
+                sitemap: true,
                 clear: uploaded.updated,
                 with: session))
 
@@ -424,6 +425,7 @@ extension Unidoc.DB
             volume: symbol,
             hidden: hidden,
             delta: try await self.fill(volume: consume volume,
+                sitemap: !package.hidden,
                 clear: true,
                 with: session))
     }
@@ -485,6 +487,7 @@ extension Unidoc.DB
 {
     private
     func fill(volume:consuming Unidoc.Volume,
+        sitemap:Bool,
         clear:Bool = true,
         with session:Mongo.Session) async throws -> Unidoc.SitemapDelta?
     {
@@ -532,9 +535,26 @@ extension Unidoc.DB
             realm: volume.metadata.latest ? volume.metadata.realm : nil,
             with: session)
 
-        let delta:Unidoc.SitemapDelta? = volume.metadata.latest
-            ? try await self.sitemaps.update(volume.sitemap(), with: session)
-            : nil
+        let delta:Unidoc.SitemapDelta?
+        if  volume.metadata.latest
+        {
+            var new:Unidoc.Sitemap = volume.sitemap()
+
+            delta = try await self.sitemaps.diff(new: &new, with: session)
+
+            if  sitemap
+            {
+                try await self.sitemaps.upsert(some: new, with: session)
+            }
+            else if case _? = delta
+            {
+                try await self.sitemaps.delete(id: new.id, with: session)
+            }
+        }
+        else
+        {
+            delta = nil
+        }
 
         alignment:
         if  let latest:Unidoc.Edition = volume.latest
