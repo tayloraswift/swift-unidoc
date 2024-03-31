@@ -13,9 +13,9 @@ RUN apt update && apt install -y \
     libcap2-bin
 
 COPY .build/x86_64-unknown-linux-gnu/release/SwiftinitServer /bin/swiftinit
-COPY .build/x86_64-unknown-linux-gnu/release/UnidocBuild /bin/unidoc
+COPY .build/x86_64-unknown-linux-gnu/release/ssgc /bin/ssgc
 
 RUN chmod +x /bin/swiftinit
-RUN chmod +x /bin/unidoc
+RUN chmod +x /bin/ssgc
 
 CMD swift --version
