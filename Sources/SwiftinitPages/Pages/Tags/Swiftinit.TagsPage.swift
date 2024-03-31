@@ -229,6 +229,9 @@ extension Swiftinit.TagsPage
 
         section[.dl]
         {
+            $0[.dt] = "Package ID"
+            $0[.dd] = "\(self.package.id)"
+
             $0[.dt] = "Realm"
             $0[.dd]
             {
@@ -254,7 +257,7 @@ extension Swiftinit.TagsPage
                 }
             }
 
-            $0[.dt] = "Hidden"
+            $0[.dt] = "Hidden?"
             $0[.dd]
             {
                 $0 += self.package.hidden ? "yes" : "no"
