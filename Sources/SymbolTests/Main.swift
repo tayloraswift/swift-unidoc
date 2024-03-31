@@ -87,6 +87,18 @@ enum Main:TestMain, TestBattery
             }
         }
 
+        if  let tests:TestGroup = tests / "Chimaeric"
+        {
+            if  let usr:Symbol.USR = tests.expect(
+                    value: .init("s:SQsE2neoiySbx_xtFZ::SYNTHESIZED::c:@E@memory_order"))
+            {
+                tests.expect(usr ==? .vector(.init(.init(.s,
+                        ascii: "SQsE2neoiySbx_xtFZ"),
+                    self: .init(.c,
+                        ascii: "@E@memory_order"))))
+            }
+        }
+
         if  let tests:TestGroup = tests / "Block" / "FirstMember"
         {
             if  let usr:Symbol.USR = tests.expect(value: .init(

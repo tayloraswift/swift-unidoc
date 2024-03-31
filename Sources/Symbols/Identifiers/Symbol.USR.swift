@@ -41,6 +41,14 @@ extension Symbol.USR:LosslessStringConvertible
     public
     init?(_ string:String)
     {
+        self.init(string[...])
+    }
+}
+extension Symbol.USR
+{
+    private
+    init?(_ string:Substring)
+    {
         guard
         let l:String.Index = string.indices.first
         else
@@ -71,7 +79,7 @@ extension Symbol.USR:LosslessStringConvertible
         if  case .s = language,
             let i:String.Index = string[start...].firstIndex(of: ":")
         {
-            let j:String.Index = string.index(after: i)
+            var j:String.Index = string.index(after: i)
 
             if  case "e" = string[start ..< i]
             {
@@ -79,19 +87,32 @@ extension Symbol.USR:LosslessStringConvertible
                 return
             }
 
-            //  Swift symbols should never contain interior colons
-            if  let k:String.Index = string[j...].lastIndex(of: ":"),
-                case "::SYNTHESIZED::s" = string[i ..< k],
-                let feature:Symbol.Decl = .init(language, string[start ..< i]),
-                let heir:Symbol.Decl = .init(.s, string[string.index(after: k)...])
+            guard
+            let feature:Symbol.Decl = .init(language, string[start ..< i])
+            else
+            {
+                return nil
+            }
+
+            for expected:Character in ":SYNTHESIZED::"
+            {
+                if  j < string.endIndex, expected == string[j]
+                {
+                    j = string.index(after: j)
+                }
+                else
+                {
+                    return nil
+                }
+            }
+
+            if  case .scalar(let heir)? = Self.init(string[j...])
             {
                 self = .vector(.init(feature, self: heir))
                 return
             }
             else
             {
-                //  We know this symbol contains extra colons, but we don’t know what they mean
-                //  so we must fail.
                 return nil
             }
         }
