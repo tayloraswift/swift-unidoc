@@ -28,16 +28,12 @@ extension Symbol.Block:LosslessStringConvertible
     public
     init?(_ description:__shared String)
     {
-        if  let index:String.Index = description.index(description.startIndex,
-                offsetBy: 4,
-                limitedBy: description.endIndex),
-            description.starts(with: "s:e:")
-        {
-            self.init(name: .init(description.suffix(from: index)))
-        }
+        guard case .block(let block)? = Symbol.USR.init(description)
         else
         {
             return nil
         }
+
+        self = block
     }
 }

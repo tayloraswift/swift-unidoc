@@ -39,24 +39,66 @@ extension Symbol.USR:LosslessStringConvertible
 {
     /// Parses a USR from a string.
     public
-    init?(_ description:String)
+    init?(_ string:String)
     {
-        if  let block:Symbol.Block = .init(description)
+        guard
+        let l:String.Index = string.indices.first
+        else
         {
-            self = .block(block)
-            return
+            return nil
         }
 
-        let fragments:[Substring] = description.split(separator: ":",
-            omittingEmptySubsequences: true)
+        let colon:String.Index = string.index(after: l)
 
-        if      let scalar:Symbol.Decl = .init(fragments: fragments)
+        guard colon < string.endIndex,
+        case ":" = string[colon],
+        let language:Unicode.Scalar = .init(string[l ..< colon]),
+        let language:Symbol.Decl.Language = .init(language)
+        else
         {
-            self = .scalar(scalar)
+            return nil
         }
-        else if let vector:Symbol.Decl.Vector = .init(fragments: fragments)
+
+        let start:String.Index = string.index(after: colon)
+
+        guard start < string.endIndex
+        else
         {
-            self = .vector(vector)
+            return nil
+        }
+
+        special:
+        if  case .s = language,
+            let i:String.Index = string[start...].firstIndex(of: ":")
+        {
+            let j:String.Index = string.index(after: i)
+
+            if  case "e" = string[start ..< i]
+            {
+                self = .block(.init(name: String.init(string[j...])))
+                return
+            }
+
+            //  Swift symbols should never contain interior colons
+            if  let k:String.Index = string[j...].lastIndex(of: ":"),
+                case "::SYNTHESIZED::s" = string[i ..< k],
+                let feature:Symbol.Decl = .init(language, string[start ..< i]),
+                let heir:Symbol.Decl = .init(.s, string[string.index(after: k)...])
+            {
+                self = .vector(.init(feature, self: heir))
+                return
+            }
+            else
+            {
+                //  We know this symbol contains extra colons, but we don’t know what they mean
+                //  so we must fail.
+                return nil
+            }
+        }
+
+        if  let symbol:Symbol.Decl = .init(language, string[start...])
+        {
+            self = .scalar(symbol)
         }
         else
         {

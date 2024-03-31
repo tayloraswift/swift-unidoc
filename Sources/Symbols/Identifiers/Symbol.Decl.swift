@@ -8,7 +8,7 @@ extension Symbol
         public
         let rawValue:String
 
-        @inlinable internal
+        @inlinable
         init(unchecked rawValue:String)
         {
             self.rawValue = rawValue
@@ -43,18 +43,25 @@ extension Symbol.Decl
     /// mangled suffix, returning nil if the suffix contains characters
     /// that are not allowed to appear in a symbol identifier.
     ///
-    /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, '.', '-', and `@`.
+    /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, '(', ')', ':', '.', '-', and `@`.
     @inlinable public
     init?(_ language:Language, _ suffix:some StringProtocol)
     {
+        if  suffix.isEmpty
+        {
+            return nil
+        }
         for ascii:UInt8 in suffix.utf8
         {
             switch Unicode.Scalar.init(ascii)
             {
             case "$":           continue
             case "-":           continue
+            case ":":           continue
             case ".":           continue
             case "_":           continue
+            case "(":           continue
+            case ")":           continue
             case "0" ... "9":   continue
             case "@":           continue
             case "A" ... "Z":   continue
@@ -119,22 +126,13 @@ extension Symbol.Decl:LosslessStringConvertible
     @inlinable public
     init?(_ description:__shared String)
     {
-        self.init(fragments: description.split(separator: ":", maxSplits: 1,
-            omittingEmptySubsequences: false))
-    }
-    @inlinable internal
-    init?(fragments:__shared [Substring])
-    {
-        if  fragments.count == 2,
-            let language:Unicode.Scalar = .init(fragments[0]),
-            let language:Language = .init(language)
-        {
-            self.init(language, fragments[1])
-        }
+        guard case .scalar(let scalar)? = Symbol.USR.init(description)
         else
         {
             return nil
         }
+
+        self = scalar
     }
 }
 
