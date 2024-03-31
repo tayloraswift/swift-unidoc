@@ -306,7 +306,7 @@ extension Swiftinit.ServerLoop
 
             response = try await endpoint.load(
                 from: .init(self, tour: self.tour),
-                with: metadata.cookies,
+                with: metadata.credentials,
                 as: self.format(locale: metadata.annotation.locale))
                 ?? .notFound(.init(
                     content: .string("not found"),

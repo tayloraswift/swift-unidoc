@@ -16,7 +16,7 @@ extension Swiftinit
 }
 extension Swiftinit.ServerErrorPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
 {
-    var title:String { "Internal Server Error" }
+    var title:String { "Internal server error" }
 }
 extension Swiftinit.ServerErrorPage:Swiftinit.ApplicationPage
 {
@@ -27,7 +27,7 @@ extension Swiftinit.ServerErrorPage:Swiftinit.ApplicationPage
         main[.section]
         {
             $0[.p] = """
-            Internal Server Error (type: \(String.init(reflecting: type(of: self.error))))
+            Internal server error (type: \(String.init(reflecting: type(of: self.error))))
             """
 
             $0[.p]

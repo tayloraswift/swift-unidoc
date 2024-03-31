@@ -13,7 +13,7 @@ extension Swiftinit
         let from:String?
 
         private
-        var rightsRequired:Unidoc.PackageRights
+        var privileges:Unidoc.User.Level
 
         init(account:Unidoc.Account, package:Unidoc.Package, update:Update, from:String? = nil)
         {
@@ -22,7 +22,7 @@ extension Swiftinit
             self.update = update
             self.from = from
 
-            self.rightsRequired = .editor
+            self.privileges = .human
         }
     }
 }
@@ -33,11 +33,7 @@ extension Swiftinit.PackageConfigEndpoint:Swiftinit.RestrictedEndpoint
     mutating
     func admit(level:Unidoc.User.Level) -> Bool
     {
-        if  case .administratrix = level
-        {
-            self.rightsRequired = .reader
-        }
-
+        self.privileges = level
         return true
     }
 
@@ -54,7 +50,7 @@ extension Swiftinit.PackageConfigEndpoint:Swiftinit.RestrictedEndpoint
             return .notFound("No such package")
         }
 
-        if  rights < self.rightsRequired
+        if  case .human = self.privileges, rights < .editor
         {
             return .forbidden("You are not authorized to edit this package!")
         }

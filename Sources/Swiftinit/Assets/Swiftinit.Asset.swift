@@ -4,6 +4,7 @@ extension Swiftinit
     enum Asset:String, CaseIterable, Hashable, Sendable
     {
         case error404_jpg       = "error404.jpg"
+        case error4xx_jpg       = "error4xx.jpg"
         case error500_jpg       = "error500.jpg"
 
         case favicon_ico        = "favicon.ico"
@@ -57,6 +58,7 @@ extension Swiftinit.Asset
         switch self
         {
         case .error404_jpg:     false
+        case .error4xx_jpg:     false
         case .error500_jpg:     false
         case .favicon_ico:      false
         case .favicon_png:      false

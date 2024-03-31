@@ -221,14 +221,20 @@ extension Unidoc.DB.Users
 
     /// Charges the given API key by the specified amount, returning the amount of API calls
     /// left after the charge.
+    ///
+    /// If the key is non-nil, this function only returns a result if the key is active, and so
+    /// this method doubles as an authentication check.
+    ///
+    /// If the key is nil, this function will charge the `user` unconditionally, and so some
+    /// other means of authenticating the user must be used.
     public
-    func charge(apiKey:Int64,
+    func charge(apiKey:Int64?,
         user:Unidoc.Account,
         cost:Int = 1,
         with session:Mongo.Session) async throws -> Int?
     {
-        let (user, _):(LimitView?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<LimitView>>.init(Self.name,
+        let (meter, _):(Unidoc.UserMeter?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.UserMeter>>.init(Self.name,
                 returning: .new)
             {
                 $0[.hint]
@@ -248,10 +254,11 @@ extension Unidoc.DB.Users
                 $0[.fields] = .init
                 {
                     $0[Element[.apiLimitLeft]] = true
+                    $0[Element[.apiKey]] = true
                 }
             },
             against: self.database)
 
-        return user?.apiLimitLeft
+        return meter?.apiLimitLeft
     }
 }

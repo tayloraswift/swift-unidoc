@@ -72,7 +72,8 @@ extension GitHub.RepoMonitor:GitHub.Crawler
 
             let response:GitHub.RepoMonitorResponse = try await connection.crawl(
                 owner: origin.owner,
-                repo: origin.name)
+                repo: origin.name,
+                tags: 10)
 
             let now:BSON.Millisecond = .now()
 

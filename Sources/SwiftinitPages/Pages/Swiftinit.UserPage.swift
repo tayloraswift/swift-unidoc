@@ -74,6 +74,59 @@ extension Swiftinit.UserPage:Swiftinit.ApplicationPage
                     $0[.dt] = "Email"
                     $0[.dd] = github.email
                 }
+
+                $0[.h2] = "Repositories"
+
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Swiftinit.API[.packageIndex])"
+                    $0.method = "post"
+
+                    $0.class = "config"
+                }
+                    content:
+                {
+                    $0[.dl]
+                    {
+                        $0[.dt] = "Repo owner"
+                        $0[.dd]
+                        {
+                            $0[.input]
+                            {
+                                $0.type = "text"
+                                $0.name = "owner"
+                                $0.value = github.login
+
+                                if  case .human = self.user.level
+                                {
+                                    $0.disabled = true
+                                }
+                                else
+                                {
+                                    $0.required = true
+                                }
+                            }
+                        }
+
+                        $0[.dt] = "Repo name"
+                        $0[.dd]
+                        {
+                            $0[.input]
+                            {
+                                $0.type = "text"
+                                $0.name = "repo"
+                                $0.required = true
+                            }
+                        }
+                    }
+
+                    $0[.button]
+                    {
+                        $0.class = "area"
+                        $0.type = "submit"
+                    } = "Index GitHub repository"
+                }
             }
 
             $0[.h2] = "API keys"

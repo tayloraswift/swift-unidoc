@@ -7,7 +7,7 @@ extension Swiftinit
     {
         consuming
         func load(from server:borrowing Server,
-            with cookies:Cookies,
+            with credentials:Swiftinit.Credentials,
             as format:RenderFormat) async throws -> HTTP.ServerResponse?
     }
 }
