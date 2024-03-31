@@ -183,12 +183,16 @@ extension SSGC.NominalSources
                     headers.update(with: $0)
                     fallthrough
 
-                case "cpp", "cxx":
+                case "cc", "cpp", "cxx":
                     self.module.language |= .cpp
 
                 case "txt":
                     //  The most common culprit is a `CMakeLists.txt`.
                     //  It’s not worth warning about these.
+                    break
+
+                case "s", "S":
+                    //  These sometimes show up in C modules. We ignore them.
                     break
 
                 default:
