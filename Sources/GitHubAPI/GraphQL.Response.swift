@@ -22,13 +22,13 @@ extension GraphQL.Response:JSONObjectDecodable
     @inlinable public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        if  let data:Data = try json[.data]?.decode()
+        if  let errors:JSON.Array = try json[.errors]?.decode()
         {
-            self = .success(data)
+            self = .failure(.init(json: errors))
         }
         else
         {
-            self = .failure(.init(json: try json[.errors].decode()))
+            self = .success(try json[.data].decode())
         }
     }
 }
