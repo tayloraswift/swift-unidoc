@@ -31,7 +31,7 @@ extension GitHub.Client<GitHub.API<String>>.Connection
     /// possible to run a GraphQL API request without a token.
     @inlinable public
     func post<Response>(query:String,
-        for _:Response.Type = Response.self) async throws -> Response
+        for _:Response.Type = Response.self) async throws -> GraphQL.Response<Response>
         where Response:JSONDecodable
     {
         let request:HTTP2Client.Request = .init(headers:
@@ -61,11 +61,7 @@ extension GitHub.Client<GitHub.API<String>>.Connection
                 json.utf8 += buffer.readableBytesView
             }
 
-            switch try json.decode(GraphQL.Response<Response>.self)
-            {
-            case .success(let data):    return data
-            case .failure(let error):   throw error
-            }
+            return try json.decode()
 
         case 403?:
             if  let second:String = response.headers?["x-ratelimit-reset"].first,
