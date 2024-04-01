@@ -21,7 +21,18 @@ extension GitHub.Client<GitHub.API<String>>.Connection
             }
             """
         }
-        return try await self.post(query: "\(query)")
+
+        let response:GraphQL.Response<GitHub.TagResponse> = try await self.post(
+            query: "\(query)")
+
+        if  let error:GraphQL.ServerError = response.errors.first
+        {
+            throw error
+        }
+        else
+        {
+            return response.data
+        }
     }
 
     func crawl(owner:String, repo:String, tags:Int) async throws -> GitHub.RepoMonitorResponse
@@ -75,7 +86,19 @@ extension GitHub.Client<GitHub.API<String>>.Connection
             }
             """
         }
-        return try await self.post(query: "\(query)")
+
+        let response:GraphQL.Response<GitHub.RepoMonitorResponse> = try await self.post(
+            query: "\(query)")
+
+        let error:GraphQL.ServerError? = response.errors.first { $0.type != "NOT_FOUND" }
+        if  let error:GraphQL.ServerError
+        {
+            throw error
+        }
+        else
+        {
+            return response.data
+        }
     }
 
     func search(repos search:String,
@@ -130,6 +153,16 @@ extension GitHub.Client<GitHub.API<String>>.Connection
             """
         }
 
-        return try await self.post(query: "\(query)")
+        let response:GraphQL.Response<GitHub.RepoTelescopeResponse> = try await self.post(
+            query: "\(query)")
+
+        if  let error:GraphQL.ServerError = response.errors.first
+        {
+            throw error
+        }
+        else
+        {
+            return response.data
+        }
     }
 }
