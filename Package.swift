@@ -99,7 +99,7 @@ let package:Package = .init(
             from: "1.0.0")),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-            from: "4.3.0")),
+            from: "4.4.0")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
