@@ -1,7 +1,6 @@
 import BSON
 import HTTP
 import JSON
-import LZ77
 import MongoDB
 import S3
 import S3Client
