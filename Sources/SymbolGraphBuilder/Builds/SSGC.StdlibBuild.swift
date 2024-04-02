@@ -28,7 +28,9 @@ extension SSGC.StdlibBuild
 }
 extension SSGC.StdlibBuild:SSGC.DocumentationBuild
 {
-    func compile(with swift:SSGC.Toolchain) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
+    func compile(
+        with swift:SSGC.Toolchain,
+        logs _:inout Logs) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
         let sources:[SSGC.NominalSources] =

@@ -1,12 +1,10 @@
 import BSON
 import HTTPClient
-import JSON
 import SymbolGraphBuilder
 import SymbolGraphs
 import Symbols
 import System
 import UnidocAPI
-import UnidocLinker
 import UnidocRecords
 
 extension Unidoc
@@ -45,7 +43,6 @@ extension Unidoc.Client
 {
     func buildAndUpload(local symbol:Symbol.Package,
         search:FilePath?,
-        pretty:Bool,
         toolchain:SSGC.Toolchain) async throws
     {
         let workspace:SSGC.Workspace = try await .create(at: ".unidoc")
@@ -56,7 +53,7 @@ extension Unidoc.Client
             let build:SSGC.StdlibBuild = try await .swift(in: workspace,
                 clean: true)
 
-            object = try await .init(building: build, with: toolchain, pretty: pretty)
+            object = try await .init(building: build, with: toolchain)
         }
         else if
             let search:FilePath
@@ -66,7 +63,7 @@ extension Unidoc.Client
                 in: workspace,
                 clean: true)
 
-            object = try await .init(building: build, with: toolchain, pretty: pretty)
+            object = try await .init(building: build, with: toolchain)
         }
         else
         {
@@ -82,7 +79,6 @@ extension Unidoc.Client
     }
 
     func buildAndUpload(remote symbol:Symbol.Package,
-        pretty:Bool,
         force:Unidoc.VersionSeries?,
         toolchain:SSGC.Toolchain) async throws
     {
@@ -118,11 +114,9 @@ extension Unidoc.Client
             return
         }
 
-        let result:Result<Unidoc.Snapshot, Unidoc.BuildFailure> = try await self.build(labels,
-            action: force != nil ? .uplinkRefresh : .uplinkInitial,
-            pretty: pretty,
-            toolchain: toolchain)
-
+        let result:Unidoc.Build = try await .with(toolchain: toolchain,
+            labels: labels,
+            action: force != nil ? .uplinkRefresh : .uplinkInitial)
 
         try await self.connect
         {
@@ -133,10 +127,8 @@ extension Unidoc.Client
             case .success(let labeled):
                 try await connection.upload(labeled)
 
-            case .failure(let failure):
-                try await connection.upload(.init(
-                    package: labels.coordinate.package,
-                    failure: failure))
+            case .failure(let report):
+                try await connection.upload(report)
             }
         }
     }
@@ -156,10 +148,9 @@ extension Unidoc.Client
             (\(labels.coordinate))
             """)
 
-        let result:Result<Unidoc.Snapshot, Unidoc.BuildFailure> = try await self.build(labels,
-            action: .uplinkRefresh,
-            pretty: false,
-            toolchain: toolchain)
+        let result:Unidoc.Build = try await .with(toolchain: toolchain,
+            labels: labels,
+            action: .uplinkRefresh)
 
         try await self.connect
         {
@@ -170,77 +161,9 @@ extension Unidoc.Client
             case .success(let labeled):
                 try await connection.upload(labeled)
 
-            case .failure(let failure):
-                try await connection.upload(.init(
-                    package: labels.coordinate.package,
-                    failure: failure))
+            case .failure(let report):
+                try await connection.upload(report)
             }
-        }
-    }
-
-    private
-    func build(_ labels:Unidoc.BuildLabels,
-        action:Unidoc.Snapshot.PendingAction,
-        pretty:Bool,
-        toolchain:SSGC.Toolchain) async throws -> Result<Unidoc.Snapshot, Unidoc.BuildFailure>
-    {
-        let workspace:SSGC.Workspace = try await .create(at: ".unidoc")
-
-        guard
-        let tag:String = labels.tag
-        else
-        {
-            print("""
-                No new documentation to build, run with -f or -e to build the latest release
-                or prerelease anyway.
-                """)
-
-            return .failure(.init(reason: .noValidVersion))
-        }
-
-        guard
-        let build:SSGC.PackageBuild = try? await .remote(
-            package: labels.package,
-            from: labels.repo,
-            at: tag,
-            in: workspace,
-            clean: [.artifacts])
-        else
-        {
-            return .failure(.init(reason: .failedToCloneRepository))
-        }
-
-        do
-        {
-            let archive:SymbolGraphObject<Void> = try await .init(building: build,
-                with: toolchain,
-                pretty: pretty)
-
-            return .success(Unidoc.Snapshot.init(id: labels.coordinate,
-                metadata: archive.metadata,
-                inline: archive.graph,
-                action: action))
-        }
-        catch let error as SSGC.ManifestDumpError
-        {
-            return .failure(.init(reason: error.leaf ?
-                    .failedToReadManifest :
-                    .failedToReadManifestForDependency))
-        }
-        catch let error as SSGC.PackageBuildError
-        {
-            print("Error: \(error)")
-
-            let reason:Unidoc.BuildFailure.Reason
-
-            switch error
-            {
-            case .swift_package_update:         reason = .failedToResolveDependencies
-            case .swift_build:                  reason = .failedToCompile
-            case .swift_symbolgraph_extract:    reason = .failedToCompile
-            }
-
-            return .failure(.init(reason: reason))
         }
     }
 }
@@ -289,10 +212,10 @@ extension Unidoc.Client
                     continue
                 }
 
-                let buildable:Unidoc.BuildLabels
+                let labels:Unidoc.BuildLabels
                 do
                 {
-                    buildable = try await self.connect
+                    labels = try await self.connect
                     {
                         @Sendable (connection:Unidoc.Client.Connection) in
 
@@ -312,17 +235,17 @@ extension Unidoc.Client
                     continue
                 }
 
-                if  case .swift = buildable.package
+                if  case .swift = labels.package
                 {
                     //  We cannot build the standard library this way.
                     print("Skipping 'swift'")
                     continue
                 }
 
-                if  case .success(let snapshot) = try await self.build(buildable,
-                        action: .uplinkRefresh,
-                        pretty: pretty,
-                        toolchain: toolchain)
+                if  case .success(let snapshot) = try await Unidoc.Build.with(
+                        toolchain: toolchain,
+                        labels: labels,
+                        action: .uplinkRefresh)
                 {
                     try await self.connect
                     {
@@ -335,7 +258,7 @@ extension Unidoc.Client
                 }
                 else
                 {
-                    print("Failed to build \(buildable.package) \(buildable.tag ?? "?")")
+                    print("Failed to build \(labels.package) \(labels.tag ?? "?")")
                     unbuildable[edition] = ()
                 }
             }
