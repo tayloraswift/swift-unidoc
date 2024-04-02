@@ -61,9 +61,9 @@ extension Swiftinit.SitemapIndexEndpoint:Swiftinit.PublicEndpoint
             }
         }
 
-        var resource:HTTP.Resource = .init(content: .binary(index.utf8),
-            type: .application(.xml, charset: .utf8),
-            gzip: false)
+        var resource:HTTP.Resource = .init(content: .init(
+            body: .binary(index.utf8),
+            type: .application(.xml, charset: .utf8)))
 
         resource.optimize(tag: self.tag)
 

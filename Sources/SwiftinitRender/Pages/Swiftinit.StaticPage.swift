@@ -29,8 +29,8 @@ extension Swiftinit.StaticPage where Self:Swiftinit.RenderablePage
 
         return .init(
             headers: .init(canonical: canonical ?? location),
-            content: .binary(html.utf8),
-            type: .text(.html, charset: .utf8),
-            gzip: false)
+            content: .init(
+                body: .binary(html.utf8),
+                type: .text(.html, charset: .utf8)))
     }
 }

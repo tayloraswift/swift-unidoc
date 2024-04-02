@@ -1,5 +1,6 @@
 import BSON
 import HTTP
+import HTTPServer
 import JSON
 import MongoDB
 import S3
@@ -31,7 +32,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
         let package:Unidoc.Package
         let failure:Unidoc.BuildFailure?
-        let logs:Unidoc.BuildLogs.Exported?
+        var logs:[Unidoc.BuildLogType] = []
 
         switch self.outcome
         {
@@ -40,10 +41,44 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
             package = report.package
             failure = report.failure
-            //  TODO: export logs
-            logs = nil
 
             json = nil
+
+            let logsToExport:Int = report.logs.count
+            if  logsToExport > 0
+            {
+                guard
+                let bucket:AWS.S3.Bucket = server.bucket.assets
+                else
+                {
+                    Log[.warning] = "No destination bucket configured for exporting build logs!"
+                    break
+                }
+
+                logs.reserveCapacity(logsToExport)
+
+                let s3:AWS.S3.Client = .init(threads: server.context.threads,
+                    niossl: server.context.niossl,
+                    bucket: bucket)
+
+                try await s3.connect
+                {
+                    for log:Unidoc.BuildLog in report.logs
+                    {
+                        let path:Unidoc.BuildLogPath = .init(package: report.package,
+                            type: log.type)
+
+                        try await $0.put(content: .init(
+                                body: .binary(log.text.bytes),
+                                type: .text(.plain),
+                                encoding: .gzip),
+                            using: .standard,
+                            path: "\(path)")
+
+                        logs.append(log.type)
+                    }
+                }
+            }
 
         case .success:
             var snapshot:Unidoc.Snapshot = try .init(bson: bson)
@@ -54,7 +89,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
                     niossl: server.context.niossl,
                     bucket: bucket)
 
-                try await snapshot.move(to: s3)
+                try await snapshot.moveSymbolGraph(to: s3)
             }
 
             let uploaded:Unidoc.UploadStatus = try await server.db.snapshots.upsert(
@@ -63,7 +98,6 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
             package = uploaded.package
             failure = nil
-            logs = nil
 
             json = .encode(uploaded)
 
@@ -83,7 +117,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
                     niossl: server.context.niossl,
                     bucket: bucket)
 
-                try await snapshot.move(to: s3)
+                try await snapshot.moveSymbolGraph(to: s3)
             }
 
             let uploaded:Unidoc.UploadStatus = try await server.db.unidoc.snapshots.upsert(
@@ -92,7 +126,6 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
             package = uploaded.package
             failure = nil
-            logs = nil
 
             json = .encode(uploaded)
         }
@@ -105,9 +138,9 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
         if  let json:JSON = json
         {
-            return .ok(.init(content: .binary(json.utf8),
-                type: .application(.json, charset: .utf8),
-                gzip: false))
+            return .ok(.init(content: .init(
+                body: .binary(json.utf8),
+                type: .application(.json, charset: .utf8))))
         }
         else
         {

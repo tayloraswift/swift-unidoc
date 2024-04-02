@@ -96,10 +96,10 @@ extension Main
 
                 print("Uploading \(path)...")
 
-                try await connection.put(content,
+                try await connection.put(
+                    content: .init(body: .binary(content), type: asset.type),
                     using: .standard,
                     path: path,
-                    type: asset.type,
                     with: key)
             }
         }

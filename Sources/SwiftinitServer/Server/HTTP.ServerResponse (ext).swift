@@ -8,11 +8,12 @@ extension HTTP.ServerResponse
         switch self
         {
         case .resource(let resource, status: let status):
-            if  case .length = resource.content,
+            if  case nil = resource.content,
                 case 200 = status
             {
                 return \.notModified
             }
+
             switch status
             {
             case 200:   return \.ok

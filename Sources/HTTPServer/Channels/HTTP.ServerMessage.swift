@@ -46,9 +46,9 @@ extension HTTP.ServerMessage
         self.init(500,
             copying: .init(
                 headers: .init(),
-                content: .string(Authority.redact(error: error)),
-                type: .text(.plain, charset: .utf8),
-                gzip: false),
+                content: .init(
+                    body: .string(Authority.redact(error: error)),
+                    type: .text(.plain, charset: .utf8))),
             using: allocator)
     }
 }
@@ -82,30 +82,35 @@ extension HTTP.ServerMessage
         copying resource:HTTP.Resource,
         using allocator:__shared ByteBufferAllocator)
     {
-        let buffer:ByteBuffer?
-        let length:Int
-        switch resource.content
+        if  let content:HTTP.Resource.Content = resource.content
         {
-        case .buffer(let bytes):
-            length = bytes.readableBytes
-            buffer = bytes
+            let buffer:ByteBuffer
+            let length:Int
 
-        case .binary(let bytes):
-            length = bytes.count
-            buffer = allocator.buffer(bytes: bytes)
+            switch content.body
+            {
+            case .buffer(let bytes):
+                length = bytes.readableBytes
+                buffer = bytes
 
-        case .string(let string):
-            length = string.utf8.count
-            buffer = allocator.buffer(string: string)
+            case .binary(let bytes):
+                length = bytes.count
+                buffer = allocator.buffer(bytes: bytes)
 
-        case .length(let bytes):
-            length = bytes
-            buffer = nil
-        }
+            case .string(let string):
+                length = string.utf8.count
+                buffer = allocator.buffer(string: string)
+            }
 
-        if  let buffer:ByteBuffer
-        {
             self.init(status, content: buffer)
+
+            self.headers.add(name: "content-length", value: "\(length)")
+            self.headers.add(name: "content-type",   value: "\(content.type)")
+
+            if  let encoding:MediaEncoding = content.encoding
+            {
+                self.headers.add(name: "content-encoding", value: "\(encoding)")
+            }
         }
         else
         {
@@ -134,19 +139,5 @@ extension HTTP.ServerMessage
         }
 
         self.headers.add(name: "access-control-allow-origin", value: "*")
-
-        //  The rest of these headers should only appear if there is physical content.
-        if  case nil = buffer
-        {
-            return
-        }
-
-        if  resource.gzip
-        {
-            self.headers.add(name: "content-encoding", value: "gzip")
-        }
-
-        self.headers.add(name: "content-length", value: "\(length)")
-        self.headers.add(name: "content-type",   value: "\(resource.type)")
     }
 }

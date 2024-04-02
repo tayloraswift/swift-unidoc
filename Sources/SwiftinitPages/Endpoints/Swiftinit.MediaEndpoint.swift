@@ -26,27 +26,20 @@ extension Swiftinit.MediaEndpoint
             return .notFound("Resource not found.")
         }
 
-        let content:HTTP.Resource.Content
-        let gzipped:Bool
+        let content:HTTP.Resource.Content?
+
         switch output.text
         {
         case .inline(.gzip(let gzip)):
-            content = .binary(gzip.bytes)
-            gzipped = true
+            content = .init(body: .binary(gzip.bytes), type: self.type, encoding: .gzip)
 
         case .inline(.utf8(let utf8)):
-            content = .binary(utf8)
-            gzipped = false
+            content = .init(body: .binary(utf8), type: self.type)
 
-        case .length(let bytes):
-            content = .length(bytes)
-            gzipped = false // ???
+        case .length:
+            content = nil
         }
 
-        return .ok(.init(
-            content: content,
-            type: self.type,
-            gzip: gzipped,
-            hash: output.hash))
+        return .ok(.init(content: content, hash: output.hash))
     }
 }

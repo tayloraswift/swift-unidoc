@@ -17,14 +17,14 @@ extension Unidoc
         public
         var failure:BuildFailure?
         public
-        var logs:BuildLogs.Exported?
+        var logs:[BuildLogType]
 
         @inlinable public
         init(id:Unidoc.Package,
             progress:Unidoc.BuildProgress? = nil,
             request:Unidoc.BuildRequest? = nil,
             failure:Unidoc.BuildFailure? = nil,
-            logs:Unidoc.BuildLogs.Exported? = nil)
+            logs:[BuildLogType] = [])
         {
             self.id = id
             self.progress = progress
@@ -55,7 +55,7 @@ extension Unidoc.BuildMetadata:BSONDocumentEncodable
         bson[.progress] = self.progress
         bson[.request] = self.request
         bson[.failure] = self.failure
-        bson[.logs] = self.logs
+        bson[.logs] = self.logs.isEmpty ? nil : self.logs
     }
 }
 extension Unidoc.BuildMetadata:BSONDocumentDecodable
@@ -67,6 +67,6 @@ extension Unidoc.BuildMetadata:BSONDocumentDecodable
             progress: try bson[.progress]?.decode(),
             request: try bson[.request]?.decode(),
             failure: try bson[.failure]?.decode(),
-            logs: try bson[.logs]?.decode())
+            logs: try bson[.logs]?.decode() ?? [])
     }
 }

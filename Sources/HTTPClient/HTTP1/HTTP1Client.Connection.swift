@@ -25,21 +25,14 @@ extension HTTP1Client.Connection:Sendable
 extension HTTP1Client.Connection
 {
     @inlinable public
-    func buffer(string:Substring) -> ByteBuffer
+    func buffer(_ body:HTTP.Resource.Content.Body) -> ByteBuffer
     {
-        self.channel.allocator.buffer(substring: string)
-    }
-
-    @inlinable public
-    func buffer(string:String) -> ByteBuffer
-    {
-        self.channel.allocator.buffer(string: string)
-    }
-
-    @inlinable public
-    func buffer(bytes:[UInt8]) -> ByteBuffer
-    {
-        self.channel.allocator.buffer(bytes: bytes)
+        switch body
+        {
+        case .buffer(let buffer):   buffer
+        case .binary(let bytes):    self.channel.allocator.buffer(bytes: bytes)
+        case .string(let string):   self.channel.allocator.buffer(string: string)
+        }
     }
 }
 extension HTTP1Client.Connection

@@ -43,10 +43,7 @@ extension Swiftinit.VertexEndpoint
     public
     func failure(format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
     {
-        .notFound(.init(
-            content: .string("Snapshot not found.\n"),
-            type: .text(.plain, charset: .utf8),
-            gzip: false))
+        .notFound("Snapshot not found.\n")
     }
 
     public

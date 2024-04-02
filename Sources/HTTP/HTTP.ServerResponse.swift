@@ -85,7 +85,7 @@ extension HTTP.ServerResponse
         switch self
         {
         case .redirect:                 0
-        case .resource(let self, _):    self.content.size
+        case .resource(let self, _):    self.content?.body.size ?? 0
         }
     }
 }
