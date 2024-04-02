@@ -6,19 +6,19 @@ enum DiagnosticLine:Equatable, Sendable
 }
 extension DiagnosticLine
 {
-    func description(colors:TerminalColors) -> String
+    func write(to text:inout some TextOutputStream, colors:TerminalColors)
     {
         switch self
         {
         case .annotation(let underline):
-            colors.bold("""
+            text.write(colors.bold("""
                 \(String.init(repeating: " ", count: underline.lowerBound))\
                 \(String.init(repeating: "~", count: underline.count - 1))^
                 """,
-                .rgb(255, 70, 110))
+                .rgb(255, 70, 110)))
 
         case .source(let line):
-            line
+            text.write(line)
         }
     }
 }

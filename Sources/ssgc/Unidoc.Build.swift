@@ -32,7 +32,7 @@ extension Unidoc.Build
             logs: .init(
                 swiftPackageResolve: logs.swiftPackageResolve.map { .gzip(bytes: $0[...]) },
                 swiftPackageBuild: logs.swiftPackageBuild.map { .gzip(bytes: $0[...]) },
-                ssgcDocsBuild: nil))
+                ssgcDocsBuild: logs.ssgcDiagnostics.map { .gzip(bytes: $0[...]) }))
     }
 }
 extension Unidoc.Build

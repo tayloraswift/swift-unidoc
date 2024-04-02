@@ -51,7 +51,10 @@ extension SymbolGraphObject<Void>
             include: package.include,
             output: directory)
 
-        let graph:SymbolGraph = try await .build(package: package, from: artifacts)
+        let graph:SymbolGraph = try await .build(package: package,
+            from: artifacts,
+            logs: &logs)
+
         self.init(metadata: metadata, graph: graph)
     }
 }
