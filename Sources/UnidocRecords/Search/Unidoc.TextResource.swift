@@ -58,12 +58,8 @@ extension Unidoc.TextResource:BSONDocumentEncodable, BSONEncodable
             bson[.utf8] = BSON.UTF8View<ArraySlice<UInt8>>.init(bytes: utf8)
 
         case .gzip(let gzip):
-            bson[.hash] = MD5.init(hashing: gzip)
-            bson[.gzip] = BSON.BinaryView<ArraySlice<UInt8>>.init(
-                //  Do NOT use `compressed` here. That has a special meaning to MongoDB,
-                //  and newer versions of `mongod` will reject it.
-                subtype: .generic,
-                bytes: gzip)
+            bson[.hash] = MD5.init(hashing: gzip.bytes)
+            bson[.gzip] = gzip
         }
     }
 }
@@ -74,9 +70,9 @@ extension Unidoc.TextResource:BSONDocumentDecodable, BSONDecodable
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let text:Unidoc.TextStorage
-        if  let gzip:BSON.BinaryView<ArraySlice<UInt8>> = try bson[.gzip]?.decode()
+        if  let compressed:Unidoc.TextStorage.Compressed = try bson[.gzip]?.decode()
         {
-            text = .gzip(gzip.bytes)
+            text = .gzip(compressed)
         }
         else
         {

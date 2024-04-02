@@ -1,0 +1,6 @@
+extension SSGC
+{
+    protocol DocumentationLogger
+    {
+    }
+}

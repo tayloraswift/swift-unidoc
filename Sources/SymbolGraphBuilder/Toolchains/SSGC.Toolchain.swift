@@ -27,24 +27,32 @@ extension SSGC
         let triple:Triple
 
         private
+        let pretty:Bool
+
+        private
         init(swiftPath:String,
             swiftSDK:AppleSDK?,
             version:SwiftVersion,
             commit:SymbolGraphMetadata.Commit?,
-            triple:Triple)
+            triple:Triple,
+            pretty:Bool)
         {
             self.swiftPath = swiftPath
             self.swiftSDK = swiftSDK
             self.version = version
             self.commit = commit
             self.triple = triple
+            self.pretty = pretty
         }
     }
 }
 extension SSGC.Toolchain
 {
     public
-    init(parsing splash:String, swiftPath:String, swiftSDK:SSGC.AppleSDK? = nil) throws
+    init(parsing splash:String,
+        swiftPath:String,
+        swiftSDK:SSGC.AppleSDK? = nil,
+        pretty:Bool = false) throws
     {
         //  Splash should consist of two complete lines and a final newline. If the final
         //  newline isn’t present, the output was clipped.
@@ -115,11 +123,15 @@ extension SSGC.Toolchain
             swiftSDK: swiftSDK,
             version: swift,
             commit: commit,
-            triple: triple)
+            triple: triple,
+            pretty: pretty)
     }
 
     public static
-    func detect(swiftPath:String = "swift", swiftSDK:SSGC.AppleSDK? = nil) async throws -> Self
+    func detect(
+        swiftPath:String = "swift",
+        swiftSDK:SSGC.AppleSDK? = nil,
+        pretty:Bool = false) async throws -> Self
     {
         let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
 
@@ -132,7 +144,8 @@ extension SSGC.Toolchain
         try await SystemProcess.init(command: swiftPath, "--version", stdout: writable)()
         return try .init(parsing: try readable.read(buffering: 1024),
             swiftPath: swiftPath,
-            swiftSDK: swiftSDK)
+            swiftSDK: swiftSDK,
+            pretty: pretty)
     }
 }
 extension SSGC.Toolchain
@@ -261,8 +274,7 @@ extension SSGC.Toolchain
     /// output directory.
     func dump(modules:[SSGC.NominalSources],
         include:[FilePath],
-        output:ArtifactsDirectory,
-        pretty:Bool) async throws -> [Artifacts]
+        output:ArtifactsDirectory) async throws -> [Artifacts]
     {
         for sources:SSGC.NominalSources in modules
         {
@@ -347,7 +359,7 @@ extension SSGC.Toolchain
                 arguments.append("-emit-extension-block-symbols")
             }
 
-            if  pretty
+            if  self.pretty
             {
                 arguments.append("-pretty-print")
             }

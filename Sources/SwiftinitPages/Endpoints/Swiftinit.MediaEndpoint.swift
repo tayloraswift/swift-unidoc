@@ -31,7 +31,7 @@ extension Swiftinit.MediaEndpoint
         switch output.text
         {
         case .inline(.gzip(let gzip)):
-            content = .binary(gzip)
+            content = .binary(gzip.bytes)
             gzipped = true
 
         case .inline(.utf8(let utf8)):

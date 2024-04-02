@@ -54,7 +54,7 @@ enum Main:TestMain, TestBattery
         let workspace:SSGC.Workspace =
             await (tests ! "workspace").do({ try await .create(at: ".testing") }),
         let toolchain:SSGC.Toolchain =
-            await (tests ! "toolchain").do({ try await .detect() })
+            await (tests ! "toolchain").do({ try await .detect(pretty: true) })
         else
         {
             return
@@ -66,8 +66,7 @@ enum Main:TestMain, TestBattery
                 try await .init(building: try await .swift(
                         in: workspace,
                         clean: true),
-                    with: toolchain,
-                    pretty: true)
+                    with: toolchain)
             })
         {
             docs.roundtrip(for: tests, in: workspace.path)
@@ -82,8 +81,7 @@ enum Main:TestMain, TestBattery
                         at: "1.1.0",
                         in: workspace,
                         clean: [.artifacts]),
-                    with: toolchain,
-                    pretty: true)
+                    with: toolchain)
             })
         {
             docs.roundtrip(for: tests, in: workspace.path)
@@ -98,8 +96,7 @@ enum Main:TestMain, TestBattery
                         at: "2.63.0",
                         in: workspace,
                         clean: [.artifacts]),
-                    with: toolchain,
-                    pretty: true)
+                    with: toolchain)
             })
         {
             //  the swift-docc-plugin dependency should have been linted.
@@ -126,8 +123,7 @@ enum Main:TestMain, TestBattery
                         at: "2.24.0",
                         in: workspace,
                         clean: [.artifacts]),
-                    with: toolchain,
-                    pretty: true)
+                    with: toolchain)
             })
         {
             tests.expect(docs.metadata.dependencies.map(\.package.name) **?
@@ -151,8 +147,7 @@ enum Main:TestMain, TestBattery
                         at: "0.1.2",
                         in: workspace,
                         clean: [.artifacts]),
-                    with: toolchain,
-                    pretty: true)
+                    with: toolchain)
             })
         {
             tests.expect(docs.metadata.dependencies.map(\.package.name) **?
@@ -176,8 +171,7 @@ enum Main:TestMain, TestBattery
                         at: "508.0.0",
                         in: workspace,
                         clean: [.artifacts]),
-                    with: toolchain,
-                    pretty: true)
+                    with: toolchain)
             })
         {
             //  the swift-argument-parser dependency should have been linted.
