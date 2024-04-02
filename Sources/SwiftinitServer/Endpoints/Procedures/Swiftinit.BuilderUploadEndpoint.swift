@@ -31,6 +31,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
         let package:Unidoc.Package
         let failure:Unidoc.BuildFailure?
+        let logs:Unidoc.BuildLogs.Exported?
 
         switch self.outcome
         {
@@ -39,13 +40,15 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
             package = report.package
             failure = report.failure
+            //  TODO: export logs
+            logs = nil
 
             json = nil
 
         case .success:
             var snapshot:Unidoc.Snapshot = try .init(bson: bson)
 
-            if  let bucket:AWS.S3.Bucket = server.bucket
+            if  let bucket:AWS.S3.Bucket = server.bucket.graphs
             {
                 let s3:AWS.S3.Client = .init(threads: server.context.threads,
                     niossl: server.context.niossl,
@@ -60,6 +63,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
             package = uploaded.package
             failure = nil
+            logs = nil
 
             json = .encode(uploaded)
 
@@ -73,7 +77,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
                 action: .uplinkRefresh,
                 with: session)
 
-            if  let bucket:AWS.S3.Bucket = server.bucket
+            if  let bucket:AWS.S3.Bucket = server.bucket.graphs
             {
                 let s3:AWS.S3.Client = .init(threads: server.context.threads,
                     niossl: server.context.niossl,
@@ -88,6 +92,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
             package = uploaded.package
             failure = nil
+            logs = nil
 
             json = .encode(uploaded)
         }
@@ -95,6 +100,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
         let _:Unidoc.BuildMetadata? = try await server.db.packageBuilds.finishBuild(
             package: package,
             failure: failure,
+            logs: logs,
             with: session)
 
         if  let json:JSON = json

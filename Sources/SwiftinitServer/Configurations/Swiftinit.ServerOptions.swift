@@ -1,6 +1,5 @@
 import GitHubAPI
 import HTTPServer
-import S3
 
 extension Swiftinit
 {
@@ -10,13 +9,13 @@ extension Swiftinit
         let authority:any ServerAuthority
         var github:GitHub.Integration?
         var mirror:Bool
-        var bucket:AWS.S3.Bucket?
+        var bucket:Buckets
         var mode:Mode
 
         init(authority:any ServerAuthority,
             github:GitHub.Integration? = nil,
             mirror:Bool = false,
-            bucket:AWS.S3.Bucket? = nil,
+            bucket:Buckets,
             mode:Mode = .production)
         {
             self.authority = authority
@@ -74,7 +73,7 @@ extension Swiftinit.ServerOptions
         else
         {
             list.append(Swiftinit.AirdropPlugin.init())
-            list.append(Swiftinit.LinkerPlugin.init(bucket: self.bucket))
+            list.append(Swiftinit.LinkerPlugin.init(bucket: self.bucket.graphs))
             list.append(Swiftinit.LinterPlugin.init())
         }
 
