@@ -93,7 +93,7 @@ extension Swiftinit.ServerLoop
     nonisolated
     var github:GitHub.Integration? { self.options.github }
     nonisolated
-    var bucket:AWS.S3.Bucket? { self.options.bucket }
+    var bucket:Swiftinit.Buckets { self.options.bucket }
 
     nonisolated
     var format:Swiftinit.RenderFormat
