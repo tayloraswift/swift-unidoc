@@ -5,7 +5,7 @@ import S3
 extension Unidoc.Snapshot
 {
     mutating
-    func move(to s3:AWS.S3.Client) async throws
+    func moveSymbolGraph(to s3:AWS.S3.Client) async throws
     {
         var deflator:LZ77.Deflator
 
@@ -30,10 +30,10 @@ extension Unidoc.Snapshot
 
         try await s3.connect
         {
-            try await $0.put(bson,
+            try await $0.put(
+                content: .init(body: .binary(bson), type: .application(.bson)),
                 using: .standard,
-                path: "\(self.path)",
-                type: .application(.bson))
+                path: "\(self.path)")
         }
     }
 }

@@ -233,7 +233,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
-            logs.swiftPackageResolve = try? log.resolution.read()
+            logs.swiftPackageResolution = try? log.resolution.read()
             throw SSGC.PackageBuildError.swift_package_update(code, invocation)
         }
 

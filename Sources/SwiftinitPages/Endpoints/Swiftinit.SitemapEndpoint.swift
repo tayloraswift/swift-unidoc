@@ -60,9 +60,9 @@ extension Swiftinit.SitemapEndpoint:HTTP.ServerEndpoint
             string += "\(prefix)\(uri)\n"
         }
 
-        return .ok(.init(content: .string(string),
-            type: .text(.plain, charset: .utf8),
-            gzip: false,
+        return .ok(.init(content: .init(
+                body: .string(string),
+                type: .text(.plain, charset: .utf8)),
             hash: output.sitemap.hash))
     }
 }

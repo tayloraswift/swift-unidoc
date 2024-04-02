@@ -25,7 +25,7 @@ extension Cache
 
         if  let tag:MD5 = request.tag, case tag? = resource.hash
         {
-            resource.content.drop()
+            resource.content = nil
         }
 
         return .ok(resource)
@@ -53,9 +53,7 @@ extension Cache
                 let asset:[UInt8] = try self.assets.appending(key.source).read()
                 let hash:MD5 = .init(hashing: asset)
                 let resource:HTTP.Resource = .init(
-                    content: .binary(asset),
-                    type: key.type,
-                    gzip: false,
+                    content: .init(body: .binary(asset), type: key.type),
                     hash: hash)
                 $0 = resource
                 return resource

@@ -223,7 +223,7 @@ extension Unidoc.DB.PackageBuilds
     func finishBuild(
         package:Unidoc.Package,
         failure:Unidoc.BuildFailure?,
-        logs:Unidoc.BuildLogs.Exported?,
+        logs:[Unidoc.BuildLogType],
         with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
     {
         let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
@@ -251,8 +251,10 @@ extension Unidoc.DB.PackageBuilds
                     }
                     else
                     {
-                        //  TODO:
-                        //  Do we also want to store the logs in the case of a successful build?
+                        $0[.set]
+                        {
+                            $0[Unidoc.BuildMetadata[.logs]] = logs
+                        }
                         $0[.unset]
                         {
                             $0[Unidoc.BuildMetadata[.progress]] = ()

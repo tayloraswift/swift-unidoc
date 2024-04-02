@@ -6,18 +6,27 @@ extension SSGC.PackageBuild
     struct Logs
     {
         public
-        var swiftPackageResolve:[UInt8]?
+        var swiftPackageResolution:[UInt8]?
         public
         var swiftPackageBuild:[UInt8]?
+        /// The concatenated `swift symbolgraph-extract` logs.
+        ///
+        /// Please note for some reason, whoever named the tool rendered the term *symbol graph*
+        /// as a portmanteau, but the property renders it as two words for consistency with the
+        /// rest of the project. When using camel case, the *G* in *Graph* **must** always be
+        /// capitalized!
         public
-        var ssgcDiagnostics:[UInt8]?
+        var swiftSymbolGraphExtract:[UInt8]?
+        public
+        var ssgcDocsBuild:[UInt8]?
 
         @inlinable public
         init()
         {
-            self.swiftPackageResolve = nil
+            self.swiftPackageResolution = nil
             self.swiftPackageBuild = nil
-            self.ssgcDiagnostics = nil
+            self.swiftSymbolGraphExtract = nil
+            self.ssgcDocsBuild = nil
         }
     }
 }
@@ -41,6 +50,6 @@ extension SSGC.PackageBuild.Logs:SSGC.DocumentationLogger
                 buffer = [UInt8].init(text.utf8)
             }
 
-        } (&self.ssgcDiagnostics)
+        } (&self.ssgcDocsBuild)
     }
 }

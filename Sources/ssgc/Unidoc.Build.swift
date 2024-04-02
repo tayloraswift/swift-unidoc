@@ -15,24 +15,31 @@ extension Unidoc.Build
 {
     private static
     func failure(package:Unidoc.Package,
-        because reason:Unidoc.BuildFailure.Reason,
-        logs:consuming Unidoc.BuildLogs) -> Self
+        because failure:Unidoc.BuildFailure.Reason,
+        logs:consuming [Unidoc.BuildLog]) -> Self
     {
-        .failure(.init(package: package, failure: .init(reason: reason), logs: logs))
+        .failure(.init(package: package, failure: .init(reason: failure), logs: logs))
     }
 
     private static
     func failure(package:Unidoc.Package,
-        because reason:Unidoc.BuildFailure.Reason,
+        because failure:Unidoc.BuildFailure.Reason,
         logs:consuming SSGC.PackageBuild.Logs) -> Self
     {
-        .failure(
-            package: package,
-            because: reason,
-            logs: .init(
-                swiftPackageResolve: logs.swiftPackageResolve.map { .gzip(bytes: $0[...]) },
-                swiftPackageBuild: logs.swiftPackageBuild.map { .gzip(bytes: $0[...]) },
-                ssgcDocsBuild: logs.ssgcDiagnostics.map { .gzip(bytes: $0[...]) }))
+        var compressed:[Unidoc.BuildLog] = []
+
+        for case let (type, utf8?) in
+        [
+            (Unidoc.BuildLogType.swiftPackageResolution, logs.swiftPackageResolution),
+            (Unidoc.BuildLogType.swiftPackageBuild, logs.swiftPackageBuild),
+            (Unidoc.BuildLogType.swiftSymbolGraphExtract, logs.swiftSymbolGraphExtract),
+            (Unidoc.BuildLogType.ssgcDocsBuild, logs.ssgcDocsBuild)
+        ]
+        {
+            compressed.append(.init(text: .gzip(bytes: utf8[...], level: 10), type: type))
+        }
+
+        return .failure(package: package, because: failure, logs: compressed)
     }
 }
 extension Unidoc.Build
@@ -56,7 +63,7 @@ extension Unidoc.Build
             return .failure(
                 package: labels.coordinate.package,
                 because: .noValidVersion,
-                logs: .init())
+                logs: [])
         }
 
         guard
@@ -71,7 +78,7 @@ extension Unidoc.Build
             return .failure(
                 package: labels.coordinate.package,
                 because: .failedToCloneRepository,
-                logs: .init())
+                logs: [])
         }
 
         var logs:SSGC.PackageBuild.Logs = .init()

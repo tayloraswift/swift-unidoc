@@ -93,9 +93,8 @@ extension Swiftinit.ExportEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
 
         return .ok(.init(
             headers: .init(canonical: nil, rateLimit: self.rateLimit),
-            content: .binary(html.utf8),
-            type: .text(.plain, charset: .utf8),
-            gzip: false,
-            hash: nil))
+            content: .init(
+                body: .binary(html.utf8),
+                type: .text(.plain, charset: .utf8))))
     }
 }

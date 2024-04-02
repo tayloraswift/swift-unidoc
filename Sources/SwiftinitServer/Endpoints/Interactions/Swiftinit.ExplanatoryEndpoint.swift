@@ -27,9 +27,8 @@ extension Swiftinit.ExplanatoryEndpoint:Swiftinit.PublicEndpoint
             database: server.db.unidoc.id,
             query: self.query)
 
-        return .ok(.init(
-            content: .string(explanation),
-            type: .text(.plain, charset: .utf8),
-            gzip: false))
+        return .ok(.init(content: .init(
+            body: .string(explanation),
+            type: .text(.plain, charset: .utf8))))
     }
 }
