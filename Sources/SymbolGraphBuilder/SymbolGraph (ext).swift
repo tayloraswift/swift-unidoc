@@ -12,7 +12,9 @@ import SourceDiagnostics
 extension SymbolGraph
 {
     static
-    func build(package:SSGC.PackageSources, from artifacts:[Artifacts]) async throws -> Self
+    func build(package:SSGC.PackageSources,
+        from artifacts:[Artifacts],
+        logs:inout some SSGC.DocumentationLogger) async throws -> Self
     {
         precondition(package.cultures.count == artifacts.count,
             "Mismatched cultures and artifacts!")
@@ -114,7 +116,7 @@ extension SymbolGraph
                 return try linker.load()
             }
 
-            linker.status(root: root).emit(colors: .enabled)
+            logs.log(messages: linker.status(root: root))
 
             print("""
                 Linked documentation!
