@@ -1,5 +1,5 @@
 {
-  "originHash" : "bcaa8143aaee6f5fcf364578c633da2d904aaec5deff8f23f5a36ad5285c399b",
+  "originHash" : "f35a3b95b2c931701b5c992c090fdf4ac5511c50b5bc34d8b4c6731a2ec0091c",
   "pins" : [
     {
       "identity" : "swift-atomics",
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-png",
       "state" : {
-        "revision" : "8d802b8e93d67102d473205bfa9b8f56671569a9",
-        "version" : "4.3.0"
+        "revision" : "aa3c213d1e811050c5228f8d444ddb9c897e2a76",
+        "version" : "4.4.0"
       }
     },
     {

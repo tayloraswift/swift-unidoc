@@ -29,7 +29,7 @@ extension Swiftinit.Server
     var secure:Bool { self.loop.secure }
 
     var github:GitHub.Integration? { self.loop.github }
-    var bucket:AWS.S3.Bucket? { self.loop.bucket }
+    var bucket:Swiftinit.Buckets { self.loop.bucket }
 
     var format:Swiftinit.RenderFormat { self.loop.format }
     var db:Swiftinit.DB { self.loop.db }

@@ -26,39 +26,31 @@ extension AWS.S3
 extension AWS.S3.Connection
 {
     public
-    func put(_ content:[UInt8],
+    func put(content:HTTP.Resource.Content,
         using storage:AWS.S3.StorageClass = .standard,
         path:String,
-        type:MediaType,
         with key:AWS.AccessKey? = nil) async throws
     {
-        try await self.put(self.http1.buffer(bytes: content),
-            using: storage,
-            path: path,
-            type: type,
-            with: key)
-    }
+        let body:ByteBuffer = self.http1.buffer(content.body)
 
-    private
-    func put(_ content:ByteBuffer,
-        using storage:AWS.S3.StorageClass,
-        path:String,
-        type:MediaType,
-        with key:AWS.AccessKey?) async throws
-    {
-        var headers:HTTPHeaders = key?.sign(put: content,
+        var headers:HTTPHeaders = key?.sign(put: body,
             storage: storage,
             bucket: self.bucket,
             path: path) ?? ["host": bucket.domain]
 
-        headers.add(name: "content-length", value: "\(content.readableBytes)")
-        headers.add(name: "content-type", value: "\(type)")
+        headers.add(name: "content-length", value: "\(body.readableBytes)")
+        headers.add(name: "content-type", value: "\(content.type)")
+
+        if  let encoding:MediaEncoding = content.encoding
+        {
+            headers.add(name: "content-encoding", value: "\(encoding)")
+        }
 
         let facet:HTTP1Client.Facet = try await self.http1.fetch(.init(
             method: .PUT,
             path: path,
             head: headers,
-            body: content))
+            body: body))
 
         guard
         let status:HTTPResponseStatus = facet.head?.status

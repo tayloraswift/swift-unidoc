@@ -21,7 +21,8 @@ enum Main
         let options:Options = try .parse()
         let toolchain:SSGC.Toolchain = try await .detect(
             swiftPath: options.swift ?? "swift",
-            swiftSDK: options.swiftSDK)
+            swiftSDK: options.swiftSDK,
+            pretty: options.pretty)
 
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
 
@@ -68,7 +69,6 @@ enum Main
                 options.input == nil
             {
                 try await unidoc.buildAndUpload(remote: package,
-                    pretty: options.pretty,
                     force: options.force,
                     toolchain: toolchain)
             }
@@ -76,7 +76,6 @@ enum Main
             {
                 try await unidoc.buildAndUpload(local: package,
                     search: options.input.map(FilePath.init(_:)),
-                    pretty: options.pretty,
                     toolchain: toolchain)
             }
         }

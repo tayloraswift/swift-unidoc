@@ -179,7 +179,9 @@ extension Main
             return .init(authority: authority,
                 github: github,
                 mirror: self.mirror,
-                bucket: self.development.bucket,
+                bucket: .init(
+                    assets: self.development.bucket,
+                    graphs: self.development.bucket),
                 mode: .development(.init(source: assets), self.development))
         }
         else
@@ -187,7 +189,9 @@ extension Main
             return .init(authority: authority,
                 github: github,
                 mirror: self.mirror,
-                bucket: .init(region: .us_east_1, name: "symbolgraphs"),
+                bucket: .init(
+                    assets: .init(region: .us_east_1, name: "swiftinit"),
+                    graphs: .init(region: .us_east_1, name: "symbolgraphs")),
                 mode: .production)
         }
     }

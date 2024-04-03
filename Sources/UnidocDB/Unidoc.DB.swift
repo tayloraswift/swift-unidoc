@@ -4,11 +4,12 @@ import GitHubAPI
 import MongoDB
 import SemanticVersions
 import SHA1
+import SourceDiagnostics
 import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocAPI
-import SourceDiagnostics
+import UnidocRecords_LZ77
 import UnidocLinker
 @_spi(testable)
 import UnidocRecords

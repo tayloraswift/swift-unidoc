@@ -10,11 +10,15 @@ extension Unidoc
         public
         let failure:BuildFailure
 
+        public
+        var logs:[BuildLog]
+
         @inlinable public
-        init(package:Package, failure:BuildFailure)
+        init(package:Package, failure:BuildFailure, logs:[BuildLog])
         {
             self.package = package
             self.failure = failure
+            self.logs = logs
         }
     }
 }
@@ -25,6 +29,7 @@ extension Unidoc.BuildFailureReport
     {
         case package = "P"
         case failure = "F"
+        case logs = "L"
     }
 }
 extension Unidoc.BuildFailureReport:BSONDocumentEncodable
@@ -34,6 +39,7 @@ extension Unidoc.BuildFailureReport:BSONDocumentEncodable
     {
         bson[.package] = self.package
         bson[.failure] = self.failure
+        bson[.logs] = self.logs.isEmpty ? nil : self.logs
     }
 }
 extension Unidoc.BuildFailureReport:BSONDocumentDecodable
@@ -43,6 +49,7 @@ extension Unidoc.BuildFailureReport:BSONDocumentDecodable
     {
         self.init(
             package: try bson[.package].decode(),
-            failure: try bson[.failure].decode())
+            failure: try bson[.failure].decode(),
+            logs: try bson[.logs]?.decode() ?? [])
     }
 }
