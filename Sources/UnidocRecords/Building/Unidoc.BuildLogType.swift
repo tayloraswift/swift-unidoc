@@ -13,7 +13,7 @@ extension Unidoc
 }
 extension Unidoc.BuildLogType
 {
-    @inlinable
+    @inlinable public
     var name:String
     {
         switch self

@@ -394,7 +394,117 @@ extension Swiftinit.TagsPage
                         from: self.location)
 
                     $0[.div]
-                    $0[.div]
+
+                    switch self.build?.failure?.reason
+                    {
+                    case .timeout?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            We failed to build the package in the allotted time.
+                            """
+                        } = "Failed (timeout)"
+
+                    case .noValidVersion?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            There were no valid versions of this package to build.
+                            """
+                        } = "Skipped"
+
+                    case .failedToCloneRepository?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            We failed to clone the package’s repository.
+                            """
+                        } = "Failed (git)"
+
+                    case .failedToReadManifest?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            We failed to detect the package’s manifest.
+                            """
+                        } = "Failed (swift)"
+
+                    case .failedToReadManifestForDependency?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            We failed to read the manifest of one of the package’s dependencies.
+                            """
+                        } = "Failed (swift)"
+
+                    case .failedToResolveDependencies?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            We failed to resolve the package’s dependencies.
+                            """
+                        } = "Failed (swift)"
+
+                    case .failedToBuild?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            We failed to build the package’s source code.
+                            """
+                        } = "Failed (swift)"
+
+                    case .failedToExtractSymbolGraph?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            We failed to extract the package’s symbol graphs.
+                            """
+                        } = "Failed (swift)"
+
+                    case .failedToLoadSymbolGraph?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            We failed to parse the package’s symbol graphs.
+                            """
+                        } = "Failed (ssgc)"
+
+                    case .failedToLinkSymbolGraph?:
+                        $0[.div]
+                        {
+                            $0.title = """
+                            We failed to link the package’s documentation.
+                            """
+                        } = "Failed (ssgc)"
+
+                    case nil:
+                        $0[.div]
+                    }
+                }
+            }
+
+            //  TODO: this looks really ugly visually, but it’s a start.
+            if  let build:Unidoc.BuildMetadata = self.build, !build.logs.isEmpty
+            {
+                section[.h4] = "Build logs"
+
+                section[.ol]
+                {
+                    for log:Unidoc.BuildLogType in build.logs
+                    {
+                        $0[.li]
+                        {
+                            //  We never persist logs anywhere except in S3, where they are
+                            //  served through CloudFront. Therefore, we can safely hardcode
+                            //  the URL here.
+                            let path:Unidoc.BuildLogPath = .init(package: build.id, type: log)
+
+                            $0[.a]
+                            {
+                                $0.href = "https://static.swiftinit.org\(path)"
+                            } = log.name
+                        }
+                    }
                 }
             }
         }

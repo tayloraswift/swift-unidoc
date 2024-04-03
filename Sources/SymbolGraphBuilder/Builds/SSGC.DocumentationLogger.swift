@@ -5,6 +5,9 @@ extension SSGC
     protocol DocumentationLogger
     {
         mutating
-        func log(messages:consuming DiagnosticMessages)
+        func attach(extractorLog:[UInt8])
+
+        mutating
+        func attach(messages:consuming DiagnosticMessages)
     }
 }

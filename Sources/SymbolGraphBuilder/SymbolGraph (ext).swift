@@ -63,6 +63,11 @@ extension SymbolGraph
                 extensions      : \(extensions.count)
                 """)
         }
+        catch let error
+        {
+            throw SSGC.DocumentationBuildError.loading(error)
+        }
+
         do
         {
             var linker:SSGC.Linker = .init(nominations: nominations,
@@ -116,7 +121,7 @@ extension SymbolGraph
                 return try linker.load()
             }
 
-            logs.log(messages: linker.status(root: root))
+            logs.attach(messages: linker.status(root: root))
 
             print("""
                 Linked documentation!
@@ -126,6 +131,10 @@ extension SymbolGraph
                 """)
 
             return graph
+        }
+        catch let error
+        {
+            throw SSGC.DocumentationBuildError.linking(error)
         }
     }
 }

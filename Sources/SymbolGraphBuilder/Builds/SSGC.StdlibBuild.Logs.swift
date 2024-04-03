@@ -14,7 +14,12 @@ extension SSGC.StdlibBuild
 extension SSGC.StdlibBuild.Logs:SSGC.DocumentationLogger
 {
     public
-    func log(messages:consuming DiagnosticMessages)
+    func attach(extractorLog:[UInt8])
+    {
+    }
+
+    public
+    func attach(messages:consuming DiagnosticMessages)
     {
         messages.emit(colors: .enabled)
     }

@@ -36,9 +36,18 @@ extension SystemProcess
     init(command:String, arguments:[String],
         stdout:FileDescriptor? = nil,
         stderr:FileDescriptor? = nil,
+        echo:Bool = false,
         with environment:consuming SystemProcess.Environment = .inherit) throws
     {
         let invocation:[String] = [command] + arguments
+        if  echo
+        {
+            let invocation:String = "\(invocation.joined(separator: " "))\n"
+            if  case nil = try stdout?.writeAll(invocation.utf8)
+            {
+                print(invocation, terminator: "")
+            }
+        }
         // must be null-terminated!
         let argv:[UnsafeMutablePointer<CChar>?] = invocation.map
         {
@@ -67,7 +76,7 @@ extension SystemProcess
         #elseif canImport(Glibc)
         var actions:posix_spawn_file_actions_t = .init()
         #endif
-        
+
         do
         {
             posix_spawn_file_actions_init(&actions)

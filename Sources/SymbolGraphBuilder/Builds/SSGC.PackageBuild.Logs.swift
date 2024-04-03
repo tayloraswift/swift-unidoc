@@ -33,7 +33,13 @@ extension SSGC.PackageBuild
 extension SSGC.PackageBuild.Logs:SSGC.DocumentationLogger
 {
     public mutating
-    func log(messages:consuming DiagnosticMessages)
+    func attach(extractorLog:[UInt8])
+    {
+        self.swiftSymbolGraphExtract = extractorLog
+    }
+
+    public mutating
+    func attach(messages:consuming DiagnosticMessages)
     {
         {
             (buffer:inout [UInt8]?) in

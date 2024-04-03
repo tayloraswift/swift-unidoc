@@ -112,8 +112,25 @@ extension Unidoc.Build
             switch error
             {
             case .swift_package_update:         reason = .failedToResolveDependencies
-            case .swift_build:                  reason = .failedToCompile
-            case .swift_symbolgraph_extract:    reason = .failedToCompile
+            case .swift_build:                  reason = .failedToBuild
+            case .swift_symbolgraph_extract:    reason = .failedToExtractSymbolGraph
+            }
+
+            return .failure(
+                package: labels.coordinate.package,
+                because: reason,
+                logs: logs)
+        }
+        catch let error as SSGC.DocumentationBuildError
+        {
+            print("Error: \(error)")
+
+            let reason:Unidoc.BuildFailure.Reason
+
+            switch error
+            {
+            case .loading:                      reason = .failedToLoadSymbolGraph
+            case .linking:                      reason = .failedToLinkSymbolGraph
             }
 
             return .failure(
