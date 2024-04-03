@@ -277,7 +277,9 @@ extension SSGC.Toolchain
         output:ArtifactsDirectory,
         log:FilePath) async throws -> [Artifacts]
     {
-        try await log.open(.writeOnly)
+        try await log.open(.writeOnly,
+            permissions: (.rw, .r, .r),
+            options: [.create, .truncate])
         {
             (log:FileDescriptor) in
 
