@@ -1,4 +1,5 @@
 import SymbolGraphs
+import System
 
 extension SymbolGraphObject<Void>
 {
@@ -46,10 +47,20 @@ extension SymbolGraphObject<Void>
 
         (metadata, package) = try await build.compile(with: swift, logs: &logs)
 
-        let directory:ArtifactsDirectory = { $0.artifacts } (build)
+        let directory:ArtifactsDirectory = build.artifacts
+        let extractor:FilePath = directory.path / "extractor.log"
+        defer
+        {
+            if  let extractor:[UInt8] = try? extractor.read()
+            {
+                logs.attach(extractorLog: extractor)
+            }
+        }
+
         let artifacts:[Artifacts] = try await swift.dump(modules: package.cultures,
             include: package.include,
-            output: directory)
+            output: directory,
+            log: extractor)
 
         let graph:SymbolGraph = try await .build(package: package,
             from: artifacts,
