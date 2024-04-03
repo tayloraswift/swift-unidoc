@@ -12,34 +12,32 @@ extension DiagnosticFragment:CustomStringConvertible
     @usableFromInline
     var description:String
     {
-        self.description(colors: .disabled)
+        var text:String = ""
+        self.write(to: &text, colors: .disabled)
+        return text
     }
 }
 extension DiagnosticFragment
 {
-    @usableFromInline
-    func description(colors:TerminalColors) -> String
+    func write(to text:inout some TextOutputStream, colors:TerminalColors)
     {
         switch self
         {
         case .heading(let location?):
-            return "\(location): "
+            text.write("\(location): ")
 
         case .heading(nil):
-            return "(unknown) "
+            text.write("(unknown) ")
 
-        case .message(let prefix, let text):
-            return "\(colors.bold("\(prefix):", prefix.color)) \(colors.bold(text))\n"
+        case .message(let prefix, let message):
+            text.write("\(colors.bold("\(prefix):", prefix.color)) \(colors.bold(message))\n")
 
         case .context(let context):
-            var lines:String = ""
             for line:DiagnosticLine in context
             {
-                lines += line.description(colors: colors)
-                lines.append("\n")
+                line.write(to: &text, colors: colors)
+                text.write("\n")
             }
-
-            return lines
         }
     }
 }

@@ -9,25 +9,17 @@ extension HTTP
         public
         let headers:Headers
         public
-        var content:Content
-        public
-        var type:MediaType
-        public
-        var gzip:Bool
+        var content:Content?
         public
         var hash:MD5?
 
         @inlinable public
         init(headers:Headers = .init(),
-            content:Content,
-            type:MediaType,
-            gzip:Bool,
+            content:Content?,
             hash:MD5? = nil)
         {
             self.headers = headers
             self.content = content
-            self.type = type
-            self.gzip = gzip
             self.hash = hash
         }
     }
@@ -37,9 +29,9 @@ extension HTTP.Resource:ExpressibleByStringLiteral, ExpressibleByStringInterpola
     @inlinable public
     init(stringLiteral:String)
     {
-        self.init(content: .string(stringLiteral),
-            type: .text(.plain, charset: .utf8),
-            gzip: false)
+        self.init(content: .init(
+            body: .string(stringLiteral),
+            type: .text(.plain, charset: .utf8)))
     }
 }
 extension HTTP.Resource
@@ -54,22 +46,26 @@ extension HTTP.Resource
         {
             hash = precomputed
         }
-        else
+        else if
+            let content:Content = self.content
         {
-            switch self.content
+            switch content.body
             {
             case .binary(let buffer):   hash = .init(hashing: buffer)
             case .buffer(let buffer):   hash = .init(hashing: buffer.readableBytesView)
             case .string(let string):   hash = .init(hashing: string.utf8)
-            case .length:               return
             }
 
             self.hash = hash
         }
+        else
+        {
+            return
+        }
 
         if  case hash? = tag
         {
-            self.content.drop()
+            self.content = nil
         }
     }
 }

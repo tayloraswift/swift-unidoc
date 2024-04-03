@@ -27,24 +27,32 @@ extension SSGC
         let triple:Triple
 
         private
+        let pretty:Bool
+
+        private
         init(swiftPath:String,
             swiftSDK:AppleSDK?,
             version:SwiftVersion,
             commit:SymbolGraphMetadata.Commit?,
-            triple:Triple)
+            triple:Triple,
+            pretty:Bool)
         {
             self.swiftPath = swiftPath
             self.swiftSDK = swiftSDK
             self.version = version
             self.commit = commit
             self.triple = triple
+            self.pretty = pretty
         }
     }
 }
 extension SSGC.Toolchain
 {
     public
-    init(parsing splash:String, swiftPath:String, swiftSDK:SSGC.AppleSDK? = nil) throws
+    init(parsing splash:String,
+        swiftPath:String,
+        swiftSDK:SSGC.AppleSDK? = nil,
+        pretty:Bool = false) throws
     {
         //  Splash should consist of two complete lines and a final newline. If the final
         //  newline isn’t present, the output was clipped.
@@ -115,11 +123,15 @@ extension SSGC.Toolchain
             swiftSDK: swiftSDK,
             version: swift,
             commit: commit,
-            triple: triple)
+            triple: triple,
+            pretty: pretty)
     }
 
     public static
-    func detect(swiftPath:String = "swift", swiftSDK:SSGC.AppleSDK? = nil) async throws -> Self
+    func detect(
+        swiftPath:String = "swift",
+        swiftSDK:SSGC.AppleSDK? = nil,
+        pretty:Bool = false) async throws -> Self
     {
         let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
 
@@ -132,7 +144,8 @@ extension SSGC.Toolchain
         try await SystemProcess.init(command: swiftPath, "--version", stdout: writable)()
         return try .init(parsing: try readable.read(buffering: 1024),
             swiftPath: swiftPath,
-            swiftSDK: swiftSDK)
+            swiftSDK: swiftSDK,
+            pretty: pretty)
     }
 }
 extension SSGC.Toolchain
@@ -262,111 +275,118 @@ extension SSGC.Toolchain
     func dump(modules:[SSGC.NominalSources],
         include:[FilePath],
         output:ArtifactsDirectory,
-        pretty:Bool) async throws -> [Artifacts]
+        log:FilePath) async throws -> [Artifacts]
     {
-        for sources:SSGC.NominalSources in modules
+        try await log.open(.writeOnly,
+            permissions: (.rw, .r, .r),
+            options: [.create, .truncate])
         {
-            let label:String
-            if  case .toolchain? = sources.origin
+            (log:FileDescriptor) in
+
+            for sources:SSGC.NominalSources in modules
             {
-                label = "toolchain"
-            }
-            else
-            {
-                //  Only dump symbols for library targets.
-                switch sources.module.type
+                let label:String
+                if  case .toolchain? = sources.origin
                 {
-                case .binary:       break
-                case .executable:   continue
-                case .regular:      break
-                case .macro:        break
-                case .plugin:       continue
-                case .snippet:      continue
-                case .system:       continue
-                case .test:         continue
+                    label = "toolchain"
+                }
+                else
+                {
+                    //  Only dump symbols for library targets.
+                    switch sources.module.type
+                    {
+                    case .binary:       break
+                    case .executable:   continue
+                    case .regular:      break
+                    case .macro:        break
+                    case .plugin:       continue
+                    case .snippet:      continue
+                    case .system:       continue
+                    case .test:         continue
+                    }
+
+                    label = """
+                    \(sources.module.language?.description ?? "?"), \(sources.module.type)
+                    """
                 }
 
-                label = """
-                \(sources.module.language?.description ?? "?"), \(sources.module.type)
-                """
-            }
+                let module:Symbol.Module = sources.module.id
+                let header:String = "Dumping symbols for module '\(module)' (\(label))\n"
 
-            let module:Symbol.Module = sources.module.id
+                print(header, terminator: "")
+                try log.writeAll(header.utf8)
 
-            print("Dumping symbols for module '\(module)' (\(label))")
-
-            // https://github.com/apple/swift/issues/71635
-            let _minimumACL:String
-            if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
-            {
-                switch module
+                // https://github.com/apple/swift/issues/71635
+                let _minimumACL:String
+                if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
                 {
-                case "_Concurrency":        _minimumACL = "public"
-                case "_Differentiation":    _minimumACL = "public"
-                case "_StringProcessing":   _minimumACL = "internal"
-                case "Foundation":          _minimumACL = "internal"
-                default:                    _minimumACL = "internal"
+                    switch module
+                    {
+                    case "_Concurrency":        _minimumACL = "public"
+                    case "_Differentiation":    _minimumACL = "public"
+                    case "_StringProcessing":   _minimumACL = "internal"
+                    case "Foundation":          _minimumACL = "internal"
+                    default:                    _minimumACL = "internal"
+                    }
                 }
-            }
-            else
-            {
-                _minimumACL = "internal"
-            }
-
-            var arguments:[String] =
-            [
-                "symbolgraph-extract",
-
-                "-module-name",                     "\(module)",
-                "-target",                          "\(self.triple)",
-                "-minimum-access-level",            _minimumACL,
-                "-output-dir",                      "\(output.path)",
-                // "-emit-extension-block-symbols",
-                "-include-spi-symbols",
-                "-skip-inherited-docs",
-            ]
-
-            if  let swiftSDK:SSGC.AppleSDK = self.swiftSDK
-            {
-                arguments.append("-sdk")
-                arguments.append(swiftSDK.path)
-            }
-
-            if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
-            {
-                switch module
+                else
                 {
-                case "_StringProcessing":   break
-                case "Foundation":          break
-                default:
+                    _minimumACL = "internal"
+                }
+
+                var arguments:[String] =
+                [
+                    "symbolgraph-extract",
+
+                    "-module-name",                     "\(module)",
+                    "-target",                          "\(self.triple)",
+                    "-minimum-access-level",            _minimumACL,
+                    "-output-dir",                      "\(output.path)",
+                    // "-emit-extension-block-symbols",
+                    "-include-spi-symbols",
+                    "-skip-inherited-docs",
+                ]
+
+                if  let swiftSDK:SSGC.AppleSDK = self.swiftSDK
+                {
+                    arguments.append("-sdk")
+                    arguments.append(swiftSDK.path)
+                }
+
+                if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
+                {
+                    switch module
+                    {
+                    case "_StringProcessing":   break
+                    case "Foundation":          break
+                    default:
+                        arguments.append("-emit-extension-block-symbols")
+                    }
+                }
+                else
+                {
                     arguments.append("-emit-extension-block-symbols")
                 }
-            }
-            else
-            {
-                arguments.append("-emit-extension-block-symbols")
-            }
 
-            if  pretty
-            {
-                arguments.append("-pretty-print")
-            }
-            for include:FilePath in include
-            {
-                arguments.append("-I")
-                arguments.append("\(include)")
-            }
+                if  self.pretty
+                {
+                    arguments.append("-pretty-print")
+                }
+                for include:FilePath in include
+                {
+                    arguments.append("-I")
+                    arguments.append("\(include)")
+                }
 
-            let null:FilePath = "/dev/null"
-            try await null.open(.writeOnly)
-            {
                 let environment:SystemProcess.Environment = .inherit
                 {
                     $0["SWIFT_BACKTRACE"] = "enable=no"
                 }
                 let extractor:SystemProcess = try .init(command: self.swiftPath,
                     arguments: arguments,
-                    stderr: $0,
+                    stdout: log,
+                    stderr: log,
+                    echo: true,
                     with: environment)
 
                 do
@@ -375,58 +395,60 @@ extension SSGC.Toolchain
                 }
                 catch SystemProcessError.exit(139, _)
                 {
-                    print("""
+                    let display:String = """
                     Failed to dump symbols for module '\(module)' due to SIGSEGV \
                     from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
                     compiler; see https://github.com/apple/swift/issues/68767.
-                    """)
 
-                    return
+                    """
+
+                    try log.writeAll(display.utf8)
+                    print(display, terminator: "")
                 }
                 catch SystemProcessError.exit(let code, let invocation)
                 {
                     throw SSGC.PackageBuildError.swift_symbolgraph_extract(code, invocation)
                 }
             }
-        }
 
-        var parts:[Symbol.Module: [SymbolGraphPart.ID]] = [:]
-        for part:Result<FilePath.Component, any Error> in output.path.directory
-        {
-            //  We don’t want to *parse* the JSON yet to discover the culture,
-            //  because the JSON can be very large, and parsing JSON is very
-            //  expensive (compared to parsing BSON). So we trust that the file
-            //  name is correct and indicates what is contained within the file.
-            if  let id:SymbolGraphPart.ID = .init("\(try part.get())")
+            var parts:[Symbol.Module: [SymbolGraphPart.ID]] = [:]
+            for part:Result<FilePath.Component, any Error> in output.path.directory
             {
-                switch id.namespace
+                //  We don’t want to *parse* the JSON yet to discover the culture,
+                //  because the JSON can be very large, and parsing JSON is very
+                //  expensive (compared to parsing BSON). So we trust that the file
+                //  name is correct and indicates what is contained within the file.
+                if  let id:SymbolGraphPart.ID = .init("\(try part.get())")
                 {
-                case    "CDispatch",                    // too low-level
-                        "CFURLSessionInterface",        // too low-level
-                        "CFXMLInterface",               // too low-level
-                        "CoreFoundation",               // too low-level
-                        "Glibc",                        // linux-gnu specific
-                        "SwiftGlibc",                   // linux-gnu specific
-                        "SwiftOnoneSupport",            // contains no symbols
-                        "SwiftOverlayShims",            // too low-level
-                        "SwiftShims",                   // contains no symbols
-                        "_Builtin_intrinsics",          // contains only one symbol, free(_:)
-                        "_Builtin_stddef_max_align_t",  // contains only two symbols
-                        "_InternalStaticMirror",        // unbuildable
-                        "_InternalSwiftScan",           // unbuildable
-                        "_SwiftConcurrencyShims",       // contains only two symbols
-                        "std":                          // unbuildable
-                    continue
+                    switch id.namespace
+                    {
+                    case    "CDispatch",                    // too low-level
+                            "CFURLSessionInterface",        // too low-level
+                            "CFXMLInterface",               // too low-level
+                            "CoreFoundation",               // too low-level
+                            "Glibc",                        // linux-gnu specific
+                            "SwiftGlibc",                   // linux-gnu specific
+                            "SwiftOnoneSupport",            // contains no symbols
+                            "SwiftOverlayShims",            // too low-level
+                            "SwiftShims",                   // contains no symbols
+                            "_Builtin_intrinsics",          // contains only one symbol, free(_:)
+                            "_Builtin_stddef_max_align_t",  // contains only two symbols
+                            "_InternalStaticMirror",        // unbuildable
+                            "_InternalSwiftScan",           // unbuildable
+                            "_SwiftConcurrencyShims",       // contains only two symbols
+                            "std":                          // unbuildable
+                        continue
 
-                default:
-                    parts[id.culture, default: []].append(id)
+                    default:
+                        parts[id.culture, default: []].append(id)
+                    }
                 }
             }
-        }
 
-        return modules.map
-        {
-            .init(directory: output, parts: parts[$0.module.id, default: []])
+            return modules.map
+            {
+                .init(directory: output, parts: parts[$0.module.id, default: []])
+            }
         }
     }
 }

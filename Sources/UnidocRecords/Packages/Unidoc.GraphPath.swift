@@ -32,8 +32,5 @@ extension Unidoc.GraphPath
 extension Unidoc.GraphPath:CustomStringConvertible
 {
     @inlinable public
-    var description:String
-    {
-        "/\(self.prefix)"
-    }
+    var description:String { "/\(self.prefix)" }
 }

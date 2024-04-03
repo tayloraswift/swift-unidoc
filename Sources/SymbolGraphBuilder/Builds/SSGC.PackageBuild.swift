@@ -193,7 +193,8 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     mutating
     func compile(
-        with swift:SSGC.Toolchain) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
+        with swift:SSGC.Toolchain,
+        logs:inout Logs) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         switch self.id
         {
@@ -232,6 +233,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
+            logs.swiftPackageResolution = try? log.resolution.read()
             throw SSGC.PackageBuildError.swift_package_update(code, invocation)
         }
 
@@ -243,6 +245,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
+            logs.swiftPackageBuild = try? log.build.read()
             throw SSGC.PackageBuildError.swift_build(code, invocation)
         }
 

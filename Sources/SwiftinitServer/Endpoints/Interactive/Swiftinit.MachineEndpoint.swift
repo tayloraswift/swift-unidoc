@@ -33,8 +33,8 @@ extension Swiftinit.MachineEndpoint
             return .notFound("")
         }
 
-        return .ok(.init(content: .binary(json.utf8),
-            type: .application(.json, charset: .utf8),
-            gzip: false))
+        return .ok(.init(content: .init(
+            body: .binary(json.utf8),
+            type: .application(.json, charset: .utf8))))
     }
 }

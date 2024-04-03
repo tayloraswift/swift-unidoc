@@ -53,6 +53,7 @@ extension Swiftinit.BuilderPollEndpoint:Swiftinit.MachineEndpoint
                 let _:Unidoc.BuildMetadata = try await server.db.packageBuilds.finishBuild(
                     package: build.id,
                     failure: .init(reason: .noValidVersion),
+                    logs: [],
                     with: session)
             {
                 continue polling

@@ -99,7 +99,7 @@ let package:Package = .init(
             from: "1.0.0")),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-            from: "4.3.0")),
+            from: "4.4.0")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -510,10 +510,17 @@ let package:Package = .init(
         .target(name: "UnidocDB",
             dependencies: [
                 .target(name: "GitHubAPI"),
+                .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocLinker"),
+                .target(name: "UnidocRecords"),
                 .target(name: "UnixTime"),
-                .product(name: "LZ77", package: "swift-png"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
+            ]),
+
+        .target(name: "UnidocRecords_LZ77",
+            dependencies: [
+                .target(name: "UnidocRecords"),
+                .product(name: "LZ77", package: "swift-png"),
             ]),
 
         .target(name: "SourceDiagnostics",
@@ -578,7 +585,7 @@ let package:Package = .init(
                 .target(name: "ArgumentParsing"),
                 .target(name: "HTTPClient"),
                 .target(name: "SymbolGraphBuilder"),
-                .target(name: "UnidocLinker"),
+                .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocRecords"),
             ]),
 
