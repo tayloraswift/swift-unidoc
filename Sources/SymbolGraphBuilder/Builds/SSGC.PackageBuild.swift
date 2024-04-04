@@ -240,8 +240,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let scratch:SSGC.PackageBuildDirectory
         do
         {
-            scratch = try await swift.build(package: self.root,
-                log: log.build)
+            scratch = try await swift.build(package: self.root, log: log.build)
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
