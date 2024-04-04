@@ -262,7 +262,8 @@ extension SSGC.Toolchain
                 "--configuration", release ? "release" : "debug",
                 "--package-path", "\(package)",
                 "--scratch-path", "\(scratch.path)",
-                stdout: $0)()
+                stdout: $0,
+                stderr: $0)()
         }
 
         return scratch
