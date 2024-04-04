@@ -34,7 +34,7 @@ extension Unidoc.Build
             (Unidoc.BuildLogType.swiftPackageBuild, logs.swiftPackageBuild),
             (Unidoc.BuildLogType.swiftSymbolGraphExtract, logs.swiftSymbolGraphExtract),
             (Unidoc.BuildLogType.ssgcDocsBuild, logs.ssgcDocsBuild)
-        ]
+        ]   where !utf8.isEmpty
         {
             compressed.append(.init(text: .gzip(bytes: utf8[...], level: 10), type: type))
         }
