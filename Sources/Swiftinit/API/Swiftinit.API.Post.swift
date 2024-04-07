@@ -1,7 +1,7 @@
 extension Swiftinit.API
 {
     @frozen public
-    enum Post:String, Swiftinit.Method
+    enum Post:String, Sendable
     {
         case packageAlias = "package-alias"
         case packageAlign = "package-align"
@@ -19,5 +19,16 @@ extension Swiftinit.API
         case delete
 
         case userConfig = "user-config"
+    }
+}
+extension Swiftinit.API.Post:LosslessStringConvertible
+{
+    @inlinable public
+    var description:String { self.rawValue }
+
+    @inlinable public
+    init?(_ description:String)
+    {
+        self.init(rawValue: description)
     }
 }
