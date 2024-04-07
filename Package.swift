@@ -589,6 +589,12 @@ let package:Package = .init(
                 .target(name: "UnidocRecords"),
             ]),
 
+        .executableTarget(name: "SwiftinitRelay",
+            dependencies: [
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOPosix", package: "swift-nio"),
+            ]),
+
         .executableTarget(name: "SwiftinitServer",
             dependencies: [
                 .target(name: "GitHubClient"),
