@@ -10,15 +10,15 @@ extension Swiftinit.Docs
 {
     struct ForeignPage
     {
-        let mesh:Swiftinit.Mesh
+        let cone:Unidoc.Cone
         let apex:Unidoc.ForeignVertex
 
         private
         let stem:Unidoc.StemComponents
 
-        init(mesh:Swiftinit.Mesh, apex:Unidoc.ForeignVertex) throws
+        init(cone:Unidoc.Cone, apex:Unidoc.ForeignVertex) throws
         {
-            self.mesh = mesh
+            self.cone = cone
             self.apex = apex
 
             self.stem = try .init(self.apex.stem)
@@ -118,6 +118,6 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.ApicalPage
             }
         }
 
-        main += self.mesh.halo
+        main += self.cone.halo
     }
 }

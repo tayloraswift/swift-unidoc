@@ -1,10 +1,10 @@
 import MarkdownABI
 import UnidocRecords
 
-extension Swiftinit
+extension Unidoc
 {
     public
-    struct Mesh
+    struct Cone
     {
         private
         let writings:(overview:Markdown.Bytecode?, details:Markdown.Bytecode?)
@@ -25,7 +25,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.Mesh
+extension Unidoc.Cone
 {
     init(_ context:Unidoc.RelativePageContext,
         groups:borrowing [Unidoc.AnyGroup],
@@ -81,7 +81,7 @@ extension Swiftinit.Mesh
             halo: halo)
     }
 }
-extension Swiftinit.Mesh
+extension Unidoc.Cone
 {
     var context:Unidoc.RelativePageContext { self.halo.context }
 
