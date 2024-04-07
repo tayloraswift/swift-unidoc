@@ -37,17 +37,17 @@ extension Swiftinit.AdminPage.Recode.Target
         }
     }
 }
-extension Swiftinit.AdminPage.Recode.Target:Swiftinit.RenderablePage
+extension Swiftinit.AdminPage.Recode.Target:Unidoc.RenderablePage
 {
     var title:String { "Recode \(self.label)?" }
 }
-extension Swiftinit.AdminPage.Recode.Target:Swiftinit.StaticPage
+extension Swiftinit.AdminPage.Recode.Target:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.AdminPage.Recode.uri.path / self.rawValue }
 }
-extension Swiftinit.AdminPage.Recode.Target:Swiftinit.AdministrativePage
+extension Swiftinit.AdminPage.Recode.Target:Unidoc.AdministrativePage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.form]
         {

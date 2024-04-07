@@ -34,17 +34,17 @@ extension Swiftinit.RealmPage
             user: user)
     }
 }
-extension Swiftinit.RealmPage:Swiftinit.RenderablePage
+extension Swiftinit.RealmPage:Unidoc.RenderablePage
 {
     var title:String { "Realms · \(self.metadata.symbol)" }
 }
-extension Swiftinit.RealmPage:Swiftinit.StaticPage
+extension Swiftinit.RealmPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Realm[self.metadata.symbol] }
 }
-extension Swiftinit.RealmPage:Swiftinit.ApplicationPage
+extension Swiftinit.RealmPage:Unidoc.ApplicationPage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

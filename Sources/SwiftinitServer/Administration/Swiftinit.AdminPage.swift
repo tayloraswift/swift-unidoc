@@ -36,17 +36,17 @@ extension Swiftinit.AdminPage
         Swiftinit.Root.admin / action.rawValue
     }
 }
-extension Swiftinit.AdminPage:Swiftinit.StaticPage
+extension Swiftinit.AdminPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Root.admin.uri }
 }
-extension Swiftinit.AdminPage:Swiftinit.RenderablePage
+extension Swiftinit.AdminPage:Unidoc.RenderablePage
 {
     var title:String { "Administrator Tools" }
 }
-extension Swiftinit.AdminPage:Swiftinit.AdministrativePage
+extension Swiftinit.AdminPage:Unidoc.AdministrativePage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.h1] = "Welcome Empress!"
 

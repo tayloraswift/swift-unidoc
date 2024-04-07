@@ -23,7 +23,7 @@ extension Swiftinit
 extension Swiftinit.SitemapIndexEndpoint:Swiftinit.PublicEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
-        as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let db:Swiftinit.DB = server.db
 

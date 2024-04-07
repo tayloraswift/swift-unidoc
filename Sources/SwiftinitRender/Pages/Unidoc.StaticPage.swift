@@ -3,7 +3,7 @@ import HTTP
 import Media
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     public
     protocol StaticPage:RenderablePage
@@ -12,15 +12,15 @@ extension Swiftinit
         var location:URI { get }
     }
 }
-extension Swiftinit.StaticPage
+extension Unidoc.StaticPage
 {
     @inlinable public
     var canonicalURI:URI? { nil }
 }
-extension Swiftinit.StaticPage where Self:Swiftinit.RenderablePage
+extension Unidoc.StaticPage where Self:Unidoc.RenderablePage
 {
     public
-    func resource(format:Swiftinit.RenderFormat) -> HTTP.Resource
+    func resource(format:Unidoc.RenderFormat) -> HTTP.Resource
     {
         let canonical:String? = self.canonicalURI?.description
         let location:String = "\(self.location)"

@@ -26,7 +26,7 @@ extension Swiftinit.Stats
         }
     }
 }
-extension Swiftinit.Stats.PackagePage:Swiftinit.RenderablePage
+extension Swiftinit.Stats.PackagePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.volume.title) Statistics" }
 
@@ -41,17 +41,17 @@ extension Swiftinit.Stats.PackagePage:Swiftinit.RenderablePage
         """
     }
 }
-extension Swiftinit.Stats.PackagePage:Swiftinit.StaticPage
+extension Swiftinit.Stats.PackagePage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Stats[self.volume] }
 }
-extension Swiftinit.Stats.PackagePage:Swiftinit.ApplicationPage
+extension Swiftinit.Stats.PackagePage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Stats.PackagePage:Swiftinit.VertexPage
+extension Swiftinit.Stats.PackagePage:Unidoc.VertexPage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let back:String = "\(Swiftinit.Docs[self.volume])"
 

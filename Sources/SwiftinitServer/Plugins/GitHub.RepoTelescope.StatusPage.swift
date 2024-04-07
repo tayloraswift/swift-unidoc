@@ -44,14 +44,14 @@ extension GitHub.RepoTelescope.StatusPage
             entries: [_].init(buffer.entries))
     }
 }
-extension GitHub.RepoTelescope.StatusPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
+extension GitHub.RepoTelescope.StatusPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
     var title:String { "GitHub repo telescope" }
 }
-extension GitHub.RepoTelescope.StatusPage:Swiftinit.AdministrativePage
+extension GitHub.RepoTelescope.StatusPage:Unidoc.AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let now:UnixInstant = .now()
 

@@ -19,17 +19,17 @@ extension Swiftinit
 extension Swiftinit.UserPage
 {
 }
-extension Swiftinit.UserPage:Swiftinit.RenderablePage
+extension Swiftinit.UserPage:Unidoc.RenderablePage
 {
     var title:String { "Account settings" }
 }
-extension Swiftinit.UserPage:Swiftinit.StaticPage
+extension Swiftinit.UserPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Root.account.uri }
 }
-extension Swiftinit.UserPage:Swiftinit.ApplicationPage
+extension Swiftinit.UserPage:Unidoc.ApplicationPage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

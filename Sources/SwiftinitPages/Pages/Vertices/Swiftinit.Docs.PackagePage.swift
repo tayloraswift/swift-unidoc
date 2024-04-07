@@ -26,20 +26,20 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.PackagePage:Swiftinit.RenderablePage
+extension Swiftinit.Docs.PackagePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.volume.title) Documentation" }
 
 }
-extension Swiftinit.Docs.PackagePage:Swiftinit.StaticPage
+extension Swiftinit.Docs.PackagePage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume] }
 }
-extension Swiftinit.Docs.PackagePage:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.PackagePage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
+extension Swiftinit.Docs.PackagePage:Unidoc.ApicalPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
 
@@ -56,7 +56,7 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
         """
     }
 
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section]
         {

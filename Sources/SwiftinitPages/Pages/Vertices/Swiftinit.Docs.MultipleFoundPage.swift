@@ -42,23 +42,23 @@ extension Swiftinit.Docs.MultipleFoundPage
 
     }
 }
-extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.RenderablePage
+extension Swiftinit.Docs.MultipleFoundPage:Unidoc.RenderablePage
 {
     var title:String { "Disambiguation Page · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.StaticPage
+extension Swiftinit.Docs.MultipleFoundPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, .bare(self.identity)] }
 }
-extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.MultipleFoundPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.MultipleFoundPage:Swiftinit.VertexPage
+extension Swiftinit.Docs.MultipleFoundPage:Unidoc.VertexPage
 {
     var sidebar:Never? { nil }
 
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

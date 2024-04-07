@@ -5,12 +5,12 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     public
     protocol VertexPage:ApplicationPage
     {
-        associatedtype Context:Unidoc.VertexContext
+        associatedtype Context:VertexContext
         associatedtype Sidebar:HTML.OutputStreamable
 
         var sidebar:Sidebar? { get }
@@ -18,17 +18,17 @@ extension Swiftinit
         var context:Context { get }
     }
 }
-extension Swiftinit.VertexPage where Self:Swiftinit.StaticPage
+extension Unidoc.VertexPage where Self:Unidoc.StaticPage
 {
     @inlinable public
     var canonicalURI:URI? { self.context.canonical?.uri }
 }
-extension Swiftinit.VertexPage
+extension Unidoc.VertexPage
 {
     var volume:Unidoc.VolumeMetadata { self.context.volume }
 
     public
-    func head(augmenting head:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let json:JSON = .array
         {
@@ -56,7 +56,7 @@ extension Swiftinit.VertexPage
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let sidebar:Sidebar? = self.sidebar
 

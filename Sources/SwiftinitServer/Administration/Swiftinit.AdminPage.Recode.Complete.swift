@@ -18,17 +18,17 @@ extension Swiftinit.AdminPage.Recode
         }
     }
 }
-extension Swiftinit.AdminPage.Recode.Complete:Swiftinit.RenderablePage
+extension Swiftinit.AdminPage.Recode.Complete:Unidoc.RenderablePage
 {
     var title:String { "Migration complete" }
 }
-extension Swiftinit.AdminPage.Recode.Complete:Swiftinit.StaticPage
+extension Swiftinit.AdminPage.Recode.Complete:Unidoc.StaticPage
 {
     var location:URI { self.target.location }
 }
-extension Swiftinit.AdminPage.Recode.Complete:Swiftinit.AdministrativePage
+extension Swiftinit.AdminPage.Recode.Complete:Unidoc.AdministrativePage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.p] = "Modified \(self.modified) of \(self.selected) vertices!"
     }

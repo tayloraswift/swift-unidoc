@@ -21,7 +21,7 @@ extension Swiftinit.ServerLoop.Promise
         self.continuation.resume(returning: response)
     }
 
-    func resume(rendering error:any Error, as format:Swiftinit.RenderFormat)
+    func resume(rendering error:any Error, as format:Unidoc.RenderFormat)
     {
         let page:Swiftinit.ServerErrorPage = .init(error: error)
         self.resume(returning: .error(page.resource(format: format)))

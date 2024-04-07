@@ -1,4 +1,4 @@
 extension Swiftinit.ServerPlugin
 {
-    var page:(any Swiftinit.RenderablePage)? { self.status.load() }
+    var page:(any Unidoc.RenderablePage)? { self.status.load() }
 }

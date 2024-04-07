@@ -8,7 +8,7 @@ extension Swiftinit.ServerOptions
 }
 extension Swiftinit.ServerOptions.Mode
 {
-    var server:Swiftinit.RenderFormat.Server
+    var server:Unidoc.RenderFormat.Server
     {
         switch self
         {

@@ -10,7 +10,7 @@ extension Swiftinit
 {
     /// An endpoint that optimizes the output of the base endpoint’s ``HTTP.ServerResponse``.
     struct OptimizingEndpoint<Base>:Sendable
-        where   Base:HTTP.ServerEndpoint<Swiftinit.RenderFormat>,
+        where   Base:HTTP.ServerEndpoint<Unidoc.RenderFormat>,
                 Base:Mongo.PipelineEndpoint,
                 Base:Sendable
     {
@@ -32,7 +32,7 @@ extension Swiftinit.OptimizingEndpoint:Swiftinit.PublicEndpoint
 {
     consuming
     func load(from server:borrowing Swiftinit.Server,
-        as format:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
+        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
 

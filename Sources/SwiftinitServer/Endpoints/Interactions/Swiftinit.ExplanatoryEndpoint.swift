@@ -20,7 +20,7 @@ extension Swiftinit
 extension Swiftinit.ExplanatoryEndpoint:Swiftinit.PublicEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
-        as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)
         let explanation:String = try await session.explain(

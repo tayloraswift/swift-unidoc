@@ -2,7 +2,7 @@ import HTML
 import HTTP
 import Media
 
-extension Swiftinit
+extension Unidoc
 {
     /// A renderable page that lacks a static URL. This protocol has no requirements; it only
     /// exists to allow users to explicitly opt-in to a default implementation for
@@ -12,10 +12,10 @@ extension Swiftinit
     {
     }
 }
-extension Swiftinit.DynamicPage
+extension Unidoc.DynamicPage
 {
     public
-    func resource(format:Swiftinit.RenderFormat) -> HTTP.Resource
+    func resource(format:Unidoc.RenderFormat) -> HTTP.Resource
     {
         let html:HTML = self.rendered(format: format)
 

@@ -33,7 +33,7 @@ extension Unidoc.RedirectEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndp
 extension Unidoc.RedirectEndpoint:HTTP.ServerEndpoint
 {
     public consuming
-    func response(as format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         guard
         let output:Unidoc.RedirectOutput = self.value

@@ -21,17 +21,17 @@ extension Swiftinit.AdminPage.Recode
     static
     var uri:URI { Swiftinit.Root.admin / Self.name }
 }
-extension Swiftinit.AdminPage.Recode:Swiftinit.RenderablePage
+extension Swiftinit.AdminPage.Recode:Unidoc.RenderablePage
 {
     var title:String { "Schema · Administrator Tools" }
 }
-extension Swiftinit.AdminPage.Recode:Swiftinit.StaticPage
+extension Swiftinit.AdminPage.Recode:Unidoc.StaticPage
 {
     var location:URI { Self.uri }
 }
-extension Swiftinit.AdminPage.Recode:Swiftinit.AdministrativePage
+extension Swiftinit.AdminPage.Recode:Unidoc.AdministrativePage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.h1] = "Manage Schema"
         main[.ul]

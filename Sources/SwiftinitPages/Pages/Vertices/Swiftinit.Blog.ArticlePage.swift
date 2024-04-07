@@ -25,13 +25,13 @@ extension Swiftinit.Blog.ArticlePage
     private
     var volume:Unidoc.VolumeMetadata { self.cone.halo.context.volume }
 }
-extension Swiftinit.Blog.ArticlePage:Swiftinit.RenderablePage
+extension Swiftinit.Blog.ArticlePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.apex.headline.safe)" }
 
     var description:String? { self.cone.overview?.description }
 }
-extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
+extension Swiftinit.Blog.ArticlePage:Unidoc.StaticPage
 {
     var location:URI
     {
@@ -41,7 +41,7 @@ extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         body[.header]
         {

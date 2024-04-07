@@ -42,7 +42,7 @@ extension Unidoc.PackagesCreatedEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBat
 extension Unidoc.PackagesCreatedEndpoint:HTTP.ServerEndpoint
 {
     public consuming
-    func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         //  If we access `self.batch` directly, it dispatches through the protocol witness to
         //  avoid consuming `self`, so we need to use the closure to make `self` `borrowing`

@@ -7,7 +7,7 @@ extension Swiftinit
 {
     protocol NonblockingEndpoint:ProceduralEndpoint
     {
-        associatedtype Status:HTTP.ServerEndpoint<RenderFormat>
+        associatedtype Status:HTTP.ServerEndpoint<Unidoc.RenderFormat>
 
         func enqueue(on server:borrowing Server,
             payload:consuming [UInt8],

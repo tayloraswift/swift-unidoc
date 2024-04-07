@@ -25,17 +25,17 @@ extension Swiftinit.ReplicaSetPage
     static
     var uri:URI { Swiftinit.Root.admin / Self.name }
 }
-extension Swiftinit.ReplicaSetPage:Swiftinit.RenderablePage
+extension Swiftinit.ReplicaSetPage:Unidoc.RenderablePage
 {
     var title:String { "Replica set information" }
 }
-extension Swiftinit.ReplicaSetPage:Swiftinit.StaticPage
+extension Swiftinit.ReplicaSetPage:Unidoc.StaticPage
 {
     var location:URI { Self.uri }
 }
-extension Swiftinit.ReplicaSetPage:Swiftinit.AdministrativePage
+extension Swiftinit.ReplicaSetPage:Unidoc.AdministrativePage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.h1] = "Replica set"
         main[.dl]

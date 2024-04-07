@@ -30,7 +30,7 @@ extension Unidoc.RealmEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoin
 extension Unidoc.RealmEndpoint:HTTP.ServerEndpoint
 {
     public consuming
-    func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         guard
         let output:Unidoc.RealmQuery.Output = self.value

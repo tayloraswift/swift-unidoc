@@ -24,7 +24,7 @@ extension Swiftinit.IntegralRequest
         /// Runs on the update loop, which is ordered with respect to other updates.
         case update(any Swiftinit.ProceduralEndpoint)
 
-        case syncResource(any Swiftinit.RenderablePage & Sendable)
+        case syncResource(any Unidoc.RenderablePage & Sendable)
         case syncRedirect(HTTP.Redirect)
         case syncLoad(Cache<Swiftinit.Asset>.Request)
     }
@@ -35,7 +35,7 @@ extension Swiftinit.IntegralRequest.Ordering
     func explainable<Base>(_ endpoint:Base,
         parameters:Swiftinit.PipelineParameters,
         accept:HTTP.AcceptType? = nil) -> Self
-        where   Base:HTTP.ServerEndpoint<Swiftinit.RenderFormat>,
+        where   Base:HTTP.ServerEndpoint<Unidoc.RenderFormat>,
                 Base:Mongo.PipelineEndpoint,
                 Base:Sendable
     {

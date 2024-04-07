@@ -42,17 +42,17 @@ extension Swiftinit.PackagesCrawledPage
         self.init(dates: dates, year: year)
     }
 }
-extension Swiftinit.PackagesCrawledPage:Swiftinit.RenderablePage
+extension Swiftinit.PackagesCrawledPage:Unidoc.RenderablePage
 {
     var title:String { "Packages · \(self.year)" }
 }
-extension Swiftinit.PackagesCrawledPage:Swiftinit.StaticPage
+extension Swiftinit.PackagesCrawledPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Telescope[self.year] }
 }
-extension Swiftinit.PackagesCrawledPage:Swiftinit.ApplicationPage
+extension Swiftinit.PackagesCrawledPage:Unidoc.ApplicationPage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

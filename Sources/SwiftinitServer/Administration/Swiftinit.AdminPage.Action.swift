@@ -46,17 +46,17 @@ extension Swiftinit.AdminPage.Action
         }
     }
 }
-extension Swiftinit.AdminPage.Action:Swiftinit.RenderablePage
+extension Swiftinit.AdminPage.Action:Unidoc.RenderablePage
 {
     var title:String { "\(self.label)?" }
 }
-extension Swiftinit.AdminPage.Action:Swiftinit.StaticPage
+extension Swiftinit.AdminPage.Action:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.AdminPage[self] }
 }
-extension Swiftinit.AdminPage.Action:Swiftinit.AdministrativePage
+extension Swiftinit.AdminPage.Action:Unidoc.AdministrativePage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.form]
         {

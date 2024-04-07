@@ -1,4 +1,4 @@
-extension Swiftinit.RenderFormat
+extension Unidoc.RenderFormat
 {
     @frozen public
     enum Server
@@ -7,7 +7,7 @@ extension Swiftinit.RenderFormat
         case localhost(port:Int)
     }
 }
-extension Swiftinit.RenderFormat.Server:CustomStringConvertible
+extension Unidoc.RenderFormat.Server:CustomStringConvertible
 {
     @inlinable public
     var description:String
