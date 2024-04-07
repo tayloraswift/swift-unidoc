@@ -5,7 +5,7 @@ import URI
 
 extension Unidoc.CanonicalVersion
 {
-    init?(principal:Unidoc.PrincipalOutput, layer:(some Swiftinit.VertexLayer).Type)
+    init?(principal:Unidoc.PrincipalOutput, layer:(some Unidoc.VertexLayer).Type)
     {
         guard
         let volumeOfLatest:Unidoc.VolumeMetadata = principal.volumeOfLatest,

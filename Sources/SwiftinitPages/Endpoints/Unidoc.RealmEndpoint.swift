@@ -1,49 +1,45 @@
 import HTTP
-import Media
 import MongoDB
 import SwiftinitRender
 import UnidocDB
 import UnidocQueries
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
-    struct HomeEndpoint
+    struct RealmEndpoint
     {
         public
-        let query:Unidoc.ActivityQuery
+        let query:RealmQuery
         public
-        var value:Unidoc.ActivityQuery.Output?
+        var value:RealmQuery.Output?
 
         @inlinable public
-        init(query:Unidoc.ActivityQuery)
+        init(query:RealmQuery)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Swiftinit.HomeEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.RealmEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.HomeEndpoint:HTTP.ServerEndpoint
+extension Unidoc.RealmEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
     {
         guard
-        let output:Unidoc.ActivityQuery.Output = self.value
+        let output:Unidoc.RealmQuery.Output = self.value
         else
         {
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let page:Swiftinit.HomePage = .init(
-            repo: output.repo,
-            docs: output.docs)
-
+        let page:Swiftinit.RealmPage = .init(from: output)
         return .ok(page.resource(format: format))
     }
 }

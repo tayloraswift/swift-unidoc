@@ -5,15 +5,15 @@ import UnidocDB
 import UnidocQueries
 import UnixTime
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct PackagesCrawledEndpoint
     {
         public
-        let query:Unidoc.PackagesCrawledQuery
+        let query:PackagesCrawledQuery
         public
-        var batch:[Unidoc.PackagesCrawledQuery.Date]
+        var batch:[PackagesCrawledQuery.Date]
 
         @usableFromInline
         let year:Timestamp.Year
@@ -37,12 +37,12 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackagesCrawledEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBatchEndpoint
+extension Unidoc.PackagesCrawledEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBatchEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.PackagesCrawledEndpoint:HTTP.ServerEndpoint
+extension Unidoc.PackagesCrawledEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse

@@ -5,7 +5,7 @@ extension Swiftinit
     {
     }
 }
-extension Swiftinit.Docs:Swiftinit.VertexLayer
+extension Swiftinit.Docs:Unidoc.VertexLayer
 {
     @inlinable public static
     var docs:Swiftinit.Root { .docs }

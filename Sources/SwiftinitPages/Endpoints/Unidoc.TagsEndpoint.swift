@@ -4,30 +4,30 @@ import SwiftinitRender
 import UnidocDB
 import UnidocQueries
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct TagsEndpoint
     {
         public
-        let query:Unidoc.VersionsQuery
+        let query:VersionsQuery
         public
-        var value:Unidoc.VersionsQuery.Output?
+        var value:VersionsQuery.Output?
 
         @inlinable public
-        init(query:Unidoc.VersionsQuery)
+        init(query:VersionsQuery)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Swiftinit.TagsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.TagsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.TagsEndpoint:HTTP.ServerEndpoint
+extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse

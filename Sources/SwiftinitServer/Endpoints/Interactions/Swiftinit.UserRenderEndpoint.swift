@@ -92,7 +92,7 @@ extension Swiftinit.UserRenderEndpoint:Swiftinit.PublicEndpoint
             return .resource("Inactive or nonexistent API key\n", status: 429)
         }
 
-        var endpoint:Swiftinit.ExportEndpoint = .init(rateLimit: .init(remaining: remaining),
+        var endpoint:Unidoc.ExportEndpoint = .init(rateLimit: .init(remaining: remaining),
             query: self.request)
 
         try await endpoint.pull(from: server.db.unidoc.id, with: session)

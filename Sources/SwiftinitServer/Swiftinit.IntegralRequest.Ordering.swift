@@ -129,7 +129,7 @@ extension Swiftinit.IntegralRequest.Ordering
         _ trunk:String,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .explainable(Swiftinit.BlogEndpoint.init(query: .init(
+        .explainable(Unidoc.BlogEndpoint.init(query: .init(
                 volume: .init(package: "__swiftinit", version: "__max"),
                 vertex: .init(path: [blog, trunk], hash: nil))),
             parameters: parameters)
@@ -148,14 +148,14 @@ extension Swiftinit.IntegralRequest.Ordering
             case "all-symbols"? = stem.first,
             case stem.endIndex = stem.index(after: stem.startIndex)
         {
-            return .explainable(Swiftinit.SitemapEndpoint.init(query: .init(
+            return .explainable(Unidoc.SitemapEndpoint.init(query: .init(
                     package: volume.package)),
                 parameters: parameters)
         }
         else
         {
             let shoot:Unidoc.Shoot = .init(path: stem, hash: parameters.hash)
-            return .explainable(Swiftinit.DocsEndpoint.init(query: .init(
+            return .explainable(Unidoc.DocsEndpoint.init(query: .init(
                     volume: volume,
                     vertex: shoot)),
                 parameters: parameters)
@@ -168,7 +168,7 @@ extension Swiftinit.IntegralRequest.Ordering
     {
         if  let id:Symbol.Edition = .init(trunk)
         {
-            .explainable(Swiftinit.LunrEndpoint.init(query: .init(
+            .explainable(Unidoc.LunrEndpoint.init(query: .init(
                     tag: parameters.tag,
                     id: id)),
                 parameters: parameters,
@@ -176,7 +176,7 @@ extension Swiftinit.IntegralRequest.Ordering
         }
         else if trunk == "packages.json"
         {
-            .explainable(Swiftinit.TextEndpoint.init(query: .init(
+            .explainable(Unidoc.TextEndpoint.init(query: .init(
                     tag: parameters.tag,
                     id: .packages_json)),
                 parameters: parameters,
@@ -193,7 +193,7 @@ extension Swiftinit.IntegralRequest.Ordering
         _ stem:ArraySlice<String>,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .explainable(Swiftinit.PtclEndpoint.init(query: .init(
+        .explainable(Unidoc.PtclEndpoint.init(query: .init(
                 volume: .init(trunk),
                 vertex: .init(path: stem, hash: parameters.hash),
                 layer: .protocols)),
@@ -204,7 +204,7 @@ extension Swiftinit.IntegralRequest.Ordering
     func get(realm trunk:String,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .explainable(Swiftinit.RealmEndpoint.init(query: .init(
+        .explainable(Unidoc.RealmEndpoint.init(query: .init(
                 realm: trunk,
                 user: parameters.user)),
             parameters: parameters)
@@ -215,7 +215,7 @@ extension Swiftinit.IntegralRequest.Ordering
         _ stem:ArraySlice<String>,
         with parameters:Swiftinit.PipelineParameters) -> Self
     {
-        .explainable(Swiftinit.StatsEndpoint.init(query: .init(
+        .explainable(Unidoc.StatsEndpoint.init(query: .init(
                 volume: .init(trunk),
                 vertex: .init(path: stem, hash: parameters.hash))),
             parameters: parameters)
@@ -237,7 +237,7 @@ extension Swiftinit.IntegralRequest.Ordering
             filter = .none(limit: 12)
         }
 
-        return .explainable(Swiftinit.TagsEndpoint.init(query: .init(
+        return .explainable(Unidoc.TagsEndpoint.init(query: .init(
                 symbol: .init(trunk),
                 filter: filter,
                 as: parameters.user)),
@@ -248,13 +248,13 @@ extension Swiftinit.IntegralRequest.Ordering
     func get(telescope trunk:String, with parameters:Swiftinit.PipelineParameters) -> Self?
     {
         if  let year:Timestamp.Year = .init(trunk),
-            let endpoint:Swiftinit.PackagesCrawledEndpoint = .init(year: year)
+            let endpoint:Unidoc.PackagesCrawledEndpoint = .init(year: year)
         {
             .explainable(endpoint, parameters: parameters)
         }
         else if
             let date:Timestamp.Date = .init(trunk),
-            let endpoint:Swiftinit.PackagesCreatedEndpoint = .init(date: date)
+            let endpoint:Unidoc.PackagesCreatedEndpoint = .init(date: date)
         {
             .explainable(endpoint, parameters: parameters)
         }
@@ -277,13 +277,13 @@ extension Swiftinit.IntegralRequest.Ordering
         //  Always pass empty parameters, as this endpoint always returns a redirect!
         if  let overload:Symbol.Decl = parameters.overload
         {
-            return .explainable(Swiftinit.RedirectEndpoint<Symbol.Decl>.init(
+            return .explainable(Unidoc.RedirectEndpoint<Symbol.Decl>.init(
                     query: .init(volume: query.volume, lookup: overload)),
                 parameters: .none)
         }
         else
         {
-            return .explainable(Swiftinit.RedirectEndpoint<Unidoc.Shoot>.init(
+            return .explainable(Unidoc.RedirectEndpoint<Unidoc.Shoot>.init(
                     query: query),
                 parameters: .none)
         }

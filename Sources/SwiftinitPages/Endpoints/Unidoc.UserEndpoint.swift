@@ -4,42 +4,42 @@ import SwiftinitRender
 import UnidocDB
 import UnidocQueries
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
-    struct RealmEndpoint
+    struct UserEndpoint
     {
         public
-        let query:Unidoc.RealmQuery
+        let query:UserQuery
         public
-        var value:Unidoc.RealmQuery.Output?
+        var value:User?
 
         @inlinable public
-        init(query:Unidoc.RealmQuery)
+        init(query:UserQuery)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Swiftinit.RealmEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.UserEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.RealmEndpoint:HTTP.ServerEndpoint
+extension Unidoc.UserEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
     {
         guard
-        let output:Unidoc.RealmQuery.Output = self.value
+        let user:Unidoc.User = self.value
         else
         {
-            return .error("Query for endpoint '\(Self.self)' returned no outputs!")
+            return .notFound("No such user")
         }
 
-        let page:Swiftinit.RealmPage = .init(from: output)
+        let page:Swiftinit.UserPage = .init(user: user)
         return .ok(page.resource(format: format))
     }
 }

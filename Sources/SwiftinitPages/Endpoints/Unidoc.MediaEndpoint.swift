@@ -5,7 +5,7 @@ import SwiftinitRender
 import UnidocDB
 import UnidocQueries
 
-extension Swiftinit
+extension Unidoc
 {
     public
     protocol MediaEndpoint:Mongo.SingleOutputEndpoint
@@ -13,7 +13,7 @@ extension Swiftinit
         var type:MediaType { get }
     }
 }
-extension Swiftinit.MediaEndpoint
+extension Unidoc.MediaEndpoint
     where Self:HTTP.ServerEndpoint, Query.Iteration.BatchElement == Unidoc.TextResourceOutput
 {
     public consuming

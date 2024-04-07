@@ -8,14 +8,14 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     public
     protocol VertexEndpoint:Mongo.SingleOutputEndpoint
         where Query.Iteration.BatchElement == Unidoc.VertexOutput
     {
         associatedtype VertexContext:Unidoc.VertexContext
-        associatedtype VertexLayer:Swiftinit.VertexLayer
+        associatedtype VertexLayer:Unidoc.VertexLayer
 
         func failure(format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
 
@@ -33,7 +33,7 @@ extension Swiftinit
             format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
     }
 }
-extension Swiftinit.VertexEndpoint
+extension Unidoc.VertexEndpoint
 {
     /// All vertex endpoints should be read-only, and they read from secondary replicas when
     /// possible.
@@ -68,7 +68,7 @@ extension Swiftinit.VertexEndpoint
         }
     }
 }
-extension Swiftinit.VertexEndpoint where Self:HTTP.ServerEndpoint
+extension Unidoc.VertexEndpoint where Self:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse

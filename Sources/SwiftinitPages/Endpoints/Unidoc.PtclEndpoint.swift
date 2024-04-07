@@ -6,25 +6,25 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct PtclEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
     {
         public
-        let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent>
+        let query:VertexQuery<LookupAdjacent>
         public
-        var value:Unidoc.VertexOutput?
+        var value:VertexOutput?
 
         @inlinable public
-        init(query:Unidoc.VertexQuery<Unidoc.LookupAdjacent>)
+        init(query:VertexQuery<LookupAdjacent>)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Swiftinit.PtclEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
+extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
     typealias VertexLayer = Swiftinit.Ptcl
