@@ -1,6 +1,6 @@
 import Symbols
 
-extension Swiftinit.Mesh.Halo
+extension Unidoc.Cone.Halo
 {
     enum Partisanship:Equatable, Hashable, Comparable, Sendable
     {

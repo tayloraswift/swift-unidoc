@@ -10,16 +10,16 @@ extension Swiftinit.Docs
     struct ArticlePage
     {
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
-        let mesh:Swiftinit.Mesh
+        let cone:Unidoc.Cone
         let apex:Unidoc.ArticleVertex
 
         init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            mesh:Swiftinit.Mesh,
+            cone:Unidoc.Cone,
             apex:Unidoc.ArticleVertex)
         {
             self.sidebar = sidebar
             self.apex = apex
-            self.mesh = mesh
+            self.cone = cone
         }
     }
 }
@@ -56,7 +56,7 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.ApicalPage
 
             $0[.h1] = self.apex.headline.safe
 
-            $0 ?= self.mesh.overview
+            $0 ?= self.cone.overview
 
             if  let file:Unidoc.Scalar = self.apex.readme
             {
@@ -66,8 +66,8 @@ extension Swiftinit.Docs.ArticlePage:Swiftinit.ApicalPage
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
-        main[.section, { $0.class = "details literature" }] = self.mesh.details
+        main[.section, { $0.class = "details literature" }] = self.cone.details
 
-        main += self.mesh.halo
+        main += self.cone.halo
     }
 }

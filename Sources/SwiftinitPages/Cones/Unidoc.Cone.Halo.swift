@@ -7,7 +7,7 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension Swiftinit.Mesh
+extension Unidoc.Cone
 {
     struct Halo
     {
@@ -69,7 +69,7 @@ extension Swiftinit.Mesh
         }
     }
 }
-extension Swiftinit.Mesh.Halo
+extension Unidoc.Cone.Halo
 {
     init(_ context:Unidoc.RelativePageContext,
         curated:consuming Set<Unidoc.Scalar>,
@@ -98,7 +98,7 @@ extension Swiftinit.Mesh.Halo
         try self.organize(groups: groups, excluding: consume curated)
     }
 }
-extension Swiftinit.Mesh.Halo
+extension Unidoc.Cone.Halo
 {
     private mutating
     func organize(groups:[Unidoc.AnyGroup],
@@ -237,7 +237,7 @@ extension Swiftinit.Mesh.Halo
         self._topics.sort { $0.id < $1.id }
     }
 }
-extension Swiftinit.Mesh.Halo:HTML.OutputStreamable
+extension Unidoc.Cone.Halo:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

@@ -9,13 +9,13 @@ extension Swiftinit.Blog
     struct ArticlePage
     {
         private
-        let mesh:Swiftinit.Mesh
+        let cone:Unidoc.Cone
         private
         let apex:Unidoc.ArticleVertex
 
-        init(mesh:Swiftinit.Mesh, apex:Unidoc.ArticleVertex)
+        init(cone:Unidoc.Cone, apex:Unidoc.ArticleVertex)
         {
-            self.mesh = mesh
+            self.cone = cone
             self.apex = apex
         }
     }
@@ -23,13 +23,13 @@ extension Swiftinit.Blog
 extension Swiftinit.Blog.ArticlePage
 {
     private
-    var volume:Unidoc.VolumeMetadata { self.mesh.halo.context.volume }
+    var volume:Unidoc.VolumeMetadata { self.cone.halo.context.volume }
 }
 extension Swiftinit.Blog.ArticlePage:Swiftinit.RenderablePage
 {
     var title:String { "\(self.apex.headline.safe)" }
 
-    var description:String? { self.mesh.overview?.description }
+    var description:String? { self.cone.overview?.description }
 }
 extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
 {
@@ -58,8 +58,8 @@ extension Swiftinit.Blog.ArticlePage:Swiftinit.StaticPage
                 }
                 $0[.section, { $0.class = "details literature" }]
                 {
-                    $0 ?= self.mesh.overview
-                    $0 ?= self.mesh.details
+                    $0 ?= self.cone.overview
+                    $0 ?= self.cone.details
                 }
             }
         }

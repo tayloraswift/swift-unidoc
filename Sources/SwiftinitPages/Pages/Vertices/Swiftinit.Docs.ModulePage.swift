@@ -10,16 +10,16 @@ extension Swiftinit.Docs
     struct ModulePage
     {
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
-        let mesh:Swiftinit.Mesh
+        let cone:Unidoc.Cone
         let apex:Unidoc.CultureVertex
 
         init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            mesh:Swiftinit.Mesh,
+            cone:Unidoc.Cone,
             apex:Unidoc.CultureVertex)
         {
             self.sidebar = sidebar
             self.apex = apex
-            self.mesh = mesh
+            self.cone = cone
         }
     }
 }
@@ -88,7 +88,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.ApicalPage
 
             $0[.h1] = self.name
 
-            $0 ?= self.mesh.overview
+            $0 ?= self.cone.overview
 
             if  let readme:Unidoc.Scalar = self.apex.readme
             {
@@ -160,8 +160,8 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.ApicalPage
             }
         }
 
-        main[.section, { $0.class = "details literature" }] = self.mesh.details
+        main[.section, { $0.class = "details literature" }] = self.cone.details
 
-        main += self.mesh.halo
+        main += self.cone.halo
     }
 }

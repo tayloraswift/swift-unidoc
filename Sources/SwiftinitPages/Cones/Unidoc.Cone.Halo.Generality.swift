@@ -1,4 +1,4 @@
-extension Swiftinit.Mesh.Halo
+extension Unidoc.Cone.Halo
 {
     enum Generality:Equatable, Hashable, Comparable, Sendable
     {

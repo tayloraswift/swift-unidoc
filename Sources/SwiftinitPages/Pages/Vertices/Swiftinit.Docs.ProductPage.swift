@@ -7,12 +7,12 @@ extension Swiftinit.Docs
 {
     struct ProductPage
     {
-        let mesh:Swiftinit.Mesh
+        let cone:Unidoc.Cone
         let apex:Unidoc.ProductVertex
 
-        init(mesh:Swiftinit.Mesh, apex:Unidoc.ProductVertex)
+        init(cone:Unidoc.Cone, apex:Unidoc.ProductVertex)
         {
-            self.mesh = mesh
+            self.cone = cone
             self.apex = apex
         }
     }
@@ -189,6 +189,6 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.ApicalPage
             }
         }
 
-        main += self.mesh.halo
+        main += self.cone.halo
     }
 }

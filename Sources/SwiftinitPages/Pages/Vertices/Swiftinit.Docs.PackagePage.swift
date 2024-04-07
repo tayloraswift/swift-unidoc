@@ -16,12 +16,12 @@ extension Swiftinit.Docs
 {
     struct PackagePage
     {
-        let mesh:Swiftinit.Mesh
+        let cone:Unidoc.Cone
         let apex:Unidoc.GlobalVertex
 
-        init(mesh:Swiftinit.Mesh, apex:Unidoc.GlobalVertex)
+        init(cone:Unidoc.Cone, apex:Unidoc.GlobalVertex)
         {
-            self.mesh = mesh
+            self.cone = cone
             self.apex = apex
         }
     }
@@ -345,6 +345,6 @@ extension Swiftinit.Docs.PackagePage:Swiftinit.ApicalPage
                 title: "Package stats and coverage details")
         }
 
-        main += self.mesh.halo
+        main += self.cone.halo
     }
 }

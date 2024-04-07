@@ -15,18 +15,18 @@ extension Swiftinit.Docs
     struct DeclPage
     {
         let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
-        let mesh:Swiftinit.Mesh
+        let cone:Unidoc.Cone
         let apex:Unidoc.DeclVertex
 
         private
         let stem:Unidoc.StemComponents
 
         init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
-            mesh:Swiftinit.Mesh,
+            cone:Unidoc.Cone,
             apex:Unidoc.DeclVertex) throws
         {
             self.sidebar = sidebar
-            self.mesh = mesh
+            self.cone = cone
             self.apex = apex
 
             self.stem = try .init(self.apex.stem)
@@ -107,7 +107,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.ApicalPage
 
             $0[.h1] = self.stem.last
 
-            $0 ?= self.mesh.overview
+            $0 ?= self.cone.overview
 
             if  let location:SourceLocation<Unidoc.Scalar> = self.apex.location
             {
@@ -238,7 +238,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.ApicalPage
             }
 
             if  let constraints:Swiftinit.ConstraintsList = .init(self.context,
-                    constraints: self.mesh.halo.peerConstraints)
+                    constraints: self.cone.halo.peerConstraints)
             {
                 $0[.details, { $0.open = true }]
                 {
@@ -259,9 +259,9 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.ApicalPage
                 } = "Browse conforming types"
             }
 
-            $0 ?= self.mesh.details
+            $0 ?= self.cone.details
         }
 
-        main += self.mesh.halo
+        main += self.cone.halo
     }
 }
