@@ -7,30 +7,30 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
-    struct RedirectEndpoint<Predicate> where Predicate:Unidoc.VertexPredicate
+    struct RedirectEndpoint<Predicate> where Predicate:VertexPredicate
     {
         public
-        let query:Unidoc.RedirectQuery<Predicate>
+        let query:RedirectQuery<Predicate>
         public
-        var value:Unidoc.RedirectOutput?
+        var value:RedirectOutput?
 
         @inlinable public
-        init(query:Unidoc.RedirectQuery<Predicate>)
+        init(query:RedirectQuery<Predicate>)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Swiftinit.RedirectEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.RedirectEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.RedirectEndpoint:HTTP.ServerEndpoint
+extension Unidoc.RedirectEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse

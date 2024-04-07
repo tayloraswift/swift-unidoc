@@ -7,7 +7,7 @@ import UnidocDB
 import UnidocQueries
 import UnidocRecords
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct ExportEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
@@ -15,14 +15,14 @@ extension Swiftinit
         public
         let rateLimit:HTTP.Resource.Headers.RateLimit
         public
-        let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent>
+        let query:VertexQuery<LookupAdjacent>
         public
-        var value:Unidoc.VertexOutput?
+        var value:VertexOutput?
 
         @inlinable public
         init(
             rateLimit:HTTP.Resource.Headers.RateLimit,
-            query:Unidoc.VertexQuery<Unidoc.LookupAdjacent>)
+            query:VertexQuery<LookupAdjacent>)
         {
             self.rateLimit = rateLimit
             self.query = query
@@ -30,7 +30,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ExportEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
+extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
     typealias VertexLayer = Swiftinit.Docs

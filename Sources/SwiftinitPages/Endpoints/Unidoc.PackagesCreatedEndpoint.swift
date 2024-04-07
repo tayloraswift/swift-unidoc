@@ -5,15 +5,15 @@ import UnidocDB
 import UnidocQueries
 import UnixTime
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct PackagesCreatedEndpoint
     {
         public
-        let query:Unidoc.PackagesQuery<Unidoc.PackageCreated>
+        let query:PackagesQuery<PackageCreated>
         public
-        var batch:[Unidoc.PackageOutput]
+        var batch:[PackageOutput]
 
         @usableFromInline
         let date:Timestamp.Date
@@ -34,12 +34,12 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackagesCreatedEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBatchEndpoint
+extension Unidoc.PackagesCreatedEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBatchEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.PackagesCreatedEndpoint:HTTP.ServerEndpoint
+extension Unidoc.PackagesCreatedEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse

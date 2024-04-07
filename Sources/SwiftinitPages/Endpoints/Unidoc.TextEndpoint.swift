@@ -4,7 +4,7 @@ import MongoDB
 import UnidocDB
 import UnidocQueries
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct TextEndpoint
@@ -22,12 +22,12 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.TextEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.TextEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.TextEndpoint:Swiftinit.MediaEndpoint
+extension Unidoc.TextEndpoint:Unidoc.MediaEndpoint
 {
     @inlinable public
     var type:MediaType
@@ -39,6 +39,6 @@ extension Swiftinit.TextEndpoint:Swiftinit.MediaEndpoint
         }
     }
 }
-extension Swiftinit.TextEndpoint:HTTP.ServerEndpoint
+extension Unidoc.TextEndpoint:HTTP.ServerEndpoint
 {
 }

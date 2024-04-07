@@ -1,45 +1,49 @@
 import HTTP
+import Media
 import MongoDB
 import SwiftinitRender
 import UnidocDB
 import UnidocQueries
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
-    struct AccountEndpoint
+    struct HomeEndpoint
     {
         public
-        let query:Unidoc.UserQuery
+        let query:ActivityQuery
         public
-        var value:Unidoc.User?
+        var value:ActivityQuery.Output?
 
         @inlinable public
-        init(query:Unidoc.UserQuery)
+        init(query:ActivityQuery)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Swiftinit.AccountEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.HomeEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.AccountEndpoint:HTTP.ServerEndpoint
+extension Unidoc.HomeEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
     {
         guard
-        let user:Unidoc.User = self.value
+        let output:Unidoc.ActivityQuery.Output = self.value
         else
         {
-            return .notFound("No such user")
+            return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let page:Swiftinit.UserPage = .init(user: user)
+        let page:Swiftinit.HomePage = .init(
+            repo: output.repo,
+            docs: output.docs)
+
         return .ok(page.resource(format: format))
     }
 }

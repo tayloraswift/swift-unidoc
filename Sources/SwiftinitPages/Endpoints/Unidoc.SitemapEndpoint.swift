@@ -7,30 +7,30 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct SitemapEndpoint
     {
         public
-        let query:Unidoc.SitemapQuery
+        let query:SitemapQuery
         public
-        var value:Unidoc.SitemapQuery.Output?
+        var value:SitemapQuery.Output?
 
         @inlinable public
-        init(query:Unidoc.SitemapQuery)
+        init(query:SitemapQuery)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Swiftinit.SitemapEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.SitemapEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Swiftinit.SitemapEndpoint:HTTP.ServerEndpoint
+extension Unidoc.SitemapEndpoint:HTTP.ServerEndpoint
 {
     /// Generates a plain text sitemap for the given package.
     ///

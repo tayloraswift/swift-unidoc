@@ -2,7 +2,7 @@ import Swiftinit
 import UnidocRecords
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     /// Vertex layers are a way of segregating documentation orthogonally to the normal
     /// hierarchy. Although they are visible to users, their true purpose is signal to search
@@ -27,7 +27,7 @@ extension Swiftinit
         var hist:Swiftinit.Root { get }
     }
 }
-extension Swiftinit.VertexLayer
+extension Unidoc.VertexLayer
 {
     private static
     subscript(volume:Unidoc.VolumeSelector, detail detail:Bool) -> URI

@@ -7,25 +7,25 @@ import UnidocDB
 import UnidocQueries
 import UnidocRecords
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct StatsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
     {
         public
-        let query:Unidoc.VertexQuery<Unidoc.LookupLimited>
+        let query:VertexQuery<LookupLimited>
         public
-        var value:Unidoc.VertexOutput?
+        var value:VertexOutput?
 
         @inlinable public
-        init(query:Unidoc.VertexQuery<Unidoc.LookupLimited>)
+        init(query:VertexQuery<LookupLimited>)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Swiftinit.StatsEndpoint:Swiftinit.VertexEndpoint, HTTP.ServerEndpoint
+extension Unidoc.StatsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
     typealias VertexLayer = Swiftinit.Stats

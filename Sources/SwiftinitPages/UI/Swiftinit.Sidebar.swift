@@ -6,7 +6,7 @@ import URI
 extension Swiftinit
 {
     @frozen public
-    struct Sidebar<Root> where Root:VertexLayer
+    struct Sidebar<Root> where Root:Unidoc.VertexLayer
     {
         private
         let volume:Unidoc.VolumeMetadata

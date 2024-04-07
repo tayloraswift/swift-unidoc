@@ -139,7 +139,7 @@ extension Swiftinit.IntegralRequest
 
             self.init(
                 metadata: metadata,
-                ordering: .explainable(Swiftinit.HomeEndpoint.init(query: .init(limit: 16)),
+                ordering: .explainable(Unidoc.HomeEndpoint.init(query: .init(limit: 16)),
                     parameters: parameters))
 
             return
@@ -162,7 +162,7 @@ extension Swiftinit.IntegralRequest
                     break
                 }
 
-                ordering = .explainable(Swiftinit.AccountEndpoint.init(
+                ordering = .explainable(Unidoc.UserEndpoint.init(
                         query: .init(session: user)),
                     parameters: .init(uri.query?.parameters, tag: tag))
 
@@ -176,7 +176,7 @@ extension Swiftinit.IntegralRequest
                 let parameters:Swiftinit.PipelineParameters = .init(uri.query?.parameters,
                     tag: tag)
 
-                ordering = .explainable(Swiftinit.TextEndpoint.init(query: .init(
+                ordering = .explainable(Unidoc.TextEndpoint.init(query: .init(
                         tag: parameters.tag,
                         id: .robots_txt)),
                     parameters: parameters)
