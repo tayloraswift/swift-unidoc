@@ -1,7 +1,7 @@
 import HTML
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     public
     protocol AdministrativePage:RenderablePage
@@ -9,10 +9,10 @@ extension Swiftinit
         func main(_:inout HTML.ContentEncoder, format:RenderFormat)
     }
 }
-extension Swiftinit.AdministrativePage
+extension Unidoc.AdministrativePage
 {
     public
-    func head(augmenting head:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         head[.link]
         {
@@ -22,7 +22,7 @@ extension Swiftinit.AdministrativePage
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         body[.header, { $0.class = "app" }]
         {

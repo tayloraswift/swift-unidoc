@@ -15,15 +15,15 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PolicyErrorPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
+extension Swiftinit.PolicyErrorPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
     var title:String { "Policy error" }
 }
-extension Swiftinit.PolicyErrorPage:Swiftinit.ApplicationPage
+extension Swiftinit.PolicyErrorPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section]
         {

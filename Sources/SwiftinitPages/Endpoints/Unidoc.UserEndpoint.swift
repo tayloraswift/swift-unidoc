@@ -30,7 +30,7 @@ extension Unidoc.UserEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 extension Unidoc.UserEndpoint:HTTP.ServerEndpoint
 {
     public consuming
-    func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         guard
         let user:Unidoc.User = self.value

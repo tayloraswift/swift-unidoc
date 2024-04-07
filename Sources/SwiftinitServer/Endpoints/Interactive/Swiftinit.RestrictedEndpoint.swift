@@ -25,7 +25,7 @@ extension Swiftinit.RestrictedEndpoint
     consuming
     func load(from server:borrowing Swiftinit.Server,
         with credentials:Swiftinit.Credentials,
-        as _:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         if  server.secure
         {

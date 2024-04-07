@@ -44,14 +44,14 @@ extension GitHub.RepoMonitor.StatusPage
             entries: [_].init(buffer.entries))
     }
 }
-extension GitHub.RepoMonitor.StatusPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
+extension GitHub.RepoMonitor.StatusPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
     var title:String { "GitHub repo monitor" }
 }
-extension GitHub.RepoMonitor.StatusPage:Swiftinit.AdministrativePage
+extension GitHub.RepoMonitor.StatusPage:Unidoc.AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let now:UnixInstant = .now()
 

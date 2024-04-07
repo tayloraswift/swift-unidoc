@@ -20,17 +20,17 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackagesCreatedPage:Swiftinit.RenderablePage
+extension Swiftinit.PackagesCreatedPage:Unidoc.RenderablePage
 {
     var title:String { "Packages · \(self.date)" }
 }
-extension Swiftinit.PackagesCreatedPage:Swiftinit.StaticPage
+extension Swiftinit.PackagesCreatedPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Telescope[self.date] }
 }
-extension Swiftinit.PackagesCreatedPage:Swiftinit.ApplicationPage
+extension Swiftinit.PackagesCreatedPage:Unidoc.ApplicationPage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

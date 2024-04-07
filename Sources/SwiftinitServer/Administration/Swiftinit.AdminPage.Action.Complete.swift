@@ -16,14 +16,14 @@ extension Swiftinit.AdminPage.Action
         }
     }
 }
-extension Swiftinit.AdminPage.Action.Complete:Swiftinit.StaticPage
+extension Swiftinit.AdminPage.Action.Complete:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.AdminPage[self.action] }
     var title:String { "Action complete" }
 }
-extension Swiftinit.AdminPage.Action.Complete:Swiftinit.AdministrativePage
+extension Swiftinit.AdminPage.Action.Complete:Unidoc.AdministrativePage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.p] = self.text
     }

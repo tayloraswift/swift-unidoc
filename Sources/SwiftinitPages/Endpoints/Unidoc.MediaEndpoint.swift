@@ -17,7 +17,7 @@ extension Unidoc.MediaEndpoint
     where Self:HTTP.ServerEndpoint, Query.Iteration.BatchElement == Unidoc.TextResourceOutput
 {
     public consuming
-    func response(as _:Swiftinit.RenderFormat) -> HTTP.ServerResponse
+    func response(as _:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         guard
         let output:Unidoc.TextResourceOutput = self.value

@@ -31,13 +31,13 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ReallyPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
+extension Swiftinit.ReallyPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
 }
-extension Swiftinit.ReallyPage:Swiftinit.ApplicationPage
+extension Swiftinit.ReallyPage:Unidoc.ApplicationPage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

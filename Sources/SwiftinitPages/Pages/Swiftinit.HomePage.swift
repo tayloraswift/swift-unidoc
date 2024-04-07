@@ -22,24 +22,24 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.HomePage:Swiftinit.StaticPage
+extension Swiftinit.HomePage:Unidoc.StaticPage
 {
     var canonicalURI:URI? { [] }
     var location:URI { [] }
 }
-extension Swiftinit.HomePage:Swiftinit.RenderablePage
+extension Swiftinit.HomePage:Unidoc.RenderablePage
 {
     var description:String? { "Browse recent package releases and documentation builds" }
 
     var title:String { "Recent Activity" }
 
     public
-    func head(augmenting head:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         head[unsafe: .script] = format.assets.script(volumes: nil)
     }
 
-    func body(_ body:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         //  This div centers the content.
         body[.div]

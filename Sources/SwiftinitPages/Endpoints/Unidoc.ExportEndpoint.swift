@@ -40,7 +40,7 @@ extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         matches:consuming [Unidoc.AnyVertex],
         tree:consuming Unidoc.TypeTree?,
         with context:Unidoc.PeripheralPageContext,
-        format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
+        format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         if  matches.isEmpty
         {
@@ -58,7 +58,7 @@ extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
         with context:Unidoc.AbsolutePageContext,
-        format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
+        format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         let article:Unidoc.ArticleVertex
         switch apex

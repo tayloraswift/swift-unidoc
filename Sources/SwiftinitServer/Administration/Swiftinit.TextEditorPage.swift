@@ -21,16 +21,16 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.TextEditorPage:Swiftinit.DynamicPage
+extension Swiftinit.TextEditorPage:Unidoc.DynamicPage
 {
 }
-extension Swiftinit.TextEditorPage:Swiftinit.RenderablePage
+extension Swiftinit.TextEditorPage:Unidoc.RenderablePage
 {
     var title:String { "Text editor" }
 }
-extension Swiftinit.TextEditorPage:Swiftinit.AdministrativePage
+extension Swiftinit.TextEditorPage:Unidoc.AdministrativePage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.form]
         {

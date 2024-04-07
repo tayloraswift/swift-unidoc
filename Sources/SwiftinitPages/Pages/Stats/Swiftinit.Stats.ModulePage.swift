@@ -42,7 +42,7 @@ extension Swiftinit.Stats.ModulePage
     private
     var stem:Unidoc.Stem { self.vertex.stem }
 }
-extension Swiftinit.Stats.ModulePage:Swiftinit.RenderablePage
+extension Swiftinit.Stats.ModulePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.name) · \(self.volume.title) Statistics" }
 
@@ -59,17 +59,17 @@ extension Swiftinit.Stats.ModulePage:Swiftinit.RenderablePage
         """
     }
 }
-extension Swiftinit.Stats.ModulePage:Swiftinit.StaticPage
+extension Swiftinit.Stats.ModulePage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Stats[self.volume, self.vertex.route] }
 }
-extension Swiftinit.Stats.ModulePage:Swiftinit.ApplicationPage
+extension Swiftinit.Stats.ModulePage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Stats.ModulePage:Swiftinit.VertexPage
+extension Swiftinit.Stats.ModulePage:Unidoc.VertexPage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let back:String = "\(Swiftinit.Docs[self.volume, self.vertex.route])"
 

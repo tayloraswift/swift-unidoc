@@ -28,21 +28,21 @@ extension Swiftinit.Docs.ArticlePage
     private
     var stem:Unidoc.Stem { self.apex.stem }
 }
-extension Swiftinit.Docs.ArticlePage:Swiftinit.RenderablePage
+extension Swiftinit.Docs.ArticlePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.apex.headline.safe) · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.ArticlePage:Swiftinit.StaticPage
+extension Swiftinit.Docs.ArticlePage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.ArticlePage:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.ArticlePage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ArticlePage:Swiftinit.ApicalPage
+extension Swiftinit.Docs.ArticlePage:Unidoc.ApicalPage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

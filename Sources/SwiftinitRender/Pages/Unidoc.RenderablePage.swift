@@ -2,7 +2,7 @@ import HTML
 import HTTP
 import Media
 
-extension Swiftinit
+extension Unidoc
 {
     public
     protocol RenderablePage
@@ -17,22 +17,22 @@ extension Swiftinit
         func resource(format:RenderFormat) -> HTTP.Resource
     }
 }
-extension Swiftinit.RenderablePage
+extension Unidoc.RenderablePage
 {
     @inlinable public
     var description:String? { nil }
 
     @inlinable public
-    func head(augmenting    _:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func head(augmenting    _:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
     }
 }
-extension Swiftinit.RenderablePage
+extension Unidoc.RenderablePage
 {
     func rendered(
         canonical:String? = nil,
         location:String? = nil,
-        format:Swiftinit.RenderFormat) -> HTML
+        format:Unidoc.RenderFormat) -> HTML
     {
         .document
         {
@@ -47,7 +47,7 @@ extension Swiftinit.RenderablePage
     func render(to html:inout HTML.ContentEncoder,
         canonical:String?,
         location:String?,
-        format:Swiftinit.RenderFormat)
+        format:Unidoc.RenderFormat)
     {
         html[.html, { $0.lang = "en" }]
         {

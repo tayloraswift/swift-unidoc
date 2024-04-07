@@ -17,20 +17,20 @@ extension Unidoc
         associatedtype VertexContext:Unidoc.VertexContext
         associatedtype VertexLayer:Unidoc.VertexLayer
 
-        func failure(format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
+        func failure(format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
 
         func failure(
             matches:consuming [Unidoc.AnyVertex],
             tree:consuming Unidoc.TypeTree?,
             with context:Unidoc.PeripheralPageContext,
-            format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
+            format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
 
         func success(
             vertex:consuming Unidoc.AnyVertex,
             groups:consuming [Unidoc.AnyGroup],
             tree:consuming Unidoc.TypeTree?,
             with context:VertexContext,
-            format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
+            format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     }
 }
 extension Unidoc.VertexEndpoint
@@ -41,7 +41,7 @@ extension Unidoc.VertexEndpoint
     var replica:Mongo.ReadPreference { .nearest }
 
     public
-    func failure(format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
+    func failure(format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         .notFound("Snapshot not found.\n")
     }
@@ -51,7 +51,7 @@ extension Unidoc.VertexEndpoint
         matches:consuming [Unidoc.AnyVertex],
         tree:consuming Unidoc.TypeTree?,
         with context:Unidoc.PeripheralPageContext,
-        format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
+        format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         if  let choices:Swiftinit.Docs.MultipleFoundPage = .init(context, matches: matches)
         {
@@ -71,7 +71,7 @@ extension Unidoc.VertexEndpoint
 extension Unidoc.VertexEndpoint where Self:HTTP.ServerEndpoint
 {
     public consuming
-    func response(as format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         guard
         let output:Unidoc.VertexOutput = self.value,

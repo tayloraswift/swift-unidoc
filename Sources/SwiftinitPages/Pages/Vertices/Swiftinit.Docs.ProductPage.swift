@@ -25,19 +25,19 @@ extension Swiftinit.Docs.ProductPage
         .init(type: self.apex.type)
     }
 }
-extension Swiftinit.Docs.ProductPage:Swiftinit.RenderablePage
+extension Swiftinit.Docs.ProductPage:Unidoc.RenderablePage
 {
     var title:String { "\(self.apex.symbol) · \(self.volume.title) Products" }
 }
-extension Swiftinit.Docs.ProductPage:Swiftinit.StaticPage
+extension Swiftinit.Docs.ProductPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.ProductPage:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.ProductPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ProductPage:Swiftinit.ApicalPage
+extension Swiftinit.Docs.ProductPage:Unidoc.ApicalPage
 {
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .product(volume: self.volume) }
 
@@ -49,7 +49,7 @@ extension Swiftinit.Docs.ProductPage:Swiftinit.ApicalPage
         """
     }
 
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

@@ -1,7 +1,7 @@
 import HTTP
 import Media
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct RenderFormat
@@ -25,7 +25,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.RenderFormat
+extension Unidoc.RenderFormat
 {
     @inlinable public
     var secure:Bool

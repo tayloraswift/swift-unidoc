@@ -24,7 +24,7 @@ extension Swiftinit.AuthEndpoint:Swiftinit.InteractiveEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
         with credentials:Swiftinit.Credentials,
-        as format:Swiftinit.RenderFormat) async throws -> HTTP.ServerResponse?
+        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let github:GitHub.Client<GitHub.OAuth>
         if  let oauth:GitHub.OAuth = server.github?.oauth

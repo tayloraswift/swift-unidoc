@@ -14,15 +14,15 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ServerErrorPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
+extension Swiftinit.ServerErrorPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
     var title:String { "Internal server error" }
 }
-extension Swiftinit.ServerErrorPage:Swiftinit.ApplicationPage
+extension Swiftinit.ServerErrorPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section]
         {

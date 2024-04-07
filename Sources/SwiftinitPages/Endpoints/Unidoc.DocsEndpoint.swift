@@ -34,7 +34,7 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
         with context:Unidoc.RelativePageContext,
-        format:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
+        format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         let resource:HTTP.Resource
 

@@ -18,7 +18,7 @@ extension Swiftinit
 extension Swiftinit.LoginEndpoint:Swiftinit.PublicEndpoint
 {
     func load(from server:borrowing Swiftinit.Server,
-        as _:Swiftinit.RenderFormat) -> HTTP.ServerResponse?
+        as _:Unidoc.RenderFormat) -> HTTP.ServerResponse?
     {
         if  let oauth:GitHub.OAuth = server.github?.oauth
         {

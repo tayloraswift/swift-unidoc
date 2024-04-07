@@ -31,6 +31,6 @@ extension Swiftinit.Server
     var github:GitHub.Integration? { self.loop.github }
     var bucket:Swiftinit.Buckets { self.loop.bucket }
 
-    var format:Swiftinit.RenderFormat { self.loop.format }
+    var format:Unidoc.RenderFormat { self.loop.format }
     var db:Swiftinit.DB { self.loop.db }
 }

@@ -92,7 +92,7 @@ extension Main
                 }
 
                 let content:[UInt8] = try assets.appending(asset.source).read()
-                let path:String = asset.path(prepending: Swiftinit.RenderFormat.Assets.version)
+                let path:String = asset.path(prepending: Unidoc.RenderFormat.Assets.version)
 
                 print("Uploading \(path)...")
 

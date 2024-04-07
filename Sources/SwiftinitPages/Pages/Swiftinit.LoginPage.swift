@@ -23,20 +23,20 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.LoginPage:Swiftinit.StaticPage
+extension Swiftinit.LoginPage:Unidoc.StaticPage
 {
     @inlinable public
     var location:URI { Swiftinit.Root.login.uri }
 }
-extension Swiftinit.LoginPage:Swiftinit.RenderablePage
+extension Swiftinit.LoginPage:Unidoc.RenderablePage
 {
     public
     var title:String { "Log in with GitHub" }
 }
-extension Swiftinit.LoginPage:Swiftinit.ApplicationPage
+extension Swiftinit.LoginPage:Unidoc.ApplicationPage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

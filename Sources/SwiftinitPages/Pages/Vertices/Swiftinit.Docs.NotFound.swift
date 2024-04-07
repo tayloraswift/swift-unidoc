@@ -17,17 +17,17 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.NotFoundPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
+extension Swiftinit.Docs.NotFoundPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
     var title:String { "Symbol Not Found · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.NotFoundPage:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.NotFoundPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.NotFoundPage:Swiftinit.VertexPage
+extension Swiftinit.Docs.NotFoundPage:Unidoc.VertexPage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section]
         {

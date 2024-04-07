@@ -27,14 +27,14 @@ extension Unidoc.CollectionEventsPage
         self.init(entries: [_].init(buffer.entries))
     }
 }
-extension Unidoc.CollectionEventsPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
+extension Unidoc.CollectionEventsPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
     var title:String { Visitor.title }
 }
-extension Unidoc.CollectionEventsPage:Swiftinit.AdministrativePage
+extension Unidoc.CollectionEventsPage:Unidoc.AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let now:UnixInstant = .now()
 

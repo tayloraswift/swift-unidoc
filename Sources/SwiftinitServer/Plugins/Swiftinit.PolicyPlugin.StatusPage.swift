@@ -18,14 +18,14 @@ extension Swiftinit.PolicyPlugin
         }
     }
 }
-extension Swiftinit.PolicyPlugin.StatusPage:Swiftinit.RenderablePage, Swiftinit.DynamicPage
+extension Swiftinit.PolicyPlugin.StatusPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
     var title:String { "Policy plugin" }
 }
-extension Swiftinit.PolicyPlugin.StatusPage:Swiftinit.AdministrativePage
+extension Swiftinit.PolicyPlugin.StatusPage:Unidoc.AdministrativePage
 {
     public
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.h1] = "Policy plugin"
 

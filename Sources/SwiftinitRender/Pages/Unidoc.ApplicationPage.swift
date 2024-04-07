@@ -2,7 +2,7 @@ import HTML
 import UnidocRecords
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     public
     protocol ApplicationPage<Navigator>:RenderablePage
@@ -13,21 +13,21 @@ extension Swiftinit
         func main(_:inout HTML.ContentEncoder, format:RenderFormat)
     }
 }
-extension Swiftinit.ApplicationPage<HTML.Logo>
+extension Unidoc.ApplicationPage<HTML.Logo>
 {
     @inlinable public
     var navigator:HTML.Logo { .init() }
 }
-extension Swiftinit.ApplicationPage
+extension Unidoc.ApplicationPage
 {
     public
-    func head(augmenting head:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         head[unsafe: .script] = format.assets.script(volumes: nil)
     }
 
     public
-    func body(_ body:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         body[.header, { $0.class = "app" }]
         {

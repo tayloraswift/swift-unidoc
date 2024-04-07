@@ -24,17 +24,17 @@ extension Swiftinit.CookiePage
     static
     var uri:URI { Swiftinit.Root.admin / Self.name }
 }
-extension Swiftinit.CookiePage:Swiftinit.RenderablePage
+extension Swiftinit.CookiePage:Unidoc.RenderablePage
 {
     var title:String { "Cookies · Administrator Tools" }
 }
-extension Swiftinit.CookiePage:Swiftinit.StaticPage
+extension Swiftinit.CookiePage:Unidoc.StaticPage
 {
     var location:URI { Self.uri }
 }
-extension Swiftinit.CookiePage:Swiftinit.AdministrativePage
+extension Swiftinit.CookiePage:Unidoc.AdministrativePage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.h1] = "Manage cookies"
 

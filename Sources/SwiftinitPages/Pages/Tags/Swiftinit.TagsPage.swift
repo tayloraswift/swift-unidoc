@@ -48,11 +48,11 @@ extension Swiftinit.TagsPage
     private
     var view:Swiftinit.Permissions { self.table.view }
 }
-extension Swiftinit.TagsPage:Swiftinit.RenderablePage
+extension Swiftinit.TagsPage:Unidoc.RenderablePage
 {
     var title:String { "Git Tags · \(self.package.symbol)" }
 }
-extension Swiftinit.TagsPage:Swiftinit.StaticPage
+extension Swiftinit.TagsPage:Unidoc.StaticPage
 {
     var location:URI
     {
@@ -66,9 +66,9 @@ extension Swiftinit.TagsPage:Swiftinit.StaticPage
         }
     }
 }
-extension Swiftinit.TagsPage:Swiftinit.ApplicationPage
+extension Swiftinit.TagsPage:Unidoc.ApplicationPage
 {
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let now:UnixInstant = .now()
 

@@ -8,6 +8,6 @@ extension Swiftinit
         consuming
         func load(from server:borrowing Server,
             with credentials:Swiftinit.Credentials,
-            as format:RenderFormat) async throws -> HTTP.ServerResponse?
+            as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     }
 }

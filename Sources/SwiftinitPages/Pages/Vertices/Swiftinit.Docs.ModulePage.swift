@@ -39,19 +39,19 @@ extension Swiftinit.Docs.ModulePage
     private
     var stem:Unidoc.Stem { self.apex.stem }
 }
-extension Swiftinit.Docs.ModulePage:Swiftinit.RenderablePage
+extension Swiftinit.Docs.ModulePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.name) · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.ModulePage:Swiftinit.StaticPage
+extension Swiftinit.Docs.ModulePage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.ModulePage:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.ModulePage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ModulePage:Swiftinit.ApicalPage
+extension Swiftinit.Docs.ModulePage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
     {
@@ -65,7 +65,7 @@ extension Swiftinit.Docs.ModulePage:Swiftinit.ApicalPage
         }
     }
 
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

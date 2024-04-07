@@ -7,7 +7,7 @@ extension GitHub
     /// The name of this protocol is ``GitHub.Crawler``.
     protocol Crawler
     {
-        associatedtype StatusPage:Swiftinit.RenderablePage & Sendable
+        associatedtype StatusPage:Unidoc.RenderablePage & Sendable
 
         var interval:Duration { get }
         var status:StatusPage { get }

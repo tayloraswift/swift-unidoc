@@ -38,7 +38,7 @@ extension Unidoc.SitemapEndpoint:HTTP.ServerEndpoint
     /// sitemaps, and all other XML sitemap features (like `<priority>`) are irrelevant to us,
     /// since Google ignores them. Therefore, we use the plain text format.
     public consuming
-    func response(as _:Swiftinit.RenderFormat) -> HTTP.ServerResponse
+    func response(as _:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         guard
         let output:Unidoc.SitemapQuery.Output = self.value

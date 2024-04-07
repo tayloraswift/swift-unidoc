@@ -44,7 +44,7 @@ extension Swiftinit.Ptcl.ConformersPage
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }
 }
-extension Swiftinit.Ptcl.ConformersPage:Swiftinit.RenderablePage
+extension Swiftinit.Ptcl.ConformersPage:Unidoc.RenderablePage
 {
     var title:String
     {
@@ -59,19 +59,19 @@ extension Swiftinit.Ptcl.ConformersPage:Swiftinit.RenderablePage
         """
     }
 }
-extension Swiftinit.Ptcl.ConformersPage:Swiftinit.StaticPage
+extension Swiftinit.Ptcl.ConformersPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Ptcl[self.volume, self.vertex.route] }
 }
-extension Swiftinit.Ptcl.ConformersPage:Swiftinit.ApplicationPage
+extension Swiftinit.Ptcl.ConformersPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Ptcl.ConformersPage:Swiftinit.VertexPage
+extension Swiftinit.Ptcl.ConformersPage:Unidoc.VertexPage
 {
     var context:Unidoc.PeripheralPageContext { self.halo.context }
 
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let back:String = "\(Swiftinit.Docs[self.volume, self.vertex.route])"
         let name:Substring = self.stem.last

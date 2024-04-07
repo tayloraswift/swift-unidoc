@@ -14,7 +14,7 @@ extension Swiftinit.PackageAlignEndpoint
 extension Swiftinit.PackageAlignEndpoint.Status:HTTP.ServerEndpoint
 {
     consuming
-    func response(as _:Swiftinit.RenderFormat) throws -> HTTP.ServerResponse
+    func response(as _:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         switch self
         {

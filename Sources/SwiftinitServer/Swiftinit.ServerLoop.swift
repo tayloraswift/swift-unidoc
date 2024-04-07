@@ -96,13 +96,13 @@ extension Swiftinit.ServerLoop
     var bucket:Swiftinit.Buckets { self.options.bucket }
 
     nonisolated
-    var format:Swiftinit.RenderFormat
+    var format:Unidoc.RenderFormat
     {
         self.format(locale: nil)
     }
 
     nonisolated private
-    func format(locale:HTTP.Locale?) -> Swiftinit.RenderFormat
+    func format(locale:HTTP.Locale?) -> Unidoc.RenderFormat
     {
         .init(
             assets: self.options.cloudfront ? .cloudfront : .local,

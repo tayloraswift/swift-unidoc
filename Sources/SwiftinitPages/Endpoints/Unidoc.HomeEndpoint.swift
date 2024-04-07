@@ -31,7 +31,7 @@ extension Unidoc.HomeEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 extension Unidoc.HomeEndpoint:HTTP.ServerEndpoint
 {
     public consuming
-    func response(as format:Swiftinit.RenderFormat) -> HTTP.ServerResponse
+    func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         guard
         let output:Unidoc.ActivityQuery.Output = self.value

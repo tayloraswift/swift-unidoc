@@ -64,7 +64,7 @@ extension Swiftinit.DashboardEndpoint:Swiftinit.AdministrativeEndpoint
                 return .notFound("No such plugin")
             }
             guard
-            let page:any Swiftinit.RenderablePage = plugin.page
+            let page:any Unidoc.RenderablePage = plugin.page
             else
             {
                 return .notFound("This plugin has not been initialized yet")

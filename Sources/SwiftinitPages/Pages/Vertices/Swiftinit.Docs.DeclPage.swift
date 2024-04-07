@@ -41,20 +41,20 @@ extension Swiftinit.Docs.DeclPage
         .init(phylum: self.apex.phylum, kinks: self.apex.kinks)
     }
 }
-extension Swiftinit.Docs.DeclPage:Swiftinit.RenderablePage
+extension Swiftinit.Docs.DeclPage:Unidoc.RenderablePage
 {
     var title:String { "\(self.stem.last) · \(self.volume.title) Documentation" }
 
 }
-extension Swiftinit.Docs.DeclPage:Swiftinit.StaticPage
+extension Swiftinit.Docs.DeclPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.DeclPage:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.DeclPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.DeclPage:Swiftinit.ApicalPage
+extension Swiftinit.Docs.DeclPage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
     {
@@ -72,7 +72,7 @@ extension Swiftinit.Docs.DeclPage:Swiftinit.ApicalPage
         }
     }
 
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {

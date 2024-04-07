@@ -33,19 +33,19 @@ extension Swiftinit.Docs.ForeignPage
         .init(phylum: self.apex.phylum, kinks: self.apex.kinks)
     }
 }
-extension Swiftinit.Docs.ForeignPage:Swiftinit.RenderablePage
+extension Swiftinit.Docs.ForeignPage:Unidoc.RenderablePage
 {
     var title:String { "\(self.stem.last) (ext) · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.ForeignPage:Swiftinit.StaticPage
+extension Swiftinit.Docs.ForeignPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.ForeignPage:Swiftinit.ApplicationPage
+extension Swiftinit.Docs.ForeignPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ForeignPage:Swiftinit.ApicalPage
+extension Swiftinit.Docs.ForeignPage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
     {
@@ -57,7 +57,7 @@ extension Swiftinit.Docs.ForeignPage:Swiftinit.ApicalPage
 
     var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.volume) }
 
-    func main(_ main:inout HTML.ContentEncoder, format:Swiftinit.RenderFormat)
+    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section, { $0.class = "introduction" }]
         {
