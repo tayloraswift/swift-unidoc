@@ -1,7 +1,6 @@
 import SymbolGraphParts
 import Symbols
 import TraceableErrors
-import Unidoc
 
 extension SSGC
 {

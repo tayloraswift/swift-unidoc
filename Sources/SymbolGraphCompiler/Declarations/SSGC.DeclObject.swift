@@ -1,7 +1,6 @@
 import Signatures
 import SymbolGraphParts
 import Symbols
-import Unidoc
 
 extension SSGC
 {

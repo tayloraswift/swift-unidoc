@@ -1,5 +1,4 @@
 import Symbols
-import Unidoc
 
 extension SSGC
 {

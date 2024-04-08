@@ -4,7 +4,6 @@ import Signatures
 import Sources
 import SymbolGraphParts
 import Symbols
-import Unidoc
 
 extension SSGC
 {

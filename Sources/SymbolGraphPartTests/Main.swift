@@ -3,7 +3,6 @@ import SymbolGraphParts
 import Symbols
 import System
 import Testing
-import Unidoc
 
 @main
 enum Main:TestMain, TestBattery
