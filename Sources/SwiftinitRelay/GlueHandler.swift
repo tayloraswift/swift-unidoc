@@ -21,14 +21,20 @@ class GlueHandler
 extension GlueHandler
 {
     static
-    func bridge() -> (GlueHandler, GlueHandler)
+    func bridge(on eventLoop:any EventLoop) -> (GlueHandler, NIOLoopBound<GlueHandler>)
     {
         let bridge:(GlueHandler, GlueHandler) = (.init(), .init())
 
         bridge.0.partner = bridge.1
         bridge.1.partner = bridge.0
 
-        return bridge
+        return (bridge.0, .init(bridge.1, eventLoop: eventLoop))
+    }
+
+    func unlink()
+    {
+        self.partner = nil
+        self.context = nil
     }
 }
 extension GlueHandler
