@@ -7,7 +7,7 @@ enum Main
     public static
     func main() async throws
     {
-        let executor:MultiThreadedEventLoopGroup = .init(numberOfThreads: 1)
+        let executor:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
         let bootstrap:ServerBootstrap = .init(group: executor)
             .serverChannelOption(ChannelOptions.socket(.init(SOL_SOCKET), SO_REUSEADDR),
                 value: 1)
@@ -17,29 +17,37 @@ enum Main
         {
             (incoming:any Channel) in
 
-            let bridge:(GlueHandler, GlueHandler) = GlueHandler.bridge()
+            let incomingHandler:GlueHandler
+            let outgoingHandler:NIOLoopBound<GlueHandler>
 
-            let bootstrap:ClientBootstrap = .init(group: executor)
+            (incomingHandler, outgoingHandler) = GlueHandler.bridge(on: incoming.eventLoop)
+
+            let bootstrap:ClientBootstrap = .init(group: incoming.eventLoop)
                 .connectTimeout(.seconds(3))
                 .channelInitializer
             {
-                $0.pipeline.addHandler(bridge.1)
+                $0.pipeline.addHandler(outgoingHandler.value)
             }
 
-            let forward:EventLoopFuture<any Channel> = bootstrap.connect(
-                host: "google.com",
-                port: 443)
+            let host:String = "example.com" // "93.184.216.34"
 
-            return incoming.pipeline.addHandler(bridge.0)
-                .and(forward)
+            let future:EventLoopFuture = incoming.pipeline.addHandler(incomingHandler)
+                .and(bootstrap.connect(host: host, port: 443))
                 .map
             {
-                _ in
-                print("Connected to google.com")
+                _ in print("Connected to \(host)")
             }
+
+            //  Break reference cycle.
+            future.whenFailure
+            {
+                _ in outgoingHandler.value.unlink()
+            }
+
+            return future
         }
 
-        let channel:any Channel = try await bootstrap.bind(host: "127.0.0.1", port: 8001).get()
+        let channel:any Channel = try await bootstrap.bind(host: "::", port: 8001).get()
 
         print("Listening...")
 
