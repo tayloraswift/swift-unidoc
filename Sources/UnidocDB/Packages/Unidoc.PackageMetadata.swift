@@ -73,16 +73,17 @@ extension Unidoc.PackageMetadata
                 hidden: self.hidden,
                 realm: self.realm)
         {
-            let target:BSON.Millisecond = repo.crawled.advanced(by: interval)
+            var target:BSON.Millisecond = repo.crawled.advanced(by: interval)
 
             //  If the repo is already scheduled to have its tags read, we should not keep
             //  postponing that.
             if  let expires:BSON.Millisecond = self.repo?.expires,
                     expires < target
             {
-                break schedule
+                target = expires
             }
 
+            //  We always need to set this because the blank repo instances lack it.
             repo.expires = target
         }
         else
