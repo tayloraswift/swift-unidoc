@@ -77,7 +77,7 @@ extension Unidoc.PackageMetadata
 
             //  If the repo is already scheduled to have its tags read, we should not keep
             //  postponing that.
-            if  let expires:BSON.Millisecond = repo.expires,
+            if  let expires:BSON.Millisecond = self.repo?.expires,
                     expires < target
             {
                 break schedule
