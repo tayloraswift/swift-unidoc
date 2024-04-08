@@ -1,3 +1,4 @@
+import ArgumentParsing
 import GitHubAPI
 import HTTPServer
 import MongoDB
@@ -35,46 +36,29 @@ extension Main
     private mutating
     func parse() throws
     {
-        var arguments:IndexingIterator<[String]> = CommandLine.arguments.makeIterator()
-
-        //  Consume name of the executable itself.
-        let _:String? = arguments.next()
+        var arguments:CommandLine.Arguments = .init()
 
         while let argument:String = arguments.next()
         {
             switch argument
             {
             case "-a", "--authority":
-                guard let authority:String = arguments.next()
-                else
-                {
-                    throw OptionsError.invalidAuthority(nil)
-                }
-                switch authority
+                switch try arguments.next(for: "authority")
                 {
                 case "production":  self.authority = Swiftinit.Prod.self
                 case "testing":     self.authority = Swiftinit.Test.self
                 case "localhost":   self.authority = Localhost.self
-                case let invalid:   throw OptionsError.invalidAuthority(invalid)
+                case let invalid:
+                    throw CommandLine.ArgumentError.invalid("authority", value: invalid)
                 }
 
             case "-b", "--bucket":
-                guard let bucket:String = arguments.next()
-                else
-                {
-                    throw Main.OptionsError.invalidBucketName(nil)
-                }
-
-                self.development.bucket = .init(region: .us_east_1, name: bucket)
+                self.development.bucket = .init(
+                    region: .us_east_1,
+                    name: try arguments.next(for: "bucket"))
 
             case "-c", "--certificates":
-                guard let certificates:String = arguments.next()
-                else
-                {
-                    throw Main.OptionsError.invalidCertificateDirectory
-                }
-
-                self.certificates = certificates
+                self.certificates = try arguments.next(for: "certificates")
 
             case "--enable-cloudfront":
                 self.development.cloudfront = true
@@ -93,37 +77,16 @@ extension Main
                 self.redirect = true
 
             case "-s", "--replica-set":
-                guard let replicaSet:String = arguments.next()
-                else
-                {
-                    throw Main.OptionsError.invalidReplicaSet
-                }
-
-                self.development.replicaSet = replicaSet
+                self.development.replicaSet = try arguments.next(for: "replica-set")
 
             case "-m", "--mongo":
-                switch arguments.next()
-                {
-                case let host?:     self.mongo = .init(host)
-                case nil:           throw Main.OptionsError.invalidMongoReplicaSetSeed
-                }
+                self.mongo = .init(try arguments.next(for: "mongo"))
 
             case "-p", "--port":
-                guard let port:String = arguments.next()
-                else
-                {
-                    throw Main.OptionsError.invalidPort(nil)
-                }
-                guard let port:Int = .init(port)
-                else
-                {
-                    throw Main.OptionsError.invalidPort(port)
-                }
+                self.development.port = try arguments.next(for: "port")
 
-                self.development.port = port
-
-            case let unrecognized:
-                throw Main.OptionsError.unrecognized(unrecognized)
+            case let option:
+                throw CommandLine.ArgumentError.unknown(option)
             }
         }
     }

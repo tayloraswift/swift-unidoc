@@ -598,6 +598,7 @@ let package:Package = .init(
 
         .executableTarget(name: "SwiftinitServer",
             dependencies: [
+                .target(name: "ArgumentParsing"),
                 .target(name: "GitHubClient"),
                 .target(name: "HTTPServer"),
                 .target(name: "Media"),
