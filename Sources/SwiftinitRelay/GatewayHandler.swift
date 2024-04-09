@@ -1,10 +1,10 @@
 import NIOCore
 
 final
-class GlueHandler
+class GatewayHandler
 {
     private
-    var partner:GlueHandler?
+    var partner:GatewayHandler?
 
     private
     var context:ChannelHandlerContext?
@@ -18,12 +18,12 @@ class GlueHandler
         self.readPending = false
     }
 }
-extension GlueHandler
+extension GatewayHandler
 {
     static
-    func bridge(on eventLoop:any EventLoop) -> (GlueHandler, NIOLoopBound<GlueHandler>)
+    func bridge(on eventLoop:any EventLoop) -> (GatewayHandler, NIOLoopBound<GatewayHandler>)
     {
-        let bridge:(GlueHandler, GlueHandler) = (.init(), .init())
+        let bridge:(GatewayHandler, GatewayHandler) = (.init(), .init())
 
         bridge.0.partner = bridge.1
         bridge.1.partner = bridge.0
@@ -37,7 +37,7 @@ extension GlueHandler
         self.context = nil
     }
 }
-extension GlueHandler
+extension GatewayHandler
 {
     private
     func partnerWrite(_ data:NIOAny)
@@ -80,7 +80,7 @@ extension GlueHandler
     }
 }
 
-extension GlueHandler:ChannelDuplexHandler
+extension GatewayHandler:ChannelDuplexHandler
 {
     typealias InboundIn = NIOAny
     typealias OutboundIn = NIOAny

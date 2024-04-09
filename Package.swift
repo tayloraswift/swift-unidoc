@@ -592,6 +592,7 @@ let package:Package = .init(
 
         .executableTarget(name: "SwiftinitRelay",
             dependencies: [
+                .target(name: "ArgumentParsing"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
             ]),
