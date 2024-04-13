@@ -2,7 +2,7 @@ import ArgumentParsing
 import Symbols
 import Unidoc
 
-extension Main
+extension Unidoc
 {
     struct Options:Sendable
     {
@@ -17,8 +17,6 @@ extension Main
         var force:Unidoc.VersionSeries?
         var input:String?
 
-        var tool:Tool
-
         private
         init()
         {
@@ -32,18 +30,14 @@ extension Main
             self.swiftSDK = nil
             self.force = nil
             self.input = nil
-
-            self.tool = .latest
         }
     }
 }
-
-extension Main.Options
+extension Unidoc.Options
 {
     static
-    func parse() throws -> Self
+    func parse(arguments:consuming CommandLine.Arguments) throws -> Self
     {
-        var arguments:CommandLine.Arguments = .init()
         var options:Self = .init()
 
         while let option:String = arguments.next()
@@ -83,11 +77,11 @@ extension Main.Options
             case "--force-prerelease", "-e":
                 options.force = .prerelease
 
-            case "--builder", "-b":
-                options.tool = .builder
+            // case "--builder", "-b":
+            //     options.tool = .builder
 
-            case "--upgrade", "-a":
-                options.tool = .upgrade
+            // case "--upgrade", "-a":
+            //     options.tool = .upgrade
 
             case let option:
                 if  case nil = options.package
@@ -102,5 +96,20 @@ extension Main.Options
         }
 
         return options
+    }
+}
+extension Unidoc.Options
+{
+    func toolchain() throws -> SSGC.Toolchain
+    {
+        try .detect(
+            swiftPath: self.swift ?? "swift",
+            swiftSDK: self.swiftSDK,
+            pretty: self.pretty)
+    }
+
+    func client() throws -> Unidoc.Client
+    {
+        try .init(host: self.host, port: self.port, cookie: self.cookie)
     }
 }

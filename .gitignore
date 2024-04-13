@@ -1,6 +1,7 @@
 .build
 .build.*
 .mongod/*
+.ssgc
 .testing
 .unidoc
 .vscode

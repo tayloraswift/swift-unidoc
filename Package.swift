@@ -7,6 +7,7 @@ let package:Package = .init(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
+        .executable(name: "unidoc-build", targets: ["unidoc-build"]),
         .executable(name: "SwiftinitServer", targets: ["SwiftinitServer"]),
 
         .library(name: "guides", targets: ["guides"]),
@@ -582,6 +583,12 @@ let package:Package = .init(
             ]),
 
         .executableTarget(name: "ssgc",
+            dependencies: [
+                .target(name: "ArgumentParsing"),
+                .target(name: "SymbolGraphBuilder"),
+            ]),
+
+        .executableTarget(name: "unidoc-build",
             dependencies: [
                 .target(name: "ArgumentParsing"),
                 .target(name: "HTTPClient"),

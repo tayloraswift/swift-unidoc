@@ -14,7 +14,7 @@ extension SymbolGraph
     static
     func build(package:SSGC.PackageSources,
         from artifacts:[Artifacts],
-        logs:inout some SSGC.DocumentationLogger) async throws -> Self
+        log:SSGC.DocumentationLog?) throws -> Self
     {
         precondition(package.cultures.count == artifacts.count,
             "Mismatched cultures and artifacts!")
@@ -121,7 +121,14 @@ extension SymbolGraph
                 return try linker.load()
             }
 
-            logs.attach(messages: linker.status(root: root))
+            if  let log:SSGC.DocumentationLog
+            {
+                try log.emit(messages: linker.status(root: root))
+            }
+            else
+            {
+                linker.status(root: root).emit(colors: .enabled)
+            }
 
             print("""
                 Linked documentation!
