@@ -52,50 +52,45 @@ enum Main:TestMain, TestBattery
 
         guard
         let workspace:SSGC.Workspace =
-            await (tests ! "workspace").do({ try await .create(at: ".testing") }),
+            (tests ! "workspace").do({ try .create(at: ".testing") }),
         let toolchain:SSGC.Toolchain =
-            await (tests ! "toolchain").do({ try await .detect(pretty: true) })
+            (tests ! "toolchain").do({ try .detect(pretty: true) })
         else
         {
             return
         }
 
         if  let tests:TestGroup = tests / "standard-library",
-            let docs:SymbolGraphObject<Void> = (await tests.do
+            let docs:SymbolGraphObject<Void> = (tests.do
             {
-                try await .init(building: try await .swift(
-                        in: workspace,
-                        clean: true),
-                    with: toolchain)
+                try workspace.build(special: .swift, with: toolchain)
             })
         {
-            docs.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.artifacts)
         }
 
         if  let tests:TestGroup = tests / "swift-atomics",
-            let docs:SymbolGraphObject<Void> = (await tests.do
+            let docs:SymbolGraphObject<Void> = (tests.do
             {
-                try await .init(building: try await .remote(
+                try workspace.build(package: try .remote(
                         package: "swift-atomics",
                         from: "https://github.com/apple/swift-atomics.git",
                         at: "1.1.0",
-                        in: workspace,
-                        clean: [.artifacts]),
+                        in: workspace),
                     with: toolchain)
             })
         {
-            docs.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.artifacts)
         }
 
         if  let tests:TestGroup = tests / "swift-nio",
-            let docs:SymbolGraphObject<Void> = (await tests.do
+            let docs:SymbolGraphObject<Void> = (tests.do
             {
-                try await .init(building: try await .remote(
+                try workspace.build(package: try .remote(
                         package: "swift-nio",
                         from: "https://github.com/apple/swift-nio.git",
                         at: "2.63.0",
-                        in: workspace,
-                        clean: [.artifacts]),
+                        in: workspace),
                     with: toolchain)
             })
         {
@@ -108,21 +103,20 @@ enum Main:TestMain, TestBattery
                 "swift-system",
             ])
 
-            docs.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.artifacts)
 
         }
 
         //  SwiftNIO has lots of dependencies. If we can handle SwiftNIO,
         //  we can handle anything!
         if  let tests:TestGroup = tests / "swift-nio-ssl",
-            let docs:SymbolGraphObject<Void> = (await tests.do
+            let docs:SymbolGraphObject<Void> = (tests.do
             {
-                try await .init(building: try await .remote(
+                try workspace.build(package: try .remote(
                         package: "swift-nio-ssl",
                         from: "https://github.com/apple/swift-nio-ssl.git",
                         at: "2.24.0",
-                        in: workspace,
-                        clean: [.artifacts]),
+                        in: workspace),
                     with: toolchain)
             })
         {
@@ -133,20 +127,19 @@ enum Main:TestMain, TestBattery
                 "swift-nio",
             ])
 
-            docs.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.artifacts)
         }
 
         //  The swift-async-dns-resolver repo includes a git submodule, so we should be able
         //  to handle that.
         if  let tests:TestGroup = tests / "swift-async-dns-resolver",
-            let docs:SymbolGraphObject<Void> = (await tests.do
+            let docs:SymbolGraphObject<Void> = (tests.do
             {
-                try await .init(building: try await .remote(
+                try workspace.build(package: try .remote(
                         package: "swift-async-dns-resolver",
                         from: "https://github.com/apple/swift-async-dns-resolver.git",
                         at: "0.1.2",
-                        in: workspace,
-                        clean: [.artifacts]),
+                        in: workspace),
                     with: toolchain)
             })
         {
@@ -157,27 +150,26 @@ enum Main:TestMain, TestBattery
                 "swift-nio",
             ])
 
-            docs.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.artifacts)
         }
 
         //  SwiftSyntax is a morbidly obese package. If we can handle SwiftSyntax,
         //  we can handle anything!
         if  let tests:TestGroup = tests / "swift-syntax",
-            let docs:SymbolGraphObject<Void> = (await tests.do
+            let docs:SymbolGraphObject<Void> = (tests.do
             {
-                try await .init(building: try await .remote(
+                try workspace.build(package: try .remote(
                         package: "swift-syntax",
                         from: "https://github.com/apple/swift-syntax.git",
                         at: "508.0.0",
-                        in: workspace,
-                        clean: [.artifacts]),
+                        in: workspace),
                     with: toolchain)
             })
         {
             //  the swift-argument-parser dependency should have been linted.
             tests.expect(docs.metadata.dependencies.map(\.package.name) **? [])
 
-            docs.roundtrip(for: tests, in: workspace.path)
+            docs.roundtrip(for: tests, in: workspace.artifacts)
         }
     }
 }

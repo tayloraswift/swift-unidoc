@@ -5,13 +5,8 @@ extension SSGC
 {
     protocol DocumentationBuild
     {
-        associatedtype Logs:DocumentationLogger
-
         mutating
-        func compile(
-            with swift:Toolchain,
-            logs:inout Logs) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
-
-        var artifacts:ArtifactsDirectory { get }
+        func compile(into artifaces:FilePath,
+            with swift:Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     }
 }

@@ -9,7 +9,7 @@ extension SSGC.PackageBuild
         /// An unversioned root package build.
         case unversioned(Symbol.Package)
         /// A versioned root package build.
-        case versioned(SPM.DependencyPin, refname:String)
+        case versioned(SPM.DependencyPin, reference:String)
         /// A versioned dependency build.
         case upstream(SPM.DependencyPin)
     }

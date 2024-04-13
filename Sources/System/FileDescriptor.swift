@@ -86,4 +86,27 @@ extension FileDescriptor
             }
         }
     }
+
+    @inlinable public
+    func readByte<Code>(as:Code.Type = Code.self) throws -> Code?
+        where Code:RawRepresentable<UInt8>
+    {
+        try self.readByte().flatMap(Code.init(rawValue:))
+    }
+
+    @inlinable public
+    func readByte() throws -> UInt8?
+    {
+        try withUnsafeTemporaryAllocation(byteCount: 1, alignment: 1)
+        {
+            if  try self.read(into: $0) == 1
+            {
+                return $0[0]
+            }
+            else
+            {
+                return nil
+            }
+        }
+    }
 }
