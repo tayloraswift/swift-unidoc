@@ -44,16 +44,19 @@ struct Main
 @main
 extension Main
 {
-    static
+    @MainActor static
     func main() async
     {
-        await SystemProcess.do
+        do
         {
-            @Sendable in
-
             var main:Self = .init()
             try main.parse()
             try await main.launch()
+        }
+        catch let error
+        {
+            print("Error: \(error)")
+            SystemProcess.exit(with: 1)
         }
     }
 

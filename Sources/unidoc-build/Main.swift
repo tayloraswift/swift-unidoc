@@ -1,11 +1,3 @@
-#if canImport(Glibc)
-import Glibc
-#elseif canImport(Darwin)
-import Darwin
-#else
-#error("unsupported platform")
-#endif
-
 import HTTP
 import SymbolGraphs
 import Symbols
@@ -38,17 +30,17 @@ extension Unidoc
 
             case let command?:
                 print("Unknown command: \(command)")
-                exit(1)
+                SystemProcess.exit(with: 1)
 
             case nil:
                 print("No command specified")
-                exit(1)
+                SystemProcess.exit(with: 1)
             }
         }
         catch let error
         {
             print("Error: \(error)")
-            exit(255)
+            SystemProcess.exit(with: 255)
         }
     }
 }
