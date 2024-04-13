@@ -1,13 +1,6 @@
-#if canImport(Glibc)
-import Glibc
-#elseif canImport(Darwin)
-import Darwin
-#else
-#error("unsupported platform")
-#endif
-
 import ArgumentParsing
 import SymbolGraphs
+import System
 
 extension SSGC
 {
@@ -24,7 +17,7 @@ extension SSGC
         catch let error
         {
             print("Error: \(error)")
-            exit(1)
+            SystemProcess.exit(with: 1)
         }
     }
 }

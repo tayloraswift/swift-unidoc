@@ -17,7 +17,6 @@ struct PackageQueries:UnidocDatabaseTestBattery
         pool:Mongo.SessionPool,
         unidoc:Unidoc.DB) async throws
     {
-        let toolchain:SSGC.Toolchain = try await .detect()
         let session:Mongo.Session = try await .init(from: pool)
 
         let empty:SymbolGraph = .init(modules: [])
@@ -34,6 +33,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
 
         do
         {
+            let toolchain:SSGC.Toolchain = try .detect()
             docs = .init(
                 metadata: .init(
                     package: .init(name: .swift),

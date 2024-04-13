@@ -423,6 +423,7 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphBuilder",
             dependencies: [
+                .target(name: "ArgumentParsing"),
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphCompiler"),

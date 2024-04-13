@@ -22,6 +22,20 @@ struct SystemProcess:Identifiable
 }
 extension SystemProcess
 {
+    @MainActor public static
+    func exit(with status:Int32 = 0) -> Never
+    {
+        #if canImport(Glibc)
+        Glibc.exit(status)
+        #elseif canImport(Darwin)
+        Darwin.exit(status)
+        #else
+        fatalError()
+        #endif
+    }
+}
+extension SystemProcess
+{
     public
     init(command:String?, _ arguments:String?...,
         stdout:FileDescriptor? = nil,
@@ -147,23 +161,6 @@ extension SystemProcess
             return
         case let status:
             throw SystemProcessError.exit(status, self.invocation)
-        }
-    }
-}
-extension SystemProcess
-{
-    @MainActor
-    public static
-    func `do`(_ operation:() async throws -> Void) async
-    {
-        do
-        {
-            try await operation()
-        }
-        catch let error
-        {
-            print(error)
-            exit(1)
         }
     }
 }
