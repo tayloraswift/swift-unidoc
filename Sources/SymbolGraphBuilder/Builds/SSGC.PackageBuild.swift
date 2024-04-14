@@ -167,7 +167,8 @@ extension SSGC.PackageBuild
 extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     mutating
-    func compile(into artifacts:FilePath,
+    func compile(updating status:SSGC.StatusStream?,
+        into artifacts:FilePath,
         with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         switch self.id
@@ -202,6 +203,8 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         {
             throw SSGC.PackageBuildError.swift_package_update(code, invocation)
         }
+
+        try status?.send(.didResolveDependencies)
 
         let scratch:SSGC.PackageBuildDirectory
         do

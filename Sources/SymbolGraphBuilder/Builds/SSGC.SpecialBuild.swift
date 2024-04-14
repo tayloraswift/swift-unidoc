@@ -19,7 +19,8 @@ extension SSGC.SpecialBuild
 }
 extension SSGC.SpecialBuild:SSGC.DocumentationBuild
 {
-    func compile(into _:FilePath,
+    func compile(updating _:SSGC.StatusStream?,
+        into _:FilePath,
         with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267

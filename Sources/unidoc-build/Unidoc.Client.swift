@@ -9,31 +9,45 @@ import Symbols
 import System
 import UnidocAPI
 import UnidocRecords
+import UnidocRecords_LZ77
 
 extension Unidoc
 {
-    @frozen public
-    struct Client
+    struct Client:Sendable
     {
-        @usableFromInline internal
-        let http2:HTTP2Client
-        @usableFromInline internal
-        let port:Int
-        @usableFromInline internal
+        private
+        let swiftPath:String?
+        private
+        let swiftSDK:SSGC.AppleSDK?
+        private
+        let pretty:Bool
+        private
         let cookie:String
 
-        @inlinable
-        init(http2:HTTP2Client, cookie:String, port:Int)
+        let http2:HTTP2Client
+        let port:Int
+
+        private
+        init(
+            swiftPath:String?,
+            swiftSDK:SSGC.AppleSDK?,
+            pretty:Bool,
+            cookie:String,
+            http2:HTTP2Client,
+            port:Int)
         {
-            self.http2 = http2
+            self.swiftPath = swiftPath
+            self.swiftSDK = swiftSDK
+            self.pretty = pretty
             self.cookie = cookie
+            self.http2 = http2
             self.port = port
         }
     }
 }
 extension Unidoc.Client
 {
-    init(host:String, port:Int, cookie:String) throws
+    init(from options:Unidoc.Options) throws
     {
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
 
@@ -41,26 +55,28 @@ extension Unidoc.Client
             configuration.applicationProtocols = ["h2"]
 
         //  If we are not using the default port, we are probably running locally.
-        if  port != 443
+        if  options.port != 443
         {
             configuration.certificateVerification = .none
         }
 
         let niossl:NIOSSLContext = try .init(configuration: configuration)
 
-        print("Connecting to \(host):\(port)...")
+        print("Connecting to \(options.host):\(options.port)...")
 
-        let http2:HTTP2Client = .init(
-            threads: threads,
-            niossl: niossl,
-            remote: host)
-
-        self.init(http2: http2, cookie: cookie, port: port)
+        self.init(
+            swiftPath: options.swift,
+            swiftSDK: options.swiftSDK,
+            pretty: options.pretty,
+            cookie: options.cookie,
+            http2: .init(threads: threads,
+                niossl: niossl,
+                remote: options.host),
+            port: options.port)
     }
 }
 extension Unidoc.Client
 {
-    @inlinable public
     func connect<T>(with body:(Connection) async throws -> T) async throws -> T
     {
         try await self.http2.connect(port: self.port)
@@ -71,129 +87,202 @@ extension Unidoc.Client
 }
 extension Unidoc.Client
 {
-    func buildAndUpload(local symbol:Symbol.Package,
-        search:FilePath?,
-        toolchain:SSGC.Toolchain) async throws
+    private
+    func stream(from pipe:FilePath) throws -> Unidoc.BuildFailure.Reason?
     {
-        fatalError("unimplemented")
-        // let workspace:SSGC.Workspace = try .create(at: ".unidoc")
+        try SSGC.StatusStream.read(from: pipe)
+        {
+            while let update:SSGC.StatusUpdate = try $0.next()
+            {
+                switch update
+                {
+                case .didCloneRepository:
+                    continue
 
-        // let object:SymbolGraphObject<Void>
-        // if  symbol == .swift
-        // {
-        //     let build:SSGC.SpecialBuild = try .swift(in: workspace,
-        //         clean: true)
+                case .didResolveDependencies:
+                    continue
 
-        //     object = try .init(building: build, with: toolchain)
-        // }
-        // else if
-        //     let search:FilePath
-        // {
-        //     let build:SSGC.PackageBuild = try .local(package: symbol,
-        //         from: search,
-        //         in: workspace,
-        //         clean: true)
+                case .success:
+                    return nil
 
-        //     object = try .init(building: build, with: toolchain)
-        // }
-        // else
-        // {
-        //     fatalError("No package search path specified.")
-        // }
+                case .failedToCloneRepository:
+                    return .failedToCloneRepository
 
-        // try await self.connect
-        // {
-        //     @Sendable (connection:Unidoc.Client.Connection) in
+                case .failedToReadManifest:
+                    return .failedToReadManifest
 
-        //     try await connection.upload(object)
-        // }
+                case .failedToReadManifestForDependency:
+                    return .failedToReadManifestForDependency
+
+                case .failedToResolveDependencies:
+                    return .failedToResolveDependencies
+
+                case .failedToBuild:
+                    return .failedToBuild
+
+                case .failedToExtractSymbolGraph:
+                    return .failedToExtractSymbolGraph
+
+                case .failedToLoadSymbolGraph:
+                    return .failedToLoadSymbolGraph
+
+                case .failedToLinkSymbolGraph:
+                    return .failedToLinkSymbolGraph
+                }
+            }
+
+            throw SSGC.StatusUpdateError.init()
+        }
     }
 
-    func buildAndUpload(remote symbol:Symbol.Package,
-        force:Unidoc.VersionSeries?,
-        toolchain:SSGC.Toolchain) async throws
+    @discardableResult
+    func buildAndUpload(
+        labels:Unidoc.BuildLabels,
+        action:Unidoc.Snapshot.PendingAction) async throws -> Bool
     {
-        //  Building the package might take a long time, and the server might close the
-        //  connection before the build is finished. So we do not try to keep this
-        //  connection open.
-        let labels:Unidoc.BuildLabels? = try await self.connect
-        {
-            @Sendable (connection:Unidoc.Client.Connection) in
-
-            do
-            {
-                return try await connection.latest(force, of: symbol)
-            }
-            catch let error as HTTP.StatusError
-            {
-                guard
-                case 404? = error.code
-                else
-                {
-                    throw error
-                }
-
-                return nil
-            }
-        }
-
         guard
-        let labels:Unidoc.BuildLabels
+        let tag:String = labels.tag
         else
         {
-            print("Not a buildable package.")
-            return
+            print("""
+                No new documentation to build, run with -f or -e to build the latest release
+                or prerelease anyway.
+                """)
+
+            let failureReport:Unidoc.BuildFailureReport =  .init(
+                package: labels.coordinate.package,
+                failure: .init(reason: .noValidVersion),
+                logs: [])
+
+            try await self.connect { try await $0.upload(failureReport) }
+            return false
         }
 
-        let result:Unidoc.Build = try await .with(toolchain: toolchain,
-            labels: labels,
-            action: force != nil ? .uplinkRefresh : .uplinkInitial)
+        let workspace:SSGC.Workspace = try .create(at: ".unidoc")
+        let output:FilePath = workspace.path / "output"
+        let status:FilePath = workspace.path / "status"
+        let docs:FilePath = workspace.path / "docs.bson"
 
-        try await self.connect
+        try SystemProcess.init(command: "rm", "-f", "\(status)")()
+        try SystemProcess.init(command: "mkfifo", "\(status)")()
+
+        defer
         {
-            @Sendable (connection:Unidoc.Client.Connection) in
+            try? SystemProcess.init(command: "rm", "\(status)")()
+        }
 
-            switch result
+        var arguments:[String] = [
+            "build",
+
+            "--package-name", "\(labels.package)",
+            "--package-repo", labels.repo,
+            "--tag", tag,
+            "--workspace", "\(workspace.path)",
+            "--status", "\(status)",
+            "--output", "\(docs)",
+        ]
+        if  self.pretty
+        {
+            arguments.append("--pretty")
+        }
+        if  let swift:String = self.swiftPath
+        {
+            arguments.append("--swift")
+            arguments.append("\(swift)")
+        }
+        if  let sdk:SSGC.AppleSDK = self.swiftSDK
+        {
+            arguments.append("--sdk")
+            arguments.append("\(sdk)")
+        }
+
+        let ssgc:SystemProcess = try output.open(.writeOnly,
+            permissions: (.rw, .r, .r),
+            options: [.create, .truncate])
+        {
+            try .init(command: nil, arguments: arguments,
+                stdout: $0,
+                stderr: $0)
+        }
+
+        async
+        let failure:Unidoc.BuildFailure.Reason? = try self.stream(from: status)
+
+        //  Wait for the child process to finish.
+        try ssgc()
+
+        if  let failure:Unidoc.BuildFailure.Reason = try await failure
+        {
+            var failureReport:Unidoc.BuildFailureReport = .init(
+                package: labels.coordinate.package,
+                failure: .init(reason: failure),
+                logs: [])
+
+            let output:[UInt8] = try output.read()
+            if !output.isEmpty
             {
-            case .success(let labeled):
-                try await connection.upload(labeled)
-
-            case .failure(let report):
-                try await connection.upload(report)
+                failureReport.logs.append(.init(
+                    text: .gzip(bytes: output[...], level: 10),
+                    type: .ssgc))
             }
+
+            try await self.connect { try await $0.upload(failureReport) }
+            return false
+        }
+        else
+        {
+            let object:SymbolGraphObject<Void> = try .init(
+                buffer: try docs.read())
+
+            try await self.connect
+            {
+                try await $0.upload(Unidoc.Snapshot.init(id: labels.coordinate,
+                    metadata: object.metadata,
+                    inline: object.graph,
+                    action: action))
+            }
+
+            return true
         }
     }
 
-    func buildAndUploadQueued(toolchain:SSGC.Toolchain) async throws
+    func buildAndUpload(local symbol:Symbol.Package, search:FilePath?) async throws
     {
-        let labels:Unidoc.BuildLabels = try await self.connect
-        {
-            @Sendable (connection:Unidoc.Client.Connection) in
+        let workspace:SSGC.Workspace = try .create(at: ".unidoc")
+        let docs:FilePath = workspace.path / "docs.bson"
 
-            try await connection.get(from: "/ssgc/poll", timeout: .seconds(60 * 60))
+        var arguments:[String] = [
+            "build",
+
+            "--package-name", "\(symbol)",
+            "--workspace", "\(workspace.path)",
+            "--output", "\(docs)",
+        ]
+        if  self.pretty
+        {
+            arguments.append("--pretty")
+        }
+        if  let swift:String = self.swiftPath
+        {
+            arguments.append("--swift")
+            arguments.append("\(swift)")
+        }
+        if  let sdk:SSGC.AppleSDK = self.swiftSDK
+        {
+            arguments.append("--sdk")
+            arguments.append("\(sdk)")
+        }
+        if  let search:FilePath = search
+        {
+            arguments.append("--search-path")
+            arguments.append("\(search)")
         }
 
-        print("""
-            Building package '\(labels.package)' at '\(labels.tag ?? "?")' \
-            (\(labels.coordinate))
-            """)
+        let ssgc:SystemProcess = try .init(command: nil, arguments: arguments)
+        try ssgc()
 
-        let result:Unidoc.Build = try await .with(toolchain: toolchain,
-            labels: labels,
-            action: .uplinkRefresh)
+        let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
 
-        try await self.connect
-        {
-            @Sendable (connection:Unidoc.Client.Connection) in
-
-            switch result
-            {
-            case .success(let labeled):
-                try await connection.upload(labeled)
-
-            case .failure(let report):
-                try await connection.upload(report)
-            }
-        }
+        try await self.connect { try await $0.upload(object) }
     }
 }

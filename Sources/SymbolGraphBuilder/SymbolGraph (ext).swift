@@ -12,9 +12,9 @@ import SourceDiagnostics
 extension SymbolGraph
 {
     static
-    func build(package:SSGC.PackageSources,
-        from artifacts:[Artifacts],
-        log:SSGC.DocumentationLog?) throws -> Self
+    func compile(artifacts:[Artifacts],
+        package:SSGC.PackageSources,
+        logger:SSGC.DocumentationLogger?) throws -> Self
     {
         precondition(package.cultures.count == artifacts.count,
             "Mismatched cultures and artifacts!")
@@ -121,9 +121,9 @@ extension SymbolGraph
                 return try linker.load()
             }
 
-            if  let log:SSGC.DocumentationLog
+            if  let logger:SSGC.DocumentationLogger
             {
-                try log.emit(messages: linker.status(root: root))
+                try logger.emit(messages: linker.status(root: root))
             }
             else
             {

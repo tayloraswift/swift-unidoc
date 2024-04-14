@@ -77,12 +77,6 @@ extension Unidoc.Options
             case "--force-prerelease", "-e":
                 options.force = .prerelease
 
-            // case "--builder", "-b":
-            //     options.tool = .builder
-
-            // case "--upgrade", "-a":
-            //     options.tool = .upgrade
-
             case let option:
                 if  case nil = options.package
                 {
@@ -96,20 +90,5 @@ extension Unidoc.Options
         }
 
         return options
-    }
-}
-extension Unidoc.Options
-{
-    func toolchain() throws -> SSGC.Toolchain
-    {
-        try .detect(
-            swiftPath: self.swift ?? "swift",
-            swiftSDK: self.swiftSDK,
-            pretty: self.pretty)
-    }
-
-    func client() throws -> Unidoc.Client
-    {
-        try .init(host: self.host, port: self.port, cookie: self.cookie)
     }
 }
