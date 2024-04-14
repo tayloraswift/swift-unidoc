@@ -22,8 +22,6 @@ extension SSGC.Workspace
     var artifacts:FilePath { self.path / "artifacts" }
     @inlinable public
     var checkouts:FilePath { self.path / "checkouts" }
-    @inlinable public
-    var status:FilePath { self.path / "status" }
 }
 extension SSGC.Workspace
 {
@@ -46,26 +44,24 @@ extension SSGC.Workspace
 {
     public
     func build(package build:SSGC.PackageBuild,
-        with swift:SSGC.Toolchain,
-        log:FilePath.Component? = nil) throws -> SymbolGraphObject<Void>
+        with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, with: swift, log: log)
+        try self.build(some: build, toolchain: swift, logger: nil, status: nil)
     }
 
     public
     func build(special build:SSGC.SpecialBuild,
-        with swift:SSGC.Toolchain,
-        log:FilePath.Component? = nil) throws -> SymbolGraphObject<Void>
+        with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, with: swift, log: log)
+        try self.build(some: build, toolchain: swift, logger: nil, status: nil)
     }
 }
 extension SSGC.Workspace
 {
-    private
     func build<Build>(some build:consuming Build,
-        with swift:SSGC.Toolchain,
-        log:FilePath.Component?) throws -> SymbolGraphObject<Void>
+        toolchain swift:SSGC.Toolchain,
+        logger:SSGC.DocumentationLogger?,
+        status:SSGC.StatusStream?) throws -> SymbolGraphObject<Void>
         where Build:SSGC.DocumentationBuild
     {
         let metadata:SymbolGraphMetadata
@@ -74,16 +70,16 @@ extension SSGC.Workspace
         let output:FilePath = self.artifacts
         try output.directory.create(clean: true)
 
-        (metadata, package) = try build.compile(into: output, with: swift)
+        (metadata, package) = try build.compile(updating: status, into: output, with: swift)
 
         let artifacts:[Artifacts] = try swift.dump(modules: package.cultures,
             include: package.include,
             output: output)
 
-        let graph:SymbolGraph = try .build(package: package,
-            from: artifacts,
-            log: log.map { .init(path: output / $0) })
+        let compiled:SymbolGraph = try .compile(artifacts: artifacts,
+            package: package,
+            logger: logger)
 
-        return .init(metadata: metadata, graph: graph)
+        return .init(metadata: metadata, graph: compiled)
     }
 }

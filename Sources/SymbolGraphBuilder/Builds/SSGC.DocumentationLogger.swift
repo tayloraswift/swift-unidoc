@@ -3,12 +3,18 @@ import System
 
 extension SSGC
 {
-    struct DocumentationLog
+    @frozen public
+    struct DocumentationLogger
     {
         let path:FilePath
+
+        init(path:FilePath)
+        {
+            self.path = path
+        }
     }
 }
-extension SSGC.DocumentationLog
+extension SSGC.DocumentationLogger
 {
     func emit(messages:consuming DiagnosticMessages) throws
     {

@@ -22,6 +22,9 @@ extension Unidoc
             case "builder"?:
                 try await Self.builder(arguments: arguments)
 
+            case "package"?:
+                try await Self.package(arguments: arguments)
+
             case "latest"?:
                 try await Self.latest(arguments: arguments)
 
@@ -50,9 +53,10 @@ extension Unidoc
     func builder(arguments:consuming CommandLine.Arguments) async throws
     {
         let options:Options = try .parse(arguments: arguments)
+        let unidoc:Client = try .init(from: options)
 
-        let toolchain:SSGC.Toolchain = try options.toolchain()
-        let unidoc:Client = try options.client()
+        /// TODO: make configurable
+        let pollInterval:Duration = .seconds(60 * 60)
 
         while true
         {
@@ -61,7 +65,17 @@ extension Unidoc
             let cooldown:Void = try await Task.sleep(for: .seconds(5))
             do
             {
-                try await unidoc.buildAndUploadQueued(toolchain: toolchain)
+                let labels:Unidoc.BuildLabels = try await unidoc.connect
+                {
+                    try await $0.labels(waiting: pollInterval)
+                }
+
+                print("""
+                    Building package '\(labels.package)' at '\(labels.tag ?? "?")' \
+                    (\(labels.coordinate))
+                    """)
+
+                try await unidoc.buildAndUpload(labels: labels, action: .uplinkRefresh)
                 try await cooldown
             }
             catch let error
@@ -73,12 +87,10 @@ extension Unidoc
     }
 
     private static
-    func latest(arguments:consuming CommandLine.Arguments) async throws
+    func package(arguments:consuming CommandLine.Arguments) async throws
     {
         let options:Options = try .parse(arguments: arguments)
-
-        let toolchain:SSGC.Toolchain = try options.toolchain()
-        let unidoc:Client = try options.client()
+        let unidoc:Client = try .init(from: options)
 
         guard
         let package:Symbol.Package = options.package
@@ -87,28 +99,48 @@ extension Unidoc
             fatalError("No package specified")
         }
 
-        if  package != .swift,
-            options.input == nil
-        {
-            try await unidoc.buildAndUpload(remote: package,
-                force: options.force,
-                toolchain: toolchain)
-        }
+        try await unidoc.buildAndUpload(
+            local: package,
+            search: options.input.map(FilePath.init(_:)))
+    }
+
+    private static
+    func latest(arguments:consuming CommandLine.Arguments) async throws
+    {
+        let options:Options = try .parse(arguments: arguments)
+        let unidoc:Client = try .init(from: options)
+
+        guard
+        let package:Symbol.Package = options.package
         else
         {
-            try await unidoc.buildAndUpload(local: package,
-                search: options.input.map(FilePath.init(_:)),
-                toolchain: toolchain)
+            print("No package specified!")
+            return
         }
+
+        let labels:Unidoc.BuildLabels? = try await unidoc.connect
+        {
+            try await $0.labels(of: package, series: options.force ?? .release)
+        }
+
+        guard
+        let labels:Unidoc.BuildLabels
+        else
+        {
+            print("Package '\(package)' is not buildable by labels!")
+            return
+        }
+
+        try await unidoc.buildAndUpload(
+            labels: labels,
+            action: options.force != nil ? .uplinkRefresh : .uplinkInitial)
     }
 
     private static
     func upgrade(arguments:consuming CommandLine.Arguments) async throws
     {
         let options:Options = try .parse(arguments: arguments)
-
-        let toolchain:SSGC.Toolchain = try options.toolchain()
-        let unidoc:Client = try options.client()
+        let unidoc:Client = try .init(from: options)
 
         var unbuildable:[Unidoc.Edition: ()] = [:]
 
@@ -131,26 +163,18 @@ extension Unidoc
                     continue
                 }
 
-                let labels:Unidoc.BuildLabels
-                do
+                let labels:Unidoc.BuildLabels? = try await unidoc.connect
                 {
-                    labels = try await unidoc.connect
-                    {
-                        @Sendable (connection:Unidoc.Client.Connection) in
-
-                        try await connection.build(id: edition)
-                    }
+                    try await $0.labels(id: edition)
                 }
-                catch let error as HTTP.StatusError
-                {
-                    guard
-                    case 404? = error.code
-                    else
-                    {
-                        throw error
-                    }
 
+                guard
+                let labels:Unidoc.BuildLabels
+                else
+                {
                     print("No buildable package for \(edition).")
+
+                    unbuildable[edition] = ()
                     continue
                 }
 
@@ -158,21 +182,13 @@ extension Unidoc
                 {
                     //  We cannot build the standard library this way.
                     print("Skipping 'swift'")
+
+                    unbuildable[edition] = ()
                     continue
                 }
 
-                if  case .success(let snapshot) = try await Unidoc.Build.with(
-                        toolchain: toolchain,
-                        labels: labels,
-                        action: .uplinkRefresh)
+                if  try await unidoc.buildAndUpload(labels: labels, action: .uplinkRefresh)
                 {
-                    try await unidoc.connect
-                    {
-                        @Sendable (connection:Unidoc.Client.Connection) in
-
-                        try await connection.upload(snapshot)
-                    }
-
                     upgraded += 1
                 }
                 else

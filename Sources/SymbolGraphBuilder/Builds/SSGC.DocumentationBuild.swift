@@ -6,7 +6,8 @@ extension SSGC
     protocol DocumentationBuild
     {
         mutating
-        func compile(into artifaces:FilePath,
+        func compile(updating status:SSGC.StatusStream?,
+            into artifaces:FilePath,
             with swift:Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     }
 }

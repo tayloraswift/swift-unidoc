@@ -18,13 +18,15 @@ extension SSGC
         var status:FilePath?
         var search:FilePath?
 
+        var output:FilePath?
+        var outputLog:FilePath?
+
         var swiftPath:String
         var swiftSDK:AppleSDK?
 
         var name:Symbol.Package?
         var repo:String?
         var tag:String?
-        var log:LogMode
         var pretty:Bool
 
         init()
@@ -34,13 +36,15 @@ extension SSGC
             self.status = nil
             self.search = nil
 
+            self.output = nil
+            self.outputLog = nil
+
             self.swiftPath = "swift"
             self.swiftSDK = nil
 
             self.name = nil
             self.repo = nil
             self.tag = nil
-            self.log = .toConsole
             self.pretty = false
         }
     }
@@ -81,8 +85,11 @@ extension SSGC.Main
             case "--tag", "-t":
                 self.tag = try arguments.next(for: option)
 
-            case "--log-to-file", "-l":
-                self.log = .toFile
+            case "--output", "-o":
+                self.output = try .init(arguments.next(for: option))
+
+            case "--output-log", "-l":
+                self.outputLog = try .init(arguments.next(for: option))
 
             case "--pretty", "-p":
                 self.pretty = true
@@ -106,19 +113,26 @@ extension SSGC.Main
             return
         }
 
-        let workspace:SSGC.Workspace = .existing(at: workspacePath)
-        try workspace.status.open(.writeOnly,
-            permissions: (.rw, .r, .r))
+        guard
+        let status:FilePath = self.status
+        else
         {
-            let status:SSGC.StatusUpdate
+            let workspace:SSGC.Workspace = .existing(at: workspacePath)
+            try self.launch(workspace: workspace, status: nil)
+            return
+        }
+
+        try SSGC.StatusStream.write(to: status)
+        {
+            let workspace:SSGC.Workspace = .existing(at: workspacePath)
             do
             {
                 try self.launch(workspace: workspace, status: $0)
-                status = .success
+                return .success
             }
             catch let error as SSGC.ManifestDumpError
             {
-                status = error.leaf ?
+                return error.leaf ?
                     .failedToReadManifest :
                     .failedToReadManifestForDependency
             }
@@ -126,26 +140,24 @@ extension SSGC.Main
             {
                 switch error
                 {
-                case .swift_package_update:         status = .failedToResolveDependencies
-                case .swift_build:                  status = .failedToBuild
-                case .swift_symbolgraph_extract:    status = .failedToExtractSymbolGraph
+                case .swift_package_update:         return .failedToResolveDependencies
+                case .swift_build:                  return .failedToBuild
+                case .swift_symbolgraph_extract:    return .failedToExtractSymbolGraph
                 }
             }
             catch let error as SSGC.DocumentationBuildError
             {
                 switch error
                 {
-                case .loading:  status = .failedToLoadSymbolGraph
-                case .linking:  status = .failedToLinkSymbolGraph
+                case .loading:  return .failedToLoadSymbolGraph
+                case .linking:  return .failedToLinkSymbolGraph
                 }
             }
-
-            try $0.writeAll([status.rawValue])
         }
     }
 
     private
-    func launch(workspace:SSGC.Workspace, status _:FileDescriptor?) throws
+    func launch(workspace:SSGC.Workspace, status:SSGC.StatusStream?) throws
     {
         guard
         let package:Symbol.Package = self.name
@@ -159,20 +171,15 @@ extension SSGC.Main
             swiftSDK: self.swiftSDK,
             pretty: self.pretty)
 
-
-        let log:FilePath.Component?
-
-        switch self.log
-        {
-        case .toConsole:    log = nil
-        case .toFile:       log = "docs.log"
-        }
-
+        let logger:SSGC.DocumentationLogger? = self.outputLog.map(SSGC.DocumentationLogger.init)
         let object:SymbolGraphObject<Void>
 
         if  package == .swift
         {
-            object = try workspace.build(special: .swift, with: toolchain, log: log)
+            object = try workspace.build(some: SSGC.SpecialBuild.swift,
+                toolchain: toolchain,
+                logger: logger,
+                status: status)
         }
         else if
             let repo:String = self.repo,
@@ -184,21 +191,30 @@ extension SSGC.Main
                 at: tag,
                 in: workspace)
 
-            object = try workspace.build(package: build, with: toolchain, log: log)
+            try status?.send(.didCloneRepository)
+
+            object = try workspace.build(some: build,
+                toolchain: toolchain,
+                logger: logger,
+                status: status)
         }
         else if
             let search:FilePath = self.search
         {
             let build:SSGC.PackageBuild = try .local(package: package, from: search)
 
-            object = try workspace.build(package: build, with: toolchain, log: log)
+            object = try workspace.build(some: build,
+                toolchain: toolchain,
+                logger: logger,
+                status: status)
         }
         else
         {
             throw CommandLine.ArgumentError.missing("--search-path")
         }
 
-        try (workspace.artifacts / "docs.bson").open(.writeOnly,
+        let output:FilePath = self.output ?? workspace.path / "docs.bson"
+        try output.open(.writeOnly,
             permissions: (.rw, .r, .r),
             options: [.create, .truncate])
         {

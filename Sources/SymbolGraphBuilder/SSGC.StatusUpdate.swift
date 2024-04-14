@@ -3,9 +3,12 @@ extension SSGC
     @frozen public
     enum StatusUpdate:UInt8, Equatable, Sendable
     {
-        case success = 0
+        case didCloneRepository = 0
+        case didResolveDependencies
 
-        case failedToCloneRepository = 1
+        case success = 128
+
+        case failedToCloneRepository
         case failedToReadManifest
         case failedToReadManifestForDependency
         case failedToResolveDependencies
