@@ -13,15 +13,11 @@ import URI
 
 extension Unidoc.Client
 {
-    @frozen public
     struct Connection
     {
-        @usableFromInline internal
         let http2:HTTP2Client.Connection
-        @usableFromInline internal
         let cookie:String
 
-        @inlinable internal
         init(http2:HTTP2Client.Connection, cookie:String)
         {
             self.http2 = http2
@@ -37,20 +33,57 @@ extension Unidoc.Client.Connection
         let prompt:Unidoc.BuildLabelsPrompt = ._allSymbolGraphs(upTo: abi, limit: 16)
         return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
     }
-
-    func build(id:Unidoc.Edition) async throws -> Unidoc.BuildLabels
+}
+extension Unidoc.Client.Connection
+{
+    func labels(waiting duration:Duration) async throws -> Unidoc.BuildLabels
     {
-        let prompt:Unidoc.BuildLabelsPrompt = .edition(id)
-        return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
+        try await self.get(from: "/ssgc/poll", timeout: duration)
     }
 
-    func latest(_ force:Unidoc.VersionSeries?,
-        of package:Symbol.Package) async throws -> Unidoc.BuildLabels
+    func labels(id:Unidoc.Edition) async throws -> Unidoc.BuildLabels?
     {
-        let prompt:Unidoc.BuildLabelsPrompt = .packageNamed(package, series: force)
-        return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
+        do
+        {
+            let prompt:Unidoc.BuildLabelsPrompt = .edition(id)
+            return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
+        }
+        catch let error as HTTP.StatusError
+        {
+            guard
+            case 404? = error.code
+            else
+            {
+                throw error
+            }
+
+            return nil
+        }
     }
 
+    func labels(of package:Symbol.Package,
+        series:Unidoc.VersionSeries) async throws -> Unidoc.BuildLabels?
+    {
+        do
+        {
+            let prompt:Unidoc.BuildLabelsPrompt = .packageNamed(package, series: series)
+            return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
+        }
+        catch let error as HTTP.StatusError
+        {
+            guard
+            case 404? = error.code
+            else
+            {
+                throw error
+            }
+
+            return nil
+        }
+    }
+}
+extension Unidoc.Client.Connection
+{
     func upload(_ unlabeled:consuming SymbolGraphObject<Void>) async throws
     {
         let bson:BSON.Document = .init(encoding: unlabeled)
@@ -58,7 +91,7 @@ extension Unidoc.Client.Connection
         print("Uploading unlabeled symbol graph...")
 
         let _:Unidoc.UploadStatus = try await self.put(bson: bson,
-            to: "/ssgc/\(Unidoc.BuildOutcome.successUnlabeled)",
+            to: "/ssgc/\(Unidoc.BuildRoute.labeling)",
             timeout: .seconds(60))
 
         print("Successfully uploaded symbol graph!")
@@ -71,22 +104,22 @@ extension Unidoc.Client.Connection
         print("Uploading labeled symbol graph...")
 
         let _:Unidoc.UploadStatus = try await self.put(bson: bson,
-            to: "/ssgc/\(Unidoc.BuildOutcome.success)",
+            to: "/ssgc/\(Unidoc.BuildRoute.labeled)",
             timeout: .seconds(60))
 
         print("Successfully uploaded symbol graph!")
     }
 
-    func upload(_ report:consuming Unidoc.BuildFailureReport) async throws
+    func upload(_ report:consuming Unidoc.BuildReport) async throws
     {
         let bson:BSON.Document = .init(encoding: consume report)
 
-        print("Uploading build failure report...")
+        print("Uploading build report...")
 
         do
         {
             let _:Never = try await self.put(bson: bson,
-                to: "/ssgc/\(Unidoc.BuildOutcome.failure)")
+                to: "/ssgc/\(Unidoc.BuildRoute.report)")
         }
         catch let error as HTTP.StatusError
         {
@@ -98,13 +131,12 @@ extension Unidoc.Client.Connection
             }
         }
 
-        print("Successfully uploaded build failure report!")
+        print("Successfully uploaded build report!")
     }
 }
 
 extension Unidoc.Client.Connection
 {
-    @inlinable internal
     func headers(_ method:String, _ endpoint:String) -> HPACKHeaders
     {
         [
@@ -122,7 +154,6 @@ extension Unidoc.Client.Connection
 extension Unidoc.Client.Connection
 {
     @discardableResult
-    @inlinable public
     func post(urlencoded:consuming String, to endpoint:String) async throws -> [ByteBuffer]
     {
         try await self.fetch(endpoint, method: "POST",
@@ -131,7 +162,6 @@ extension Unidoc.Client.Connection
     }
 
     @discardableResult
-    @inlinable public
     func put(bson:consuming BSON.Document,
         to endpoint:String,
         timeout:Duration = .seconds(15)) async throws -> [ByteBuffer]
@@ -143,7 +173,6 @@ extension Unidoc.Client.Connection
             timeout: timeout)
     }
 
-    @inlinable public
     func put<Response>(bson:consuming BSON.Document,
         to endpoint:String,
         timeout:Duration = .seconds(15),
@@ -160,7 +189,6 @@ extension Unidoc.Client.Connection
         return try json.decode()
     }
 
-    @inlinable public
     func get<Response>(_:Response.Type = Response.self,
         from endpoint:String,
         timeout:Duration) async throws -> Response
@@ -178,7 +206,6 @@ extension Unidoc.Client.Connection
 }
 extension Unidoc.Client.Connection
 {
-    @inlinable internal
     func fetch(_ endpoint:String,
         method:String,
         body:ByteBuffer? = nil,

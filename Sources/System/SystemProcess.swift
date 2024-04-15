@@ -22,8 +22,22 @@ struct SystemProcess:Identifiable
 }
 extension SystemProcess
 {
+    @MainActor public static
+    func exit(with status:Int32 = 0) -> Never
+    {
+        #if canImport(Glibc)
+        Glibc.exit(status)
+        #elseif canImport(Darwin)
+        Darwin.exit(status)
+        #else
+        fatalError()
+        #endif
+    }
+}
+extension SystemProcess
+{
     public
-    init(command:String, _ arguments:String?...,
+    init(command:String?, _ arguments:String?...,
         stdout:FileDescriptor? = nil,
         stderr:FileDescriptor? = nil) throws
     {
@@ -33,13 +47,23 @@ extension SystemProcess
     }
 
     public
-    init(command:String, arguments:[String],
+    init(command:String?, arguments:[String],
         stdout:FileDescriptor? = nil,
         stderr:FileDescriptor? = nil,
         echo:Bool = false,
         with environment:consuming SystemProcess.Environment = .inherit) throws
     {
-        let invocation:[String] = [command] + arguments
+        let invocation:[String]
+        if  let command:String
+        {
+            invocation = [command] + arguments
+        }
+        else
+        {
+            let current:String = .init(cString: CommandLine.unsafeArgv[0]!)
+            invocation = [current] + arguments
+        }
+
         if  echo
         {
             let invocation:String = "\(invocation.joined(separator: " "))\n"
@@ -98,7 +122,14 @@ extension SystemProcess
         var process:pid_t = 0
         let status:Int32 = environment.withUnsafePointers
         {
-            posix_spawnp(&process, command, &actions, nil, argv, $0)
+            if  let command:String
+            {
+                posix_spawnp(&process, command, &actions, nil, argv, $0)
+            }
+            else
+            {
+                posix_spawn(&process, invocation[0], &actions, nil, argv, $0)
+            }
         }
         if   status != 0
         {
@@ -109,7 +140,7 @@ extension SystemProcess
     }
 
     public
-    func status() async throws -> Int32
+    func status() throws -> Int32
     {
         var status:Int32 = 0
         switch waitpid(self.id, &status, 0)
@@ -122,31 +153,14 @@ extension SystemProcess
     }
 
     public
-    func callAsFunction() async throws
+    func callAsFunction() throws
     {
-        switch try await self.status()
+        switch try self.status()
         {
         case 0:
             return
         case let status:
             throw SystemProcessError.exit(status, self.invocation)
-        }
-    }
-}
-extension SystemProcess
-{
-    @MainActor
-    public static
-    func `do`(_ operation:() async throws -> Void) async
-    {
-        do
-        {
-            try await operation()
-        }
-        catch let error
-        {
-            print(error)
-            exit(1)
         }
     }
 }

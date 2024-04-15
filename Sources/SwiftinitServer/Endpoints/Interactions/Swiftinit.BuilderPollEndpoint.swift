@@ -50,10 +50,9 @@ extension Swiftinit.BuilderPollEndpoint:Swiftinit.MachineEndpoint
                 return json
             }
             else if
-                let _:Unidoc.BuildMetadata = try await server.db.packageBuilds.finishBuild(
+                let _:Unidoc.BuildMetadata = try await server.db.packageBuilds.updateBuild(
                     package: build.id,
-                    failure: .init(reason: .noValidVersion),
-                    logs: [],
+                    failure: .noValidVersion,
                     with: session)
             {
                 continue polling

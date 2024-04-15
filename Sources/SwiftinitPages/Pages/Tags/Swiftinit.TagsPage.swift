@@ -354,14 +354,36 @@ extension Swiftinit.TagsPage
         {
             section[.div, { $0.class = "build-pipeline" }]
             {
-                if  case _? = self.build?.progress
+                if  let progress:Unidoc.BuildProgress = self.build?.progress
                 {
                     $0[.div]
                     {
                         $0.title = "You cannot cancel a build that has already started!"
                     } = "Cancel build"
                     $0[.div] = "Queued"
-                    $0[.div] { $0.class = "phase" } = "Started"
+                    $0[.div]
+                    {
+                        $0.class = "phase"
+                        $0.title = switch progress.stage
+                        {
+                        case .initializing:
+                            """
+                            The builder is initializing.
+                            """
+                        case .cloningRepository:
+                            """
+                            The builder is cloning the package’s repository.
+                            """
+                        case .resolvingDependencies:
+                            """
+                            The builder is resolving the package’s dependencies.
+                            """
+                        case .compilingCode:
+                            """
+                            The builder is compiling the package’s source code.
+                            """
+                        }
+                    } = "Started"
                 }
                 else if
                     case _? = self.build?.request
@@ -395,7 +417,7 @@ extension Swiftinit.TagsPage
 
                     $0[.div]
 
-                    switch self.build?.failure?.reason
+                    switch self.build?.failure
                     {
                     case .timeout?:
                         $0[.div]

@@ -19,14 +19,12 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         pool:Mongo.SessionPool,
         unidoc:Unidoc.DB) async throws
     {
-        let workspace:SSGC.Workspace = try await .create(at: ".testing")
-        let toolchain:SSGC.Toolchain = try await .detect(pretty: true)
+        let workspace:SSGC.Workspace = try .create(at: ".testing")
+        let toolchain:SSGC.Toolchain = try .detect(pretty: true)
 
-        let example:SymbolGraphObject<Void> = try await .init(building: try await .local(
+        let example:SymbolGraphObject<Void> = try workspace.build(package: try .local(
                 package: "swift-malibu",
-                from: "TestPackages",
-                in: workspace,
-                clean: true),
+                from: "TestPackages"),
             with: toolchain)
 
         example.roundtrip(for: tests, in: workspace.path)
@@ -39,8 +37,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         }
         catch
         {
-            swift = try await .init(building: try await .swift(in: workspace, clean: true),
-                with: toolchain)
+            swift = try workspace.build(special: .swift, with: toolchain)
         }
 
         let session:Mongo.Session = try await .init(from: pool)
