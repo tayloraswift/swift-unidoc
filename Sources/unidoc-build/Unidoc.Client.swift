@@ -11,6 +11,23 @@ import UnidocAPI
 import UnidocRecords
 import UnidocRecords_LZ77
 
+extension Unidoc.BuildReport
+{
+    mutating
+    func attach(log:FilePath, as type:Unidoc.BuildLogType) throws
+    {
+        let utf8:[UInt8] = try log.read()
+        if  utf8.isEmpty
+        {
+            return
+        }
+
+        self.logs.append(.init(
+            text: .gzip(bytes: utf8[...], level: 10),
+            type: type))
+    }
+}
+
 extension Unidoc
 {
     struct Client:Sendable
@@ -87,47 +104,60 @@ extension Unidoc.Client
 }
 extension Unidoc.Client
 {
+    /// Listens for SSGC updates over the provided pipe, uploading any intermediate reports to
+    /// Unidoc server and returning the final report, without uploading it.
     private
-    func stream(from pipe:FilePath) throws -> Unidoc.BuildFailure.Reason?
+    func stream(from pipe:FilePath, package:Unidoc.Package) async throws -> Unidoc.BuildReport
     {
-        try SSGC.StatusStream.read(from: pipe)
+        try await SSGC.StatusStream.read(from: pipe)
         {
             while let update:SSGC.StatusUpdate = try $0.next()
             {
+                var report:Unidoc.BuildReport = .init(package: package)
                 switch update
                 {
                 case .didCloneRepository:
-                    continue
+                    report.entered = .resolvingDependencies
 
                 case .didResolveDependencies:
-                    continue
-
-                case .success:
-                    return nil
+                    report.entered = .compilingCode
 
                 case .failedToCloneRepository:
-                    return .failedToCloneRepository
+                    report.failure = .failedToCloneRepository
 
                 case .failedToReadManifest:
-                    return .failedToReadManifest
+                    report.failure = .failedToReadManifest
 
                 case .failedToReadManifestForDependency:
-                    return .failedToReadManifestForDependency
+                    report.failure = .failedToReadManifestForDependency
 
                 case .failedToResolveDependencies:
-                    return .failedToResolveDependencies
+                    report.failure = .failedToResolveDependencies
 
                 case .failedToBuild:
-                    return .failedToBuild
+                    report.failure = .failedToBuild
 
                 case .failedToExtractSymbolGraph:
-                    return .failedToExtractSymbolGraph
+                    report.failure = .failedToExtractSymbolGraph
 
                 case .failedToLoadSymbolGraph:
-                    return .failedToLoadSymbolGraph
+                    report.failure = .failedToLoadSymbolGraph
 
                 case .failedToLinkSymbolGraph:
-                    return .failedToLinkSymbolGraph
+                    report.failure = .failedToLinkSymbolGraph
+
+                case .success:
+                    return report
+                }
+
+                if  case nil = report.failure
+                {
+                    try await self.connect { try await $0.upload(report) }
+                    continue
+                }
+                else
+                {
+                    return report
                 }
             }
 
@@ -149,19 +179,22 @@ extension Unidoc.Client
                 or prerelease anyway.
                 """)
 
-            let failureReport:Unidoc.BuildFailureReport =  .init(
+            let reportNoneBuildable:Unidoc.BuildReport =  .init(
                 package: labels.coordinate.package,
-                failure: .init(reason: .noValidVersion),
+                failure: .noValidVersion,
+                entered: nil,
                 logs: [])
 
-            try await self.connect { try await $0.upload(failureReport) }
+            try await self.connect { try await $0.upload(reportNoneBuildable) }
             return false
         }
 
         let workspace:SSGC.Workspace = try .create(at: ".unidoc")
+
+        let diagnostics:FilePath = workspace.path / "docs.log"
+        let docs:FilePath = workspace.path / "docs.bson"
         let output:FilePath = workspace.path / "output"
         let status:FilePath = workspace.path / "status"
-        let docs:FilePath = workspace.path / "docs.bson"
 
         try SystemProcess.init(command: "rm", "-f", "\(status)")()
         try SystemProcess.init(command: "mkfifo", "\(status)")()
@@ -180,6 +213,7 @@ extension Unidoc.Client
             "--workspace", "\(workspace.path)",
             "--status", "\(status)",
             "--output", "\(docs)",
+            "--output-log", "\(diagnostics)"
         ]
         if  self.pretty
         {
@@ -200,46 +234,43 @@ extension Unidoc.Client
             permissions: (.rw, .r, .r),
             options: [.create, .truncate])
         {
-            try .init(command: nil, arguments: arguments,
+            try .init(command: nil,
+                arguments: arguments,
                 stdout: $0,
                 stderr: $0)
         }
 
         async
-        let failure:Unidoc.BuildFailure.Reason? = try self.stream(from: status)
+        let updates:Unidoc.BuildReport = try self.stream(from: status,
+            package: labels.coordinate.package)
 
         //  Wait for the child process to finish.
         try ssgc()
 
-        if  let failure:Unidoc.BuildFailure.Reason = try await failure
+        var report:Unidoc.BuildReport = try await updates
+
+        try report.attach(log: output, as: .ssgc)
+        try report.attach(log: diagnostics, as: .ssgcDiagnostics)
+
+        if  case _? = report.failure
         {
-            var failureReport:Unidoc.BuildFailureReport = .init(
-                package: labels.coordinate.package,
-                failure: .init(reason: failure),
-                logs: [])
-
-            let output:[UInt8] = try output.read()
-            if !output.isEmpty
-            {
-                failureReport.logs.append(.init(
-                    text: .gzip(bytes: output[...], level: 10),
-                    type: .ssgc))
-            }
-
-            try await self.connect { try await $0.upload(failureReport) }
+            try await self.connect { try await $0.upload(report) }
             return false
         }
         else
         {
-            let object:SymbolGraphObject<Void> = try .init(
-                buffer: try docs.read())
-
+            let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
+            //  We want to upload the symbol graph first, mainly so that the server does not
+            //  need to handle a state where the build is allegedly successful, but the symbol
+            //  graph is not available yet.
             try await self.connect
             {
                 try await $0.upload(Unidoc.Snapshot.init(id: labels.coordinate,
                     metadata: object.metadata,
                     inline: object.graph,
                     action: action))
+
+                try await $0.upload(report)
             }
 
             return true

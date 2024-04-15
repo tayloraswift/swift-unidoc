@@ -22,8 +22,8 @@ extension Unidoc
         public
         var action:PendingAction?
 
-        /// Only present for standard library snapshots. This is used to automatically load
-        /// the latest version of the standard library without querying git tags.
+        /// Only present for standard library snapshots. This is used to automatically load the
+        /// latest version of the standard library without querying git tags.
         public
         var swift:PatchVersion?
         /// Any dependencies that have been pinned for this snapshot.

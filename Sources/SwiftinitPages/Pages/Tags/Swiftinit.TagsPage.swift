@@ -395,7 +395,7 @@ extension Swiftinit.TagsPage
 
                     $0[.div]
 
-                    switch self.build?.failure?.reason
+                    switch self.build?.failure
                     {
                     case .timeout?:
                         $0[.div]

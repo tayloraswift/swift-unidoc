@@ -3,39 +3,23 @@ import BSON
 extension Unidoc
 {
     @frozen public
-    struct BuildFailure:Equatable, Sendable
+    enum BuildFailure:Int32, BSONEncodable, BSONDecodable, Equatable, Sendable
     {
-        public
-        let reason:Reason
-
-        @inlinable public
-        init(reason:Reason)
-        {
-            self.reason = reason
-        }
+        case timeout = 0
+        case noValidVersion = 1
+        case failedToCloneRepository = 2
+        case failedToReadManifest = 3
+        case failedToReadManifestForDependency = 4
+        case failedToResolveDependencies = 5
+        case failedToBuild = 6
+        case failedToExtractSymbolGraph = 7
+        case failedToLoadSymbolGraph = 8
+        case failedToLinkSymbolGraph = 9
     }
 }
 extension Unidoc.BuildFailure
 {
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
-        case reason = "T"
-    }
-}
-extension Unidoc.BuildFailure:BSONDocumentEncodable
-{
+    @available(*, deprecated, renamed: "Unidoc.BuildFailure")
     public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
-        bson[.reason] = self.reason
-    }
-}
-extension Unidoc.BuildFailure:BSONDocumentDecodable
-{
-    public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(reason: try bson[.reason].decode())
-    }
+    typealias Reason = Unidoc.BuildFailure
 }

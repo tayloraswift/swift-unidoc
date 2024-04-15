@@ -209,8 +209,9 @@ extension Unidoc.DB.PackageBuilds
                     {
                         $0[Unidoc.BuildMetadata[.progress]] = Unidoc.BuildProgress.init(
                             started: .now(),
+                            builder: builder,
                             request: request,
-                            builder: builder)
+                            stage: .initializing)
                     }
                 }
             },
@@ -220,10 +221,11 @@ extension Unidoc.DB.PackageBuilds
     }
 
     public
-    func finishBuild(
+    func updateBuild(
         package:Unidoc.Package,
-        failure:Unidoc.BuildFailure?,
-        logs:[Unidoc.BuildLogType],
+        entered:Unidoc.BuildStage? = nil,
+        failure:Unidoc.BuildFailure? = nil,
+        logs:[Unidoc.BuildLogType] = [],
         with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
     {
         let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
@@ -237,7 +239,16 @@ extension Unidoc.DB.PackageBuilds
                 }
                 $0[.update]
                 {
-                    if  let failure:Unidoc.BuildFailure = failure
+                    if  let entered:Unidoc.BuildStage
+                    {
+                        $0[.set]
+                        {
+                            $0[Unidoc.BuildMetadata[.progress] /
+                                Unidoc.BuildProgress[.stage]] = entered
+                        }
+                    }
+                    else if
+                        let failure:Unidoc.BuildFailure
                     {
                         $0[.set]
                         {
@@ -272,8 +283,7 @@ extension Unidoc.DB.PackageBuilds
     func lintBuilds(startedBefore:BSON.Millisecond,
         with session:Mongo.Session) async throws -> Int
     {
-        let failure:Unidoc.BuildFailure = Unidoc.BuildFailure.init(
-            reason: .timeout)
+        let failure:Unidoc.BuildFailure = .timeout
         let response:Mongo.UpdateResponse = try await session.run(
             command: Mongo.Update<Mongo.Many, Unidoc.Package>.init(Self.name)
             {
