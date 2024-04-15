@@ -578,6 +578,7 @@ let package:Package = .init(
 
         .executableTarget(name: "S3Export",
             dependencies: [
+                .target(name: "ArgumentParsing"),
                 .target(name: "S3Client"),
                 .target(name: "System"),
                 .target(name: "SwiftinitAssets"),
