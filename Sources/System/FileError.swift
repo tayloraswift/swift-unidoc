@@ -1,10 +1,10 @@
 import TraceableErrors
 
 public
-enum FileError:Error, Sendable
+enum FileError:Error, Equatable, Sendable
 {
-    case opening(FilePath, any Error)
-    case closing(FilePath, any Error)
+    case opening(FilePath, Errno)
+    case closing(FilePath, Errno)
 }
 extension FileError
 {

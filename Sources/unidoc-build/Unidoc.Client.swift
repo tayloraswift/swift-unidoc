@@ -193,8 +193,13 @@ extension Unidoc.Client
         let output:FilePath = workspace.path / "output"
         let status:FilePath = workspace.path / "status"
 
-         try SystemProcess.init(command: "rm", "-f", "\(status)")()
-         try SystemProcess.init(command: "mkfifo", "\(status)")()
+        try SystemProcess.init(command: "rm", "-f", "\(status)")()
+        try SystemProcess.init(command: "mkfifo", "\(status)")()
+
+        //  Delete stale artifacts
+        try SystemProcess.init(command: "rm", "-f", "\(diagnostics)")()
+        try SystemProcess.init(command: "rm", "-f", "\(output)")()
+        try SystemProcess.init(command: "rm", "-f", "\(docs)")()
 
         defer
         {
