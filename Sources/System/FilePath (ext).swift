@@ -1,3 +1,4 @@
+@_exported import struct SystemPackage.Errno
 @_exported import struct SystemPackage.FilePath
 
 extension FilePath:@unchecked Sendable
@@ -34,7 +35,7 @@ extension FilePath
                 options: options,
                 permissions: permissions.map(FilePermissions.init(_:)))
         }
-        catch let error
+        catch let error as Errno
         {
             throw FileError.opening(self, error)
         }
@@ -47,7 +48,7 @@ extension FilePath
         {
             try file.close()
         }
-        catch let error
+        catch let error as Errno
         {
             throw FileError.closing(self, error)
         }
