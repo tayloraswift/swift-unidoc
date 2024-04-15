@@ -10,16 +10,19 @@ extension Unidoc
         public
         var started:BSON.Millisecond
         public
+        var builder:Account
+        public
         var request:BuildRequest
         public
-        var builder:Account
+        var stage:BuildStage
 
         @inlinable public
-        init(started:BSON.Millisecond, request:BuildRequest, builder:Account)
+        init(started:BSON.Millisecond, builder:Account, request:BuildRequest, stage:BuildStage)
         {
             self.started = started
-            self.request = request
             self.builder = builder
+            self.request = request
+            self.stage = stage
         }
     }
 }
@@ -29,8 +32,9 @@ extension Unidoc.BuildProgress:Mongo.MasterCodingModel
     enum CodingKey:String, Sendable
     {
         case started = "S"
-        case request = "R"
         case builder = "b"
+        case request = "R"
+        case stage = "P"
     }
 }
 extension Unidoc.BuildProgress:BSONDocumentEncodable
@@ -39,8 +43,9 @@ extension Unidoc.BuildProgress:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.started] = self.started
-        bson[.request] = self.request
         bson[.builder] = self.builder
+        bson[.request] = self.request
+        bson[.stage] = self.stage
     }
 }
 extension Unidoc.BuildProgress:BSONDocumentDecodable
@@ -50,7 +55,8 @@ extension Unidoc.BuildProgress:BSONDocumentDecodable
     {
         self.init(
             started: try bson[.started].decode(),
+            builder: try bson[.builder].decode(),
             request: try bson[.request].decode(),
-            builder: try bson[.builder].decode())
+            stage: try bson[.stage].decode())
     }
 }

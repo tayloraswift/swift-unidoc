@@ -18,9 +18,9 @@ extension SSGC
 extension SSGC.StatusStream
 {
     @inlinable public static
-    func read<T>(from fifo:FilePath, with body:(Self) throws -> T) throws -> T
+    func read<T>(from fifo:FilePath, with body:(Self) async throws -> T) async throws -> T
     {
-        try fifo.open(.readOnly) { try body(.init(file: $0)) }
+        try await fifo.open(.readOnly) { try await body(.init(file: $0)) }
     }
 
     @inlinable public

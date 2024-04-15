@@ -13,11 +13,11 @@ extension Swiftinit
 {
     struct BuilderUploadEndpoint:Sendable
     {
-        let outcome:Unidoc.BuildOutcome
+        let route:Unidoc.BuildRoute
 
-        init(outcome:Unidoc.BuildOutcome)
+        init(route:Unidoc.BuildRoute)
         {
-            self.outcome = outcome
+            self.route = route
         }
     }
 }
@@ -32,14 +32,16 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
         let package:Unidoc.Package
         let failure:Unidoc.BuildFailure?
+        let entered:Unidoc.BuildStage?
         var logs:[Unidoc.BuildLogType] = []
 
-        switch self.outcome
+        switch self.route
         {
-        case .failure:
-            let report:Unidoc.BuildFailureReport = try .init(bson: bson)
+        case .report:
+            let report:Unidoc.BuildReport = try .init(bson: bson)
 
             package = report.package
+            entered = report.entered
             failure = report.failure
 
             json = nil
@@ -70,7 +72,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
 
                         try await $0.put(content: .init(
                                 body: .binary(log.text.bytes),
-                                type: .text(.plain),
+                                type: .text(.plain, charset: .utf8),
                                 encoding: .gzip),
                             using: .standard,
                             path: "\(path)")
@@ -80,7 +82,7 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
                 }
             }
 
-        case .success:
+        case .labeled:
             var snapshot:Unidoc.Snapshot = try .init(bson: bson)
 
             if  let bucket:AWS.S3.Bucket = server.bucket.graphs
@@ -97,11 +99,12 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
                 with: session)
 
             package = uploaded.package
+            entered = nil
             failure = nil
 
             json = .encode(uploaded)
 
-        case .successUnlabeled:
+        case .labeling:
             let documentation:SymbolGraphObject<Void> = try .init(bson: bson)
 
             var (snapshot, _):(Unidoc.Snapshot, _?) = try await server.db.unidoc.label(
@@ -125,13 +128,15 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
                 with: session)
 
             package = uploaded.package
+            entered = nil
             failure = nil
 
             json = .encode(uploaded)
         }
 
-        let _:Unidoc.BuildMetadata? = try await server.db.packageBuilds.finishBuild(
+        let _:Unidoc.BuildMetadata? = try await server.db.packageBuilds.updateBuild(
             package: package,
+            entered: entered,
             failure: failure,
             logs: logs,
             with: session)

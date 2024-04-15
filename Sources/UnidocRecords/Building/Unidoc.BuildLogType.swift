@@ -10,9 +10,8 @@ extension Unidoc
         case _swiftPackageBuild = "B"
         case _swiftSymbolGraphExtract = "E"
 
-        case _ssgcDiagnostics = "D"
-
         case ssgc = "C"
+        case ssgcDiagnostics = "D"
     }
 }
 extension Unidoc.BuildLogType
@@ -25,8 +24,8 @@ extension Unidoc.BuildLogType
         case ._swiftPackageResolution:      "swift-package-resolution"
         case ._swiftPackageBuild:           "swift-package-build"
         case ._swiftSymbolGraphExtract:     "swift-symbolgraph-extract"
-        case ._ssgcDiagnostics:             "ssgc-diagnostics"
         case .ssgc:                         "ssgc"
+        case .ssgcDiagnostics:              "ssgc-diagnostics"
         }
     }
 }

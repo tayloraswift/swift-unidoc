@@ -34,8 +34,8 @@ extension Swiftinit.StreamedRequest:HTTP.ServerStreamedRequest
 
         guard
         case Swiftinit.Root.ssgc.id? = path.popFirst(),
-        let outcome:String = path.popFirst(),
-        let outcome:Unidoc.BuildOutcome = .init(outcome)
+        let route:String = path.popFirst(),
+        let route:Unidoc.BuildRoute = .init(route)
         else
         {
             return nil
@@ -52,7 +52,7 @@ extension Swiftinit.StreamedRequest:HTTP.ServerStreamedRequest
         }
 
         self.init(
-            endpoint: Swiftinit.BuilderUploadEndpoint.init(outcome: outcome),
+            endpoint: Swiftinit.BuilderUploadEndpoint.init(route: route),
             cookies: .init(header: headers["cookie"]))
     }
 }

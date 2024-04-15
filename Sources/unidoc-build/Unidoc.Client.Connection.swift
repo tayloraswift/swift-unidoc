@@ -91,7 +91,7 @@ extension Unidoc.Client.Connection
         print("Uploading unlabeled symbol graph...")
 
         let _:Unidoc.UploadStatus = try await self.put(bson: bson,
-            to: "/ssgc/\(Unidoc.BuildOutcome.successUnlabeled)",
+            to: "/ssgc/\(Unidoc.BuildRoute.labeling)",
             timeout: .seconds(60))
 
         print("Successfully uploaded symbol graph!")
@@ -104,22 +104,22 @@ extension Unidoc.Client.Connection
         print("Uploading labeled symbol graph...")
 
         let _:Unidoc.UploadStatus = try await self.put(bson: bson,
-            to: "/ssgc/\(Unidoc.BuildOutcome.success)",
+            to: "/ssgc/\(Unidoc.BuildRoute.labeled)",
             timeout: .seconds(60))
 
         print("Successfully uploaded symbol graph!")
     }
 
-    func upload(_ report:consuming Unidoc.BuildFailureReport) async throws
+    func upload(_ report:consuming Unidoc.BuildReport) async throws
     {
         let bson:BSON.Document = .init(encoding: consume report)
 
-        print("Uploading build failure report...")
+        print("Uploading build report...")
 
         do
         {
             let _:Never = try await self.put(bson: bson,
-                to: "/ssgc/\(Unidoc.BuildOutcome.failure)")
+                to: "/ssgc/\(Unidoc.BuildRoute.report)")
         }
         catch let error as HTTP.StatusError
         {
@@ -131,7 +131,7 @@ extension Unidoc.Client.Connection
             }
         }
 
-        print("Successfully uploaded build failure report!")
+        print("Successfully uploaded build report!")
     }
 }
 
