@@ -37,6 +37,9 @@ extension Unidoc
         public
         var realmAligning:Bool
 
+        public
+        var platformPreference:Triple?
+
         /// The remote git repo this package tracks.
         ///
         /// Currently only GitHub repos are supported.
@@ -49,6 +52,7 @@ extension Unidoc
             hidden:Bool = false,
             realm:Unidoc.Realm? = nil,
             realmAligning:Bool = false,
+            platformPreference:Triple? = nil,
             repo:PackageRepo? = nil)
         {
             self.id = id
@@ -56,6 +60,7 @@ extension Unidoc
             self.hidden = hidden
             self.realm = realm
             self.realmAligning = realmAligning
+            self.platformPreference = platformPreference
             self.repo = repo
         }
     }
@@ -123,6 +128,7 @@ extension Unidoc.PackageMetadata:Mongo.MasterCodingModel
         case hidden = "H"
         case realm = "r"
         case realmAligning = "A"
+        case platformPreference = "O"
         case repo = "G"
 
         @available(*, unavailable)
@@ -144,6 +150,7 @@ extension Unidoc.PackageMetadata:BSONDocumentEncodable
         bson[.hidden] = self.hidden ? true : nil
         bson[.realm] = self.realm
         bson[.realmAligning] = self.realmAligning ? true : nil
+        bson[.platformPreference] = self.platformPreference
         bson[.repo] = self.repo
     }
 }
@@ -157,6 +164,7 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
             hidden: try bson[.hidden]?.decode() ?? false,
             realm: try bson[.realm]?.decode(),
             realmAligning: try bson[.realmAligning]?.decode() ?? false,
+            platformPreference: try bson[.platformPreference]?.decode(),
             repo: try bson[.repo]?.decode())
     }
 }

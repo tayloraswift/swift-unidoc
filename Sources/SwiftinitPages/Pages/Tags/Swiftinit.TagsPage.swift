@@ -508,7 +508,7 @@ extension Swiftinit.TagsPage
             //  TODO: this looks really ugly visually, but it’s a start.
             if  let build:Unidoc.BuildMetadata = self.build, !build.logs.isEmpty
             {
-                section[.h4] = "Build logs"
+                section[.h3] = "Build logs"
 
                 section[.ol]
                 {
@@ -529,6 +529,55 @@ extension Swiftinit.TagsPage
                     }
                 }
             }
+        }
+
+        section[.h3] = "Build configuration"
+
+        section[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Swiftinit.API[.packageConfig])"
+            $0.method = "post"
+
+            $0.class = "config"
+        }
+            content:
+        {
+            $0[.dl]
+            {
+                $0[.dt] = "Platform preference"
+                $0[.dd]
+                {
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "package"
+                        $0.value = "\(self.package.id)"
+                    }
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "from"
+                        $0.value = "\(self.location)"
+                    }
+                    $0[.input]
+                    {
+                        $0.type = "text"
+                        $0.name = "platform-preference"
+                        $0.required = true
+
+                        $0.placeholder = "x86_64-unknown-linux-gnu"
+                        $0.pattern = #"^[a-zA-Z0-9_\-\.]+$"#
+                        $0.value = self.package.platformPreference?.description
+                    }
+                }
+            }
+
+            $0[.button]
+            {
+                $0.class = "area"
+                $0.type = "submit"
+            } = "Update configuration"
         }
 
         section[.h3] = "Names and aliases"
