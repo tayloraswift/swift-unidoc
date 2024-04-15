@@ -1,3 +1,4 @@
+import ArgumentParsing
 import HTTPClient
 import NIOCore
 import NIOPosix
@@ -23,10 +24,7 @@ struct Main
     private mutating
     func parse() throws
     {
-        var arguments:IndexingIterator<[String]> = Swift.CommandLine.arguments.makeIterator()
-        //  Consume name of the executable itself.
-        let _:String? = arguments.next()
-
+        var arguments:CommandLine.Arguments = .init()
         while let argument:String = arguments.next()
         {
             if  case nil = self.match
