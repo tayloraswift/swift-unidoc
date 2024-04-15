@@ -593,6 +593,10 @@ extension Swiftinit.IntegralRequest.Ordering
                 You can cancel a build if it has not started yet.
                 """
                 button = "Cancel build"
+
+            case .platformPreference:
+                //  Doesn’t need a confirmation page.
+                return nil
             }
 
         case .userConfig:

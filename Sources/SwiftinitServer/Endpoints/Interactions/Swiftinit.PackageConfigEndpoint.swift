@@ -84,6 +84,15 @@ extension Swiftinit.PackageConfigEndpoint:Swiftinit.RestrictedEndpoint
             updated = changed != nil ? symbol : nil
             rebuildPackageList = changed ?? false
 
+        case .platformPreference(let triple):
+            let _:Bool? = try await server.db.packages.update(
+                package: self.package,
+                platformPreference: triple,
+                with: session)
+
+            updated = nil
+            rebuildPackageList = false
+
         case .build(let request?):
             _ = try await server.db.packageBuilds.submitBuild(request: request,
                 package: self.package,

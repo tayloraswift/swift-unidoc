@@ -1,4 +1,5 @@
 import BSON
+import SymbolGraphs
 import Symbols
 
 extension Swiftinit.PackageConfigEndpoint
@@ -6,6 +7,7 @@ extension Swiftinit.PackageConfigEndpoint
     enum Update
     {
         case hidden(Bool)
+        case platformPreference(Triple)
         case symbol(Symbol.Package)
         case expires(BSON.Millisecond)
         case build(Unidoc.BuildRequest?)
@@ -19,6 +21,12 @@ extension Swiftinit.PackageConfigEndpoint.Update
             let hidden:Bool = .init(hidden)
         {
             self = .hidden(hidden)
+        }
+        else if
+            let triple:String = form["platform-preference"],
+            let triple:Triple = .init(triple)
+        {
+            self = .platformPreference(triple)
         }
         else if
             let symbol:Symbol.Package = form["symbol"].map(Symbol.Package.init(_:))
