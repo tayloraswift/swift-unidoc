@@ -1,4 +1,5 @@
 import System
+import struct SystemPackage.Errno
 
 extension SSGC
 {
@@ -44,6 +45,13 @@ extension SSGC.StatusStream
 
     func send(_ update:SSGC.StatusUpdate) throws
     {
-        try self.file.writeAll([update.rawValue])
+        do
+        {
+            try self.file.writeAll([update.rawValue])
+        }
+        catch let error as Errno
+        {
+            throw error == .brokenPipe ? SSGC.StatusStreamError.pipeDisconnected : error
+        }
     }
 }

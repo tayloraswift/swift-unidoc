@@ -1,33 +1,42 @@
 import TraceableErrors
 
 public
-struct FileError:Error, Sendable
+enum FileError:Error, Sendable
 {
-    public
-    let underlying:any Error
-    public
-    let path:FilePath
-
-    public
-    init(underlying:any Error, path:FilePath)
-    {
-        self.underlying = underlying
-        self.path = path
-    }
+    case opening(FilePath, any Error)
+    case closing(FilePath, any Error)
 }
-extension FileError:Equatable
+extension FileError
 {
-    public static
-    func == (lhs:Self, rhs:Self) -> Bool
+    @inlinable public
+    var path:FilePath
     {
-        lhs.path == rhs.path && lhs.underlying == rhs.underlying
+        switch self
+        {
+        case .opening(let path, _):  path
+        case .closing(let path, _):  path
+        }
     }
 }
 extension FileError:TraceableError
 {
+    @inlinable public
+    var underlying:any Error
+    {
+        switch self
+        {
+        case .opening(_, let error): error
+        case .closing(_, let error): error
+        }
+    }
+
     public
     var notes:[String]
     {
-        ["In file '\(self.path)'"]
+        switch self
+        {
+        case .opening(let path, _):  ["While opening file '\(path)'"]
+        case .closing(let path, _):  ["While closing file '\(path)'"]
+        }
     }
 }

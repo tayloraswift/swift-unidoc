@@ -11,6 +11,10 @@ import UnidocAPI
 import UnidocRecords
 import URI
 
+extension Unidoc.Client.Connection
+{
+
+}
 extension Unidoc.Client
 {
     struct Connection
@@ -84,7 +88,7 @@ extension Unidoc.Client.Connection
 }
 extension Unidoc.Client.Connection
 {
-    func upload(_ unlabeled:consuming SymbolGraphObject<Void>) async throws
+    func upload(_ unlabeled:SymbolGraphObject<Void>) async throws
     {
         let bson:BSON.Document = .init(encoding: unlabeled)
 
@@ -97,7 +101,7 @@ extension Unidoc.Client.Connection
         print("Successfully uploaded symbol graph!")
     }
 
-    func upload(_ labeled:consuming Unidoc.Snapshot) async throws
+    func upload(_ labeled:Unidoc.Snapshot) async throws
     {
         let bson:BSON.Document = .init(encoding: labeled)
 
@@ -110,28 +114,36 @@ extension Unidoc.Client.Connection
         print("Successfully uploaded symbol graph!")
     }
 
-    func upload(_ report:consuming Unidoc.BuildReport) async throws
+    func upload(_ report:Unidoc.BuildReport) async throws
     {
-        let bson:BSON.Document = .init(encoding: consume report)
-
-        print("Uploading build report...")
-
+        let bson:BSON.Document = .init(encoding: report)
         do
         {
             let _:Never = try await self.put(bson: bson,
                 to: "/ssgc/\(Unidoc.BuildRoute.report)")
         }
-        catch let error as HTTP.StatusError
+        catch is HTTP.NonError
         {
-            guard
-            case 204? = error.code
+            if  let stage:Unidoc.BuildStage = report.entered
+            {
+                print("Reported build entered stage: \(stage)")
+            }
+            else if
+                let failure:Unidoc.BuildFailure = report.failure
+            {
+                print("Reported build failure: \(failure)")
+            }
             else
             {
-                throw error
+                print("Uploaded build logs!")
             }
         }
-
-        print("Successfully uploaded build report!")
+        catch let error
+        {
+            print("Warning: failed to upload build report!")
+            print("Error: \(error)")
+            throw error
+        }
     }
 }
 
@@ -238,6 +250,9 @@ extension Unidoc.Client.Connection
             {
             case 200?, 201?, 202?, 203?:
                 return response.buffers
+
+            case 204?:
+                throw HTTP.NonError.init()
 
             case 301?:
                 if  let location:String = response.headers?["location"].first
