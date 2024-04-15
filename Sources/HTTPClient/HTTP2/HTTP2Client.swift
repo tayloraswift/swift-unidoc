@@ -5,19 +5,20 @@ import NIOPosix
 import NIOSSL
 
 @frozen public
-struct HTTP2Client
+struct HTTP2Client:@unchecked Sendable
 {
-    @usableFromInline internal
-    let bootstrap:ClientBootstrap
+    /// We must **never** modify the bootstrap after initialization!
+    @usableFromInline
+    let _bootstrap:ClientBootstrap
 
     /// The hostname of the remote service.
     public
     let remote:String
 
     private
-    init(bootstrap:ClientBootstrap, remote:String)
+    init(_bootstrap:ClientBootstrap, remote:String)
     {
-        self.bootstrap = bootstrap
+        self._bootstrap = _bootstrap
         self.remote = remote
     }
 }
@@ -32,7 +33,7 @@ extension HTTP2Client
     public
     init(threads:MultiThreadedEventLoopGroup, niossl:NIOSSLContext, remote:String)
     {
-        let bootstrap:ClientBootstrap = .init(group: threads)
+        let _bootstrap:ClientBootstrap = .init(group: threads)
             .connectTimeout(.seconds(3))
             .channelInitializer
         {
@@ -69,7 +70,7 @@ extension HTTP2Client
             }
         }
 
-        self.init(bootstrap: bootstrap, remote: remote)
+        self.init(_bootstrap: _bootstrap, remote: remote)
     }
 }
 extension HTTP2Client
@@ -91,7 +92,7 @@ extension HTTP2Client
     @inlinable public
     func connect<T>(port:Int = 443, with body:(Connection) async throws -> T) async throws -> T
     {
-        let channel:any Channel = try await self.bootstrap.connect(
+        let channel:any Channel = try await self._bootstrap.connect(
             host: self.remote,
             port: port).get()
 

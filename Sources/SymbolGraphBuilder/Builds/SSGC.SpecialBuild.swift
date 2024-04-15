@@ -4,33 +4,24 @@ import System
 extension SSGC
 {
     public
-    struct StdlibBuild
+    struct SpecialBuild
     {
-        /// Where to emit documentation artifacts to.
-        let artifacts:ArtifactsDirectory
-
         private
-        init(artifacts:ArtifactsDirectory)
+        init()
         {
-            self.artifacts = artifacts
         }
     }
 }
-extension SSGC.StdlibBuild
+extension SSGC.SpecialBuild
 {
     public static
-    func swift(in shared:SSGC.Workspace, clean:Bool = false) async throws -> Self
-    {
-        let container:SSGC.Workspace = try await shared.create("swift", clean: clean)
-        return .init(artifacts: try await container.create("artifacts", clean: clean,
-            as: ArtifactsDirectory.self)) // https://github.com/apple/swift/issues/71602
-    }
+    var swift:Self { .init() }
 }
-extension SSGC.StdlibBuild:SSGC.DocumentationBuild
+extension SSGC.SpecialBuild:SSGC.DocumentationBuild
 {
-    func compile(
-        with swift:SSGC.Toolchain,
-        logs _:inout Logs) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
+    func compile(updating _:SSGC.StatusStream?,
+        into _:FilePath,
+        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
         let sources:[SSGC.NominalSources] =

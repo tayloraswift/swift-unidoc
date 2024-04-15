@@ -19,8 +19,8 @@ struct VolumeQueries:UnidocDatabaseTestBattery
         pool:Mongo.SessionPool,
         unidoc:Unidoc.DB) async throws
     {
-        let workspace:SSGC.Workspace = try await .create(at: ".testing")
-        let swift:SSGC.Toolchain = try await .detect()
+        let workspace:SSGC.Workspace = try .create(at: ".testing")
+        let swift:SSGC.Toolchain = try .detect()
 
         let session:Mongo.Session = try await .init(from: pool)
         let package:Symbol.Package = "swift-version-controlled"

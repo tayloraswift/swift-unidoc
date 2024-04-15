@@ -1,13 +1,29 @@
 import SourceDiagnostics
+import System
 
 extension SSGC
 {
-    protocol DocumentationLogger
+    @frozen public
+    struct DocumentationLogger
     {
-        mutating
-        func attach(extractorLog:[UInt8])
+        let path:FilePath
 
-        mutating
-        func attach(messages:consuming DiagnosticMessages)
+        init(path:FilePath)
+        {
+            self.path = path
+        }
+    }
+}
+extension SSGC.DocumentationLogger
+{
+    func emit(messages:consuming DiagnosticMessages) throws
+    {
+        try self.path.open(.writeOnly,
+            permissions: (.rw, .r, .r),
+            options: [.create, .truncate])
+        {
+            let text:String = "\(messages)"
+            try $0.writeAll(text.utf8)
+        }
     }
 }

@@ -13,17 +13,14 @@ extension SSGC
     {
         /// What is being built.
         let id:ID
-        /// Where to emit documentation artifacts to.
-        let artifacts:ArtifactsDirectory
 
         /// Where the package root directory is. There should be a `Package.swift`
         /// manifest at the top level of this directory.
         var root:FilePath
 
-        init(id:ID, artifacts:ArtifactsDirectory, root:FilePath)
+        init(id:ID, root:FilePath)
         {
             self.id = id
-            self.artifacts = artifacts
             self.root = root
         }
     }
@@ -71,21 +68,10 @@ extension SSGC.PackageBuild
     ///     -   packages:
     ///         The location in which this function will search for a directory
     ///         named `"\(package)"`.
-    ///     -   shared:
-    ///         The directory in which this function will create a location to
-    ///         dump build artifacts to.
     public static
-    func local(package:Symbol.Package,
-        from packages:FilePath,
-        in shared:SSGC.Workspace,
-        clean:Bool = false) async throws -> Self
+    func local(package:Symbol.Package, from packages:FilePath) throws -> Self
     {
-        let container:SSGC.Workspace = try await shared.create("\(package)", clean: clean)
-
-        return .init(id: .unversioned(package),
-            // https://github.com/apple/swift/issues/71602
-            artifacts: try await container.create("artifacts", as: ArtifactsDirectory.self),
-            root: packages / "\(package)")
+        return .init(id: .unversioned(package), root: packages / "\(package)")
     }
 
     /// Clones or pulls the specified package from a git repository, checking out
@@ -97,61 +83,51 @@ extension SSGC.PackageBuild
     ///         same as the last path component of the remote URL.
     ///     -   remote:
     ///         The URL of the git repository to clone or pull from.
-    ///     -   refname:
-    ///         The ref to check out. This string must match exactly, e.g. `v0.1.0`
+    ///     -   reference:
+    ///         The git reference to check out. This string must match exactly, e.g. `v0.1.0`
     ///         is not equivalent to `0.1.0`.
     ///     -   shared:
     ///         The directory in which this function will create folders.
     public static
     func remote(package:Symbol.Package,
         from repository:String,
-        at refname:String,
-        in shared:SSGC.Workspace,
-        clean:Set<Clean> = []) async throws -> Self
+        at reference:String,
+        in workspace:SSGC.Workspace,
+        clean:Bool = false) throws -> Self
     {
-        let version:AnyVersion = .init(refname)
-
         //  The directory layout looks something like:
         //
         //  myworkspace/
-        //  └── username.swift-example-package/
-        //      ├── artifacts@v1.0.0/
-        //      │   └── ...
-        //      ├── artifacts@v1.1.0/
-        //      │   └── ...
-        //      └── checkouts/
-        //          └── swift-example-package/
-        //              ├── .git/
-        //              ├── .build/
-        //              ├── .build.unidoc/
-        //              ├── Package.swift
-        //              └── ...
+        //  ├── artifacts/
+        //  └── checkouts/
+        //      └── swift-example-package/
+        //          ├── .git/
+        //          ├── .build/
+        //          ├── .build.unidoc/
+        //          ├── Package.swift
+        //          └── ...
 
-        let container:SSGC.Workspace = try await shared.create("\(package)")
-        let checkouts:SSGC.CheckoutDirectory = try await container.create("checkouts",
-            clean: clean.contains(.checkouts),
-            as: SSGC.CheckoutDirectory.self) // https://github.com/apple/swift/issues/71602
-        let artifacts:ArtifactsDirectory = try await container.create("artifacts@\(refname)",
-            clean: clean.contains(.artifacts),
-            as: ArtifactsDirectory.self)    // ditto
-
-        let cloned:FilePath = checkouts.path / "\(package)"
+        let clone:FilePath = workspace.checkouts / "\(package)"
+        if  clean
+        {
+            try clone.directory.remove()
+        }
 
         print("Pulling repository from remote: \(repository)")
 
-        if  cloned.directory.exists()
+        if  clone.directory.exists()
         {
-            try await SystemProcess.init(command: "git", "-C", "\(cloned)", "fetch")()
+            try SystemProcess.init(command: "git", "-C", "\(clone)", "fetch")()
         }
         else
         {
-            try await SystemProcess.init(command: "git", "-C", "\(checkouts)",
-                "clone", repository, "\(package)", "--recurse-submodules", "--quiet")()
+            try SystemProcess.init(command: "git", "-C", "\(workspace.checkouts)",
+                "clone", repository, "\(package)", "--recurse-submodules")()
         }
 
-        try await SystemProcess.init(command: "git", "-C", "\(cloned)",
+        try SystemProcess.init(command: "git", "-C", "\(clone)",
             "-c", "advice.detachedHead=false",
-            "checkout", "-f", refname,
+            "checkout", "-f", reference,
             "--recurse-submodules")()
 
         let (readable, writable):(FileDescriptor, FileDescriptor) =
@@ -163,8 +139,8 @@ extension SSGC.PackageBuild
             try? readable.close()
         }
 
-        try await SystemProcess.init(command: "git", "-C", "\(cloned)",
-            "rev-list", "-n", "1", refname,
+        try SystemProcess.init(command: "git", "-C", "\(clone)",
+            "rev-list", "-n", "1", reference,
             stdout: writable)()
 
         //  Note: output contains trailing newline
@@ -175,13 +151,12 @@ extension SSGC.PackageBuild
 
         if  let revision:SHA1 = .init(stdout.prefix(while: \.isHexDigit))
         {
+            let version:AnyVersion = .init(reference)
             let pin:SPM.DependencyPin = .init(identity: package,
                 location: .remote(url: repository),
                 revision: revision,
                 version: version)
-            return .init(id: .versioned(pin, refname: refname),
-                artifacts: artifacts,
-                root: cloned)
+            return .init(id: .versioned(pin, reference: reference), root: clone)
         }
         else
         {
@@ -192,9 +167,9 @@ extension SSGC.PackageBuild
 extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     mutating
-    func compile(
-        with swift:SSGC.Toolchain,
-        logs:inout Logs) async throws -> (SymbolGraphMetadata, SSGC.PackageSources)
+    func compile(updating status:SSGC.StatusStream?,
+        into artifacts:FilePath,
+        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         switch self.id
         {
@@ -207,8 +182,8 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         }
 
         let manifestVersions:[MinorVersion] = try self.listExtraManifests()
-        var manifest:SPM.Manifest = try await swift.manifest(package: self.root,
-            json: self.artifacts.path / "\(self.id.package).package.json",
+        var manifest:SPM.Manifest = try swift.manifest(package: self.root,
+            json: artifacts / "\(self.id.package).package.json",
             leaf: true)
 
         print("""
@@ -219,32 +194,25 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         /// The manifest root is always an absolute path, so we would rather use that.
         self.root = .init(manifest.root.path)
 
-        let log:(resolution:FilePath, build:FilePath) =
-        (
-            self.artifacts.path / "resolution.log",
-            self.artifacts.path / "build.log"
-        )
-
         let pins:[SPM.DependencyPin]
-
         do
         {
-            pins = try await swift.resolve(package: self.root, log: log.resolution)
+            pins = try swift.resolve(package: self.root)
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
-            logs.swiftPackageResolution = try? log.resolution.read()
             throw SSGC.PackageBuildError.swift_package_update(code, invocation)
         }
+
+        try status?.send(.didResolveDependencies)
 
         let scratch:SSGC.PackageBuildDirectory
         do
         {
-            scratch = try await swift.build(package: self.root, log: log.build)
+            scratch = try swift.build(package: self.root)
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
-            logs.swiftPackageBuild = try? log.build.read()
             throw SSGC.PackageBuildError.swift_build(code, invocation)
         }
 
@@ -264,8 +232,8 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
 
-            let manifest:SPM.Manifest = try await swift.manifest(package: checkout,
-                json: self.artifacts.path / "\(pin.identity).package.json",
+            let manifest:SPM.Manifest = try swift.manifest(package: checkout,
+                json: artifacts / "\(pin.identity).package.json",
                 leaf: false)
 
             for product:SPM.Manifest.Product in manifest.products

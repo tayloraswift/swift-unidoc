@@ -1,8 +1,10 @@
 extension CommandLine
 {
-    public
+    @frozen public
     struct Arguments
     {
+        public
+        let tool:String
         private
         var list:ArraySlice<String>
 
@@ -24,6 +26,7 @@ extension CommandLine
                 return string
             }
 
+            self.tool = arguments[0]
             self.list = arguments[1...]
         }
     }

@@ -19,6 +19,31 @@ extension FilePath
 }
 extension FilePath.Directory
 {
+    /// A shorthand for creating a directory and (conditionally) cleaning it.
+    public
+    func create(clean:Bool) throws
+    {
+        if  clean
+        {
+            try self.remove()
+        }
+
+        try self.create()
+    }
+    /// Creates the directory, including any implied parent directories if they do not already
+    /// exist.
+    public
+    func create() throws
+    {
+        try SystemProcess.init(command: "mkdir", "-p", "\(self.path)")()
+    }
+
+    public
+    func remove() throws
+    {
+        try SystemProcess.init(command: "rm", "-rf", "\(self.path)")()
+    }
+
     /// Returns true if a directory exists at ``path``, returns false if
     /// the file does not exist or is not a directory.
     public
