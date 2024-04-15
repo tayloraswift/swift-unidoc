@@ -18,6 +18,43 @@ extension FilePath
 }
 extension FilePath
 {
+    @inlinable
+    func open(_ mode:FileDescriptor.AccessMode,
+        permissions:
+        (
+            owner:FilePermissions.Component?,
+            group:FilePermissions.Component?,
+            other:FilePermissions.Component?
+        )?,
+        options:FileDescriptor.OpenOptions) throws -> FileDescriptor
+    {
+        do
+        {
+            return try .open(self, mode,
+                options: options,
+                permissions: permissions.map(FilePermissions.init(_:)))
+        }
+        catch let error
+        {
+            throw FileError.opening(self, error)
+        }
+    }
+
+    @inlinable
+    func close(_ file:FileDescriptor) throws
+    {
+        do
+        {
+            try file.close()
+        }
+        catch let error
+        {
+            throw FileError.closing(self, error)
+        }
+    }
+}
+extension FilePath
+{
     @inlinable public
     func open<T>(_ mode:FileDescriptor.AccessMode,
         permissions:
@@ -29,18 +66,27 @@ extension FilePath
         options:FileDescriptor.OpenOptions = [],
         with body:(FileDescriptor) throws -> T) throws -> T
     {
+        let file:FileDescriptor = try self.open(mode,
+            permissions: permissions,
+            options: options)
+
+        let success:T
         do
         {
-            let file:FileDescriptor = try .open(self, mode,
-                options: options,
-                permissions: permissions.map(FilePermissions.init(_:)))
-            return try file.closeAfter { try body(file) }
+            success = try body(file)
         }
         catch let error
         {
-            throw FileError.init(underlying: error, path: self)
+            //  If the closure throws, we still need to close the file.
+            //  But we do not care about any additional errors from that.
+            try? file.close()
+            throw error
         }
+
+        try self.close(file)
+        return success
     }
+
     @inlinable public
     func open<T>(_ mode:FileDescriptor.AccessMode,
         permissions:
@@ -52,9 +98,9 @@ extension FilePath
         options:FileDescriptor.OpenOptions = [],
         with body:(FileDescriptor) async throws -> T) async throws -> T
     {
-        let file:FileDescriptor = try .open(self, mode,
-            options: options,
-            permissions: permissions.map(FilePermissions.init(_:)))
+        let file:FileDescriptor = try self.open(mode,
+            permissions: permissions,
+            options: options)
 
         let success:T
         do
@@ -66,15 +112,8 @@ extension FilePath
             try? file.close()
             throw error
         }
-        do
-        {
-            try file.close()
-        }
-        catch let error
-        {
-            throw FileError.init(underlying: error, path: self)
-        }
 
+        try self.close(file)
         return success
     }
 }

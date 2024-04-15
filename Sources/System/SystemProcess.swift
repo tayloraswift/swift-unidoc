@@ -37,33 +37,32 @@ extension SystemProcess
 extension SystemProcess
 {
     public
-    init(command:String?, _ arguments:String?...,
-        stdout:FileDescriptor? = nil,
-        stderr:FileDescriptor? = nil) throws
-    {
-        try self.init(command: command, arguments: arguments.compactMap { $0 },
-            stdout: stdout,
-            stderr: stderr)
-    }
-
-    public
-    init(command:String?, arguments:[String],
+    init(command:String?,
+        _ arguments:String?...,
         stdout:FileDescriptor? = nil,
         stderr:FileDescriptor? = nil,
         echo:Bool = false,
         with environment:consuming SystemProcess.Environment = .inherit) throws
     {
-        let invocation:[String]
-        if  let command:String
-        {
-            invocation = [command] + arguments
-        }
-        else
-        {
-            let current:String = .init(cString: CommandLine.unsafeArgv[0]!)
-            invocation = [current] + arguments
-        }
+        try self.init(command: command,
+            arguments: arguments.compactMap { $0 },
+            stdout: stdout,
+            stderr: stderr,
+            echo: echo,
+            with: environment)
+    }
 
+    public
+    init(command:String?,
+        arguments:[String],
+        stdout:FileDescriptor? = nil,
+        stderr:FileDescriptor? = nil,
+        echo:Bool = false,
+        with environment:consuming SystemProcess.Environment = .inherit) throws
+    {
+        /// Note: `argv[0]` is not necessarily a valid path to the current executable.
+        /// However, `/proc/self/exe` is.
+        let invocation:[String] = [command ?? "/proc/self/exe"] + arguments
         if  echo
         {
             let invocation:String = "\(invocation.joined(separator: " "))\n"
@@ -140,27 +139,24 @@ extension SystemProcess
     }
 
     public
-    func status() throws -> Int32
+    func status() throws -> Result<Void, SystemProcessError>
     {
         var status:Int32 = 0
+
         switch waitpid(self.id, &status, 0)
         {
-        case self.id:
-            return status
-        case let status:
-            throw SystemProcessError.wait(status, self.invocation)
+        case self.id:       break
+        case let status:    return .failure(.wait(status, self.invocation))
         }
+
+        //  It would be great if we could interpret the status code. But we do not have
+        //  the `WIFEXITED`, `WEXITSTATUS`, etc. macros available in Swift.
+        return status == 0 ? .success(()) : .failure(.exit(status, self.invocation))
     }
 
     public
     func callAsFunction() throws
     {
-        switch try self.status()
-        {
-        case 0:
-            return
-        case let status:
-            throw SystemProcessError.exit(status, self.invocation)
-        }
+        try self.status().get()
     }
 }

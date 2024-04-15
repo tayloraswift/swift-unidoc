@@ -16,14 +16,14 @@ extension Unidoc
             var arguments:CommandLine.Arguments = .init()
             switch arguments.next()
             {
-            case "build"?:
+            case "compile"?:
                 SSGC.main(arguments: arguments)
 
-            case "builder"?:
-                try await Self.builder(arguments: arguments)
+            case "requests"?:
+                try await Self.requests(arguments: arguments)
 
-            case "package"?:
-                try await Self.package(arguments: arguments)
+            case "local"?:
+                try await Self.local(arguments: arguments)
 
             case "latest"?:
                 try await Self.latest(arguments: arguments)
@@ -50,7 +50,7 @@ extension Unidoc
 extension Unidoc
 {
     private static
-    func builder(arguments:consuming CommandLine.Arguments) async throws
+    func requests(arguments:consuming CommandLine.Arguments) async throws
     {
         let options:Options = try .parse(arguments: arguments)
         let unidoc:Client = try .init(from: options)
@@ -87,7 +87,7 @@ extension Unidoc
     }
 
     private static
-    func package(arguments:consuming CommandLine.Arguments) async throws
+    func local(arguments:consuming CommandLine.Arguments) async throws
     {
         let options:Options = try .parse(arguments: arguments)
         let unidoc:Client = try .init(from: options)

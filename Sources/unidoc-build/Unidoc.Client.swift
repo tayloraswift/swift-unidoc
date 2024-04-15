@@ -91,10 +91,19 @@ extension Unidoc.Client
     private
     func stream(from pipe:FilePath, package:Unidoc.Package) async throws -> Unidoc.BuildReport
     {
+        //  The SSGC child process blocks until somebody opens the pipe for reading, which we do
+        //  here. Sometimes, we run into errors inside the following code block, which cause us
+        //  to exit prematurely, which closes the pipe. When this happens, the child process is
+        //  likely to experience a Broken Pipe error.
+        //
+        //  Because we wait on the child process exit before we wait on the result of this
+        //  function, we might observe the Broken Pipe error instead of the actual error that
+        //  caused the premature exit. Therefore, we avoid throwing out of this function when
+        //  possible, e.g. when failing to upload reports.
         try await SSGC.StatusStream.read(from: pipe)
         {
             //  Acknowledge the build request.
-            try await self.connect
+            try? await self.connect
             {
                 try await $0.upload(.init(package: package, entered: .cloningRepository))
             }
@@ -184,8 +193,8 @@ extension Unidoc.Client
         let output:FilePath = workspace.path / "output"
         let status:FilePath = workspace.path / "status"
 
-        try SystemProcess.init(command: "rm", "-f", "\(status)")()
-        try SystemProcess.init(command: "mkfifo", "\(status)")()
+         try SystemProcess.init(command: "rm", "-f", "\(status)")()
+         try SystemProcess.init(command: "mkfifo", "\(status)")()
 
         defer
         {
@@ -193,7 +202,7 @@ extension Unidoc.Client
         }
 
         var arguments:[String] = [
-            "build",
+            "compile",
 
             "--package-name", "\(labels.package)",
             "--package-repo", labels.repo,
@@ -232,7 +241,6 @@ extension Unidoc.Client
         let updates:Unidoc.BuildReport = try self.stream(from: status,
             package: labels.coordinate.package)
 
-        //  Wait for the child process to finish.
         try ssgc()
 
         var report:Unidoc.BuildReport = try await updates
@@ -271,7 +279,7 @@ extension Unidoc.Client
         let docs:FilePath = workspace.path / "docs.bson"
 
         var arguments:[String] = [
-            "build",
+            "compile",
 
             "--package-name", "\(symbol)",
             "--workspace", "\(workspace.path)",

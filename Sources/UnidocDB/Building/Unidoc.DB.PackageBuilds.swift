@@ -220,10 +220,42 @@ extension Unidoc.DB.PackageBuilds
         return update != nil
     }
 
+    @discardableResult
     public
     func updateBuild(
         package:Unidoc.Package,
-        entered:Unidoc.BuildStage? = nil,
+        entered:Unidoc.BuildStage,
+        with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
+    {
+        let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.BuildMetadata>>.init(Self.name,
+                returning: .old)
+            {
+                $0[.query]
+                {
+                    //  We must only write to build metadata that already contain `progress`,
+                    //  otherwise we may generate undecodable structures!
+                    $0[Unidoc.BuildMetadata[.id]] = package
+                    $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
+                }
+                $0[.update]
+                {
+                    $0[.set]
+                    {
+                        $0[ Unidoc.BuildMetadata[.progress] /
+                            Unidoc.BuildProgress[.stage]] = entered
+                    }
+                }
+            },
+            against: self.database)
+
+        return status
+    }
+
+    @discardableResult
+    public
+    func finishBuild(
+        package:Unidoc.Package,
         failure:Unidoc.BuildFailure? = nil,
         logs:[Unidoc.BuildLogType]? = nil,
         with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
@@ -238,16 +270,7 @@ extension Unidoc.DB.PackageBuilds
                 }
                 $0[.update]
                 {
-                    if  let entered:Unidoc.BuildStage
-                    {
-                        $0[.set]
-                        {
-                            $0[Unidoc.BuildMetadata[.progress] /
-                                Unidoc.BuildProgress[.stage]] = entered
-                        }
-                    }
-                    else if
-                        let failure:Unidoc.BuildFailure
+                    if  let failure:Unidoc.BuildFailure
                     {
                         $0[.set]
                         {

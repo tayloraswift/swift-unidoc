@@ -1,4 +1,5 @@
 import HTTP
+import HTTPServer
 import JSON
 
 extension Swiftinit.ServerLoop
@@ -23,6 +24,8 @@ extension Swiftinit.ServerLoop.Promise
 
     func resume(rendering error:any Error, as format:Unidoc.RenderFormat)
     {
+        Log[.error] = "\(error)"
+
         let page:Swiftinit.ServerErrorPage = .init(error: error)
         self.resume(returning: .error(page.resource(format: format)))
     }
