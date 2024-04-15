@@ -225,7 +225,7 @@ extension Unidoc.DB.PackageBuilds
         package:Unidoc.Package,
         entered:Unidoc.BuildStage? = nil,
         failure:Unidoc.BuildFailure? = nil,
-        logs:[Unidoc.BuildLogType] = [],
+        logs:[Unidoc.BuildLogType]? = nil,
         with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
     {
         let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
@@ -235,7 +235,6 @@ extension Unidoc.DB.PackageBuilds
                 $0[.query]
                 {
                     $0[Unidoc.BuildMetadata[.id]] = package
-                    $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
                 }
                 $0[.update]
                 {

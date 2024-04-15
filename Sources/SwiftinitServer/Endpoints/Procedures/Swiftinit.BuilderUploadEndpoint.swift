@@ -134,11 +134,14 @@ extension Swiftinit.BuilderUploadEndpoint:Swiftinit.BlockingEndpoint
             json = .encode(uploaded)
         }
 
+        /// The symbol graph upload and the final build report are not necessarily sequentially
+        /// consistent, so we need to avoid accidentally clearing the logs if the build report
+        /// is written before the symbol graph upload.
         let _:Unidoc.BuildMetadata? = try await server.db.packageBuilds.updateBuild(
             package: package,
             entered: entered,
             failure: failure,
-            logs: logs,
+            logs: logs.isEmpty ? nil : logs,
             with: session)
 
         if  let json:JSON = json
