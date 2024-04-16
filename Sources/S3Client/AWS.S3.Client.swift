@@ -15,10 +15,10 @@ extension AWS.S3
         @usableFromInline
         let bucket:AWS.S3.Bucket
         @usableFromInline
-        let http1:HTTP1Client
+        let http1:HTTP.Client1
 
         @inlinable
-        init(bucket:AWS.S3.Bucket, http1:HTTP1Client)
+        init(bucket:AWS.S3.Bucket, http1:HTTP.Client1)
         {
             self.http1 = http1
             self.bucket = bucket

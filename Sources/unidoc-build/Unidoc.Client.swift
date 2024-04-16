@@ -23,7 +23,7 @@ extension Unidoc
         private
         let cookie:String
 
-        let http2:HTTP2Client
+        let http2:HTTP.Client2
         let port:Int
 
         private
@@ -32,7 +32,7 @@ extension Unidoc
             swiftSDK:SSGC.AppleSDK?,
             pretty:Bool,
             cookie:String,
-            http2:HTTP2Client,
+            http2:HTTP.Client2,
             port:Int)
         {
             self.swiftPath = swiftPath

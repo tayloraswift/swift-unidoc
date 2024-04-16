@@ -7,13 +7,13 @@ extension Swiftinit
     struct PolicyClient:Identifiable
     {
         private
-        let http2:HTTP2Client
+        let http2:HTTP.Client2
         private
         let path:String
         let id:IP.Service
 
         private
-        init(http2:HTTP2Client, path:String, id:IP.Service)
+        init(http2:HTTP.Client2, path:String, id:IP.Service)
         {
             self.http2 = http2
             self.path = path

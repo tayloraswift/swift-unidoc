@@ -4,7 +4,7 @@ import JSON
 import NIOCore
 import NIOHPACK
 
-extension HTTP2Client.Connection
+extension HTTP.Client2.Connection
 {
     func get<Response>(_:Response.Type = Response.self,
         from path:String,
@@ -22,7 +22,7 @@ extension HTTP2Client.Connection
             "accept": "*/*",
         ]
 
-        let response:HTTP2Client.Facet = try await self.fetch(request)
+        let response:HTTP.Client2.Facet = try await self.fetch(request)
 
         switch response.status
         {

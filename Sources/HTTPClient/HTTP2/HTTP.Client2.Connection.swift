@@ -3,7 +3,7 @@ import NIOCore
 import NIOHPACK
 import NIOHTTP2
 
-extension HTTP2Client
+extension HTTP.Client2
 {
     @frozen public
     struct Connection
@@ -23,13 +23,13 @@ extension HTTP2Client
     }
 }
 @available(*, unavailable, message: """
-    HTTP2Client.Connection is not Sendable, use 'fetch(reducing:into:with:)' \
+    HTTP.Client2.Connection is not Sendable, use 'fetch(reducing:into:with:)' \
     to make requests in parallel.
     """)
-extension HTTP2Client.Connection:Sendable
+extension HTTP.Client2.Connection:Sendable
 {
 }
-extension HTTP2Client.Connection
+extension HTTP.Client2.Connection
 {
     @inlinable public
     func buffer(string:Substring) -> ByteBuffer
@@ -49,31 +49,31 @@ extension HTTP2Client.Connection
         self.channel.allocator.buffer(bytes: bytes)
     }
 }
-extension HTTP2Client.Connection
+extension HTTP.Client2.Connection
 {
     public
-    func fetch(_ request:__owned HPACKHeaders) async throws -> HTTP2Client.Facet
+    func fetch(_ request:__owned HPACKHeaders) async throws -> HTTP.Client2.Facet
     {
         try await self.fetch(.init(headers: request, body: nil))
     }
     public
-    func fetch(_ request:__owned HTTP2Client.Request,
-        timeout:Duration = .seconds(15)) async throws -> HTTP2Client.Facet
+    func fetch(_ request:__owned HTTP.Client2.Request,
+        timeout:Duration = .seconds(15)) async throws -> HTTP.Client2.Facet
     {
         try await self.fetch(reducing: [request], into: .init(), timeout: timeout) { $0 = $1 }
     }
 
     public
-    func fetch(_ batch:__owned [HTTP2Client.Request]) async throws -> [HTTP2Client.Facet]
+    func fetch(_ batch:__owned [HTTP.Client2.Request]) async throws -> [HTTP.Client2.Facet]
     {
         try await self.fetch(reducing: batch, into: []) { $0.append($1) }
     }
 
     @inlinable public
-    func fetch<Response>(reducing batch:__owned [HTTP2Client.Request],
+    func fetch<Response>(reducing batch:__owned [HTTP.Client2.Request],
         into initial:__owned Response,
         timeout:Duration = .seconds(15),
-        with combine:(inout Response, HTTP2Client.Facet) throws -> ()) async throws -> Response
+        with combine:(inout Response, HTTP.Client2.Facet) throws -> ()) async throws -> Response
     {
         if  batch.isEmpty
         {
@@ -82,8 +82,8 @@ extension HTTP2Client.Connection
 
         var response:Response = initial
 
-        var source:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?
-        let stream:AsyncThrowingStream<HTTP2Client.Facet, any Error> = .init
+        var source:AsyncThrowingStream<HTTP.Client2.Facet, any Error>.Continuation?
+        let stream:AsyncThrowingStream<HTTP.Client2.Facet, any Error> = .init
         {
             source = $0
         }
@@ -97,7 +97,7 @@ extension HTTP2Client.Connection
             }()
 
             let awaiting:Int = batch.count
-            var facets:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Iterator =
+            var facets:AsyncThrowingStream<HTTP.Client2.Facet, any Error>.Iterator =
                 stream.makeAsyncIterator()
 
             self.channel.writeAndFlush((source, batch)).whenFailure
@@ -107,13 +107,13 @@ extension HTTP2Client.Connection
 
             for _:Int in 0 ..< awaiting
             {
-                if  let facet:HTTP2Client.Facet = try await facets.next()
+                if  let facet:HTTP.Client2.Facet = try await facets.next()
                 {
                     try combine(&response, facet)
                 }
                 else
                 {
-                    throw HTTP2Client.UnexpectedStreamTerminationError.init()
+                    throw HTTP.Client2.UnexpectedStreamTerminationError.init()
                 }
             }
         }

@@ -1,4 +1,4 @@
-extension HTTP2Client
+extension HTTP.Client2
 {
     @frozen public
     struct UnexpectedStreamTerminationError:Equatable, Error, Sendable

@@ -1,7 +1,7 @@
 import HTTP
 import NIOCore
 
-extension HTTP1Client
+extension HTTP.Client1
 {
     @frozen public
     struct Connection
@@ -17,12 +17,12 @@ extension HTTP1Client
     }
 }
 @available(*, unavailable, message: """
-    HTTP1Client.Connection is not Sendable.
+    HTTP.Client1.Connection is not Sendable.
     """)
-extension HTTP1Client.Connection:Sendable
+extension HTTP.Client1.Connection:Sendable
 {
 }
-extension HTTP1Client.Connection
+extension HTTP.Client1.Connection
 {
     @inlinable public
     func buffer(_ body:HTTP.Resource.Content.Body) -> ByteBuffer
@@ -35,16 +35,16 @@ extension HTTP1Client.Connection
         }
     }
 }
-extension HTTP1Client.Connection
+extension HTTP.Client1.Connection
 {
     //  TODO: we could use the `content-length` header to avoid reallocating the destination
     //  buffer.
     public
-    func fetch(_ request:__owned HTTP1Client.Request) async throws -> HTTP1Client.Facet
+    func fetch(_ request:__owned HTTP.Client1.Request) async throws -> HTTP.Client1.Facet
     {
-        try await withThrowingTaskGroup(of: HTTP1Client.Facet.self)
+        try await withThrowingTaskGroup(of: HTTP.Client1.Facet.self)
         {
-            (tasks:inout ThrowingTaskGroup<HTTP1Client.Facet, any Error>) in
+            (tasks:inout ThrowingTaskGroup<HTTP.Client1.Facet, any Error>) in
 
             let channel:any Channel = self.channel
 
@@ -52,7 +52,7 @@ extension HTTP1Client.Connection
             {
                 try await withCheckedThrowingContinuation
                 {
-                    (promise:CheckedContinuation<HTTP1Client.Facet, Error>) in
+                    (promise:CheckedContinuation<HTTP.Client1.Facet, Error>) in
 
                     channel.writeAndFlush((promise, request)).whenFailure
                     {
@@ -67,7 +67,7 @@ extension HTTP1Client.Connection
             }
 
             guard
-            let facet:HTTP1Client.Facet = try await tasks.next()
+            let facet:HTTP.Client1.Facet = try await tasks.next()
             else
             {
                 throw HTTP.RequestTimeoutError.init()

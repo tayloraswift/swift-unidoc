@@ -11,12 +11,12 @@ extension GitHub.Client
     struct Connection
     {
         @usableFromInline internal
-        let http2:HTTP2Client.Connection
+        let http2:HTTP.Client2.Connection
         @usableFromInline internal
         let app:Application
 
         @inlinable internal
-        init(http2:HTTP2Client.Connection, app:Application)
+        init(http2:HTTP.Client2.Connection, app:Application)
         {
             self.http2 = http2
             self.app = app
@@ -34,7 +34,7 @@ extension GitHub.Client<GitHub.API<String>>.Connection
         for _:Response.Type = Response.self) async throws -> GraphQL.Response<Response>
         where Response:JSONDecodable
     {
-        let request:HTTP2Client.Request = .init(headers:
+        let request:HTTP.Client2.Request = .init(headers:
             [
                 ":method": "POST",
                 ":scheme": "https",
@@ -50,7 +50,7 @@ extension GitHub.Client<GitHub.API<String>>.Connection
             body: self.http2.buffer(string: query))
 
         /// GraphQL should never return redirects.
-        let response:HTTP2Client.Facet = try await self.http2.fetch(request)
+        let response:HTTP.Client2.Facet = try await self.http2.fetch(request)
 
         switch response.status
         {
@@ -109,7 +109,7 @@ extension GitHub.Client<GitHub.API<Void>>.Connection
                 "accept": "application/vnd.github+json"
             ]
 
-            let response:HTTP2Client.Facet = try await self.http2.fetch(request)
+            let response:HTTP.Client2.Facet = try await self.http2.fetch(request)
 
             //  TODO: support If-None-Match
             switch response.status

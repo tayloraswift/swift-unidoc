@@ -4,31 +4,39 @@ import NIOHTTP2
 import NIOPosix
 import NIOSSL
 
-@frozen public
-struct HTTP2Client:@unchecked Sendable
+@available(*, deprecated, renamed: "HTTP.Client1")
+public
+typealias HTTP2Client = HTTP.Client2
+
+extension HTTP
 {
-    /// We must **never** modify the bootstrap after initialization!
-    @usableFromInline
-    let _bootstrap:ClientBootstrap
-
-    /// The hostname of the remote service.
-    public
-    let remote:String
-
-    private
-    init(_bootstrap:ClientBootstrap, remote:String)
+    /// An HTTP/2 client associated with a single ``remote`` host. Always uses HTTPS.
+    @frozen public
+    struct Client2:@unchecked Sendable
     {
-        self._bootstrap = _bootstrap
-        self.remote = remote
+        /// We must **never** modify the bootstrap after initialization!
+        @usableFromInline
+        let _bootstrap:ClientBootstrap
+
+        /// The hostname of the remote service.
+        public
+        let remote:String
+
+        private
+        init(_bootstrap:ClientBootstrap, remote:String)
+        {
+            self._bootstrap = _bootstrap
+            self.remote = remote
+        }
     }
 }
-extension HTTP2Client:Identifiable
+extension HTTP.Client2:Identifiable
 {
     /// Returns the ``remote`` hostname.
     @inlinable public
     var id:String { self.remote }
 }
-extension HTTP2Client
+extension HTTP.Client2
 {
     public
     init(threads:MultiThreadedEventLoopGroup, niossl:NIOSSLContext, remote:String)
@@ -73,7 +81,7 @@ extension HTTP2Client
         self.init(_bootstrap: _bootstrap, remote: remote)
     }
 }
-extension HTTP2Client
+extension HTTP.Client2
 {
     public
     func fetch(_ request:__owned HPACKHeaders) async throws -> Facet
@@ -81,12 +89,12 @@ extension HTTP2Client
         try await self.connect { try await $0.fetch(request) }
     }
     public
-    func fetch(_ request:__owned HTTP2Client.Request) async throws -> Facet
+    func fetch(_ request:__owned Request) async throws -> Facet
     {
         try await self.connect { try await $0.fetch(request) }
     }
 }
-extension HTTP2Client
+extension HTTP.Client2
 {
     /// Connect to the remote host over HTTPS and perform the given operation.
     @inlinable public
