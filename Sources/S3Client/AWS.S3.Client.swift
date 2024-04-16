@@ -9,6 +9,9 @@ extension AWS.S3
     ///
     /// If you have multiple buckets, you will need multiple clients, because Amazon today
     /// serves different buckets from different domains.
+    ///
+    /// Most of the S3 methods are implemented on ``Connection``. Obtain a connection by calling
+    /// the ``connect(with:)`` method on the client.
     @frozen public
     struct Client
     {

@@ -46,7 +46,7 @@ extension Unidoc
 }
 extension Unidoc.Client
 {
-    init(from options:Unidoc.Options) throws
+    init(from options:Unidoc.Build) throws
     {
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
 
