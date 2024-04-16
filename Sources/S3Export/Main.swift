@@ -83,8 +83,6 @@ extension Main
 
         try await s3.connect
         {
-            @Sendable (connection:AWS.S3.Connection) in
-
             for asset:Swiftinit.Asset in Swiftinit.Asset.allCases
             {
                 if  let match:String = self.match, match != "\(asset)"
@@ -97,7 +95,7 @@ extension Main
 
                 print("Uploading \(path)...")
 
-                try await connection.put(
+                try await $0.put(
                     content: .init(body: .binary(content), type: asset.type),
                     using: .standard,
                     path: path,
