@@ -1,7 +1,7 @@
 import NIOCore
 import NIOHPACK
 
-extension HTTP2Client
+extension HTTP.Client2
 {
     @frozen public
     struct Request:Sendable

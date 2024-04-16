@@ -12,12 +12,12 @@ extension GitHub
     struct Client<Application>
     {
         @usableFromInline internal
-        let http2:HTTP2Client
+        let http2:HTTP.Client2
         public
         let app:Application
 
         private
-        init(http2:HTTP2Client, app:Application)
+        init(http2:HTTP.Client2, app:Application)
         {
             self.http2 = http2
             self.app = app
@@ -124,7 +124,7 @@ extension GitHub.Client
     func authenticate(sending request:HPACKHeaders)
         async throws -> Application.Credentials
     {
-        let response:HTTP2Client.Facet = try await self.http2.fetch(request)
+        let response:HTTP.Client2.Facet = try await self.http2.fetch(request)
 
         switch response.status
         {

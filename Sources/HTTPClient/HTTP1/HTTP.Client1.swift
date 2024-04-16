@@ -2,30 +2,38 @@ import NIOCore
 import NIOPosix
 import NIOSSL
 
-@frozen public
-struct HTTP1Client:@unchecked Sendable
+@available(*, deprecated, renamed: "HTTP.Client1")
+public
+typealias HTTP1Client = HTTP.Client1
+
+extension HTTP
 {
-    @usableFromInline
-    let _bootstrap:ClientBootstrap
-
-    /// The hostname of the remote service.
-    public
-    let remote:String
-
-    private
-    init(_bootstrap:ClientBootstrap, remote:String)
+    /// An HTTP/1.1 client associated with a single ``remote`` host. Always uses HTTPS.
+    @frozen public
+    struct Client1:@unchecked Sendable
     {
-        self._bootstrap = _bootstrap
-        self.remote = remote
+        @usableFromInline
+        let _bootstrap:ClientBootstrap
+
+        /// The hostname of the remote service.
+        public
+        let remote:String
+
+        private
+        init(_bootstrap:ClientBootstrap, remote:String)
+        {
+            self._bootstrap = _bootstrap
+            self.remote = remote
+        }
     }
 }
-extension HTTP1Client:Identifiable
+extension HTTP.Client1:Identifiable
 {
     /// Returns the ``remote`` hostname.
     @inlinable public
     var id:String { self.remote }
 }
-extension HTTP1Client
+extension HTTP.Client1
 {
     public
     init(threads:MultiThreadedEventLoopGroup, niossl:NIOSSLContext, remote:String)
@@ -60,9 +68,9 @@ extension HTTP1Client
         self.init(_bootstrap: _bootstrap, remote: remote)
     }
 }
-extension HTTP1Client
+extension HTTP.Client1
 {
-    /// Connect to the remote host over HTTPS and perform the given operation.
+    /// Connect to the ``remote`` host over HTTPS and perform the given operation.
     @inlinable public
     func connect<T>(port:Int = 443, with body:(Connection) async throws -> T) async throws -> T
     {

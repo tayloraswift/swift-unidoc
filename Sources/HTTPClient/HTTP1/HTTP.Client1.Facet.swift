@@ -1,7 +1,7 @@
 import NIOCore
 import NIOHTTP1
 
-extension HTTP1Client
+extension HTTP.Client1
 {
     @frozen public
     struct Facet:Sendable

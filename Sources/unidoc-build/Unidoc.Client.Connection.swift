@@ -19,10 +19,10 @@ extension Unidoc.Client
 {
     struct Connection
     {
-        let http2:HTTP2Client.Connection
+        let http2:HTTP.Client2.Connection
         let cookie:String
 
-        init(http2:HTTP2Client.Connection, cookie:String)
+        init(http2:HTTP.Client2.Connection, cookie:String)
         {
             self.http2 = http2
             self.cookie = cookie
@@ -241,7 +241,7 @@ extension Unidoc.Client.Connection
                 headers.add(name: "content-length", value: "\(body.readableBytes)")
             }
 
-            let response:HTTP2Client.Facet = try await self.http2.fetch(.init(
+            let response:HTTP.Client2.Facet = try await self.http2.fetch(.init(
                     headers: headers,
                     body: body),
                 timeout: timeout)

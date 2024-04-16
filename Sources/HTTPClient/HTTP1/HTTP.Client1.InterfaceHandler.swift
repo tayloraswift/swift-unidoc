@@ -1,7 +1,7 @@
 import NIOCore
 import NIOHTTP1
 
-extension HTTP1Client
+extension HTTP.Client1
 {
     final
     class InterfaceHandler
@@ -26,11 +26,11 @@ extension HTTP1Client
         }
     }
 }
-extension HTTP1Client.InterfaceHandler:ChannelHandler
+extension HTTP.Client1.InterfaceHandler:ChannelHandler
 {
     func handlerRemoved(context:ChannelHandlerContext)
     {
-        self.request?.resume(throwing: HTTP1Client.UnexpectedDisconnectionError.init())
+        self.request?.resume(throwing: HTTP.Client1.UnexpectedDisconnectionError.init())
         self.request = nil
     }
     func errorCaught(context:ChannelHandlerContext, error:any Error)
@@ -39,7 +39,7 @@ extension HTTP1Client.InterfaceHandler:ChannelHandler
         self.request = nil
     }
 }
-extension HTTP1Client.InterfaceHandler:ChannelInboundHandler
+extension HTTP.Client1.InterfaceHandler:ChannelInboundHandler
 {
     typealias InboundIn = HTTPClientResponsePart
 
@@ -76,18 +76,18 @@ extension HTTP1Client.InterfaceHandler:ChannelInboundHandler
         }
     }
 }
-extension HTTP1Client.InterfaceHandler:ChannelOutboundHandler
+extension HTTP.Client1.InterfaceHandler:ChannelOutboundHandler
 {
     typealias OutboundOut = HTTPClientRequestPart
     typealias OutboundIn =
     (
-        promise:CheckedContinuation<HTTP1Client.Facet, any Error>,
-        request:HTTP1Client.Request
+        promise:CheckedContinuation<HTTP.Client1.Facet, any Error>,
+        request:HTTP.Client1.Request
     )
 
     func write(context:ChannelHandlerContext, data:NIOAny, promise:EventLoopPromise<Void>?)
     {
-        let request:HTTP1Client.Request
+        let request:HTTP.Client1.Request
 
         (self.request, request) = self.unwrapOutboundIn(data)
 

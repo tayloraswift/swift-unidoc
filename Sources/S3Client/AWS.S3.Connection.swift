@@ -13,10 +13,10 @@ extension AWS.S3
         @usableFromInline internal
         let bucket:AWS.S3.Bucket
         @usableFromInline internal
-        let http1:HTTP1Client.Connection
+        let http1:HTTP.Client1.Connection
 
         @inlinable internal
-        init(bucket:AWS.S3.Bucket, http1:HTTP1Client.Connection)
+        init(bucket:AWS.S3.Bucket, http1:HTTP.Client1.Connection)
         {
             self.bucket = bucket
             self.http1 = http1
@@ -46,7 +46,7 @@ extension AWS.S3.Connection
             headers.add(name: "content-encoding", value: "\(encoding)")
         }
 
-        let facet:HTTP1Client.Facet = try await self.http1.fetch(.init(
+        let facet:HTTP.Client1.Facet = try await self.http1.fetch(.init(
             method: .PUT,
             path: path,
             head: headers,
@@ -69,7 +69,7 @@ extension AWS.S3.Connection
     public
     func get(path:String) async throws -> [UInt8]
     {
-        let facet:HTTP1Client.Facet = try await self.http1.fetch(.init(
+        let facet:HTTP.Client1.Facet = try await self.http1.fetch(.init(
             method: .GET,
             path: path,
             head: ["host": bucket.domain]))
@@ -93,7 +93,7 @@ extension AWS.S3.Connection
     public
     func delete(path:String) async throws -> Bool
     {
-        let facet:HTTP1Client.Facet = try await self.http1.fetch(.init(
+        let facet:HTTP.Client1.Facet = try await self.http1.fetch(.init(
             method: .DELETE,
             path: path,
             head: ["host": bucket.domain]))

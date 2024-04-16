@@ -1,4 +1,4 @@
-extension HTTP1Client
+extension HTTP.Client1
 {
     @frozen public
     struct UnexpectedDisconnectionError:Equatable, Error, Sendable

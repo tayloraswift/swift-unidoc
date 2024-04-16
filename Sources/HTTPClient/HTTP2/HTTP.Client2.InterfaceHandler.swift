@@ -6,7 +6,7 @@ extension ChannelHandlerContext:@unchecked Sendable
 {
 }
 
-extension HTTP2Client
+extension HTTP.Client2
 {
     /// An HTTP/2 handler whose sole purpose is to initiate HTTP/2 streams in parallel by
     /// creating ``ClientStreamHandler``s for the multiplexed streams and configuring them to
@@ -17,7 +17,7 @@ extension HTTP2Client
         private
         let multiplexer:NIOHTTP2Handler.StreamMultiplexer
         private
-        var owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation?
+        var owner:AsyncThrowingStream<HTTP.Client2.Facet, any Error>.Continuation?
 
         init(multiplexer:NIOHTTP2Handler.StreamMultiplexer)
         {
@@ -34,7 +34,7 @@ extension HTTP2Client
         }
     }
 }
-extension HTTP2Client.InterfaceHandler:ChannelHandler
+extension HTTP.Client2.InterfaceHandler:ChannelHandler
 {
     func handlerRemoved(context:ChannelHandlerContext)
     {
@@ -42,30 +42,30 @@ extension HTTP2Client.InterfaceHandler:ChannelHandler
         self.owner = nil
     }
 }
-extension HTTP2Client.InterfaceHandler:ChannelOutboundHandler
+extension HTTP.Client2.InterfaceHandler:ChannelOutboundHandler
 {
     typealias OutboundOut = HTTP2Frame
     typealias OutboundIn =
     (
-        owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation,
-        batch:[HTTP2Client.Request]
+        owner:AsyncThrowingStream<HTTP.Client2.Facet, any Error>.Continuation,
+        batch:[HTTP.Client2.Request]
     )
 
     func write(context:ChannelHandlerContext, data:NIOAny, promise:EventLoopPromise<Void>?)
     {
-        let owner:AsyncThrowingStream<HTTP2Client.Facet, any Error>.Continuation
-        let batch:[HTTP2Client.Request]
+        let owner:AsyncThrowingStream<HTTP.Client2.Facet, any Error>.Continuation
+        let batch:[HTTP.Client2.Request]
 
         (owner, batch) = self.unwrapOutboundIn(data)
 
         self.owner?.finish()
         self.owner = owner
 
-        for request:HTTP2Client.Request in batch
+        for request:HTTP.Client2.Request in batch
         {
             self.multiplexer.createStreamChannel
             {
-                $0.pipeline.addHandler(HTTP2Client.StreamHandler.init(owner: owner))
+                $0.pipeline.addHandler(HTTP.Client2.StreamHandler.init(owner: owner))
             }
                 .whenComplete
             {
