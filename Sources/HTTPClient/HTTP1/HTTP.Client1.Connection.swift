@@ -40,7 +40,8 @@ extension HTTP.Client1.Connection
     //  TODO: we could use the `content-length` header to avoid reallocating the destination
     //  buffer.
     public
-    func fetch(_ request:__owned HTTP.Client1.Request) async throws -> HTTP.Client1.Facet
+    func fetch(_ request:__owned HTTP.Client1.Request,
+        timeout:Duration = .seconds(15)) async throws -> HTTP.Client1.Facet
     {
         try await withThrowingTaskGroup(of: HTTP.Client1.Facet.self)
         {
@@ -48,21 +49,23 @@ extension HTTP.Client1.Connection
 
             let channel:any Channel = self.channel
 
+            //  https://forums.swift.org/t/writing-a-checkedcontinuation-to-a-channel-without-leaking/68745/
             tasks.addTask
             {
-                try await withCheckedThrowingContinuation
-                {
-                    (promise:CheckedContinuation<HTTP.Client1.Facet, Error>) in
+                let promise:
+                    EventLoopPromise<HTTP.Client1.Facet> = channel.eventLoop.makePromise()
 
-                    channel.writeAndFlush((promise, request)).whenFailure
-                    {
-                        promise.resume(throwing: $0)
-                    }
+                channel.writeAndFlush((promise, request)).whenFailure
+                {
+                    // don’t leak the promise!
+                    promise.fail($0)
                 }
+
+                return try await promise.futureResult.get()
             }
             tasks.addTask
             {
-                try await Task.sleep(for: .seconds(15))
+                try await Task.sleep(for: timeout)
                 throw HTTP.RequestTimeoutError.init()
             }
 

@@ -3,8 +3,8 @@ extension AWS.S3
     public
     enum RequestError:Error, Equatable, Sendable
     {
-        case get(UInt)
-        case put(UInt)
-        case delete(UInt)
+        case get    (UInt, String)
+        case put    (UInt, String)
+        case delete (UInt, String)
     }
 }

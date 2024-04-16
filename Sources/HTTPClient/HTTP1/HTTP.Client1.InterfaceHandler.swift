@@ -7,7 +7,7 @@ extension HTTP.Client1
     class InterfaceHandler
     {
         private
-        var request:CheckedContinuation<Facet, any Error>?
+        var request:EventLoopPromise<Facet>?
         private
         var facet:Facet
 
@@ -30,12 +30,12 @@ extension HTTP.Client1.InterfaceHandler:ChannelHandler
 {
     func handlerRemoved(context:ChannelHandlerContext)
     {
-        self.request?.resume(throwing: HTTP.Client1.UnexpectedDisconnectionError.init())
+        self.request?.fail(HTTP.Client1.UnexpectedDisconnectionError.init())
         self.request = nil
     }
     func errorCaught(context:ChannelHandlerContext, error:any Error)
     {
-        self.request?.resume(throwing: error)
+        self.request?.fail(error)
         self.request = nil
     }
 }
@@ -70,7 +70,7 @@ extension HTTP.Client1.InterfaceHandler:ChannelInboundHandler
             }
 
         case .end(_):
-            self.request?.resume(returning: self.facet)
+            self.request?.succeed(self.facet)
             self.request = nil
             self.facet = .init()
         }
@@ -81,7 +81,7 @@ extension HTTP.Client1.InterfaceHandler:ChannelOutboundHandler
     typealias OutboundOut = HTTPClientRequestPart
     typealias OutboundIn =
     (
-        promise:CheckedContinuation<HTTP.Client1.Facet, any Error>,
+        promise:EventLoopPromise<HTTP.Client1.Facet>,
         request:HTTP.Client1.Request
     )
 
