@@ -82,8 +82,23 @@ extension Swiftinit.IntegralRequest:HTTP.ServerIntegralRequest
             service: service,
             path: path)
 
+        firewall:
         if  path != "/robots.txt"
         {
+            switch service
+            {
+            case .googlebot?:   break firewall
+            case .bingbot?:     break firewall
+            case .unknown?:     break firewall
+            default:            break
+            }
+
+            guard case _? = metadata.headers.userAgent
+            else
+            {
+                return nil
+            }
+
             switch metadata.annotation
             {
             case .robot(.bytespider):   return nil
