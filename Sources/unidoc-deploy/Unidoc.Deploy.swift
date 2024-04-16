@@ -186,7 +186,7 @@ extension Unidoc.Deploy
             //  This is a big file, even compressed, so we need to increase the timeout.
             try await $0.put(object: object,
                 using: .standard,
-                path: "/unidoc-build",
+                path: "/unidoc-build.gz",
                 with: key,
                 timeout: .seconds(120))
         }
