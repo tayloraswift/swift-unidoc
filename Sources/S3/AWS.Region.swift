@@ -51,3 +51,8 @@ extension AWS.Region:CustomStringConvertible
     @inlinable public
     var description:String { self.rawValue }
 }
+extension AWS.Region:LosslessStringConvertible
+{
+    @inlinable public
+    init?(_ description:String) { self.init(rawValue: description) }
+}

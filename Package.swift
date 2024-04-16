@@ -7,6 +7,7 @@ let package:Package = .init(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
+        .executable(name: "unidoc-deploy", targets: ["unidoc-deploy"]),
         .executable(name: "unidoc-build", targets: ["unidoc-build"]),
         .executable(name: "SwiftinitServer", targets: ["SwiftinitServer"]),
 
@@ -130,9 +131,6 @@ let package:Package = .init(
             exact: "510.0.1"),
     ],
     targets: [
-        .target(name: "guides", path: "Guides"),
-
-
         .macro(name: "UnidocMacros",
             dependencies: [
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
@@ -145,6 +143,53 @@ let package:Package = .init(
                 .target(name: "UnidocMacros"),
             ],
             path: "Macros/CasesByIntegerEncodingMacro"),
+
+
+        .executableTarget(name: "ssgc",
+            dependencies: [
+                .target(name: "ArgumentParsing"),
+                .target(name: "SymbolGraphBuilder"),
+            ]),
+
+        .executableTarget(name: "unidoc-deploy",
+            dependencies: [
+                .target(name: "ArgumentParsing"),
+                .target(name: "S3Client"),
+                .target(name: "System"),
+                .target(name: "SwiftinitAssets"),
+            ]),
+
+        .executableTarget(name: "unidoc-build",
+            dependencies: [
+                .target(name: "ArgumentParsing"),
+                .target(name: "HTTPClient"),
+                .target(name: "SymbolGraphBuilder"),
+                .target(name: "UnidocRecords_LZ77"),
+                .target(name: "UnidocRecords"),
+            ]),
+
+        .executableTarget(name: "SwiftinitRelay",
+            dependencies: [
+                .target(name: "ArgumentParsing"),
+                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOPosix", package: "swift-nio"),
+            ]),
+
+        .executableTarget(name: "SwiftinitServer",
+            dependencies: [
+                .target(name: "ArgumentParsing"),
+                .target(name: "GitHubClient"),
+                .target(name: "HTTPServer"),
+                .target(name: "Media"),
+                .target(name: "Multiparts"),
+                .target(name: "S3Client"),
+                .target(name: "Sitemaps"),
+                .target(name: "SwiftinitAssets"),
+                .target(name: "SwiftinitPages"),
+                .target(name: "SwiftinitPlugins"),
+                .target(name: "UnidocAPI"),
+                .target(name: "UnidocQueries"),
+            ]),
 
 
         .target(name: "_AsyncChannel",
@@ -576,53 +621,6 @@ let package:Package = .init(
             ]),
 
 
-        .executableTarget(name: "S3Export",
-            dependencies: [
-                .target(name: "ArgumentParsing"),
-                .target(name: "S3Client"),
-                .target(name: "System"),
-                .target(name: "SwiftinitAssets"),
-            ]),
-
-        .executableTarget(name: "ssgc",
-            dependencies: [
-                .target(name: "ArgumentParsing"),
-                .target(name: "SymbolGraphBuilder"),
-            ]),
-
-        .executableTarget(name: "unidoc-build",
-            dependencies: [
-                .target(name: "ArgumentParsing"),
-                .target(name: "HTTPClient"),
-                .target(name: "SymbolGraphBuilder"),
-                .target(name: "UnidocRecords_LZ77"),
-                .target(name: "UnidocRecords"),
-            ]),
-
-        .executableTarget(name: "SwiftinitRelay",
-            dependencies: [
-                .target(name: "ArgumentParsing"),
-                .product(name: "NIOCore", package: "swift-nio"),
-                .product(name: "NIOPosix", package: "swift-nio"),
-            ]),
-
-        .executableTarget(name: "SwiftinitServer",
-            dependencies: [
-                .target(name: "ArgumentParsing"),
-                .target(name: "GitHubClient"),
-                .target(name: "HTTPServer"),
-                .target(name: "Media"),
-                .target(name: "Multiparts"),
-                .target(name: "S3Client"),
-                .target(name: "Sitemaps"),
-                .target(name: "SwiftinitAssets"),
-                .target(name: "SwiftinitPages"),
-                .target(name: "SwiftinitPlugins"),
-                .target(name: "UnidocAPI"),
-                .target(name: "UnidocQueries"),
-            ]),
-
-
         .executableTarget(name: "CodelinkTests",
             dependencies: [
                 .target(name: "Codelinks"),
@@ -776,6 +774,8 @@ let package:Package = .init(
                 .target(name: "URI"),
                 .product(name: "Testing", package: "swift-grammar"),
             ]),
+
+        .target(name: "guides", path: "Guides"),
     ])
 
 for target:PackageDescription.Target in package.targets

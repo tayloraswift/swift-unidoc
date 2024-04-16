@@ -6,7 +6,20 @@ import S3
 
 extension AWS.S3
 {
-    /// We would never be running an S3 server ourselves, so we don’t need to namespace this.
+    /// Provides the API for interacting with an AWS S3 bucket.
+    ///
+    /// The basic S3 object manipulations are ``put(content:using:path:with:)``, ``get(path:)``,
+    /// and ``delete(path:)``. Of the three, only the PUT method currently supports
+    /// authentication with an access key.
+    ///
+    /// It should be possible to implement authenticated access for GET and DELETE, but we have
+    /// not gotten around to it yet. In particular, it is uncommon to GET S3 objects directly
+    /// from a bucket to an untrusted machine; this access pattern is better suited for a
+    /// service like Amazon CloudFront.
+    ///
+    /// >   Note:
+    ///     We would never be running an S3 server ourselves, so we don’t need to namespace
+    ///     this type under ``Client``.
     @frozen public
     struct Connection
     {
@@ -110,8 +123,7 @@ extension AWS.S3.Connection
         case .ok:           return true
         case .noContent:    return true
         case .notFound:     return false
-        case let status:
-            throw AWS.S3.RequestError.delete(status.code)
+        case let status:    throw AWS.S3.RequestError.delete(status.code)
         }
     }
 }
