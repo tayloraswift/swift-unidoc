@@ -62,10 +62,10 @@ extension Unidoc.Deploy
 
         switch command
         {
-        case "asset":
+        case "assets":
             break
 
-        case "assets":
+        case "asset":
             self.artifacts = .assets(matching: arguments.next())
 
         case "builder":
@@ -155,7 +155,7 @@ extension Unidoc.Deploy
                 print("Uploading \(path)...")
 
                 try await $0.put(
-                    content: .init(body: .binary(content), type: asset.type),
+                    object: .init(body: .binary(content), type: asset.type),
                     using: .standard,
                     path: path,
                     with: key)
@@ -168,17 +168,27 @@ extension Unidoc.Deploy
         with s3:AWS.S3.Client,
         key:AWS.AccessKey) async throws
     {
-        let path:FilePath = ".build/release/unidoc-build"
-        let file:[UInt8] = try path.read()
+        let executable:FilePath = ".build/release/unidoc-build"
+        let compressed:FilePath = ".build/release/unidoc-build.gz"
+
+        print("Compressing unidoc-build...")
+
+        try SystemProcess.init(command: "gzip", "-kf", "\(executable)")()
+        let file:[UInt8] = try compressed.read()
+
         try await s3.connect
         {
             print("Uploading unidoc-build...")
-
-            try await $0.put(
-                content: .init(body: .binary(file), type: .application(.octet_stream)),
+            let object:HTTP.Resource.Content = .init(
+                body: .binary(file),
+                type: .application(.octet_stream),
+                encoding: .gzip)
+            //  This is a big file, even compressed, so we need to increase the timeout.
+            try await $0.put(object: object,
                 using: .standard,
-                path: "unidoc-build",
-                with: key)
+                path: "/unidoc-build",
+                with: key,
+                timeout: .seconds(120))
         }
     }
 }

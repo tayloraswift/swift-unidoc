@@ -8,9 +8,9 @@ extension AWS.S3
 {
     /// Provides the API for interacting with an AWS S3 bucket.
     ///
-    /// The basic S3 object manipulations are ``put(content:using:path:with:)``, ``get(path:)``,
-    /// and ``delete(path:)``. Of the three, only the PUT method currently supports
-    /// authentication with an access key.
+    /// The basic S3 object manipulations are ``put(content:using:path:with:timeout:)``,
+    /// ``get(path:timeout:)``, and ``delete(path:)``. Of the three, only the PUT method
+    /// currently supports authentication with an access key.
     ///
     /// It should be possible to implement authenticated access for GET and DELETE, but we have
     /// not gotten around to it yet. In particular, it is uncommon to GET S3 objects directly
@@ -39,10 +39,11 @@ extension AWS.S3
 extension AWS.S3.Connection
 {
     public
-    func put(content:HTTP.Resource.Content,
+    func put(object content:HTTP.Resource.Content,
         using storage:AWS.S3.StorageClass = .standard,
         path:String,
-        with key:AWS.AccessKey? = nil) async throws
+        with key:AWS.AccessKey? = nil,
+        timeout:Duration = .seconds(15)) async throws
     {
         let body:ByteBuffer = self.http1.buffer(content.body)
 
@@ -59,71 +60,67 @@ extension AWS.S3.Connection
             headers.add(name: "content-encoding", value: "\(encoding)")
         }
 
-        let facet:HTTP.Client1.Facet = try await self.http1.fetch(.init(
-            method: .PUT,
-            path: path,
-            head: headers,
-            body: body))
+        let response:HTTP.Client1.Facet = try await self.http1.fetch(.init(
+                method: .PUT,
+                path: path,
+                head: headers,
+                body: body),
+            timeout: timeout)
 
-        guard
-        let status:HTTPResponseStatus = facet.head?.status
-        else
+        switch response.head?.status
         {
-            throw AWS.S3.RequestError.put(0)
-        }
-        guard
-        case .ok = status
-        else
-        {
-            throw AWS.S3.RequestError.put(status.code)
+        case .ok?:
+            return
+
+        case let status:
+            throw AWS.S3.RequestError.put(status?.code ?? 0, String.init(
+                decoding: response.body,
+                as: Unicode.UTF8.self))
         }
     }
 
     public
-    func get(path:String) async throws -> [UInt8]
+    func get(path:String, timeout:Duration = .seconds(15)) async throws -> [UInt8]
     {
-        let facet:HTTP.Client1.Facet = try await self.http1.fetch(.init(
-            method: .GET,
-            path: path,
-            head: ["host": bucket.domain]))
+        let response:HTTP.Client1.Facet = try await self.http1.fetch(.init(
+                method: .GET,
+                path: path,
+                head: ["host": bucket.domain]),
+            timeout: timeout)
 
-        guard
-        let status:HTTPResponseStatus = facet.head?.status
-        else
+        switch response.head?.status
         {
-            throw AWS.S3.RequestError.get(0)
-        }
-        guard
-        case .ok = status
-        else
-        {
-            throw AWS.S3.RequestError.get(status.code)
-        }
+        case .ok?:
+            return response.body
 
-        return facet.body
+        case let status:
+            throw AWS.S3.RequestError.get(status?.code ?? 0, String.init(
+                decoding: response.body,
+                as: Unicode.UTF8.self))
+        }
     }
 
     public
     func delete(path:String) async throws -> Bool
     {
-        let facet:HTTP.Client1.Facet = try await self.http1.fetch(.init(
-            method: .DELETE,
-            path: path,
-            head: ["host": bucket.domain]))
+        let response:HTTP.Client1.Facet = try await self.http1.fetch(.init(
+                method: .DELETE,
+                path: path,
+                head: ["host": bucket.domain]),
+            timeout: .seconds(15))
 
-        guard
-        let status:HTTPResponseStatus = facet.head?.status
-        else
+        switch response.head?.status
         {
-            throw AWS.S3.RequestError.delete(0)
-        }
+        case .ok?, .noContent?:
+            return true
 
-        switch status
-        {
-        case .ok:           return true
-        case .noContent:    return true
-        case .notFound:     return false
-        case let status:    throw AWS.S3.RequestError.delete(status.code)
+        case .notFound?:
+            return false
+
+        case let status:
+            throw AWS.S3.RequestError.delete(status?.code ?? 0, String.init(
+                decoding: response.body,
+                as: Unicode.UTF8.self))
         }
     }
 }

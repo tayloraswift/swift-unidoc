@@ -31,7 +31,7 @@ extension Unidoc.Snapshot
         try await s3.connect
         {
             try await $0.put(
-                content: .init(body: .binary(bson), type: .application(.bson)),
+                object: .init(body: .binary(bson), type: .application(.bson)),
                 using: .standard,
                 path: "\(self.path)")
         }

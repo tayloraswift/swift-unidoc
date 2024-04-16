@@ -139,7 +139,7 @@ extension Swiftinit.BuilderUploadEndpoint
                     let path:Unidoc.BuildLogPath = .init(package: report.package,
                         type: log.type)
 
-                    try await $0.put(content: .init(
+                    try await $0.put(object: .init(
                             body: .binary(log.text.bytes),
                             type: .text(.plain, charset: .utf8),
                             encoding: .gzip),
