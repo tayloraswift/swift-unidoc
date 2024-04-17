@@ -1,6 +1,6 @@
 import HTTP
 import MongoDB
-import SwiftinitRender
+import UnidocRender
 import UnidocDB
 import UnidocQueries
 

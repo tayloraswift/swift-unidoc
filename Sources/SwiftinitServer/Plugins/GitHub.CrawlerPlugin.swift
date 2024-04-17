@@ -1,7 +1,7 @@
 import GitHubAPI
 import GitHubClient
 import MongoDB
-import SwiftinitPlugins
+import UnidocServer
 import UnixTime
 
 extension GitHub
@@ -21,9 +21,9 @@ extension GitHub
         }
     }
 }
-extension GitHub.CrawlerPlugin:Swiftinit.ServerPlugin
+extension GitHub.CrawlerPlugin:Unidoc.ServerPlugin
 {
-    func run(in context:Swiftinit.ServerPluginContext, with db:Swiftinit.DB) async throws
+    func run(in context:Unidoc.ServerPluginContext, with db:Unidoc.Database) async throws
     {
         let github:GitHub.Client<GitHub.API<String>> = .graphql(api: self.api,
             threads: context.threads,

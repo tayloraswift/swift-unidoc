@@ -1,7 +1,7 @@
 import S3
 import S3Client
-import SwiftinitPlugins
 import UnidocDB
+import UnidocServer
 
 extension Swiftinit
 {
@@ -21,9 +21,9 @@ extension Swiftinit.LinkerPlugin:Identifiable
 {
     var id:String { "linker" }
 }
-extension Swiftinit.LinkerPlugin:Swiftinit.ServerPlugin
+extension Swiftinit.LinkerPlugin:Unidoc.ServerPlugin
 {
-    func run(in context:Swiftinit.ServerPluginContext, with db:Swiftinit.DB) async throws
+    func run(in context:Unidoc.ServerPluginContext, with db:Unidoc.Database) async throws
     {
         var linker:Swiftinit.Linker = .init(updating: self.status, graphs: self.bucket.map
         {

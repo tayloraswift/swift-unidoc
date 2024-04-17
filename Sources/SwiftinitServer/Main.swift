@@ -6,6 +6,7 @@ import NIOPosix
 import NIOSSL
 import S3
 import System
+import UnidocServer
 
 struct Main
 {
@@ -14,7 +15,7 @@ struct Main
 
     /// Options specific to development mode. These are ignored if the server is
     /// bound to an authority besides ``Localhost``.
-    var development:Swiftinit.ServerOptions.Development
+    var development:Unidoc.ServerOptions.Development
 
     var redirect:Bool
     var mirror:Bool
@@ -106,7 +107,7 @@ extension Main
 extension Main
 {
     private consuming
-    func options() throws -> Swiftinit.ServerOptions
+    func options() throws -> Unidoc.ServerOptions
     {
         let privateKey:NIOSSLPrivateKey =
             try .init(file: "\(self.certificates)/privkey.pem", format: .pem)
@@ -180,9 +181,9 @@ extension Main
             var configuration:TLSConfiguration = .makeClientConfiguration()
                 configuration.applicationProtocols = ["h2"]
 
-            let context:Swiftinit.ServerPluginContext = .init(threads: threads,
+            let context:Unidoc.ServerPluginContext = .init(threads: threads,
                 niossl: try .init(configuration: configuration))
-            let options:Swiftinit.ServerOptions = try self.options()
+            let options:Unidoc.ServerOptions = try self.options()
 
             let mongodb:Mongo.DriverBootstrap = MongoDB / [mongod] /?
             {
@@ -200,7 +201,7 @@ extension Main
                 @Sendable (pool:Mongo.SessionPool) in
                 do
                 {
-                    let server:Swiftinit.ServerLoop = try await .init(
+                    let server:Unidoc.ServerLoop = try await .init(
                         context: context,
                         options: options,
                         mongodb: pool)

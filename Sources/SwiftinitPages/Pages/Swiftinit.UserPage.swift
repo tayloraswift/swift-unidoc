@@ -25,7 +25,7 @@ extension Swiftinit.UserPage:Unidoc.RenderablePage
 }
 extension Swiftinit.UserPage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Root.account.uri }
+    var location:URI { Unidoc.ServerRoot.account.uri }
 }
 extension Swiftinit.UserPage:Unidoc.ApplicationPage
 {

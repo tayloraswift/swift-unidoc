@@ -1,11 +1,12 @@
-import Atomics
 import HTML
 import HTTPServer
 import IP
+import UnidocRender
 import URI
 
 extension Swiftinit.PolicyPlugin
 {
+    @frozen public
     struct StatusPage:Sendable
     {
         let updated:ContinuousClock.Instant
@@ -20,6 +21,7 @@ extension Swiftinit.PolicyPlugin
 }
 extension Swiftinit.PolicyPlugin.StatusPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
+    @inlinable public
     var title:String { "Policy plugin" }
 }
 extension Swiftinit.PolicyPlugin.StatusPage:Unidoc.AdministrativePage

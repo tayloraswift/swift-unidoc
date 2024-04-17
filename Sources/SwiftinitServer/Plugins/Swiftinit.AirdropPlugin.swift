@@ -1,5 +1,5 @@
-import SwiftinitPlugins
 import UnidocDB
+import UnidocServer
 
 extension Swiftinit
 {
@@ -17,9 +17,9 @@ extension Swiftinit.AirdropPlugin:Identifiable
 {
     var id:String { "airdrop" }
 }
-extension Swiftinit.AirdropPlugin:Swiftinit.ServerPlugin
+extension Swiftinit.AirdropPlugin:Unidoc.ServerPlugin
 {
-    func run(in context:Swiftinit.ServerPluginContext, with db:Swiftinit.DB) async throws
+    func run(in context:Unidoc.ServerPluginContext, with db:Unidoc.Database) async throws
     {
         var airdrop:Swiftinit.Airdrop = .init(updating: self.status, policy: db.policy)
         try await airdrop.watch(db: db.unidoc, with: db.sessions)

@@ -1,20 +1,19 @@
 import MongoDB
-import SwiftinitPlugins
+import UnidocServer
 
 extension Swiftinit
 {
     struct Airdrop
     {
-
         private
         let status:AtomicPointer<Unidoc.CollectionEventsPage<Self>>
         private
-        let policy:DB.Policy
+        let policy:Unidoc.Database.Policy
         private
         var buffer:Unidoc.EventBuffer<Event>
 
         init(updating status:AtomicPointer<Unidoc.CollectionEventsPage<Self>>,
-            policy:DB.Policy)
+            policy:Unidoc.Database.Policy)
         {
             self.status = status
             self.policy = policy

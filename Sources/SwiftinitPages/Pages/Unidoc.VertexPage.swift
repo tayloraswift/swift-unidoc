@@ -1,6 +1,6 @@
 import HTML
 import JSON
-import SwiftinitRender
+import UnidocRender
 import Unidoc
 import UnidocRecords
 import URI

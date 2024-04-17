@@ -1,5 +1,5 @@
-import SwiftinitPlugins
 import UnidocDB
+import UnidocServer
 
 extension Swiftinit
 {
@@ -17,9 +17,9 @@ extension Swiftinit.LinterPlugin:Identifiable
 {
     var id:String { "linter" }
 }
-extension Swiftinit.LinterPlugin:Swiftinit.ServerPlugin
+extension Swiftinit.LinterPlugin:Unidoc.ServerPlugin
 {
-    func run(in context:Swiftinit.ServerPluginContext, with db:Swiftinit.DB) async throws
+    func run(in context:Unidoc.ServerPluginContext, with db:Unidoc.Database) async throws
     {
         var linter:Swiftinit.Linter = .init(updating: self.status)
         try await linter.watch(db: db.unidoc, with: db.sessions)

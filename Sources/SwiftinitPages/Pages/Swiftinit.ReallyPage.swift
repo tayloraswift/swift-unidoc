@@ -1,6 +1,6 @@
 import HTML
 import Media
-import SwiftinitRender
+import UnidocRender
 import URI
 
 extension Swiftinit

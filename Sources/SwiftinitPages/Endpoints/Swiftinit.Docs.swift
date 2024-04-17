@@ -1,3 +1,5 @@
+import UnidocRender
+
 extension Swiftinit
 {
     @frozen public
@@ -8,11 +10,11 @@ extension Swiftinit
 extension Swiftinit.Docs:Unidoc.VertexLayer
 {
     @inlinable public static
-    var docs:Swiftinit.Root { .docs }
+    var docs:Unidoc.ServerRoot { .docs }
 
     @inlinable public static
-    var docc:Swiftinit.Root { .docc }
+    var docc:Unidoc.ServerRoot { .docc }
 
     @inlinable public static
-    var hist:Swiftinit.Root { .hist }
+    var hist:Unidoc.ServerRoot { .hist }
 }

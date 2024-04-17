@@ -15,7 +15,7 @@ extension GitHub
         init()
 
         mutating
-        func crawl(updating db:Swiftinit.DB,
+        func crawl(updating db:Unidoc.Database,
             over connection:GitHub.Client<GitHub.API<String>>.Connection,
             with session:Mongo.Session) async throws
 

@@ -24,7 +24,7 @@ extension Swiftinit
 extension Swiftinit.PolicyClient
 {
     static
-    func bingbot(_ context:Swiftinit.ServerPluginContext) -> Self
+    func bingbot(_ context:Unidoc.ServerPluginContext) -> Self
     {
         .init(http2: .init(
                 threads: context.threads,
@@ -35,7 +35,7 @@ extension Swiftinit.PolicyClient
     }
 
     static
-    func googlebot(_ context:Swiftinit.ServerPluginContext) -> Self
+    func googlebot(_ context:Unidoc.ServerPluginContext) -> Self
     {
         .init(http2: .init(
                 threads: context.threads,

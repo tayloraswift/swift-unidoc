@@ -1,5 +1,5 @@
-import Swiftinit
 import Symbols
+import UnidocRender
 import URI
 
 extension Swiftinit
@@ -12,12 +12,12 @@ extension Swiftinit
 extension Swiftinit.Tags
 {
     @inlinable public static
-    subscript(package:Symbol.Package) -> URI { Swiftinit.Root.tags / "\(package)" }
+    subscript(package:Symbol.Package) -> URI { Unidoc.ServerRoot.tags / "\(package)" }
 
     @inlinable public static
     subscript(package:Symbol.Package, page index:Int, beta betas:Bool = false) -> URI
     {
-        var uri:URI = Swiftinit.Root.tags / "\(package)"
+        var uri:URI = Unidoc.ServerRoot.tags / "\(package)"
         uri["page"] = "\(index)"
         uri["beta"] = betas ? "true" : nil
         return uri

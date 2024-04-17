@@ -1,6 +1,6 @@
-import Swiftinit
-import URI
+import UnidocRender
 import UnixTime
+import URI
 
 extension Swiftinit
 {
@@ -11,8 +11,8 @@ extension Swiftinit
 extension Swiftinit.Telescope
 {
     static
-    subscript(date:Timestamp.Date) -> URI { Swiftinit.Root.telescope / "\(date)" }
+    subscript(date:Timestamp.Date) -> URI { Unidoc.ServerRoot.telescope / "\(date)" }
 
     static
-    subscript(year:Timestamp.Year) -> URI { Swiftinit.Root.telescope / "\(year)" }
+    subscript(year:Timestamp.Year) -> URI { Unidoc.ServerRoot.telescope / "\(year)" }
 }

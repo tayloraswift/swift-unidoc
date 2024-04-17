@@ -1,7 +1,7 @@
 import HTTPClient
 import HTTPServer
 import IP
-import SwiftinitPlugins
+import UnidocServer
 
 extension Swiftinit
 {
@@ -26,9 +26,9 @@ extension Swiftinit.PolicyPlugin:HTTP.ServerPolicy
         self.status.load()?.list
     }
 }
-extension Swiftinit.PolicyPlugin:Swiftinit.ServerPlugin
+extension Swiftinit.PolicyPlugin:Unidoc.ServerPlugin
 {
-    func run(in context:Swiftinit.ServerPluginContext, with db:Swiftinit.DB) async throws
+    func run(in context:Unidoc.ServerPluginContext, with db:Unidoc.Database) async throws
     {
         let clients:[Swiftinit.PolicyClient] =
         [

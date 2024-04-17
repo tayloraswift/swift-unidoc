@@ -1,6 +1,6 @@
 import HTML
 import SemanticVersions
-import SwiftinitRender
+import UnidocRender
 import URI
 
 extension Unidoc.CanonicalVersion

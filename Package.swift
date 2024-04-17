@@ -61,11 +61,7 @@ let package:Package = .init(
         .library(name: "SourceDiagnostics", targets: ["SourceDiagnostics"]),
         .library(name: "Sources", targets: ["Sources"]),
 
-        .library(name: "Swiftinit", targets: ["Swiftinit"]),
-        .library(name: "SwiftinitAssets", targets: ["SwiftinitAssets"]),
         .library(name: "SwiftinitPages", targets: ["SwiftinitPages"]),
-        .library(name: "SwiftinitPlugins", targets: ["SwiftinitPlugins"]),
-        .library(name: "SwiftinitRender", targets: ["SwiftinitRender"]),
 
         .library(name: "SymbolGraphBuilder", targets: ["SymbolGraphBuilder"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
@@ -83,6 +79,7 @@ let package:Package = .init(
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
+        .library(name: "UnidocServer", targets: ["UnidocServer"]),
 
         .library(name: "URI", targets: ["URI"]),
     ],
@@ -155,8 +152,11 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "ArgumentParsing"),
                 .target(name: "S3Client"),
+                .target(name: "SemanticVersions"),
+                .target(name: "SwiftinitPages"),
                 .target(name: "System"),
-                .target(name: "SwiftinitAssets"),
+                .target(name: "UnidocAssets"),
+                .target(name: "UnidocAssets_System"),
             ]),
 
         .executableTarget(name: "unidoc-build",
@@ -178,17 +178,7 @@ let package:Package = .init(
         .executableTarget(name: "SwiftinitServer",
             dependencies: [
                 .target(name: "ArgumentParsing"),
-                .target(name: "GitHubClient"),
-                .target(name: "HTTPServer"),
-                .target(name: "Media"),
-                .target(name: "Multiparts"),
-                .target(name: "S3Client"),
-                .target(name: "Sitemaps"),
-                .target(name: "SwiftinitAssets"),
-                .target(name: "SwiftinitPages"),
-                .target(name: "SwiftinitPlugins"),
-                .target(name: "UnidocAPI"),
-                .target(name: "UnidocQueries"),
+                .target(name: "UnidocServer"),
             ]),
 
 
@@ -418,46 +408,15 @@ let package:Package = .init(
 
         .target(name: "Sources"),
 
-        .target(name: "Swiftinit",
-            dependencies: [
-                .target(name: "URI"),
-            ]),
-
-        .target(name: "SwiftinitAssets",
-            dependencies: [
-                .target(name: "SwiftinitPages"),
-                .target(name: "System"),
-            ]),
-
         .target(name: "SwiftinitPages",
             dependencies: [
                 .target(name: "DynamicTime"),
                 .target(name: "GitHubAPI"),
-                .target(name: "SwiftinitRender"),
+                .target(name: "UnidocRender"),
                 .target(name: "UnidocAPI"),
                 .target(name: "UnidocProfiling"),
                 .target(name: "UnidocQueries"),
-            ]),
-
-        .target(name: "SwiftinitPlugins",
-            dependencies: [
-                .target(name: "SwiftinitRender"),
-                .target(name: "UnidocDB"),
-
-                .product(name: "Atomics", package: "swift-atomics"),
-                .product(name: "NIOPosix", package: "swift-nio"),
-                .product(name: "NIOSSL", package: "swift-nio-ssl"),
-            ]),
-
-        .target(name: "SwiftinitRender",
-            dependencies: [
-                .target(name: "HTTP"),
-                .target(name: "MarkdownDisplay"),
-                .target(name: "MarkdownRendering"),
-                .target(name: "Media"),
-                .target(name: "Swiftinit"),
-                .target(name: "UnidocRecords"),
-                .product(name: "HTML", package: "swift-dom"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "Symbols",
@@ -555,6 +514,18 @@ let package:Package = .init(
                 .product(name: "JSON", package: "swift-json"),
             ]),
 
+        .target(name: "UnidocAssets",
+            dependencies: [
+                .target(name: "Unidoc"),
+            ]),
+
+        .target(name: "UnidocAssets_System",
+            dependencies: [
+                .target(name: "Media"),
+                .target(name: "System"),
+                .target(name: "UnidocAssets"),
+            ]),
+
         .target(name: "UnidocDB",
             dependencies: [
                 .target(name: "GitHubAPI"),
@@ -605,6 +576,37 @@ let package:Package = .init(
                 .target(name: "MD5"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocAPI"),
+            ]),
+
+        .target(name: "UnidocRender",
+            dependencies: [
+                .target(name: "HTTP"),
+                .target(name: "MarkdownDisplay"),
+                .target(name: "MarkdownRendering"),
+                .target(name: "Media"),
+                .target(name: "UnidocAssets"),
+                .target(name: "UnidocRecords"),
+
+                .product(name: "HTML", package: "swift-dom"),
+            ]),
+
+        .target(name: "UnidocServer",
+            dependencies: [
+                .target(name: "GitHubClient"),
+                .target(name: "HTTPClient"),
+                .target(name: "HTTPServer"),
+                .target(name: "Media"),
+                .target(name: "Multiparts"),
+                .target(name: "S3Client"),
+                .target(name: "Sitemaps"),
+                .target(name: "SwiftinitPages"),
+                .target(name: "UnidocAssets"),
+                .target(name: "UnidocAssets_System"),
+                .target(name: "UnidocAPI"),
+                .target(name: "UnidocDB"),
+                .target(name: "UnidocProfiling"),
+                .target(name: "UnidocQueries"),
+                .target(name: "UnidocRender"),
             ]),
 
         .target(name: "UnixTime"),

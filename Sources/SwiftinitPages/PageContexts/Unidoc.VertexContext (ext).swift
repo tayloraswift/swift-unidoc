@@ -2,7 +2,7 @@ import HTML
 import LexicalPaths
 import MarkdownABI
 import MarkdownRendering
-import SwiftinitRender
+import UnidocRender
 import Symbols
 
 extension Unidoc.VertexContext
