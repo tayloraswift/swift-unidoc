@@ -9,7 +9,8 @@ let package:Package = .init(
         .executable(name: "ssgc", targets: ["ssgc"]),
         .executable(name: "unidoc-deploy", targets: ["unidoc-deploy"]),
         .executable(name: "unidoc-build", targets: ["unidoc-build"]),
-        .executable(name: "SwiftinitServer", targets: ["SwiftinitServer"]),
+        .executable(name: "swiftinit", targets: ["swiftinit"]),
+        .executable(name: "swiftinit-relay", targets: ["swiftinit-relay"]),
 
         .library(name: "guides", targets: ["guides"]),
 
@@ -168,17 +169,17 @@ let package:Package = .init(
                 .target(name: "UnidocRecords"),
             ]),
 
-        .executableTarget(name: "SwiftinitRelay",
+        .executableTarget(name: "swiftinit",
+            dependencies: [
+                .target(name: "ArgumentParsing"),
+                .target(name: "UnidocServer"),
+            ]),
+
+        .executableTarget(name: "swiftinit-relay",
             dependencies: [
                 .target(name: "ArgumentParsing"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOPosix", package: "swift-nio"),
-            ]),
-
-        .executableTarget(name: "SwiftinitServer",
-            dependencies: [
-                .target(name: "ArgumentParsing"),
-                .target(name: "UnidocServer"),
             ]),
 
 

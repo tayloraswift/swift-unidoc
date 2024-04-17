@@ -12,7 +12,7 @@ RUN apt update && apt install -y \
     libjemalloc-dev \
     libcap2-bin
 
-COPY .build/x86_64-unknown-linux-gnu/release/SwiftinitServer /bin/swiftinit
+COPY .build/x86_64-unknown-linux-gnu/release/swiftinit /bin/swiftinit
 COPY .build/x86_64-unknown-linux-gnu/release/unidoc-build /bin/unidoc-build
 COPY .build/x86_64-unknown-linux-gnu/release/ssgc /bin/ssgc
 
