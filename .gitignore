@@ -8,13 +8,11 @@
 
 Assets/secrets/
 Assets/icons/*.jpg
+Deploy/
 
 /crash*
 
-Local/Deployment/data/
 Local/Server/Certificates/*.pem
-
-Migrations/symbolgraphs.json
 
 node_modules/
 
