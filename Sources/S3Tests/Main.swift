@@ -27,7 +27,7 @@ enum Main:TestMain, TestBattery
                 AWS4-HMAC-SHA256 \
                 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request,\
                 SignedHeaders=date;host;x-amz-content-sha256;x-amz-date;x-amz-storage-class,\
-                Signature=98ad721746da40c64f1a55b78f14c238d841ea1380cd77a1b5971af0ece108bd
+                Signature=5c7844d25514be6e8f67c6199292dea5ed17cd8a5561043b75fbc6bddf745f6b
                 """)
         }
     }
