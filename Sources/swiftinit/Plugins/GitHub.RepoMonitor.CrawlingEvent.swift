@@ -1,7 +1,7 @@
 import Durations
 import GitHubAPI
 import HTML
-import SwiftinitPages
+import UnidocUI
 import Symbols
 
 extension GitHub.RepoMonitor

@@ -1,7 +1,7 @@
 import GitHubAPI
 import GitHubClient
 import HTTP
-import SwiftinitPages
+import UnidocUI
 
 extension Unidoc
 {

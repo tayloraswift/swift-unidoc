@@ -3,7 +3,7 @@ import GitHubClient
 import HTTP
 import MongoDB
 import Multiparts
-import SwiftinitPages
+import UnidocUI
 import SymbolGraphs
 import UnidocDB
 

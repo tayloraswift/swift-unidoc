@@ -2,7 +2,7 @@ import GitHubAPI
 import GitHubClient
 import HTTP
 import MongoDB
-import SwiftinitPages
+import UnidocUI
 import SymbolGraphs
 import Symbols
 import UnidocDB

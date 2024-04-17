@@ -1,5 +1,5 @@
 import HTML
-import SwiftinitPages
+import UnidocUI
 import UnixTime
 
 extension Unidoc

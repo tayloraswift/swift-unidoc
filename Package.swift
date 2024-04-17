@@ -62,7 +62,6 @@ let package:Package = .init(
         .library(name: "SourceDiagnostics", targets: ["SourceDiagnostics"]),
         .library(name: "Sources", targets: ["Sources"]),
 
-        .library(name: "SwiftinitPages", targets: ["SwiftinitPages"]),
 
         .library(name: "SymbolGraphBuilder", targets: ["SymbolGraphBuilder"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
@@ -81,6 +80,7 @@ let package:Package = .init(
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
         .library(name: "UnidocServer", targets: ["UnidocServer"]),
+        .library(name: "UnidocUI", targets: ["UnidocUI"]),
 
         .library(name: "URI", targets: ["URI"]),
     ],
@@ -154,10 +154,10 @@ let package:Package = .init(
                 .target(name: "ArgumentParsing"),
                 .target(name: "S3Client"),
                 .target(name: "SemanticVersions"),
-                .target(name: "SwiftinitPages"),
                 .target(name: "System"),
                 .target(name: "UnidocAssets"),
                 .target(name: "UnidocAssets_System"),
+                .target(name: "UnidocUI"),
             ]),
 
         .executableTarget(name: "unidoc-build",
@@ -409,17 +409,6 @@ let package:Package = .init(
 
         .target(name: "Sources"),
 
-        .target(name: "SwiftinitPages",
-            dependencies: [
-                .target(name: "DynamicTime"),
-                .target(name: "GitHubAPI"),
-                .target(name: "UnidocRender"),
-                .target(name: "UnidocAPI"),
-                .target(name: "UnidocProfiling"),
-                .target(name: "UnidocQueries"),
-                .target(name: "URI"),
-            ]),
-
         .target(name: "Symbols",
             dependencies: [
                 .target(name: "FNV1"),
@@ -600,7 +589,6 @@ let package:Package = .init(
                 .target(name: "Multiparts"),
                 .target(name: "S3Client"),
                 .target(name: "Sitemaps"),
-                .target(name: "SwiftinitPages"),
                 .target(name: "UnidocAssets"),
                 .target(name: "UnidocAssets_System"),
                 .target(name: "UnidocAPI"),
@@ -608,6 +596,18 @@ let package:Package = .init(
                 .target(name: "UnidocProfiling"),
                 .target(name: "UnidocQueries"),
                 .target(name: "UnidocRender"),
+                .target(name: "UnidocUI"),
+            ]),
+
+        .target(name: "UnidocUI",
+            dependencies: [
+                .target(name: "DynamicTime"),
+                .target(name: "GitHubAPI"),
+                .target(name: "UnidocRender"),
+                .target(name: "UnidocAPI"),
+                .target(name: "UnidocProfiling"),
+                .target(name: "UnidocQueries"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "UnixTime"),

@@ -3,7 +3,7 @@ import Durations
 import HTTP
 import Media
 import MongoDB
-import SwiftinitPages
+import UnidocUI
 import UnidocRender
 import UnidocProfiling
 import URI
