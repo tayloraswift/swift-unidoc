@@ -1,7 +1,7 @@
 import MongoDB
 import S3Client
-import SwiftinitPlugins
 import UnidocDB
+import UnidocServer
 
 extension Swiftinit
 {

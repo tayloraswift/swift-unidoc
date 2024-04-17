@@ -14,7 +14,7 @@ extension GitHub.RepoTelescope
         }
     }
 }
-extension GitHub.RepoTelescope.DiscoveryEvent:Swiftinit.ServerPluginEvent
+extension GitHub.RepoTelescope.DiscoveryEvent:Unidoc.ServerPluginEvent
 {
     static
     var name:String { "Discovered package" }

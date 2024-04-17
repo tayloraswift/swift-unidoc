@@ -21,7 +21,7 @@ extension GitHub
         private
         var tagsUpdated:Int
         private
-        var buffer:Unidoc.EventBuffer<any Swiftinit.ServerPluginEvent>
+        var buffer:Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>
 
         var error:(any Error)?
 
@@ -48,7 +48,7 @@ extension GitHub.RepoMonitor:GitHub.Crawler
     }
 
     mutating
-    func crawl(updating db:Swiftinit.DB,
+    func crawl(updating db:Unidoc.Database,
         over connection:GitHub.Client<GitHub.API<String>>.Connection,
         with session:Mongo.Session) async throws
     {

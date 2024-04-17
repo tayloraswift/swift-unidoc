@@ -2,7 +2,7 @@ import HTML
 import HTTP
 import Media
 import MongoDB
-import SwiftinitRender
+import UnidocRender
 import UnidocDB
 import UnidocQueries
 import UnidocRecords

@@ -22,7 +22,7 @@ extension GitHub.RepoMonitor
         }
     }
 }
-extension GitHub.RepoMonitor.IndexTagsEvent:Swiftinit.ServerPluginEvent
+extension GitHub.RepoMonitor.IndexTagsEvent:Unidoc.ServerPluginEvent
 {
     static
     var name:String { "Tags indexed" }

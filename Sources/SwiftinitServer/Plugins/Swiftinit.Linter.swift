@@ -1,5 +1,5 @@
 import MongoDB
-import SwiftinitPlugins
+import UnidocServer
 import UnixTime
 
 extension Swiftinit

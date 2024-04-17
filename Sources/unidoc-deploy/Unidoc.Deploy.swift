@@ -6,9 +6,10 @@ import NIOSSL
 import S3
 import S3Client
 import SemanticVersions
-import SwiftinitAssets
 import SwiftinitPages
 import System
+import UnidocAssets
+import UnidocAssets_System
 
 extension Unidoc
 {
@@ -147,7 +148,7 @@ extension Unidoc.Deploy
         try await s3.connect
         {
             let directory:FilePath = "Assets"
-            for asset:Swiftinit.Asset in Swiftinit.Asset.allCases
+            for asset:Unidoc.Asset in Unidoc.Asset.allCases
             {
                 if  let name:String = name, name != "\(asset)"
                 {

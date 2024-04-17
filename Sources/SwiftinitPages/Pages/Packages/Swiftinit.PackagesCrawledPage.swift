@@ -1,7 +1,7 @@
 import BSON
 import HTTP
 import HTML
-import SwiftinitRender
+import UnidocRender
 import UnidocDB
 import UnidocQueries
 import UnixTime

@@ -1,10 +1,10 @@
 import HTTP
 import Media
 import MongoDB
-import SwiftinitRender
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
+import UnidocRender
 
 extension Unidoc
 {

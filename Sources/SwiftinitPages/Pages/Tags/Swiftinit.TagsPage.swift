@@ -334,7 +334,7 @@ extension Swiftinit.TagsPage
             section[.form]
             {
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Swiftinit.Root.login)"
+                $0.action = "\(Unidoc.ServerRoot.login)"
                 $0.method = "post"
             }
                 content:

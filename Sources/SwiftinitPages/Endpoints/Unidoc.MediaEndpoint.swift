@@ -1,7 +1,7 @@
 import HTTP
 import Media
 import MongoQL
-import SwiftinitRender
+import UnidocRender
 import UnidocDB
 import UnidocQueries
 

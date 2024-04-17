@@ -26,7 +26,7 @@ extension GitHub.RepoMonitor
         }
     }
 }
-extension GitHub.RepoMonitor.CrawlingEvent:Swiftinit.ServerPluginEvent
+extension GitHub.RepoMonitor.CrawlingEvent:Unidoc.ServerPluginEvent
 {
     static
     var name:String { "Repo crawled" }

@@ -1,4 +1,4 @@
-import SwiftinitRender
+import UnidocRender
 
 extension Unidoc
 {

@@ -1,7 +1,7 @@
 import HTTP
 import Media
 import MongoDB
-import SwiftinitRender
+import UnidocRender
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
@@ -47,7 +47,7 @@ extension Unidoc.SitemapEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let prefix:String = "https://swiftinit.org\(Swiftinit.Root.docs)/\(output.package)"
+        let prefix:String = "https://swiftinit.org\(Unidoc.ServerRoot.docs)/\(output.package)"
         var string:String = ""
 
         for page:Unidoc.Shoot in output.sitemap.elements

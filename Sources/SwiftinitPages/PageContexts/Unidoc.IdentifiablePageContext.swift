@@ -3,7 +3,7 @@ import LexicalPaths
 import MarkdownABI
 import MarkdownRendering
 import Signatures
-import SwiftinitRender
+import UnidocRender
 import Symbols
 import Unidoc
 import UnidocDB

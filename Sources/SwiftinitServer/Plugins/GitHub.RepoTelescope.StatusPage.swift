@@ -1,6 +1,6 @@
 import HTML
 import GitHubAPI
-import SwiftinitRender
+import UnidocRender
 import UnixTime
 import URI
 
@@ -12,14 +12,14 @@ extension GitHub.RepoTelescope
         let windowsCrawled:Int
         let reposCrawled:Int
         let reposIndexed:Int
-        let entries:[Unidoc.EventBuffer<any Swiftinit.ServerPluginEvent>.Entry]
+        let entries:[Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>.Entry]
 
         private
         init(error:(any Error)?,
             windowsCrawled:Int,
             reposCrawled:Int,
             reposIndexed:Int,
-            entries:[Unidoc.EventBuffer<any Swiftinit.ServerPluginEvent>.Entry])
+            entries:[Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>.Entry])
         {
             self.error = error
             self.windowsCrawled = windowsCrawled
@@ -35,7 +35,7 @@ extension GitHub.RepoTelescope.StatusPage
         windowsCrawled:Int,
         reposCrawled:Int,
         reposIndexed:Int,
-        buffer:borrowing Unidoc.EventBuffer<any Swiftinit.ServerPluginEvent>)
+        buffer:borrowing Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>)
     {
         self.init(error: error,
             windowsCrawled: windowsCrawled,
@@ -72,7 +72,7 @@ extension GitHub.RepoTelescope.StatusPage:Unidoc.AdministrativePage
             $0[.h2] = "Events"
             $0[.ol, { $0.class = "events" }]
             {
-                for entry:Unidoc.EventBuffer<any Swiftinit.ServerPluginEvent>.Entry
+                for entry:Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>.Entry
                     in self.entries.reversed()
                 {
                     $0[.li]

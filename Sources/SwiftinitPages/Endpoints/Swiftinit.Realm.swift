@@ -1,5 +1,4 @@
-import Swiftinit
-import Symbols
+import UnidocRender
 import URI
 
 extension Swiftinit
@@ -11,5 +10,5 @@ extension Swiftinit
 extension Swiftinit.Realm
 {
     static
-    subscript(realm:String) -> URI { Swiftinit.Root.realm / realm }
+    subscript(realm:String) -> URI { Unidoc.ServerRoot.realm / realm }
 }

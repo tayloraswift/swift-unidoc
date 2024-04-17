@@ -1,5 +1,5 @@
 import HTML
-import SwiftinitRender
+import UnidocRender
 import UnidocDB
 import UnixTime
 import URI
