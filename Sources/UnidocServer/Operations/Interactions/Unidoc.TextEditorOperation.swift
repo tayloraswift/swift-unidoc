@@ -1,5 +1,5 @@
 import HTTP
-import SwiftinitPages
+import UnidocUI
 import MongoDB
 
 extension Unidoc

@@ -6,7 +6,7 @@ import Media
 import MongoDB
 import Multiparts
 import SemanticVersions
-import SwiftinitPages
+import UnidocUI
 import Symbols
 import UnidocAssets
 import UnidocDB

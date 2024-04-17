@@ -1,6 +1,6 @@
 import HTTP
 import MongoDB
-import SwiftinitPages
+import UnidocUI
 import Symbols
 import UnidocDB
 

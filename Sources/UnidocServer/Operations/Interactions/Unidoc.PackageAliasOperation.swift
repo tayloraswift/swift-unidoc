@@ -1,7 +1,7 @@
 import HTTP
 import MongoDB
 import UnidocDB
-import SwiftinitPages
+import UnidocUI
 import Symbols
 
 extension Unidoc

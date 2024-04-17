@@ -1,6 +1,6 @@
 import HTTP
 import Media
-import SwiftinitPages
+import UnidocUI
 import Unidoc
 
 extension Unidoc.PackageAlignOperation
