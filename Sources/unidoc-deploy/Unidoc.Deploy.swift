@@ -104,9 +104,14 @@ extension Unidoc.Deploy
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
         let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
 
-        let key:AWS.AccessKey = .init(
-            id: try (self.secrets / "aws-access-key-id").readLine(),
-            secret: try (self.secrets / "aws-access-key-secret").readLine())
+        let key:AWS.AccessKey? = try? .init(
+            id: (self.secrets / "aws-access-key-id").readLine(),
+            secret: (self.secrets / "aws-access-key-secret").readLine())
+
+        if  case nil = key
+        {
+            print("Note: no AWS access key found!")
+        }
 
         switch self.artifacts
         {
@@ -137,7 +142,7 @@ extension Unidoc.Deploy
     private
     func exportAssets(matching name:String?,
         with s3:AWS.S3.Client,
-        key:AWS.AccessKey) async throws
+        key:AWS.AccessKey?) async throws
     {
         try await s3.connect
         {
@@ -166,7 +171,7 @@ extension Unidoc.Deploy
     private
     func exportBinary(
         with s3:AWS.S3.Client,
-        key:AWS.AccessKey) async throws
+        key:AWS.AccessKey?) async throws
     {
         let executable:FilePath = ".build/release/unidoc-build"
         let compressed:FilePath = ".build/release/unidoc-build.gz"
