@@ -64,6 +64,11 @@ form.config
     {
         color: var(--fg-accent);
     }
+
+    input[type="text"]::placeholder
+    {
+        color: var(--fg-heavy);
+    }
 }
 form.sort-controls
 {
