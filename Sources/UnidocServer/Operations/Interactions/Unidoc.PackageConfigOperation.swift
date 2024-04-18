@@ -121,7 +121,7 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
 
         if  let updated:Symbol.Package
         {
-            return .redirect(.seeOther("\(Swiftinit.Tags[updated])"))
+            return .redirect(.seeOther("\(Unidoc.TagsEndpoint[updated])"))
         }
         else if
             let back:String = self.from

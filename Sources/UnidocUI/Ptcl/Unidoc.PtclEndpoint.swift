@@ -24,10 +24,21 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.PtclEndpoint:Unidoc.VertexLayer
+{
+    @inlinable public static
+    var docs:Unidoc.ServerRoot { .ptcl }
+
+    @inlinable public static
+    var docc:Unidoc.ServerRoot { .ptcl }
+
+    @inlinable public static
+    var hist:Unidoc.ServerRoot { .ptcl }
+}
 extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
-    typealias VertexLayer = Swiftinit.Ptcl
+    typealias VertexLayer = Self
 
     public
     func success(
@@ -63,7 +74,7 @@ extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
                 groups: groups,
                 bias: vertex.culture)
 
-            let page:Swiftinit.Ptcl.ConformersPage = try .init(
+            let page:ConformersPage = try .init(
                 sidebar: sidebar,
                 vertex: vertex,
                 halo: conformers)

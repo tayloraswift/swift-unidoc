@@ -27,7 +27,7 @@ extension GitHub.RepoTelescope.DiscoveryEvent:HTML.OutputStreamable
         dl[.dt] = "Symbol"
         dl[.dd]
         {
-            $0[.a] { $0.href = "\(Swiftinit.Tags[self.package])" } = "\(self.package)"
+            $0[.a] { $0.href = "\(Unidoc.TagsEndpoint[self.package])" } = "\(self.package)"
         }
     }
 }

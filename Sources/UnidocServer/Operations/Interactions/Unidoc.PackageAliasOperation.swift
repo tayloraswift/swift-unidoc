@@ -27,6 +27,6 @@ extension Unidoc.PackageAliasOperation:Unidoc.AdministrativeOperation
             of: self.package,
             with: session)
 
-        return .redirect(.seeOther("\(Swiftinit.Tags[self.alias])"))
+        return .redirect(.seeOther("\(Unidoc.TagsEndpoint[self.alias])"))
     }
 }

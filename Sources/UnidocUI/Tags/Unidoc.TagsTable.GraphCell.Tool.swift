@@ -38,7 +38,7 @@ extension Unidoc.TagsTable.GraphCell.Tool:HTML.OutputStreamable
         {
             $0.type = "hidden"
             $0.name = "from"
-            $0.value = "\(Swiftinit.Tags[self.package])"
+            $0.value = "\(Unidoc.TagsEndpoint[self.package])"
         }
 
         form[.button] { $0.type = "submit" } = self.label

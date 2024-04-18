@@ -108,6 +108,6 @@ extension Unidoc.PackageIndexOperation:Unidoc.RestrictedOperation
             mode: .automatic,
             with: session)
 
-        return .redirect(.seeOther("\(Swiftinit.Tags[package.symbol])"))
+        return .redirect(.seeOther("\(Unidoc.TagsEndpoint[package.symbol])"))
     }
 }

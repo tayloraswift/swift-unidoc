@@ -59,10 +59,10 @@ extension Unidoc.TagsPage:Unidoc.StaticPage
         switch self.shown
         {
         case .none:
-            Swiftinit.Tags[self.package.symbol]
+            Unidoc.TagsEndpoint[self.package.symbol]
 
         case .tags(_, page: let index, series: let series):
-            Swiftinit.Tags[self.package.symbol, page: index, beta: series == .prerelease]
+            Unidoc.TagsEndpoint[self.package.symbol, page: index, beta: series == .prerelease]
         }
     }
 }
@@ -109,7 +109,7 @@ extension Unidoc.TagsPage
                 $0[.a]
                 {
                     $0.href = """
-                    \(Swiftinit.Tags[self.package.symbol, page: page - 1, beta: beta])
+                    \(Unidoc.TagsEndpoint[self.package.symbol, page: page - 1, beta: beta])
                     """
                 } = "prev"
             }
@@ -123,7 +123,7 @@ extension Unidoc.TagsPage
                 $0[.a]
                 {
                     $0.href = """
-                    \(Swiftinit.Tags[self.package.symbol, page: page + 1, beta: beta])
+                    \(Unidoc.TagsEndpoint[self.package.symbol, page: page + 1, beta: beta])
                     """
                 } = "next"
             }
@@ -138,7 +138,7 @@ extension Unidoc.TagsPage
         section[.a]
         {
             $0.class = "area"
-            $0.href = "\(Swiftinit.Tags[self.package.symbol])"
+            $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol])"
         } = "Back to repo details"
     }
 
@@ -207,7 +207,7 @@ extension Unidoc.TagsPage
             section[.a]
             {
                 $0.class = "area"
-                $0.href = "\(Swiftinit.Tags[self.package.symbol, page: 0])"
+                $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol, page: 0])"
             } = "Browse more tags"
         }
 

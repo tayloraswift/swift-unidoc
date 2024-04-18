@@ -123,7 +123,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                                     {
                                         $0[.a]
                                         {
-                                            $0.href = "\(Swiftinit.Tags[item.package])"
+                                            $0.href = "\(Unidoc.TagsEndpoint[item.package])"
                                         } = "\(item.package)"
 
                                         $0[.span] = item.refname

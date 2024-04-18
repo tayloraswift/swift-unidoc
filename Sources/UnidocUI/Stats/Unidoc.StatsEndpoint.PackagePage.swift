@@ -5,19 +5,19 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit.Stats
+extension Unidoc.StatsEndpoint
 {
     struct PackagePage
     {
         let context:Unidoc.RelativePageContext
 
-        let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?
+        let sidebar:Swiftinit.Sidebar<Unidoc.StatsEndpoint>?
 
         private
         let vertex:Unidoc.GlobalVertex
 
         init(_ context:Unidoc.RelativePageContext,
-            sidebar:Swiftinit.Sidebar<Swiftinit.Stats>?,
+            sidebar:Swiftinit.Sidebar<Unidoc.StatsEndpoint>?,
             vertex:Unidoc.GlobalVertex)
         {
             self.context = context
@@ -26,7 +26,7 @@ extension Swiftinit.Stats
         }
     }
 }
-extension Swiftinit.Stats.PackagePage:Unidoc.RenderablePage
+extension Unidoc.StatsEndpoint.PackagePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.volume.title) Statistics" }
 
@@ -41,15 +41,15 @@ extension Swiftinit.Stats.PackagePage:Unidoc.RenderablePage
         """
     }
 }
-extension Swiftinit.Stats.PackagePage:Unidoc.StaticPage
+extension Unidoc.StatsEndpoint.PackagePage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Stats[self.volume] }
+    var location:URI { Unidoc.StatsEndpoint[self.volume] }
 }
-extension Swiftinit.Stats.PackagePage:Unidoc.ApplicationPage
+extension Unidoc.StatsEndpoint.PackagePage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Stats.PackagePage:Unidoc.VertexPage
+extension Unidoc.StatsEndpoint.PackagePage:Unidoc.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

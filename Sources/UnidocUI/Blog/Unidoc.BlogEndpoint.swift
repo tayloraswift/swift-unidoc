@@ -24,10 +24,21 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.BlogEndpoint:Unidoc.VertexLayer
+{
+    @inlinable public static
+    var docs:Unidoc.ServerRoot { .blog }
+
+    @inlinable public static
+    var docc:Unidoc.ServerRoot { .blog }
+
+    @inlinable public static
+    var hist:Unidoc.ServerRoot { .blog }
+}
 extension Unidoc.BlogEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
-    typealias VertexLayer = Swiftinit.Blog
+    typealias VertexLayer = Self
 
     public
     func success(
@@ -41,7 +52,7 @@ extension Unidoc.BlogEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         {
         case .article(let vertex):
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: vertex)
-            let page:Swiftinit.Blog.ArticlePage = .init(cone: cone, apex: vertex)
+            let page:ArticlePage = .init(cone: cone, apex: vertex)
             return .ok(page.resource(format: format))
 
         case let unexpected:
