@@ -47,7 +47,7 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
             {
                 $0[.a]
                 {
-                    $0.href = "\(Swiftinit.Tags[self.package.metadata.symbol])"
+                    $0.href = "\(Unidoc.TagsEndpoint[self.package.metadata.symbol])"
                     $0.class = dead ? "dead" : nil
 
                 } = self.name

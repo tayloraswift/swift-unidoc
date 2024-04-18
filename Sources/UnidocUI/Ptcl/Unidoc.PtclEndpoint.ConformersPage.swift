@@ -10,7 +10,7 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit.Ptcl
+extension Unidoc.PtclEndpoint
 {
     struct ConformersPage
     {
@@ -36,7 +36,7 @@ extension Swiftinit.Ptcl
         }
     }
 }
-extension Swiftinit.Ptcl.ConformersPage
+extension Unidoc.PtclEndpoint.ConformersPage
 {
     private
     var demonym:Swiftinit.DeclDemonym
@@ -44,7 +44,7 @@ extension Swiftinit.Ptcl.ConformersPage
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }
 }
-extension Swiftinit.Ptcl.ConformersPage:Unidoc.RenderablePage
+extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.RenderablePage
 {
     var title:String
     {
@@ -59,15 +59,15 @@ extension Swiftinit.Ptcl.ConformersPage:Unidoc.RenderablePage
         """
     }
 }
-extension Swiftinit.Ptcl.ConformersPage:Unidoc.StaticPage
+extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Ptcl[self.volume, self.vertex.route] }
+    var location:URI { Unidoc.PtclEndpoint[self.volume, self.vertex.route] }
 }
-extension Swiftinit.Ptcl.ConformersPage:Unidoc.ApplicationPage
+extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Ptcl.ConformersPage:Unidoc.VertexPage
+extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.VertexPage
 {
     var context:Unidoc.PeripheralPageContext { self.halo.context }
 

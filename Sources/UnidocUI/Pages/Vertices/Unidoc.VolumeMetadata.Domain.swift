@@ -31,7 +31,7 @@ extension Unidoc.VolumeMetadata.Domain:HTML.OutputStreamable
         {
             $0[.a]
             {
-                $0.href = "\(Swiftinit.Tags[self.volume.symbol.package])"
+                $0.href = "\(Unidoc.TagsEndpoint[self.volume.symbol.package])"
             } = "all tags"
         }
     }

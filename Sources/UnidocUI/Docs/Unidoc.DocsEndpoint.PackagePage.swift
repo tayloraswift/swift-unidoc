@@ -82,7 +82,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                         {
                             //  FIXME: this could be wrong if the package is renamed.
                             //  We should set this from the repo metadata instead.
-                            $0.href = "\(Swiftinit.Tags[self.volume.symbol.package])"
+                            $0.href = "\(Unidoc.TagsEndpoint[self.volume.symbol.package])"
                         } = "all tags"
                     }
                 }
@@ -138,7 +138,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                 $0[.a]
                 {
                     $0.class = "area"
-                    $0.href = "\(Swiftinit.Tags[self.volume.symbol.package])"
+                    $0.href = "\(Unidoc.TagsEndpoint[self.volume.symbol.package])"
                 } = "Repo details and more versions"
             }
 
@@ -176,7 +176,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                                     {
                                         $0[.a]
                                         {
-                                            $0.href = "\(Swiftinit.Tags[volume.symbol.package])"
+                                            $0.href = "\(Unidoc.TagsEndpoint[volume.symbol.package])"
                                         } = "\(volume.symbol.package)"
                                     }
                                 }
@@ -199,7 +199,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                                     {
                                         $0[.a]
                                         {
-                                            $0.href = "\(Swiftinit.Tags[dependency.exonym])"
+                                            $0.href = "\(Unidoc.TagsEndpoint[dependency.exonym])"
                                         } = "\(dependency.exonym)"
                                     }
                                 }
@@ -339,7 +339,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
             }
 
             $0[.div] { $0.class = "more" } = Swiftinit.StatsThumbnail.init(
-                target: Swiftinit.Stats[self.volume],
+                target: Unidoc.StatsEndpoint[self.volume],
                 census: self.apex.snapshot.census,
                 domain: self.volume.title,
                 title: "Package stats and coverage details")

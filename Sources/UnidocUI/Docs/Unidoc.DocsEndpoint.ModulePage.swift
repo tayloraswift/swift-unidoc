@@ -150,7 +150,7 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                 }
 
                 $0[.div] { $0.class = "more" } = Swiftinit.StatsThumbnail.init(
-                    target: Swiftinit.Stats[self.volume, self.apex.route],
+                    target: Unidoc.StatsEndpoint[self.volume, self.apex.route],
                     census: self.apex.census,
                     domain: self.name,
                     title: "Module stats and coverage details")

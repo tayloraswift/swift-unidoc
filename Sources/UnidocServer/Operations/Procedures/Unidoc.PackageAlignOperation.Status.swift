@@ -20,7 +20,7 @@ extension Unidoc.PackageAlignOperation.Status:HTTP.ServerEndpoint
         switch self
         {
         case .align(let package, to: _):
-            .redirect(.seeOther("\(Swiftinit.Tags[package.symbol])"))
+            .redirect(.seeOther("\(Unidoc.TagsEndpoint[package.symbol])"))
 
         case .noSuchPackage:
             .notFound("No such package")

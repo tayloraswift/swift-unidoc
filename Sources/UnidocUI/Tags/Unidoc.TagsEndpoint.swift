@@ -1,8 +1,10 @@
 import HTTP
 import MongoDB
+import Symbols
 import UnidocRender
 import UnidocDB
 import UnidocQueries
+import URI
 
 extension Unidoc
 {
@@ -20,6 +22,20 @@ extension Unidoc
             self.query = query
             self.value = nil
         }
+    }
+}
+extension Unidoc.TagsEndpoint
+{
+    @inlinable public static
+    subscript(package:Symbol.Package) -> URI { Unidoc.ServerRoot.tags / "\(package)" }
+
+    @inlinable public static
+    subscript(package:Symbol.Package, page index:Int, beta betas:Bool = false) -> URI
+    {
+        var uri:URI = Unidoc.ServerRoot.tags / "\(package)"
+        uri["page"] = "\(index)"
+        uri["beta"] = betas ? "true" : nil
+        return uri
     }
 }
 extension Unidoc.TagsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint

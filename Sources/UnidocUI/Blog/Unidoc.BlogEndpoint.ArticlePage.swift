@@ -4,7 +4,7 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit.Blog
+extension Unidoc.BlogEndpoint
 {
     struct ArticlePage
     {
@@ -20,18 +20,18 @@ extension Swiftinit.Blog
         }
     }
 }
-extension Swiftinit.Blog.ArticlePage
+extension Unidoc.BlogEndpoint.ArticlePage
 {
     private
     var volume:Unidoc.VolumeMetadata { self.cone.halo.context.volume }
 }
-extension Swiftinit.Blog.ArticlePage:Unidoc.RenderablePage
+extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.apex.headline.safe)" }
 
     var description:String? { self.cone.overview?.description }
 }
-extension Swiftinit.Blog.ArticlePage:Unidoc.StaticPage
+extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
 {
     var location:URI
     {

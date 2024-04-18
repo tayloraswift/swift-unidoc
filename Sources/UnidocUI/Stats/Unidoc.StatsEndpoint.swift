@@ -25,10 +25,21 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.StatsEndpoint:Unidoc.VertexLayer
+{
+    @inlinable public static
+    var docs:Unidoc.ServerRoot { .stats }
+
+    @inlinable public static
+    var docc:Unidoc.ServerRoot { .stats }
+
+    @inlinable public static
+    var hist:Unidoc.ServerRoot { .stats }
+}
 extension Unidoc.StatsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
-    typealias VertexLayer = Swiftinit.Stats
+    typealias VertexLayer = Self
 
     public
     func success(
@@ -48,19 +59,13 @@ extension Unidoc.StatsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         case .product(let vertex):  route = vertex.route
 
         case .culture(let vertex):
-            let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>? = .package(
-                volume: context.volume)
-            let page:Swiftinit.Stats.ModulePage = .init(context,
-                sidebar: sidebar,
-                vertex: vertex)
+            let sidebar:Swiftinit.Sidebar<Self>? = .package(volume: context.volume)
+            let page:ModulePage = .init(context, sidebar: sidebar, vertex: vertex)
             return .ok(page.resource(format: format))
 
         case .global(let vertex):
-            let sidebar:Swiftinit.Sidebar<Swiftinit.Stats>? = .package(
-                volume: context.volume)
-            let page:Swiftinit.Stats.PackagePage = .init(context,
-                sidebar: sidebar,
-                vertex: vertex)
+            let sidebar:Swiftinit.Sidebar<Self>? = .package(volume: context.volume)
+            let page:PackagePage = .init(context, sidebar: sidebar, vertex: vertex)
             return .ok(page.resource(format: format))
 
         case .file(let vertex):

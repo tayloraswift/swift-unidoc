@@ -255,7 +255,7 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
                 $0[.a]
                 {
                     $0.class = "area"
-                    $0.href = "\(Swiftinit.Ptcl[self.volume, self.apex.route])"
+                    $0.href = "\(Unidoc.PtclEndpoint[self.volume, self.apex.route])"
                 } = "Browse conforming types"
             }
 

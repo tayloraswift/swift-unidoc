@@ -35,7 +35,7 @@ extension GitHub.RepoMonitor.IndexTagsEvent:HTML.OutputStreamable
         dl[.dt] = "Package"
         dl[.dd]
         {
-            $0[.a] { $0.href = "\(Swiftinit.Tags[self.package])" } = "\(self.package)"
+            $0[.a] { $0.href = "\(Unidoc.TagsEndpoint[self.package])" } = "\(self.package)"
         }
 
         if  let prerelease:Unidoc.EditionMetadata = self.prerelease
