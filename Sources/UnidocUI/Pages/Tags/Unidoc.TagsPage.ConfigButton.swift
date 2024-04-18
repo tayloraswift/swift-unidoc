@@ -1,7 +1,7 @@
 import HTML
 import URI
 
-extension Swiftinit.TagsPage
+extension Unidoc.TagsPage
 {
     struct ConfigButton
     {
@@ -28,7 +28,7 @@ extension Swiftinit.TagsPage
         }
     }
 }
-extension Swiftinit.TagsPage.ConfigButton:HTML.OutputStreamable
+extension Unidoc.TagsPage.ConfigButton:HTML.OutputStreamable
 {
     static
     func += (form:inout HTML.ContentEncoder, self:Self)

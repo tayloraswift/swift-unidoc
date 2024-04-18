@@ -1,6 +1,6 @@
 import UnixTime
 
-extension Swiftinit.PackagesCrawledPage
+extension Unidoc.PackagesCrawledPage
 {
     struct Date
     {

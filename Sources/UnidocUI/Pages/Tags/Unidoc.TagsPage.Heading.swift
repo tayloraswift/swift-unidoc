@@ -1,6 +1,6 @@
 import HTML
 
-extension Swiftinit.TagsPage
+extension Unidoc.TagsPage
 {
     enum Heading
     {
@@ -11,7 +11,7 @@ extension Swiftinit.TagsPage
         case settingsAdmin
     }
 }
-extension Swiftinit.TagsPage.Heading:Identifiable
+extension Unidoc.TagsPage.Heading:Identifiable
 {
     var id:String
     {
@@ -25,7 +25,7 @@ extension Swiftinit.TagsPage.Heading:Identifiable
         }
     }
 }
-extension Swiftinit.TagsPage.Heading:HTML.OutputStreamableHeading
+extension Unidoc.TagsPage.Heading:HTML.OutputStreamableHeading
 {
     var display:String
     {

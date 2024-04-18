@@ -39,7 +39,7 @@ extension Unidoc.RealmEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let page:Swiftinit.RealmPage = .init(from: output)
+        let page:Unidoc.RealmPage = .init(from: output)
         return .ok(page.resource(format: format))
     }
 }

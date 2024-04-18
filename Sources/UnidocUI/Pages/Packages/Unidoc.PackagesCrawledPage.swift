@@ -7,7 +7,7 @@ import UnidocQueries
 import UnixTime
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     struct PackagesCrawledPage
     {
@@ -24,7 +24,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackagesCrawledPage
+extension Unidoc.PackagesCrawledPage
 {
     init(dates:[Unidoc.PackagesCrawledQuery.Date], in year:Timestamp.Year)
     {
@@ -42,15 +42,15 @@ extension Swiftinit.PackagesCrawledPage
         self.init(dates: dates, year: year)
     }
 }
-extension Swiftinit.PackagesCrawledPage:Unidoc.RenderablePage
+extension Unidoc.PackagesCrawledPage:Unidoc.RenderablePage
 {
     var title:String { "Packages · \(self.year)" }
 }
-extension Swiftinit.PackagesCrawledPage:Unidoc.StaticPage
+extension Unidoc.PackagesCrawledPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Telescope[self.year] }
 }
-extension Swiftinit.PackagesCrawledPage:Unidoc.ApplicationPage
+extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

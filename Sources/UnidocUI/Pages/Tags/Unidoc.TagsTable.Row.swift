@@ -7,7 +7,7 @@ import UnidocDB
 import UnidocQueries
 import UnidocRecords
 
-extension Swiftinit.TagsTable
+extension Unidoc.TagsTable
 {
     struct Row
     {
@@ -24,14 +24,14 @@ extension Swiftinit.TagsTable
         }
     }
 }
-extension Swiftinit.TagsTable.Row
+extension Unidoc.TagsTable.Row
 {
     init(
         volume:Unidoc.VolumeMetadata?,
         tagged:Tagged?,
         package:Symbol.Package,
         graph:Unidoc.Versions.Graph?,
-        view:Swiftinit.Permissions)
+        view:Unidoc.Permissions)
     {
         self.init(
             volume: volume,
@@ -39,7 +39,7 @@ extension Swiftinit.TagsTable.Row
             graph: graph.map { .init(package: package, graph: $0, view: view) })
     }
 }
-extension Swiftinit.TagsTable.Row:HTML.OutputStreamable
+extension Unidoc.TagsTable.Row:HTML.OutputStreamable
 {
     static
     func += (tr:inout HTML.ContentEncoder, self:Self)
@@ -109,7 +109,7 @@ extension Swiftinit.TagsTable.Row:HTML.OutputStreamable
             }
         }
 
-        if  let cell:Swiftinit.TagsTable.GraphCell = self.graph
+        if  let cell:Unidoc.TagsTable.GraphCell = self.graph
         {
             tr[.td] { $0.class = "graph" } = cell
         }

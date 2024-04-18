@@ -1,4 +1,4 @@
-extension Swiftinit
+extension Unidoc
 {
     struct Permissions
     {
@@ -13,7 +13,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.Permissions
+extension Unidoc.Permissions
 {
     /// Indicates whether information restricted to editors should be displayed. This returns
     /// true for package owners and for administratrices regardless of their relationship to the
@@ -30,7 +30,7 @@ extension Swiftinit.Permissions
         self.global == .administratrix || self.rights >= .owner
     }
 }
-extension Swiftinit.Permissions
+extension Unidoc.Permissions
 {
     init(package:Unidoc.PackageMetadata, user:Unidoc.User?)
     {

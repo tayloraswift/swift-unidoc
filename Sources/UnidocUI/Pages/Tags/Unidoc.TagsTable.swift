@@ -1,7 +1,7 @@
 import HTML
 import Symbols
 
-extension Swiftinit
+extension Unidoc
 {
     struct TagsTable
     {
@@ -29,7 +29,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.TagsTable:HTML.OutputStreamable
+extension Unidoc.TagsTable:HTML.OutputStreamable
 {
     static
     func += (table:inout HTML.ContentEncoder, self:Self)

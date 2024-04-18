@@ -2,7 +2,7 @@ import BSON
 import HTML
 import UnixTime
 
-extension Swiftinit
+extension Unidoc
 {
     struct PackageCard
     {
@@ -25,7 +25,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackageCard
+extension Unidoc.PackageCard
 {
     var owner:String? { self.package.metadata.repo?.origin.owner }
     var stars:Int? { self.package.metadata.repo?.stars }
@@ -34,7 +34,7 @@ extension Swiftinit.PackageCard
         self.package.metadata.repo?.origin.name ?? self.package.metadata.symbol.identifier
     }
 }
-extension Swiftinit.PackageCard:HTML.OutputStreamable
+extension Unidoc.PackageCard:HTML.OutputStreamable
 {
     static
     func += (li:inout HTML.ContentEncoder, self:Self)
@@ -96,7 +96,7 @@ extension Swiftinit.PackageCard:HTML.OutputStreamable
             case .github(let origin):   pushed = origin.pushed
             }
 
-            $0[.span] = Swiftinit.PackageIndicators.init(
+            $0[.span] = Unidoc.PackageIndicators.init(
                 pushed: pushed,
                 stars: repo.stars,
                 now: self.now)

@@ -1,7 +1,7 @@
 import HTML
 import UnixTime
 
-extension Swiftinit
+extension Unidoc
 {
     struct PackageGroups
     {
@@ -28,7 +28,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackageGroups
+extension Unidoc.PackageGroups
 {
     init(organizing packages:consuming [Unidoc.PackageOutput], heading:Heading? = nil)
     {
@@ -36,9 +36,9 @@ extension Swiftinit.PackageGroups
 
         var packages:
         (
-            inactive:[Swiftinit.PackageCard],
-            unfree:[Swiftinit.PackageCard],
-            free:[Swiftinit.PackageCard]
+            inactive:[Unidoc.PackageCard],
+            unfree:[Unidoc.PackageCard],
+            free:[Unidoc.PackageCard]
         ) = packages.reduce(into: ([], [], []))
         {
             if  case false? = $1.metadata.repo?.origin.alive
@@ -67,14 +67,14 @@ extension Swiftinit.PackageGroups
             inactive: packages.inactive)
     }
 }
-extension Swiftinit.PackageGroups
+extension Unidoc.PackageGroups
 {
     var isEmpty:Bool
     {
         self.free.isEmpty && self.unfree.isEmpty && self.inactive.isEmpty
     }
 }
-extension Swiftinit.PackageGroups
+extension Unidoc.PackageGroups
 {
     enum SortOption
     {
@@ -83,7 +83,7 @@ extension Swiftinit.PackageGroups
         case stars
     }
 }
-extension Swiftinit.PackageGroups.SortOption:Identifiable
+extension Unidoc.PackageGroups.SortOption:Identifiable
 {
     var id:String
     {
@@ -95,7 +95,7 @@ extension Swiftinit.PackageGroups.SortOption:Identifiable
         }
     }
 }
-extension Swiftinit.PackageGroups.SortOption
+extension Unidoc.PackageGroups.SortOption
 {
     var label:String
     {
@@ -116,14 +116,14 @@ extension Swiftinit.PackageGroups.SortOption
         }
     }
 }
-extension Swiftinit.PackageGroups:HTML.OutputStreamable
+extension Unidoc.PackageGroups:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
         var heading:Heading? = self.heading
 
-        for (type, group):(Heading?, [Swiftinit.PackageCard]) in
+        for (type, group):(Heading?, [Unidoc.PackageCard]) in
         [
             (nil, self.free),
             (.unfree, self.unfree),
@@ -167,7 +167,7 @@ extension Swiftinit.PackageGroups:HTML.OutputStreamable
             }
             html[.ol, { $0.class = "packages" }]
             {
-                for package:Swiftinit.PackageCard in group
+                for package:Unidoc.PackageCard in group
                 {
                     $0[.li]
                     {

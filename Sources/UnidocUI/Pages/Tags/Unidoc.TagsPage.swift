@@ -10,29 +10,29 @@ import UnidocRecords
 import UnixTime
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     struct TagsPage
     {
         private
-        let package:Unidoc.PackageMetadata
+        let package:PackageMetadata
         private
         let aliases:[Symbol.Package]
         private
-        let build:Unidoc.BuildMetadata?
+        let build:BuildMetadata?
         private
-        let realm:Unidoc.RealmMetadata?
+        let realm:RealmMetadata?
         private
         let table:TagsTable
         private
-        let shown:Unidoc.VersionsQuery.Predicate
+        let shown:VersionsQuery.Predicate
 
-        init(package:Unidoc.PackageMetadata,
+        init(package:PackageMetadata,
             aliases:[Symbol.Package] = [],
-            build:Unidoc.BuildMetadata? = nil,
-            realm:Unidoc.RealmMetadata? = nil,
+            build:BuildMetadata? = nil,
+            realm:RealmMetadata? = nil,
             table:TagsTable,
-            shown:Unidoc.VersionsQuery.Predicate)
+            shown:VersionsQuery.Predicate)
         {
             self.package = package
             self.aliases = aliases
@@ -43,16 +43,16 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.TagsPage
+extension Unidoc.TagsPage
 {
     private
-    var view:Swiftinit.Permissions { self.table.view }
+    var view:Unidoc.Permissions { self.table.view }
 }
-extension Swiftinit.TagsPage:Unidoc.RenderablePage
+extension Unidoc.TagsPage:Unidoc.RenderablePage
 {
     var title:String { "Git Tags · \(self.package.symbol)" }
 }
-extension Swiftinit.TagsPage:Unidoc.StaticPage
+extension Unidoc.TagsPage:Unidoc.StaticPage
 {
     var location:URI
     {
@@ -66,7 +66,7 @@ extension Swiftinit.TagsPage:Unidoc.StaticPage
         }
     }
 }
-extension Swiftinit.TagsPage:Unidoc.ApplicationPage
+extension Unidoc.TagsPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
@@ -78,7 +78,7 @@ extension Swiftinit.TagsPage:Unidoc.ApplicationPage
 
             if  let repo:Unidoc.PackageRepo = self.package.repo
             {
-                $0 += Swiftinit.PackageBanner.init(repo: repo, now: now)
+                $0 += Unidoc.PackageBanner.init(repo: repo, now: now)
             }
         }
 
@@ -95,7 +95,7 @@ extension Swiftinit.TagsPage:Unidoc.ApplicationPage
         }
     }
 }
-extension Swiftinit.TagsPage
+extension Unidoc.TagsPage
 {
     private
     func section(tags section:inout HTML.ContentEncoder, page:Int, beta:Bool)

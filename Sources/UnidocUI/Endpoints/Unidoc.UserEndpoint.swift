@@ -39,7 +39,7 @@ extension Unidoc.UserEndpoint:HTTP.ServerEndpoint
             return .notFound("No such user")
         }
 
-        let page:Swiftinit.UserPage = .init(user: user)
+        let page:Unidoc.UserPage = .init(user: user)
         return .ok(page.resource(format: format))
     }
 }

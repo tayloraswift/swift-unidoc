@@ -51,7 +51,7 @@ extension Unidoc.PackagesCreatedEndpoint:HTTP.ServerEndpoint
         //  This consumes `self` because it is accessing a stored property that witnesses no
         //  protocol requirements.
         let date:Timestamp.Date = self.date
-        let page:Swiftinit.PackagesCreatedPage = .init(
+        let page:Unidoc.PackagesCreatedPage = .init(
             groups: .init(organizing: batch),
             date: date)
 

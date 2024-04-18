@@ -3,31 +3,31 @@ import HTML
 import Media
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     struct UserPage
     {
         private
-        let user:Unidoc.User
+        let user:User
 
-        init(user:Unidoc.User)
+        init(user:User)
         {
             self.user = user
         }
     }
 }
-extension Swiftinit.UserPage
+extension Unidoc.UserPage
 {
 }
-extension Swiftinit.UserPage:Unidoc.RenderablePage
+extension Unidoc.UserPage:Unidoc.RenderablePage
 {
     var title:String { "Account settings" }
 }
-extension Swiftinit.UserPage:Unidoc.StaticPage
+extension Unidoc.UserPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.ServerRoot.account.uri }
 }
-extension Swiftinit.UserPage:Unidoc.ApplicationPage
+extension Unidoc.UserPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

@@ -1,7 +1,7 @@
 import SemanticVersions
 import SHA1
 
-extension Swiftinit.TagsTable.Row
+extension Unidoc.TagsTable.Row
 {
     struct Tagged
     {

@@ -2,7 +2,7 @@ import HTML
 import Media
 import Symbols
 
-extension Swiftinit.TagsTable
+extension Unidoc.TagsTable
 {
     struct GraphCell
     {
@@ -10,11 +10,11 @@ extension Swiftinit.TagsTable
         let package:Symbol.Package
         private
         let graph:Unidoc.Versions.Graph
-        let view:Swiftinit.Permissions
+        let view:Unidoc.Permissions
 
         init(package:Symbol.Package,
             graph:Unidoc.Versions.Graph,
-            view:Swiftinit.Permissions)
+            view:Unidoc.Permissions)
         {
             self.package = package
             self.graph = graph
@@ -22,7 +22,7 @@ extension Swiftinit.TagsTable
         }
     }
 }
-extension Swiftinit.TagsTable.GraphCell
+extension Unidoc.TagsTable.GraphCell
 {
     private
     var uplink:Tool
@@ -42,7 +42,7 @@ extension Swiftinit.TagsTable.GraphCell
         .init(edition: self.graph.id, package: self.package, label: "Delete")
     }
 }
-extension Swiftinit.TagsTable.GraphCell:HTML.OutputStreamable
+extension Unidoc.TagsTable.GraphCell:HTML.OutputStreamable
 {
     static
     func += (td:inout HTML.ContentEncoder, self:Self)

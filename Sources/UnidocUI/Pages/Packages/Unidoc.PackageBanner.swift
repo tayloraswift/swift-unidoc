@@ -2,7 +2,7 @@ import BSON
 import HTML
 import UnixTime
 
-extension Swiftinit
+extension Unidoc
 {
     struct PackageBanner
     {
@@ -21,7 +21,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackageBanner:HTML.OutputStreamable
+extension Unidoc.PackageBanner:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
@@ -48,7 +48,7 @@ extension Swiftinit.PackageBanner:HTML.OutputStreamable
                 icon: icon,
                 file: path)
 
-            $0[.span] = Swiftinit.PackageIndicators.init(
+            $0[.span] = Unidoc.PackageIndicators.init(
                 pushed: pushed,
                 stars: self.repo.stars,
                 now: self.now)
