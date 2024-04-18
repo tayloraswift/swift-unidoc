@@ -239,7 +239,7 @@ extension Unidoc.TagsPage
                 {
                     $0[.a]
                     {
-                        $0.href = "\(Unidoc.Realms[realm.symbol])"
+                        $0.href = "\(Unidoc.RealmEndpoint[realm.symbol])"
                     } = realm.symbol
 
                     guard self.package.realmAligning

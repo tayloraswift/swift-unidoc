@@ -3,6 +3,7 @@ import MongoDB
 import UnidocRender
 import UnidocDB
 import UnidocQueries
+import URI
 
 extension Unidoc
 {
@@ -21,6 +22,11 @@ extension Unidoc
             self.value = nil
         }
     }
+}
+extension Unidoc.RealmEndpoint
+{
+    static
+    subscript(realm:String) -> URI { Unidoc.ServerRoot.realm / realm }
 }
 extension Unidoc.RealmEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
