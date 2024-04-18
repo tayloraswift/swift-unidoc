@@ -11,13 +11,13 @@ extension Unidoc.StatsEndpoint
     {
         let context:Unidoc.RelativePageContext
 
-        let sidebar:Swiftinit.Sidebar<Unidoc.StatsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>?
 
         private
         let vertex:Unidoc.GlobalVertex
 
         init(_ context:Unidoc.RelativePageContext,
-            sidebar:Swiftinit.Sidebar<Unidoc.StatsEndpoint>?,
+            sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>?,
             vertex:Unidoc.GlobalVertex)
         {
             self.context = context
@@ -81,7 +81,7 @@ extension Unidoc.StatsEndpoint.PackagePage:Unidoc.VertexPage
         }
             content:
         {
-            $0[.h2] = Swiftinit.StatsHeading.documentationCoverage
+            $0[.h2] = Unidoc.StatsHeading.documentationCoverage
 
             $0[.h3] = "Declarations"
             $0[.figure]
@@ -94,7 +94,7 @@ extension Unidoc.StatsEndpoint.PackagePage:Unidoc.VertexPage
                 """
             }
 
-            $0[.h2] = Swiftinit.StatsHeading.interfaceBreakdown
+            $0[.h2] = Unidoc.StatsHeading.interfaceBreakdown
 
             $0[.h3] = "Declarations"
             $0[.figure]
@@ -118,7 +118,7 @@ extension Unidoc.StatsEndpoint.PackagePage:Unidoc.VertexPage
                 """
             }
 
-            $0[.h2] = Swiftinit.StatsHeading.interfaceLayers
+            $0[.h2] = Unidoc.StatsHeading.interfaceLayers
             $0[.h3] = "Declarations"
             $0[.figure]
             {

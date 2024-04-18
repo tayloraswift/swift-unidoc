@@ -1,6 +1,6 @@
 import HTML
 
-extension Swiftinit
+extension Unidoc
 {
     struct IntegratedList
     {
@@ -17,7 +17,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.IntegratedList
+extension Unidoc.IntegratedList
 {
     init?(_ context:Unidoc.RelativePageContext,
         items:[Unidoc.Scalar])
@@ -30,12 +30,12 @@ extension Swiftinit.IntegratedList
         self.init(context: context, items: items)
     }
 }
-extension Swiftinit.IntegratedList:Swiftinit.CollapsibleContent
+extension Unidoc.IntegratedList:Unidoc.CollapsibleContent
 {
     var length:Int { self.items.count }
     var count:Int { self.items.count }
 }
-extension Swiftinit.IntegratedList:HTML.OutputStreamable
+extension Unidoc.IntegratedList:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)

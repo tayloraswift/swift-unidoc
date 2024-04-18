@@ -52,7 +52,7 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         switch apex
         {
         case .article(let apex):
-            let sidebar:Swiftinit.Sidebar<Self>? = .module(
+            let sidebar:Unidoc.Sidebar<Self>? = .module(
                 volume: context.volume,
                 tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
@@ -60,7 +60,7 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
             resource = page.resource(format: format)
 
         case .culture(let apex):
-            let sidebar:Swiftinit.Sidebar<Self>? = .module(
+            let sidebar:Unidoc.Sidebar<Self>? = .module(
                 volume: context.volume,
                 tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
@@ -71,7 +71,7 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
             resource = page.resource(format: format)
 
         case .decl(let apex):
-            let sidebar:Swiftinit.Sidebar<Self>? = .module(
+            let sidebar:Unidoc.Sidebar<Self>? = .module(
                 volume: context.volume,
                 tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)

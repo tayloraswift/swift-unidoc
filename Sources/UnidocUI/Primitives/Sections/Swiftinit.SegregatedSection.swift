@@ -1,7 +1,7 @@
 import HTML
 import Unidoc
 
-extension Swiftinit
+extension Unidoc
 {
     struct SegregatedSection
     {
@@ -15,7 +15,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.SegregatedSection:HTML.OutputStreamable
+extension Unidoc.SegregatedSection:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)

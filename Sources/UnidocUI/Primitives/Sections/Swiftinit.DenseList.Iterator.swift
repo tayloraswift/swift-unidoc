@@ -1,4 +1,4 @@
-extension Swiftinit.DenseList
+extension Unidoc.DenseList
 {
     struct Iterator
     {
@@ -22,10 +22,10 @@ extension Swiftinit.DenseList
         }
     }
 }
-extension Swiftinit.DenseList.Iterator:IteratorProtocol
+extension Unidoc.DenseList.Iterator:IteratorProtocol
 {
     mutating
-    func next() -> Swiftinit.DenseList.Card?
+    func next() -> Unidoc.DenseList.Card?
     {
         switch (self.cards.0.next, self.cards.1.next)
         {

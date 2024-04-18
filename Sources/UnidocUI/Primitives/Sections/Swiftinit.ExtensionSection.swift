@@ -2,7 +2,7 @@ import HTML
 import Signatures
 import Symbols
 
-extension Swiftinit
+extension Unidoc
 {
     struct ExtensionSection
     {
@@ -26,7 +26,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ExtensionSection
+extension Unidoc.ExtensionSection
 {
     init?(_ context:Unidoc.RelativePageContext,
         group:borrowing Unidoc.ExtensionGroup,
@@ -34,7 +34,7 @@ extension Swiftinit.ExtensionSection
         bias:Unidoc.Bias)
     {
         guard
-        let body:Swiftinit.ExtensionBody = .init(context, group: group, decl: decl)
+        let body:Unidoc.ExtensionBody = .init(context, group: group, decl: decl)
         else
         {
             return nil
@@ -47,7 +47,7 @@ extension Swiftinit.ExtensionSection
             body: body)
     }
 }
-extension Swiftinit.ExtensionSection:HTML.OutputStreamable
+extension Unidoc.ExtensionSection:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
@@ -77,7 +77,7 @@ extension Swiftinit.ExtensionSection:HTML.OutputStreamable
         section[.div, .code]
         {
             $0.class = "constraints"
-        } = Swiftinit.ConstraintsList.init(self.context, constraints: self.constraints)
+        } = Unidoc.ConstraintsList.init(self.context, constraints: self.constraints)
 
         section += self.body
     }

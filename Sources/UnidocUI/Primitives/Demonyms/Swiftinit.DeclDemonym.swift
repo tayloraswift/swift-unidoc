@@ -1,6 +1,6 @@
 import Symbols
 
-extension Swiftinit
+extension Unidoc
 {
     struct DeclDemonym
     {
@@ -14,7 +14,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.DeclDemonym
+extension Unidoc.DeclDemonym
 {
     var modifier:String?
     {

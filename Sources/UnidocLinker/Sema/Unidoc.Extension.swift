@@ -8,9 +8,6 @@ extension Unidoc.Linker
 }
 extension Unidoc
 {
-    @available(*, deprecated)
-    typealias ExtensionBody = Unidoc.Extension
-
     struct Extension:Identifiable
     {
         let id:LinkerIndex<Self>

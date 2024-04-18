@@ -1,4 +1,4 @@
-extension Swiftinit
+extension Unidoc
 {
     enum ConformingTypesHeading:BiasedHeading
     {

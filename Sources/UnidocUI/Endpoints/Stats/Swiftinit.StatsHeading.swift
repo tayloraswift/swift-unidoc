@@ -1,6 +1,6 @@
 import HTML
 
-extension Swiftinit
+extension Unidoc
 {
     enum StatsHeading
     {
@@ -9,7 +9,7 @@ extension Swiftinit
         case documentationCoverage
     }
 }
-extension Swiftinit.StatsHeading:Identifiable
+extension Unidoc.StatsHeading:Identifiable
 {
     var id:String
     {
@@ -21,7 +21,7 @@ extension Swiftinit.StatsHeading:Identifiable
         }
     }
 }
-extension Swiftinit.StatsHeading:HTML.OutputStreamableHeading
+extension Unidoc.StatsHeading:HTML.OutputStreamableHeading
 {
     var display:String
     {

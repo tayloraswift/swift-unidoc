@@ -66,11 +66,11 @@ extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
                 break
             }
 
-            let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>? = .module(
+            let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>? = .module(
                 volume: context.volume,
                 tree: tree)
 
-            let conformers:Swiftinit.ConformingTypes = try .init(context,
+            let conformers:Unidoc.ConformingTypes = try .init(context,
                 groups: groups,
                 bias: vertex.culture)
 

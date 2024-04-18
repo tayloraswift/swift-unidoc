@@ -20,7 +20,7 @@ extension Unidoc.DocsEndpoint
 extension Unidoc.DocsEndpoint.ProductPage
 {
     private
-    var demonym:Swiftinit.ProductDemonym
+    var demonym:Unidoc.ProductDemonym
     {
         .init(type: self.apex.type)
     }
@@ -39,7 +39,7 @@ extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApplicationPage
 }
 extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
 {
-    var sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>? { .product(volume: self.volume) }
+    var sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>? { .product(volume: self.volume) }
 
     var descriptionFallback:String
     {

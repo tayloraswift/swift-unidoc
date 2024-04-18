@@ -1,9 +1,9 @@
 import HTML
 
-extension Swiftinit
+extension Unidoc
 {
     struct CollapsibleSection<Content>
-        where Content:Swiftinit.CollapsibleContent, Content:HTML.OutputStreamable
+        where Content:Unidoc.CollapsibleContent, Content:HTML.OutputStreamable
     {
         let heading:AutomaticHeading
         let content:Content
@@ -19,7 +19,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.CollapsibleSection
+extension Unidoc.CollapsibleSection
 {
     init(
         heading:AutomaticHeading,
@@ -45,7 +45,7 @@ extension Swiftinit.CollapsibleSection
         }
     }
 }
-extension Swiftinit.CollapsibleSection:HTML.OutputStreamable
+extension Unidoc.CollapsibleSection:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)

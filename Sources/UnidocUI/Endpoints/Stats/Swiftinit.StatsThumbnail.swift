@@ -1,7 +1,7 @@
 import HTML
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     struct StatsThumbnail
     {
@@ -23,7 +23,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.StatsThumbnail:HTML.OutputStreamable
+extension Unidoc.StatsThumbnail:HTML.OutputStreamable
 {
     static
     func += (div:inout HTML.ContentEncoder, self:Self)
@@ -36,7 +36,7 @@ extension Swiftinit.StatsThumbnail:HTML.OutputStreamable
             {
                 $0[.p]
                 {
-                    let target:Swiftinit.StatsHeading = .documentationCoverage
+                    let target:Unidoc.StatsHeading = .documentationCoverage
                     $0[.a] { $0.href = "\(url)#\(target.id)" } = "Coverage"
                 }
 
@@ -55,7 +55,7 @@ extension Swiftinit.StatsThumbnail:HTML.OutputStreamable
             {
                 $0[.p]
                 {
-                    let target:Swiftinit.StatsHeading = .interfaceBreakdown
+                    let target:Unidoc.StatsHeading = .interfaceBreakdown
                     $0[.a] { $0.href = "\(url)#\(target.id)" } = "Declarations"
                 }
 
@@ -74,7 +74,7 @@ extension Swiftinit.StatsThumbnail:HTML.OutputStreamable
             {
                 $0[.p]
                 {
-                    let target:Swiftinit.StatsHeading = .interfaceLayers
+                    let target:Unidoc.StatsHeading = .interfaceLayers
                     $0[.a] { $0.href = "\(url)#\(target.id)" } = "Interfaces"
                 }
 

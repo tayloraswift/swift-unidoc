@@ -1,18 +1,16 @@
 import HTML
 import UnidocRecords
 
-extension Swiftinit
+extension Unidoc
 {
     struct CultureCard
     {
-        let context:any Unidoc.VertexContext
+        let context:any VertexContext
 
-        let vertex:Unidoc.CultureVertex
+        let vertex:CultureVertex
         let target:String
 
-        init(_ context:any Unidoc.VertexContext,
-            vertex:Unidoc.CultureVertex,
-            target:String)
+        init(_ context:any VertexContext, vertex:CultureVertex, target:String)
         {
             self.context = context
             self.vertex = vertex
@@ -20,11 +18,11 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.CultureCard:Swiftinit.PreviewCard
+extension Unidoc.CultureCard:Unidoc.PreviewCard
 {
     var passage:Unidoc.Passage? { self.vertex.overview }
 }
-extension Swiftinit.CultureCard:HTML.OutputStreamable
+extension Unidoc.CultureCard:HTML.OutputStreamable
 {
     static
     func += (li:inout HTML.ContentEncoder, self:Self)

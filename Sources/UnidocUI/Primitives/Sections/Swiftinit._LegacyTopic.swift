@@ -1,7 +1,7 @@
 import HTML
 import MarkdownABI
 
-extension Swiftinit
+extension Unidoc
 {
     struct _LegacyTopic
     {
@@ -22,12 +22,12 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit._LegacyTopic:Swiftinit.CollapsibleContent
+extension Unidoc._LegacyTopic:Unidoc.CollapsibleContent
 {
     var length:Int { self.members.count }
     var count:Int { self.members.count }
 }
-extension Swiftinit._LegacyTopic:HTML.OutputStreamable
+extension Unidoc._LegacyTopic:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)

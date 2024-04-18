@@ -264,44 +264,44 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
                 html[.section]
                 {
                     $0.class = "group topic"
-                } = Swiftinit._LegacyTopic.init(self.context,
+                } = Unidoc._LegacyTopic.init(self.context,
                     caption: group.overview,
                     members: group.members)
             }
         }
 
-        if  let body:Swiftinit.SegregatedBody = .init(self.context, group: self.uncategorized)
+        if  let body:Unidoc.SegregatedBody = .init(self.context, group: self.uncategorized)
         {
             //  This is an uncategorized section, so let’s categorize it.
             html[.section]
             {
                 $0.class = "group segregated"
-            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedBody>.init(
+            } = Unidoc.CollapsibleSection<Unidoc.SegregatedBody>.init(
                 heading: .uncategorized,
                 content: body)
         }
 
-        if  let modules:Swiftinit.IntegratedList = .init(self.context, items: self.modules)
+        if  let modules:Unidoc.IntegratedList = .init(self.context, items: self.modules)
         {
             html[.section]
             {
                 $0.class = "group automatic"
-            } = Swiftinit.CollapsibleSection<Swiftinit.IntegratedList>.init(
+            } = Unidoc.CollapsibleSection<Unidoc.IntegratedList>.init(
                 heading: self.bias == .package ? .allModules : .otherModules,
                 content: modules)
         }
-        if  let products:Swiftinit.IntegratedList = .init(self.context, items: self.products)
+        if  let products:Unidoc.IntegratedList = .init(self.context, items: self.products)
         {
             html[.section]
             {
                 $0.class = "group automatic"
-            } = Swiftinit.CollapsibleSection<Swiftinit.IntegratedList>.init(
+            } = Unidoc.CollapsibleSection<Unidoc.IntegratedList>.init(
                 heading: self.bias == .package ? .allProducts : .otherProducts,
                 content: products)
         }
 
         if  let decl:Phylum.DeclFlags = self.decl,
-            let body:Swiftinit.SegregatedList = .init(self.context, group: self.superforms)
+            let body:Unidoc.SegregatedList = .init(self.context, group: self.superforms)
         {
             let heading:AutomaticHeading
 
@@ -329,39 +329,39 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
             html[.section]
             {
                 $0.class = "group superforms"
-            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedList>.init(
+            } = Unidoc.CollapsibleSection<Unidoc.SegregatedList>.init(
                 heading: heading,
                 content: body)
         }
-        if  let body:Swiftinit.SegregatedList = .init(self.context, group: self.inhabitants)
+        if  let body:Unidoc.SegregatedList = .init(self.context, group: self.inhabitants)
         {
             html[.section]
             {
                 $0.class = "group inhabitants"
-            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedList>.init(
+            } = Unidoc.CollapsibleSection<Unidoc.SegregatedList>.init(
                 heading: .allCases,
                 content: body)
         }
-        if  let body:Swiftinit.SegregatedBody = .init(self.context, group: self.requirements)
+        if  let body:Unidoc.SegregatedBody = .init(self.context, group: self.requirements)
         {
             html[.section]
             {
                 $0.class = "group segregated requirements"
-            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedBody>.init(
+            } = Unidoc.CollapsibleSection<Unidoc.SegregatedBody>.init(
                 heading: .allRequirements,
                 content: body)
         }
 
         let extensionsEmpty:Bool = self.extensions.allSatisfy(\.isEmpty)
 
-        if  let curation:Swiftinit.IntegratedList = .init(self.context, items: self.curation)
+        if  let curation:Unidoc.IntegratedList = .init(self.context, items: self.curation)
         {
             let last:Bool = self.peerList.isEmpty && extensionsEmpty
 
             html[.section]
             {
                 $0.class = "group topic"
-            } = Swiftinit.CollapsibleSection<Swiftinit.IntegratedList>.init(
+            } = Unidoc.CollapsibleSection<Unidoc.IntegratedList>.init(
                 heading: .seeAlso,
                 content: curation,
                 window: last ? nil : 12 ... 12)
@@ -374,7 +374,7 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
             html[.section]
             {
                 $0.class = "group topic"
-            } = Swiftinit.CollapsibleSection<Swiftinit._LegacyTopic>.init(
+            } = Unidoc.CollapsibleSection<Unidoc._LegacyTopic>.init(
                 heading: .seeAlso,
                 content: .init(self.context, members: other.members),
                 window: last ? nil : 12 ... 12)
@@ -389,23 +389,23 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
         }
 
         if  case .case = decl.phylum,
-            let peers:Swiftinit.SegregatedList = .init(self.context, group: self.peerList)
+            let peers:Unidoc.SegregatedList = .init(self.context, group: self.peerList)
         {
             html[.section]
             {
                 $0.class = "group sisters"
-            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedList>.init(
+            } = Unidoc.CollapsibleSection<Unidoc.SegregatedList>.init(
                 heading: .otherCases,
                 content: peers,
                 window: extensionsEmpty ? nil : 12 ... 12)
         }
         else if
-            let peers:Swiftinit.SegregatedBody = .init(self.context, group: self.peerList)
+            let peers:Unidoc.SegregatedBody = .init(self.context, group: self.peerList)
         {
             html[.section]
             {
                 $0.class = "group segregated sisters"
-            } = Swiftinit.CollapsibleSection<Swiftinit.SegregatedBody>.init(
+            } = Unidoc.CollapsibleSection<Unidoc.SegregatedBody>.init(
                 heading: decl.kinks[is: .required] ? .otherRequirements : .otherMembers,
                 content: peers,
                 //  If there are 8–12 members, and this is not the last section, this section
@@ -418,7 +418,7 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
             html[.section]
             {
                 $0.class = "group segregated extension"
-            } = Swiftinit.ExtensionSection.init(self.context,
+            } = Unidoc.ExtensionSection.init(self.context,
                 group: group,
                 decl: decl,
                 bias: self.bias)

@@ -3,7 +3,7 @@ import LexicalPaths
 import Signatures
 import Unidoc
 
-extension Swiftinit
+extension Unidoc
 {
     struct ConstraintsList
     {
@@ -25,7 +25,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ConstraintsList:HTML.OutputStreamable
+extension Unidoc.ConstraintsList:HTML.OutputStreamable
 {
     static
     func += (code:inout HTML.ContentEncoder, self:Self)

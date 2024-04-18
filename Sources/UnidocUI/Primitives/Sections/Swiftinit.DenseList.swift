@@ -1,7 +1,7 @@
 import HTML
 import Unidoc
 
-extension Swiftinit
+extension Unidoc
 {
     struct DenseList
     {
@@ -17,14 +17,14 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.DenseList:Sequence
+extension Unidoc.DenseList:Sequence
 {
     func makeIterator() -> Iterator
     {
         .init(context: self.context, members: self.members)
     }
 }
-extension Swiftinit.DenseList:HTML.OutputStreamable
+extension Unidoc.DenseList:HTML.OutputStreamable
 {
     static
     func += (ul:inout HTML.ContentEncoder, self:Self)

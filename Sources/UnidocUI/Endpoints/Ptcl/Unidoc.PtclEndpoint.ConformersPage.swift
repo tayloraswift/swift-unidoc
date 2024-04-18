@@ -14,19 +14,19 @@ extension Unidoc.PtclEndpoint
 {
     struct ConformersPage
     {
-        let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?
 
         private
         let vertex:Unidoc.DeclVertex
         private
-        let halo:Swiftinit.ConformingTypes
+        let halo:Unidoc.ConformingTypes
 
         private
         let stem:Unidoc.StemComponents
 
-        init(sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?,
+        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?,
             vertex:Unidoc.DeclVertex,
-            halo:Swiftinit.ConformingTypes) throws
+            halo:Unidoc.ConformingTypes) throws
         {
             self.sidebar = sidebar
             self.vertex = vertex
@@ -39,7 +39,7 @@ extension Unidoc.PtclEndpoint
 extension Unidoc.PtclEndpoint.ConformersPage
 {
     private
-    var demonym:Swiftinit.DeclDemonym
+    var demonym:Unidoc.DeclDemonym
     {
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }

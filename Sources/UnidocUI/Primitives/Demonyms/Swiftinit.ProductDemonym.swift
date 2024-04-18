@@ -1,6 +1,6 @@
 import SymbolGraphs
 
-extension Swiftinit
+extension Unidoc
 {
     struct ProductDemonym
     {
@@ -12,7 +12,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ProductDemonym
+extension Unidoc.ProductDemonym
 {
     var title:String
     {

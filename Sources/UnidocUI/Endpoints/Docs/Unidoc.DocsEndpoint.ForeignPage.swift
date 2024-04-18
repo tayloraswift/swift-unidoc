@@ -28,7 +28,7 @@ extension Unidoc.DocsEndpoint
 extension Unidoc.DocsEndpoint.ForeignPage
 {
     private
-    var demonym:Swiftinit.DeclDemonym
+    var demonym:Unidoc.DeclDemonym
     {
         .init(phylum: self.apex.phylum, kinks: self.apex.kinks)
     }
@@ -55,7 +55,7 @@ extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApicalPage
         """
     }
 
-    var sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>? { .package(volume: self.volume) }
+    var sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>? { .package(volume: self.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

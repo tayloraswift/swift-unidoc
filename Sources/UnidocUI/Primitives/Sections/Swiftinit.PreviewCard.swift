@@ -1,15 +1,15 @@
 import HTML
 import MarkdownABI
 
-extension Swiftinit
+extension Unidoc
 {
     protocol PreviewCard:HTML.OutputStreamable
     {
-        var context:any Unidoc.VertexContext { get }
-        var passage:Unidoc.Passage? { get }
+        var context:any VertexContext { get }
+        var passage:Passage? { get }
     }
 }
-extension Swiftinit.PreviewCard
+extension Unidoc.PreviewCard
 {
     var overview:Markdown.ProseSection?
     {
