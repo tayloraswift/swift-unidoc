@@ -4,7 +4,7 @@ import UnidocDB
 import UnixTime
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     struct PackagesCreatedPage
     {
@@ -20,15 +20,15 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackagesCreatedPage:Unidoc.RenderablePage
+extension Unidoc.PackagesCreatedPage:Unidoc.RenderablePage
 {
     var title:String { "Packages · \(self.date)" }
 }
-extension Swiftinit.PackagesCreatedPage:Unidoc.StaticPage
+extension Unidoc.PackagesCreatedPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Telescope[self.date] }
 }
-extension Swiftinit.PackagesCreatedPage:Unidoc.ApplicationPage
+extension Unidoc.PackagesCreatedPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

@@ -40,10 +40,10 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
         }
 
         /// In development mode, everyone is an administratrix!
-        let view:Swiftinit.Permissions = .init(package: output.package,
+        let view:Unidoc.Permissions = .init(package: output.package,
             user: format.secure ? output.user : output.user?.as(.administratrix))
 
-        let tags:Swiftinit.TagsTable
+        let tags:Unidoc.TagsTable
 
         switch self.query.filter
         {
@@ -96,7 +96,7 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
                 more: output.versions.releases.count == limit)
         }
 
-        let page:Swiftinit.TagsPage = .init(package: output.package,
+        let page:Unidoc.TagsPage = .init(package: output.package,
             aliases: output.aliases,
             build: output.build,
             realm: output.realm,

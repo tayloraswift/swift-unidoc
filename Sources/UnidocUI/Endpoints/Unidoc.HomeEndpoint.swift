@@ -40,7 +40,7 @@ extension Unidoc.HomeEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let page:Swiftinit.HomePage = .init(
+        let page:Unidoc.HomePage = .init(
             repo: output.repo,
             docs: output.docs)
 

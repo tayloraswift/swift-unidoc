@@ -47,7 +47,7 @@ extension Unidoc.PackagesCrawledEndpoint:HTTP.ServerEndpoint
     public consuming
     func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
-        let page:Swiftinit.PackagesCrawledPage = .init(dates: self.batch, in: self.year)
+        let page:Unidoc.PackagesCrawledPage = .init(dates: self.batch, in: self.year)
         return .ok(page.resource(format: format))
     }
 }

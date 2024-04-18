@@ -629,7 +629,7 @@ extension Unidoc.IntegralRequest.Ordering
             return nil
         }
 
-        let really:Swiftinit.ReallyPage = .init(title: heading,
+        let really:Unidoc.ReallyPage = .init(title: heading,
             prompt: prompt,
             button: button,
             action: .init(path: Swiftinit.API[trunk].path, query: query))

@@ -2,7 +2,7 @@ import BSON
 import HTML
 import UnixTime
 
-extension Swiftinit
+extension Unidoc
 {
     struct PackageIndicators
     {
@@ -21,7 +21,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.PackageIndicators:HTML.OutputStreamable
+extension Unidoc.PackageIndicators:HTML.OutputStreamable
 {
     static
     func += (span:inout HTML.ContentEncoder, self:Self)

@@ -1,18 +1,18 @@
 import HTML
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     struct RealmPage
     {
-        let metadata:Unidoc.RealmMetadata
+        let metadata:RealmMetadata
         let packages:PackageGroups
-        let user:Unidoc.User?
+        let user:User?
 
         private
-        init(metadata:Unidoc.RealmMetadata,
+        init(metadata:RealmMetadata,
             packages:PackageGroups,
-            user:Unidoc.User?)
+            user:User?)
         {
             self.metadata = metadata
             self.packages = packages
@@ -20,7 +20,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.RealmPage
+extension Unidoc.RealmPage
 {
     init(from output:consuming Unidoc.RealmQuery.Output)
     {
@@ -34,15 +34,15 @@ extension Swiftinit.RealmPage
             user: user)
     }
 }
-extension Swiftinit.RealmPage:Unidoc.RenderablePage
+extension Unidoc.RealmPage:Unidoc.RenderablePage
 {
     var title:String { "Realms · \(self.metadata.symbol)" }
 }
-extension Swiftinit.RealmPage:Unidoc.StaticPage
+extension Unidoc.RealmPage:Unidoc.StaticPage
 {
     var location:URI { Swiftinit.Realm[self.metadata.symbol] }
 }
-extension Swiftinit.RealmPage:Unidoc.ApplicationPage
+extension Unidoc.RealmPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

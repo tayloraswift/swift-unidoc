@@ -6,28 +6,28 @@ import UnidocRecords
 import UnixTime
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     struct HomePage
     {
-        let repo:[Unidoc.DB.RepoFeed.Activity]
-        let docs:[Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata>]
+        let repo:[DB.RepoFeed.Activity]
+        let docs:[DB.DocsFeed.Activity<VolumeMetadata>]
 
         init(
-            repo:[Unidoc.DB.RepoFeed.Activity],
-            docs:[Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata>])
+            repo:[DB.RepoFeed.Activity],
+            docs:[DB.DocsFeed.Activity<VolumeMetadata>])
         {
             self.repo = repo
             self.docs = docs
         }
     }
 }
-extension Swiftinit.HomePage:Unidoc.StaticPage
+extension Unidoc.HomePage:Unidoc.StaticPage
 {
     var canonicalURI:URI? { [] }
     var location:URI { [] }
 }
-extension Swiftinit.HomePage:Unidoc.RenderablePage
+extension Unidoc.HomePage:Unidoc.RenderablePage
 {
     var description:String? { "Browse recent package releases and documentation builds" }
 

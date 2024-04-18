@@ -3,7 +3,7 @@ import Media
 import UnidocRender
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct ReallyPage
@@ -31,10 +31,10 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ReallyPage:Unidoc.RenderablePage, Unidoc.DynamicPage
+extension Unidoc.ReallyPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
 }
-extension Swiftinit.ReallyPage:Unidoc.ApplicationPage
+extension Unidoc.ReallyPage:Unidoc.ApplicationPage
 {
     public
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)

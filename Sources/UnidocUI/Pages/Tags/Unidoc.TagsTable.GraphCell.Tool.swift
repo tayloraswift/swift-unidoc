@@ -1,7 +1,7 @@
 import HTML
 import Symbols
 
-extension Swiftinit.TagsTable.GraphCell
+extension Unidoc.TagsTable.GraphCell
 {
     struct Tool
     {
@@ -17,7 +17,7 @@ extension Swiftinit.TagsTable.GraphCell
         }
     }
 }
-extension Swiftinit.TagsTable.GraphCell.Tool:HTML.OutputStreamable
+extension Unidoc.TagsTable.GraphCell.Tool:HTML.OutputStreamable
 {
     static
     func += (form:inout HTML.ContentEncoder, self:Self)

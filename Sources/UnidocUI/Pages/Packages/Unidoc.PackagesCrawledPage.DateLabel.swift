@@ -1,7 +1,7 @@
 import HTML
 import UnixTime
 
-extension Swiftinit.PackagesCrawledPage
+extension Unidoc.PackagesCrawledPage
 {
     enum DateLabel
     {
@@ -9,7 +9,7 @@ extension Swiftinit.PackagesCrawledPage
         case md(Timestamp.Month, Int32)
     }
 }
-extension Swiftinit.PackagesCrawledPage.DateLabel:HTML.OutputStreamable
+extension Unidoc.PackagesCrawledPage.DateLabel:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)

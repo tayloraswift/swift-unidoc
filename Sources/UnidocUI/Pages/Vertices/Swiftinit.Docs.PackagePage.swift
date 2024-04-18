@@ -92,7 +92,7 @@ extension Swiftinit.Docs.PackagePage:Unidoc.ApicalPage
 
             if  let repo:Unidoc.PackageRepo = self.context.repo
             {
-                $0 += Swiftinit.PackageBanner.init(repo: repo,
+                $0 += Unidoc.PackageBanner.init(repo: repo,
                     tag: self.volume.refname,
                     now: .now())
             }
