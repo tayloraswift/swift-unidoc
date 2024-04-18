@@ -167,25 +167,6 @@ extension Unidoc.Client
         labels:Unidoc.BuildLabels,
         action:Unidoc.Snapshot.PendingAction) async throws -> Bool
     {
-        guard
-        let tag:String = labels.tag
-        else
-        {
-            print("""
-                No new documentation to build, run with -f or -e to build the latest release
-                or prerelease anyway.
-                """)
-
-            let reportNoneBuildable:Unidoc.BuildReport =  .init(
-                package: labels.coordinate.package,
-                failure: .noValidVersion,
-                entered: nil,
-                logs: [])
-
-            try await self.connect { try await $0.upload(reportNoneBuildable) }
-            return false
-        }
-
         let workspace:SSGC.Workspace = try .create(at: ".unidoc")
 
         let diagnostics:FilePath = workspace.path / "docs.log"
@@ -211,7 +192,7 @@ extension Unidoc.Client
 
             "--package-name", "\(labels.package)",
             "--package-repo", labels.repo,
-            "--tag", tag,
+            "--tag", labels.tag,
             "--workspace", "\(workspace.path)",
             "--status", "\(status)",
             "--output", "\(docs)",

@@ -19,6 +19,15 @@ extension Unidoc.BuilderLabelOperation:Unidoc.MachineOperation
     func load(from server:borrowing Unidoc.Server,
         with session:Mongo.Session) async throws -> JSON?
     {
-        try await server.db.unidoc.answer(prompt: self.prompt, with: session)
+        guard
+        let labels:Unidoc.BuildLabels = try await server.db.unidoc.answer(
+            prompt: self.prompt,
+            with: session)
+        else
+        {
+            return nil
+        }
+
+        return .object(with: labels.encode(to:))
     }
 }

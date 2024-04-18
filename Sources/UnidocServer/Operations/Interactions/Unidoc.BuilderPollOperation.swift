@@ -45,9 +45,11 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
 
             let prompt:Unidoc.BuildLabelsPrompt = .package(build.id, series: type.forced)
 
-            if  let json:JSON = try await server.db.unidoc.answer(prompt: prompt, with: session)
+            if  let labels:Unidoc.BuildLabels = try await server.db.unidoc.answer(
+                    prompt: prompt,
+                    with: session)
             {
-                return json
+                return .object(with: labels.encode(to:))
             }
             else if
                 let _:Unidoc.BuildMetadata = try await server.db.packageBuilds.finishBuild(
