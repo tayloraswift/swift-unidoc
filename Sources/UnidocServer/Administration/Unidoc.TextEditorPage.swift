@@ -12,9 +12,9 @@ extension Unidoc
     struct TextEditorPage
     {
         let string:String
-        let action:Swiftinit.API.Post
+        let action:Unidoc.PostAction
 
-        init(string:String, action:Swiftinit.API.Post)
+        init(string:String, action:Unidoc.PostAction)
         {
             self.string = string
             self.action = action
@@ -35,7 +35,7 @@ extension Unidoc.TextEditorPage:Unidoc.AdministrativePage
         main[.form]
         {
             $0.enctype = "\(MultipartType.form_data)"
-            $0.action = "\(Swiftinit.API[self.action])"
+            $0.action = "\(Unidoc.Post[self.action])"
             //  Can’t use PUT with HTML forms.
             $0.method = "post"
         }

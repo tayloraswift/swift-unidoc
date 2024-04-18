@@ -20,7 +20,7 @@ extension Unidoc.TextEditorOperation:Unidoc.AdministrativeOperation
     func load(from server:borrowing Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        let action:Swiftinit.API.Post
+        let action:Unidoc.PostAction
         switch self.id
         {
         case .robots_txt:

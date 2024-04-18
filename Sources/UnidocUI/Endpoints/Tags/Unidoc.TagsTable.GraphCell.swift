@@ -94,21 +94,21 @@ extension Unidoc.TagsTable.GraphCell:HTML.OutputStreamable
         td[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.uplink])"
+            $0.action = "\(Unidoc.Post[.uplink])"
             $0.method = "post"
         } = self.uplink
 
         td[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.unlink, really: false])"
+            $0.action = "\(Unidoc.Post[.unlink, really: false])"
             $0.method = "post"
         } = self.unlink
 
         td[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.delete, really: false])"
+            $0.action = "\(Unidoc.Post[.delete, really: false])"
             $0.method = "post"
         } = self.delete
 

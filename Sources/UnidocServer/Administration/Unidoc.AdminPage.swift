@@ -108,7 +108,7 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
         main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.uplinkAll])"
+            $0.action = "\(Unidoc.Post[.uplinkAll])"
             $0.method = "post"
         }
             content:
@@ -122,7 +122,7 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
         main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.telescope])"
+            $0.action = "\(Unidoc.Post[.telescope])"
             $0.method = "post"
         }
             content:

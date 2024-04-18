@@ -80,7 +80,7 @@ extension Unidoc.UserPage:Unidoc.ApplicationPage
                 $0[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Swiftinit.API[.packageIndex])"
+                    $0.action = "\(Unidoc.Post[.packageIndex])"
                     $0.method = "post"
 
                     $0.class = "config"
@@ -158,7 +158,7 @@ extension Unidoc.UserPage:Unidoc.ApplicationPage
             $0[.form]
             {
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Swiftinit.API[.userConfig, really: false])"
+                $0.action = "\(Unidoc.Post[.userConfig, really: false])"
                 $0.method = "post"
             }
                 content:
