@@ -24,6 +24,12 @@ button.area:active
     box-shadow: none;
     transform: none;
 }
+button.area:disabled
+{
+    color: var(--fg-semi);
+    border-color: var(--fg-light);
+    cursor: not-allowed;
+}
 
 button.text,
 button.text:hover,

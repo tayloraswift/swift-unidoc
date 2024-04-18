@@ -591,9 +591,14 @@ extension Unidoc.TagsPage
                         $0.name = "platform-preference"
                         $0.required = true
 
-                        $0.placeholder = "x86_64-unknown-linux-gnu"
+                        $0.placeholder = "aarch64-unknown-linux-gnu"
                         $0.pattern = #"^[a-zA-Z0-9_\-\.]+$"#
                         $0.value = self.package.platformPreference?.description
+
+                        if !self.view.editor
+                        {
+                            $0.readonly = true
+                        }
                     }
                 }
             }
@@ -602,6 +607,17 @@ extension Unidoc.TagsPage
             {
                 $0.class = "area"
                 $0.type = "submit"
+
+                if  case nil = self.view.global
+                {
+                    $0.disabled = true
+                    $0.title = "You are not logged in!"
+                }
+                else if !self.view.editor
+                {
+                    $0.disabled = true
+                    $0.title = "You are not an editor for this package!"
+                }
             } = "Update configuration"
         }
 
