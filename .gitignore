@@ -6,6 +6,9 @@
 .unidoc
 .vscode
 
+unidoc/
+swiftpm/
+
 Assets/secrets/
 Assets/icons/*.jpg
 Deploy/
