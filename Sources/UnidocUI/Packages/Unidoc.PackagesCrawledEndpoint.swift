@@ -4,6 +4,7 @@ import UnidocRender
 import UnidocDB
 import UnidocQueries
 import UnixTime
+import URI
 
 extension Unidoc
 {
@@ -36,6 +37,11 @@ extension Unidoc
 
         }
     }
+}
+extension Unidoc.PackagesCrawledEndpoint
+{
+    static
+    subscript(year:Timestamp.Year) -> URI { Unidoc.ServerRoot.telescope / "\(year)" }
 }
 extension Unidoc.PackagesCrawledEndpoint:Mongo.PipelineEndpoint, Mongo.SingleBatchEndpoint
 {

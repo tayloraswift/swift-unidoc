@@ -48,7 +48,7 @@ extension Unidoc.PackagesCrawledPage:Unidoc.RenderablePage
 }
 extension Unidoc.PackagesCrawledPage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Telescope[self.year] }
+    var location:URI { Unidoc.PackagesCrawledEndpoint[self.year] }
 }
 extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
 {
@@ -60,14 +60,14 @@ extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
             {
                 $0[.a]
                 {
-                    $0.href = "\(Swiftinit.Telescope[self.year.predecessor])"
+                    $0.href = "\(Unidoc.PackagesCrawledEndpoint[self.year.predecessor])"
                 } = "◀"
 
                 $0[.h1] = "\(self.year)"
 
                 $0[.a]
                 {
-                    $0.href = "\(Swiftinit.Telescope[self.year.successor])"
+                    $0.href = "\(Unidoc.PackagesCrawledEndpoint[self.year.successor])"
                 } = "▶"
             }
         }
@@ -137,7 +137,7 @@ extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
                             {
                                 $0[.a]
                                 {
-                                    $0.href = "\(Swiftinit.Telescope[id])"
+                                    $0.href = "\(Unidoc.PackagesCreatedEndpoint[id])"
                                     $0.title = """
                                     \(date.repos) Swift \
                                     \(date.repos == 1 ? "repository" : "repositories") \

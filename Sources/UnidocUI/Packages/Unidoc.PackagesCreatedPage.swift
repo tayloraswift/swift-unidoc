@@ -26,7 +26,7 @@ extension Unidoc.PackagesCreatedPage:Unidoc.RenderablePage
 }
 extension Unidoc.PackagesCreatedPage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Telescope[self.date] }
+    var location:URI { Unidoc.PackagesCreatedEndpoint[self.date] }
 }
 extension Unidoc.PackagesCreatedPage:Unidoc.ApplicationPage
 {
@@ -40,14 +40,14 @@ extension Unidoc.PackagesCreatedPage:Unidoc.ApplicationPage
 
                 $0[.a]
                 {
-                    $0.href = "\(Swiftinit.Telescope[before])"
+                    $0.href = "\(Unidoc.PackagesCreatedEndpoint[before])"
                 } = "◀"
 
                 $0[.h1] = self.date.long(.en)
 
                 $0[.a]
                 {
-                    $0.href = "\(Swiftinit.Telescope[after])"
+                    $0.href = "\(Unidoc.PackagesCreatedEndpoint[after])"
                 } = "▶"
             }
         }
