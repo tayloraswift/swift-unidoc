@@ -7,9 +7,6 @@ extension Unidoc
     @frozen public
     enum BuildLabelsPrompt:Sendable
     {
-        /// Get a list of obsolete symbol graphs.
-        case _allSymbolGraphs(upTo:PatchVersion, limit:Int?)
-
         /// Build a specific edition of a package.
         case edition(Edition)
         /// Build the latest version of a package.
@@ -28,9 +25,6 @@ extension Unidoc.BuildLabelsPrompt
         var version:Unidoc.Version? = nil
         var series:Unidoc.VersionSeries? = nil
 
-        var abi:PatchVersion? = nil
-        var limit:Int?
-
         for (key, value) in query.parameters
         {
             switch key
@@ -39,8 +33,6 @@ extension Unidoc.BuildLabelsPrompt
             case "package":         package = .init(value)
             case "version":         version = .init(value)
             case "force":           series = .init(value)
-            case "until":           abi = .init(value)
-            case "limit":           limit = .init(value)
             default:                continue
             }
         }
@@ -62,11 +54,6 @@ extension Unidoc.BuildLabelsPrompt
         {
             self = .packageNamed(packageSymbol, series: series)
         }
-        else if
-            let abi:PatchVersion
-        {
-            self = ._allSymbolGraphs(upTo: abi, limit: limit)
-        }
         else
         {
             return nil
@@ -78,12 +65,6 @@ extension Unidoc.BuildLabelsPrompt
     {
         switch self
         {
-        case ._allSymbolGraphs(let abi, let limit?):
-            ["until": "\(abi)", "limit": "\(limit)"]
-
-        case ._allSymbolGraphs(let abi, nil):
-            ["until": "\(abi)"]
-
         case .edition(let edition):
             ["package": "\(edition.package)", "version": "\(edition.version)"]
 

@@ -74,9 +74,6 @@ extension Unidoc.Build
             case "latest":
                 try await build.latest()
 
-            case "upgrade":
-                try await build.upgrade()
-
             case let command:
                 print("Unknown command: \(command)")
                 SystemProcess.exit(with: 1)
@@ -232,73 +229,5 @@ extension Unidoc.Build
         try await unidoc.buildAndUpload(
             labels: labels,
             action: self.force != nil ? .uplinkRefresh : .uplinkInitial)
-    }
-
-    private
-    func upgrade() async throws
-    {
-        let unidoc:Unidoc.Client = try .init(from: self)
-
-        var unbuildable:[Unidoc.Edition: ()] = [:]
-
-        upgrading:
-        do
-        {
-            let editions:[Unidoc.Edition] = try await unidoc.connect
-            {
-                @Sendable (connection:Unidoc.Client.Connection) in
-
-                try await connection.oldest(until: SymbolGraphABI.version)
-            }
-
-            var upgraded:Int = 0
-
-            for edition:Unidoc.Edition in editions where edition.version != -1
-            {
-                if  unbuildable.keys.contains(edition)
-                {
-                    continue
-                }
-
-                let labels:Unidoc.BuildLabels? = try await unidoc.connect
-                {
-                    try await $0.labels(id: edition)
-                }
-
-                guard
-                let labels:Unidoc.BuildLabels
-                else
-                {
-                    print("No buildable package for \(edition).")
-
-                    unbuildable[edition] = ()
-                    continue
-                }
-
-                if  case .swift = labels.package
-                {
-                    //  We cannot build the standard library this way.
-                    print("Skipping 'swift'")
-
-                    unbuildable[edition] = ()
-                    continue
-                }
-
-                if  try await unidoc.buildAndUpload(labels: labels, action: .uplinkRefresh)
-                {
-                    upgraded += 1
-                }
-                else
-                {
-                    print("Failed to build \(labels.package) \(labels.tag ?? "?")")
-                    unbuildable[edition] = ()
-                }
-            }
-            //  If we have upgraded at least one package, there are probably more.
-            if  upgraded > 0
-            {
-                continue upgrading
-            }
-        }
     }
 }
