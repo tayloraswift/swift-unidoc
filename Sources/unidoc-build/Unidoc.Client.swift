@@ -271,17 +271,16 @@ extension Unidoc.Client
         else
         {
             let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
-            //  We want to upload the symbol graph first, mainly so that the server does not
-            //  need to handle a state where the build is allegedly successful, but the symbol
-            //  graph is not available yet.
+            //  FIXME: For security reasons, the server does not handle batched uploads well.
+            //  This is usually only a problem is the uploads are very large or the network is
+            //  very slow.
+            try await self.connect { try await $0.upload(report) }
             try await self.connect
             {
                 try await $0.upload(Unidoc.Snapshot.init(id: labels.coordinate,
                     metadata: object.metadata,
                     inline: object.graph,
                     action: action))
-
-                try await $0.upload(report)
             }
 
             return true
