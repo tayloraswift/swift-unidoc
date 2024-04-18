@@ -75,6 +75,7 @@ extension Unidoc.PackageMetadata
 
         schedule:
         if  let interval:Milliseconds = repo.crawlingIntervalTarget(
+                dormant: repo.dormant(by: .millisecond(repo.crawled.value)),
                 hidden: self.hidden,
                 realm: self.realm)
         {
@@ -105,6 +106,7 @@ extension Unidoc.PackageMetadata
         repo.fetched = repo.crawled
 
         if  let interval:Milliseconds = repo.crawlingIntervalTarget(
+                dormant: repo.dormant(by: .millisecond(repo.crawled.value)),
                 hidden: self.hidden,
                 realm: self.realm)
         {
@@ -170,9 +172,9 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
 }
 extension Unidoc.PackageMetadata
 {
-    public
-    var crawlingIntervalTarget:Milliseconds?
-    {
-        self.repo?.crawlingIntervalTarget(hidden: self.hidden, realm: self.realm)
-    }
+    // public
+    // var crawlingIntervalTarget:Milliseconds?
+    // {
+    //     self.repo?.crawlingIntervalTarget(hidden: self.hidden, realm: self.realm)
+    // }
 }
