@@ -82,12 +82,31 @@ extension Unidoc.TagsPage:Unidoc.ApplicationPage
             }
         }
 
+        let dormancy:Duration?
+        if  case .none = self.shown,
+            let time:Duration = self.package.repo?.dormant(by: now)
+        {
+            /// Sure, we are ignoring leap years here, but no one will notice.
+            let years:Int = .init(time / .seconds(60 * 60 * 24 * 365))
+
+            main[.section, { $0.class = "notice dormant" }]
+            {
+                $0[.p] = "This package has been dormant for over \(years) years!"
+            }
+
+            dormancy = time
+        }
+        else
+        {
+            dormancy = nil
+        }
+
         main[.section, { $0.class = "details" }]
         {
             switch self.shown
             {
             case .none:
-                self.section(tags: &$0, now: now)
+                self.section(tags: &$0, now: now, dormancy: dormancy)
 
             case .tags(limit: _, page: let index, series: let series):
                 self.section(tags: &$0, page: index, beta: series == .prerelease)
@@ -143,7 +162,7 @@ extension Unidoc.TagsPage
     }
 
     private
-    func section(tags section:inout HTML.ContentEncoder, now:UnixInstant)
+    func section(tags section:inout HTML.ContentEncoder, now:UnixInstant, dormancy:Duration?)
     {
         if  let repo:Unidoc.PackageRepo = self.package.repo
         {
@@ -285,7 +304,8 @@ extension Unidoc.TagsPage
                 $0[.dt] = "Repo read"
                 $0[.dd] = "\(dynamicAge) ago"
             }
-            if  let fetched:BSON.Millisecond = self.package.repo?.fetched
+            if  let repo:Unidoc.PackageRepo = self.package.repo,
+                let fetched:BSON.Millisecond = repo.fetched
             {
                 let dynamicAge:Duration.DynamicFormat = .init(
                     truncating: now - .millisecond(fetched.value))
@@ -295,14 +315,19 @@ extension Unidoc.TagsPage
                 {
                     $0 += "\(dynamicAge) ago"
 
+                    let crawlingInterval:Milliseconds? = repo.crawlingIntervalTarget(
+                        dormant: dormancy,
+                        hidden: self.package.hidden,
+                        realm: self.package.realm)
+
                     $0[.span]
                     {
                         $0.class = "parenthetical"
-                    } = self.package.crawlingIntervalTarget.map
+                    } = crawlingInterval.map
                     {
-                        let interval:Duration.DynamicFormat = .init(
+                        let dynamicInterval:Duration.DynamicFormat = .init(
                             truncating: .milliseconds($0))
-                        return "target: \(interval)"
+                        return "target: \(dynamicInterval)"
                     }
                 }
             }

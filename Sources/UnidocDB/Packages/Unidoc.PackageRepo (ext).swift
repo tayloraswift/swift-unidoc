@@ -65,7 +65,33 @@ extension Unidoc.PackageRepo
 
 extension Unidoc.PackageRepo
 {
-    func crawlingIntervalTarget(hidden:Bool, realm:Unidoc.Realm?) -> Milliseconds?
+    public
+    func dormant(by now:UnixInstant) -> Duration?
+    {
+        let pushed:BSON.Millisecond
+
+        switch self.origin
+        {
+        case .github(let origin):   pushed = origin.pushed
+        }
+
+        let dormancy:Duration = now - .millisecond(pushed.value)
+        //  If the repo has been dormant for two years, we consider it abandoned.
+        if  dormancy > .seconds(60 * 60 * 24 * 365 * 2)
+        {
+            return dormancy
+        }
+        else
+        {
+            return nil
+        }
+    }
+
+    public
+    func crawlingIntervalTarget(
+        dormant:Duration?,
+        hidden:Bool,
+        realm:Unidoc.Realm?) -> Milliseconds?
     {
         guard self.origin.alive
         else
@@ -96,7 +122,7 @@ extension Unidoc.PackageRepo
         //  least two stars.)
         //
         //  If the package is part of the `public` realm (or whatever realm `0` has been named),
-        //  we consider it to have infinite stars.
+        //  we consider it to have infinite stars, and we do not care about dormancy.
         if  case 0? = realm
         {
             return interval
@@ -116,6 +142,12 @@ extension Unidoc.PackageRepo
         case 3000 ... 3999: interval += .hour * 2
         case 4000 ... 4999: interval += .hour * 1
         default:        break
+        }
+
+        //  Deprioritize dormant packages.
+        if  case _? = dormant
+        {
+            interval += .day * 7
         }
 
         return interval
