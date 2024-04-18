@@ -286,7 +286,7 @@ extension Unidoc.TagsPage
                     $0[.form]
                     {
                         $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
+                        $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
                         $0.method = "post"
                     } = ConfigButton.init(package: self.package.id,
                         update: "hidden",
@@ -347,7 +347,7 @@ extension Unidoc.TagsPage
             section[.form]
             {
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
+                $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
                 $0.method = "post"
             } = ConfigButton.init(package: self.package.id,
                 update: "refresh",
@@ -416,7 +416,7 @@ extension Unidoc.TagsPage
                     $0[.form]
                     {
                         $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
+                        $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
                         $0.method = "post"
                     } = ConfigButton.init(package: self.package.id,
                         update: "build",
@@ -432,7 +432,7 @@ extension Unidoc.TagsPage
                     $0[.form]
                     {
                         $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
+                        $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
                         $0.method = "post"
                     } = ConfigButton.init(package: self.package.id,
                         update: "build",
@@ -561,7 +561,7 @@ extension Unidoc.TagsPage
         section[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.packageConfig])"
+            $0.action = "\(Unidoc.Post[.packageConfig])"
             $0.method = "post"
 
             $0.class = "config"
@@ -627,7 +627,7 @@ extension Unidoc.TagsPage
                         $0[.form]
                         {
                             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                            $0.action = "\(Swiftinit.API[.packageConfig, really: false])"
+                            $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
                             $0.method = "post"
                         } = ConfigButton.init(package: self.package.id,
                             update: "symbol",
@@ -654,7 +654,7 @@ extension Unidoc.TagsPage
         section[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.packageAlign])"
+            $0.action = "\(Unidoc.Post[.packageAlign])"
             $0.method = "post"
         }
             content:
@@ -701,7 +701,7 @@ extension Unidoc.TagsPage
         section[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.packageAlias])"
+            $0.action = "\(Unidoc.Post[.packageAlias])"
             $0.method = "post"
         }
             content:
@@ -731,7 +731,7 @@ extension Unidoc.TagsPage
         section[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Swiftinit.API[.packageIndexTag])"
+            $0.action = "\(Unidoc.Post[.packageIndexTag])"
             $0.method = "post"
         }
             content:

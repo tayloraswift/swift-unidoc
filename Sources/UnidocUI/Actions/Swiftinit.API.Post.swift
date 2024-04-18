@@ -1,7 +1,7 @@
-extension Swiftinit.API
+extension Unidoc
 {
     @frozen public
-    enum Post:String, Sendable
+    enum PostAction:String, Sendable
     {
         case packageAlias = "package-alias"
         case packageAlign = "package-align"
@@ -21,14 +21,11 @@ extension Swiftinit.API
         case userConfig = "user-config"
     }
 }
-extension Swiftinit.API.Post:LosslessStringConvertible
+extension Unidoc.PostAction:LosslessStringConvertible
 {
     @inlinable public
     var description:String { self.rawValue }
 
     @inlinable public
-    init?(_ description:String)
-    {
-        self.init(rawValue: description)
-    }
+    init?(_ description:String) { self.init(rawValue: description) }
 }

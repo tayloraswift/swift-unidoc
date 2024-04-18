@@ -334,7 +334,7 @@ extension Unidoc.IntegralRequest.Ordering
         user account:Unidoc.Account?) throws -> Self?
     {
         guard
-        let trunk:Swiftinit.API.Post = .init(trunk)
+        let trunk:Unidoc.PostAction = .init(trunk)
         else
         {
             return nil
@@ -499,7 +499,7 @@ extension Unidoc.IntegralRequest.Ordering
         type:ContentType) throws -> Self?
     {
         guard
-        let trunk:Swiftinit.API.Post = .init(trunk)
+        let trunk:Unidoc.PostAction = .init(trunk)
         else
         {
             return nil
@@ -632,7 +632,7 @@ extension Unidoc.IntegralRequest.Ordering
         let really:Unidoc.ReallyPage = .init(title: heading,
             prompt: prompt,
             button: button,
-            action: .init(path: Swiftinit.API[trunk].path, query: query))
+            action: .init(path: Unidoc.Post[trunk].path, query: query))
 
         return .syncResource(really)
     }
