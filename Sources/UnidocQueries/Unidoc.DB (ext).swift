@@ -28,12 +28,9 @@ extension Unidoc.DB
 }
 extension Unidoc.DB
 {
-    //  TODO: we want this to return ``Unidoc.BuildLabels``, but the `_allSymbolGraphs` case
-    //  is preventing us from doing so. This means we can’t guarantee on the server side yet
-    //  that the labels contain a buildable tag.
     public
     func answer(prompt:Unidoc.BuildLabelsPrompt,
-        with session:Mongo.Session) async throws -> JSON?
+        with session:Mongo.Session) async throws -> Unidoc.BuildLabels?
     {
         switch prompt
         {
@@ -51,12 +48,10 @@ extension Unidoc.DB
                 return nil
             }
 
-            let build:Unidoc.BuildLabels = .init(coordinate: id,
+            return .init(coordinate: id,
                 package: output.package.symbol,
                 repo: repo.origin.https,
                 tag: output.edition.name)
-
-            return .object(with: build.encode(to:))
 
         case .package(let package, series: let series):
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.BuildTagQuery> = .init(
@@ -72,24 +67,25 @@ extension Unidoc.DB
                 return nil
             }
 
-            let build:Unidoc.BuildLabels
-
             if  case _? = series
             {
-                build = .init(coordinate: output.version.edition.id,
+                return .init(coordinate: output.version.edition.id,
+                    package: output.package.symbol,
+                    repo: repo.origin.https,
+                    tag: output.version.edition.name)
+            }
+            else if
+                case nil = output.version.graph
+            {
+                return .init(coordinate: output.version.edition.id,
                     package: output.package.symbol,
                     repo: repo.origin.https,
                     tag: output.version.edition.name)
             }
             else
             {
-                build = .init(coordinate: output.version.edition.id,
-                    package: output.package.symbol,
-                    repo: repo.origin.https,
-                    tag: output.version.graph == nil ? output.version.edition.name : nil)
+                return nil
             }
-
-            return .object(with: build.encode(to:))
 
         case .packageNamed(let package, series: let series):
             let filter:Unidoc.VersionsQuery.Predicate
@@ -114,8 +110,6 @@ extension Unidoc.DB
                 return nil
             }
 
-            let build:Unidoc.BuildLabels
-
             if  let series:Unidoc.VersionSeries
             {
                 let tag:Unidoc.Versions.Tag?
@@ -133,27 +127,24 @@ extension Unidoc.DB
                     return nil
                 }
 
-                build = .init(coordinate: tag.edition.id,
+                return .init(coordinate: tag.edition.id,
+                    package: output.package.symbol,
+                    repo: repo.origin.https,
+                    tag: tag.edition.name)
+            }
+            else if
+                let tag:Unidoc.Versions.Tag = output.versions.releases.first,
+                case nil = tag.graph
+            {
+                return .init(coordinate: tag.edition.id,
                     package: output.package.symbol,
                     repo: repo.origin.https,
                     tag: tag.edition.name)
             }
             else
             {
-                guard
-                let tag:Unidoc.Versions.Tag = output.versions.releases.first
-                else
-                {
-                    return nil
-                }
-
-                build = .init(coordinate: tag.edition.id,
-                    package: output.package.symbol,
-                    repo: repo.origin.https,
-                    tag: tag.graph == nil ? tag.edition.name : nil)
+                return nil
             }
-
-            return .object(with: build.encode(to:))
         }
     }
 }

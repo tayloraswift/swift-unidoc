@@ -13,10 +13,10 @@ extension Unidoc
         public
         let repo:String
         public
-        let tag:String?
+        let tag:String
 
         @inlinable public
-        init(coordinate:Edition, package:Symbol.Package, repo:String, tag:String?)
+        init(coordinate:Edition, package:Symbol.Package, repo:String, tag:String)
         {
             self.coordinate = coordinate
             self.package = package
@@ -55,6 +55,6 @@ extension Unidoc.BuildLabels:JSONObjectDecodable
         self.init(coordinate: try json[.coordinate].decode(),
             package: try json[.symbol].decode(),
             repo: try json[.repo].decode(),
-            tag: try json[.tag]?.decode())
+            tag: try json[.tag].decode())
     }
 }
