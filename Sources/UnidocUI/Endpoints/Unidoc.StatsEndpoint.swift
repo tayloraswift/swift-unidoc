@@ -68,6 +68,6 @@ extension Unidoc.StatsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         }
 
         //  There is documentation for this vertex, but it doesn’t have any stats.
-        return .redirect(.temporary("\(Swiftinit.Docs[context.volume, route])"))
+        return .redirect(.temporary("\(Unidoc.DocsEndpoint[context.volume, route])"))
     }
 }

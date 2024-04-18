@@ -23,7 +23,7 @@ extension Unidoc.VolumeMetadata.Domain:HTML.OutputStreamable
         {
             $0[.a]
             {
-                $0.href = "\(Swiftinit.Docs[self.volume])"
+                $0.href = "\(Unidoc.DocsEndpoint[self.volume])"
             } = "\(self.volume.symbol.package) \(self.volume.symbol.version)"
         }
 

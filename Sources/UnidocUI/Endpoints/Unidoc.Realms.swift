@@ -1,13 +1,13 @@
 import UnidocRender
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
-    enum Realm
+    enum Realms
     {
     }
 }
-extension Swiftinit.Realm
+extension Unidoc.Realms
 {
     static
     subscript(realm:String) -> URI { Unidoc.ServerRoot.realm / realm }

@@ -55,7 +55,7 @@ extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
                 break
             }
 
-            let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
+            let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>? = .module(
                 volume: context.volume,
                 tree: tree)
 
@@ -75,6 +75,6 @@ extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         }
 
         //  There is documentation for this vertex, but it is not a protocol.
-        return .redirect(.temporary("\(Swiftinit.Docs[context.volume, route])"))
+        return .redirect(.temporary("\(Unidoc.DocsEndpoint[context.volume, route])"))
     }
 }

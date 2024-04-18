@@ -14,7 +14,7 @@ extension Swiftinit.Ptcl
 {
     struct ConformersPage
     {
-        let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
+        let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?
 
         private
         let vertex:Unidoc.DeclVertex
@@ -24,7 +24,7 @@ extension Swiftinit.Ptcl
         private
         let stem:Unidoc.StemComponents
 
-        init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
+        init(sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?,
             vertex:Unidoc.DeclVertex,
             halo:Swiftinit.ConformingTypes) throws
         {
@@ -73,7 +73,7 @@ extension Swiftinit.Ptcl.ConformersPage:Unidoc.VertexPage
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        let back:String = "\(Swiftinit.Docs[self.volume, self.vertex.route])"
+        let back:String = "\(Unidoc.DocsEndpoint[self.volume, self.vertex.route])"
         let name:Substring = self.stem.last
 
         main[.section, { $0.class = "introduction" }]

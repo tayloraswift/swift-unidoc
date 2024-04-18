@@ -75,7 +75,7 @@ extension Unidoc.CanonicalVersion
 
         self.init(relationship: relationship,
             package: volumeOfLatest.title,
-            volume: Swiftinit.Docs[volumeOfLatest], // this does *not* use `layer`!
+            volume: Unidoc.DocsEndpoint[volumeOfLatest], // this does *not* use `layer`!
             target: target)
     }
 }

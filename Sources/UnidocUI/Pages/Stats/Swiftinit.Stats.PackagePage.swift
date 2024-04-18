@@ -53,7 +53,7 @@ extension Swiftinit.Stats.PackagePage:Unidoc.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        let back:String = "\(Swiftinit.Docs[self.volume])"
+        let back:String = "\(Unidoc.DocsEndpoint[self.volume])"
 
         main[.section, { $0.class = "introduction" }]
         {

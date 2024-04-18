@@ -53,7 +53,7 @@ extension Unidoc.VertexEndpoint
         with context:Unidoc.PeripheralPageContext,
         format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
-        if  let choices:Swiftinit.Docs.MultipleFoundPage = .init(context, matches: matches)
+        if  let choices:Unidoc.DocsEndpoint.MultipleFoundPage = .init(context, matches: matches)
         {
             return .multiple(choices.resource(format: format))
         }
@@ -61,7 +61,7 @@ extension Unidoc.VertexEndpoint
         {
             //  We currently don’t have any actual means of obtaining a type tree in this
             //  situation, but in theory, we could.
-            let display:Swiftinit.Docs.NotFoundPage = .init(context,
+            let display:Unidoc.DocsEndpoint.NotFoundPage = .init(context,
                 sidebar: .module(volume: context.volume, tree: tree))
 
             return .notFound(display.resource(format: format))

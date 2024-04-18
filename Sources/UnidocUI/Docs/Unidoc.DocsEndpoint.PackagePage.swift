@@ -12,7 +12,7 @@ import UnidocRecords
 import UnixTime
 import URI
 
-extension Swiftinit.Docs
+extension Unidoc.DocsEndpoint
 {
     struct PackagePage
     {
@@ -26,22 +26,22 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.PackagePage:Unidoc.RenderablePage
+extension Unidoc.DocsEndpoint.PackagePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.volume.title) Documentation" }
 
 }
-extension Swiftinit.Docs.PackagePage:Unidoc.StaticPage
+extension Unidoc.DocsEndpoint.PackagePage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume] }
+    var location:URI { Unidoc.DocsEndpoint[self.volume] }
 }
-extension Swiftinit.Docs.PackagePage:Unidoc.ApplicationPage
+extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.PackagePage:Unidoc.ApicalPage
+extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 {
-    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.context.volume) }
+    var sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>? { .package(volume: self.context.volume) }
 
     var descriptionFallback:String
     {
@@ -227,7 +227,7 @@ extension Swiftinit.Docs.PackagePage:Unidoc.ApicalPage
                                     {
                                         $0[.a]
                                         {
-                                            $0.href = "\(Swiftinit.Docs[pinned])"
+                                            $0.href = "\(Unidoc.DocsEndpoint[pinned])"
                                         } = pinned.symbol.version
                                     }
                                 }

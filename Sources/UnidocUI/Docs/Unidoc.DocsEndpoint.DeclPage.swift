@@ -10,18 +10,18 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit.Docs
+extension Unidoc.DocsEndpoint
 {
     struct DeclPage
     {
-        let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
+        let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?
         let cone:Unidoc.Cone
         let apex:Unidoc.DeclVertex
 
         private
         let stem:Unidoc.StemComponents
 
-        init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
+        init(sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?,
             cone:Unidoc.Cone,
             apex:Unidoc.DeclVertex) throws
         {
@@ -33,7 +33,7 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.DeclPage
+extension Unidoc.DocsEndpoint.DeclPage
 {
     private
     var demonym:Swiftinit.DeclDemonym
@@ -41,20 +41,20 @@ extension Swiftinit.Docs.DeclPage
         .init(phylum: self.apex.phylum, kinks: self.apex.kinks)
     }
 }
-extension Swiftinit.Docs.DeclPage:Unidoc.RenderablePage
+extension Unidoc.DocsEndpoint.DeclPage:Unidoc.RenderablePage
 {
     var title:String { "\(self.stem.last) · \(self.volume.title) Documentation" }
 
 }
-extension Swiftinit.Docs.DeclPage:Unidoc.StaticPage
+extension Unidoc.DocsEndpoint.DeclPage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
+    var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.DeclPage:Unidoc.ApplicationPage
+extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.DeclPage:Unidoc.ApicalPage
+extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
     {

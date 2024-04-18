@@ -74,7 +74,7 @@ extension Unidoc.TagsTable.Row:HTML.OutputStreamable
         {
             if  let volume:Unidoc.VolumeMetadata = self.volume
             {
-                $0[.a] { $0.href = "\(Swiftinit.Docs[volume])" } = "\(version)"
+                $0[.a] { $0.href = "\(Unidoc.DocsEndpoint[volume])" } = "\(version)"
             }
             else
             {

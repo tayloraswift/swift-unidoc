@@ -3,7 +3,7 @@ import UnidocRender
 import UnidocRecords
 import URI
 
-extension Swiftinit.Docs
+extension Unidoc.DocsEndpoint
 {
     struct ProductPage
     {
@@ -17,7 +17,7 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.ProductPage
+extension Unidoc.DocsEndpoint.ProductPage
 {
     private
     var demonym:Swiftinit.ProductDemonym
@@ -25,21 +25,21 @@ extension Swiftinit.Docs.ProductPage
         .init(type: self.apex.type)
     }
 }
-extension Swiftinit.Docs.ProductPage:Unidoc.RenderablePage
+extension Unidoc.DocsEndpoint.ProductPage:Unidoc.RenderablePage
 {
     var title:String { "\(self.apex.symbol) · \(self.volume.title) Products" }
 }
-extension Swiftinit.Docs.ProductPage:Unidoc.StaticPage
+extension Unidoc.DocsEndpoint.ProductPage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
+    var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.ProductPage:Unidoc.ApplicationPage
+extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ProductPage:Unidoc.ApicalPage
+extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
 {
-    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .product(volume: self.volume) }
+    var sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>? { .product(volume: self.volume) }
 
     var descriptionFallback:String
     {
@@ -90,12 +90,12 @@ extension Swiftinit.Docs.ProductPage:Unidoc.ApicalPage
                     $0 += "The "
                     $0[.a]
                     {
-                        $0.href = "\(Swiftinit.Docs[self.volume])"
+                        $0.href = "\(Unidoc.DocsEndpoint[self.volume])"
                     } = self.volume.title
                     $0 += " package also contains "
                     $0[.a]
                     {
-                        $0.href = "\(Swiftinit.Docs[self.volume, vertex.route])"
+                        $0.href = "\(Unidoc.DocsEndpoint[self.volume, vertex.route])"
                     } = "a module"
                     $0 += " with the same name."
                 }
@@ -155,7 +155,7 @@ extension Swiftinit.Docs.ProductPage:Unidoc.ApicalPage
                                 {
                                     $0[.a]
                                     {
-                                        $0.href = "\(Swiftinit.Docs[volume, vertex.route])"
+                                        $0.href = "\(Unidoc.DocsEndpoint[volume, vertex.route])"
                                     } = vertex.module.name
                                 }
                                 $0[.td]
@@ -168,7 +168,7 @@ extension Swiftinit.Docs.ProductPage:Unidoc.ApicalPage
                                 {
                                     $0[.a]
                                     {
-                                        $0.href = "\(Swiftinit.Docs[volume, vertex.route])"
+                                        $0.href = "\(Unidoc.DocsEndpoint[volume, vertex.route])"
                                     } = vertex.symbol
                                 }
 
@@ -176,7 +176,7 @@ extension Swiftinit.Docs.ProductPage:Unidoc.ApicalPage
                                 {
                                     $0[.a]
                                     {
-                                        $0.href = "\(Swiftinit.Docs[volume])"
+                                        $0.href = "\(Unidoc.DocsEndpoint[volume])"
                                     } = "\(volume.symbol.package)"
                                 }
 

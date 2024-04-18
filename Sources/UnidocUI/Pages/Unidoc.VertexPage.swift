@@ -35,7 +35,7 @@ extension Unidoc.VertexPage
             $0
             {
                 $0["id"] = "\(self.volume.symbol)"
-                $0["trunk"] = "\(Swiftinit.Docs[self.volume])"
+                $0["trunk"] = "\(Unidoc.DocsEndpoint[self.volume])"
             }
 
             for dependency:Unidoc.VolumeMetadata.Dependency in self.volume.dependencies
@@ -46,7 +46,7 @@ extension Unidoc.VertexPage
                     $0
                     {
                         $0["id"] = "\(dependency.symbol)"
-                        $0["trunk"] = "\(Swiftinit.Docs[dependency])"
+                        $0["trunk"] = "\(Unidoc.DocsEndpoint[dependency])"
                     }
                 }
             }

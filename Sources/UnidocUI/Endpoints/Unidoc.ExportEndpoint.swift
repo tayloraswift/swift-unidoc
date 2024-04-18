@@ -33,7 +33,7 @@ extension Unidoc
 extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
-    typealias VertexLayer = Swiftinit.Docs
+    typealias VertexLayer = Unidoc.DocsEndpoint
 
     public
     func failure(

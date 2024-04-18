@@ -5,15 +5,15 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit.Docs
+extension Unidoc.DocsEndpoint
 {
     struct ModulePage
     {
-        let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
+        let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?
         let cone:Unidoc.Cone
         let apex:Unidoc.CultureVertex
 
-        init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
+        init(sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?,
             cone:Unidoc.Cone,
             apex:Unidoc.CultureVertex)
         {
@@ -23,7 +23,7 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.ModulePage
+extension Unidoc.DocsEndpoint.ModulePage
 {
     private
     var demonym:Swiftinit.ModuleDemonym
@@ -39,19 +39,19 @@ extension Swiftinit.Docs.ModulePage
     private
     var stem:Unidoc.Stem { self.apex.stem }
 }
-extension Swiftinit.Docs.ModulePage:Unidoc.RenderablePage
+extension Unidoc.DocsEndpoint.ModulePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.name) · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.ModulePage:Unidoc.StaticPage
+extension Unidoc.DocsEndpoint.ModulePage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
+    var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.ModulePage:Unidoc.ApplicationPage
+extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ModulePage:Unidoc.ApicalPage
+extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
     {
@@ -78,7 +78,7 @@ extension Swiftinit.Docs.ModulePage:Unidoc.ApicalPage
                     {
                         $0[.a]
                         {
-                            $0.href = "\(Swiftinit.Docs[self.volume])"
+                            $0.href = "\(Unidoc.DocsEndpoint[self.volume])"
                         } = "\(self.volume.symbol.package) \(self.volume.symbol.version)"
                     }
 
