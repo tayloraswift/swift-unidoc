@@ -18,8 +18,7 @@ enum Main:TestMain, TestBattery
                     Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
                     Target: x86_64-unknown-linux-gnu
 
-                    """,
-                    swiftPath: "/usr/bin/swift"))
+                    """))
             {
                 tests.expect(swift.version ==? .init(version: .v(5, 8, 0),
                     nightly: .DEVELOPMENT_SNAPSHOT))
@@ -30,8 +29,7 @@ enum Main:TestMain, TestBattery
                     Swift version 5.10 (swift-5.10-RELEASE)
                     Target: x86_64-unknown-linux-gnu
 
-                    """,
-                    swiftPath: "/usr/bin/swift"))
+                    """))
             {
                 tests.expect(swift.version ==? .init(version: .v(5, 10, 0), nightly: nil))
                 tests.expect(swift.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
@@ -42,8 +40,7 @@ enum Main:TestMain, TestBattery
                     Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
                     Target: arm64-apple-macosx14.0
 
-                    """,
-                    swiftPath: "/usr/bin/swift"))
+                    """))
             {
                 tests.expect(swift.version ==? .init(version: .v(5, 10, 0), nightly: nil))
                 tests.expect(swift.triple ==? .init("arm64", "apple", "macosx14.0", nil))

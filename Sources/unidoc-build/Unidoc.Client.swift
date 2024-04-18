@@ -165,9 +165,26 @@ extension Unidoc.Client
     @discardableResult
     func buildAndUpload(
         labels:Unidoc.BuildLabels,
-        action:Unidoc.Snapshot.PendingAction) async throws -> Bool
+        action:Unidoc.Snapshot.PendingAction,
+        remove:Bool = false,
+        cache:FilePath? = nil) async throws -> Bool
     {
-        let workspace:SSGC.Workspace = try .create(at: ".unidoc")
+        if  let cache:FilePath, remove
+        {
+            //  If there is less than 2GB of free space on the current file system, and we are
+            //  using a manually-managed SwiftPM cache, we should clear it.
+            let stats:FileSystemStats = try .containing(path: cache)
+            let space:UInt = stats.blocksFreeForUnprivileged * stats.blockSize
+
+            print("Free space available: \(space / 1_000_000) MB")
+
+            if  space < 2_000_000_000
+            {
+                try cache.directory.remove()
+            }
+        }
+
+        let workspace:SSGC.Workspace = try .create(at: "unidoc")
 
         let diagnostics:FilePath = workspace.path / "docs.log"
         let docs:FilePath = workspace.path / "docs.bson"
@@ -211,6 +228,16 @@ extension Unidoc.Client
         {
             arguments.append("--sdk")
             arguments.append("\(sdk)")
+        }
+        if  let cache:FilePath
+        {
+            arguments.append("--swiftpm-cache")
+            arguments.append("\(cache)")
+        }
+        if  remove
+        {
+            arguments.append("--remove-build")
+            arguments.append("--remove-clone")
         }
 
         let ssgc:SystemProcess = try output.open(.writeOnly,
@@ -261,7 +288,7 @@ extension Unidoc.Client
 
     func buildAndUpload(local symbol:Symbol.Package, search:FilePath?) async throws
     {
-        let workspace:SSGC.Workspace = try .create(at: ".unidoc")
+        let workspace:SSGC.Workspace = try .create(at: ".ssgc")
         let docs:FilePath = workspace.path / "docs.bson"
 
         var arguments:[String] = [

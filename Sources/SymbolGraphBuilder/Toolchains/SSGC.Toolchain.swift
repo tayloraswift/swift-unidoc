@@ -12,12 +12,18 @@ extension SSGC
     @frozen public
     struct Toolchain
     {
-        /// The `swift` command, which might be a path to a specific Swift toolchain, or just the
-        /// string `"swift"`.
+        /// A path to a specific Swift toolchain to use, or just the string `"swift"`.
         private
-        let swiftPath:String
+        let swiftCommand:String
+        /// A path to the SwiftPM cache directory to use.
+        private
+        let swiftCache:FilePath?
         private
         let swiftSDK:AppleSDK?
+
+        /// What to name the scratch directory.
+        public
+        let scratch:FilePath.Component
 
         public
         let version:SwiftVersion
@@ -30,15 +36,19 @@ extension SSGC
         let pretty:Bool
 
         private
-        init(swiftPath:String,
+        init(swiftCommand:String,
+            swiftCache:FilePath?,
             swiftSDK:AppleSDK?,
+            scratch:FilePath.Component,
             version:SwiftVersion,
             commit:SymbolGraphMetadata.Commit?,
             triple:Triple,
             pretty:Bool)
         {
-            self.swiftPath = swiftPath
+            self.swiftCommand = swiftCommand
+            self.swiftCache = swiftCache
             self.swiftSDK = swiftSDK
+            self.scratch = scratch
             self.version = version
             self.commit = commit
             self.triple = triple
@@ -50,8 +60,10 @@ extension SSGC.Toolchain
 {
     public
     init(parsing splash:String,
-        swiftPath:String,
+        swiftCommand:String = "swift",
+        swiftCache:FilePath? = nil,
         swiftSDK:SSGC.AppleSDK? = nil,
+        scratch:FilePath.Component = ".build.ssgc",
         pretty:Bool = false) throws
     {
         //  Splash should consist of two complete lines and a final newline. If the final
@@ -119,8 +131,10 @@ extension SSGC.Toolchain
         }
 
         self.init(
-            swiftPath: swiftPath,
+            swiftCommand: swiftCommand,
+            swiftCache: swiftCache,
             swiftSDK: swiftSDK,
+            scratch: scratch,
             version: swift,
             commit: commit,
             triple: triple,
@@ -129,7 +143,8 @@ extension SSGC.Toolchain
 
     public static
     func detect(
-        swiftPath:String = "swift",
+        swiftCache:FilePath? = nil,
+        swiftPath:FilePath? = nil,
         swiftSDK:SSGC.AppleSDK? = nil,
         pretty:Bool = false) throws -> Self
     {
@@ -141,9 +156,12 @@ extension SSGC.Toolchain
             try? readable.close()
         }
 
-        try SystemProcess.init(command: swiftPath, "--version", stdout: writable)()
+        let swift:String = swiftPath?.string ?? "swift"
+
+        try SystemProcess.init(command: swift, "--version", stdout: writable)()
         return try .init(parsing: try readable.read(buffering: 1024),
-            swiftPath: swiftPath,
+            swiftCommand: swift,
+            swiftCache: swiftCache,
             swiftSDK: swiftSDK,
             pretty: pretty)
     }
@@ -197,7 +215,7 @@ extension SSGC.Toolchain
                 permissions: (.rw, .r, .r),
                 options: [.create, .truncate])
             {
-                let dump:SystemProcess = try .init(command: self.swiftPath,
+                let dump:SystemProcess = try .init(command: self.swiftCommand,
                     "package", "dump-package",
                     "--package-path", "\(package)",
                     stdout: $0)
@@ -217,10 +235,19 @@ extension SSGC.Toolchain
 
     func resolve(package:FilePath) throws -> [SPM.DependencyPin]
     {
-        try SystemProcess.init(command: self.swiftPath,
+        var arguments:[String] =
+        [
             "package",
             "update",
-            "--package-path", "\(package)")()
+            "--package-path", "\(package)"
+        ]
+        if  let path:FilePath = self.swiftCache
+        {
+            arguments.append("--cache-path")
+            arguments.append("\(path)")
+        }
+
+        try SystemProcess.init(command: self.swiftCommand, arguments: arguments)()
 
         do
         {
@@ -238,13 +265,22 @@ extension SSGC.Toolchain
         package:FilePath,
         release:Bool = false) throws -> SSGC.PackageBuildDirectory
     {
-        let scratch:SSGC.PackageBuildDirectory = .init(path: package / ".build.unidoc")
+        let scratch:SSGC.PackageBuildDirectory = .init(path: package / self.scratch)
 
-        try SystemProcess.init(command: self.swiftPath,
+        var arguments:[String] =
+        [
             "build",
             "--configuration", release ? "release" : "debug",
             "--package-path", "\(package)",
-            "--scratch-path", "\(scratch.path)")()
+            "--scratch-path", "\(scratch.path)",
+        ]
+        if  let path:FilePath = self.swiftCache
+        {
+            arguments.append("--cache-path")
+            arguments.append("\(path)")
+        }
+
+        try SystemProcess.init(command: self.swiftCommand, arguments: arguments)()
 
         return scratch
     }
@@ -354,7 +390,7 @@ extension SSGC.Toolchain
             {
                 $0["SWIFT_BACKTRACE"] = "enable=no"
             }
-            let extractor:SystemProcess = try .init(command: self.swiftPath,
+            let extractor:SystemProcess = try .init(command: self.swiftCommand,
                 arguments: arguments,
                 echo: true,
                 with: environment)

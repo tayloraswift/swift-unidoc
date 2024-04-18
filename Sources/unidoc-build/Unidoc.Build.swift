@@ -151,6 +151,7 @@ extension Unidoc.Build
     func requests() async throws
     {
         let unidoc:Unidoc.Client = try .init(from: self)
+        let cache:FilePath = "swiftpm"
 
         /// TODO: make configurable
         let pollInterval:Duration = .seconds(60 * 60)
@@ -172,7 +173,15 @@ extension Unidoc.Build
                     (\(labels.coordinate))
                     """)
 
-                try await unidoc.buildAndUpload(labels: labels, action: .uplinkRefresh)
+                /// As this runs continuously, we should remove the build artifacts afterwards,
+                /// to avoid filling up the disk. We must also remove the cloned repository,
+                /// as it may experience name conflicts on long timescales.
+                try await unidoc.buildAndUpload(
+                    labels: labels,
+                    action: .uplinkRefresh,
+                    remove: true,
+                    cache: cache)
+
                 try await cooldown
             }
             catch let error
@@ -195,8 +204,7 @@ extension Unidoc.Build
             fatalError("No package specified")
         }
 
-        try await unidoc.buildAndUpload(
-            local: package,
+        try await unidoc.buildAndUpload(local: package,
             search: self.input.map(FilePath.init(_:)))
     }
 
