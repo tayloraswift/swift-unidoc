@@ -191,7 +191,7 @@ extension Unidoc.TagsPage
                     {
                         $0[.a]
                         {
-                            $0.href = "\(Swiftinit.Telescope[created])"
+                            $0.href = "\(Unidoc.PackagesCreatedEndpoint[created])"
                         } = "\(created.month(.en)) \(created.day), \(created.year)"
                     }
                 }
