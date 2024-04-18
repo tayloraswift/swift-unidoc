@@ -23,10 +23,21 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.DocsEndpoint:Unidoc.VertexLayer
+{
+    @inlinable public static
+    var docs:Unidoc.ServerRoot { .docs }
+
+    @inlinable public static
+    var docc:Unidoc.ServerRoot { .docc }
+
+    @inlinable public static
+    var hist:Unidoc.ServerRoot { .hist }
+}
 extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 {
     public
-    typealias VertexLayer = Swiftinit.Docs
+    typealias VertexLayer = Self
 
     public
     func success(
@@ -41,36 +52,30 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         switch apex
         {
         case .article(let apex):
-            let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
+            let sidebar:Swiftinit.Sidebar<Self>? = .module(
                 volume: context.volume,
                 tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.ArticlePage = .init(
-                sidebar: sidebar,
-                cone: cone,
-                apex: apex)
+            let page:ArticlePage = .init(sidebar: sidebar, cone: cone, apex: apex)
             resource = page.resource(format: format)
 
         case .culture(let apex):
-            let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
+            let sidebar:Swiftinit.Sidebar<Self>? = .module(
                 volume: context.volume,
                 tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.ModulePage = .init(
+            let page:ModulePage = .init(
                 sidebar: sidebar,
                 cone: cone,
                 apex: apex)
             resource = page.resource(format: format)
 
         case .decl(let apex):
-            let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? = .module(
+            let sidebar:Swiftinit.Sidebar<Self>? = .module(
                 volume: context.volume,
                 tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.DeclPage = try .init(
-                sidebar: sidebar,
-                cone: cone,
-                apex: apex)
+            let page:DeclPage = try .init(sidebar: sidebar, cone: cone, apex: apex)
             resource = page.resource(format: format)
 
         case .file:
@@ -78,23 +83,17 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 
         case .product(let apex):
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.ProductPage = .init(
-                cone: cone,
-                apex: apex)
+            let page:ProductPage = .init(cone: cone, apex: apex)
             resource = page.resource(format: format)
 
         case .foreign(let apex):
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.ForeignPage = try .init(
-                cone: cone,
-                apex: apex)
+            let page:ForeignPage = try .init(cone: cone, apex: apex)
             resource = page.resource(format: format)
 
         case .global(let apex):
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:Swiftinit.Docs.PackagePage = .init(
-                cone: cone,
-                apex: apex)
+            let page:PackagePage = .init(cone: cone, apex: apex)
             resource = page.resource(format: format)
         }
 

@@ -5,15 +5,15 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit.Docs
+extension Unidoc.DocsEndpoint
 {
     struct ArticlePage
     {
-        let sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?
+        let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?
         let cone:Unidoc.Cone
         let apex:Unidoc.ArticleVertex
 
-        init(sidebar:Swiftinit.Sidebar<Swiftinit.Docs>?,
+        init(sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?,
             cone:Unidoc.Cone,
             apex:Unidoc.ArticleVertex)
         {
@@ -23,24 +23,24 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.ArticlePage
+extension Unidoc.DocsEndpoint.ArticlePage
 {
     private
     var stem:Unidoc.Stem { self.apex.stem }
 }
-extension Swiftinit.Docs.ArticlePage:Unidoc.RenderablePage
+extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.apex.headline.safe) · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.ArticlePage:Unidoc.StaticPage
+extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
+    var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.ArticlePage:Unidoc.ApplicationPage
+extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ArticlePage:Unidoc.ApicalPage
+extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.ApicalPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

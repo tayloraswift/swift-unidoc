@@ -105,7 +105,7 @@ extension Unidoc.IdentifiablePageContext
     func subdomain(_ module:Unidoc.Route) -> Unidoc.VolumeMetadata.Subdomain?
     {
         let module:HTML.Link<Substring> = .init(display: module.stem.first,
-            target: "\(Swiftinit.Docs[self.volume, module])")
+            target: "\(Unidoc.DocsEndpoint[self.volume, module])")
         return .init(self.volume, culture: .original(module))
     }
 

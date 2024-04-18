@@ -6,7 +6,7 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit.Docs
+extension Unidoc.DocsEndpoint
 {
     struct ForeignPage
     {
@@ -25,7 +25,7 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.ForeignPage
+extension Unidoc.DocsEndpoint.ForeignPage
 {
     private
     var demonym:Swiftinit.DeclDemonym
@@ -33,19 +33,19 @@ extension Swiftinit.Docs.ForeignPage
         .init(phylum: self.apex.phylum, kinks: self.apex.kinks)
     }
 }
-extension Swiftinit.Docs.ForeignPage:Unidoc.RenderablePage
+extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.RenderablePage
 {
     var title:String { "\(self.stem.last) (ext) · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.ForeignPage:Unidoc.StaticPage
+extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, self.apex.route] }
+    var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Swiftinit.Docs.ForeignPage:Unidoc.ApplicationPage
+extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.ForeignPage:Unidoc.ApicalPage
+extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
     {
@@ -55,7 +55,7 @@ extension Swiftinit.Docs.ForeignPage:Unidoc.ApicalPage
         """
     }
 
-    var sidebar:Swiftinit.Sidebar<Swiftinit.Docs>? { .package(volume: self.volume) }
+    var sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>? { .package(volume: self.volume) }
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
@@ -86,7 +86,7 @@ extension Swiftinit.Docs.ForeignPage:Unidoc.ApicalPage
 
                     $0[.a]
                     {
-                        $0.href = "\(Swiftinit.Docs[other])"
+                        $0.href = "\(Unidoc.DocsEndpoint[other])"
                     } = other.symbol.package == .swift
                         ? "the Swift standard library"
                         : other.title

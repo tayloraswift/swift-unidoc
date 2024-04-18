@@ -59,7 +59,7 @@ extension Unidoc.IdentifiablePageContext.Cache
             case (.culture(let vertex), principal: true)?:
                 (vertex, nil)
             case (.culture(let vertex), principal: false)?:
-                (vertex, self.load(id) { Swiftinit.Docs[$0, vertex.route] })
+                (vertex, self.load(id) { Unidoc.DocsEndpoint[$0, vertex.route] })
             default:
                 nil
             }
@@ -75,7 +75,7 @@ extension Unidoc.IdentifiablePageContext.Cache
             case (.article(let vertex), principal: true)?:
                 (vertex, nil)
             case (.article(let vertex), principal: false)?:
-                (vertex, self.load(id) { Swiftinit.Docs[$0, vertex.route] })
+                (vertex, self.load(id) { Unidoc.DocsEndpoint[$0, vertex.route] })
             default:
                 nil
             }
@@ -91,7 +91,7 @@ extension Unidoc.IdentifiablePageContext.Cache
             case (.decl(let vertex), principal: true)?:
                 (vertex, nil)
             case (.decl(let vertex), principal: false)?:
-                (vertex, self.load(id) { Swiftinit.Docs[$0, vertex.route] })
+                (vertex, self.load(id) { Unidoc.DocsEndpoint[$0, vertex.route] })
             default:
                 nil
             }
@@ -112,13 +112,13 @@ extension Unidoc.IdentifiablePageContext.Cache
                     {
                         switch vertex
                         {
-                        case .article(let vertex):  Swiftinit.Docs[$0, vertex.route]
-                        case .culture(let vertex):  Swiftinit.Docs[$0, vertex.route]
-                        case .decl(let vertex):     Swiftinit.Docs[$0, vertex.route]
+                        case .article(let vertex):  Unidoc.DocsEndpoint[$0, vertex.route]
+                        case .culture(let vertex):  Unidoc.DocsEndpoint[$0, vertex.route]
+                        case .decl(let vertex):     Unidoc.DocsEndpoint[$0, vertex.route]
                         case .file:                 nil
-                        case .product(let vertex):  Swiftinit.Docs[$0, vertex.route]
-                        case .foreign(let vertex):  Swiftinit.Docs[$0, vertex.route]
-                        case .global:               Swiftinit.Docs[$0]
+                        case .product(let vertex):  Unidoc.DocsEndpoint[$0, vertex.route]
+                        case .foreign(let vertex):  Unidoc.DocsEndpoint[$0, vertex.route]
+                        case .global:               Unidoc.DocsEndpoint[$0]
                         }
                     }
 

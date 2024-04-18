@@ -1,6 +1,6 @@
 import HTML
 
-extension Swiftinit.Docs.PackagePage
+extension Unidoc.DocsEndpoint.PackagePage
 {
     enum Heading
     {
@@ -10,7 +10,7 @@ extension Swiftinit.Docs.PackagePage
         case snapshot
     }
 }
-extension Swiftinit.Docs.PackagePage.Heading:Identifiable
+extension Unidoc.DocsEndpoint.PackagePage.Heading:Identifiable
 {
     var id:String
     {
@@ -23,7 +23,7 @@ extension Swiftinit.Docs.PackagePage.Heading:Identifiable
         }
     }
 }
-extension Swiftinit.Docs.PackagePage.Heading:HTML.OutputStreamableHeading
+extension Unidoc.DocsEndpoint.PackagePage.Heading:HTML.OutputStreamableHeading
 {
     var display:String
     {

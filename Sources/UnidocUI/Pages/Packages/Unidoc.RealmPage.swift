@@ -40,7 +40,7 @@ extension Unidoc.RealmPage:Unidoc.RenderablePage
 }
 extension Unidoc.RealmPage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Realm[self.metadata.symbol] }
+    var location:URI { Unidoc.Realms[self.metadata.symbol] }
 }
 extension Unidoc.RealmPage:Unidoc.ApplicationPage
 {

@@ -3,7 +3,7 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Swiftinit.Docs
+extension Unidoc.DocsEndpoint
 {
     struct MultipleFoundPage
     {
@@ -26,7 +26,7 @@ extension Swiftinit.Docs
         }
     }
 }
-extension Swiftinit.Docs.MultipleFoundPage
+extension Unidoc.DocsEndpoint.MultipleFoundPage
 {
     init?(_ context:consuming Unidoc.PeripheralPageContext,
         matches:__shared [Unidoc.AnyVertex])
@@ -42,19 +42,19 @@ extension Swiftinit.Docs.MultipleFoundPage
 
     }
 }
-extension Swiftinit.Docs.MultipleFoundPage:Unidoc.RenderablePage
+extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.RenderablePage
 {
     var title:String { "Disambiguation Page · \(self.volume.title) Documentation" }
 }
-extension Swiftinit.Docs.MultipleFoundPage:Unidoc.StaticPage
+extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.StaticPage
 {
-    var location:URI { Swiftinit.Docs[self.volume, .bare(self.identity)] }
+    var location:URI { Unidoc.DocsEndpoint[self.volume, .bare(self.identity)] }
 }
-extension Swiftinit.Docs.MultipleFoundPage:Unidoc.ApplicationPage
+extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.ApplicationPage
 {
     typealias Navigator = HTML.Logo
 }
-extension Swiftinit.Docs.MultipleFoundPage:Unidoc.VertexPage
+extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.VertexPage
 {
     var sidebar:Never? { nil }
 

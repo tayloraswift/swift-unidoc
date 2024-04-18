@@ -155,7 +155,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                                         $0[.span] = "\(item.volume.symbol.package)"
                                         $0[.a]
                                         {
-                                            $0.href = "\(Swiftinit.Docs[item.volume])"
+                                            $0.href = "\(Unidoc.DocsEndpoint[item.volume])"
                                         } = item.volume.symbol.version
                                     }
 
