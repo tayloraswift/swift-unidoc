@@ -6,6 +6,14 @@ import System
 
 extension SSGC
 {
+    enum ScratchPolicy:String, Equatable
+    {
+        case keep
+        case remove
+    }
+}
+extension SSGC
+{
     struct Main:Sendable
     {
         /// A path to the workspace directory. SSGC will **create** this workspace unless
@@ -21,12 +29,22 @@ extension SSGC
         var output:FilePath?
         var outputLog:FilePath?
 
-        var swiftPath:String
+        var swiftPath:FilePath?
         var swiftSDK:AppleSDK?
+
+        var swiftCache:FilePath?
 
         var name:Symbol.Package?
         var repo:String?
         var tag:String?
+
+        /// If true, SSGC will remove the Swift build directory (usually `.build.ssgc`) after
+        /// it finishes building documentation.
+        var removeBuild:Bool
+        /// If true, SSGC will remove the cloned git repository after it finishes building
+        /// documentation. This has no effect for local builds, and will also not remove any
+        /// cloned repositories from the SwiftPM cache.
+        var removeClone:Bool
         var pretty:Bool
 
         init()
@@ -39,12 +57,15 @@ extension SSGC
             self.output = nil
             self.outputLog = nil
 
-            self.swiftPath = "swift"
+            self.swiftCache = nil
+            self.swiftPath = nil
             self.swiftSDK = nil
 
             self.name = nil
             self.repo = nil
             self.tag = nil
+            self.removeBuild = false
+            self.removeClone = false
             self.pretty = false
         }
     }
@@ -58,8 +79,14 @@ extension SSGC.Main
         {
             switch option
             {
+            case "--swiftpm-cache":
+                self.swiftCache = .init(try arguments.next(for: option))
+
             case "--swift", "-s":
-                self.swiftPath = try arguments.next(for: option)
+                self.swiftPath = .init(try arguments.next(for: option))
+
+            case "--sdk", "-k":
+                self.swiftSDK = try .init(arguments.next(for: option))
 
             case "--workspace-name", "-w":
                 self.workspaceName = try .init(arguments.next(for: option))
@@ -72,9 +99,6 @@ extension SSGC.Main
 
             case "--search-path", "-I":
                 self.search = .init(try arguments.next(for: option))
-
-            case "--sdk", "-k":
-                self.swiftSDK = try .init(arguments.next(for: option))
 
             case "--package-name", "-n":
                 self.name = try .init(arguments.next(for: option))
@@ -90,6 +114,12 @@ extension SSGC.Main
 
             case "--output-log", "-l":
                 self.outputLog = try .init(arguments.next(for: option))
+
+            case "--remove-build":
+                self.removeBuild = true
+
+            case "--remove-clone":
+                self.removeClone = true
 
             case "--pretty", "-p":
                 self.pretty = true
@@ -166,7 +196,7 @@ extension SSGC.Main
             throw CommandLine.ArgumentError.missing("--package-name")
         }
 
-        let toolchain:SSGC.Toolchain = try .detect(
+        let toolchain:SSGC.Toolchain = try .detect(swiftCache: self.swiftCache,
             swiftPath: self.swiftPath,
             swiftSDK: self.swiftSDK,
             pretty: self.pretty)
@@ -182,16 +212,17 @@ extension SSGC.Main
                 status: status)
         }
         else if
-            let repo:String = self.repo,
-            let tag:String = self.tag
+            let search:FilePath = self.search
         {
-            let build:SSGC.PackageBuild = try .remote(
-                package: package,
-                from: repo,
-                at: tag,
-                in: workspace)
+            let build:SSGC.PackageBuild = .local(package: package, from: search)
 
-            try status?.send(.didCloneRepository)
+            defer
+            {
+                if  self.removeBuild
+                {
+                    try? (build.root / toolchain.scratch).directory.remove()
+                }
+            }
 
             object = try workspace.build(some: build,
                 toolchain: toolchain,
@@ -199,9 +230,30 @@ extension SSGC.Main
                 status: status)
         }
         else if
-            let search:FilePath = self.search
+            let repo:String = self.repo,
+            let tag:String = self.tag
         {
-            let build:SSGC.PackageBuild = try .local(package: package, from: search)
+            defer
+            {
+                let repoClone:FilePath = workspace.checkouts / "\(package)"
+
+                if  self.removeClone
+                {
+                    try? repoClone.directory.remove()
+                }
+                if  self.removeBuild
+                {
+                    try? (repoClone / toolchain.scratch).directory.remove()
+                }
+            }
+
+            let build:SSGC.PackageBuild = try .remote(
+                package: package,
+                from: repo,
+                at: tag,
+                in: workspace)
+
+            try status?.send(.didCloneRepository)
 
             object = try workspace.build(some: build,
                 toolchain: toolchain,

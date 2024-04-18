@@ -7,7 +7,7 @@ extension SSGC
     {
         mutating
         func compile(updating status:SSGC.StatusStream?,
-            into artifaces:FilePath,
+            into artifacts:FilePath,
             with swift:Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     }
 }

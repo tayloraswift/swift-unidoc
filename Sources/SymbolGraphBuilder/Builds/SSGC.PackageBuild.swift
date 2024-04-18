@@ -69,7 +69,7 @@ extension SSGC.PackageBuild
     ///         The location in which this function will search for a directory
     ///         named `"\(package)"`.
     public static
-    func local(package:Symbol.Package, from packages:FilePath) throws -> Self
+    func local(package:Symbol.Package, from packages:FilePath) -> Self
     {
         return .init(id: .unversioned(package), root: packages / "\(package)")
     }
