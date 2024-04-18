@@ -7,10 +7,10 @@ extension Unidoc.DocsEndpoint
     struct NotFoundPage
     {
         let context:Unidoc.PeripheralPageContext
-        let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?
 
         init(_ context:Unidoc.PeripheralPageContext,
-            sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?)
+            sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?)
         {
             self.context = context
             self.sidebar = sidebar

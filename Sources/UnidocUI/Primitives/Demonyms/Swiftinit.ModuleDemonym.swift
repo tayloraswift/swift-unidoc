@@ -1,7 +1,7 @@
 import SymbolGraphs
 import Symbols
 
-extension Swiftinit
+extension Unidoc
 {
     struct ModuleDemonym
     {
@@ -15,7 +15,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ModuleDemonym
+extension Unidoc.ModuleDemonym
 {
     var title:String
     {

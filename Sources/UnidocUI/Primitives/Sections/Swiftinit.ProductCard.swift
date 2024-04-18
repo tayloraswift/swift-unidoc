@@ -1,17 +1,17 @@
 import HTML
 import UnidocRecords
 
-extension Swiftinit
+extension Unidoc
 {
     struct ProductCard
     {
-        let context:any Unidoc.VertexContext
+        let context:any VertexContext
 
-        let vertex:Unidoc.ProductVertex
+        let vertex:ProductVertex
         let target:String
 
-        init(_ context:any Unidoc.VertexContext,
-            vertex:Unidoc.ProductVertex,
+        init(_ context:any VertexContext,
+            vertex:ProductVertex,
             target:String)
         {
             self.context = context
@@ -20,11 +20,11 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ProductCard:Swiftinit.PreviewCard
+extension Unidoc.ProductCard:Unidoc.PreviewCard
 {
     var passage:Unidoc.Passage? { nil }
 }
-extension Swiftinit.ProductCard:HTML.OutputStreamable
+extension Unidoc.ProductCard:HTML.OutputStreamable
 {
     static
     func += (li:inout HTML.ContentEncoder, self:Self)

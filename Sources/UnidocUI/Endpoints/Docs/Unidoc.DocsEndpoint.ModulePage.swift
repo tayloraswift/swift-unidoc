@@ -9,11 +9,11 @@ extension Unidoc.DocsEndpoint
 {
     struct ModulePage
     {
-        let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?
         let cone:Unidoc.Cone
         let apex:Unidoc.CultureVertex
 
-        init(sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?,
+        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?,
             cone:Unidoc.Cone,
             apex:Unidoc.CultureVertex)
         {
@@ -26,7 +26,7 @@ extension Unidoc.DocsEndpoint
 extension Unidoc.DocsEndpoint.ModulePage
 {
     private
-    var demonym:Swiftinit.ModuleDemonym
+    var demonym:Unidoc.ModuleDemonym
     {
         .init(
             language: self.apex.module.language ?? .swift,
@@ -149,7 +149,7 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                     break
                 }
 
-                $0[.div] { $0.class = "more" } = Swiftinit.StatsThumbnail.init(
+                $0[.div] { $0.class = "more" } = Unidoc.StatsThumbnail.init(
                     target: Unidoc.StatsEndpoint[self.volume, self.apex.route],
                     census: self.apex.census,
                     domain: self.name,

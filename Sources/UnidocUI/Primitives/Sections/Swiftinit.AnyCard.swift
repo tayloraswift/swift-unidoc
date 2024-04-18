@@ -1,6 +1,6 @@
 import HTML
 
-extension Swiftinit
+extension Unidoc
 {
     enum AnyCard
     {
@@ -10,7 +10,7 @@ extension Swiftinit
         case product(ProductCard)
     }
 }
-extension Swiftinit.AnyCard:HTML.OutputStreamable
+extension Unidoc.AnyCard:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.AttributeEncoder, self:Self)

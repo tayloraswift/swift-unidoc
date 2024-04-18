@@ -1,11 +1,11 @@
-extension Swiftinit.SourceLink
+extension Unidoc.SourceLink
 {
     enum Icon
     {
         case github
     }
 }
-extension Swiftinit.SourceLink.Icon:Identifiable
+extension Unidoc.SourceLink.Icon:Identifiable
 {
     var id:String
     {

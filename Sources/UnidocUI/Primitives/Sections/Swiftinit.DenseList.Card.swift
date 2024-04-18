@@ -3,20 +3,20 @@ import LexicalPaths
 import Signatures
 import Symbols
 
-extension Swiftinit.DenseList
+extension Unidoc.DenseList
 {
     struct Card
     {
         let target:String
         let decl:Unidoc.DeclVertex
         let path:UnqualifiedPath
-        let constraints:Swiftinit.ConstraintsList?
+        let constraints:Unidoc.ConstraintsList?
 
         private
         init(target:String,
             decl:Unidoc.DeclVertex,
             path:UnqualifiedPath,
-            constraints:Swiftinit.ConstraintsList?)
+            constraints:Unidoc.ConstraintsList?)
         {
             self.target = target
             self.decl = decl
@@ -25,7 +25,7 @@ extension Swiftinit.DenseList
         }
     }
 }
-extension Swiftinit.DenseList.Card
+extension Unidoc.DenseList.Card
 {
     init?(_ type:Unidoc.Scalar,
         constraints:[GenericConstraint<Unidoc.Scalar?>] = [],
@@ -45,11 +45,11 @@ extension Swiftinit.DenseList.Card
             constraints: .init(context, constraints: constraints))
     }
 }
-extension Swiftinit.DenseList.Card:HTML.OutputStreamableAnchor
+extension Unidoc.DenseList.Card:HTML.OutputStreamableAnchor
 {
     var id:String { "\(self.decl.symbol)" }
 }
-extension Swiftinit.DenseList.Card:HTML.OutputStreamable
+extension Unidoc.DenseList.Card:HTML.OutputStreamable
 {
     static
     func += (li:inout HTML.ContentEncoder, self:Self)

@@ -14,14 +14,14 @@ extension Unidoc.DocsEndpoint
 {
     struct DeclPage
     {
-        let sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?
         let cone:Unidoc.Cone
         let apex:Unidoc.DeclVertex
 
         private
         let stem:Unidoc.StemComponents
 
-        init(sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>?,
+        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?,
             cone:Unidoc.Cone,
             apex:Unidoc.DeclVertex) throws
         {
@@ -36,7 +36,7 @@ extension Unidoc.DocsEndpoint
 extension Unidoc.DocsEndpoint.DeclPage
 {
     private
-    var demonym:Swiftinit.DeclDemonym
+    var demonym:Unidoc.DeclDemonym
     {
         .init(phylum: self.apex.phylum, kinks: self.apex.kinks)
     }
@@ -237,7 +237,7 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
                 }
             }
 
-            if  let constraints:Swiftinit.ConstraintsList = .init(self.context,
+            if  let constraints:Unidoc.ConstraintsList = .init(self.context,
                     constraints: self.cone.halo.peerConstraints)
             {
                 $0[.details, { $0.open = true }]

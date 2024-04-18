@@ -72,7 +72,7 @@ extension Unidoc.VertexPage
                         $0.class = "searchbar"
                         $0.title = """
                         Search for types in the current package, including types from
-                        dependencies, or for any package on Swiftinit.
+                        dependencies, or for any package on Unidoc.
 
                         Shortcut: /
                         """

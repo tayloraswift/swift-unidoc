@@ -1,7 +1,7 @@
 import HTML
 import Symbols
 
-extension Swiftinit
+extension Unidoc
 {
     @dynamicMemberLookup
     struct ExtensionBody
@@ -16,26 +16,26 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ExtensionBody
+extension Unidoc.ExtensionBody
 {
     typealias Lists =
     (
-        conformances:Swiftinit.SegregatedList,
-        protocols:Swiftinit.SegregatedList,
-        types:Swiftinit.SegregatedList,
-        typealiases:Swiftinit.SegregatedList,
-        membersOnType:Swiftinit.SegregatedList,
-        membersOnInstance:Swiftinit.SegregatedList,
-        featuresOnType:Swiftinit.SegregatedList,
-        featuresOnInstance:Swiftinit.SegregatedList,
-        subtypes:Swiftinit.SegregatedList,
-        subclasses:Swiftinit.SegregatedList,
-        overriddenBy:Swiftinit.SegregatedList,
-        restatedBy:Swiftinit.SegregatedList,
-        defaultImplementations:Swiftinit.SegregatedList
+        conformances:Unidoc.SegregatedList,
+        protocols:Unidoc.SegregatedList,
+        types:Unidoc.SegregatedList,
+        typealiases:Unidoc.SegregatedList,
+        membersOnType:Unidoc.SegregatedList,
+        membersOnInstance:Unidoc.SegregatedList,
+        featuresOnType:Unidoc.SegregatedList,
+        featuresOnInstance:Unidoc.SegregatedList,
+        subtypes:Unidoc.SegregatedList,
+        subclasses:Unidoc.SegregatedList,
+        overriddenBy:Unidoc.SegregatedList,
+        restatedBy:Unidoc.SegregatedList,
+        defaultImplementations:Unidoc.SegregatedList
     )
 }
-extension Swiftinit.ExtensionBody
+extension Unidoc.ExtensionBody
 {
     // var visibleItems:Int
     // {
@@ -171,14 +171,14 @@ extension Swiftinit.ExtensionBody
     }
 }
 
-extension Swiftinit.ExtensionBody
+extension Unidoc.ExtensionBody
 {
     private
     subscript(
         dynamicMember keyPath:
-        KeyPath<Lists, Swiftinit.SegregatedList>) -> Swiftinit.SegregatedSection?
+        KeyPath<Lists, Unidoc.SegregatedList>) -> Unidoc.SegregatedSection?
     {
-        let items:Swiftinit.SegregatedList = self.lists[keyPath: keyPath]
+        let items:Unidoc.SegregatedList = self.lists[keyPath: keyPath]
         if  items.isEmpty
         {
             return nil
@@ -206,7 +206,7 @@ extension Swiftinit.ExtensionBody
         return .init(heading: heading, items: items)
     }
 }
-extension Swiftinit.ExtensionBody:HTML.OutputStreamable
+extension Unidoc.ExtensionBody:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)

@@ -2,7 +2,7 @@ import HTML
 import Signatures
 import Unidoc
 
-extension Swiftinit
+extension Unidoc
 {
     struct ConformingTypesHeader
     {
@@ -19,7 +19,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ConformingTypesHeader:HTML.OutputStreamable
+extension Unidoc.ConformingTypesHeader:HTML.OutputStreamable
 {
     static
     func += (h2:inout HTML.ContentEncoder, self:Self)

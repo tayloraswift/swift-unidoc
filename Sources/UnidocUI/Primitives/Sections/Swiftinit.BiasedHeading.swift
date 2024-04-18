@@ -1,4 +1,4 @@
-extension Swiftinit
+extension Unidoc
 {
     protocol BiasedHeading
     {
@@ -7,7 +7,7 @@ extension Swiftinit
         static func `extension`(in culture:Unidoc.Scalar) -> Self
     }
 }
-extension Swiftinit.BiasedHeading
+extension Unidoc.BiasedHeading
 {
     init(culture:Unidoc.Scalar, bias:Unidoc.Bias)
     {

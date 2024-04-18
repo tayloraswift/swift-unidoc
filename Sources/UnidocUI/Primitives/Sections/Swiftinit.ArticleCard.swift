@@ -1,18 +1,16 @@
 import HTML
 import UnidocRecords
 
-extension Swiftinit
+extension Unidoc
 {
     struct ArticleCard
     {
-        let context:any Unidoc.VertexContext
+        let context:any VertexContext
 
-        let vertex:Unidoc.ArticleVertex
+        let vertex:ArticleVertex
         let target:String
 
-        init(_ context:any Unidoc.VertexContext,
-            vertex:Unidoc.ArticleVertex,
-            target:String)
+        init(_ context:any VertexContext, vertex:ArticleVertex, target:String)
         {
             self.context = context
             self.vertex = vertex
@@ -20,11 +18,11 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ArticleCard:Swiftinit.PreviewCard
+extension Unidoc.ArticleCard:Unidoc.PreviewCard
 {
     var passage:Unidoc.Passage? { self.vertex.overview }
 }
-extension Swiftinit.ArticleCard:HTML.OutputStreamable
+extension Unidoc.ArticleCard:HTML.OutputStreamable
 {
     static
     func += (li:inout HTML.ContentEncoder, self:Self)

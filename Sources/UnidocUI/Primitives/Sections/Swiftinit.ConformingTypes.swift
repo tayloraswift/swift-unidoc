@@ -1,10 +1,10 @@
 import HTML
 
-extension Swiftinit
+extension Unidoc
 {
     struct ConformingTypes
     {
-        let context:Unidoc.PeripheralPageContext
+        let context:PeripheralPageContext
 
         private
         let culture:Unidoc.Scalar
@@ -15,7 +15,7 @@ extension Swiftinit
         var count:Int
 
         private
-        init(_ context:Unidoc.PeripheralPageContext, culture:Unidoc.Scalar)
+        init(_ context:PeripheralPageContext, culture:Unidoc.Scalar)
         {
             self.context = context
             self.culture = culture
@@ -24,7 +24,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.ConformingTypes
+extension Unidoc.ConformingTypes
 {
     init(_ context:Unidoc.PeripheralPageContext,
         groups:[Unidoc.AnyGroup],
@@ -49,7 +49,7 @@ extension Swiftinit.ConformingTypes
 
     var cultures:Int { self.conformers.count }
 }
-extension Swiftinit.ConformingTypes:HTML.OutputStreamable
+extension Unidoc.ConformingTypes:HTML.OutputStreamable
 {
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
@@ -58,13 +58,13 @@ extension Swiftinit.ConformingTypes:HTML.OutputStreamable
         {
             html[.section, { $0.class = "group conformer" }]
             {
-                $0[.h2] = Swiftinit.ConformingTypesHeader.init(self.context,
+                $0[.h2] = Unidoc.ConformingTypesHeader.init(self.context,
                     heading: .init(culture: group.culture, bias: .culture(self.culture)))
 
                 $0[.ul]
                 {
                     $0.class = "cards dense"
-                } = Swiftinit.DenseList.init(self.context,
+                } = Unidoc.DenseList.init(self.context,
                     members: (group.unconditional, group.conditional))
             }
         }

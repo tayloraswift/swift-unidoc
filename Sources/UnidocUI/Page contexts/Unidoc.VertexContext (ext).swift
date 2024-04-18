@@ -16,7 +16,7 @@ extension Unidoc.VertexContext
 }
 extension Unidoc.VertexContext
 {
-    func card(decl id:Unidoc.Scalar) -> Swiftinit.DeclCard?
+    func card(decl id:Unidoc.Scalar) -> Unidoc.DeclCard?
     {
         guard case (let vertex, let url?)? = self[decl: id]
         else
@@ -26,7 +26,7 @@ extension Unidoc.VertexContext
         return .init(self, vertex: vertex, target: url)
     }
 
-    func card(_ id:Unidoc.Scalar) -> Swiftinit.AnyCard?
+    func card(_ id:Unidoc.Scalar) -> Unidoc.AnyCard?
     {
         switch self[vertex: id]
         {
@@ -78,7 +78,7 @@ extension Unidoc.VertexContext
         }
     }
 
-    func link(source file:Unidoc.Scalar, line:Int? = nil) -> Swiftinit.SourceLink?
+    func link(source file:Unidoc.Scalar, line:Int? = nil) -> Unidoc.SourceLink?
     {
         guard
         let refname:String = self[file.edition]?.refname,
@@ -89,7 +89,7 @@ extension Unidoc.VertexContext
             return nil
         }
 
-        let icon:Swiftinit.SourceLink.Icon
+        let icon:Unidoc.SourceLink.Icon
         let blob:String
 
         switch origin

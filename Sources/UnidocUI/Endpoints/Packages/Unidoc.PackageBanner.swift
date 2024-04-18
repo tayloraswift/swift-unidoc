@@ -29,7 +29,7 @@ extension Unidoc.PackageBanner:HTML.OutputStreamable
         html[.p] = self.repo.origin.about
 
         let pushed:BSON.Millisecond
-        let icon:Swiftinit.SourceLink.Icon
+        let icon:Unidoc.SourceLink.Icon
         let path:Substring
 
         switch self.repo.origin
@@ -42,7 +42,7 @@ extension Unidoc.PackageBanner:HTML.OutputStreamable
 
         html[.p, { $0.class = "chyron" }]
         {
-            $0 += Swiftinit.SourceLink.init(
+            $0 += Unidoc.SourceLink.init(
                 target: self.tag.map { "\(self.repo.origin.https)/tree/\($0)" }
                     ?? self.repo.origin.https,
                 icon: icon,

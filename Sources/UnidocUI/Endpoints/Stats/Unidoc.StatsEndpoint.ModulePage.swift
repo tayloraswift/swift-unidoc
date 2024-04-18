@@ -11,13 +11,13 @@ extension Unidoc.StatsEndpoint
     {
         let context:Unidoc.RelativePageContext
 
-        let sidebar:Swiftinit.Sidebar<Unidoc.StatsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>?
 
         private
         let vertex:Unidoc.CultureVertex
 
         init(_ context:Unidoc.RelativePageContext,
-            sidebar:Swiftinit.Sidebar<Unidoc.StatsEndpoint>?,
+            sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>?,
             vertex:Unidoc.CultureVertex)
         {
             self.context = context
@@ -29,7 +29,7 @@ extension Unidoc.StatsEndpoint
 extension Unidoc.StatsEndpoint.ModulePage
 {
     private
-    var demonym:Swiftinit.ModuleDemonym
+    var demonym:Unidoc.ModuleDemonym
     {
         .init(
             language: self.vertex.module.language ?? .swift,
@@ -99,7 +99,7 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
         }
             content:
         {
-            $0[.h2] = Swiftinit.StatsHeading.documentationCoverage
+            $0[.h2] = Unidoc.StatsHeading.documentationCoverage
 
             $0[.h3] = "Declarations"
             $0[.figure]
@@ -126,7 +126,7 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
             }
             */
 
-            $0[.h2] = Swiftinit.StatsHeading.interfaceBreakdown
+            $0[.h2] = Unidoc.StatsHeading.interfaceBreakdown
 
             $0[.h3] = "Declarations"
             $0[.figure]
@@ -150,7 +150,7 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
                 """
             }
 
-            $0[.h2] = Swiftinit.StatsHeading.interfaceLayers
+            $0[.h2] = Unidoc.StatsHeading.interfaceLayers
 
             $0[.h3] = "Declarations"
             $0[.figure]

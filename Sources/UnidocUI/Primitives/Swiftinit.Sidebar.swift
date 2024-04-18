@@ -3,7 +3,7 @@ import UnidocQueries
 import UnidocRecords
 import URI
 
-extension Swiftinit
+extension Unidoc
 {
     @frozen public
     struct Sidebar<Root> where Root:Unidoc.VertexLayer
@@ -21,7 +21,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.Sidebar
+extension Unidoc.Sidebar
 {
     static
     func package(volume:Unidoc.VolumeMetadata) -> Self
@@ -48,7 +48,7 @@ extension Swiftinit.Sidebar
         return .init(volume: volume, nouns: nouns)
     }
 }
-extension Swiftinit.Sidebar:HTML.OutputStreamable
+extension Unidoc.Sidebar:HTML.OutputStreamable
 {
     public static
     func += (html:inout HTML.ContentEncoder, self:Self)

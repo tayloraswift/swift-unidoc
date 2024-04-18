@@ -1,7 +1,7 @@
 import HTML
 import Symbols
 
-extension Swiftinit
+extension Unidoc
 {
     @dynamicMemberLookup
     struct SegregatedBody
@@ -18,20 +18,20 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.SegregatedBody
+extension Unidoc.SegregatedBody
 {
     typealias Lists =
     (
-        protocols:Swiftinit.SegregatedList,
-        types:Swiftinit.SegregatedList,
-        typealiases:Swiftinit.SegregatedList,
-        macros:Swiftinit.SegregatedList,
-        membersOnType:Swiftinit.SegregatedList,
-        membersOnInstance:Swiftinit.SegregatedList,
-        globals:Swiftinit.SegregatedList
+        protocols:Unidoc.SegregatedList,
+        types:Unidoc.SegregatedList,
+        typealiases:Unidoc.SegregatedList,
+        macros:Unidoc.SegregatedList,
+        membersOnType:Unidoc.SegregatedList,
+        membersOnInstance:Unidoc.SegregatedList,
+        globals:Unidoc.SegregatedList
     )
 }
-extension Swiftinit.SegregatedBody:Swiftinit.CollapsibleContent
+extension Unidoc.SegregatedBody:Unidoc.CollapsibleContent
 {
     var length:Int
     {
@@ -44,7 +44,7 @@ extension Swiftinit.SegregatedBody:Swiftinit.CollapsibleContent
         + self.lists.globals.visible.count
     }
 }
-extension Swiftinit.SegregatedBody
+extension Unidoc.SegregatedBody
 {
     init?(_ context:Unidoc.RelativePageContext,
         group:__shared [Unidoc.Scalar])
@@ -94,14 +94,14 @@ extension Swiftinit.SegregatedBody
         self.init(lists: lists, count: group.count)
     }
 }
-extension Swiftinit.SegregatedBody
+extension Unidoc.SegregatedBody
 {
     private
     subscript(
         dynamicMember keyPath:
-        KeyPath<Lists, Swiftinit.SegregatedList>) -> Swiftinit.SegregatedSection?
+        KeyPath<Lists, Unidoc.SegregatedList>) -> Unidoc.SegregatedSection?
     {
-        let items:Swiftinit.SegregatedList = self.lists[keyPath: keyPath]
+        let items:Unidoc.SegregatedList = self.lists[keyPath: keyPath]
         if  items.isEmpty
         {
             return nil
@@ -123,7 +123,7 @@ extension Swiftinit.SegregatedBody
         return .init(heading: heading, items: items)
     }
 }
-extension Swiftinit.SegregatedBody:HTML.OutputStreamable
+extension Unidoc.SegregatedBody:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)

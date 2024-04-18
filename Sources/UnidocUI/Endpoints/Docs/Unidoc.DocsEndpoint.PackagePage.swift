@@ -41,7 +41,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApplicationPage
 }
 extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 {
-    var sidebar:Swiftinit.Sidebar<Unidoc.DocsEndpoint>? { .package(volume: self.context.volume) }
+    var sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>? { .package(volume: self.context.volume) }
 
     var descriptionFallback:String
     {
@@ -338,7 +338,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                 }
             }
 
-            $0[.div] { $0.class = "more" } = Swiftinit.StatsThumbnail.init(
+            $0[.div] { $0.class = "more" } = Unidoc.StatsThumbnail.init(
                 target: Unidoc.StatsEndpoint[self.volume],
                 census: self.apex.snapshot.census,
                 domain: self.volume.title,
