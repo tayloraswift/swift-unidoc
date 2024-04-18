@@ -241,7 +241,8 @@ extension SSGC.Main
                 {
                     try? repoClone.directory.remove()
                 }
-                if  self.removeBuild
+                else if
+                    self.removeBuild
                 {
                     try? (repoClone / toolchain.scratch).directory.remove()
                 }
