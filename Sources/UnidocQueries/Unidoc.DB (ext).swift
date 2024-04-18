@@ -37,19 +37,6 @@ extension Unidoc.DB
     {
         switch prompt
         {
-        case ._allSymbolGraphs(upTo: let version, limit: let limit):
-            let editions:[Unidoc.Edition] = try await self.snapshots.oldest(limit ?? 16,
-                until: version,
-                with: session)
-
-            return .array
-            {
-                for id:Unidoc.Edition in editions
-                {
-                    $0[+] = id
-                }
-            }
-
         case .edition(let id):
             var endpoint:Mongo.SingleOutputFromPrimary<Unidoc.BuildEditionQuery> = .init(
                 query: .init(edition: id))

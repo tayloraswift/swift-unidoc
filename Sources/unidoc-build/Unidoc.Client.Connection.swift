@@ -29,15 +29,6 @@ extension Unidoc.Client
         }
     }
 }
-
-extension Unidoc.Client.Connection
-{
-    func oldest(until abi:PatchVersion) async throws -> [Unidoc.Edition]
-    {
-        let prompt:Unidoc.BuildLabelsPrompt = ._allSymbolGraphs(upTo: abi, limit: 16)
-        return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
-    }
-}
 extension Unidoc.Client.Connection
 {
     func labels(waiting duration:Duration) async throws -> Unidoc.BuildLabels
