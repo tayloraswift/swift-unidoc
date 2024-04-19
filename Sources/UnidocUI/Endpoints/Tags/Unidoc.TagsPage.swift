@@ -411,7 +411,7 @@ extension Unidoc.TagsPage
                     } = "Started"
                 }
                 else if
-                    case _? = self.build?.request
+                    let request:Unidoc.BuildRequest = self.build?.request
                 {
                     $0[.form]
                     {
@@ -424,7 +424,7 @@ extension Unidoc.TagsPage
                         label: "Cancel build",
                         from: self.location)
 
-                    $0[.div] { $0.class = "phase" } = "Queued"
+                    $0[.div] { $0.class = "phase" } = "Queued (\(request.series))"
                     $0[.div]
                 }
                 else
