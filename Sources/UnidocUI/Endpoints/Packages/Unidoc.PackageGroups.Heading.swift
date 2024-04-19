@@ -16,10 +16,10 @@ extension Unidoc.PackageGroups.Heading:Identifiable
     {
         switch self
         {
-        case .realm:    "ss:realm-members"
-        case .free:     "ss:free"
-        case .unfree:   "ss:unfree"
-        case .inactive: "ss:inactive"
+        case .realm:        "ss:realm-members"
+        case .free:         "ss:free"
+        case .unfree:       "ss:unfree"
+        case .inactive:     "ss:inactive"
         }
     }
 }
@@ -29,10 +29,10 @@ extension Unidoc.PackageGroups.Heading:HTML.OutputStreamableHeading
     {
         switch self
         {
-        case .realm:    "Realm members"
-        case .free:     "Free packages"
-        case .unfree:   "Unfree packages"
-        case .inactive: "Inactive packages"
+        case .realm:        "Realm members"
+        case .free:         "Free packages"
+        case .unfree:       "Unfree packages"
+        case .inactive:     "Inactive packages"
         }
     }
 }

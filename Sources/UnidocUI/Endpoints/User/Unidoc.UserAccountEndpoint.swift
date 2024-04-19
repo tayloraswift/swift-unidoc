@@ -7,27 +7,27 @@ import UnidocQueries
 extension Unidoc
 {
     @frozen public
-    struct UserEndpoint
+    struct UserAccountEndpoint
     {
         public
-        let query:UserQuery
+        let query:UserAccountQuery
         public
         var value:User?
 
         @inlinable public
-        init(query:UserQuery)
+        init(query:UserAccountQuery)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Unidoc.UserEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.UserAccountEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Unidoc.UserEndpoint:HTTP.ServerEndpoint
+extension Unidoc.UserAccountEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
@@ -39,7 +39,7 @@ extension Unidoc.UserEndpoint:HTTP.ServerEndpoint
             return .notFound("No such user")
         }
 
-        let page:Unidoc.UserPage = .init(user: user)
+        let page:Unidoc.UserAccountPage = .init(user: user)
         return .ok(page.resource(format: format))
     }
 }

@@ -149,7 +149,7 @@ extension Unidoc.VersionsPage
             section[.a]
             {
                 $0.class = "area"
-                $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol, page: 0])"
+                $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol, .release, page: 0])"
             } = "Browse more tags"
         }
 

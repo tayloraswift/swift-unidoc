@@ -46,7 +46,7 @@ extension Unidoc.TagsPage:Unidoc.StaticPage
 {
     var location:URI
     {
-        Unidoc.TagsEndpoint[self.package.symbol, page: self.index, beta: self.series == .prerelease]
+        Unidoc.TagsEndpoint[self.package.symbol, self.series, page: self.index]
     }
 }
 extension Unidoc.TagsPage:Unidoc.ApplicationPage
@@ -65,54 +65,52 @@ extension Unidoc.TagsPage:Unidoc.ApplicationPage
 
         main[.section, { $0.class = "details" }]
         {
-            self.section(tags: &$0, page: index, beta: series == .prerelease)
+            $0[.h2] = self.heading
+            $0[.nav, { $0.class = "paginator" }]
+            {
+                if  self.index > 0
+                {
+                    $0[.a] { $0.href = "\(self.prev)" } = "prev"
+                }
+                else
+                {
+                    $0[.span] = "prev"
+                }
+
+                if  self.table.more
+                {
+                    $0[.a] { $0.href = "\(self.next)" } = "next"
+                }
+                else
+                {
+                    $0[.span] = "next"
+                }
+            }
+
+            $0[.table] { $0.class = "tags" } = self.table
+
+            $0[.a]
+            {
+                $0.class = "area"
+                $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol])"
+            } = "Back to repo details"
         }
     }
 }
 extension Unidoc.TagsPage
 {
     private
-    func section(tags section:inout HTML.ContentEncoder, page:Int, beta:Bool)
+    var heading:Heading
     {
-        section[.h2] = beta ? Heading.prereleases : Heading.releases
-
-        section[.nav, { $0.class = "paginator" }]
+        switch self.series
         {
-            if  page > 0
-            {
-                $0[.a]
-                {
-                    $0.href = """
-                    \(Unidoc.TagsEndpoint[self.package.symbol, page: page - 1, beta: beta])
-                    """
-                } = "prev"
-            }
-            else
-            {
-                $0[.span] = "prev"
-            }
-
-            if  self.table.more
-            {
-                $0[.a]
-                {
-                    $0.href = """
-                    \(Unidoc.TagsEndpoint[self.package.symbol, page: page + 1, beta: beta])
-                    """
-                } = "next"
-            }
-            else
-            {
-                $0[.span] = "next"
-            }
+        case .release:      .releases
+        case .prerelease:   .prereleases
         }
-
-        section[.table] { $0.class = "tags" } = self.table
-
-        section[.a]
-        {
-            $0.class = "area"
-            $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol])"
-        } = "Back to repo details"
     }
+
+    private
+    var prev:URI { Unidoc.TagsEndpoint[self.package.symbol, self.series, page: self.index - 1] }
+    private
+    var next:URI { Unidoc.TagsEndpoint[self.package.symbol, self.series, page: self.index + 1] }
 }

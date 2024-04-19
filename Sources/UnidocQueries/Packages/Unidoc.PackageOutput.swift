@@ -46,7 +46,7 @@ extension Unidoc.PackageOutput
     {
         pipeline[stage: .replaceWith] = .init
         {
-            $0[Unidoc.PackageOutput[.metadata]] = Mongo.Pipeline.ROOT
+            $0[Unidoc.PackageOutput[.metadata]] = metadata
         }
 
         //  Lookup the latest release of each package.

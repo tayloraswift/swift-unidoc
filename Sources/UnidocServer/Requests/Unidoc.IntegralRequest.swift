@@ -65,7 +65,7 @@ extension Unidoc.IntegralRequest
                     break
                 }
 
-                ordering = .explainable(Unidoc.UserEndpoint.init(
+                ordering = .explainable(Unidoc.UserAccountEndpoint.init(
                         query: .init(session: user)),
                     parameters: .init(uri.query?.parameters, tag: tag))
 
@@ -190,6 +190,10 @@ extension Unidoc.IntegralRequest
 
         case Unidoc.ServerRoot.telescope.id:
             ordering = .get(telescope: trunk,
+                with: .init(uri.query?.parameters, tag: tag))
+
+        case Unidoc.ServerRoot.user.id:
+            ordering = .get(user: trunk,
                 with: .init(uri.query?.parameters, tag: tag))
 
         case "reference":

@@ -5,7 +5,7 @@ import URI
 
 extension Unidoc
 {
-    struct UserPage
+    struct UserAccountPage
     {
         private
         let user:User
@@ -16,18 +16,15 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.UserPage
-{
-}
-extension Unidoc.UserPage:Unidoc.RenderablePage
+extension Unidoc.UserAccountPage:Unidoc.RenderablePage
 {
     var title:String { "Account settings" }
 }
-extension Unidoc.UserPage:Unidoc.StaticPage
+extension Unidoc.UserAccountPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.ServerRoot.account.uri }
 }
-extension Unidoc.UserPage:Unidoc.ApplicationPage
+extension Unidoc.UserAccountPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

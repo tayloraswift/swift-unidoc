@@ -51,6 +51,14 @@ extension Unidoc.User
         return self
     }
 }
+extension Unidoc.User
+{
+    @inlinable public
+    var name:String?
+    {
+        self.github?.name
+    }
+}
 extension Unidoc.User:Mongo.MasterCodingModel
 {
     public
