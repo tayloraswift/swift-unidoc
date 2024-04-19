@@ -436,7 +436,7 @@ extension Unidoc.TagsPage
                         $0.method = "post"
                     } = ConfigButton.init(package: self.package.id,
                         update: "build",
-                        value: "rebuild",
+                        value: "request",
                         label: "Request build",
                         from: self.location)
 

@@ -4,44 +4,45 @@ import UnidocAPI
 extension Unidoc
 {
     @frozen public
-    enum BuildRequest:Int32, Equatable, Sendable
+    struct BuildRequest:Equatable, Sendable
     {
-        case auto = 0
-        case release = 1
-        case prerelease = 2
+        public
+        let series:VersionSeries
+        public
+        let force:Bool
+
+        @inlinable public
+        init(series:VersionSeries, force:Bool)
+        {
+            self.series = series
+            self.force = force
+        }
     }
 }
-extension Unidoc.BuildRequest
+extension Unidoc.BuildRequest:RawRepresentable
 {
-    @inlinable public static
-    func force(_ value:Unidoc.VersionSeries) -> Self
+    @inlinable public
+    init?(rawValue:Int32)
     {
-        switch value
+        switch rawValue
         {
-        case .prerelease:   .prerelease
-        case .release:      .release
+        case 0:     self = .init(series: .release, force: false)
+        case 1:     self = .init(series: .release, force: true)
+        case 2:     self = .init(series: .prerelease, force: false)
+        case 3:     self = .init(series: .prerelease, force: true)
+        default:    return nil
         }
     }
 
     @inlinable public
-    var forced:Unidoc.VersionSeries?
+    var rawValue:Int32
     {
-        switch self
+        switch (self.series, self.force)
         {
-        case .auto:         nil
-        case .release:      .release
-        case .prerelease:   .prerelease
-        }
-    }
-
-    @inlinable public
-    var series:Unidoc.VersionSeries
-    {
-        switch self
-        {
-        case .auto:         .release
-        case .release:      .release
-        case .prerelease:   .prerelease
+        case (.release, false):     0
+        case (.release, true):      1
+        case (.prerelease, false):  2
+        case (.prerelease, true):   3
         }
     }
 }

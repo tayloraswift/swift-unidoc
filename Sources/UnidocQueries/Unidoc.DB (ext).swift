@@ -53,9 +53,9 @@ extension Unidoc.DB
                 repo: repo.origin.https,
                 tag: output.edition.name)
 
-        case .package(let package, series: let series):
+        case .package(let package, series: let series, force: let force):
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.BuildTagQuery> = .init(
-                query: .init(package: package, version: series ?? .release))
+                query: .init(package: package, version: series))
 
             try await pipeline.pull(from: self.id, with: session)
 
@@ -67,15 +67,7 @@ extension Unidoc.DB
                 return nil
             }
 
-            if  case _? = series
-            {
-                return .init(coordinate: output.version.edition.id,
-                    package: output.package.symbol,
-                    repo: repo.origin.https,
-                    tag: output.version.edition.name)
-            }
-            else if
-                case nil = output.version.graph
+            if  force || output.version.graph == nil
             {
                 return .init(coordinate: output.version.edition.id,
                     package: output.package.symbol,
@@ -87,14 +79,13 @@ extension Unidoc.DB
                 return nil
             }
 
-        case .packageNamed(let package, series: let series):
+        case .packageNamed(let package, series: let series, force: let force):
             let filter:Unidoc.VersionsQuery.Predicate
 
             switch series
             {
-            case .none:         filter = .tags(limit: 1, series: .release)
-            case .release?:     filter = .tags(limit: 1, series: .release)
-            case .prerelease?:  filter = .tags(limit: 1, series: .prerelease)
+            case .release:      filter = .tags(limit: 1, series: .release)
+            case .prerelease:   filter = .tags(limit: 1, series: .prerelease)
             }
 
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.VersionsQuery> = .init(
@@ -110,31 +101,15 @@ extension Unidoc.DB
                 return nil
             }
 
-            if  let series:Unidoc.VersionSeries
+            let tag:Unidoc.Versions.Tag?
+
+            switch series
             {
-                let tag:Unidoc.Versions.Tag?
-
-                switch series
-                {
-                case .release:      tag = output.versions.releases.first
-                case .prerelease:   tag = output.versions.prereleases.first
-                }
-
-                guard
-                let tag:Unidoc.Versions.Tag
-                else
-                {
-                    return nil
-                }
-
-                return .init(coordinate: tag.edition.id,
-                    package: output.package.symbol,
-                    repo: repo.origin.https,
-                    tag: tag.edition.name)
+            case .release:      tag = output.versions.releases.first
+            case .prerelease:   tag = output.versions.prereleases.first
             }
-            else if
-                let tag:Unidoc.Versions.Tag = output.versions.releases.first,
-                case nil = tag.graph
+
+            if  let tag:Unidoc.Versions.Tag, force || tag.graph == nil
             {
                 return .init(coordinate: tag.edition.id,
                     package: output.package.symbol,

@@ -61,7 +61,10 @@ extension Unidoc.Client.Connection
     {
         do
         {
-            let prompt:Unidoc.BuildLabelsPrompt = .packageNamed(package, series: series)
+            let prompt:Unidoc.BuildLabelsPrompt = .packageNamed(package,
+                series: series,
+                force: true)
+
             return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
         }
         catch let error as HTTP.StatusError
