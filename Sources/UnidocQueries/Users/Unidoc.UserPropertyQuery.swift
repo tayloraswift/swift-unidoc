@@ -23,7 +23,7 @@ extension Unidoc
 extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
 {
     public
-    typealias CollectionOrigin = Unidoc.DB.Users
+    typealias CollectionOrigin = Unidoc.DB.Packages
 
     public
     typealias Collation = SimpleCollation
@@ -32,39 +32,51 @@ extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
     typealias Iteration = Mongo.Single<Output>
 
     @inlinable public
-    var hint:Mongo.CollectionIndex? { nil }
+    var hint:Mongo.CollectionIndex? { Unidoc.DB.Packages.indexAccount }
 
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
         pipeline[stage: .match] = .init
         {
-            $0[Unidoc.User[.id]] = self.account
+            $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]] = self.account
+            $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]]
+            {
+                $0[.exists] = true
+            }
         }
 
-        pipeline[stage: .replaceWith] = .init(Output.CodingKey.self)
+        pipeline[stage: .facet] = .init
         {
-            $0[.user] = Mongo.Pipeline.ROOT
+            $0[Output[.packages]] = .init
+            {
+                Unidoc.PackageOutput.extend(pipeline: &$0, from: Mongo.Pipeline.ROOT)
+            }
         }
+
+        let account:Mongo.Variable<Unidoc.Scalar> = "account"
 
         pipeline[stage: .lookup] = .init
         {
-            $0[.from] = Unidoc.DB.Packages.name
-            $0[.localField] = Output[.user] / Unidoc.User[.id]
-            $0[.foreignField] = Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]
+            $0[.from] = Unidoc.DB.Users.name
+            $0[.let] = .init
+            {
+                $0[let: account] = self.account
+            }
             $0[.pipeline] = .init
             {
                 $0[stage: .match] = .init
                 {
-                    $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]]
-                    {
-                        $0[.exists] = true
-                    }
+                    $0[.expr] { $0[.eq] = (Unidoc.User[.id], account) }
                 }
-
-                Unidoc.PackageOutput.extend(pipeline: &$0, from: Mongo.Pipeline.ROOT)
             }
-            $0[.as] = Output[.packages]
+            $0[.as] = Output[.user]
+        }
+
+        //  Unbox zero- or one-element array.
+        pipeline[stage: .set] = .init
+        {
+            $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
         }
     }
 }

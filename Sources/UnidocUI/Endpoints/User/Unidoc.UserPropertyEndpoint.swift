@@ -46,7 +46,8 @@ extension Unidoc.UserPropertyEndpoint:HTTP.ServerEndpoint
             return .notFound("No such user")
         }
         guard
-        let name:String = output.user.name ?? output.packages.first?.metadata.repo?.origin.owner
+        let name:String = output.user?.name ??
+            output.packages.first?.metadata.repo?.origin.owner
         else
         {
             return .notFound("This user has no packages or has not set up her account.")
@@ -54,7 +55,8 @@ extension Unidoc.UserPropertyEndpoint:HTTP.ServerEndpoint
 
         let page:Unidoc.UserPropertyPage = .init(name: name,
             user: output.user,
-            packages: .init(organizing: output.packages, heading: .free))
+            packages: .init(organizing: output.packages, heading: .free),
+            id: self.query.account)
 
         return .ok(page.resource(format: format))
     }

@@ -113,7 +113,20 @@ extension Unidoc.VersionsPage
                     }
 
                     $0[.dt] = "Owner"
-                    $0[.dd] = origin.owner
+                    if  let account:Unidoc.Account = repo.account
+                    {
+                        $0[.dd]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "\(Unidoc.UserPropertyEndpoint[account])"
+                            } = origin.owner
+                        }
+                    }
+                    else
+                    {
+                        $0[.dd] = origin.owner
+                    }
 
                     $0[.dt] = "Watchers"
                     $0[.dd] = "\(origin.watchers)"
