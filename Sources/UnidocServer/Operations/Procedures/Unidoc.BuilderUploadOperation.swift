@@ -59,6 +59,12 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
         case .labeled:
             var snapshot:Unidoc.Snapshot = try .init(bson: bson)
 
+            /// A successful (labeled) build also sets the platform preference, since we now
+            /// know that the package can be built on that platform.
+            let _:Bool? = try await server.db.packages.update(package: snapshot.id.package,
+                platformPreference: snapshot.metadata.triple,
+                with: session)
+
             if  let bucket:AWS.S3.Bucket = server.bucket.graphs
             {
                 let s3:AWS.S3.Client = .init(threads: server.context.threads,
