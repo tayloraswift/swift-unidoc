@@ -9,12 +9,12 @@ extension Unidoc.UserPropertyQuery
     struct Output
     {
         public
-        let user:Unidoc.User
+        let user:Unidoc.User?
         public
         let packages:[Unidoc.PackageOutput]
 
         @inlinable public
-        init(user:Unidoc.User,
+        init(user:Unidoc.User?,
             packages:[Unidoc.PackageOutput])
         {
             self.user = user
@@ -36,7 +36,7 @@ extension Unidoc.UserPropertyQuery.Output:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(user: try bson[.user].decode(),
+        self.init(user: try bson[.user]?.decode(),
             packages: try bson[.packages].decode())
     }
 }

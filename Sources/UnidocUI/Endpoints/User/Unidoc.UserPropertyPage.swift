@@ -9,15 +9,18 @@ extension Unidoc
         private
         let name:String
         private
-        let user:User
+        let user:User?
         private
         let packages:PackageGroups
+        private
+        let id:Account
 
-        init(name:String, user:User, packages:PackageGroups)
+        init(name:String, user:User?, packages:PackageGroups, id:Account)
         {
             self.name = name
             self.user = user
             self.packages = packages
+            self.id = id
         }
     }
 }
@@ -27,7 +30,7 @@ extension Unidoc.UserPropertyPage:Unidoc.RenderablePage
 }
 extension Unidoc.UserPropertyPage:Unidoc.StaticPage
 {
-    var location:URI { Unidoc.UserPropertyEndpoint[self.user.id] }
+    var location:URI { Unidoc.UserPropertyEndpoint[self.id] }
 }
 extension Unidoc.UserPropertyPage:Unidoc.ApplicationPage
 {
