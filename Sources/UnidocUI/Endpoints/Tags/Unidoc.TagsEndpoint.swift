@@ -59,11 +59,9 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
         let view:Unidoc.Permissions = .init(package: output.package,
             user: format.secure ? output.user : output.user?.as(.administratrix))
 
-        let tags:Unidoc.TagsTable
-
         switch self.query.filter
         {
-        case .tags(limit: let limit, page: _, series: let series):
+        case .tags(limit: let limit, page: let index, series: let series):
             let list:[Unidoc.Versions.Tag]
             switch series
             {
@@ -71,11 +69,19 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
             case .prerelease:   list = output.versions.prereleases
             }
 
-            tags = .init(
+            let tags:Unidoc.TagsTable = .init(
                 package: output.package.symbol,
                 tagged: list,
                 view: view,
                 more: list.count == limit)
+
+            let page:Unidoc.TagsPage = .init(package: output.package,
+                series: series,
+                index: index,
+                limit: limit,
+                table: tags)
+
+            return .ok(page.resource(format: format))
 
         case .none(limit: let limit):
             var prereleases:ArraySlice<Unidoc.Versions.Tag> = output.versions.prereleases[...]
@@ -104,21 +110,20 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
             list += prereleases
             list += releases
 
-            tags = .init(
+            let tags:Unidoc.TagsTable = .init(
                 package: output.package.symbol,
                 tagless: output.versions.top,
                 tagged: list,
                 view: view,
                 more: output.versions.releases.count == limit)
+
+            let page:Unidoc.VersionsPage = .init(package: output.package,
+                aliases: output.aliases,
+                build: output.build,
+                realm: output.realm,
+                table: tags)
+
+            return .ok(page.resource(format: format))
         }
-
-        let page:Unidoc.TagsPage = .init(package: output.package,
-            aliases: output.aliases,
-            build: output.build,
-            realm: output.realm,
-            table: tags,
-            shown: self.query.filter)
-
-        return .ok(page.resource(format: format))
     }
 }
