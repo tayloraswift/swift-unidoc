@@ -39,4 +39,9 @@ section
             color: var(--fg-accent);
         }
     }
+
+    > h2, > h3
+    {
+        margin-top: 1.5em;
+    }
 }

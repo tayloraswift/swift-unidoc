@@ -330,9 +330,10 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 
                         $0[link: url]
                         {
+                            $0.target = "_blank"
+                            $0.rel = .external
                             $0.rel = .noopener
                             $0.rel = .google_ugc
-                            $0.target = "_blank"
                         } = "\(commit)"
                     }
                 }

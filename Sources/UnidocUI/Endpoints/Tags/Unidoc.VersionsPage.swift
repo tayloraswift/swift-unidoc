@@ -298,182 +298,43 @@ extension Unidoc.VersionsPage
             }
         }
 
-        if  self.view.editor
+        section[.div]
         {
-            section[.div, { $0.class = "build-pipeline" }]
+            $0.class = "build-pipeline"
+        } = BuildTools.init(package: self.package,
+            build: self.build,
+            view: self.view,
+            back: self.location)
+
+        //  All logged-in users can see the build logs. The only reason they are not totally
+        //  public is to prevent crawlers from making dynamic CloudFront requests, because the
+        //  CDN firewall is less effective than our apex firewall.
+        if  case _? = self.view.global,
+            let build:Unidoc.BuildMetadata = self.build,
+            !build.logs.isEmpty
+        {
+            section[.h3] = "Build logs"
+            section[.ol]
             {
-                if  let progress:Unidoc.BuildProgress = self.build?.progress
-                {
-                    $0[.div]
-                    {
-                        $0.title = "You cannot cancel a build that has already started!"
-                    } = "Cancel build"
-                    $0[.div] = "Queued"
-                    $0[.div]
-                    {
-                        $0.class = "phase"
-                        $0.title = switch progress.stage
-                        {
-                        case .initializing:
-                            """
-                            The builder is initializing.
-                            """
-                        case .cloningRepository:
-                            """
-                            The builder is cloning the package’s repository.
-                            """
-                        case .resolvingDependencies:
-                            """
-                            The builder is resolving the package’s dependencies.
-                            """
-                        case .compilingCode:
-                            """
-                            The builder is compiling the package’s source code.
-                            """
-                        }
-                    } = "Started"
-                }
-                else if
-                    let request:Unidoc.BuildRequest = self.build?.request
-                {
-                    $0[.form]
-                    {
-                        $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
-                        $0.method = "post"
-                    } = ConfigButton.init(package: self.package.id,
-                        update: "build",
-                        value: "cancel",
-                        label: "Cancel build",
-                        from: self.location)
-
-                    $0[.div] { $0.class = "phase" } = "Queued (\(request.series))"
-                    $0[.div]
-                }
-                else
-                {
-                    $0[.form]
-                    {
-                        $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
-                        $0.method = "post"
-                    } = ConfigButton.init(package: self.package.id,
-                        update: "build",
-                        value: "request",
-                        label: "Request build",
-                        from: self.location)
-
-                    $0[.div]
-
-                    switch self.build?.failure
-                    {
-                    case .timeout?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            We failed to build the package in the allotted time.
-                            """
-                        } = "Failed (timeout)"
-
-                    case .noValidVersion?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            There were no valid versions of this package to build.
-                            """
-                        } = "Skipped"
-
-                    case .failedToCloneRepository?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            We failed to clone the package’s repository.
-                            """
-                        } = "Failed (git)"
-
-                    case .failedToReadManifest?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            We failed to detect the package’s manifest.
-                            """
-                        } = "Failed (swift)"
-
-                    case .failedToReadManifestForDependency?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            We failed to read the manifest of one of the package’s dependencies.
-                            """
-                        } = "Failed (swift)"
-
-                    case .failedToResolveDependencies?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            We failed to resolve the package’s dependencies.
-                            """
-                        } = "Failed (swift)"
-
-                    case .failedToBuild?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            We failed to build the package’s source code.
-                            """
-                        } = "Failed (swift)"
-
-                    case .failedToExtractSymbolGraph?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            We failed to extract the package’s symbol graphs.
-                            """
-                        } = "Failed (swift)"
-
-                    case .failedToLoadSymbolGraph?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            We failed to parse the package’s symbol graphs.
-                            """
-                        } = "Failed (ssgc)"
-
-                    case .failedToLinkSymbolGraph?:
-                        $0[.div]
-                        {
-                            $0.title = """
-                            We failed to link the package’s documentation.
-                            """
-                        } = "Failed (ssgc)"
-
-                    case nil:
-                        $0[.div]
-                    }
-                }
+                $0.class = "build-logs"
             }
-
-            //  TODO: this looks really ugly visually, but it’s a start.
-            if  let build:Unidoc.BuildMetadata = self.build, !build.logs.isEmpty
+                content:
             {
-                section[.h3] = "Build logs"
-
-                section[.ol]
+                for log:Unidoc.BuildLogType in build.logs
                 {
-                    for log:Unidoc.BuildLogType in build.logs
+                    $0[.li]
                     {
-                        $0[.li]
-                        {
-                            //  We never persist logs anywhere except in S3, where they are
-                            //  served through CloudFront. Therefore, we can safely hardcode
-                            //  the URL here.
-                            let path:Unidoc.BuildLogPath = .init(package: build.id, type: log)
+                        //  We never persist logs anywhere except in S3, where they are
+                        //  served through CloudFront. Therefore, we can safely hardcode
+                        //  the URL here.
+                        let path:Unidoc.BuildLogPath = .init(package: build.id, type: log)
 
-                            $0[.a]
-                            {
-                                $0.href = "https://static.swiftinit.org\(path)"
-                            } = log.name
-                        }
+                        $0[.a]
+                        {
+                            $0.target = "_blank"
+                            $0.href = "https://static.swiftinit.org\(path)"
+                            $0.rel = .external
+                        } = log.name
                     }
                 }
             }
@@ -698,3 +559,4 @@ extension Unidoc.VersionsPage
         }
     }
 }
+
