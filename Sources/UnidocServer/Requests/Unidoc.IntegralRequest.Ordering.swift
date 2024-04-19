@@ -512,7 +512,13 @@ extension Unidoc.IntegralRequest.Ordering
             return nil
         }
 
-        let query:URI.Query = try .parse(parameters: body)
+        let action:URI = .init(path: Unidoc.Post[trunk].path,
+            query: try .parse(parameters: body))
+
+        let form:[String: String] = action.query?.parameters.reduce(into: [:])
+        {
+            $0[$1.key] = $1.value
+        } ?? [:]
 
         let heading:String
         let prompt:String
@@ -537,11 +543,6 @@ extension Unidoc.IntegralRequest.Ordering
             button = "It is so ordered"
 
         case .packageConfig:
-            let form:[String: String] = query.parameters.reduce(into: [:])
-            {
-                $0[$1.key] = $1.value
-            }
-
             guard
             let update:Unidoc.PackageConfigOperation.Update = .init(from: form)
             else
@@ -581,15 +582,6 @@ extension Unidoc.IntegralRequest.Ordering
                 """
                 button = "Rename package"
 
-            case .build(_?):
-                heading = "Build package?"
-                prompt = """
-                A builder will select a recent version of the package once one becomes \
-                available. If you tag a new release in the meantime, it might build that \
-                instead.
-                """
-                button = "Build package"
-
             case .build(nil):
                 heading = "Cancel build?"
                 prompt = """
@@ -597,17 +589,15 @@ extension Unidoc.IntegralRequest.Ordering
                 """
                 button = "Cancel build"
 
+            case .build(_?):
+                return .syncResource(Unidoc.BuildRequestPage.init(action: action))
+
             case .platformPreference:
                 //  Doesn’t need a confirmation page.
                 return nil
             }
 
         case .userConfig:
-            let form:[String: String] = query.parameters.reduce(into: [:])
-            {
-                $0[$1.key] = $1.value
-            }
-
             guard
             let update:Unidoc.UserConfigOperation.Update = .init(from: form)
             else
@@ -632,7 +622,7 @@ extension Unidoc.IntegralRequest.Ordering
         let really:Unidoc.ReallyPage = .init(title: heading,
             prompt: prompt,
             button: button,
-            action: .init(path: Unidoc.Post[trunk].path, query: query))
+            action: action)
 
         return .syncResource(really)
     }

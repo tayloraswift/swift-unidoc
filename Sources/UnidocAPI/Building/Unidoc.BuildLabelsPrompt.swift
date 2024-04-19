@@ -10,9 +10,9 @@ extension Unidoc
         /// Build a specific edition of a package.
         case edition(Edition)
         /// Build the latest version of a package.
-        case package(Package, series:VersionSeries?)
+        case package(Package, series:VersionSeries, force:Bool)
         /// Build the latest version of a package by name.
-        case packageNamed(Symbol.Package, series:VersionSeries?)
+        case packageNamed(Symbol.Package, series:VersionSeries, force:Bool)
     }
 }
 extension Unidoc.BuildLabelsPrompt
@@ -24,6 +24,7 @@ extension Unidoc.BuildLabelsPrompt
         var package:Unidoc.Package? = nil
         var version:Unidoc.Version? = nil
         var series:Unidoc.VersionSeries? = nil
+        var force:Bool = false
 
         for (key, value) in query.parameters
         {
@@ -32,7 +33,8 @@ extension Unidoc.BuildLabelsPrompt
             case "package-symbol":  packageSymbol = .init(value)
             case "package":         package = .init(value)
             case "version":         version = .init(value)
-            case "force":           series = .init(value)
+            case "series":          series = .init(value)
+            case "force":           force = value == "true"
             default:                continue
             }
         }
@@ -46,13 +48,13 @@ extension Unidoc.BuildLabelsPrompt
             let package:Unidoc.Package,
             let series:Unidoc.VersionSeries
         {
-            self = .package(package, series: series)
+            self = .package(package, series: series, force: force)
         }
         else if
             let packageSymbol:Symbol.Package,
             let series:Unidoc.VersionSeries
         {
-            self = .packageNamed(packageSymbol, series: series)
+            self = .packageNamed(packageSymbol, series: series, force: force)
         }
         else
         {
@@ -68,17 +70,11 @@ extension Unidoc.BuildLabelsPrompt
         case .edition(let edition):
             ["package": "\(edition.package)", "version": "\(edition.version)"]
 
-        case .package(let package, let series?):
-            ["package": "\(package)", "force": "\(series)"]
+        case .package(let package, let series, let force):
+            ["package": "\(package)", "series": "\(series)", "force": "\(force)"]
 
-        case .package(let package, nil):
-            ["package": "\(package)"]
-
-        case .packageNamed(let package, let series?):
-            ["package-symbol": "\(package)", "force": "\(series)"]
-
-        case .packageNamed(let package, nil):
-            ["package-symbol": "\(package)"]
+        case .packageNamed(let package, let series, let force):
+            ["package-symbol": "\(package)", "series": "\(series)", "force": "\(force)"]
         }
     }
 }

@@ -5,7 +5,7 @@ struct URI:Sendable
 {
     public
     var path:Path
-    @usableFromInline internal
+    @usableFromInline
     var parameters:[Query.Parameter]?
 
     @inlinable public

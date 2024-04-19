@@ -43,10 +43,10 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
                 continue polling
             }
 
-            let prompt:Unidoc.BuildLabelsPrompt = .package(build.id, series: type.forced)
-
             if  let labels:Unidoc.BuildLabels = try await server.db.unidoc.answer(
-                    prompt: prompt,
+                    prompt: .package(build.id,
+                        series: type.series,
+                        force: type.force),
                     with: session)
             {
                 return .object(with: labels.encode(to:))

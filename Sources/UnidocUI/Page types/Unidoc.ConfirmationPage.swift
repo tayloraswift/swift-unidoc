@@ -5,37 +5,30 @@ import URI
 
 extension Unidoc
 {
-    @frozen public
-    struct ReallyPage
+    public
+    protocol ConfirmationPage:ApplicationPage, DynamicPage
     {
-        public
-        let title:String
-        @usableFromInline
-        let prompt:String
-        @usableFromInline
-        let button:String
+        /// The form encoding to use.
+        static
+        var encoding:MediaSubtype { get }
 
-        @usableFromInline
-        let action:URI
+        /// The path to post to and pre-populated parameters to submit.
+        var action:URI { get }
+        /// The button text to show.
+        var button:String { get }
+        /// The page title to show.
+        var title:String { get }
 
-        @inlinable public
-        init(title:String,
-            prompt:String,
-            button:String,
-            action:URI)
-        {
-            self.title = title
-            self.prompt = prompt
-            self.button = button
-            self.action = action
-        }
+        /// Adds additional content to the form.
+        func form(_ form:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     }
 }
-extension Unidoc.ReallyPage:Unidoc.RenderablePage, Unidoc.DynamicPage
+extension Unidoc.ConfirmationPage
 {
-}
-extension Unidoc.ReallyPage:Unidoc.ApplicationPage
-{
+    /// The default form encoding, which is `application/x-www-form-urlencoded`.
+    @inlinable public static
+    var encoding:MediaSubtype { .x_www_form_urlencoded }
+
     public
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
@@ -48,13 +41,14 @@ extension Unidoc.ReallyPage:Unidoc.ApplicationPage
         {
             $0[.form]
             {
-                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.enctype = "\(MediaType.application(Self.encoding))"
                 $0.action = "\(self.action.path)"
                 $0.method = "post"
             }
                 content:
             {
-                $0[.p] = self.prompt
+                self.form(&$0, format: format)
+
                 $0[.p]
                 {
                     $0[.button] { $0.class = "area" ; $0.type = "submit" } = self.button

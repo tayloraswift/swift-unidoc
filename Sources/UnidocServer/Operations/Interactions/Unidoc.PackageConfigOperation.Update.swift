@@ -44,9 +44,11 @@ extension Unidoc.PackageConfigOperation.Update
             self = .expires(later)
         }
         else if
-            case "rebuild" = form["build"]
+            case "request" = form["build"]
         {
-            self = .build(.auto)
+            self = .build(.init(
+                series: form["series"] == "prerelease" ? .prerelease : .release,
+                force: form["force"] == "true"))
         }
         else if
             case "cancel" = form["build"]
