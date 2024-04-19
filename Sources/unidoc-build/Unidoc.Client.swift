@@ -272,7 +272,7 @@ extension Unidoc.Client
         {
             let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
             //  FIXME: For security reasons, the server does not handle batched uploads well.
-            //  This is usually only a problem is the uploads are very large or the network is
+            //  This is usually only a problem if the uploads are very large or the network is
             //  very slow.
             try await self.connect { try await $0.upload(report) }
             try await self.connect
