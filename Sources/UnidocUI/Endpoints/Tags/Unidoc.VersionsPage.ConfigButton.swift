@@ -1,7 +1,7 @@
 import HTML
 import URI
 
-extension Unidoc.TagsPage
+extension Unidoc.VersionsPage
 {
     struct ConfigButton
     {
@@ -28,7 +28,7 @@ extension Unidoc.TagsPage
         }
     }
 }
-extension Unidoc.TagsPage.ConfigButton:HTML.OutputStreamable
+extension Unidoc.VersionsPage.ConfigButton:HTML.OutputStreamable
 {
     static
     func += (form:inout HTML.ContentEncoder, self:Self)
