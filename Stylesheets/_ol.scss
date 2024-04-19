@@ -1,0 +1,13 @@
+ol.steps
+{
+    padding-left: 0;
+}
+ol.build-logs
+{
+    padding-left: 1em;
+
+    > li::marker
+    {
+        font-variant-numeric: oldstyle-nums;
+    }
+}

@@ -21,10 +21,15 @@ div.build-pipeline
 
         box-sizing: border-box;
         display: flex;
+
+        //  Horizontal alignment, when not wrapped
         justify-content: center;
+        //  Horizontal alignment, when wrapped
+        text-align: center;
+        //  Vertical alignment
         align-items: center;
 
-        color: var(--fg-light);
+        color: var(--fg-semi);
     }
     > div.phase
     {
