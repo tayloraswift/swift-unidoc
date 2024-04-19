@@ -268,6 +268,21 @@ extension Unidoc.IntegralRequest.Ordering
     }
 
     static
+    func get(user trunk:String, with parameters:Unidoc.PipelineParameters) -> Self?
+    {
+        guard
+        let account:Unidoc.Account = .init(trunk)
+        else
+        {
+            return nil
+        }
+
+        return .explainable(Unidoc.UserPropertyEndpoint.init(query: .init(
+                account: account)),
+            parameters: parameters)
+    }
+
+    static
     func get(
         legacy trunk:String,
         _ stem:ArraySlice<String>,

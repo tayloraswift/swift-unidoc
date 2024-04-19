@@ -1,9 +1,10 @@
 import HTTP
 import MongoDB
 import Symbols
-import UnidocRender
+import UnidocAPI
 import UnidocDB
 import UnidocQueries
+import UnidocRender
 import URI
 
 extension Unidoc
@@ -30,11 +31,11 @@ extension Unidoc.TagsEndpoint
     subscript(package:Symbol.Package) -> URI { Unidoc.ServerRoot.tags / "\(package)" }
 
     @inlinable public static
-    subscript(package:Symbol.Package, page index:Int, beta betas:Bool = false) -> URI
+    subscript(package:Symbol.Package, series:Unidoc.VersionSeries, page index:Int) -> URI
     {
         var uri:URI = Unidoc.ServerRoot.tags / "\(package)"
         uri["page"] = "\(index)"
-        uri["beta"] = betas ? "true" : nil
+        uri["beta"] = series == .prerelease ? "true" : nil
         return uri
     }
 }

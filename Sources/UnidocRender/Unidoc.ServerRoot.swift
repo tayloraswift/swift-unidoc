@@ -25,6 +25,7 @@ extension Unidoc
         case stats
         case tags
         case telescope
+        case user
     }
 }
 extension Unidoc.ServerRoot
@@ -71,6 +72,7 @@ extension Unidoc.ServerRoot:Identifiable
         case .stats:        "stats"
         case .tags:         "tags"
         case .telescope:    "telescope"
+        case .user:         "user"
         }
     }
 }

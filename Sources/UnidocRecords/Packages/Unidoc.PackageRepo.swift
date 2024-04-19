@@ -28,7 +28,7 @@ extension Unidoc
         /// The account that owns the repo, and could be reasonably allowed to update its
         /// package settings.
         public
-        var account:Unidoc.Account?
+        var account:Account?
 
         /// When the repo was created. Both GitHub and GitLab define this field.
         ///
@@ -69,7 +69,7 @@ extension Unidoc
             crawled:BSON.Millisecond,
             fetched:BSON.Millisecond?,
             expires:BSON.Millisecond?,
-            account:Unidoc.Account?,
+            account:Account?,
             created:BSON.Millisecond,
             updated:BSON.Millisecond,
             license:PackageLicense?,
@@ -94,16 +94,6 @@ extension Unidoc
             self.stars = stars
         }
     }
-}
-extension Unidoc.PackageRepo
-{
-    @available(*, deprecated, renamed: "Unidoc.PackageOrigin")
-    public
-    typealias AnyOrigin = Unidoc.PackageOrigin
-
-    @available(*, deprecated, renamed: "Unidoc.GitHubOrigin")
-    public
-    typealias GitHubOrigin = Unidoc.GitHubOrigin
 }
 extension Unidoc.PackageRepo
 {

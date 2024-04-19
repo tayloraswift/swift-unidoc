@@ -6,7 +6,7 @@ extension Unidoc
 {
     /// Returns the user account information for the currently-authenticated user.
     @frozen public
-    struct UserQuery:Sendable
+    struct UserAccountQuery:Sendable
     {
         public
         let session:UserSession
@@ -18,7 +18,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.UserQuery:Mongo.PipelineQuery
+extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
 {
     public
     typealias CollectionOrigin = Unidoc.DB.Users
