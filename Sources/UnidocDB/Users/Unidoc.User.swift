@@ -58,6 +58,11 @@ extension Unidoc.User
     {
         self.github?.name
     }
+    @inlinable public
+    var bio:String?
+    {
+        self.github?.bio
+    }
 }
 extension Unidoc.User:Mongo.MasterCodingModel
 {

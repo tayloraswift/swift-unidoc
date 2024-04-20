@@ -24,9 +24,9 @@ extension Unidoc
 extension Unidoc.PackageBanner:HTML.OutputStreamable
 {
     static
-    func += (html:inout HTML.ContentEncoder, self:Self)
+    func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        html[.p] = self.repo.origin.about
+        section[.p] = self.repo.origin.about
 
         let pushed:BSON.Millisecond
         let icon:Unidoc.SourceLink.Icon
@@ -40,7 +40,7 @@ extension Unidoc.PackageBanner:HTML.OutputStreamable
             path = "\(origin.owner)/\(origin.name)"
         }
 
-        html[.p, { $0.class = "chyron" }]
+        section[.p, { $0.class = "chyron" }]
         {
             $0 += Unidoc.SourceLink.init(
                 target: self.tag.map { "\(self.repo.origin.https)/tree/\($0)" }
