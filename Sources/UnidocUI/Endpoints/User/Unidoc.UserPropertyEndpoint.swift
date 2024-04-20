@@ -53,8 +53,8 @@ extension Unidoc.UserPropertyEndpoint:HTTP.ServerEndpoint
             return .notFound("This user has no packages or has not set up her account.")
         }
 
-        let page:Unidoc.UserPropertyPage = .init(name: name,
-            user: output.user,
+        let page:Unidoc.UserPropertyPage = .init(user: output.user,
+            name: name,
             packages: .init(organizing: output.packages, heading: .free),
             id: self.query.account)
 

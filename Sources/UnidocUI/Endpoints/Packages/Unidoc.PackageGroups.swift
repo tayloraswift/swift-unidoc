@@ -73,6 +73,11 @@ extension Unidoc.PackageGroups
     {
         self.free.isEmpty && self.unfree.isEmpty && self.inactive.isEmpty
     }
+
+    var count:Int
+    {
+        self.free.count + self.unfree.count + self.inactive.count
+    }
 }
 extension Unidoc.PackageGroups
 {

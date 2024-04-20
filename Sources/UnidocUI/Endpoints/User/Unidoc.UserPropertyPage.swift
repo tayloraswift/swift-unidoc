@@ -7,18 +7,18 @@ extension Unidoc
     struct UserPropertyPage
     {
         private
-        let name:String
-        private
         let user:User?
+        private
+        let name:String
         private
         let packages:PackageGroups
         private
         let id:Account
 
-        init(name:String, user:User?, packages:PackageGroups, id:Account)
+        init(user:User?, name:String, packages:PackageGroups, id:Account)
         {
-            self.name = name
             self.user = user
+            self.name = name
             self.packages = packages
             self.id = id
         }
@@ -39,6 +39,11 @@ extension Unidoc.UserPropertyPage:Unidoc.ApplicationPage
         main[.section, { $0.class = "introduction" }]
         {
             $0[.h1] = self.title
+
+            $0 += Unidoc.UserBanner.init(
+                user: self.user,
+                name: self.name,
+                packages: self.packages.count)
         }
         main[.section] { $0.class = "details" } = self.packages
     }
