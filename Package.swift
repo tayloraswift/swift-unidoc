@@ -86,7 +86,7 @@ let package:Package = .init(
     ],
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
-            from: "0.6.2")),
+            from: "1.0.0-alpha.1")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.3.4")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(

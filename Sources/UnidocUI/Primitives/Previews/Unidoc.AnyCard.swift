@@ -13,14 +13,14 @@ extension Unidoc
 extension Unidoc.AnyCard:HTML.OutputStreamable
 {
     static
-    func += (html:inout HTML.AttributeEncoder, self:Self)
+    func |= (html:inout HTML.AttributeEncoder, self:Self)
     {
         switch self
         {
-        case .article(let card):    html += card
-        case .culture(let card):    html += card
-        case .decl(let card):       html += card
-        case .product(let card):    html += card
+        case .article(let card):    html |= card
+        case .culture(let card):    html |= card
+        case .decl(let card):       html |= card
+        case .product(let card):    html |= card
         }
     }
 
