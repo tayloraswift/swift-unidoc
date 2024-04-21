@@ -290,6 +290,10 @@ let package:Package = .init(
         .target(name: "ISO",
             dependencies: [
                 .target(name: "CasesByIntegerEncodingMacro"),
+            ],
+            exclude: [
+                "ISO.Country.swift",
+                "ISO.Macrolanguage.swift",
             ]),
 
         .target(name: "LexicalPaths"),

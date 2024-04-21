@@ -200,7 +200,6 @@ extension ISO
             case pm
             case pn
             case pr
-
             case pt
             case pw
             case py
@@ -245,7 +244,6 @@ extension ISO
             case tr
             case tt
             case tv
-
             case tz
             case ua
             case ug
