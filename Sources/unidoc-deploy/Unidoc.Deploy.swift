@@ -174,8 +174,8 @@ extension Unidoc.Deploy
         with s3:AWS.S3.Client,
         key:AWS.AccessKey?) async throws
     {
-        let executable:FilePath = ".build/release/unidoc-build"
-        let compressed:FilePath = ".build/release/unidoc-build.gz"
+        let executable:FilePath = ".build.aarch64/release/unidoc-build"
+        let compressed:FilePath = ".build.aarch64/release/unidoc-build.gz"
 
         print("Compressing unidoc-build...")
 

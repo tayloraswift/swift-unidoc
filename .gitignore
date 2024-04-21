@@ -8,10 +8,11 @@
 
 unidoc/
 swiftpm/
+deploy-builder
 
+Aarch64/
 Assets/secrets/
 Assets/icons/*.jpg
-Deploy/
 
 /crash*
 
