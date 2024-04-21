@@ -26,7 +26,7 @@ extension Unidoc.DependencyTable:HTML.OutputStreamable
             {
                 $0[.th] = "Package"
                 $0[.th] = "Requirement"
-                $0[.th] = "Resolved Version"
+                $0[.th] = "Resolved version"
             }
         }
         table[.tbody]

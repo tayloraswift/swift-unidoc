@@ -31,7 +31,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
 {
     var description:String? { "Browse recent package releases and documentation builds" }
 
-    var title:String { "Recent Activity" }
+    var title:String { "Recent activity" }
 
     public
     func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
@@ -109,7 +109,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                 {
                     $0[.section, { $0.class = "repo" }]
                     {
-                        $0[.h2] = "Recent Activity"
+                        $0[.h2] = "Recent activity"
                         $0[.ol]
                         {
                             for item:Unidoc.DB.RepoFeed.Activity in self.repo
@@ -139,7 +139,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
 
                     $0[.section, { $0.class = "docs" }]
                     {
-                        $0[.h2] = "Recent Docs"
+                        $0[.h2] = "Recent docs"
                         $0[.ol]
                         {
                             for item:Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata> in

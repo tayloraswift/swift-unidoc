@@ -28,7 +28,7 @@ extension Unidoc.StatsEndpoint
 }
 extension Unidoc.StatsEndpoint.PackagePage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.volume.title) Statistics" }
+    var title:String { "\(self.volume.title) statistics" }
 
     var description:String?
     {

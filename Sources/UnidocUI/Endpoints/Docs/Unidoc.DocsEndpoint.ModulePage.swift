@@ -41,7 +41,7 @@ extension Unidoc.DocsEndpoint.ModulePage
 }
 extension Unidoc.DocsEndpoint.ModulePage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.name) · \(self.volume.title) Documentation" }
+    var title:String { "\(self.name) · \(self.volume.title) documentation" }
 }
 extension Unidoc.DocsEndpoint.ModulePage:Unidoc.StaticPage
 {

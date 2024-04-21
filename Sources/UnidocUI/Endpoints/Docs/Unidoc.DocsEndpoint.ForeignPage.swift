@@ -35,7 +35,7 @@ extension Unidoc.DocsEndpoint.ForeignPage
 }
 extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.stem.last) (ext) · \(self.volume.title) Documentation" }
+    var title:String { "\(self.stem.last) (ext) · \(self.volume.title) documentation" }
 }
 extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.StaticPage
 {

@@ -48,7 +48,7 @@ extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.RenderablePage
 {
     var title:String
     {
-        "\(self.stem.last) (Conforming Types) · \(self.volume.title) Documentation"
+        "\(self.stem.last) (conforming types) · \(self.volume.title) documentation"
     }
 
     var description:String?
