@@ -1,5 +1,5 @@
 {
-  "originHash" : "6fa6443f8e6a2740912fd3b60532ded2506dece728d4768ec770833cce88d1b1",
+  "originHash" : "c7800bd808b38b68bc2f2bab567b4d6fccb392145dcfc6b7b0ea7b6fa9db58e6",
   "pins" : [
     {
       "identity" : "swift-atomics",
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-dom",
       "state" : {
-        "revision" : "399584c4c2393fbd64f48f541b5f5ce77c184ab5",
-        "version" : "0.6.1"
+        "revision" : "a83bfebeff2518f7477da364da551a8c4a54e1c1",
+        "version" : "0.6.2"
       }
     },
     {
