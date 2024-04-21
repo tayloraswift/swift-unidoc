@@ -27,7 +27,7 @@ extension Unidoc.DocsEndpoint.ProductPage
 }
 extension Unidoc.DocsEndpoint.ProductPage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.apex.symbol) · \(self.volume.title) Products" }
+    var title:String { "\(self.apex.symbol) · \(self.volume.title) products" }
 }
 extension Unidoc.DocsEndpoint.ProductPage:Unidoc.StaticPage
 {

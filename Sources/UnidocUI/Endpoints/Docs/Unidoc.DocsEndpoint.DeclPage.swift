@@ -43,7 +43,7 @@ extension Unidoc.DocsEndpoint.DeclPage
 }
 extension Unidoc.DocsEndpoint.DeclPage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.stem.last) · \(self.volume.title) Documentation" }
+    var title:String { "\(self.stem.last) · \(self.volume.title) documentation" }
 
 }
 extension Unidoc.DocsEndpoint.DeclPage:Unidoc.StaticPage
@@ -90,7 +90,7 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
 
                     if  self.apex.kinks[is: .intrinsicWitness]
                     {
-                        $0 += " (Default Implementation)"
+                        $0 += " (Default implementation)"
                     }
                 }
 

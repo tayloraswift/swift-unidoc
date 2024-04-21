@@ -44,7 +44,7 @@ extension Unidoc.DocsEndpoint.MultipleFoundPage
 }
 extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.RenderablePage
 {
-    var title:String { "Disambiguation Page · \(self.volume.title) Documentation" }
+    var title:String { "Disambiguation page · \(self.volume.title) documentation" }
 }
 extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.StaticPage
 {

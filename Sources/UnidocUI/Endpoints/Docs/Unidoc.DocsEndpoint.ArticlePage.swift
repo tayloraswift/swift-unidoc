@@ -30,7 +30,7 @@ extension Unidoc.DocsEndpoint.ArticlePage
 }
 extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.apex.headline.safe) · \(self.volume.title) Documentation" }
+    var title:String { "\(self.apex.headline.safe) · \(self.volume.title) documentation" }
 }
 extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.StaticPage
 {

@@ -19,7 +19,7 @@ extension Unidoc.DocsEndpoint
 }
 extension Unidoc.DocsEndpoint.NotFoundPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
-    var title:String { "Symbol Not Found · \(self.volume.title) Documentation" }
+    var title:String { "Symbol not found · \(self.volume.title) documentation" }
 }
 extension Unidoc.DocsEndpoint.NotFoundPage:Unidoc.ApplicationPage
 {

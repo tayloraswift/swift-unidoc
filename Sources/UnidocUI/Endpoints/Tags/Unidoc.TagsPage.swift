@@ -40,7 +40,7 @@ extension Unidoc.TagsPage
 }
 extension Unidoc.TagsPage:Unidoc.RenderablePage
 {
-    var title:String { "Git Tags · \(self.package.symbol)" }
+    var title:String { "Tags · \(self.package.symbol)" }
 }
 extension Unidoc.TagsPage:Unidoc.StaticPage
 {

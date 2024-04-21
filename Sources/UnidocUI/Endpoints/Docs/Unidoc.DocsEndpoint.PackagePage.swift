@@ -28,7 +28,7 @@ extension Unidoc.DocsEndpoint
 }
 extension Unidoc.DocsEndpoint.PackagePage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.volume.title) Documentation" }
+    var title:String { "\(self.volume.title) documentation" }
 
 }
 extension Unidoc.DocsEndpoint.PackagePage:Unidoc.StaticPage
@@ -67,7 +67,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = self.volume.symbol.package == .swift
-                    ? "Standard Library"
+                    ? "Standard library"
                     : "Package"
 
                 $0[.span, { $0.class = "domain" }]

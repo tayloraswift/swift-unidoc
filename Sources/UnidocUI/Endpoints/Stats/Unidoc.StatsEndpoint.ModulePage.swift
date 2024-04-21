@@ -44,7 +44,7 @@ extension Unidoc.StatsEndpoint.ModulePage
 }
 extension Unidoc.StatsEndpoint.ModulePage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.name) · \(self.volume.title) Statistics" }
+    var title:String { "\(self.name) · \(self.volume.title) statistics" }
 
     var description:String?
     {
