@@ -182,7 +182,7 @@ extension Unidoc.Linker
         switch target
         {
         case nil:
-            return .text(text)
+            return .fallback(text: text)
 
         case .scalar(let scalar)?:
             return .path(path, self.expand(scalar, to: length))

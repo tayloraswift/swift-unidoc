@@ -112,8 +112,8 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                 return nil
             }
 
-        case .text(let text):
-            return text
+        case .fallback(text: _):
+            return nil
         }
     }
 
@@ -136,7 +136,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
         case .link(https: let url, safe: let safe):
             html[.a] { $0.href = "https://\(url)"; $0.rel = safe ? nil : .nofollow } = url
 
-        case .text(let text):
+        case .fallback(text: let text):
             html[.code] = text
 
         case .path(let stem, let path):
@@ -204,7 +204,7 @@ extension Markdown.ProseSection:TextOutputStreamableMarkdown
             //  We are probably better off not printing the URL at all.
             return
 
-        case .text(let text):
+        case .fallback(text: let text):
             utf8 += text.utf8
 
         case .path(let stem, let scalars):

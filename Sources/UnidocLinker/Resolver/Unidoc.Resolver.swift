@@ -136,7 +136,7 @@ extension Unidoc.Resolver
             }
         }
 
-        return .text("<unavailable>")
+        return .fallback(text: "<unavailable>")
     }
 }
 extension Unidoc.Resolver
@@ -152,7 +152,7 @@ extension Unidoc.Resolver
             self.diagnostics[location] = .error("""
                 autolink expression '\(link)' could not be parsed
                 """)
-            return .text(link)
+            return .fallback(text: link)
         }
 
         let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
@@ -183,7 +183,7 @@ extension Unidoc.Resolver
             self.diagnostics[location] = .error("""
                 doclink expression '\(link)' could not be parsed
                 """)
-            return .text(link)
+            return .fallback(text: link)
         }
 
         return self.resolve(ucf: doclink.path.joined(separator: "/"), at: location)
