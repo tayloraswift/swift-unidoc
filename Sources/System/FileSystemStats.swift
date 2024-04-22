@@ -78,17 +78,17 @@ extension FileSystemStats
 
             return $0[0]
         }
-
-        return .init(id: stats.f_fsid,
-            fragmentCount: stats.f_blocks,
-            fragmentSize: stats.f_frsize,
-            blocksFreeForUnprivileged: stats.f_bavail,
-            blocksFree: stats.f_bfree,
-            blockSize: stats.f_bsize,
-            inodesFreeForUnprivileged: stats.f_favail,
-            inodesFree: stats.f_ffree,
-            inodeCount: stats.f_files,
-            maxNameLength: stats.f_namemax,
-            flags: stats.f_flag)
+        //  Explicit `UInt32 -> UInt` conversion needed on Darwin.
+        return .init(id: UInt.init(stats.f_fsid),
+            fragmentCount: UInt.init(stats.f_blocks),
+            fragmentSize: UInt.init(stats.f_frsize),
+            blocksFreeForUnprivileged: UInt.init(stats.f_bavail),
+            blocksFree: UInt.init(stats.f_bfree),
+            blockSize: UInt.init(stats.f_bsize),
+            inodesFreeForUnprivileged: UInt.init(stats.f_favail),
+            inodesFree: UInt.init(stats.f_ffree),
+            inodeCount: UInt.init(stats.f_files),
+            maxNameLength: UInt.init(stats.f_namemax),
+            flags: UInt.init(stats.f_flag))
     }
 }
