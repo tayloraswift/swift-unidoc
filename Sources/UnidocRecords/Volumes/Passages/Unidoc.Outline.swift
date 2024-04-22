@@ -10,7 +10,7 @@ extension Unidoc
         /// An external web link. The string does not contain the URL scheme.
         case link(https:String, safe:Bool)
         case path(String, [Unidoc.Scalar])
-        case text(String)
+        case fallback(text:String)
     }
 }
 extension Unidoc.Outline
@@ -44,7 +44,7 @@ extension Unidoc.Outline:BSONDocumentEncodable
             bson[.scalars] = scalars
             bson[.display] = string
 
-        case .text(let string):
+        case .fallback(text: let string):
             bson[.display] = string
         }
     }
@@ -59,7 +59,7 @@ extension Unidoc.Outline:BSONDocumentDecodable
             switch try bson[.scalars]?.decode(to: [Unidoc.Scalar].self)
             {
             case let scalars?:  self = .path(display, scalars)
-            case nil:           self = .text(display)
+            case nil:           self = .fallback(text: display)
             }
         }
         else if
