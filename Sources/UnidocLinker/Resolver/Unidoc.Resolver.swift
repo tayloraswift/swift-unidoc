@@ -1,9 +1,8 @@
-import CodelinkResolution
-import Codelinks
-import Doclinks
+import LinkResolution
 import SourceDiagnostics
 import Sources
 import SymbolGraphs
+import UCF
 import Unidoc
 import UnidocRecords
 

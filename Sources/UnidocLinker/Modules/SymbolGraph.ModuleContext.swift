@@ -1,4 +1,4 @@
-import CodelinkResolution
+import LinkResolution
 import LexicalPaths
 import SymbolGraphs
 import Symbols

@@ -1,12 +1,10 @@
-import CodelinkResolution
-import Codelinks
-import DoclinkResolution
-import Doclinks
 import LexicalPaths
+import LinkResolution
 import MarkdownAST
 import Sources
 import SymbolGraphs
 import SourceDiagnostics
+import UCF
 
 extension SSGC
 {

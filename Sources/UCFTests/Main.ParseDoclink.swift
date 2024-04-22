@@ -1,13 +1,13 @@
-import Doclinks
 import Testing_
+import UCF
 
 extension Main
 {
-    struct Parsing
+    struct ParseDoclink
     {
     }
 }
-extension Main.Parsing:TestBattery
+extension Main.ParseDoclink:TestBattery
 {
     static
     func run(tests:TestGroup)

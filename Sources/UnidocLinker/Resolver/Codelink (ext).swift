@@ -1,6 +1,5 @@
-import Codelinks
-import Doclinks
 import SymbolGraphs
+import UCF
 
 extension Codelink
 {

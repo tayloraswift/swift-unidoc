@@ -1,8 +1,6 @@
-import CodelinkResolution
-import Codelinks
-import DoclinkResolution
 import FNV1
 import LexicalPaths
+import LinkResolution
 import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
@@ -13,6 +11,7 @@ import Sources
 import SymbolGraphCompiler
 import SymbolGraphs
 import Symbols
+import UCF
 import Unidoc
 import SourceDiagnostics
 

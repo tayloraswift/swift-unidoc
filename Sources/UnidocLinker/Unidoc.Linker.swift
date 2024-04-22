@@ -1,5 +1,5 @@
-import CodelinkResolution
-import Codelinks
+import LinkResolution
+import UCF
 import SemanticVersions
 import Signatures
 import SymbolGraphs

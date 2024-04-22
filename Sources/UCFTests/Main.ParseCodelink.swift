@@ -1,9 +1,14 @@
-import Codelinks
+import UCF
 import FNV1
 import Testing_
 
-@main
-enum Main:TestMain, TestBattery
+extension Main
+{
+    enum ParseCodelink
+    {
+    }
+}
+extension Main.ParseCodelink:TestBattery
 {
     static
     func run(tests:TestGroup)
