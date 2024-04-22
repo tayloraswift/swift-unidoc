@@ -1,6 +1,6 @@
 import Codelinks
 import FNV1
-import Testing
+import Testing_
 
 @main
 enum Main:TestMain, TestBattery

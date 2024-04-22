@@ -3,7 +3,7 @@ import SemanticVersions
 import SymbolGraphs
 import Symbols
 import System
-import Testing
+import Testing_
 
 extension SymbolGraphObject<Void>
 {

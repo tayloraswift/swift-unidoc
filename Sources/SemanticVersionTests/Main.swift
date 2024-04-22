@@ -1,5 +1,5 @@
 import SemanticVersions
-import Testing
+import Testing_
 
 @main
 enum Main:TestMain, TestBattery

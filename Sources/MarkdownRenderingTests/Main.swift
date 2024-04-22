@@ -1,7 +1,7 @@
 import HTML
 import MarkdownABI
 import MarkdownRendering
-import Testing
+import Testing_
 
 @main
 enum Main:TestMain, TestBattery

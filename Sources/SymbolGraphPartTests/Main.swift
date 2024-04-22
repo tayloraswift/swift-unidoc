@@ -2,7 +2,7 @@ import Signatures
 import SymbolGraphParts
 import Symbols
 import System
-import Testing
+import Testing_
 
 @main
 enum Main:TestMain, TestBattery

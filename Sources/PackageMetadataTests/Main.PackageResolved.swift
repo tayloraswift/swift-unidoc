@@ -1,7 +1,7 @@
 import JSON
 import PackageMetadata
 import System
-import Testing
+import Testing_
 
 extension Main
 {

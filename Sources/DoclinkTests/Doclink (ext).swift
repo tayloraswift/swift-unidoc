@@ -1,5 +1,5 @@
 import Doclinks
-import Testing
+import Testing_
 
 extension Doclink
 {

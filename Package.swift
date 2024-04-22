@@ -88,15 +88,15 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
             from: "1.0.0-alpha.1")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
-            from: "0.3.4")),
+            from: "0.4.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.14.0")),
+            from: "0.14.1")),
         //.package(path: "../swift-mongodb"),
 
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-            from: "1.0.0")),
+            from: "1.0.1")),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.1")),
@@ -107,12 +107,8 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-collections.git", .upToNextMinor(
             from: "1.1.0")),
 
-        /// swift-nio has a low rate of breakage, and can be trusted with a major-only
-        /// version requirement.
         .package(url: "https://github.com/apple/swift-nio",
             from: "2.64.0"),
-        /// swift-nio-ssl has a low rate of breakage, and can be trusted with a
-        /// major-only version requirement.
         .package(url: "https://github.com/apple/swift-nio-ssl",
             from: "2.26.0"),
 
@@ -120,9 +116,6 @@ let package:Package = .init(
             from: "1.30.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.3.0")),
-        /// swift-system has broken in a minor before, and can't be trusted with a
-        /// major-only version requirement.
-        /// See: https://forums.swift.org/t/windows-build-is-broken/58036
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
@@ -489,7 +482,7 @@ let package:Package = .init(
                 .target(name: "SymbolGraphs"),
                 .target(name: "System"),
 
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .target(name: "UA",
@@ -631,70 +624,70 @@ let package:Package = .init(
         .executableTarget(name: "CodelinkTests",
             dependencies: [
                 .target(name: "Codelinks"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "DoclinkTests",
             dependencies: [
                 .target(name: "Doclinks"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "FNV1Tests",
             dependencies: [
                 .target(name: "FNV1"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "IPTests",
             dependencies: [
                 .target(name: "IP"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "MarkdownParsingTests",
             dependencies: [
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownSemantics"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "MarkdownPluginSwiftTests",
             dependencies: [
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "MarkdownRendering"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "MarkdownRenderingTests",
             dependencies: [
                 .target(name: "MarkdownRendering"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "MD5Tests",
             dependencies: [
                 .target(name: "MD5"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "PackageMetadataTests",
             dependencies: [
                 .target(name: "PackageMetadata"),
                 .target(name: "System"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "S3Tests",
             dependencies: [
                 .target(name: "S3Client"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "SemanticVersionTests",
             dependencies: [
                 .target(name: "SemanticVersions"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "SymbolGraphBuilderTests",
@@ -707,7 +700,7 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "System"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "SymbolGraphLinkerTests",
@@ -715,32 +708,32 @@ let package:Package = .init(
                 .target(name: "MarkdownRendering"),
                 .target(name: "SymbolGraphLinker"),
                 .product(name: "HTML", package: "swift-dom"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "SymbolGraphPartTests",
             dependencies: [
                 .target(name: "SymbolGraphParts"),
                 .target(name: "System"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "SymbolGraphTests",
             dependencies: [
                 .target(name: "SymbolGraphs"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "SymbolTests",
             dependencies: [
                 .target(name: "Symbols"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "SystemTests",
             dependencies: [
                 .target(name: "System"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ],
             exclude:
             [
@@ -750,7 +743,7 @@ let package:Package = .init(
         .executableTarget(name: "UATests",
             dependencies: [
                 .target(name: "UA"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "UnidocRecordsTests",
@@ -779,7 +772,7 @@ let package:Package = .init(
         .executableTarget(name: "URITests",
             dependencies: [
                 .target(name: "URI"),
-                .product(name: "Testing", package: "swift-grammar"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .target(name: "guides", path: "Guides"),

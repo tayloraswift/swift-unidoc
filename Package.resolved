@@ -1,5 +1,5 @@
 {
-  "originHash" : "5d90875a7edcd7c5d9e517af2b5f3d06c893a72611724678507a6efcb9510cc9",
+  "originHash" : "678b50abbdcfc798680da26214f68aad626d316b6548cf59f6527dd3288a775b",
   "pins" : [
     {
       "identity" : "swift-atomics",
@@ -34,7 +34,7 @@
       "location" : "https://github.com/tayloraswift/swift-dom",
       "state" : {
         "revision" : "d1490a70331d99a98ecc87813478df7f8ac2dbe4",
-        "version" : "1.0.0-alpha.1"
+        "version" : "1.0.0"
       }
     },
     {
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-grammar",
       "state" : {
-        "revision" : "6db3dd8912fc7acb821021cd96677b2e0eeb09f0",
-        "version" : "0.3.4"
+        "revision" : "642d5957896f06b03e35c48fc439488367d3fd21",
+        "version" : "0.4.0"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-json",
       "state" : {
-        "revision" : "f691272d461e9052f4eaed6887cfd14b6d5a5210",
-        "version" : "1.0.0"
+        "revision" : "22ffd76580e58d8e99dcabc8521d80bbf71eaffa",
+        "version" : "1.0.1"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "f9abb5a43b2d05b06dc8f30a8f8fc36e78e22fe1",
-        "version" : "0.14.0"
+        "revision" : "a74c64d20b8f5090e583f5f0011e99aebfce76d2",
+        "version" : "0.14.1"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio",
       "state" : {
-        "revision" : "fc63f0cf4e55a4597407a9fc95b16a2bc44b4982",
-        "version" : "2.64.0"
+        "revision" : "359c461e5561d22c6334828806cc25d759ca7aa6",
+        "version" : "2.65.0"
       }
     },
     {
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-png",
       "state" : {
-        "revision" : "4553010a4d293831627c15635fecabc788b9bebc",
-        "version" : "4.4.1"
+        "revision" : "14a720bfcf1b0660dc63979d55d218babc8d651f",
+        "version" : "4.4.2"
       }
     },
     {

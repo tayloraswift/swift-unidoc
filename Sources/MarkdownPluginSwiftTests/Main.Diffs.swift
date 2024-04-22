@@ -1,7 +1,7 @@
 import HTML
 import MarkdownPluginSwift
 import MarkdownRendering
-import Testing
+import Testing_
 
 extension Main
 {

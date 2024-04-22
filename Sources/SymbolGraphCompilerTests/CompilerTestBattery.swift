@@ -3,7 +3,7 @@ import SymbolGraphCompiler
 import SymbolGraphParts
 import Symbols
 import System
-import Testing
+import Testing_
 
 protocol CompilerTestBattery:TestBattery
 {

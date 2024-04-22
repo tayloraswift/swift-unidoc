@@ -1,5 +1,5 @@
 import MarkdownPluginSwift
-import Testing
+import Testing_
 
 extension Main
 {

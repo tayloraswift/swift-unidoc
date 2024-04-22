@@ -2,7 +2,7 @@ import JSON
 import PackageGraphs
 import PackageMetadata
 import System
-import Testing
+import Testing_
 
 extension Main
 {
