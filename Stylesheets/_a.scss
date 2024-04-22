@@ -1,15 +1,41 @@
 @import 'Mixins/ControlArea';
 @import 'Typefaces';
 
-a
+a[href]
 {
     color: var(--fg-accent);
     text-decoration: none;
     text-underline-offset: 0.35em;
 }
-a:hover, a:focus
+a[href]:hover, a[href]:focus
 {
     text-decoration: underline;
+}
+
+//  Style for links that are not clickable. These occur when documentation authors write
+//  markdown links with invalid URLs.
+a:not([href])
+{
+    cursor: default;
+}
+a:not([href])::after
+{
+    display: inline-block;
+    content: '';
+    height: 12px;
+    width: 12px;
+
+    margin-left: 0.5em;
+    margin-right: 0.25em;
+
+    background: var(--fg-accent);
+    mask-image: var(--broken-link-icon);
+    mask-size: 100% 100%;
+
+    -webkit-mask-image: var(--broken-link-icon);
+    -webkit-mask-size: 100% 100%;
+
+    background-color: var(--fg-semi)
 }
 
 a.area
@@ -34,6 +60,7 @@ a[rel='external']::after
     width: 12px;
 
     margin-left: 0.5em;
+    margin-right: 0.25em;
 
     background: var(--fg-accent);
     mask-image: var(--leaving-icon);
