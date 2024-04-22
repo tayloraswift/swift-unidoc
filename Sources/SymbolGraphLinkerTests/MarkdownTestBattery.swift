@@ -3,7 +3,7 @@ import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
-import Testing
+import Testing_
 import SourceDiagnostics
 
 @_spi(testable)

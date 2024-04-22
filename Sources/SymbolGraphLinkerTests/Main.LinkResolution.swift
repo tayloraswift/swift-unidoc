@@ -3,7 +3,7 @@ import LexicalPaths
 import MarkdownAST
 @_spi(testable)
 import SymbolGraphLinker
-import Testing
+import Testing_
 
 extension Main
 {

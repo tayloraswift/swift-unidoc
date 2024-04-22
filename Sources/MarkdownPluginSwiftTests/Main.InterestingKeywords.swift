@@ -1,5 +1,5 @@
 import Signatures
-import Testing
+import Testing_
 
 @_spi(testable)
 import MarkdownPluginSwift

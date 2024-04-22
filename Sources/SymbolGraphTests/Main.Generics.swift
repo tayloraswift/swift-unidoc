@@ -1,7 +1,7 @@
 import BSON
 import Signatures
 import SymbolGraphs
-import Testing
+import Testing_
 
 extension Main
 {

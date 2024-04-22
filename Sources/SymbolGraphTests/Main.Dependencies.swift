@@ -1,6 +1,6 @@
 import BSON
 import SymbolGraphs
-import Testing
+import Testing_
 
 extension Main
 {

@@ -1,7 +1,7 @@
 import S3
 @_spi(testable)
 import S3Client
-import Testing
+import Testing_
 
 @main
 enum Main:TestMain, TestBattery

@@ -2,7 +2,7 @@ import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
 import Sources
-import Testing
+import Testing_
 
 extension Main
 {
