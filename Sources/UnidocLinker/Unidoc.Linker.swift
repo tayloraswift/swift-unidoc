@@ -1,4 +1,5 @@
 import CodelinkResolution
+import Codelinks
 import SemanticVersions
 import Signatures
 import SymbolGraphs
@@ -168,6 +169,29 @@ extension Unidoc.Linker
 }
 extension Unidoc.Linker
 {
+    func format(codelink:Codelink,
+        to target:CodelinkResolver<Unidoc.Scalar>.Overload.Target?) -> Unidoc.Outline
+    {
+        /// This looks a lot like a stem, but it always uses spaces, never tabs.
+        /// Its purpose is to allow splitting the path into words without parsing the
+        /// Swift language grammar.
+        var path:String { codelink.path.visible.joined(separator: " ") }
+        var text:String { codelink.path.visible.joined(separator: ".") }
+        let length:Int = codelink.path.visible.count
+
+        switch target
+        {
+        case nil:
+            return .fallback(text: text)
+
+        case .scalar(let scalar)?:
+            return .path(path, self.expand(scalar, to: length))
+
+        case .vector(let feature, self: let heir)?:
+            return .path(path, self.expand((heir, feature), to: length))
+        }
+    }
+
     func expand(_ vector:(Unidoc.Scalar, Unidoc.Scalar), to length:Int) -> [Unidoc.Scalar]
     {
         self.expand(vector.0, to: length - 1) + [vector.1]

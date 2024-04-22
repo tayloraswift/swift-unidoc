@@ -12,6 +12,33 @@ a:hover, a:focus
     text-decoration: underline;
 }
 
+//  Style for links that are not clickable. These occur when documentation authors write
+//  markdown links with invalid URLs.
+a:not([href])
+{
+    color: var(--fg-semi);
+    text-decoration: none;
+}
+a:not([href])::after
+{
+    display: inline-block;
+    content: '';
+    height: 12px;
+    width: 12px;
+
+    margin-left: 0.5em;
+    margin-right: 0.25em;
+
+    background: var(--fg-accent);
+    mask-image: var(--broken-link-icon);
+    mask-size: 100% 100%;
+
+    -webkit-mask-image: var(--broken-link-icon);
+    -webkit-mask-size: 100% 100%;
+
+    background-color: var(--fg-semi)
+}
+
 a.area
 {
     margin: 1.5rem 0;
@@ -26,7 +53,7 @@ a.area:focus
 
 //  This uses a 16px icon with a 2px stroke width, but on a retina display the 75% scale should
 //  still look sharp.
-a[rel='external']::after
+a[rel~='external']::after
 {
     display: inline-block;
     content: '';
@@ -34,6 +61,7 @@ a[rel='external']::after
     width: 12px;
 
     margin-left: 0.5em;
+    margin-right: 0.25em;
 
     background: var(--fg-accent);
     mask-image: var(--leaving-icon);

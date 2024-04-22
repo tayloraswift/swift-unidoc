@@ -4,28 +4,6 @@ import SymbolGraphs
 
 extension Codelink
 {
-    init?(parsing unresolved:__shared /* borrowing */ SymbolGraph.Outline.Unresolved)
-    {
-        switch unresolved.type
-        {
-        case .doc:
-            guard
-            let doclink:Doclink = .init(doc: unresolved.link[...])
-            else
-            {
-                return nil
-            }
-
-            self.init(doclink.path.joined(separator: "/"))
-
-        case .ucf:
-            self.init(unresolved.link)
-
-        case .web:
-            return nil
-        }
-    }
-
     /// The `domain` must share indices with `link`.
     init?(translating link:__shared String, to domain:__shared Substring)
     {
