@@ -1,13 +1,13 @@
 @import 'Mixins/ControlArea';
 @import 'Typefaces';
 
-a[href]
+a
 {
     color: var(--fg-accent);
     text-decoration: none;
     text-underline-offset: 0.35em;
 }
-a[href]:hover, a[href]:focus
+a:hover, a:focus
 {
     text-decoration: underline;
 }
@@ -16,7 +16,8 @@ a[href]:hover, a[href]:focus
 //  markdown links with invalid URLs.
 a:not([href])
 {
-    cursor: default;
+    color: var(--fg-semi);
+    text-decoration: none;
 }
 a:not([href])::after
 {
@@ -52,7 +53,7 @@ a.area:focus
 
 //  This uses a 16px icon with a 2px stroke width, but on a retina display the 75% scale should
 //  still look sharp.
-a[rel='external']::after
+a[rel~='external']::after
 {
     display: inline-block;
     content: '';
