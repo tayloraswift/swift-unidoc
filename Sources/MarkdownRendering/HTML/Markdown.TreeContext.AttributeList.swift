@@ -60,9 +60,18 @@ extension Markdown.TreeContext.AttributeList
         case .style:    self.style += value
 
         case .external:
-            self.others.append((.rel, "\(HTML.Attribute.Rel.nofollow)"))
-            self.others.append((.rel, "\(HTML.Attribute.Rel.noopener)"))
-            self.others.append((.rel, "\(HTML.Attribute.Rel.google_ugc)"))
+            self.others.append((.target, "_blank"))
+            self.others.append((.rel, """
+            \(HTML.Attribute.Rel.external) \
+            \(HTML.Attribute.Rel.nofollow) \
+            \(HTML.Attribute.Rel.noopener) \
+            \(HTML.Attribute.Rel.google_ugc)
+            """))
+            self.others.append((.href, value))
+
+        case .safelink:
+            self.others.append((.target, "_blank"))
+            self.others.append((.rel, "\(HTML.Attribute.Rel.external)"))
             self.others.append((.href, value))
         }
     }

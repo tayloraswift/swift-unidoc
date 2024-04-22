@@ -70,7 +70,11 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             switch attribute
             {
             case .href:
-                if !safe
+                if  safe
+                {
+                    attribute = .safelink
+                }
+                else
                 {
                     attribute = .external
                 }

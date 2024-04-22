@@ -235,13 +235,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                             url = nil
                         }
 
-                        $0[link: url]
-                        {
-                            $0.target = "_blank"
-                            $0.rel = .external
-                            $0.rel = .noopener
-                            $0.rel = .google_ugc
-                        } = "\(commit)"
+                        $0[link: url] { $0.external(safe: false) } = "\(commit)"
                     }
                 }
             }
