@@ -30,6 +30,12 @@ extension Markdown
 }
 extension Markdown.SemanticSections
 {
+    // public
+    // func anchors() -> [UCF.AnchorIdentifier: String]
+    // {
+
+    // }
+
     @inlinable public
     var isEmpty:Bool
     {

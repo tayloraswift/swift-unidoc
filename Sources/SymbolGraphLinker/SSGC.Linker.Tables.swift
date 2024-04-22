@@ -1,5 +1,4 @@
-import CodelinkResolution
-import DoclinkResolution
+import LinkResolution
 import MarkdownSemantics
 import SourceDiagnostics
 

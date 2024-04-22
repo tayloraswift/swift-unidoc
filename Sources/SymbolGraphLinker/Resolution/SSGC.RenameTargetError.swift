@@ -1,5 +1,5 @@
-import Codelinks
-import CodelinkResolution
+import UCF
+import LinkResolution
 import LexicalPaths
 import SourceDiagnostics
 

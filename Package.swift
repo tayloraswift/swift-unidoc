@@ -18,10 +18,6 @@ let package:Package = .init(
 
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
-        .library(name: "Codelinks", targets: ["Codelinks"]),
-        .library(name: "CodelinkResolution", targets: ["CodelinkResolution"]),
-        .library(name: "Doclinks", targets: ["Doclinks"]),
-        .library(name: "DoclinkResolution", targets: ["DoclinkResolution"]),
         .library(name: "FNV1", targets: ["FNV1"]),
 
         .library(name: "GitHubAPI", targets: ["GitHubAPI"]),
@@ -36,6 +32,7 @@ let package:Package = .init(
         .library(name: "InlineArray", targets: ["InlineArray"]),
         .library(name: "InlineBuffer", targets: ["InlineBuffer"]),
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
+        .library(name: "LinkResolution", targets: ["LinkResolution"]),
         .library(name: "LexicalPaths", targets: ["LexicalPaths"]),
 
         .library(name: "MarkdownABI", targets: ["MarkdownABI"]),
@@ -73,6 +70,9 @@ let package:Package = .init(
         .library(name: "System", targets: ["System"]),
 
         .library(name: "UA", targets: ["UA"]),
+
+        .library(name: "UCF", targets: ["UCF"]),
+
         .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
@@ -191,31 +191,6 @@ let package:Package = .init(
                 .target(name: "SemanticVersions"),
             ]),
 
-        .target(name: "Codelinks",
-            dependencies: [
-                .target(name: "FNV1"),
-                .target(name: "LexicalPaths"),
-            ]),
-
-        .target(name: "CodelinkResolution",
-            dependencies: [
-                .target(name: "Codelinks"),
-                .target(name: "SourceDiagnostics"),
-                //  This dependency is present for (questionable?) performance reasons.
-                .target(name: "Unidoc"),
-            ]),
-
-        .target(name: "Doclinks",
-            dependencies: [
-                .target(name: "URI"),
-            ]),
-
-        .target(name: "DoclinkResolution",
-            dependencies: [
-                .target(name: "Doclinks"),
-                .target(name: "Symbols"),
-            ]),
-
         .target(name: "DynamicTime"),
 
         .target(name: "FNV1"),
@@ -285,11 +260,22 @@ let package:Package = .init(
                 .target(name: "CasesByIntegerEncodingMacro"),
             ],
             exclude: [
-                "ISO.Country.swift",
-                "ISO.Macrolanguage.swift",
+                "ISO.Country (gen).swift",
+                // "ISO.Country.swift",
+                "ISO.Macrolanguage (gen).swift",
+                // "ISO.Macrolanguage.swift",
             ]),
 
         .target(name: "LexicalPaths"),
+
+        .target(name: "LinkResolution",
+            dependencies: [
+                .target(name: "UCF"),
+                .target(name: "SourceDiagnostics"),
+                .target(name: "Symbols"),
+                //  This dependency is present for (questionable?) performance reasons.
+                .target(name: "Unidoc"),
+            ]),
 
         .target(name: "MarkdownABI"),
 
@@ -332,12 +318,11 @@ let package:Package = .init(
 
         .target(name: "MarkdownSemantics",
             dependencies: [
-                .target(name: "Codelinks"),
-                .target(name: "Doclinks"),
                 .target(name: "MarkdownAST"),
                 .target(name: "MarkdownDisplay"),
                 .target(name: "Snippets"),
                 .target(name: "SourceDiagnostics"),
+                .target(name: "UCF"),
 
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ]),
@@ -430,8 +415,7 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphLinker",
             dependencies: [
-                .target(name: "CodelinkResolution"),
-                .target(name: "DoclinkResolution"),
+                .target(name: "LinkResolution"),
                 .target(name: "InlineArray"),
                 .target(name: "InlineDictionary"),
                 .target(name: "MarkdownParsing"),
@@ -490,6 +474,13 @@ let package:Package = .init(
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
+        .target(name: "UCF",
+            dependencies: [
+                .target(name: "FNV1"),
+                .target(name: "LexicalPaths"),
+                .target(name: "URI"),
+            ]),
+
         .target(name: "Unidoc"),
 
         .target(name: "UnidocAPI",
@@ -537,8 +528,7 @@ let package:Package = .init(
 
         .target(name: "UnidocLinker",
             dependencies: [
-                .target(name: "CodelinkResolution"),
-                .target(name: "DoclinkResolution"),
+                .target(name: "LinkResolution"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "UnidocRecords"),
             ]),
@@ -620,16 +610,9 @@ let package:Package = .init(
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
-
-        .executableTarget(name: "CodelinkTests",
+        .executableTarget(name: "UCFTests",
             dependencies: [
-                .target(name: "Codelinks"),
-                .product(name: "Testing_", package: "swift-grammar"),
-            ]),
-
-        .executableTarget(name: "DoclinkTests",
-            dependencies: [
-                .target(name: "Doclinks"),
+                .target(name: "UCF"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
