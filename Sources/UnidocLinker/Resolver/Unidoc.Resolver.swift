@@ -118,180 +118,44 @@ extension Unidoc.Resolver
             }
 
         case .unresolved(let unresolved):
-            let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
-            let codelink:Codelink
-
-            resolution:
-            if  case .web = unresolved.type
+            let location:SourceLocation<Unidoc.Scalar>? = unresolved.location?.map
             {
-                let domain:Substring = unresolved.link.prefix { $0 != "/" }
-
-                if  let link:Codelink = .init(translating: unresolved.link, to: domain)
-                {
-                    codelink = link
-                }
-                else
-                {
-                    let root:Substring
-                    if  let j:String.Index = domain.lastIndex(of: "."),
-                        let i:String.Index = domain[..<j].lastIndex(of: ".")
-                    {
-                        root = domain[domain.index(after: i)...]
-                    }
-                    else
-                    {
-                        root = domain
-                    }
-                    //  We will follow links to GitHub and reputable open-source indexes.
-                    let safe:Bool = switch root
-                    {
-                    case "freebsd.org":     true
-                    case "github.com":      true
-                    case "ietf.org":        true
-                    case "man7.org":        true
-                    case "mozilla.org":     true
-                    case "scala-lang.org":  true
-                    case "swiftinit.org":   true
-                    case "swift.org":       true
-                    case "wikipedia.org":   true
-                    default:                false
-                    }
-
-                    return .link(https: unresolved.link, safe: safe)
-                }
-
-                //  Translation always lowercases the URL, so we need to use the collated table.
-                switch self.caseless.resolve(codelink)
-                {
-                case .some(let overloads):
-                    guard
-                    let overload:CodelinkResolver<Unidoc.Scalar>.Overload = overloads.first
-                    else
-                    {
-                        //  Not an error, this was only speculative.
-                        return .link(https: unresolved.link, safe: false)
-                    }
-
-                    resolution = overload.target
-
-                case .one(let overload):
-                    resolution = overload.target
-                }
-
-                print("DEBUG: successful translation of '\(unresolved.link)'")
-            }
-            else if
-                let resolved:(Codelink, CodelinkResolver<Unidoc.Scalar>.Overload.Target?) =
-                    self.resolve(unresolved)
-            {
-                (codelink, resolution) = resolved
-            }
-            else
-            {
-                return .text(unresolved.link)
+                self.current.id + $0
             }
 
-            /// This looks a lot like a stem, but it always uses spaces, never tabs.
-            /// Its purpose is to allow splitting the path into words without parsing the
-            /// Swift language grammar.
-            var path:String { codelink.path.visible.joined(separator: " ") }
-            var text:String { codelink.path.visible.joined(separator: ".") }
-            let length:Int = codelink.path.visible.count
-
-            switch resolution
+            switch unresolved.type
             {
-            case nil:
-                return .text(text)
+            case .web:
+                return self.resolve(web: unresolved.link, at: location)
 
-            case .scalar(let scalar)?:
-                return .path(path, self.context.expand(scalar, to: length))
+            case .doc:
+                return self.resolve(doc: unresolved.link, at: location)
 
-            case .vector(let feature, self: let heir)?:
-                return .path(path, self.context.expand((heir, feature), to: length))
+            case .ucf:
+                return self.resolve(ucf: unresolved.link, at: location)
             }
         }
 
-        return .text("<unavailable>")
+        return .fallback(text: "<unavailable>")
     }
-
+}
+extension Unidoc.Resolver
+{
     private mutating
-    func resolve(_ outline:SymbolGraph.Outline) -> Unidoc.TopicMember
+    func resolve(ucf link:String, at location:SourceLocation<Unidoc.Scalar>?) -> Unidoc.Outline
     {
-        switch outline
-        {
-        case .location:
-            //  This doesn’t make sense in the context of a topic.
-            break
-
-        case .vertex(let scalar, text: _):
-            if  let _:Int = scalar / .decl,
-                let scalar:Unidoc.Scalar = self.current.scalars.decls[scalar]
-            {
-                return .scalar(scalar)
-            }
-            else if
-                let namespace:Int = scalar / .module,
-                let scalar:Unidoc.Scalar = self.current.scalars.modules[namespace]
-            {
-                return .scalar(scalar)
-            }
-            else
-            {
-                //  TODO: there should be more sanity checks here.
-                //  The rest of the planes don’t cross packages... yet...
-                return .scalar(self.current.id + scalar)
-            }
-
-        case .vector(let feature, self: _, text: _):
-            //  Only references to declarations can generate vectors. So we can assume
-            //  both components are declaration scalars.
-            if  let feature:Unidoc.Scalar = self.current.scalars.decls[feature]
-            {
-                return .scalar(feature)
-            }
-
-        case .unresolved(let unresolved):
-            switch self.resolve(unresolved)
-            {
-            case  nil:
-                return .text(unresolved.link)
-
-            case (let codelink, nil)?:
-                return .text(codelink.path.visible.joined(separator: "."))
-
-            case (_, .scalar(let scalar)?)?:
-                return .scalar(scalar)
-
-            case (_, .vector(let feature, self: _)?)?:
-                return .scalar(feature)
-            }
-        }
-
-        return .text("<unavailable>")
-    }
-
-    private mutating
-    func resolve(_ unresolved:SymbolGraph.Outline.Unresolved) ->
-    (
-        codelink:Codelink,
-        resolved:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
-    )?
-    {
-        let location:SourceLocation<Unidoc.Scalar>? = unresolved.location?.map
-        {
-            self.current.id + $0
-        }
-
         guard
-        let codelink:Codelink = .init(parsing: unresolved)
+        let codelink:Codelink = .init(link)
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
             self.diagnostics[location] = .error("""
-                autolink expression '\(unresolved.link)' could not be parsed
+                autolink expression '\(link)' could not be parsed
                 """)
-            return nil
+            return .fallback(text: link)
         }
+
+        let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
 
         switch self.codelinks.resolve(codelink)
         {
@@ -299,11 +163,93 @@ extension Unidoc.Resolver
             self.diagnostics[location] = CodelinkResolutionError<Unidoc.Symbolicator>.init(
                 overloads: overloads,
                 codelink: codelink)
-
-            return (codelink, nil)
+            resolution = nil
 
         case .one(let overload):
-            return (codelink, overload.target)
+            resolution = overload.target
         }
+
+        return self.context.format(codelink: codelink, to: resolution)
+    }
+
+    private mutating
+    func resolve(doc link:String, at location:SourceLocation<Unidoc.Scalar>?) -> Unidoc.Outline
+    {
+        guard
+        let doclink:Doclink = .init(doc: link[...])
+        else
+        {
+            //  Somehow, a symbolgraph was compiled with an unparseable doclink!
+            self.diagnostics[location] = .error("""
+                doclink expression '\(link)' could not be parsed
+                """)
+            return .fallback(text: link)
+        }
+
+        return self.resolve(ucf: doclink.path.joined(separator: "/"), at: location)
+    }
+
+    private mutating
+    func resolve(web link:String, at _:SourceLocation<Unidoc.Scalar>?) -> Unidoc.Outline
+    {
+        let domain:Substring = link.prefix { $0 != "/" }
+
+        //  FIXME: codelink is probably not the right model type here. All of these paths will
+        //  be slash (`/`) separated.
+        guard
+        let codelink:Codelink = .init(translating: link, to: domain)
+        else
+        {
+            let root:Substring
+            if  let j:String.Index = domain.lastIndex(of: "."),
+                let i:String.Index = domain[..<j].lastIndex(of: ".")
+            {
+                root = domain[domain.index(after: i)...]
+            }
+            else
+            {
+                root = domain
+            }
+            //  We will follow links to GitHub and reputable open-source indexes.
+            let safe:Bool = switch root
+            {
+            case "freebsd.org":     true
+            case "github.com":      true
+            case "ietf.org":        true
+            case "man7.org":        true
+            case "mozilla.org":     true
+            case "scala-lang.org":  true
+            case "swiftinit.org":   true
+            case "swift.org":       true
+            case "wikipedia.org":   true
+            default:                false
+            }
+
+            return .link(https: link, safe: safe)
+        }
+
+        let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
+
+        //  Translation always lowercases the URL, so we need to use the collated table.
+        switch self.caseless.resolve(codelink)
+        {
+        case .some(let overloads):
+            guard
+            let overload:CodelinkResolver<Unidoc.Scalar>.Overload = overloads.first
+            else
+            {
+                //  Not an error, this was only speculative.
+                return .link(https: link, safe: false)
+            }
+
+            resolution = overload.target
+
+        case .one(let overload):
+            resolution = overload.target
+        }
+
+        print("DEBUG: successful translation of '\(link)'")
+
+        return self.context.format(codelink: codelink, to: resolution)
     }
 }
