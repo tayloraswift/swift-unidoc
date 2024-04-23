@@ -7,8 +7,8 @@ extension SymbolGraph
     @frozen public
     enum Outline:Equatable, Hashable, Sendable
     {
-        case vertex(Int32, text:String)
-        case vector(Int32, self:Int32, text:String)
+        case vector(Int32, self:Int32, text:OutlineText)
+        case vertex(Int32, text:OutlineText)
         case location(SourceLocation<Int32>)
         case unresolved(Unresolved)
     }
@@ -87,7 +87,7 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
     {
         if  let id:Int32 = try bson[.vertex_self]?.decode()
         {
-            let text:String = try bson[.text].decode()
+            let text:SymbolGraph.OutlineText = try bson[.text].decode()
 
             if  let heir:Int32 = try bson[.vector_self]?.decode()
             {

@@ -823,6 +823,20 @@ extension SSGC.Linker
 }
 extension SSGC.Linker
 {
+    public mutating
+    func index(articles:[[SSGC.Article]])
+    {
+        //  TODO: DocC doesn’t do this, but it would be nice if we also indexed the anchors in
+        //  bound articles and regular doccomments.
+        for article:SSGC.Article in articles.joined()
+        {
+            if  let id:Int32 = article.standalone
+            {
+                self.tables.anchors.index(sections: article.body.details, of: id)
+            }
+        }
+    }
+
     /// Links articles that have already been assigned addresses.
     ///
     /// This throws an error if and only if a file system error occurs. This is fatal because

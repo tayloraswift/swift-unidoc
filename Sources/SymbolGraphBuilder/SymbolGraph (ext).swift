@@ -113,6 +113,8 @@ extension SymbolGraph
 
             let graph:SymbolGraph = try profiler.measure(\.linking)
             {
+                linker.index(articles: articles)
+
                 try linker.link(articles: articles)
 
                 try linker.link(namespaces: namespaces, at: scalarPositions)

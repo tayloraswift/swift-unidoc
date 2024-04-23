@@ -1,4 +1,5 @@
 import BSON
+import SymbolGraphs
 import Unidoc
 
 extension Unidoc
@@ -9,7 +10,7 @@ extension Unidoc
         case file(line:Int?, Unidoc.Scalar)
         /// An external web link. The string does not contain the URL scheme.
         case link(https:String, safe:Bool)
-        case path(String, [Unidoc.Scalar])
+        case path(SymbolGraph.OutlineText, [Unidoc.Scalar])
         case fallback(text:String)
     }
 }
@@ -40,12 +41,12 @@ extension Unidoc.Outline:BSONDocumentEncodable
             bson[.file_line] = number
             bson[.scalars] = [file]
 
-        case .path(let string, let scalars):
+        case .path(let display, let scalars):
             bson[.scalars] = scalars
-            bson[.display] = string
+            bson[.display] = display
 
-        case .fallback(text: let string):
-            bson[.display] = string
+        case .fallback(text: let text):
+            bson[.display] = text
         }
     }
 }
@@ -54,12 +55,12 @@ extension Unidoc.Outline:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        if  let display:String = try bson[.display]?.decode()
+        if  let text:String = try bson[.display]?.decode()
         {
             switch try bson[.scalars]?.decode(to: [Unidoc.Scalar].self)
             {
-            case let scalars?:  self = .path(display, scalars)
-            case nil:           self = .fallback(text: display)
+            case let scalars?:  self = .path(SymbolGraph.OutlineText.init(text), scalars)
+            case nil:           self = .fallback(text: text)
             }
         }
         else if

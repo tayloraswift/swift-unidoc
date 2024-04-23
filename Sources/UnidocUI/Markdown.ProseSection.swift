@@ -143,7 +143,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
         case .fallback(text: let text):
             html[.code] = text
 
-        case .path(let stem, let path):
+        case .path(let display, let path):
             //  We never started using path outlines for inline file elements, so we don’t need
             //  any backwards compatibility adaptors here.
             guard
@@ -159,15 +159,17 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             }
             else if SymbolGraph.Plane.article.contains(id.citizen)
             {
-                html ?= self.context.link(article: id)
+                html ?= self.context.link(article: id, fragment: display.fragment)
             }
             else
             {
                 //  Take the suffix of the stem, because it may include a module namespace,
                 //  and we never render the module namespace, even if it was written in the
                 //  codelink text.
+
+                //  TODO: support URL fragment?
                 html[.code] = self.context.vector(path,
-                    display: stem.split(separator: " ").suffix(path.count))
+                    display: display.vector.suffix(path.count))
             }
         }
     }
@@ -211,8 +213,8 @@ extension Markdown.ProseSection:TextOutputStreamableMarkdown
         case .fallback(text: let text):
             utf8 += text.utf8
 
-        case .path(let stem, let scalars):
-            let components:[Substring] = stem.split(separator: " ").suffix(scalars.count)
+        case .path(let display, let path):
+            let components:[Substring] = display.vector.suffix(path.count)
             var first:Bool = true
             for component:Substring in components
             {

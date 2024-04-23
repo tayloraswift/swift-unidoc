@@ -22,7 +22,7 @@ extension Markdown
         public override
         func emit(into binary:inout BinaryEncoder)
         {
-            binary[.dt, { $0[.id] = "st:\(self.name)" }]
+            binary[.dt, { $0[.id] = self.id }]
             {
                 $0[self.code ? .code : .em] = self.name
             }
@@ -32,4 +32,9 @@ extension Markdown
             }
         }
     }
+}
+extension Markdown.BlockTerm
+{
+    @inlinable public
+    var id:String { "st:\(self.name)" }
 }
