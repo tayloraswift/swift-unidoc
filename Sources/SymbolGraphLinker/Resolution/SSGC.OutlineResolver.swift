@@ -16,16 +16,20 @@ extension SSGC
         let codelinks:CodelinkResolver<Int32>
         private
         let doclinks:DoclinkResolver
+        private
+        let anchors:AnchorResolver
 
         init(
             diagnostics:consuming Diagnostics<SSGC.Symbolicator>,
             codelinks:CodelinkResolver<Int32>,
-            doclinks:DoclinkResolver)
+            doclinks:DoclinkResolver,
+            anchors:AnchorResolver)
         {
             self.diagnostics = diagnostics
 
             self.codelinks = codelinks
             self.doclinks = doclinks
+            self.anchors = anchors
         }
     }
 }
@@ -74,7 +78,9 @@ extension SSGC.OutlineResolver
             return nil
 
         case .one(let overload):
-            let text:String = codelink.path.visible.joined(separator: " ")
+            let text:SymbolGraph.OutlineText = .init(vector: codelink.path.visible,
+                fragment: nil)
+
             switch overload.target
             {
             case .scalar(let id):
@@ -96,9 +102,17 @@ extension SSGC.OutlineResolver
     func outline(_ doclink:Doclink,
         at _:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {
-        self.doclinks.resolve(doclink, docc: true).map
+        //  TODO: accept fragment
+        let fragment:Substring? = nil
+
+        if  let last:String = doclink.path.last,
+            let id:Int32 = self.doclinks.resolve(doclink, docc: true)
         {
-            .vertex($0, text: doclink.path.last ?? "")
+            return .vertex(id, text: .init(path: last[...], fragment: fragment))
+        }
+        else
+        {
+            return nil
         }
     }
 }

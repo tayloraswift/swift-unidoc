@@ -70,11 +70,21 @@ extension Unidoc.VertexContext
         return .init(display: path, target: url)
     }
 
-    func link(article:Unidoc.Scalar) -> HTML.Link<Markdown.Bytecode.SafeView>?
+    func link(article:Unidoc.Scalar,
+        fragment:Substring?) -> HTML.Link<Markdown.Bytecode.SafeView>?
     {
         self[article: article].map
         {
-            .init(display: $0.headline.safe, target: $1)
+            let target:String?
+
+            switch ($1, fragment)
+            {
+            case (let page?, let fragment?):    target = "\(page)#\(fragment)"
+            case (let page?, nil):              target = page
+            case (nil, _):                      target = nil
+            }
+
+            return .init(display: $0.headline.safe, target: target)
         }
     }
 

@@ -1,4 +1,5 @@
 import MarkdownAST
+import UCF
 
 extension Markdown
 {
@@ -30,11 +31,32 @@ extension Markdown
 }
 extension Markdown.SemanticSections
 {
-    // public
-    // func anchors() -> [UCF.AnchorIdentifier: String]
-    // {
+    public
+    func anchors() -> [UCF.AnchorMangling: String]
+    {
+        self.article.reduce(into: [:])
+        {
+            (anchors:inout [UCF.AnchorMangling: String], block:Markdown.BlockElement) in
 
-    // }
+            block.traverse
+            {
+                let id:String?
+
+                switch $0
+                {
+                case let block as Markdown.BlockHeading:    id = block.id
+                case let block as Markdown.BlockTerm:       id = block.id
+                default:                                    return
+                }
+
+                if  let id:String
+                {
+                    let mangling:UCF.AnchorMangling = .init(mangling: id)
+                    anchors[mangling] = id
+                }
+            }
+        }
+    }
 
     @inlinable public
     var isEmpty:Bool

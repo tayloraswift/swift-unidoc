@@ -14,14 +14,18 @@ extension SSGC.Linker
         @_spi(testable) public
         var doclinks:DoclinkResolver.Table
 
+        var anchors:SSGC.AnchorResolver
+
         @_spi(testable) public
         init(diagnostics:Diagnostics<SSGC.Symbolicator> = .init(),
             codelinks:CodelinkResolver<Int32>.Table = .init(),
-            doclinks:DoclinkResolver.Table = .init())
+            doclinks:DoclinkResolver.Table = .init(),
+            anchors:SSGC.AnchorResolver = .init())
         {
             self.diagnostics = diagnostics
             self.codelinks = codelinks
             self.doclinks = doclinks
+            self.anchors = anchors
         }
     }
 }
@@ -97,26 +101,30 @@ extension SSGC.Linker.Tables
     {
         let codelinks:CodelinkResolver<Int32>.Table = self.codelinks
         let doclinks:DoclinkResolver.Table = self.doclinks
+        let anchors:SSGC.AnchorResolver = self.anchors
 
         var outliner:SSGC.Outliner = .init(resources: scopes.resources,
             resolver: .init(
                 diagnostics: (consume self).diagnostics,
                 codelinks: .init(table: codelinks, scope: scopes.codelink),
-                doclinks: .init(table: doclinks, scope: scopes.doclink)))
+                doclinks: .init(table: doclinks, scope: scopes.doclink),
+                anchors: anchors))
 
         do
         {
             let success:Success = try body(&outliner)
             self = .init(diagnostics: outliner.diagnostics(),
                 codelinks: codelinks,
-                doclinks: doclinks)
+                doclinks: doclinks,
+                anchors: anchors)
             return success
         }
         catch let error
         {
             self = .init(diagnostics: outliner.diagnostics(),
                 codelinks: codelinks,
-                doclinks: doclinks)
+                doclinks: doclinks,
+                anchors: anchors)
             throw error
         }
     }
