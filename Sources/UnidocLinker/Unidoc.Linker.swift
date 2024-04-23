@@ -178,7 +178,7 @@ extension Unidoc.Linker
         {
             return .fallback(text: codelink.path.visible.joined(separator: "."))
         }
-
+        /// TODO: support fragment in `Codelink`?
         let text:SymbolGraph.OutlineText = .init(vector: codelink.path.visible, fragment: nil)
 
         switch target

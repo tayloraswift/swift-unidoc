@@ -92,5 +92,13 @@ extension Main.ParseDoclink:TestBattery
         {
             tests.expect(doclink ==? .init(absolute: false, path: ["Ingredient X"]))
         }
+
+        if  let tests:TestGroup = tests / "Fragment",
+            let doclink:Doclink = .parse("doc:Professor#Laboratory%20Rules", for: tests)
+        {
+            tests.expect(doclink ==? .init(absolute: false,
+                path: ["Professor"],
+                fragment: "Laboratory Rules"))
+        }
     }
 }

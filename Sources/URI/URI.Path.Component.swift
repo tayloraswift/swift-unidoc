@@ -45,7 +45,7 @@ extension URI.Path.Component:LosslessStringConvertible
 }
 extension URI.Path.Component:CustomStringConvertible
 {
-    public
+    @inlinable public
     var description:String
     {
         switch self

@@ -16,6 +16,16 @@ extension UCF
         }
     }
 }
+extension UCF.AnchorMangling:Comparable
+{
+    @inlinable public static
+    func < (a:Self, b:Self) -> Bool { a.rawValue < b.rawValue }
+}
+extension UCF.AnchorMangling:CustomStringConvertible
+{
+    @inlinable public
+    var description:String { self.rawValue }
+}
 extension UCF.AnchorMangling
 {
     @inlinable public

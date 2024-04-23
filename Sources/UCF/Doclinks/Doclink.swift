@@ -7,12 +7,15 @@ struct Doclink:Equatable, Hashable, Sendable
     let absolute:Bool
     public
     let path:[String]
+    public
+    let fragment:String?
 
     @inlinable public
-    init(absolute:Bool, path:[String])
+    init(absolute:Bool, path:[String], fragment:String? = nil)
     {
         self.absolute = absolute
         self.path = path
+        self.fragment = fragment
     }
 }
 extension Doclink
@@ -22,11 +25,32 @@ extension Doclink
     {
         self.absolute ? self.path.first : nil
     }
-    /// Returns the string value of the doclink, without the `doc:` prefix.
+    /// Returns the string value of the doclink, without the `doc:` prefix, percent-encoding any
+    /// special characters as needed.
     @inlinable public
     var text:String
     {
-        "\(self.absolute ? "//" : "")\(self.path.joined(separator: "/"))"
+        var first:Bool = true
+        var text:String = self.absolute ? "//" : ""
+        for component:String in self.path
+        {
+            if  first
+            {
+                first = false
+            }
+            else
+            {
+                text.append("/")
+            }
+
+            text += "\(URI.Path.Component.push(component))"
+        }
+        if  let fragment:String = self.fragment
+        {
+            text += "\(URI.Fragment.init(decoded: fragment))"
+        }
+
+        return text
     }
 }
 extension Doclink:CustomStringConvertible
@@ -74,9 +98,26 @@ extension Doclink
                 return nil
             }
         }
-        if  let path:URI.Path = .init(relative: uri[start...])
+
+        let fragment:URI.Fragment?
+        let end:String.Index
+
+        if  let hashtag:String.Index = uri[start...].firstIndex(of: "#")
         {
-            self.init(absolute: slashes >= 2, path: path.normalized())
+            fragment = .init(decoding: uri[uri.index(after: hashtag)...])
+            end = hashtag
+        }
+        else
+        {
+            fragment = nil
+            end = uri.endIndex
+        }
+
+        if  let path:URI.Path = .init(relative: uri[start ..< end])
+        {
+            self.init(absolute: slashes >= 2,
+                path: path.normalized(),
+                fragment: fragment?.decoded)
         }
         else
         {

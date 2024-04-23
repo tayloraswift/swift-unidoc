@@ -7,9 +7,10 @@ extension URI.Fragment
 }
 extension URI.Fragment.EncodingSet:PercentEncodingSet
 {
+    /// The fragment encoding set is exactly the same as the ``URI/Query.EncodingSet``.
     @inlinable public static
     func contains(_ byte:UInt8) -> Bool
     {
-        byte == 0x3F ? false : URI.Query.EncodingSet.contains(byte)
+        URI.Query.EncodingSet.contains(byte)
     }
 }

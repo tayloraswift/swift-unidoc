@@ -100,19 +100,34 @@ extension SSGC.OutlineResolver
     }
     mutating
     func outline(_ doclink:Doclink,
-        at _:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
+        at source:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {
-        //  TODO: accept fragment
-        let fragment:Substring? = nil
-
-        if  let last:String = doclink.path.last,
-            let id:Int32 = self.doclinks.resolve(doclink, docc: true)
-        {
-            return .vertex(id, text: .init(path: last[...], fragment: fragment))
-        }
+        guard
+        let last:String = doclink.path.last,
+        let id:Int32 = self.doclinks.resolve(doclink, docc: true)
         else
         {
             return nil
         }
+
+        let fragment:Substring?
+        if  let spelling:String = doclink.fragment
+        {
+            switch self.anchors[id, normalizing: spelling]
+            {
+            case .success(let original):
+                fragment = original[...]
+
+            case .failure(let error):
+                self.diagnostics[source] = error
+                fragment = nil
+            }
+        }
+        else
+        {
+            fragment = nil
+        }
+
+        return .vertex(id, text: .init(path: last[...], fragment: fragment))
     }
 }
