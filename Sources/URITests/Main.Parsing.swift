@@ -105,5 +105,18 @@ extension Main.Parsing:TestBattery
         {
             tests.expect(uri.path.normalized() ==? ["def"])
         }
+
+        if  let tests:TestGroup = tests / "Fragment",
+            let fragment:URI.Fragment = tests.expect(
+                value: .init(decoding: "Parameters"))
+        {
+            tests.expect(fragment.decoded ==? "Parameters")
+        }
+        if  let tests:TestGroup = tests / "FragmentWithSpaces",
+            let fragment:URI.Fragment = tests.expect(
+                value: .init(decoding: "Getting%20started"))
+        {
+            tests.expect(fragment.decoded ==? "Getting started")
+        }
     }
 }
