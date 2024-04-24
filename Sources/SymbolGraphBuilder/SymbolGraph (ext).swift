@@ -113,6 +113,9 @@ extension SymbolGraph
 
             let graph:SymbolGraph = try profiler.measure(\.linking)
             {
+                try linker.collate(namespaces: namespaces, at: namespacePositions)
+                try linker.collate(extensions: extensions, at: extensionPositions)
+
                 linker.link(
                     namespaces: namespacePositions,
                     extensions: extensionPositions,
