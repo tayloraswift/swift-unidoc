@@ -61,6 +61,15 @@ extension Markdown.InlineContainer:Markdown.TextElement
     }
 
     @inlinable public mutating
+    func rewrite(by rewrite:(inout Markdown.InlineHyperlink.Target?) throws -> ()) rethrows
+    {
+        for index:Int in self.elements.indices
+        {
+            try self.elements[index].rewrite(by: rewrite)
+        }
+    }
+
+    @inlinable public mutating
     func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
     {
         for index:Int in self.elements.indices

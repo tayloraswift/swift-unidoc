@@ -12,6 +12,10 @@ extension Markdown
         /// Returns the plain text content of this element.
         var text:String { get }
 
+        /// Rewrites all inline hyperlink targets in this element.
+        mutating
+        func rewrite(by rewrite:(inout InlineHyperlink.Target?) throws -> ()) rethrows
+
         /// Replaces symbolic codelinks in this element’s inline content
         /// with references.
         mutating
@@ -26,6 +30,12 @@ extension Markdown.TextElement
         var text:String = ""
         text += self
         return text
+    }
+
+    /// Does nothing.
+    @inlinable public mutating
+    func rewrite(by _:(inout Markdown.InlineHyperlink.Target?) throws -> ()) rethrows
+    {
     }
 
     /// Does nothing.
