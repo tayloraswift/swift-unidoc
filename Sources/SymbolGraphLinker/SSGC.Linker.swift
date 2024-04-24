@@ -42,6 +42,8 @@ extension SSGC
 
         private
         var supplements:[Int32: (source:Markdown.Source, body:Markdown.SemanticDocument)]
+        private
+        var collations:ArticleCollations
 
         public
         init(nominations:SSGC.Nominations,
@@ -63,6 +65,7 @@ extension SSGC
             self.tables = .init()
 
             self.supplements = [:]
+            self.collations = .init()
         }
     }
 }
@@ -352,6 +355,22 @@ extension SSGC.Linker
                 hash: .init(truncating: .module(namespace))))
         }
 
+        for (c, articles):(Int, [SSGC.Article]) in zip(articles.indices, articles)
+        {
+            let resources:[String: SSGC.Resource] = self.resources[c]
+            for article:SSGC.Article in articles
+            {
+                try self.tables.inline(resources: resources,
+                    into: article.body.details,
+                    with: self.swiftParser)
+
+                /// Compute id for module landing page if not standalone.
+                /// This might get more complicated in the future?
+                let id:Int32 = article.standalone ?? (c * .module)
+                self.tables.anchors.index(article: article.body, id: id)
+            }
+        }
+
         return articles
     }
 
@@ -540,7 +559,7 @@ extension SSGC.Linker
     /// This throws an error if and only if a file system error occurs. This is fatal because
     /// there is already logic in the linker to handle the case where files are missing.
     public mutating
-    func link(namespaces sources:[[SSGC.Namespace]],
+    func collate(namespaces sources:[[SSGC.Namespace]],
         at destinations:[[SymbolGraph.Namespace]]) throws
     {
         precondition(self.symbolizer.graph.cultures.count == destinations.count)
@@ -576,42 +595,23 @@ extension SSGC.Linker
         }
 
         //  Second pass: link everything else.
-        for (c, module):(Int, Symbol.Module) in zip(
+        for (c, resources):(Int, [String: SSGC.Resource]) in zip(
             self.symbolizer.graph.cultures.indices,
-            self.symbolizer.graph.namespaces)
+            self.resources)
         {
-            let culture:Culture = .init(resources: self.resources[c],
-                imports: self.symbolizer.importAll,
-                module: module)
-
             for (source, destination):
                 (SSGC.Namespace, SymbolGraph.Namespace) in zip(sources[c], destinations[c])
             {
-                try self.link(decls: source.decls,
-                    at: destination.range,
-                    of: culture,
-                    in: self.symbolizer.graph.namespaces[destination.index])
+                for (i, decl):(Int32, SSGC.Decl) in zip(destination.range, source.decls)
+                {
+                    try self.collate(decl: decl, with: resources, at: i)
+                }
             }
         }
     }
 
     private mutating
-    func link(decls:[SSGC.Decl],
-        at addresses:ClosedRange<Int32>,
-        of culture:Culture,
-        in namespace:Symbol.Module) throws
-    {
-        for (address, decl):(Int32, SSGC.Decl) in zip(addresses, decls)
-        {
-            try self.link(decl: decl, at: address, of: culture, in: namespace)
-        }
-    }
-
-    private mutating
-    func link(decl:SSGC.Decl,
-        at address:Int32,
-        of culture:Culture,
-        in namespace:Symbol.Module) throws
+    func collate(decl:SSGC.Decl, with resources:[String: SSGC.Resource], at i:Int32) throws
     {
         let signature:Signature<Int32> = decl.signature.map { self.symbolizer.intern($0) }
 
@@ -631,25 +631,24 @@ extension SSGC.Linker
             .init(comment: $0, in: location?.file)
         }
 
-        let markdown:(parsed:Markdown.SemanticDocument, file:Int32?)?
+        let article:SSGC.ArticleCollation?
+        var scope:[String] { decl.phylum.scope(trimming: decl.path) }
 
-        switch (comment, self.supplements.removeValue(forKey: address))
+        switch (comment, self.supplements.removeValue(forKey: i))
         {
         case (nil, nil):
-            markdown = nil
+            article = nil
 
         case (let comment?, nil):
             /// The file associated with the doccomment is always the same as
             /// the file the declaration itself lives in, so we would only ever
             /// care about the file associated with the supplement.
-            markdown =
-            (
-                parsed: comment.parse(
+            article = .init(combined: comment.parse(
                     markdownParser: self.doccommentParser,
                     snippetsTable: self.snippets,
                     diagnostics: &self.tables.diagnostics),
-                file: nil
-            )
+                scope: scope,
+                file: nil)
 
         case (let comment?, let supplement?):
             if  case .override? = supplement.body.metadata.merge
@@ -662,90 +661,48 @@ extension SSGC.Linker
                 snippetsTable: self.snippets,
                 diagnostics: &self.tables.diagnostics)
 
-            markdown =
-            (
-                parsed: body.merged(appending: supplement.body),
-                file: supplement.source.origin?.file
-            )
+            article = .init(combined: body.merged(appending: supplement.body),
+                scope: scope,
+                file: supplement.source.origin?.file)
 
         case (nil, let supplement?):
-            markdown =
-            (
-                parsed: supplement.body,
-                file: supplement.source.origin?.file
-            )
+            article = .init(combined: supplement.body,
+                scope: scope,
+                file: supplement.source.origin?.file)
         }
 
-        let renamed:String? = signature.availability.universal?.renamed
-            ?? signature.availability.agnostic[.swift]?.renamed
-            ?? signature.availability.agnostic[.swiftPM]?.renamed
-
-        let article:SymbolGraph.Article?
-        let rename:Int32?
-
-        if  let sections:Markdown.SemanticSections = markdown?.parsed.details
+        if  let article:SSGC.ArticleCollation
         {
-            try self.tables.inline(resources: culture.resources,
-                into: sections,
+            try self.tables.inline(resources: resources,
+                into: article.combined.details,
                 with: self.swiftParser)
-        }
-        if  markdown != nil || renamed != nil
-        {
-            (article, rename) = self.tables.resolving(with: .init(
-                namespace: namespace,
-                culture: culture,
-                scope: decl.phylum.scope(trimming: decl.path)))
-            {
-                (outliner:inout SSGC.Outliner) in
-                (
-                    markdown.map
-                    {
-                        let (article, topics):(SymbolGraph.Article, [[Int32]]) = outliner.link(
-                            body: $0.parsed,
-                            file: $0.file)
 
-                        self.symbolizer.graph.curation += topics
-                        return article
-                    },
-                    renamed.map
-                    {
-                        outliner.follow(rename: $0, of: decl.path, at: location)
-                    } ?? nil
-                )
-            }
-        }
-        else
-        {
-            article = nil
-            rename = nil
+            self.tables.anchors.index(article: article.combined, id: i)
+
+            self.collations[i] = article
         }
 
         {
             $0?.requirements = requirements
             $0?.inhabitants = inhabitants
             $0?.superforms = superforms
-            $0?.renamed = rename
             $0?.origin = origin
 
             $0?.signature = signature
             $0?.location = location
-            $0?.article = article
 
-        } (&self.symbolizer.graph.decls.nodes[address].decl)
+        } (&self.symbolizer.graph.decls.nodes[i].decl)
+
     }
-}
-extension SSGC.Linker
-{
+
     /// Links extensions that have already been assigned addresses.
     ///
     /// This throws an error if and only if a file system error occurs. This is fatal because
     /// there is already logic in the linker to handle the case where files are missing.
     public mutating
-    func link(extensions:[SSGC.Extension], at addresses:[(Int32, Int)]) throws
+    func collate(extensions:[SSGC.Extension], at addresses:[(Int32, Int)]) throws
     {
-        for ((scalar, index), `extension`):((Int32, Int), SSGC.Extension) in zip(
-            addresses,
-            extensions)
+        for ((i, j), `extension`):((Int32, Int), SSGC.Extension) in zip(addresses, extensions)
         {
             //  Extensions can have many constituent extension blocks, each potentially
             //  with its own doccomment. It’s not clear to me how to combine them,
@@ -785,64 +742,156 @@ extension SSGC.Linker
             let file:Int32? = location.map { self.symbolizer.intern($0.file) }
             let markdown:Markdown.Source = .init(comment: comment, in: file)
 
-            //  Need to load these before mutating the symbol graph to avoid
-            //  overlapping access
-            let imports:[Symbol.Module] = self.symbolizer.importAll
-            let parsed:Markdown.SemanticDocument = markdown.parse(
-                markdownParser: self.doccommentParser,
-                snippetsTable: self.snippets,
-                diagnostics: &self.tables.diagnostics)
+            let collation:SSGC.ArticleCollation = .init(combined: markdown.parse(
+                    markdownParser: self.doccommentParser,
+                    snippetsTable: self.snippets,
+                    diagnostics: &self.tables.diagnostics),
+                scope: [String].init(`extension`.path),
+                file: file)
 
-            try
-            {
-                let culture:Culture = .init(resources: self.resources[$0.culture],
-                    imports: imports,
-                    module: self.symbolizer.graph.namespaces[$0.culture])
+            let c:Int = self.symbolizer.graph.decls.nodes[i].extensions[j].culture
 
-                try self.tables.inline(resources: culture.resources,
-                    into: parsed.details,
-                    with: self.swiftParser)
+            try self.tables.inline(resources: self.resources[c],
+                into: collation.combined.details,
+                with: self.swiftParser)
 
-                let scopes:SSGC.OutlineResolutionScopes = .init(
-                    namespace: self.symbolizer.graph.namespaces[$0.namespace],
-                    culture: culture,
-                    scope: [String].init(`extension`.path))
+            //  FIXME: We should index the anchors in the extension documentation, but
+            //  extensions have 2-dimensional coordinates, and we don’t currently have a way to
+            //  event link to them in the first place.
 
-                let topics:[[Int32]]
+            //  FIXME: We still need to normalize the same-page anchors in the article!
 
-                ($0.article, topics) = self.tables.resolving(with: scopes)
-                {
-                    $0.link(body: parsed, file: file)
-                }
-
-                self.symbolizer.graph.curation += topics
-
-            } (&self.symbolizer.graph.decls.nodes[scalar].extensions[index])
+            self.collations[i, j] = collation
         }
     }
 }
 extension SSGC.Linker
 {
     public mutating
-    func index(articles:[[SSGC.Article]])
+    func link(namespaces:[[SymbolGraph.Namespace]],
+        extensions:[(Int32, Int)],
+        articles:[[SSGC.Article]])
     {
-        //  TODO: DocC doesn’t do this, but it would be nice if we also indexed the anchors in
-        //  bound articles and regular doccomments.
-        for article:SSGC.Article in articles.joined()
+        self.link(namespaces: namespaces)
+        self.link(extensions: extensions)
+        self.link(articles: articles)
+    }
+
+    private mutating
+    func link(namespaces:[[SymbolGraph.Namespace]])
+    {
+        //  Second pass: link everything else.
+        for (c, module):(Int, Symbol.Module) in zip(
+            self.symbolizer.graph.cultures.indices,
+            self.symbolizer.graph.namespaces)
         {
-            if  let id:Int32 = article.standalone
+            let culture:Culture = .init(resources: self.resources[c],
+                imports: self.symbolizer.importAll,
+                module: module)
+
+            for namespace:SymbolGraph.Namespace in namespaces[c]
             {
-                self.tables.anchors.index(sections: article.body.details, of: id)
+                let module:Symbol.Module = self.symbolizer.graph.namespaces[namespace.index]
+                for i:Int32 in namespace.range
+                {
+                    self.link(decl: i, of: culture, in: module)
+                }
             }
         }
     }
 
-    /// Links articles that have already been assigned addresses.
-    ///
-    /// This throws an error if and only if a file system error occurs. This is fatal because
-    /// there is already logic in the linker to handle the case where files are missing.
-    public mutating
-    func link(articles:[[SSGC.Article]]) throws
+    private mutating
+    func link(decl address:Int32, of culture:Culture, in module:Symbol.Module)
+    {
+        {
+            guard
+            let decl:SymbolGraph.Decl = $0
+            else
+            {
+                fatalError("Attempting to typeset a declaration that has not been indexed!")
+            }
+
+            let article:SSGC.ArticleCollation? = self.collations.move(address)
+            let renamed:String? = decl.signature.availability.universal?.renamed
+                ?? decl.signature.availability.agnostic[.swift]?.renamed
+                ?? decl.signature.availability.agnostic[.swiftPM]?.renamed
+
+            if  case nil = article,
+                case nil = renamed
+            {
+                return // Nothing to do.
+            }
+
+            let linked:SymbolGraph.Article?
+            let rename:Int32?
+
+            (linked, rename) = self.tables.resolving(with: .init(
+                namespace: module,
+                culture: culture,
+                scope: article?.scope ?? decl.phylum.scope(trimming: decl.path)))
+            {
+                (outliner:inout SSGC.Outliner) in
+                (
+                    article.map
+                    {
+                        let (article, topics):(SymbolGraph.Article, [[Int32]]) = outliner.link(
+                            body: $0.combined,
+                            file: $0.file)
+
+                        self.symbolizer.graph.curation += topics
+                        return article
+                    },
+                    renamed.map
+                    {
+                        outliner.follow(rename: $0, of: decl.path, at: decl.location)
+                    } ?? nil
+                )
+            }
+
+            $0?.renamed = rename
+            $0?.article = linked
+
+        } (&self.symbolizer.graph.decls.nodes[address].decl)
+    }
+
+    private mutating
+    func link(extensions:[(Int32, Int)])
+    {
+        //  Need to load this before mutating the symbol graph to avoid overlapping access
+        let imports:[Symbol.Module] = self.symbolizer.importAll
+
+        for (i, j):(Int32, Int) in extensions
+        {
+            guard
+            let article:SSGC.ArticleCollation = self.collations.move(i, j)
+            else
+            {
+                continue
+            }
+
+            {
+                let scopes:SSGC.OutlineResolutionScopes = .init(
+                    namespace: self.symbolizer.graph.namespaces[$0.namespace],
+                    culture: .init(resources: self.resources[$0.culture],
+                        imports: imports,
+                        module: self.symbolizer.graph.namespaces[$0.culture]),
+                    scope: article.scope)
+
+                let topics:[[Int32]]
+
+                ($0.article, topics) = self.tables.resolving(with: scopes)
+                {
+                    $0.link(body: article.combined, file: article.file)
+                }
+
+                self.symbolizer.graph.curation += topics
+
+            } (&self.symbolizer.graph.decls.nodes[i].extensions[j])
+        }
+    }
+
+    private mutating
+    func link(articles:[[SSGC.Article]])
     {
         for c:Int in articles.indices
         {
@@ -852,10 +901,6 @@ extension SSGC.Linker
 
             for article:SSGC.Article in articles[c]
             {
-                try self.tables.inline(resources: culture.resources,
-                    into: article.body.details,
-                    with: self.swiftParser)
-
                 self.tables.resolving(with: .init(culture: culture))
                 {
                     let (documentation, topics):(SymbolGraph.Article, [[Int32]]) = $0.link(

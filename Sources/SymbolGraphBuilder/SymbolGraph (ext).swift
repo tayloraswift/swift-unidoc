@@ -74,7 +74,7 @@ extension SymbolGraph
                 modules: package.cultures.map(\.module),
                 plugins: [.swift])
 
-            let scalarPositions:[[SymbolGraph.Namespace]] = profiler.measure(\.linking)
+            let namespacePositions:[[SymbolGraph.Namespace]] = profiler.measure(\.linking)
             {
                 linker.allocate(namespaces: namespaces)
             }
@@ -113,12 +113,10 @@ extension SymbolGraph
 
             let graph:SymbolGraph = try profiler.measure(\.linking)
             {
-                linker.index(articles: articles)
-
-                try linker.link(articles: articles)
-
-                try linker.link(namespaces: namespaces, at: scalarPositions)
-                try linker.link(extensions: extensions, at: extensionPositions)
+                linker.link(
+                    namespaces: namespacePositions,
+                    extensions: extensionPositions,
+                    articles: articles)
 
                 return try linker.load()
             }

@@ -134,6 +134,12 @@ extension Markdown.InlineHyperlink:Markdown.TextElement
     }
 
     @inlinable public mutating
+    func rewrite(by rewrite:(inout Markdown.InlineHyperlink.Target?) throws -> ()) rethrows
+    {
+        try rewrite(&self.target)
+    }
+
+    @inlinable public mutating
     func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
     {
         switch self.target

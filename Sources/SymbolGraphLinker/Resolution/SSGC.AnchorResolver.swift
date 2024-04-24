@@ -18,7 +18,7 @@ extension SSGC
 }
 extension SSGC.AnchorResolver
 {
-    mutating
+    private mutating
     func index(sections:Markdown.SemanticSections, of id:Int32)
     {
         let anchors:[UCF.AnchorMangling: String] = sections.anchors()
@@ -28,6 +28,12 @@ extension SSGC.AnchorResolver
         }
 
         self.table[id] = anchors
+    }
+
+    mutating
+    func index(article:Markdown.SemanticDocument, id:Int32)
+    {
+        self.index(sections: article.details, of: id)
     }
 
     subscript(scope:Int32,

@@ -31,6 +31,21 @@ extension SSGC.Linker
 }
 extension SSGC.Linker.Tables
 {
+    // mutating
+    // func index(inlining resources:[String: SSGC.Resource],
+    //     into article:SSGC.ArticleCollation,
+    //     with parser:Markdown.SwiftLanguage?,
+    //     for id:Int32) throws
+    // {
+    //     try self.inline(resources: resources,
+    //         into: article.combined.details,
+    //         with: parser)
+
+    //     self.anchors.index(sections: article.combined.details, of: id)
+
+    //     //  TODO: rewrite same-page anchors
+    // }
+
     mutating
     func inline(resources:[String: SSGC.Resource],
         into sections:Markdown.SemanticSections,
