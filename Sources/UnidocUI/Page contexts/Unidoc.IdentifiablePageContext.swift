@@ -41,25 +41,25 @@ extension Unidoc
         }
 
         public
-        subscript(vertex id:Unidoc.Scalar) -> (vertex:Unidoc.AnyVertex, url:String?)?
+        subscript(vertex id:Unidoc.Scalar) -> Unidoc.LinkReference<Unidoc.AnyVertex>?
         {
             self.cache[id]
         }
 
         public
-        subscript(culture id:Unidoc.Scalar) -> (vertex:Unidoc.CultureVertex, url:String?)?
+        subscript(culture id:Unidoc.Scalar) -> Unidoc.LinkReference<Unidoc.CultureVertex>?
         {
             self.cache[culture: id]
         }
 
         public
-        subscript(article id:Unidoc.Scalar) -> (vertex:Unidoc.ArticleVertex, url:String?)?
+        subscript(article id:Unidoc.Scalar) -> Unidoc.LinkReference<Unidoc.ArticleVertex>?
         {
             self.cache[article: id]
         }
 
         public
-        subscript(decl id:Unidoc.Scalar) -> (vertex:Unidoc.DeclVertex, url:String?)?
+        subscript(decl id:Unidoc.Scalar) -> Unidoc.LinkReference<Unidoc.DeclVertex>?
         {
             self.cache[decl: id]
         }
@@ -111,14 +111,14 @@ extension Unidoc.IdentifiablePageContext
 
     /// Generates a subdomain header for a module which is **not** the current principal vertex.
     ///
-    /// This function returns nil is `culture` is the current principal vertex. To generate a
+    /// This function returns nil if `culture` is the current principal vertex. To generate a
     /// subdomain header for the current principal vertex, use ``subdomain(_:)`` instead.
     final
     func subdomain(_ module:Substring,
         culture:Unidoc.Scalar) -> Unidoc.VolumeMetadata.Subdomain?
     {
         guard
-        let url:String = self[culture: culture]?.url
+        let url:String = self[culture: culture]?.target?.location
         else
         {
             return nil
@@ -140,7 +140,7 @@ extension Unidoc.IdentifiablePageContext
         }
 
         guard
-        let namespace:String = self[culture: culture]?.url,
+        let namespace:String = self[culture: culture]?.target?.location,
         let culture:HTML.Link<Symbol.Module> = self.link(module: culture)
         else
         {

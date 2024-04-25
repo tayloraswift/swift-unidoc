@@ -5,6 +5,7 @@ import MarkdownRendering
 import SymbolGraphs
 import Unidoc
 import UnidocRecords
+import URI
 
 extension Markdown
 {
@@ -87,7 +88,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                 return nil
             }
 
-        case .path(_, let scalars):
+        case .path(let display, let scalars):
             //  We would never have a use for the display text when loading an attribute.
             guard
             let target:Unidoc.Scalar = scalars.last
@@ -99,7 +100,34 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             switch attribute
             {
             case .href:
-                return self.context[vertex: target]?.url
+                guard
+                let target:Unidoc.LinkTarget = self.context[vertex: target]?.target
+                else
+                {
+                    return nil
+                }
+
+                let fragment:URI.Fragment? = display.fragment.map
+                {
+                    .init(decoded: String.init($0))
+                }
+
+                switch (target.location, fragment)
+                {
+                case (let url?, nil):
+                    return url
+
+                case (let url?, let fragment?):
+                    //  This is a link to another page.
+                    return "\(url)\(fragment)"
+
+                case (nil, let fragment?):
+                    return "\(fragment)"
+
+                case (nil, nil):
+                    //  This is a link to the current page.
+                    return nil
+                }
 
             //  This needs to be here for backwards compatibility with older symbol graphs.
             case .src:
@@ -159,7 +187,47 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             }
             else if SymbolGraph.Plane.article.contains(id.citizen)
             {
-                html ?= self.context.link(article: id, fragment: display.fragment)
+                guard
+                let link:Unidoc.LinkReference<Unidoc.ArticleVertex> = self.context[article: id]
+                else
+                {
+                    html[.code] = display.path
+                    return
+                }
+                guard
+                let target:Unidoc.LinkTarget = link.target
+                else
+                {
+                    //  This is a broken link, but we can still render the display text.
+                    //  This is our fault, not the documentation author’s.
+                    html[.a] = link.vertex.headline.safe
+                    return
+                }
+
+                let fragment:URI.Fragment? = display.fragment.map
+                {
+                    .init(decoded: String.init($0))
+                }
+
+                switch (target.location, fragment)
+                {
+                case (let url?, nil):
+                    //  This is a link to another page.
+                    html[.a] { $0.href = url } = link.vertex.headline.safe
+
+                case (let url?, let fragment?):
+                    //  This is a link to another page with a fragment.
+                    html[.a] { $0.href = "\(url)\(fragment)" } = display.fragment
+
+                case (nil, let fragment?):
+                    //  This is a link to the current page with a fragment. We should use the
+                    //  heading text as the display text.
+                    html[.a] { $0.href = "\(fragment)" } = display.fragment
+
+                case (nil, nil):
+                    //  This is a link to the current page.
+                    html[.a] = link.vertex.headline.safe
+                }
             }
             else
             {

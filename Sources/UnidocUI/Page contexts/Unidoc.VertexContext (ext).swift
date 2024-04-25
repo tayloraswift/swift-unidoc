@@ -18,32 +18,34 @@ extension Unidoc.VertexContext
 {
     func card(decl id:Unidoc.Scalar) -> Unidoc.DeclCard?
     {
-        guard case (let vertex, let url?)? = self[decl: id]
+        guard
+        let link:Unidoc.LinkReference<Unidoc.DeclVertex> = self[decl: id],
+        let url:String = link.target?.location
         else
         {
             return nil
         }
-        return .init(self, vertex: vertex, target: url)
+
+        return .init(self, vertex: link.vertex, target: url)
     }
 
     func card(_ id:Unidoc.Scalar) -> Unidoc.AnyCard?
     {
-        switch self[vertex: id]
+        guard
+        let link:Unidoc.LinkReference<Unidoc.AnyVertex> = self[vertex: id],
+        let url:String = link.target?.location
+        else
         {
-        case (.article(let vertex), let url?)?:
-            .article(.init(self, vertex: vertex, target: url))
+            return nil
+        }
 
-        case (.culture(let vertex), let url?)?:
-            .culture(.init(self, vertex: vertex, target: url))
-
-        case (.decl(let vertex), let url?)?:
-            .decl(.init(self, vertex: vertex, target: url))
-
-        case (.product(let vertex), let url?)?:
-            .product(.init(self, vertex: vertex, target: url))
-
-        default:
-            nil
+        switch link.vertex
+        {
+        case .article(let vertex):  return .article(.init(self, vertex: vertex, target: url))
+        case .culture(let vertex):  return .culture(.init(self, vertex: vertex, target: url))
+        case .decl(let vertex):     return .decl(.init(self, vertex: vertex, target: url))
+        case .product(let vertex):  return .product(.init(self, vertex: vertex, target: url))
+        default:                    return nil
         }
     }
 }
@@ -53,39 +55,21 @@ extension Unidoc.VertexContext
     {
         self[culture: module].map
         {
-            .init(display: $0.module.id, target: $1)
+            .init(display: $0.vertex.module.id, target: $0.target?.location)
         }
     }
 
     func link(decl:Unidoc.Scalar) -> HTML.Link<UnqualifiedPath>?
     {
         guard
-        let (decl, url):(Unidoc.DeclVertex, String?) = self[decl: decl],
-        let path:UnqualifiedPath = .init(splitting: decl.stem)
+        let link:Unidoc.LinkReference<Unidoc.DeclVertex> = self[decl: decl],
+        let path:UnqualifiedPath = .init(splitting: link.vertex.stem)
         else
         {
             return nil
         }
 
-        return .init(display: path, target: url)
-    }
-
-    func link(article:Unidoc.Scalar,
-        fragment:Substring?) -> HTML.Link<Markdown.Bytecode.SafeView>?
-    {
-        self[article: article].map
-        {
-            let target:String?
-
-            switch ($1, fragment)
-            {
-            case (let page?, let fragment?):    target = "\(page)#\(fragment)"
-            case (let page?, nil):              target = page
-            case (nil, _):                      target = nil
-            }
-
-            return .init(display: $0.headline.safe, target: target)
-        }
+        return .init(display: path, target: link.target?.location)
     }
 
     func link(source file:Unidoc.Scalar, line:Int? = nil) -> Unidoc.SourceLink?

@@ -48,7 +48,7 @@ extension HTML.VectorLink:HTML.OutputStreamable
                 html += "."
             }
 
-            html[link: self.inliner[vertex: scalar]?.url] = display
+            html[link: self.inliner[vertex: scalar]?.target?.location] = display
         }
     }
 }

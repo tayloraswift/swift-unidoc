@@ -7,9 +7,9 @@ extension Markdown.InlineHyperlink
     {
         /// The link target has already been outlined.
         case outlined   (Int)
-        /// The link target is a fragment within the current document. The string includes a
-        /// leading `#`.
-        case fragment   (String)
+        /// The link target is a fragment within the current document. The string does not
+        /// include a leading `#`.
+        case fragment   (Markdown.SourceString)
         /// The link target is an absolute path. The string includes a leading `/`.
         case absolute   (Markdown.SourceString)
         /// The link target is a relative path. The string does not include a leading `./`.

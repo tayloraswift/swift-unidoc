@@ -1,6 +1,7 @@
 import LinkResolution
 import MarkdownSemantics
 import SourceDiagnostics
+import UCF
 
 extension SSGC.Linker
 {
@@ -14,6 +15,7 @@ extension SSGC.Linker
         @_spi(testable) public
         var doclinks:DoclinkResolver.Table
 
+        private
         var anchors:SSGC.AnchorResolver
 
         @_spi(testable) public
@@ -31,20 +33,42 @@ extension SSGC.Linker
 }
 extension SSGC.Linker.Tables
 {
-    // mutating
-    // func index(inlining resources:[String: SSGC.Resource],
-    //     into article:SSGC.ArticleCollation,
-    //     with parser:Markdown.SwiftLanguage?,
-    //     for id:Int32) throws
-    // {
-    //     try self.inline(resources: resources,
-    //         into: article.combined.details,
-    //         with: parser)
+    mutating
+    func index(article:Markdown.SemanticDocument, id scope:Int32?)
+    {
+        let anchors:SSGC.AnchorTable = self.anchors.index(
+            article: article.details,
+            id: scope)
 
-    //     self.anchors.index(sections: article.combined.details, of: id)
+        func rewrite(_ target:inout Markdown.InlineHyperlink.Target?)
+        {
+            guard
+            case .fragment(var spelling)? = target
+            else
+            {
+                return
+            }
 
-    //     //  TODO: rewrite same-page anchors
-    // }
+            switch anchors[normalizing: spelling.string]
+            {
+            case .success(let fragment):
+                spelling.string = fragment
+                target = .fragment(spelling)
+
+            case .failure(let error):
+                self.diagnostics[spelling.source] = error
+            }
+        }
+
+        article.overview?.sanitize(with: rewrite)
+        article.details.traverse
+        {
+            if  case let block as Markdown.BlockProse = $0
+            {
+                block.sanitize(with: rewrite)
+            }
+        }
+    }
 
     mutating
     func inline(resources:[String: SSGC.Resource],

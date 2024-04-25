@@ -113,7 +113,7 @@ extension SSGC.OutlineResolver
         let fragment:Substring?
         if  let spelling:String = doclink.fragment
         {
-            switch self.anchors[id, normalizing: spelling]
+            switch self.anchors[id][normalizing: spelling]
             {
             case .success(let original):
                 fragment = original[...]

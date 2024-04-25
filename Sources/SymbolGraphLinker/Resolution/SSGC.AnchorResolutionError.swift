@@ -7,10 +7,10 @@ extension SSGC
     {
         let id:UCF.AnchorMangling
         let fragment:String
-        let scope:Int32
+        let scope:Int32?
         let notes:[Note]
 
-        init(id:UCF.AnchorMangling, fragment:String, scope:Int32, notes:[Note])
+        init(id:UCF.AnchorMangling, fragment:String, scope:Int32?, notes:[Note])
         {
             self.id = id
             self.fragment = fragment
@@ -26,9 +26,19 @@ extension SSGC.AnchorResolutionError:Diagnostic
     static
     func += (output:inout DiagnosticOutput<Symbolicator>, self:Self)
     {
-        output[.warning] += """
-        Link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on its
-        target page (\(output.symbolicator[self.scope]))
-        """
+        if  let scope:Int32 = self.scope
+        {
+            output[.warning] += """
+            Link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
+            its target page (\(output.symbolicator[scope]))
+            """
+        }
+        else
+        {
+            output[.warning] += """
+            Link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
+            its target page (unknown extension)
+            """
+        }
     }
 }
