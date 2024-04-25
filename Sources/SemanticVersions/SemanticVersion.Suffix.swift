@@ -55,7 +55,8 @@ extension SemanticVersion.Suffix
             build = nil
         }
 
-        if  let dash:String.Index = string[..<i].lastIndex(of: "-")
+        //  First index, not last index, because a prerelease suffix can contain dashes.
+        if  let dash:String.Index = string[..<i].firstIndex(of: "-")
         {
             alpha = .init(string[string.index(after: dash) ..< i])
             i = dash
