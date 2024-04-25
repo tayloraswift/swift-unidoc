@@ -68,6 +68,7 @@ extension Markdown.SwiftFlavor:Markdown.ParsingFlavor
 extension Markdown.SwiftFlavor
 {
     /// Detects and breaks apart magical aside blocks.
+    @available(*, unavailable)
     static
     func rewrite(
         child block:consuming Markdown.BlockElement,

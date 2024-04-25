@@ -108,51 +108,74 @@ extension Markdown.SemanticAnalyzer
 {
     /// Rewrites the given block elements non-recursively.
     private mutating
-    func rewrite(blocks:consuming ArraySlice<Markdown.BlockElement>) -> [Markdown.BlockElement]
-    {
-        var rewritten:[Markdown.BlockElement] = []
-            rewritten.reserveCapacity(blocks.count)
-        for block:Markdown.BlockElement in blocks
-        {
-            self.expand(block: block)
-            {
-                rewritten.append($0)
-            }
-        }
-
-        return rewritten
-    }
-
-    /// Rewrites the given block elements non-recursively.
-    private mutating
     func rewrite(blocks:inout [Markdown.BlockElement])
     {
         blocks = self.rewrite(blocks: (consume blocks)[...])
     }
 
+    /// Rewrites the given block elements non-recursively.
     private mutating
-    func expand(block:consuming Markdown.BlockElement,
-        into yield:(consuming Markdown.BlockElement) -> ())
+    func rewrite(blocks:consuming ArraySlice<Markdown.BlockElement>) -> [Markdown.BlockElement]
     {
-        switch block
+        var expanded:[Markdown.BlockElement] = []
+            expanded.reserveCapacity(blocks.count)
+
+        /// Expand blocks.
+        for block:Markdown.BlockElement in blocks
         {
-        case let block as Markdown.BlockCodeFragment:
-            do
+            switch block
             {
-                try block.inline(snippets: self.snippets)
+            case let block as Markdown.BlockCodeFragment:
+                do
                 {
-                    self.remove(block: $0, else: yield)
+                    try block.inline(snippets: self.snippets)
+                    {
+                        self.remove(block: $0)
+                        {
+                            expanded.append($0)
+                        }
+                    }
+                }
+                catch let error
+                {
+                    self.diagnostics[block.source] = .error(error)
+                }
+
+            case let block:
+                self.remove(block: block)
+                {
+                    expanded.append($0)
                 }
             }
-            catch let error
+        }
+
+        /// Compact blocks.
+        var compacted:[Markdown.BlockElement] = []
+            compacted.reserveCapacity(expanded.count)
+
+        var blocks:IndexingIterator<[Markdown.BlockElement]> = expanded.makeIterator()
+        var next:Markdown.BlockElement? = blocks.next()
+
+        while let block:Markdown.BlockElement = next
+        {
+            next = blocks.next()
+
+            if  case let first as Markdown.BlockTopicReference = block
             {
-                self.diagnostics[block.source] = .error(error)
+                //  Coalesce consecutive topic references.
+                while case (let block as Markdown.BlockTopicReference)? = next
+                {
+                    next = blocks.next()
+                    first.targets += block.targets
+                }
             }
 
-        case let block:
-            self.remove(block: block, else: yield)
+            compacted.append(block)
         }
+
+        return compacted
     }
+
 
     private mutating
     func remove(block:consuming Markdown.BlockElement,
