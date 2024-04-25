@@ -14,7 +14,7 @@ extension Markdown.SwiftFlavor:Markdown.ParsingFlavor
     func process(toplevel block:Markdown.BlockElement)
     {
         if  case let block as Markdown.BlockHeading = block,
-            case 2 ... 3 = block.level
+            case 2 ... 4 = block.level
         {
             block.anchor()
         }
