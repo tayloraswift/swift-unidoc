@@ -7,27 +7,27 @@ extension Unidoc
     class AbsolutePageContext:IdentifiablePageContext<Vertices>
     {
         public override
-        subscript(vertex id:Unidoc.Scalar) -> (vertex:Unidoc.AnyVertex, url:String?)?
+        subscript(vertex id:Unidoc.Scalar) -> Unidoc.LinkReference<Unidoc.AnyVertex>?
         {
-            super[vertex: id].map { ($0.vertex, $0.url.map { "https://swiftinit.org\($0)" }) }
+            super[vertex: id]?.map { "https://swiftinit.org\($0)" }
         }
 
         public override
-        subscript(culture id:Unidoc.Scalar) -> (vertex:Unidoc.CultureVertex, url:String?)?
+        subscript(culture id:Unidoc.Scalar) -> Unidoc.LinkReference<Unidoc.CultureVertex>?
         {
-            super[culture: id].map { ($0.vertex, $0.url.map { "https://swiftinit.org\($0)" }) }
+            super[culture: id]?.map { "https://swiftinit.org\($0)" }
         }
 
         public override
-        subscript(article id:Unidoc.Scalar) -> (vertex:Unidoc.ArticleVertex, url:String?)?
+        subscript(article id:Unidoc.Scalar) -> Unidoc.LinkReference<Unidoc.ArticleVertex>?
         {
-            super[article: id].map { ($0.vertex, $0.url.map { "https://swiftinit.org\($0)" }) }
+            super[article: id]?.map { "https://swiftinit.org\($0)" }
         }
 
         public override
-        subscript(decl id:Unidoc.Scalar) -> (vertex:Unidoc.DeclVertex, url:String?)?
+        subscript(decl id:Unidoc.Scalar) -> Unidoc.LinkReference<Unidoc.DeclVertex>?
         {
-            super[decl: id].map { ($0.vertex, $0.url.map { "https://swiftinit.org\($0)" }) }
+            super[decl: id]?.map { "https://swiftinit.org\($0)" }
         }
     }
 }

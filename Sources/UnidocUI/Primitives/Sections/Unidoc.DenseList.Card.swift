@@ -32,15 +32,16 @@ extension Unidoc.DenseList.Card
         with context:some Unidoc.VertexContext)
     {
         guard
-        case (let decl, let url?)? = context[decl: type],
-        let path:UnqualifiedPath = .init(splitting: decl.stem)
+        let link:Unidoc.LinkReference<Unidoc.DeclVertex> = context[decl: type],
+        let url:String = link.target?.location,
+        let path:UnqualifiedPath = .init(splitting: link.vertex.stem)
         else
         {
             return nil
         }
 
         self.init(target: url,
-            decl: decl,
+            decl: link.vertex,
             path: path,
             constraints: .init(context, constraints: constraints))
     }

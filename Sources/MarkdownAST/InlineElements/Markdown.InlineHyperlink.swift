@@ -44,7 +44,11 @@ extension Markdown.InlineHyperlink
                 elements: elements)
 
         case "#":
-            self.init(target: .fragment(target), elements: elements)
+            let i:String.Index = target.index(after: target.startIndex)
+            self.init(target: .fragment(.init(
+                    source: source,
+                    string: String.init(target[i...]))),
+                elements: elements)
 
         case ".":
             let trimmed:Markdown.SourceString
@@ -109,7 +113,7 @@ extension Markdown.InlineHyperlink:Markdown.TreeElement
             case .absolute:                 break
             case .relative:                 break
             case .external(let url):        $0[.external] = url.string
-            case .fragment(let fragment):   $0[.href] = fragment
+            case .fragment(let fragment):   $0[.href] = "#\(fragment.string)"
             case .outlined(let reference):  $0[.href] = reference
             }
         }

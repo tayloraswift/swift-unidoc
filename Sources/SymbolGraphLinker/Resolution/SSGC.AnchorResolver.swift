@@ -18,55 +18,21 @@ extension SSGC
 }
 extension SSGC.AnchorResolver
 {
-    private mutating
-    func index(sections:Markdown.SemanticSections, of id:Int32)
-    {
-        let anchors:[UCF.AnchorMangling: String] = sections.anchors()
-        if  anchors.isEmpty
-        {
-            return
-        }
-
-        self.table[id] = anchors
-    }
-
     mutating
-    func index(article:Markdown.SemanticDocument, id:Int32)
+    func index(article:Markdown.SemanticSections, id:Int32?) -> SSGC.AnchorTable
     {
-        self.index(sections: article.details, of: id)
+        let anchors:[UCF.AnchorMangling: String] = article.anchors()
+
+        if  let id:Int32, !anchors.isEmpty
+        {
+            self.table[id] = anchors
+        }
+
+        return .init(scope: id, table: anchors)
     }
 
-    subscript(scope:Int32,
-        normalizing fragment:String) -> Result<String, SSGC.AnchorResolutionError>
+    subscript(scope:Int32) -> SSGC.AnchorTable
     {
-        let id:UCF.AnchorMangling = .init(mangling: fragment)
-        guard
-        let choices:[UCF.AnchorMangling: String] = self.table[scope]
-        else
-        {
-            return .failure(.init(id: id,
-                fragment: fragment,
-                scope: scope,
-                notes: []))
-        }
-
-        guard
-        let fragment:String = choices[id]
-        else
-        {
-            var notes:[SSGC.AnchorResolutionError.Note] = choices.map
-            {
-                .init(id: $0.key, fragment: $0.value)
-            }
-
-            notes.sort { $0.id < $1.id }
-
-            return .failure(.init(id: id,
-                fragment: fragment,
-                scope: scope,
-                notes: notes))
-        }
-
-        return .success(fragment)
+        .init(scope: scope, table: self.table[scope] ?? [:])
     }
 }

@@ -367,7 +367,7 @@ extension SSGC.Linker
                 /// Compute id for module landing page if not standalone.
                 /// This might get more complicated in the future?
                 let id:Int32 = article.standalone ?? (c * .module)
-                self.tables.anchors.index(article: article.body, id: id)
+                self.tables.index(article: article.body, id: id)
             }
         }
 
@@ -677,7 +677,7 @@ extension SSGC.Linker
                 into: article.combined.details,
                 with: self.swiftParser)
 
-            self.tables.anchors.index(article: article.combined, id: i)
+            self.tables.index(article: article.combined, id: i)
 
             self.collations[i] = article
         }
@@ -758,8 +758,7 @@ extension SSGC.Linker
             //  FIXME: We should index the anchors in the extension documentation, but
             //  extensions have 2-dimensional coordinates, and we don’t currently have a way to
             //  event link to them in the first place.
-
-            //  FIXME: We still need to normalize the same-page anchors in the article!
+            self.tables.index(article: collation.combined, id: nil)
 
             self.collations[i, j] = collation
         }
