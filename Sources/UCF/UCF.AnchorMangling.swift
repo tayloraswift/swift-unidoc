@@ -44,7 +44,6 @@ extension UCF.AnchorMangling
             }
             switch $0
             {
-            case ":":   return false
             case "'":   return false
             case "’":   return false
             case "‘":   return false
