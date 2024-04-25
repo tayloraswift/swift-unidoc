@@ -16,7 +16,8 @@ extension Unidoc
         var port:Int
 
         var pretty:Bool
-        var swift:String?
+        var executablePath:String?
+        var swiftPath:String?
         var swiftSDK:SSGC.AppleSDK?
         var force:Unidoc.VersionSeries?
         var input:String?
@@ -30,7 +31,8 @@ extension Unidoc
             self.port = 8443
 
             self.pretty = false
-            self.swift = nil
+            self.executablePath = nil
+            self.swiftPath = nil
             self.swiftSDK = nil
             self.force = nil
             self.input = nil
@@ -116,7 +118,7 @@ extension Unidoc.Build
                 options.pretty = true
 
             case "--swift", "-s":
-                options.swift = try arguments.next(for: option)
+                options.swiftPath = try arguments.next(for: option)
 
             case "--swift-sdk", "-k":
                 options.swiftSDK = try arguments.next(for: option)
@@ -141,6 +143,12 @@ extension Unidoc.Build
                 }
             }
         }
+
+        //  On macOS, `/proc/self/exe` is not available, so we must fall back to using the
+        //  path supplied by `argv[0]`.
+        #if os(macOS)
+        options.executablePath = arguments.tool
+        #endif
 
         return options
     }

@@ -15,6 +15,9 @@ extension Unidoc
     struct Client:Sendable
     {
         private
+        let executablePath:String?
+
+        private
         let swiftPath:String?
         private
         let swiftSDK:SSGC.AppleSDK?
@@ -27,7 +30,7 @@ extension Unidoc
         let port:Int
 
         private
-        init(
+        init(executablePath:String?,
             swiftPath:String?,
             swiftSDK:SSGC.AppleSDK?,
             pretty:Bool,
@@ -35,6 +38,7 @@ extension Unidoc
             http2:HTTP.Client2,
             port:Int)
         {
+            self.executablePath = executablePath
             self.swiftPath = swiftPath
             self.swiftSDK = swiftSDK
             self.pretty = pretty
@@ -64,7 +68,8 @@ extension Unidoc.Client
         print("Connecting to \(options.host):\(options.port)...")
 
         self.init(
-            swiftPath: options.swift,
+            executablePath: options.executablePath,
+            swiftPath: options.swiftPath,
             swiftSDK: options.swiftSDK,
             pretty: options.pretty,
             cookie: options.cookie,
@@ -246,7 +251,7 @@ extension Unidoc.Client
             permissions: (.rw, .r, .r),
             options: [.create, .truncate])
         {
-            try .init(command: nil,
+            try .init(command: self.executablePath,
                 arguments: arguments,
                 stdout: $0,
                 stderr: $0)
@@ -319,7 +324,7 @@ extension Unidoc.Client
             arguments.append("\(search)")
         }
 
-        let ssgc:SystemProcess = try .init(command: nil, arguments: arguments)
+        let ssgc:SystemProcess = try .init(command: self.executablePath, arguments: arguments)
         try ssgc()
 
         let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
