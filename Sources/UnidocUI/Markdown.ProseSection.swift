@@ -5,6 +5,7 @@ import MarkdownRendering
 import SymbolGraphs
 import Unidoc
 import UnidocRecords
+import URI
 
 extension Markdown
 {
@@ -87,7 +88,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                 return nil
             }
 
-        case .path(_, let scalars):
+        case .path(let display, let scalars):
             //  We would never have a use for the display text when loading an attribute.
             guard
             let target:Unidoc.Scalar = scalars.last
@@ -99,7 +100,34 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             switch attribute
             {
             case .href:
-                return self.context[vertex: target]?.url
+                guard
+                let target:Unidoc.LinkTarget = self.context[vertex: target]?.target
+                else
+                {
+                    return nil
+                }
+
+                let fragment:URI.Fragment? = display.fragment.map
+                {
+                    .init(decoded: String.init($0))
+                }
+
+                switch (target.location, fragment)
+                {
+                case (let url?, nil):
+                    return url
+
+                case (let url?, let fragment?):
+                    //  This is a link to another page.
+                    return "\(url)\(fragment)"
+
+                case (nil, let fragment?):
+                    return "\(fragment)"
+
+                case (nil, nil):
+                    //  This is a link to the current page.
+                    return nil
+                }
 
             //  This needs to be here for backwards compatibility with older symbol graphs.
             case .src:
@@ -143,7 +171,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
         case .fallback(text: let text):
             html[.code] = text
 
-        case .path(let stem, let path):
+        case .path(let display, let path):
             //  We never started using path outlines for inline file elements, so we don’t need
             //  any backwards compatibility adaptors here.
             guard
@@ -159,15 +187,57 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             }
             else if SymbolGraph.Plane.article.contains(id.citizen)
             {
-                html ?= self.context.link(article: id)
+                guard
+                let link:Unidoc.LinkReference<Unidoc.ArticleVertex> = self.context[article: id]
+                else
+                {
+                    html[.code] = display.path
+                    return
+                }
+                guard
+                let target:Unidoc.LinkTarget = link.target
+                else
+                {
+                    //  This is a broken link, but we can still render the display text.
+                    //  This is our fault, not the documentation author’s.
+                    html[.a] = link.vertex.headline.safe
+                    return
+                }
+
+                let fragment:URI.Fragment? = display.fragment.map
+                {
+                    .init(decoded: String.init($0))
+                }
+
+                switch (target.location, fragment)
+                {
+                case (let url?, nil):
+                    //  This is a link to another page.
+                    html[.a] { $0.href = url } = link.vertex.headline.safe
+
+                case (let url?, let fragment?):
+                    //  This is a link to another page with a fragment.
+                    html[.a] { $0.href = "\(url)\(fragment)" } = display.fragment
+
+                case (nil, let fragment?):
+                    //  This is a link to the current page with a fragment. We should use the
+                    //  heading text as the display text.
+                    html[.a] { $0.href = "\(fragment)" } = display.fragment
+
+                case (nil, nil):
+                    //  This is a link to the current page.
+                    html[.a] = link.vertex.headline.safe
+                }
             }
             else
             {
                 //  Take the suffix of the stem, because it may include a module namespace,
                 //  and we never render the module namespace, even if it was written in the
                 //  codelink text.
+
+                //  TODO: support URL fragment?
                 html[.code] = self.context.vector(path,
-                    display: stem.split(separator: " ").suffix(path.count))
+                    display: display.vector.suffix(path.count))
             }
         }
     }
@@ -211,8 +281,8 @@ extension Markdown.ProseSection:TextOutputStreamableMarkdown
         case .fallback(text: let text):
             utf8 += text.utf8
 
-        case .path(let stem, let scalars):
-            let components:[Substring] = stem.split(separator: " ").suffix(scalars.count)
+        case .path(let display, let path):
+            let components:[Substring] = display.vector.suffix(path.count)
             var first:Bool = true
             for component:Substring in components
             {

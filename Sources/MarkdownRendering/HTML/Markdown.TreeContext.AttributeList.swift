@@ -53,7 +53,7 @@ extension Markdown.TreeContext.AttributeList
         case .checked:  self.others.append((.checked, value))
         case .disabled: self.others.append((.disabled, value))
         case .href:     self.href = value
-        case .id:       self.id = .init(rawValue: value)
+        case .id:       self.id = .init(decoded: value)
         case .src:      self.others.append((.src, value))
         case .title:    self.others.append((.title, value))
 

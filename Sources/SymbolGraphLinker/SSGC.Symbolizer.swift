@@ -1,4 +1,4 @@
-import CodelinkResolution
+import LinkResolution
 import MarkdownABI
 import MarkdownAST
 import SymbolGraphCompiler

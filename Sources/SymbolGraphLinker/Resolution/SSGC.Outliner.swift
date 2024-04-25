@@ -1,8 +1,5 @@
-import CodelinkResolution
-import Codelinks
-import DoclinkResolution
-import Doclinks
 import LexicalPaths
+import LinkResolution
 import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
@@ -11,6 +8,7 @@ import SourceDiagnostics
 import Sources
 import SymbolGraphCompiler
 import SymbolGraphs
+import UCF
 
 extension SSGC
 {
@@ -102,14 +100,14 @@ extension SSGC.Outliner
         switch reference
         {
         case .code(let link):
-            return self.outline(link: link, code: true)
+            return self.outline(ucf: link)
 
         case .link(let link):
             guard
             let colon:String.Index = link.string.firstIndex(of: ":")
             else
             {
-                return self.outline(link: link, code: false)
+                return self.outline(doc: link)
             }
 
             switch link.string[..<colon]
@@ -120,7 +118,7 @@ extension SSGC.Outliner
                     source: link.source,
                     string: trimmed)
 
-                return self.outline(link: link, code: false)
+                return self.outline(doc: link)
 
             case "http", "https":
                 guard
@@ -184,54 +182,62 @@ extension SSGC.Outliner
     }
 
     private mutating
-    func outline(link:Markdown.SourceString, code:Bool) -> Int?
+    func outline(ucf link:Markdown.SourceString) -> Int?
     {
         self.cache(link.string)
         {
-            resolution:
-            if  code
+            guard
+            let codelink:Codelink = .init(link.string)
+            else
             {
-                guard
-                let codelink:Codelink = .init(link.string)
-                else
-                {
-                    break resolution
-                }
-
-                if  let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
-                        at: link.source)
-                {
-                    return outline
-                }
-
-                return .unresolved(ucf: link.string, location: link.source.start)
-            }
-            else if let doclink:Doclink = .init(doc: link.string[...])
-            {
-                if  let outline:SymbolGraph.Outline = self.resolver.outline(doclink,
-                        at: link.source)
-                {
-                    return outline
-                }
-                //  Resolution might still succeed by reinterpreting the doclink as a codelink.
-                else if !doclink.absolute,
-                    let codelink:Codelink = .init(doclink.path.joined(separator: "/")),
-                    let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
-                        at: link.source)
-                {
-                    return outline
-                }
-
                 self.resolver.diagnostics[link.source] =
-                    Warning.doclinkNotStaticallyResolvable(doclink)
+                    SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
 
-                return .unresolved(doc: link.string, location: link.source.start)
+                return nil
+            }
+
+            if  let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
+                    at: link.source)
+            {
+                return outline
+            }
+
+            return .unresolved(ucf: link.string, location: link.source.start)
+        }
+    }
+    private mutating
+    func outline(doc link:Markdown.SourceString) -> Int?
+    {
+        self.cache(link.string)
+        {
+            guard
+            let doclink:Doclink = .init(doc: link.string[...])
+            else
+            {
+                self.resolver.diagnostics[link.source] =
+                    SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
+
+                return nil
+            }
+
+            if  let outline:SymbolGraph.Outline = self.resolver.outline(doclink,
+                    at: link.source)
+            {
+                return outline
+            }
+            //  Resolution might still succeed by reinterpreting the doclink as a codelink.
+            else if !doclink.absolute,
+                let codelink:Codelink = .init(doclink.path.joined(separator: "/")),
+                let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
+                    at: link.source)
+            {
+                return outline
             }
 
             self.resolver.diagnostics[link.source] =
-                SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
+                Warning.doclinkNotStaticallyResolvable(doclink)
 
-            return nil
+            return .unresolved(doc: link.string, location: link.source.start)
         }
     }
 }

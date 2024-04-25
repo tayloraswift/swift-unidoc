@@ -24,14 +24,11 @@ extension Unidoc
         subscript(vertex:Unidoc.Scalar) -> AnyVertex? { get }
 
         /// Returns the vertex document for the specified vertex and its URL, if available.
-        ///
-        /// The URL could be nil if the vertex’s native volume could not be loaded, or if the URL
-        /// would point back to the current page.
-        subscript(vertex id:Unidoc.Scalar) -> (vertex:AnyVertex, url:String?)? { get }
+        subscript(vertex id:Unidoc.Scalar) -> LinkReference<AnyVertex>? { get }
 
-        subscript(culture id:Unidoc.Scalar) -> (vertex:CultureVertex, url:String?)? { get }
-        subscript(article id:Unidoc.Scalar) -> (vertex:ArticleVertex, url:String?)? { get }
-        subscript(decl id:Unidoc.Scalar) -> (vertex:DeclVertex, url:String?)? { get }
+        subscript(culture id:Unidoc.Scalar) -> LinkReference<CultureVertex>? { get }
+        subscript(article id:Unidoc.Scalar) -> LinkReference<ArticleVertex>? { get }
+        subscript(decl id:Unidoc.Scalar) -> LinkReference<DeclVertex>? { get }
 
         subscript(file id:Unidoc.Scalar) -> FileVertex? { get }
     }

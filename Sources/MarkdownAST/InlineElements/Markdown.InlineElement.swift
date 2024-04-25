@@ -72,6 +72,24 @@ extension Markdown.InlineElement:Markdown.TextElement
     }
 
     @inlinable public mutating
+    func rewrite(by rewrite:(inout Markdown.InlineHyperlink.Target?) throws -> ()) rethrows
+    {
+        switch /* consume */ self
+        {
+        case .container(var container):
+            defer { self = .container(container) }
+            try container.rewrite(by: rewrite)
+
+        case .link(var link):
+            defer { self = .link(link) }
+            try link.rewrite(by: rewrite)
+
+        case let ignored:
+            self = ignored
+        }
+    }
+
+    @inlinable public mutating
     func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
     {
         switch /* consume */ self
