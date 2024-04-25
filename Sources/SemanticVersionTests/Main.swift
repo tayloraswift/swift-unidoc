@@ -26,6 +26,11 @@ enum Main:TestMain, TestBattery
             tests.expect(SemanticVersion.init(refname: "v0.1.2-rc3") ==?
                 .prerelease(.v(0, 1, 2), "rc3"))
         }
+        if  let tests:TestGroup = tests / "SemanticVersion" / "Prerelease" / "Dashes"
+        {
+            tests.expect(SemanticVersion.init(refname: "600.0.0-prerelease-2024-04-25") ==?
+                .prerelease(.v(600, 0, 0), "prerelease-2024-04-25"))
+        }
 
         if  let tests:TestGroup = tests / "SemanticVersion" / "Build"
         {
@@ -36,6 +41,11 @@ enum Main:TestMain, TestBattery
         {
             tests.expect(SemanticVersion.init(refname: "v0.1.2+build3") ==?
                 .release(.v(0, 1, 2), build: "build3"))
+        }
+        if  let tests:TestGroup = tests / "SemanticVersion" / "Build" / "Dashes"
+        {
+            tests.expect(SemanticVersion.init(refname: "v0.1.2+build-3") ==?
+                .release(.v(0, 1, 2), build: "build-3"))
         }
 
         if  let tests:TestGroup = tests / "SemanticVersion" / "PrereleaseBuild"
