@@ -1,12 +1,10 @@
-import CodelinkResolution
-import Codelinks
-import DoclinkResolution
-import Doclinks
 import LexicalPaths
+import LinkResolution
 import MarkdownAST
 import Sources
 import SymbolGraphs
 import SourceDiagnostics
+import UCF
 
 extension SSGC
 {
@@ -18,16 +16,20 @@ extension SSGC
         let codelinks:CodelinkResolver<Int32>
         private
         let doclinks:DoclinkResolver
+        private
+        let anchors:AnchorResolver
 
         init(
             diagnostics:consuming Diagnostics<SSGC.Symbolicator>,
             codelinks:CodelinkResolver<Int32>,
-            doclinks:DoclinkResolver)
+            doclinks:DoclinkResolver,
+            anchors:AnchorResolver)
         {
             self.diagnostics = diagnostics
 
             self.codelinks = codelinks
             self.doclinks = doclinks
+            self.anchors = anchors
         }
     }
 }
@@ -76,7 +78,9 @@ extension SSGC.OutlineResolver
             return nil
 
         case .one(let overload):
-            let text:String = codelink.path.visible.joined(separator: " ")
+            let text:SymbolGraph.OutlineText = .init(vector: codelink.path.visible,
+                fragment: nil)
+
             switch overload.target
             {
             case .scalar(let id):
@@ -96,11 +100,34 @@ extension SSGC.OutlineResolver
     }
     mutating
     func outline(_ doclink:Doclink,
-        at _:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
+        at source:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {
-        self.doclinks.resolve(doclink, docc: true).map
+        guard
+        let last:String = doclink.path.last,
+        let id:Int32 = self.doclinks.resolve(doclink, docc: true)
+        else
         {
-            .vertex($0, text: doclink.path.last ?? "")
+            return nil
         }
+
+        let fragment:Substring?
+        if  let spelling:String = doclink.fragment
+        {
+            switch self.anchors[id][normalizing: spelling]
+            {
+            case .success(let original):
+                fragment = original[...]
+
+            case .failure(let error):
+                self.diagnostics[source] = error
+                fragment = nil
+            }
+        }
+        else
+        {
+            fragment = nil
+        }
+
+        return .vertex(id, text: .init(path: last[...], fragment: fragment))
     }
 }

@@ -1,6 +1,6 @@
 import MarkdownABI
-import Doclinks
 import Sources
+import UCF
 
 extension Markdown
 {
@@ -44,6 +44,7 @@ extension Markdown
                     $0[.li] { $0[.code] = link.string }
 
                 case .outlined(let reference):
+                    //  FIXME: should this be a `card`?
                     $0[.li] { $0 &= reference }
                 }
             }

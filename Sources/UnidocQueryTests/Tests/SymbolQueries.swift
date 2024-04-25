@@ -278,7 +278,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     let lengths:[String: Int] = overview.outlines.reduce(into: [:])
                     {
                         guard
-                        case .path(let words, let path) = $1
+                        case .path(let text, let path) = $1
                         else
                         {
                             tests.expect(value: nil as [Unidoc.Scalar]?)
@@ -292,7 +292,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                         {
                             tests.expect(nil: $0)
                             $0 = path.count
-                        } (&$0[words])
+                        } (&$0["\(text)"])
                     }
                     //  The ``Int.max`` test case is especially valuable because not only is it
                     //  a multi-component cross-package reference, but the `max` member is also
@@ -352,7 +352,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     //  TODO: This is not a bug, but it is a missed optimization opportunity.
                     //  We do not need to resolve the two leading path components, as they will
                     //  never be shown to the user.
-                    tests.expect(text ==? "swift string index")
+                    tests.expect(text.vector ..? ["swift", "string", "index"])
                     tests.expect(path.count ==? 3)
                 }
             }

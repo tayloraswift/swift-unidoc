@@ -1,4 +1,4 @@
-import Codelinks
+import UCF
 import SourceDiagnostics
 
 extension CodelinkResolutionError

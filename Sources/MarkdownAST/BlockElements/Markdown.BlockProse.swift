@@ -44,3 +44,20 @@ extension Markdown
         }
     }
 }
+extension Markdown.BlockProse
+{
+    /// Rewrites the targets of any hyperlinks in this prose block by calling the supplied
+    /// closure.
+    ///
+    /// Unlike ``outline(by:)``, this method is specific to `BlockProse` because links in other
+    /// types of blocks tend to have special semantics that are not compatible with link
+    /// sanitization.
+    @inlinable public
+    func sanitize(with rewrite:(inout Markdown.InlineHyperlink.Target?) throws -> ()) rethrows
+    {
+        for index:Int in self.elements.indices
+        {
+            try self.elements[index].rewrite(by: rewrite)
+        }
+    }
+}

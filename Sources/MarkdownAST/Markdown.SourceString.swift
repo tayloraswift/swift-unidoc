@@ -10,7 +10,7 @@ extension Markdown
         let source:SourceReference<Markdown.Source>
         /// The text value of this reference.
         public
-        let string:String
+        var string:String
 
         @inlinable public
         init(source:SourceReference<Markdown.Source>, string:String)

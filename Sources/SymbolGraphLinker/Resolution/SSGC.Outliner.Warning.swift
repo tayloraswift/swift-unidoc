@@ -1,5 +1,5 @@
-import Doclinks
 import SourceDiagnostics
+import UCF
 
 extension SSGC.Outliner
 {

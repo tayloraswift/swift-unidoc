@@ -1,13 +1,13 @@
-import Doclinks
 import Testing_
+import UCF
 
 extension Main
 {
-    struct Parsing
+    struct ParseDoclink
     {
     }
 }
-extension Main.Parsing:TestBattery
+extension Main.ParseDoclink:TestBattery
 {
     static
     func run(tests:TestGroup)
@@ -91,6 +91,14 @@ extension Main.Parsing:TestBattery
             let doclink:Doclink = .parse("doc:Ingredient%20X", for: tests)
         {
             tests.expect(doclink ==? .init(absolute: false, path: ["Ingredient X"]))
+        }
+
+        if  let tests:TestGroup = tests / "Fragment",
+            let doclink:Doclink = .parse("doc:Professor#Laboratory%20Rules", for: tests)
+        {
+            tests.expect(doclink ==? .init(absolute: false,
+                path: ["Professor"],
+                fragment: "Laboratory Rules"))
         }
     }
 }

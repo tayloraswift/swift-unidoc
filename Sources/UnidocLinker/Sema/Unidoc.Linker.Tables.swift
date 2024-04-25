@@ -1,4 +1,4 @@
-import CodelinkResolution
+import LinkResolution
 import JSON
 import SymbolGraphs
 import Symbols

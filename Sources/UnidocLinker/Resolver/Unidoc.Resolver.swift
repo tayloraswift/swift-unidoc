@@ -1,9 +1,8 @@
-import CodelinkResolution
-import Codelinks
-import Doclinks
+import LinkResolution
 import SourceDiagnostics
 import Sources
 import SymbolGraphs
+import UCF
 import Unidoc
 import UnidocRecords
 
@@ -66,16 +65,6 @@ extension Unidoc.Resolver
     private mutating
     func expand(_ outline:SymbolGraph.Outline) -> Unidoc.Outline
     {
-        func words(in text:String) -> Int
-        {
-            var length:Int = 1
-            for character:Character in text where character == " "
-            {
-                length += 1
-            }
-            return length
-        }
-
         switch outline
         {
         case .location(let location):
@@ -87,7 +76,7 @@ extension Unidoc.Resolver
             if  case SymbolGraph.Plane.decl? = .of(id),
                 let id:Unidoc.Scalar = self.current.scalars.decls[id]
             {
-                return .path(text, self.context.expand(id, to: words(in: text)))
+                return .path(text, self.context.expand(id, to: text.words))
             }
             else if
                 let namespace:Int = id / .module,
@@ -114,7 +103,7 @@ extension Unidoc.Resolver
             if  let feature:Unidoc.Scalar = self.current.scalars.decls[feature],
                 let heir:Unidoc.Scalar = self.current.scalars.decls[heir]
             {
-                return .path(text, self.context.expand((heir, feature), to: words(in: text)))
+                return .path(text, self.context.expand((heir, feature), to: text.words))
             }
 
         case .unresolved(let unresolved):
