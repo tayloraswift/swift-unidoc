@@ -35,13 +35,13 @@ extension Unidoc.SegregatedBody:Unidoc.CollapsibleContent
 {
     var length:Int
     {
-        self.lists.protocols.visible.count
-        + self.lists.types.visible.count
-        + self.lists.typealiases.visible.count
-        + self.lists.macros.visible.count
-        + self.lists.membersOnType.visible.count
-        + self.lists.membersOnInstance.visible.count
-        + self.lists.globals.visible.count
+        self.lists.protocols.length +
+        self.lists.types.length +
+        self.lists.typealiases.length +
+        self.lists.macros.length +
+        self.lists.membersOnType.length +
+        self.lists.membersOnInstance.length +
+        self.lists.globals.length
     }
 }
 extension Unidoc.SegregatedBody

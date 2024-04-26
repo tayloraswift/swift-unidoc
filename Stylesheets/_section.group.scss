@@ -65,6 +65,12 @@ section.group
             }
         }
     }
+    details.impl + details.impl
+    {
+        margin-top: 1em;
+        border-top: dashed 1px var(--fg-light);
+        padding-top: 1em;
+    }
 
     details[open]
     {
