@@ -21,61 +21,19 @@ extension Markdown
 }
 extension Markdown.InlineHyperlink
 {
-    @inlinable public
+    public
     init(source:SourceReference<Markdown.Source>,
         target:String?,
         elements:[Markdown.InlineSpan])
     {
-        guard
-        let target:String,
-            target.startIndex < target.endIndex
+        if  let target:String,
+                target.startIndex < target.endIndex
+        {
+            self.init(target: .init(source: source, target: target), elements: elements)
+        }
         else
         {
             self.init(target: nil, elements: elements)
-            return
-        }
-
-        switch target[target.startIndex]
-        {
-        case "/":
-            self.init(target: .absolute(.init(
-                    source: source,
-                    string: target)),
-                elements: elements)
-
-        case "#":
-            let i:String.Index = target.index(after: target.startIndex)
-            self.init(target: .fragment(.init(
-                    source: source,
-                    string: String.init(target[i...]))),
-                elements: elements)
-
-        case ".":
-            let trimmed:Markdown.SourceString
-            let i:String.Index = target.index(after: target.startIndex)
-            if  i < target.endIndex, target[i] == "/"
-            {
-                let j:String.Index = target.index(after: i)
-                if  j == target.endIndex
-                {
-                    self.init(target: nil, elements: elements)
-                    return
-                }
-
-                trimmed = .init(source: source, string: String.init(target[j...]))
-            }
-            else
-            {
-                trimmed = .init(source: source, string: target)
-            }
-
-            self.init(target: .relative(trimmed), elements: elements)
-
-        default:
-            self.init(target: .external(.init(
-                    source: source,
-                    string: target)),
-                elements: elements)
         }
     }
 }
@@ -112,7 +70,7 @@ extension Markdown.InlineHyperlink:Markdown.TreeElement
             //  These will almost certainly be invalid, so there is no point in encoding them.
             case .absolute:                 break
             case .relative:                 break
-            case .external(let url):        $0[.external] = url.string
+            case .external(let url):        $0[.external] = "\(url)"
             case .fragment(let fragment):   $0[.href] = "#\(fragment.string)"
             case .outlined(let reference):  $0[.href] = reference
             }
@@ -146,18 +104,20 @@ extension Markdown.InlineHyperlink:Markdown.TextElement
     @inlinable public mutating
     func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
     {
+        let reference:Markdown.AnyReference
         switch self.target
         {
-        case    nil, .outlined?, .fragment?:
-            return
+        case .none:                     return
+        case .outlined?:                return
+        case .fragment?:                return
+        case .relative(let link)?:      reference = .link(link)
+        case .absolute(let link)?:      reference = .link(link)
+        case .external(url: let url)?:  reference = .external(url: url)
+        }
 
-        case    .relative(let link)?,
-                .absolute(let link)?,
-                .external(let link)?:
-            if  let reference:Int = try register(.link(link))
-            {
-                self.target = .outlined(reference)
-            }
+        if  let reference:Int = try register(reference)
+        {
+            self.target = .outlined(reference)
         }
     }
 }

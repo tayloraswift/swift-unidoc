@@ -311,7 +311,7 @@ extension SSGC.Linker
         {
             let namespace:Symbol.Module = self.symbolizer.graph.namespaces[$0]
 
-            var scalars:(first:Int32, last:Int32)? = nil
+            var range:(first:Int32, last:Int32)? = nil
             var articles:[SSGC.Article] = []
 
             for file:any SSGC.ResourceFile in markdown[$0]
@@ -320,21 +320,21 @@ extension SSGC.Linker
                 {
                     articles.append(article)
 
-                    guard let scalar:Int32 = article.standalone
+                    guard case .standalone(id: let id) = article.type
                     else
                     {
                         continue
                     }
 
-                    switch scalars
+                    switch range
                     {
-                    case  nil:              scalars = (scalar, scalar)
-                    case (let first, _)?:   scalars = (first,  scalar)
+                    case  nil:              range = (id,    id)
+                    case (let first, _)?:   range = (first, id)
                     }
                 }
             }
 
-            self.symbolizer.graph.cultures[$0].articles = scalars.map
+            self.symbolizer.graph.cultures[$0].articles = range.map
             {
                 $0.first ... $0.last
             }
@@ -364,10 +364,7 @@ extension SSGC.Linker
                     into: article.body.details,
                     with: self.swiftParser)
 
-                /// Compute id for module landing page if not standalone.
-                /// This might get more complicated in the future?
-                let id:Int32 = article.standalone ?? (c * .module)
-                self.tables.index(article: article.body, id: id)
+                self.tables.index(article: article.body, id: article.id(in: c))
             }
         }
 
@@ -447,7 +444,7 @@ extension SSGC.Linker
             }
             else
             {
-                return .init(standalone: nil, file: file, body: supplement.body)
+                return .init(type: .culture, file: file, body: supplement.body)
             }
 
         case .standalone(let heading):
@@ -470,12 +467,12 @@ extension SSGC.Linker
             id = .tutorial(namespace, name)
         }
 
-        if  let scalar:Int32 = self.symbolizer.allocate(article: id, title: title)
+        if  let id:Int32 = self.symbolizer.allocate(article: id, title: title)
         {
              //  Make the standalone article visible for doclink resolution.
-            self.tables.doclinks[prefix, name] = scalar
-            self.router[route][nil, default: []].append(scalar)
-            return .init(standalone: scalar, file: file, body: supplement.body)
+            self.tables.doclinks[prefix, name] = id
+            self.router[route][nil, default: []].append(id)
+            return .init(type: .standalone(id: id), file: file, body: supplement.body)
         }
         else if
             let titleLocation:SourceReference<Markdown.Source> = title.source
@@ -800,7 +797,7 @@ extension SSGC.Linker
     }
 
     private mutating
-    func link(decl address:Int32, of culture:Culture, in module:Symbol.Module)
+    func link(decl id:Int32, of culture:Culture, in module:Symbol.Module)
     {
         {
             guard
@@ -810,7 +807,7 @@ extension SSGC.Linker
                 fatalError("Attempting to typeset a declaration that has not been indexed!")
             }
 
-            let article:SSGC.ArticleCollation? = self.collations.move(address)
+            let article:SSGC.ArticleCollation? = self.collations.move(id)
             let renamed:String? = decl.signature.availability.universal?.renamed
                 ?? decl.signature.availability.agnostic[.swift]?.renamed
                 ?? decl.signature.availability.agnostic[.swiftPM]?.renamed
@@ -827,6 +824,7 @@ extension SSGC.Linker
             (linked, rename) = self.tables.resolving(with: .init(
                 namespace: module,
                 culture: culture,
+                origin: id,
                 scope: article?.scope ?? decl.phylum.scope(trimming: decl.path)))
             {
                 (outliner:inout SSGC.Outliner) in
@@ -850,7 +848,7 @@ extension SSGC.Linker
             $0?.renamed = rename
             $0?.article = linked
 
-        } (&self.symbolizer.graph.decls.nodes[address].decl)
+        } (&self.symbolizer.graph.decls.nodes[id].decl)
     }
 
     private mutating
@@ -874,6 +872,7 @@ extension SSGC.Linker
                     culture: .init(resources: self.resources[$0.culture],
                         imports: imports,
                         module: self.symbolizer.graph.namespaces[$0.culture]),
+                    origin: nil,
                     scope: article.scope)
 
                 let topics:[[Int32]]
@@ -900,7 +899,7 @@ extension SSGC.Linker
 
             for article:SSGC.Article in articles[c]
             {
-                self.tables.resolving(with: .init(culture: culture))
+                self.tables.resolving(with: .init(culture: culture, origin: article.id(in: c)))
                 {
                     let (documentation, topics):(SymbolGraph.Article, [[Int32]]) = $0.link(
                         body: article.body,
@@ -908,12 +907,12 @@ extension SSGC.Linker
 
                     self.symbolizer.graph.curation += topics
 
-                    if  let a:Int32 = article.standalone
+                    switch article.type
                     {
-                        self.symbolizer.graph.articles.nodes[a].article = documentation
-                    }
-                    else
-                    {
+                    case .standalone(id: let id):
+                        self.symbolizer.graph.articles.nodes[id].article = documentation
+
+                    case .culture:
                         //  This is the article for the module’s landing page.
                         self.symbolizer.graph.cultures[c].article = documentation
                     }

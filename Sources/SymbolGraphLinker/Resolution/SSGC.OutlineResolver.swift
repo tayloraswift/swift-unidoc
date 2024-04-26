@@ -18,18 +18,22 @@ extension SSGC
         let doclinks:DoclinkResolver
         private
         let anchors:AnchorResolver
+        private
+        let origin:Int32?
 
         init(
             diagnostics:consuming Diagnostics<SSGC.Symbolicator>,
             codelinks:CodelinkResolver<Int32>,
             doclinks:DoclinkResolver,
-            anchors:AnchorResolver)
+            anchors:AnchorResolver,
+            origin:Int32?)
         {
             self.diagnostics = diagnostics
 
             self.codelinks = codelinks
             self.doclinks = doclinks
             self.anchors = anchors
+            self.origin = origin
         }
     }
 }
@@ -103,20 +107,20 @@ extension SSGC.OutlineResolver
         at source:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {
         guard
-        let last:String = doclink.path.last,
-        let id:Int32 = self.doclinks.resolve(doclink, docc: true)
+        let page:Int32 = doclink.path.isEmpty ? self.origin : self.doclinks.resolve(doclink,
+            docc: true)
         else
         {
             return nil
         }
 
-        let fragment:Substring?
+        let fragment:String?
         if  let spelling:String = doclink.fragment
         {
-            switch self.anchors[id][normalizing: spelling]
+            switch self.anchors[page][normalizing: spelling]
             {
             case .success(let original):
-                fragment = original[...]
+                fragment = original
 
             case .failure(let error):
                 self.diagnostics[source] = error
@@ -128,6 +132,19 @@ extension SSGC.OutlineResolver
             fragment = nil
         }
 
-        return .vertex(id, text: .init(path: last[...], fragment: fragment))
+        if  case page? = self.origin,
+            let fragment:String
+        {
+            return .fragment(fragment)
+        }
+        else if
+            let last:String = doclink.path.last
+        {
+            return .vertex(page, text: .init(path: last[...], fragment: fragment?[...]))
+        }
+        else
+        {
+            return nil
+        }
     }
 }

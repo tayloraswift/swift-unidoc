@@ -118,14 +118,12 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                     return url
 
                 case (let url?, let fragment?):
-                    //  This is a link to another page.
                     return "\(url)\(fragment)"
 
                 case (nil, let fragment?):
                     return "\(fragment)"
 
                 case (nil, nil):
-                    //  This is a link to the current page.
                     return nil
                 }
 
@@ -143,6 +141,9 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             default:
                 return nil
             }
+
+        case .fragment(let text):
+            return "\(URI.Fragment.init(decoded: text))"
 
         case .fallback(text: _):
             return nil
@@ -167,9 +168,6 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
 
         case .link(https: let url, safe: let safe):
             html[.a] { $0.href = "https://\(url)"; $0.rel = safe ? nil : .nofollow } = url
-
-        case .fallback(text: let text):
-            html[.code] = text
 
         case .path(let display, let path):
             //  We never started using path outlines for inline file elements, so we don’t need
@@ -239,6 +237,12 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                 html[.code] = self.context.vector(path,
                     display: display.vector.suffix(path.count))
             }
+
+        case .fragment(let text):
+            html[.a] { $0.href = "\(URI.Fragment.init(decoded: text))" } = text
+
+        case .fallback(text: let text):
+            html[.code] = text
         }
     }
 }
@@ -278,9 +282,6 @@ extension Markdown.ProseSection:TextOutputStreamableMarkdown
             //  We are probably better off not printing the URL at all.
             return
 
-        case .fallback(text: let text):
-            utf8 += text.utf8
-
         case .path(let display, let path):
             let components:[Substring] = display.vector.suffix(path.count)
             var first:Bool = true
@@ -297,6 +298,12 @@ extension Markdown.ProseSection:TextOutputStreamableMarkdown
 
                 utf8 += component.utf8
             }
+
+        case .fragment(let text):
+            utf8 += text.utf8
+
+        case .fallback(text: let text):
+            utf8 += text.utf8
         }
     }
 }

@@ -12,6 +12,8 @@ extension Unidoc
         case link(https:String, safe:Bool)
         case path(SymbolGraph.OutlineText, [Unidoc.Scalar])
         case fallback(text:String)
+        /// A URL fragment, without the hashtag (`#`) prefix.
+        case fragment(String)
     }
 }
 extension Unidoc.Outline
@@ -22,6 +24,7 @@ extension Unidoc.Outline
         case file_line = "L"
         case link_safe = "H"
         case link_url = "U"
+        case fragment = "F"
         case display = "T"
         case scalars = "s"
     }
@@ -47,6 +50,9 @@ extension Unidoc.Outline:BSONDocumentEncodable
 
         case .fallback(text: let text):
             bson[.display] = text
+
+        case .fragment(let display):
+            bson[.fragment] = display
         }
     }
 }
@@ -62,6 +68,11 @@ extension Unidoc.Outline:BSONDocumentDecodable
             case let scalars?:  self = .path(SymbolGraph.OutlineText.init(text), scalars)
             case nil:           self = .fallback(text: text)
             }
+        }
+        else if
+            let text:String = try bson[.fragment]?.decode()
+        {
+            self = .fragment(text)
         }
         else if
             let url:String = try bson[.link_url]?.decode()
