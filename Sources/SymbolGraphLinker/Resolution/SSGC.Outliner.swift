@@ -103,42 +103,19 @@ extension SSGC.Outliner
             return self.outline(ucf: link)
 
         case .link(let link):
-            guard
-            let colon:String.Index = link.string.firstIndex(of: ":")
-            else
+            return self.outline(doc: link)
+
+        case .external(url: let url):
+            switch url.scheme
             {
-                return self.outline(doc: link)
+            case "doc":     return self.outline(doc: url.suffix)
+            case "http":    return self.outline(web: url.suffix)
+            case "https":   return self.outline(web: url.suffix)
+            default:        break
             }
 
-            switch link.string[..<colon]
-            {
-            case "doc":
-                let trimmed:String = .init(link.string[link.string.index(after: colon)...])
-                let link:Markdown.SourceString = .init(
-                    source: link.source,
-                    string: trimmed)
-
-                return self.outline(doc: link)
-
-            case "http", "https":
-                guard
-                let start:String.Index = link.string.index(colon,
-                    offsetBy: 3,
-                    limitedBy: link.string.endIndex)
-                else
-                {
-                    break
-                }
-
-                return self.outline(translating: link, to: link.string[start...])
-
-            default:
-                break
-            }
-
-            self.resolver.diagnostics[link.source] =
-                SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
-
+            self.resolver.diagnostics[url.suffix.source] =
+                SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(url.suffix)
             return nil
 
         case .file(let link):
@@ -175,9 +152,12 @@ extension SSGC.Outliner
     }
 
     private mutating
-    func outline(translating link:Markdown.SourceString, to url:Substring) -> Int?
+    func outline(web link:__owned Markdown.SourceString) -> Int?
     {
-        self.cache.add(outline: .unresolved(web: String.init(url),
+        //  Remove leading slashes
+        var link:Markdown.SourceString = consume link
+        link.string.removeFirst(2)
+        return self.cache.add(outline: .unresolved(web: link.string,
             location: link.source.start))
     }
 

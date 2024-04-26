@@ -9,5 +9,6 @@ enum Main:TestMain
         PackageQueries.self,
         VolumeQueries.self,
         SymbolQueries.self,
+        LinkResolution.self,
     ]
 }

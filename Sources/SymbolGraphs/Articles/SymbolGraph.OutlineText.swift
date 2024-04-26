@@ -51,7 +51,8 @@ extension SymbolGraph.OutlineText:LosslessStringConvertible
     @inlinable public
     init(_ string:String)
     {
-        if  let i:String.Index = string.lastIndex(of: "#")
+        //  The target heading is encoded in clear text, and may contain a hashtag!
+        if  let i:String.Index = string.firstIndex(of: "#")
         {
             self.init(path: string[..<i], fragment: string[string.index(after: i)...])
         }

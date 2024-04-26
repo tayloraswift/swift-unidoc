@@ -42,10 +42,26 @@ extension SSGC.Linker.Tables
 
         func rewrite(_ target:inout Markdown.InlineHyperlink.Target?)
         {
-            guard
-            case .fragment(var spelling)? = target
-            else
+            var spelling:Markdown.SourceString
+
+            switch target
             {
+            case .external(let url)?:
+                guard
+                case "doc" = url.scheme,
+                case "#"? = url.suffix.string.first
+                else
+                {
+                    return
+                }
+
+                spelling = url.suffix
+                spelling.string.removeFirst()
+
+            case .fragment(let link)?:
+                spelling = link
+
+            default:
                 return
             }
 
@@ -147,7 +163,8 @@ extension SSGC.Linker.Tables
                 diagnostics: (consume self).diagnostics,
                 codelinks: .init(table: codelinks, scope: scopes.codelink),
                 doclinks: .init(table: doclinks, scope: scopes.doclink),
-                anchors: anchors))
+                anchors: anchors,
+                origin: scopes.origin))
 
         do
         {

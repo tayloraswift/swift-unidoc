@@ -9,6 +9,8 @@ extension SymbolGraph
     {
         case vector(Int32, self:Int32, text:OutlineText)
         case vertex(Int32, text:OutlineText)
+        /// A URL fragment, without the hashtag (`#`) prefix.
+        case fragment(String)
         case location(SourceLocation<Int32>)
         case unresolved(Unresolved)
     }
@@ -43,6 +45,7 @@ extension SymbolGraph.Outline
         case unresolved_web = "W"
         case unresolved_ucf = "U"
 
+        case fragment = "F"
         case location = "L"
         case vector_self = "S"
         case vertex_self = "R"
@@ -64,6 +67,9 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
             bson[.vertex_self] = id
             bson[.vector_self] = heir
             bson[.text] = text
+
+        case .fragment(let self):
+            bson[.fragment] = self
 
         case .location(let self):
             bson[.location] = self
@@ -98,6 +104,12 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
                 self = .vertex(id, text: text)
             }
 
+            return
+        }
+        else if
+            let fragment:String = try bson[.fragment]?.decode()
+        {
+            self = .fragment(fragment)
             return
         }
 

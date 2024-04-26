@@ -45,6 +45,7 @@ extension Main.LinkResolution:TestBattery
                         resources: [:],
                         imports: [],
                         module: "ThisModule"),
+                    origin: nil,
                     scope: []))
                 {
                     tests.expect(value: $0.outline(reference: .code(_string("A.b"))))
@@ -67,6 +68,7 @@ extension Main.LinkResolution:TestBattery
                         resources: [:],
                         imports: [],
                         module: "ThisModule"),
+                    origin: nil,
                     scope: ["A"]))
                 {
                     tests.expect(value: $0.outline(reference: .code(_string("A.b"))))
@@ -107,6 +109,7 @@ extension Main.LinkResolution:TestBattery
                         resources: [:],
                         imports: ["OtherModule"],
                         module: "ThisModule"),
+                    origin: nil,
                     scope: []))
                 {
                     tests.expect(value: $0.outline(reference: .code(_string("A.b"))))
@@ -127,6 +130,7 @@ extension Main.LinkResolution:TestBattery
                         resources: [:],
                         imports: [],
                         module: "ThisModule"),
+                    origin: nil,
                     scope: []))
                 {
                     tests.expect(value: $0.outline(reference: .code(_string("A.b"))))
@@ -154,6 +158,7 @@ extension Main.LinkResolution:TestBattery
                     resources: [:],
                     imports: [],
                     module: "ThisModule"),
+                origin: nil,
                 scope: []))
             {
 
@@ -189,6 +194,7 @@ extension Main.LinkResolution:TestBattery
                     resources: [:],
                     imports: ["OtherModule"],
                     module: "ThisModule"),
+                origin: nil,
                 scope: []))
             {
 

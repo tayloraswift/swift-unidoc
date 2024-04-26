@@ -72,6 +72,9 @@ extension Unidoc.Resolver
             let line:Int? = location.position == .zero ? nil : location.position.line
             return .file(line: line, self.current.id + location.file)
 
+        case .fragment(let text):
+            return .fragment(text)
+
         case .vertex(let id, text: let text):
             if  case SymbolGraph.Plane.decl? = .of(id),
                 let id:Unidoc.Scalar = self.current.scalars.decls[id]
