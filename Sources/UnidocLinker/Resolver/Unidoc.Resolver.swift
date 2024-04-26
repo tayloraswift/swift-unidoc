@@ -178,7 +178,33 @@ extension Unidoc.Resolver
             return .fallback(text: link)
         }
 
-        return self.resolve(ucf: doclink.path.joined(separator: "/"), at: location)
+        guard
+        let codelink:Codelink = .equivalent(to: doclink)
+        else
+        {
+            //  We don’t really support cross-package doclinks yet.
+            self.diagnostics[location] = .warning("""
+                dynamic resolution of doclink '\(link)' is not supported yet
+                """)
+            return .fallback(text: link)
+        }
+
+        let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
+
+        //  TODO: improve diagnostics
+        switch self.codelinks.resolve(codelink)
+        {
+        case .some(let overloads):
+            self.diagnostics[location] = CodelinkResolutionError<Unidoc.Symbolicator>.init(
+                overloads: overloads,
+                codelink: codelink)
+            resolution = nil
+
+        case .one(let overload):
+            resolution = overload.target
+        }
+
+        return self.context.format(codelink: codelink, to: resolution)
     }
 
     private mutating

@@ -206,8 +206,8 @@ extension SSGC.Outliner
                 return outline
             }
             //  Resolution might still succeed by reinterpreting the doclink as a codelink.
-            else if !doclink.absolute,
-                let codelink:Codelink = .init(doclink.path.joined(separator: "/")),
+            else if
+                let codelink:Codelink = .equivalent(to: doclink),
                 let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
                     at: link.source)
             {
