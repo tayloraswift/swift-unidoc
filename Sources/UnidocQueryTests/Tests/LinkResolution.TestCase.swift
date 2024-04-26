@@ -14,6 +14,7 @@ extension LinkResolution
         let externalLinks:KeyValuePairs<String, Bool>
         let fragmentLinks:[String]
         let brokenLinks:[String]
+        let outlines:Int?
 
         init(
             name:String,
@@ -21,7 +22,8 @@ extension LinkResolution
             internalLinks:KeyValuePairs<String, [String]> = [:],
             externalLinks:KeyValuePairs<String, Bool> = [:],
             fragmentLinks:[String] = [],
-            brokenLinks:[String] = [])
+            brokenLinks:[String] = [],
+            outlines:Int? = nil)
         {
             self.name = name
             self.path = path
@@ -29,6 +31,7 @@ extension LinkResolution
             self.externalLinks = externalLinks
             self.fragmentLinks = fragmentLinks
             self.brokenLinks = brokenLinks
+            self.outlines = outlines
         }
     }
 }
@@ -66,6 +69,12 @@ extension LinkResolution.TestCase
         if  let details:Unidoc.Passage = vertex.details
         {
             outlines += details.outlines
+        }
+
+        if  let count:Int = self.outlines,
+            let tests:TestGroup = tests / "OutlineCount"
+        {
+            tests.expect(outlines.count ==? count)
         }
 
         var internalLinks:[String: [String]] = [:]

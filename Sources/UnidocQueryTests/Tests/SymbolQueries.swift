@@ -315,46 +315,6 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             }
         }
 
-        if  let tests:TestGroup = tests / "Barbie" / "ExternalLinks"
-        {
-            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
-                "swift-malibu", ["barbiecore", "external-links"])
-            await tests.do
-            {
-                if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
-                    let vertex:Unidoc.AnyVertex = tests.expect(
-                        value: output.principal?.vertex),
-                    let prose:Unidoc.Passage = tests.expect(
-                            value: vertex.overview)
-                {
-                    //  Note: the duplicate outline was not optimized away because external
-                    //  links are resolved dynamically, and this means their representation
-                    //  within symbol graphs encodes their source locations, for diagnostics.
-                    tests.expect(prose.outlines.count ==? 4)
-                    tests.expect(prose.outlines[..<3] ..? [
-                            .link(https: "en.wikipedia.org/wiki/Main_Page", safe: true),
-                            .link(https: "en.wikipedia.org/wiki/Main_Page", safe: true),
-                            .link(https: "liberationnews.org", safe: false),
-                        ])
-
-                    guard
-                    case .path(let text, let path) = prose.outlines[3]
-                    else
-                    {
-                        tests.expect(value: nil as [Unidoc.Scalar]?)
-                        return
-                    }
-
-                    //  TODO: This is not a bug, but it is a missed optimization opportunity.
-                    //  We do not need to resolve the two leading path components, as they will
-                    //  never be shown to the user.
-                    tests.expect(text.vector ..? ["swift", "string", "index"])
-                    tests.expect(path.count ==? 3)
-                }
-            }
-        }
-
         if  let tests:TestGroup = tests / "SeeAlso"
         {
             if  let test:TestCase = .init(tests / "GeneratedFromTopics",
