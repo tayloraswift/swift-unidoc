@@ -5,21 +5,34 @@ extension Unidoc
     struct SegregatedList
     {
         private(set)
-        var visible:[Unidoc.DeclCard]
+        var recommended:[Unidoc.DeclCard]
         private
-        var details:[Unidoc.DeclCard]
+        var discouraged:[Unidoc.DeclCard]
+        private
+        var underscored:[Unidoc.DeclCard]
+        private
+        var interfaces:[Unidoc.DeclCard]
 
         private
-        init(visible:[Unidoc.DeclCard], details:[Unidoc.DeclCard])
+        init(
+            recommended:[Unidoc.DeclCard],
+            discouraged:[Unidoc.DeclCard],
+            underscored:[Unidoc.DeclCard],
+            interfaces:[Unidoc.DeclCard])
         {
-            self.visible = visible
-            self.details = details
+            self.recommended = recommended
+            self.discouraged = discouraged
+            self.underscored = underscored
+            self.interfaces = interfaces
         }
     }
 }
 extension Unidoc.SegregatedList:ExpressibleByArrayLiteral
 {
-    init(arrayLiteral:Never...) { self.init(visible: [], details: []) }
+    init(arrayLiteral:Never...)
+    {
+        self.init(recommended: [], discouraged: [], underscored: [], interfaces: [])
+    }
 }
 extension Unidoc.SegregatedList
 {
@@ -43,12 +56,24 @@ extension Unidoc.SegregatedList
 }
 extension Unidoc.SegregatedList:Unidoc.CollapsibleContent
 {
-    var length:Int { self.visible.count }
-    var count:Int { self.visible.count + self.details.count }
+    var length:Int { self.recommended.count }
+    var count:Int
+    {
+        self.recommended.count +
+        self.discouraged.count +
+        self.underscored.count +
+        self.interfaces.count
+    }
 }
 extension Unidoc.SegregatedList
 {
-    var isEmpty:Bool { self.visible.isEmpty && self.details.isEmpty }
+    var isEmpty:Bool
+    {
+        self.recommended.isEmpty &&
+        self.discouraged.isEmpty &&
+        self.underscored.isEmpty &&
+        self.interfaces.isEmpty
+    }
 
     mutating
     func append(_ card:Unidoc.DeclCard?)
@@ -59,9 +84,27 @@ extension Unidoc.SegregatedList
     mutating
     func append(_ card:Unidoc.DeclCard)
     {
-        card.vertex.flags.route.underscored
-        ? self.details.append(card)
-        : self.visible.append(card)
+        guard case nil = card.vertex.signature.spis
+        else
+        {
+            self.interfaces.append(card)
+            return
+        }
+        guard card.vertex.signature.availability.isGenerallyRecommended
+        else
+        {
+            self.discouraged.append(card)
+            return
+        }
+
+        if  card.vertex.flags.route.underscored
+        {
+            self.underscored.append(card)
+        }
+        else
+        {
+            self.recommended.append(card)
+        }
     }
 }
 extension Unidoc.SegregatedList:HTML.OutputStreamable
@@ -69,40 +112,88 @@ extension Unidoc.SegregatedList:HTML.OutputStreamable
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        if !self.visible.isEmpty
+        if !self.recommended.isEmpty
         {
             section[.ul, { $0.class = "cards" }]
             {
-                for card:Unidoc.DeclCard in self.visible
+                for card:Unidoc.DeclCard in self.recommended
                 {
                     $0[.li] = card
                 }
             }
         }
 
-        if  self.details.isEmpty
+        if !self.underscored.isEmpty
         {
-            return
+            section[.details, { $0.class = "impl" }]
+            {
+                $0[.summary]
+                {
+                    $0[.p] { $0.class = "view" } = """
+                    Show implementation details (\(self.underscored.count))
+                    """
+
+                    $0[.p] { $0.class = "hide" } = """
+                    Hide implementation details
+                    """
+                }
+
+                $0[.ul, { $0.class = "cards" }]
+                {
+                    for card:Unidoc.DeclCard in self.underscored
+                    {
+                        $0[.li] = card
+                    }
+                }
+            }
         }
 
-        section[.details, { $0.class = "impl" }]
+        if !self.discouraged.isEmpty
         {
-            $0[.summary]
+            section[.details, { $0.class = "impl" }]
             {
-                $0[.p] { $0.class = "view" } = """
-                Show implementation details (\(self.details.count))
-                """
-
-                $0[.p] { $0.class = "hide" } = """
-                Hide implementation details
-                """
-            }
-
-            $0[.ul, { $0.class = "cards" }]
-            {
-                for card:Unidoc.DeclCard in self.details
+                $0[.summary]
                 {
-                    $0[.li] = card
+                    $0[.p] { $0.class = "view" } = """
+                    Show obsolete interfaces (\(self.discouraged.count))
+                    """
+
+                    $0[.p] { $0.class = "hide" } = """
+                    Hide obsolete interfaces
+                    """
+                }
+
+                $0[.ul, { $0.class = "cards" }]
+                {
+                    for card:Unidoc.DeclCard in self.discouraged
+                    {
+                        $0[.li] = card
+                    }
+                }
+            }
+        }
+
+        if !self.interfaces.isEmpty
+        {
+            section[.details, { $0.class = "impl" }]
+            {
+                $0[.summary]
+                {
+                    $0[.p] { $0.class = "view" } = """
+                    Show system interfaces (\(self.interfaces.count))
+                    """
+
+                    $0[.p] { $0.class = "hide" } = """
+                    Hide system interfaces
+                    """
+                }
+
+                $0[.ul, { $0.class = "cards spi" }]
+                {
+                    for card:Unidoc.DeclCard in self.interfaces
+                    {
+                        $0[.li] = card
+                    }
                 }
             }
         }
