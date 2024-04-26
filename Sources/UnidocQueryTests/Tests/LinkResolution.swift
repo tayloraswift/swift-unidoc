@@ -50,25 +50,39 @@ struct LinkResolution:UnidocDatabaseTestBattery
             .init(name: "Decl",
                 path: ["LinkAnchors", "LinkAnchors"],
                 internalLinks: [
-                    "LinkAnchors.Example-article": [
-                        "Example-article#Level two heading",
-                        "Example-article#Level two heading: with special characters",
-                        "Example-article#Level three heading",
-                        "Example-article#Level four heading",
-                        "Example-article#Level four heading with hashtag (#)",
+                    "LinkAnchors.Internal-links": [
+                        "Internal-links#Level two heading",
+                        "Internal-links#Level two heading: with special characters",
+                        "Internal-links#Level three heading",
+                        "Internal-links#Level four heading",
+                        "Internal-links#Level four heading with hashtag (#)",
                     ],
                 ],
                 fragmentLinks: [
                     "Using the LinkAnchors enum"
                 ]),
 
-            .init(name: "Article",
-                path: ["LinkAnchors", "Example-article"],
+            .init(name: "InternalLinks",
+                path: ["LinkAnchors", "Internal-links"],
                 //  Both the roundabout link and the direct link should be optimized to a single
                 //  direct link.
                 fragmentLinks: [
                     "Level two heading",
-                ])
+                ]),
+
+            .init(name: "ExternalLinks",
+                path: ["LinkAnchors", "External-links"],
+                //  Both the roundabout link and the direct link should be optimized to a single
+                //  direct link.
+                internalLinks: [
+                    "Swift.String.Index": [
+                        "swift string index",
+                    ],
+                ],
+                externalLinks: [
+                    "en.wikipedia.org/wiki/Main_Page": true,
+                    "liberationnews.org": false,
+                ]),
         ]
 
         for `case`:TestCase in cases

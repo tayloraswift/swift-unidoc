@@ -2,7 +2,7 @@
 
 This is an example article that contains multiple linkable headings.
 
-This is a roundabout link to a heading on this page: <doc:Example-article#Level-two-heading>.
+This is a roundabout link to a heading on this page: <doc:Internal-links#Level-two-heading>.
 
 This is a direct link to a heading on this page: <doc:#Level-two-heading>.
 
