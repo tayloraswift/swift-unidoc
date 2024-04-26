@@ -279,3 +279,16 @@ extension Codelink
         return nil
     }
 }
+extension Codelink
+{
+    @inlinable public static
+    func equivalent(to doclink:Doclink) -> Self?
+    {
+        if  doclink.absolute
+        {
+            return nil
+        }
+
+        return .init(doclink.path.joined(separator: "/"))
+    }
+}
