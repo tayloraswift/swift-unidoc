@@ -76,13 +76,21 @@ struct LinkResolution:UnidocDatabaseTestBattery
                 //  direct link.
                 internalLinks: [
                     "Swift.String.Index": [
+                        //  TODO:
+                        //  This is not a bug, but it is a missed optimization opportunity. We
+                        //  do not need to resolve the two leading path components, as they will
+                        //  never be shown to the user.
                         "swift string index",
                     ],
                 ],
                 externalLinks: [
                     "en.wikipedia.org/wiki/Main_Page": true,
                     "liberationnews.org": false,
-                ]),
+                ],
+                //  Note: the duplicate outline was not optimized away because external
+                //  links are resolved dynamically, and this means their representation
+                //  within symbol graphs encodes their source locations, for diagnostics.
+                outlines: 4),
         ]
 
         for `case`:TestCase in cases
