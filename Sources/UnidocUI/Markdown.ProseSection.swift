@@ -167,7 +167,21 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             html ?= self.context.link(source: id, line: line)
 
         case .link(https: let url, safe: let safe):
-            html[.a] { $0.href = "https://\(url)"; $0.rel = safe ? nil : .nofollow } = url
+            html[.a]
+            {
+                $0.target = "_blank"
+                $0.href = "https://\(url)"
+
+                $0[name: .rel] = safe ? """
+                \(HTML.Attribute.Rel.external)
+                """ :
+                """
+                \(HTML.Attribute.Rel.external) \
+                \(HTML.Attribute.Rel.nofollow) \
+                \(HTML.Attribute.Rel.noopener) \
+                \(HTML.Attribute.Rel.google_ugc)
+                """
+            } = url
 
         case .path(let display, let path):
             //  We never started using path outlines for inline file elements, so we don’t need
