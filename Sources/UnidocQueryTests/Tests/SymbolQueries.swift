@@ -190,9 +190,6 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     tests.expect(tree.rows ..?
                         [
                             .init(
-                                shoot: .init(stem: "BarbieCore External-links"),
-                                type: .text("External links")),
-                            .init(
                                 shoot: .init(stem: "BarbieCore Getting-started"),
                                 type: .text("Getting started")),
                             .init(
