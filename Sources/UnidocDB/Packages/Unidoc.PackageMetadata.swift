@@ -170,11 +170,3 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
             repo: try bson[.repo]?.decode())
     }
 }
-extension Unidoc.PackageMetadata
-{
-    // public
-    // var crawlingIntervalTarget:Milliseconds?
-    // {
-    //     self.repo?.crawlingIntervalTarget(hidden: self.hidden, realm: self.realm)
-    // }
-}
