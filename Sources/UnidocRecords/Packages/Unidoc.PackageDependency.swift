@@ -23,15 +23,15 @@ extension Unidoc
 extension Unidoc.PackageDependency
 {
     @inlinable public
-    init(dependent:Unidoc.Version, source:Unidoc.Package, target:Unidoc.Package)
+    init(source:Unidoc.Edition, target:Unidoc.Package)
     {
-        self.init(id: .init(source: source, target: target), dependent: dependent)
+        self.init(id: .init(source: source.package, target: target), dependent: source.version)
     }
 }
 extension Unidoc.PackageDependency
 {
     @inlinable public
-    var source:Unidoc.Package { self.id.source }
+    var source:Unidoc.Edition { .init(package: self.id.source, version: self.dependent) }
     @inlinable public
     var target:Unidoc.Package { self.id.target }
 }
@@ -41,7 +41,7 @@ extension Unidoc.PackageDependency
     enum CodingKey:String, Sendable
     {
         case id = "_id"
-        case dependent = "V"
+        case dependent = "v"
     }
 }
 extension Unidoc.PackageDependency:BSONDocumentEncodable
