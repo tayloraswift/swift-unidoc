@@ -83,19 +83,14 @@ extension Unidoc.VertexEndpoint where Self:HTTP.ServerEndpoint
 
         if  let vertex:Unidoc.AnyVertex = principal.vertex
         {
-            let canonical:Unidoc.CanonicalVersion? = .init(principal: principal,
-                layer: VertexLayer.self)
-            let vertices:Unidoc.Vertices = .init(principal: vertex,
-                secondary: output.vertices)
-            let volumes:Unidoc.Volumes = .init(principal: principal.volume,
-                secondary: output.volumes)
+            let vertexContext:VertexContext = .init(canonical: .init(principal: principal,
+                    layer: VertexLayer.self),
+                principal: principal.volume,
+                secondary: output.volumes,
+                packages: output.packages,
+                vertices: .init(principal: vertex, secondary: output.vertices))
 
             _ = consume output
-
-            let context:VertexContext = .init(canonical: canonical,
-                vertices: vertices,
-                volumes: volumes,
-                repo: principal.repo)
 
             let groups:[Unidoc.AnyGroup] = principal.groups
             let tree:Unidoc.TypeTree? = principal.tree
@@ -106,20 +101,20 @@ extension Unidoc.VertexEndpoint where Self:HTTP.ServerEndpoint
                 vertex: consume vertex,
                 groups: consume groups,
                 tree: consume tree,
-                with: context,
+                with: vertexContext,
                 format: format)
         }
         else
         {
-            let context:Unidoc.PeripheralPageContext = .init(canonical: nil,
-                cache: .init(
-                    vertices: .init(secondary: principal.matches),
-                    volumes: .init(principal: principal.volume)),
-                repo: principal.repo)
+            let vertexContext:Unidoc.PeripheralPageContext = .init(canonical: nil,
+                principal: principal.volume,
+                secondary: output.volumes,
+                packages: output.packages,
+                vertices: .init(secondary: principal.matches))
 
             return try self.failure(matches: principal.matches,
                 tree: principal.tree,
-                with: context,
+                with: vertexContext,
                 format: format)
         }
     }

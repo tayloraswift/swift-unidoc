@@ -1,9 +1,10 @@
 import UnidocRecords
+import UnidocRender
 
 extension Unidoc
 {
     @frozen public
-    struct Vertices
+    struct IdentifiableVertices
     {
         @usableFromInline
         let principal:AnyVertex
@@ -20,7 +21,12 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.Vertices
+extension Unidoc.IdentifiableVertices:Identifiable
+{
+    @inlinable public
+    var id:Unidoc.Scalar { self.principal.id }
+}
+extension Unidoc.IdentifiableVertices:Unidoc.VertexContextTable
 {
     public
     init(principal:Unidoc.AnyVertex, secondary:borrowing [Unidoc.AnyVertex])
@@ -31,16 +37,6 @@ extension Unidoc.Vertices
         }
         self.init(principal: principal, secondary: secondary)
     }
-}
-extension Unidoc.Vertices:Identifiable
-{
-    @inlinable public
-    var id:Unidoc.Scalar { self.principal.id }
-}
-extension Unidoc.Vertices:Unidoc.VertexCache
-{
-    @inlinable public static
-    func form(from self:consuming Unidoc.Vertices) -> Self { `self` }
 
     @inlinable public
     subscript(_ vertex:Unidoc.Scalar) -> (vertex:Unidoc.AnyVertex, principal:Bool)?
