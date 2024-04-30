@@ -19,7 +19,7 @@ extension Unidoc
         case file(FileVertex)
         case product(ProductVertex)
         case foreign(ForeignVertex)
-        case global(GlobalVertex)
+        case landing(LandingVertex)
     }
 }
 extension Unidoc.AnyVertex
@@ -79,11 +79,11 @@ extension Unidoc.AnyVertex
         }
     }
     @inlinable public
-    var global:Unidoc.GlobalVertex?
+    var landing:Unidoc.LandingVertex?
     {
         switch self
         {
-        case .global(let global):   global
+        case .landing(let landing): landing
         case _:                     nil
         }
     }
@@ -101,7 +101,7 @@ extension Unidoc.AnyVertex:Identifiable
         case .file(let file):       file.id
         case .product(let product): product.id
         case .foreign(let foreign): foreign.id
-        case .global(let global):   global.id
+        case .landing(let landing): landing.id
         }
     }
 }
@@ -118,7 +118,7 @@ extension Unidoc.AnyVertex
         case .file:                 nil
         case .product:              nil
         case .foreign:              nil
-        case .global:               nil
+        case .landing:              nil
         }
     }
     @inlinable public
@@ -132,7 +132,7 @@ extension Unidoc.AnyVertex
         case .file:                 nil
         case .product:              nil
         case .foreign:              nil
-        case .global:               nil
+        case .landing:              nil
         }
     }
     @inlinable public
@@ -146,7 +146,7 @@ extension Unidoc.AnyVertex
         case .file:                 nil
         case .product(let product): product.shoot
         case .foreign(let foreign): foreign.shoot
-        case .global:               nil
+        case .landing:              nil
         }
     }
 }
@@ -173,6 +173,8 @@ extension Unidoc.AnyVertex
         /// empty string.
         case stem = "U"
 
+        /// Appears in ``Global`` only.
+        case packages = "k"
         /// Appears in ``Global`` only.
         case snapshot = "O"
 
@@ -357,10 +359,11 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
             bson[.hash] = self.hash
             bson[.stem] = self.stem
 
-        case .global(let self):
+        case .landing(let self):
             bson[.hash] = self.hash
             bson[.stem] = self.stem
             bson[.snapshot] = self.snapshot
+            bson[.packages] = self.packages.isEmpty ? nil : self.packages
         }
     }
 }
@@ -448,7 +451,9 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
                 hash: try bson[.hash].decode()))
 
         case _:
-            self = .global(.init(id: id, snapshot: try bson[.snapshot].decode()))
+            self = .landing(.init(id: id,
+                snapshot: try bson[.snapshot].decode(),
+                packages: try bson[.packages]?.decode() ?? []))
         }
     }
 }

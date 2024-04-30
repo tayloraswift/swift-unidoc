@@ -54,7 +54,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
                     tests.expect(output.volume.patch ==? .v(0, 2, 0))
-                    tests.expect(value: output.vertex?.global)
+                    tests.expect(value: output.vertex?.landing)
                 }
             }
         }
@@ -71,7 +71,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
                     tests.expect(output.volume.patch ==? .v(0, 2, 0))
-                    tests.expect(value: output.vertex?.global)
+                    tests.expect(value: output.vertex?.landing)
                 }
             }
         }
@@ -88,7 +88,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
                     tests.expect(output.volume.patch ==? .v(0, 1, 0))
-                    tests.expect(value: output.vertex?.global)
+                    tests.expect(value: output.vertex?.landing)
                 }
             }
         }
@@ -106,7 +106,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
                     tests.expect(nil: output.volume.patch)
                     tests.expect(output.volume.refname ==? "1.0.0-beta.1")
-                    tests.expect(value: output.vertex?.global)
+                    tests.expect(value: output.vertex?.landing)
                 }
             }
         }

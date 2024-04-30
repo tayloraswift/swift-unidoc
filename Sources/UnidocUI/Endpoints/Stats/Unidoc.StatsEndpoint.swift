@@ -63,7 +63,7 @@ extension Unidoc.StatsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
             let page:ModulePage = .init(context, sidebar: sidebar, vertex: vertex)
             return .ok(page.resource(format: format))
 
-        case .global(let vertex):
+        case .landing(let vertex):
             let sidebar:Unidoc.Sidebar<Self>? = .package(volume: context.volume)
             let page:PackagePage = .init(context, sidebar: sidebar, vertex: vertex)
             return .ok(page.resource(format: format))

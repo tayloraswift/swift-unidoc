@@ -92,7 +92,7 @@ extension Unidoc.DB.Vertices
                 $0 += vertices.products.lazy.map(Unidoc.AnyVertex.product(_:))
                 $0 += vertices.foreign.lazy.map(Unidoc.AnyVertex.foreign(_:))
 
-                $0.append(Unidoc.AnyVertex.global(vertices.global))
+                $0.append(Unidoc.AnyVertex.landing(vertices.landing))
             },
             against: self.database)
 

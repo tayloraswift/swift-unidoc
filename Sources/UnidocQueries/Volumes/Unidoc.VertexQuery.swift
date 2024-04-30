@@ -379,7 +379,27 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 $0[stage: .replaceWith] = results
                 $0[stage: .project] = .init(with: Unidoc.VolumeMetadata.names(_:))
             }
+
+            //  This really does need to be written with two unwinds, a naïve `$in` lookup
+            //  causes a collection scan for some reason.
+            $0[Unidoc.VertexOutput[.packages]] = .init
+            {
+                let id:Mongo.AnyKeyPath = Unidoc.PrincipalOutput[.vertex] /
+                    Unidoc.AnyVertex[.packages]
+
+                $0[stage: .unwind] = id
+                $0[stage: .lookup] = .init
+                {
+                    $0[.from] = Unidoc.DB.Packages.name
+                    $0[.localField] = id
+                    $0[.foreignField] = Unidoc.PackageMetadata[.id]
+                    $0[.as] = id
+                }
+                $0[stage: .unwind] = id
+                $0[stage: .replaceWith] = id
+            }
         }
+
         //  Unbox single-element arrays.
         pipeline[stage: .set] = .init
         {

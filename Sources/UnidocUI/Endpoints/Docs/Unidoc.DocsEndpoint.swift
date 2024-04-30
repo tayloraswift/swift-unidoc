@@ -91,7 +91,7 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
             let page:ForeignPage = try .init(cone: cone, apex: apex)
             resource = page.resource(format: format)
 
-        case .global(let apex):
+        case .landing(let apex):
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
             let page:PackagePage = .init(cone: cone, apex: apex)
             resource = page.resource(format: format)
