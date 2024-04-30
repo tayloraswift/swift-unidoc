@@ -17,9 +17,9 @@ extension Unidoc.DocsEndpoint
     struct PackagePage
     {
         let cone:Unidoc.Cone
-        let apex:Unidoc.GlobalVertex
+        let apex:Unidoc.LandingVertex
 
-        init(cone:Unidoc.Cone, apex:Unidoc.GlobalVertex)
+        init(cone:Unidoc.Cone, apex:Unidoc.LandingVertex)
         {
             self.cone = cone
             self.apex = apex

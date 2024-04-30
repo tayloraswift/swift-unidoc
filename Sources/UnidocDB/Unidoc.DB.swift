@@ -677,7 +677,14 @@ extension Unidoc.DB
 
         let dependencies:[Unidoc.VolumeMetadata.Dependency] = linker.dependencies(
             pinned: snapshot.pins)
-        let mesh:Unidoc.Linker.Mesh = linker.link()
+
+        let mesh:Unidoc.Linker.Mesh = linker.link(around: .init(id: snapshot.id.global,
+            snapshot: .init(abi: snapshot.metadata.abi,
+                latestManifest: snapshot.metadata.tools,
+                extraManifests: snapshot.metadata.manifests,
+                requirements: snapshot.metadata.requirements,
+                commit: snapshot.metadata.commit?.sha1),
+            packages: snapshot.pins.compactMap(\.?.package)))
 
         linker.status().emit(colors: .enabled)
 

@@ -128,7 +128,7 @@ extension Unidoc.IdentifiablePageContext.Cache
                         case .file:                 nil
                         case .product(let vertex):  Unidoc.DocsEndpoint[$0, vertex.route]
                         case .foreign(let vertex):  Unidoc.DocsEndpoint[$0, vertex.route]
-                        case .global:               Unidoc.DocsEndpoint[$0]
+                        case .landing:              Unidoc.DocsEndpoint[$0]
                         }
                     }
 

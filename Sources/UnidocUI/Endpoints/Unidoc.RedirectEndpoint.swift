@@ -53,7 +53,7 @@ extension Unidoc.RedirectEndpoint:HTTP.ServerEndpoint
         case .file?, nil:           nil
         case .product(let vertex)?: Unidoc.DocsEndpoint[output.volume, vertex.route]
         case .foreign(let vertex)?: Unidoc.DocsEndpoint[output.volume, vertex.route]
-        case .global?:              Unidoc.DocsEndpoint[output.volume]
+        case .landing?:             Unidoc.DocsEndpoint[output.volume]
         }
 
         if  let redirect:URI
