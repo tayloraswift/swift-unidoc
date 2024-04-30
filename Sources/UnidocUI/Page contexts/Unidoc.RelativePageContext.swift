@@ -3,7 +3,7 @@ import UnidocRender
 extension Unidoc
 {
     public final
-    class RelativePageContext:IdentifiablePageContext<Vertices>
+    class RelativePageContext:IdentifiablePageContext<IdentifiableVertices>
     {
     }
 }

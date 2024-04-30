@@ -12,32 +12,38 @@ import UnidocRecords
 extension Unidoc
 {
     public
-    class IdentifiablePageContext<VertexCacheType> where VertexCacheType:Unidoc.VertexCache
+    class IdentifiablePageContext<Table> where Table:Unidoc.VertexContextTable
     {
         public
         let canonical:CanonicalVersion?
 
+        private(set)
+        var packages:PackageContext
         private
         var cache:Cache
 
-        public
-        let repo:PackageRepo?
-
-        init(canonical:CanonicalVersion?, cache:Cache, repo:Unidoc.PackageRepo?)
+        private
+        init(canonical:CanonicalVersion?, packages:PackageContext, cache:Cache)
         {
-            self.cache = cache
-            self.repo = repo
             self.canonical = canonical
+            self.packages = packages
+            self.cache = cache
         }
 
         public convenience required
-        init(canonical:CanonicalVersion?, vertices:Vertices, volumes:Volumes, repo:PackageRepo?)
+        init(canonical:Unidoc.CanonicalVersion?,
+            principal:Unidoc.VolumeMetadata,
+            secondary:borrowing [Unidoc.VolumeMetadata],
+            packages:__shared [Unidoc.PackageMetadata],
+            vertices:Table)
         {
             self.init(canonical: canonical,
+                packages: .init(
+                    principal: principal.id.package,
+                    metadata: packages),
                 cache: .init(
-                    vertices: .form(from: consume vertices),
-                    volumes: volumes),
-                repo: repo)
+                    vertices: vertices,
+                    volumes: .init(principal: principal, secondary: secondary)))
         }
 
         public
@@ -68,12 +74,21 @@ extension Unidoc
 extension Unidoc.IdentifiablePageContext:Identifiable
 {
     public final
-    var id:VertexCacheType.ID { self.cache.vertices.id }
+    var id:Table.ID { self.cache.vertices.id }
 }
 extension Unidoc.IdentifiablePageContext:Unidoc.VertexContext
 {
     public final
     var volume:Unidoc.VolumeMetadata { self.cache.volumes.principal }
+
+    public final
+    var repo:Unidoc.PackageRepo? { self.packages.principal?.repo }
+
+    public
+    subscript(package id:Unidoc.Package) -> Unidoc.PackageMetadata?
+    {
+        self.packages.metadata[id]
+    }
 
     public final
     subscript(secondary volume:Unidoc.Edition) -> Unidoc.VolumeMetadata?

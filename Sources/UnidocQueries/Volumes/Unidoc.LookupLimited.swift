@@ -13,6 +13,18 @@ extension Unidoc
 }
 extension Unidoc.LookupLimited:Unidoc.LookupContext
 {
+    public
+    func packages(_ pipeline:inout Mongo.PipelineEncoder,
+        volume:Mongo.AnyKeyPath,
+        vertex:Mongo.AnyKeyPath,
+        output:Mongo.AnyKeyPath)
+    {
+        pipeline[stage: .set] = .init
+        {
+            $0[output] = .init { $0.append(volume / Unidoc.VolumeMetadata[.cell]) }
+        }
+    }
+
     /// Sets the `output` to an empty array.
     public
     func groups(_ pipeline:inout Mongo.PipelineEncoder,

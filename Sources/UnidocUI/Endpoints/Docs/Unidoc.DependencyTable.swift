@@ -1,5 +1,6 @@
 import HTML
 import SemanticVersions
+import Symbols
 
 extension Unidoc
 {
@@ -35,50 +36,41 @@ extension Unidoc.DependencyTable:HTML.OutputStreamable
             {
                 $0[.tr]
                 {
-                    let pinned:Unidoc.VolumeMetadata?
+                    let tags:Symbol.Package?
+                    //  We need to check for the standard library first, as we will not usually
+                    //  have the package metadata for it. The standard library is also special,
+                    //  so we always know its name.
+                    if  dependency.exonym == .swift
+                    {
+                        tags = .swift
+                    }
+                    else if
+                        let pinned:Unidoc.VolumeMetadata.DependencyPin = dependency.pin
+                    {
+                        tags = self.context[package: pinned.edition.package]?.symbol
+                        //  This needs to be here temporarily, until we have re-uplinked all the
+                        //  landing page vertices.
+                            ?? self.context[pinned.edition]?.symbol.package
+                    }
+                    else
+                    {
+                        tags = nil
+                    }
 
-                    if  let volume:Unidoc.Edition = dependency.pin?.linked,
-                        let volume:Unidoc.VolumeMetadata = self.context[volume]
+                    if  let tags:Symbol.Package
                     {
                         //  We link to the tags page here, because we are already
                         //  linking to the specific version in the other column.
-                        pinned = volume
                         $0[.td]
                         {
                             $0[.a]
                             {
-                                $0.href = "\(Unidoc.TagsEndpoint[volume.symbol.package])"
-                            } = "\(volume.symbol.package)"
-                        }
-                    }
-                    /*
-                    else if case _? = dependency.pin
-                    {
-                        //  We were able to pin the dependency to a known edition,
-                        //  but we don't have any documentation for it.
-                        //  The volume’s exonym for that package is likely a valid
-                        //  way to access the page for that package, so we will
-                        //  generate a link to that. We know this because the only
-                        //  way the dependency could have been pinned in the first
-                        //  place is if the exonym was a valid alias for the package
-                        //  at some point in the past.
-                        //
-                        //  This isn’t 100% safe, because the exonym may have been
-                        //  deregistered or usurped by another package. But it is
-                        //  useful enough to be worth the 404 errors.
-                        pinned = nil
-                        $0[.td]
-                        {
-                            $0[.a]
-                            {
-                                $0.href = "\(Unidoc.TagsEndpoint[dependency.exonym])"
+                                $0.href = "\(Unidoc.TagsEndpoint[tags])"
                             } = "\(dependency.exonym)"
                         }
                     }
-                    */
                     else
                     {
-                        pinned = nil
                         $0[.td] = "\(dependency.exonym)"
                     }
 
@@ -94,14 +86,15 @@ extension Unidoc.DependencyTable:HTML.OutputStreamable
                         }
                     }
 
-                    if  let pinned:Unidoc.VolumeMetadata
+                    if  let linked:Unidoc.Edition = dependency.pin?.linked,
+                        let linked:Unidoc.VolumeMetadata = self.context[linked]
                     {
                         $0[.td]
                         {
                             $0[.a]
                             {
-                                $0.href = "\(Unidoc.DocsEndpoint[pinned])"
-                            } = pinned.symbol.version
+                                $0.href = "\(Unidoc.DocsEndpoint[linked])"
+                            } = linked.symbol.version
                         }
                     }
                     else if

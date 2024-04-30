@@ -7,14 +7,15 @@ extension Unidoc.IdentifiablePageContext
 {
     struct Cache
     {
-        var vertices:VertexCacheType
-        var volumes:Unidoc.Volumes
+        private(set)
+        var vertices:Table
+        var volumes:Unidoc.VolumeContext
 
         private
         var uris:[Unidoc.Scalar: String]
 
-        init(vertices:VertexCacheType,
-            volumes:Unidoc.Volumes,
+        init(vertices:Table,
+            volumes:Unidoc.VolumeContext,
             uris:[Unidoc.Scalar: String] = [:])
         {
             self.vertices = vertices

@@ -28,9 +28,6 @@ extension Unidoc
         let volumeOfLatest:VolumeMetadata?
 
         public
-        let repo:PackageRepo?
-
-        public
         let tree:TypeTree?
 
         @inlinable internal
@@ -41,7 +38,6 @@ extension Unidoc
             groups:[AnyGroup],
             volume:VolumeMetadata,
             volumeOfLatest:VolumeMetadata?,
-            repo:PackageRepo?,
             tree:TypeTree?)
         {
             self.matches = matches
@@ -54,7 +50,6 @@ extension Unidoc
             self.volume = volume
             self.volumeOfLatest = volumeOfLatest
 
-            self.repo = repo
             self.tree = tree
         }
     }
@@ -70,7 +65,6 @@ extension Unidoc.PrincipalOutput:Mongo.MasterCodingModel
         case groups = "G"
         case volume = "Z"
         case volumeOfLatest = "R"
-        case repo = "O"
         case tree = "T"
     }
 }
@@ -86,7 +80,6 @@ extension Unidoc.PrincipalOutput:BSONDocumentDecodable
             groups: try bson[.groups].decode(),
             volume: try bson[.volume].decode(),
             volumeOfLatest: try bson[.volumeOfLatest]?.decode(),
-            repo: try bson[.repo]?.decode(),
             tree: try bson[.tree]?.decode())
     }
 }
