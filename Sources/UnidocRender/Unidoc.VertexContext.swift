@@ -1,10 +1,4 @@
-import HTML
-import LexicalPaths
-import MarkdownABI
-import MarkdownRendering
 import Symbols
-import Unidoc
-import UnidocDB
 import UnidocRecords
 
 extension Unidoc
