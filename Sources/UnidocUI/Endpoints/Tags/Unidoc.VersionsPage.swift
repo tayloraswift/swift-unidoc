@@ -113,20 +113,7 @@ extension Unidoc.VersionsPage
                     }
 
                     $0[.dt] = "Owner"
-                    if  let account:Unidoc.Account = repo.account
-                    {
-                        $0[.dd]
-                        {
-                            $0[.a]
-                            {
-                                $0.href = "\(Unidoc.UserPropertyEndpoint[account])"
-                            } = origin.owner
-                        }
-                    }
-                    else
-                    {
-                        $0[.dd] = origin.owner
-                    }
+                    $0[.dd] = origin.owner
 
                     $0[.dt] = "Watchers"
                     $0[.dd] = "\(origin.watchers)"
@@ -151,6 +138,15 @@ extension Unidoc.VersionsPage
                     }
                 }
             }
+        }
+
+        if  let account:Unidoc.Account = self.package.repo?.account
+        {
+            section[.a]
+            {
+                $0.class = "area"
+                $0.href = "\(Unidoc.UserPropertyEndpoint[account])"
+            } = "More packages by this author"
         }
 
         section[.h2] = Heading.tags

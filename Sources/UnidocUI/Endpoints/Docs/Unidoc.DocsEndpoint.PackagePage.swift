@@ -132,10 +132,20 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                             $0[.dd] = repo.topics.joined(separator: ", ")
                         }
 
-                        //  If the repo belongs to a person, show the owner.
-                        if  origin.owner != "apple"
+                        $0[.dt] = "Owner"
+
+                        if  let account:Unidoc.Account = repo.account
                         {
-                            $0[.dt] = "Owner"
+                            $0[.dd]
+                            {
+                                $0[.a]
+                                {
+                                    $0.href = "\(Unidoc.UserPropertyEndpoint[account])"
+                                } = origin.owner
+                            }
+                        }
+                        else
+                        {
                             $0[.dd] = origin.owner
                         }
                     }
