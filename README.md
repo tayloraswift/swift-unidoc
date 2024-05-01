@@ -1,6 +1,6 @@
 <div align="center">
 
-<strong><em><code>unidoc</code></em></strong><br><small><code>0.10</code></small>
+<strong><em><code>unidoc</code></em></strong><br><small><code>0.12</code></small>
 
 [![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/ci.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/ci.yml)
 
