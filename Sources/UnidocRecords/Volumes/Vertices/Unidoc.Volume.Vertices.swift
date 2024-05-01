@@ -16,7 +16,7 @@ extension Unidoc.Volume
         public
         var foreign:[Unidoc.ForeignVertex]
         public
-        var global:Unidoc.GlobalVertex
+        var landing:Unidoc.LandingVertex
 
         @inlinable public
         init(
@@ -26,7 +26,7 @@ extension Unidoc.Volume
             files:[Unidoc.FileVertex],
             products:[Unidoc.ProductVertex],
             foreign:[Unidoc.ForeignVertex],
-            global:Unidoc.GlobalVertex)
+            landing:Unidoc.LandingVertex)
         {
             self.articles = articles
             self.cultures = cultures
@@ -34,7 +34,7 @@ extension Unidoc.Volume
             self.files = files
             self.products = products
             self.foreign = foreign
-            self.global = global
+            self.landing = landing
         }
     }
 }

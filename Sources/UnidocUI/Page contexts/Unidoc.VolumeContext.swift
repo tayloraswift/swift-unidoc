@@ -1,14 +1,9 @@
-import Unidoc
-import UnidocRecords
-
 extension Unidoc
 {
-    @frozen public
-    struct Volumes:Sendable
+    struct VolumeContext:Sendable
     {
-        public
         let principal:Unidoc.VolumeMetadata
-        public private(set)
+        private(set)
         var secondary:[Unidoc.Edition: Unidoc.VolumeMetadata]
 
         private
@@ -21,9 +16,8 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.Volumes
+extension Unidoc.VolumeContext
 {
-    public
     init(principal:Unidoc.VolumeMetadata, secondary:borrowing [Unidoc.VolumeMetadata] = [])
     {
         let secondary:[Unidoc.Edition: Unidoc.VolumeMetadata] = secondary.reduce(into: [:])
@@ -33,11 +27,10 @@ extension Unidoc.Volumes
         self.init(principal: principal, secondary: secondary)
     }
 }
-extension Unidoc.Volumes
+extension Unidoc.VolumeContext
 {
-    @inlinable public
-    subscript(zone:Unidoc.Edition) -> Unidoc.VolumeMetadata?
+    subscript(id:Unidoc.Edition) -> Unidoc.VolumeMetadata?
     {
-        self.principal.id == zone ? self.principal : self.secondary[zone]
+        self.principal.id == id ? self.principal : self.secondary[id]
     }
 }

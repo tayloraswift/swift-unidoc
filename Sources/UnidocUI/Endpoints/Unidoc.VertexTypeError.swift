@@ -8,7 +8,7 @@ extension Unidoc
         case file
         case product
         case foreign
-        case global
+        case landing
     }
 }
 extension Unidoc.VertexTypeError
@@ -24,7 +24,7 @@ extension Unidoc.VertexTypeError
         case .file:     .file
         case .product:  .product
         case .foreign:  .foreign
-        case .global:   .global
+        case .landing:  .landing
         }
     }
 }
@@ -42,7 +42,7 @@ extension Unidoc.VertexTypeError:CustomStringConvertible
         case .file:     name = "file"
         case .product:  name = "product"
         case .foreign:  name = "foreign"
-        case .global:   name = "global"
+        case .landing:  name = "landing"
         }
 
         return "unexpected vertex type (\(name))"

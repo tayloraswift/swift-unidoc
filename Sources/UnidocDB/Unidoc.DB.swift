@@ -63,6 +63,10 @@ extension Unidoc.DB
     var metadata:Metadata { .init(database: self.id) }
 
     @inlinable public
+    var packageDependencies:PackageDependencies { .init(database: self.id) }
+    @inlinable public
+    var editionDependencies:EditionDependencies { .init(database: self.id) }
+    @inlinable public
     var volumes:Volumes { .init(database: self.id) }
     @inlinable public
     var vertices:Vertices { .init(database: self.id) }
@@ -92,6 +96,8 @@ extension Unidoc.DB:Mongo.DatabaseModel
         try await self.sitemaps.setup(with: session)
         try await self.metadata.setup(with: session)
 
+        try await self.packageDependencies.setup(with: session)
+        try await self.editionDependencies.setup(with: session)
         try await self.volumes.setup(with: session)
         try await self.vertices.setup(with: session)
         try await self.groups.setup(with: session)
@@ -474,6 +480,9 @@ extension Unidoc.DB
     func unlink(volume:Unidoc.VolumeMetadata,
         with session:Mongo.Session) async throws
     {
+        try await self.editionDependencies.clear(dependent: volume.id, with: session)
+        try await self.packageDependencies.clear(dependent: volume.id, with: session)
+
         try await self.vertices.clear(range: volume.id, with: session)
         try await self.groups.clear(range: volume.id, with: session)
         try await self.trees.clear(range: volume.id, with: session)
@@ -486,6 +495,24 @@ extension Unidoc.DB
 }
 extension Unidoc.DB
 {
+    private
+    func fillEdges(from metadata:Unidoc.VolumeMetadata, with session:Mongo.Session) async throws
+    {
+        try await self.editionDependencies.insert(dependencies: metadata.dependencies,
+            dependent: metadata.id,
+            with: session)
+
+        guard metadata.latest
+        else
+        {
+            return
+        }
+
+        try await self.packageDependencies.update(dependencies: metadata.dependencies,
+            dependent: metadata.id,
+            with: session)
+    }
+
     private
     func fill(volume:consuming Unidoc.Volume,
         sitemap:Bool,
@@ -512,19 +539,21 @@ extension Unidoc.DB
 
         if  clear
         {
-            try await self.vertices.clear(range: volume.edition, with: session)
-            try await self.groups.clear(range: volume.edition, with: session)
-            try await self.trees.clear(range: volume.edition, with: session)
-
-            try await self.search.delete(id: volume.id, with: session)
-            try await self.volumes.delete(id: volume.edition, with: session)
+            try await self.unlink(volume: volume.metadata, with: session)
         }
         //  If there is a volume generated from a prerelease with the same patch number,
         //  we need to delete that too.
-        if  case .declined? = try await self.unlink(volume: volume.id, with: session)
+        if  let occupant:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume.id,
+                with: session)
         {
             //  We should not clear release versions by name, only by coordinate.
-            return nil
+            guard case nil = occupant.patch
+            else
+            {
+                return nil
+            }
+
+            try await self.unlink(volume: occupant, with: session)
         }
 
         try await self.volumes.insert(some: volume.metadata, with: session)
@@ -535,6 +564,8 @@ extension Unidoc.DB
         try await self.groups.insert(volume.groups,
             realm: volume.metadata.latest ? volume.metadata.realm : nil,
             with: session)
+
+        try await self.fillEdges(from: volume.metadata, with: session)
 
         let delta:Unidoc.SitemapDelta?
         if  volume.metadata.latest
@@ -646,7 +677,14 @@ extension Unidoc.DB
 
         let dependencies:[Unidoc.VolumeMetadata.Dependency] = linker.dependencies(
             pinned: snapshot.pins)
-        let mesh:Unidoc.Linker.Mesh = linker.link()
+
+        let mesh:Unidoc.Linker.Mesh = linker.link(around: .init(id: snapshot.id.global,
+            snapshot: .init(abi: snapshot.metadata.abi,
+                latestManifest: snapshot.metadata.tools,
+                extraManifests: snapshot.metadata.manifests,
+                requirements: snapshot.metadata.requirements,
+                commit: snapshot.metadata.commit?.sha1),
+            packages: snapshot.pins.compactMap(\.?.package)))
 
         linker.status().emit(colors: .enabled)
 

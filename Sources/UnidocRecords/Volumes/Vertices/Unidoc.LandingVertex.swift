@@ -4,24 +4,31 @@ import UnidocAPI
 
 extension Unidoc
 {
+    @available(*, deprecated, renamed: "LandingVertex")
+    public
+    typealias GlobalVertex = LandingVertex
+
     @frozen public
-    struct GlobalVertex:Identifiable, Equatable, Sendable
+    struct LandingVertex:Identifiable, Equatable, Sendable
     {
         public
         let id:Unidoc.Scalar
 
         public
         var snapshot:Unidoc.SnapshotDetails
+        public
+        var packages:[Unidoc.Package]
 
         @inlinable public
-        init(id:Unidoc.Scalar, snapshot:Unidoc.SnapshotDetails)
+        init(id:Unidoc.Scalar, snapshot:Unidoc.SnapshotDetails, packages:[Unidoc.Package])
         {
             self.id = id
             self.snapshot = snapshot
+            self.packages = packages
         }
     }
 }
-extension Unidoc.GlobalVertex:Unidoc.PrincipalVertex
+extension Unidoc.LandingVertex:Unidoc.PrincipalVertex
 {
     @inlinable public
     var overview:Unidoc.Passage? { nil }

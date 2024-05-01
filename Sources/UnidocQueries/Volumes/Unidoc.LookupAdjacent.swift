@@ -23,6 +23,28 @@ extension Unidoc
 extension Unidoc.LookupAdjacent:Unidoc.LookupContext
 {
     public
+    func packages(_ pipeline:inout Mongo.PipelineEncoder,
+        volume:Mongo.AnyKeyPath,
+        vertex:Mongo.AnyKeyPath,
+        output:Mongo.AnyKeyPath)
+    {
+        pipeline[stage: .set] = .init
+        {
+            $0[output] = .expr
+            {
+                $0[.concatArrays]
+                {
+                    $0 { $0.append(volume / Unidoc.VolumeMetadata[.cell]) }
+                    $0.expr
+                    {
+                        $0[.coalesce] = (vertex / Unidoc.AnyVertex[.packages], [] as [Never])
+                    }
+                }
+            }
+        }
+    }
+
+    public
     func groups(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.AnyKeyPath,
         vertex:Mongo.AnyKeyPath,
