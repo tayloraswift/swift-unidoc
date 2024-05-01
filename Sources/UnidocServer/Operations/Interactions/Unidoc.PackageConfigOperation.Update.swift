@@ -36,12 +36,8 @@ extension Unidoc.PackageConfigOperation.Update
         else if
             case "true"? = form["refresh"]
         {
-            //  Right now there is an artificial one second delay to mitigate spam, but it’s not
-            //  clear to me if this is actually beneficial.
-            let now:BSON.Millisecond = .now()
-            let later:BSON.Millisecond = .init(now.value + 1_000)
-
-            self = .expires(later)
+            let already:BSON.Millisecond = .init(0)
+            self = .expires(already)
         }
         else if
             case "request" = form["build"]
