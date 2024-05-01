@@ -9,7 +9,7 @@ extension Unidoc.CanonicalVersion.Target
         case .decl:             "A"
         case .product:          "A"
         case .foreign:          "An"
-        case .global:           "A"
+        case .landing:          "A"
         }
     }
     var demonym:String
@@ -21,7 +21,7 @@ extension Unidoc.CanonicalVersion.Target
         case .decl:             "symbol"
         case .product:          "package product"
         case .foreign:          "extension overlay"
-        case .global:           "package"
+        case .landing:          "package"
         }
     }
     var identity:String
@@ -33,7 +33,7 @@ extension Unidoc.CanonicalVersion.Target
         case .decl:             "signature"
         case .product:          "name"
         case .foreign:          "base declaration"
-        case .global:           "identity"
+        case .landing:          "identity"
         }
     }
 }

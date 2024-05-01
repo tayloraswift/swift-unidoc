@@ -55,8 +55,8 @@ extension Unidoc.CanonicalVersion
             case .foreign(let vertex):
                 target = .foreign(layer[volumeOfLatest, vertex.route])
 
-            case .global:
-                target = .global
+            case .landing:
+                target = .landing
             }
         }
         else
@@ -69,7 +69,7 @@ extension Unidoc.CanonicalVersion
             case .file?, nil:   return   nil
             case .product?:     target = .product(nil)
             case .foreign?:     target = .foreign(nil)
-            case .global?:      target = .global
+            case .landing?:     target = .landing
             }
         }
 
@@ -91,7 +91,7 @@ extension Unidoc.CanonicalVersion
         case .decl(let uri):    uri
         case .product(let uri): uri
         case .foreign(let uri): uri
-        case .global:           self.volume
+        case .landing:          self.volume
         }
     }
 }
@@ -127,7 +127,7 @@ extension Unidoc.CanonicalVersion:HTML.OutputStreamable
             }
         }
 
-        if  case .global = self.target
+        if  case .landing = self.target
         {
             section[.p]
             {

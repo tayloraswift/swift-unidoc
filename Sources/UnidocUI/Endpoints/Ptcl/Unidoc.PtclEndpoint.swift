@@ -56,7 +56,7 @@ extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         case .culture(let vertex):  route = vertex.route
         case .foreign(let vertex):  route = vertex.route
         case .product(let vertex):  route = vertex.route
-        case .global(let vertex):   route = vertex.route
+        case .landing(let vertex):  route = vertex.route
 
         case .decl(let vertex):
             guard case .protocol = vertex.phylum

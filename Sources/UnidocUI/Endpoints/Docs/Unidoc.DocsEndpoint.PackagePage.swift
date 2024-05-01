@@ -17,13 +17,22 @@ extension Unidoc.DocsEndpoint
     struct PackagePage
     {
         let cone:Unidoc.Cone
-        let apex:Unidoc.GlobalVertex
+        let apex:Unidoc.LandingVertex
 
-        init(cone:Unidoc.Cone, apex:Unidoc.GlobalVertex)
+        init(cone:Unidoc.Cone, apex:Unidoc.LandingVertex)
         {
             self.cone = cone
             self.apex = apex
         }
+    }
+}
+extension Unidoc.DocsEndpoint.PackagePage
+{
+    /// This might be different from the volume symbol if the package has been renamed.
+    private
+    var tags:Symbol.Package
+    {
+        self.context.packages.principal?.symbol ?? self.volume.symbol.package
     }
 }
 extension Unidoc.DocsEndpoint.PackagePage:Unidoc.RenderablePage
@@ -58,6 +67,8 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
+        let tags:URI = Unidoc.TagsEndpoint[self.tags]
+
         main[.section]
         {
             $0.class = "introduction"
@@ -78,12 +89,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 
                     $0[.span, { $0.class = "jump" }]
                     {
-                        $0[.a]
-                        {
-                            //  FIXME: this could be wrong if the package is renamed.
-                            //  We should set this from the repo metadata instead.
-                            $0.href = "\(Unidoc.TagsEndpoint[self.volume.symbol.package])"
-                        } = "all tags"
+                        $0[.a] { $0.href = "\(tags)" } = "all tags"
                     }
                 }
             }
@@ -138,7 +144,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                 $0[.a]
                 {
                     $0.class = "area"
-                    $0.href = "\(Unidoc.TagsEndpoint[self.volume.symbol.package])"
+                    $0.href = "\(tags)"
                 } = "Repo details and more versions"
             }
 

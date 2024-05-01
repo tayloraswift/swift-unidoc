@@ -53,7 +53,7 @@ extension Unidoc.RedirectEndpoint:HTTP.ServerEndpoint
         case .file?, nil:           nil
         case .product(let vertex)?: Unidoc.DocsEndpoint[output.volume, vertex.route]
         case .foreign(let vertex)?: Unidoc.DocsEndpoint[output.volume, vertex.route]
-        case .global?:              Unidoc.DocsEndpoint[output.volume]
+        case .landing?:             Unidoc.DocsEndpoint[output.volume]
         }
 
         if  let redirect:URI
@@ -63,10 +63,10 @@ extension Unidoc.RedirectEndpoint:HTTP.ServerEndpoint
         else
         {
             let context:Unidoc.PeripheralPageContext = .init(canonical: nil,
-                cache: .init(
-                    vertices: .init(secondary: output.matches),
-                    volumes: .init(principal: output.volume)),
-                repo: nil)
+                principal: output.volume,
+                secondary: [],
+                packages: [],
+                vertices: .init(secondary: output.matches))
 
             let display:Unidoc.DocsEndpoint.NotFoundPage = .init(context, sidebar: nil)
             //  We return 410 Gone instead of 404 Not Found so that search engines and

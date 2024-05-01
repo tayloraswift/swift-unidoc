@@ -14,11 +14,11 @@ extension Unidoc.StatsEndpoint
         let sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>?
 
         private
-        let vertex:Unidoc.GlobalVertex
+        let vertex:Unidoc.LandingVertex
 
         init(_ context:Unidoc.RelativePageContext,
             sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>?,
-            vertex:Unidoc.GlobalVertex)
+            vertex:Unidoc.LandingVertex)
         {
             self.context = context
             self.sidebar = sidebar

@@ -1,6 +1,7 @@
 import BSON
 import MongoQL
 import UnidocDB
+import UnidocRecords
 
 extension Unidoc
 {

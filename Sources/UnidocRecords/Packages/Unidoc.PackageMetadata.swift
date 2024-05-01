@@ -1,11 +1,6 @@
 import BSON
-import Durations
-import MongoQL
 import SymbolGraphs
 import Symbols
-import Unidoc
-import UnidocRecords
-import UnixTime
 
 extension Unidoc
 {
@@ -67,61 +62,6 @@ extension Unidoc
 }
 extension Unidoc.PackageMetadata
 {
-    mutating
-    func crawled(repo:consuming Unidoc.PackageRepo)
-    {
-        //  Don’t wipe the fetched time.
-        repo.fetched = self.repo?.fetched
-
-        schedule:
-        if  let interval:Milliseconds = repo.crawlingIntervalTarget(
-                dormant: repo.dormant(by: .millisecond(repo.crawled.value)),
-                hidden: self.hidden,
-                realm: self.realm)
-        {
-            var target:BSON.Millisecond = repo.crawled.advanced(by: interval)
-
-            //  If the repo is already scheduled to have its tags read, we should not keep
-            //  postponing that.
-            if  let expires:BSON.Millisecond = self.repo?.expires,
-                    expires < target
-            {
-                target = expires
-            }
-
-            //  We always need to set this because the blank repo instances lack it.
-            repo.expires = target
-        }
-        else
-        {
-            repo.expires = nil
-        }
-
-        self.repo = repo
-    }
-
-    public mutating
-    func fetched(repo:consuming Unidoc.PackageRepo)
-    {
-        repo.fetched = repo.crawled
-
-        if  let interval:Milliseconds = repo.crawlingIntervalTarget(
-                dormant: repo.dormant(by: .millisecond(repo.crawled.value)),
-                hidden: self.hidden,
-                realm: self.realm)
-        {
-            repo.expires = repo.crawled.advanced(by: interval)
-        }
-        else
-        {
-            repo.expires = nil
-        }
-
-        self.repo = repo
-    }
-}
-extension Unidoc.PackageMetadata:Mongo.MasterCodingModel
-{
     @frozen public
     enum CodingKey:String, Sendable
     {
@@ -158,7 +98,7 @@ extension Unidoc.PackageMetadata:BSONDocumentEncodable
 }
 extension Unidoc.PackageMetadata:BSONDocumentDecodable
 {
-    @inlinable public
+    public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
@@ -169,12 +109,4 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
             platformPreference: try bson[.platformPreference]?.decode(),
             repo: try bson[.repo]?.decode())
     }
-}
-extension Unidoc.PackageMetadata
-{
-    // public
-    // var crawlingIntervalTarget:Milliseconds?
-    // {
-    //     self.repo?.crawlingIntervalTarget(hidden: self.hidden, realm: self.realm)
-    // }
 }

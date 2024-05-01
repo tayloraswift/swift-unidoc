@@ -112,7 +112,7 @@ extension Unidoc.Linker
 extension Unidoc.Linker
 {
     public mutating
-    func link() -> Mesh
+    func link(around landing:consuming Unidoc.LandingVertex) -> Mesh
     {
         var tables:Tables = .init(context: consume self)
 
@@ -127,7 +127,7 @@ extension Unidoc.Linker
 
         self = (consume tables).context
 
-        return .init(
+        return .init(around: landing,
             conformances: conformances,
             extensions: extensions,
             products: products,

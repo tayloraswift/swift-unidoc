@@ -1,9 +1,10 @@
 import UnidocRecords
+import UnidocRender
 
 extension Unidoc
 {
     @frozen public
-    struct SecondaryOnly
+    struct PeripheralVertices
     {
         @usableFromInline
         var secondary:[Unidoc.Scalar: AnyVertex]
@@ -15,7 +16,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.SecondaryOnly
+extension Unidoc.PeripheralVertices
 {
     public
     init(secondary:borrowing [Unidoc.AnyVertex])
@@ -23,24 +24,18 @@ extension Unidoc.SecondaryOnly
         self.init(secondary: secondary.reduce(into: [:]) { $0[$1.id] = $1 })
     }
 }
-extension Unidoc.SecondaryOnly:Identifiable
+extension Unidoc.PeripheralVertices:Identifiable
 {
     @inlinable public
     var id:Never? { nil }
 }
-extension Unidoc.SecondaryOnly:Unidoc.VertexCache
+extension Unidoc.PeripheralVertices:Unidoc.VertexContextTable
 {
-    public static
-    func form(from vertices:consuming Unidoc.Vertices) -> Self
+    @inlinable public
+    init(principal:Unidoc.AnyVertex, secondary:borrowing [Unidoc.AnyVertex])
     {
-        let principal:Unidoc.AnyVertex
-        var secondary:[Unidoc.Scalar: Unidoc.AnyVertex]
-
-        (principal, secondary) = { ($0.principal, $0.secondary) } (consume vertices)
-
-        secondary[principal.id] = principal
-
-        return .init(secondary: secondary)
+        self.init(secondary: secondary)
+        self.secondary[principal.id] = principal
     }
 
     @inlinable public

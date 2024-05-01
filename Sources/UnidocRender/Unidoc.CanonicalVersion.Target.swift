@@ -10,7 +10,7 @@ extension Unidoc.CanonicalVersion
         case decl(URI?)
         case product(URI?)
         case foreign(URI?)
-        case global
+        case landing
     }
 }
 extension Unidoc.CanonicalVersion.Target
@@ -25,7 +25,7 @@ extension Unidoc.CanonicalVersion.Target
         case .decl(let uri):    uri
         case .product(let uri): uri
         case .foreign(let uri): uri
-        case .global:           nil
+        case .landing:          nil
         }
     }
 }

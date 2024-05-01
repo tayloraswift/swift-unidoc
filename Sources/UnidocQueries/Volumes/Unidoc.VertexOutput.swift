@@ -1,5 +1,6 @@
 import BSON
 import MongoQL
+import UnidocDB
 import UnidocRecords
 
 extension Unidoc
@@ -13,15 +14,19 @@ extension Unidoc
         let vertices:[Unidoc.AnyVertex]
         public
         let volumes:[Unidoc.VolumeMetadata]
+        public
+        let packages:[Unidoc.PackageMetadata]
 
         @inlinable public
         init(principal:PrincipalOutput?,
             vertices:[Unidoc.AnyVertex],
-            volumes:[Unidoc.VolumeMetadata])
+            volumes:[Unidoc.VolumeMetadata],
+            packages:[Unidoc.PackageMetadata])
         {
             self.principal = principal
             self.vertices = vertices
             self.volumes = volumes
+            self.packages = packages
         }
     }
 }
@@ -33,6 +38,7 @@ extension Unidoc.VertexOutput:Mongo.MasterCodingModel
         case principal
         case vertices
         case volumes
+        case packages
     }
 }
 extension Unidoc.VertexOutput:BSONDocumentDecodable
@@ -43,6 +49,7 @@ extension Unidoc.VertexOutput:BSONDocumentDecodable
         self.init(
             principal: try bson[.principal]?.decode(),
             vertices: try bson[.vertices].decode(),
-            volumes: try bson[.volumes].decode())
+            volumes: try bson[.volumes].decode(),
+            packages: try bson[.packages].decode())
     }
 }

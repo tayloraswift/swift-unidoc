@@ -4,7 +4,7 @@ import UnidocRecords
 extension Unidoc
 {
     public final
-    class AbsolutePageContext:IdentifiablePageContext<Vertices>
+    class AbsolutePageContext:IdentifiablePageContext<IdentifiableVertices>
     {
         public override
         subscript(vertex id:Unidoc.Scalar) -> Unidoc.LinkReference<Unidoc.AnyVertex>?

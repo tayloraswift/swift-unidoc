@@ -107,29 +107,6 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
             }
         }
 
-        //  Lookup the repo-level information.
-        pipeline[stage: .lookup] = .init
-        {
-            $0[.from] = Unidoc.DB.Packages.name
-            $0[.localField] = Unidoc.PrincipalOutput[.volume] / Unidoc.VolumeMetadata[.cell]
-            $0[.foreignField] = Unidoc.PackageMetadata[.id]
-            $0[.as] = Unidoc.PrincipalOutput[.repo]
-        }
-
-        //  Unbox single-element array and access element field.
-        pipeline[stage: .set] = .init
-        {
-            $0[Unidoc.PrincipalOutput[.repo]] = .expr
-            {
-                $0[.first] = Unidoc.PrincipalOutput[.repo]
-            }
-        }
-        pipeline[stage: .set] = .init
-        {
-            $0[Unidoc.PrincipalOutput[.repo]] =
-                Unidoc.PrincipalOutput[.repo] / Unidoc.PackageMetadata[.repo]
-        }
-
         //  Look up the vertex in the volume of the latest stable release of its home package.
         //  The lookup correlates verticies by symbol.
         //
@@ -240,7 +217,6 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                         .vertex,
                         .vertexInLatest,
                         .groups,
-                        .repo,
                     ]
                     {
                         $0[Unidoc.PrincipalOutput[key]] = true
@@ -379,7 +355,31 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 $0[stage: .replaceWith] = results
                 $0[stage: .project] = .init(with: Unidoc.VolumeMetadata.names(_:))
             }
+
+            //  This really does need to be written with two unwinds, a naïve `$in` lookup
+            //  causes a collection scan for some reason.
+            $0[Unidoc.VertexOutput[.packages]] = .init
+            {
+                let id:Mongo.AnyKeyPath = "_id"
+
+                self.lookup.packages(&$0,
+                    volume: Unidoc.PrincipalOutput[.volume],
+                    vertex: Unidoc.PrincipalOutput[.vertex],
+                    output: id)
+
+                $0[stage: .unwind] = id
+                $0[stage: .lookup] = .init
+                {
+                    $0[.from] = Unidoc.DB.Packages.name
+                    $0[.localField] = id
+                    $0[.foreignField] = Unidoc.PackageMetadata[.id]
+                    $0[.as] = id
+                }
+                $0[stage: .unwind] = id
+                $0[stage: .replaceWith] = id
+            }
         }
+
         //  Unbox single-element arrays.
         pipeline[stage: .set] = .init
         {

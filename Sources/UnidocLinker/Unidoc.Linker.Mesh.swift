@@ -42,7 +42,7 @@ extension Unidoc.Linker
 }
 extension Unidoc.Linker.Mesh
 {
-    init(
+    init(around landing:consuming Unidoc.LandingVertex,
         conformances:consuming Unidoc.Linker.Table<Unidoc.Conformers>,
         extensions:consuming Unidoc.Linker.Table<Unidoc.Extension>,
         products:consuming [Unidoc.ProductVertex],
@@ -67,11 +67,6 @@ extension Unidoc.Linker.Mesh
             mapper.add(vertex)
         }
 
-        var snapshot:Unidoc.SnapshotDetails = .init(abi: linker.current.metadata.abi,
-            latestManifest: linker.current.metadata.tools,
-            extraManifests: linker.current.metadata.manifests,
-            requirements: linker.current.metadata.requirements,
-            commit: linker.current.metadata.commit?.sha1)
         var foreign:[Unidoc.ForeignVertex] = []
 
         var census:Unidoc.Census.Enumerators = .init(cultures: cultures.count)
@@ -187,7 +182,7 @@ extension Unidoc.Linker.Mesh
         }
 
         //  Integrate stats.
-        snapshot.census = .init(from: census.combined)
+        landing.snapshot.census = .init(from: census.combined)
         for c:Int in cultures.indices
         {
             cultures[c].census = .init(from: census.cultures[c])
@@ -202,7 +197,7 @@ extension Unidoc.Linker.Mesh
                 files: files,
                 products: copy products,
                 foreign: foreign,
-                global: .init(id: linker.current.id.global, snapshot: snapshot)),
+                landing: landing),
             groups: groups,
             index: index,
             trees: trees,
