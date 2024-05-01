@@ -37,7 +37,7 @@ extension Unidoc.UserBanner:HTML.OutputStreamable
                 $0[.span]
                 {
                     $0.class = "placeholder"
-                } = "This user has not verified her GitHub account!"
+                } = "This user has not verified her/his GitHub account!"
             }
         }
 
