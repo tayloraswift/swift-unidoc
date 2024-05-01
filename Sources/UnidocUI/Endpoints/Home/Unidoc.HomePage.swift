@@ -90,7 +90,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                             $0[.a]
                             {
                                 $0.href = "/docs/swift"
-                            } = "Standard Library Docs"
+                            } = "Standard library docs"
                         }
 
                         $0[.li]
@@ -99,6 +99,22 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                             {
                                 $0.href = "/docs/swift-package-manager/packagedescription"
                             } = "SwiftPM PackageDescription"
+                        }
+
+                        $0[.li]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "/docs/swift-syntax/swiftsyntax"
+                            } = "SwiftSyntax docs"
+                        }
+
+                        $0[.li]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "/help/self-serve"
+                            } = "Self-serve help"
                         }
                     }
                 }
