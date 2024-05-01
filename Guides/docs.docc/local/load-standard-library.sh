@@ -1,1 +1,1 @@
-swift run -c release ssgc swift
+swift run -c release unidoc-build local swift

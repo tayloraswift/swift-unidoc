@@ -87,7 +87,7 @@ A fresh Unidoc database contains no documentation. Let’s build some now.
 
 The documentation compiler lives in this repository, and is packaged as a normal SwiftPM executable target.
 
-To invoke the compiler, run the `ssgc` tool and pass it a single argument, which is the name of the package you want to build documentation for. In our case, the “package” is `swift`, which is a special name identifying the standard library itself.
+To invoke the compiler, run the `unidoc-build` tool and pass it the name of the package you want to build documentation for. In our case, the “package” is `swift`, which is a special name identifying the standard library itself.
 
 @Code(file: load-standard-library.sh, title: load-standard-library.sh)
 
@@ -123,11 +123,11 @@ git clone https://github.com/apple/swift-nio
 
 **Where** you clone the repository is important, because you will need to tell Unidoc where to find the project. In this example, we cloned the repository inside a directory called `/swift`, which is a plausible place to store Git repositories in a devcontainer.
 
-Next, you can try building `swift-nio` with `ssgc`, specifying the path to the search directory (`/swift`) with the `-I` option.
+Next, you can try building `swift-nio` with `unidoc-build`, specifying the path to the search directory (`/swift`) with the `-I` option.
 
 @Code(file: load-swift-nio.sh, title: load-swift-nio.sh)
 
-Unidoc will launch a `swift build` process, which could take a few minutes to build the package. When the build completes, it will then compile, upload, and link the documentation. Because the documentation is local, it will have the version number `0.0.0`, and it will not show up on the homepage. You can view it by navigating directly to [`localhost:8443/docs/swift-nio`](https://localhost:8443/docs/swift-nio).
+Unidoc will launch a `swift build` process, which could take a few minutes to build the package. When the build completes, it will then compile, upload, and link the documentation. Because the documentation is local, it will have the version number `__max`, and it will not show up on the homepage. You can view it by navigating directly to [`localhost:8443/docs/swift-nio`](https://localhost:8443/docs/swift-nio).
 
 Congratulations! You have successfully set up a local Unidoc server and previewed some documentation for a local project.
 
