@@ -1,3 +1,9 @@
+#if canImport(Glibc)
+import Glibc
+#elseif canImport(Darwin)
+import Darwin
+#endif
+
 import ArgumentParsing
 import HTTP
 import SymbolGraphs
@@ -57,6 +63,7 @@ extension Unidoc.Build
 
         if  command == "compile"
         {
+            setlinebuf(stdout)
             SSGC.main(arguments: arguments)
             return
         }
