@@ -8,10 +8,7 @@ let package:Package = .init(
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
         .executable(name: "unidoc-build", targets: ["unidoc-build"]),
-        .executable(name: "unidoc-deploy", targets: ["unidoc-deploy"]),
         .executable(name: "unidoc-preview", targets: ["unidoc-preview"]),
-        .executable(name: "swiftinit", targets: ["swiftinit"]),
-        .executable(name: "swiftinit-relay", targets: ["swiftinit-relay"]),
 
         .library(name: "guides", targets: ["guides"]),
 
@@ -109,7 +106,7 @@ let package:Package = .init(
             from: "1.1.0")),
 
         .package(url: "https://github.com/apple/swift-nio",
-            from: "2.64.0"),
+            from: "2.65.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl",
             from: "2.26.0"),
 
@@ -152,34 +149,10 @@ let package:Package = .init(
                 .target(name: "UnidocRecords"),
             ]),
 
-        .executableTarget(name: "unidoc-deploy",
-            dependencies: [
-                .target(name: "ArgumentParsing"),
-                .target(name: "S3Client"),
-                .target(name: "SemanticVersions"),
-                .target(name: "System"),
-                .target(name: "UnidocAssets"),
-                .target(name: "UnidocAssets_System"),
-                .target(name: "UnidocUI"),
-            ]),
-
         .executableTarget(name: "unidoc-preview",
             dependencies: [
                 .target(name: "ArgumentParsing"),
                 .target(name: "UnidocServer"),
-            ]),
-
-        .executableTarget(name: "swiftinit",
-            dependencies: [
-                .target(name: "ArgumentParsing"),
-                .target(name: "UnidocServer"),
-            ]),
-
-        .executableTarget(name: "swiftinit-relay",
-            dependencies: [
-                .target(name: "ArgumentParsing"),
-                .product(name: "NIOCore", package: "swift-nio"),
-                .product(name: "NIOPosix", package: "swift-nio"),
             ]),
 
 
