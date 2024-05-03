@@ -13,14 +13,14 @@ extension Unidoc.DB
         else
         {
             return try await self.uplink(edition,
-                loader: nil as Swiftinit.GraphLoader?,
+                loader: nil as AWS.S3.GraphLoader?,
                 with: session)
         }
 
         return try await s3.connect
         {
             try await self.uplink(edition,
-                loader: Swiftinit.GraphLoader.init(s3: $0),
+                loader: AWS.S3.GraphLoader.init(s3: $0),
                 with: session)
         }
     }

@@ -19,7 +19,7 @@ extension GitHub
         private
         var reposIndexed:Int
         private
-        var buffer:Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>
+        var buffer:Unidoc.EventBuffer<Event>
 
         var error:(any Error)?
 
@@ -44,7 +44,7 @@ extension GitHub.RepoTelescope:GitHub.Crawler
             windowsCrawled: self.windowsCrawled,
             reposCrawled: self.reposCrawled,
             reposIndexed: self.reposIndexed,
-            buffer: self.buffer)
+            events: .init(from: self.buffer))
     }
 
     mutating
@@ -98,8 +98,7 @@ extension GitHub.RepoTelescope:GitHub.Crawler
                 with: session)
             {
             case (_, new: true):
-                self.buffer.push(
-                    event: GitHub.RepoTelescope.DiscoveryEvent.init(package: symbol))
+                self.buffer.push(event: .discovery(.init(package: symbol)))
                 self.reposIndexed += 1
                 fallthrough
 

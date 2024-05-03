@@ -1,8 +1,11 @@
 import FNV1
 import HTML
+import UnidocAPI
+import UnidocRecords
 
-extension Swiftinit.Linker
+extension Unidoc.GraphLinker
 {
+    @frozen public
     enum Event:Unidoc.CollectionEvent, Sendable
     {
         case uplinked(Unidoc.UplinkStatus)
@@ -12,9 +15,9 @@ extension Swiftinit.Linker
         case caught(any Error)
     }
 }
-extension Swiftinit.Linker.Event:HTML.OutputStreamable
+extension Unidoc.GraphLinker.Event:HTML.OutputStreamable
 {
-    static
+    public static
     func += (div:inout HTML.ContentEncoder, self:Self)
     {
         switch self

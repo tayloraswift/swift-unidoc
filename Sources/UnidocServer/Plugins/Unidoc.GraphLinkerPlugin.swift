@@ -1,15 +1,17 @@
 import S3
 import S3Client
 import UnidocDB
-import UnidocServer
 
-extension Swiftinit
+extension Unidoc
 {
-    struct LinkerPlugin:Sendable
+    public
+    struct GraphLinkerPlugin:Sendable
     {
-        let status:AtomicPointer<Unidoc.CollectionEventsPage<Linker>>
+        public
+        let status:AtomicPointer<CollectionEventsPage<GraphLinker>>
         let bucket:AWS.S3.Bucket?
 
+        public
         init(bucket:AWS.S3.Bucket?)
         {
             self.status = .init()
@@ -17,15 +19,17 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.LinkerPlugin:Identifiable
+extension Unidoc.GraphLinkerPlugin:Identifiable
 {
+    @inlinable public
     var id:String { "linker" }
 }
-extension Swiftinit.LinkerPlugin:Unidoc.ServerPlugin
+extension Unidoc.GraphLinkerPlugin:Unidoc.ServerPlugin
 {
+    public
     func run(in context:Unidoc.ServerPluginContext, with db:Unidoc.Database) async throws
     {
-        var linker:Swiftinit.Linker = .init(updating: self.status, graphs: self.bucket.map
+        var linker:Unidoc.GraphLinker = .init(updating: self.status, graphs: self.bucket.map
         {
             .init(threads: context.threads, niossl: context.niossl, bucket: $0)
         })

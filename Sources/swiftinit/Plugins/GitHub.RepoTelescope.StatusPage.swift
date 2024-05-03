@@ -12,36 +12,20 @@ extension GitHub.RepoTelescope
         let windowsCrawled:Int
         let reposCrawled:Int
         let reposIndexed:Int
-        let entries:[Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>.Entry]
+        let events:Unidoc.EventList<Event>
 
-        private
         init(error:(any Error)?,
             windowsCrawled:Int,
             reposCrawled:Int,
             reposIndexed:Int,
-            entries:[Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>.Entry])
+            events:Unidoc.EventList<Event>)
         {
             self.error = error
             self.windowsCrawled = windowsCrawled
             self.reposCrawled = reposCrawled
             self.reposIndexed = reposIndexed
-            self.entries = entries
+            self.events = events
         }
-    }
-}
-extension GitHub.RepoTelescope.StatusPage
-{
-    init(error:(any Error)?,
-        windowsCrawled:Int,
-        reposCrawled:Int,
-        reposIndexed:Int,
-        buffer:borrowing Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>)
-    {
-        self.init(error: error,
-            windowsCrawled: windowsCrawled,
-            reposCrawled: reposCrawled,
-            reposIndexed: reposIndexed,
-            entries: [_].init(buffer.entries))
     }
 }
 extension GitHub.RepoTelescope.StatusPage:Unidoc.RenderablePage, Unidoc.DynamicPage
@@ -53,8 +37,6 @@ extension GitHub.RepoTelescope.StatusPage:Unidoc.AdministrativePage
     public
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        let now:UnixInstant = .now()
-
         main[.h1] = "GitHub repo telescope"
 
         if  let error:any Error = self.error
@@ -70,20 +52,7 @@ extension GitHub.RepoTelescope.StatusPage:Unidoc.AdministrativePage
         main[.section, { $0.class = "events" }]
         {
             $0[.h2] = "Events"
-            $0[.ol, { $0.class = "events" }]
-            {
-                for entry:Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>.Entry
-                    in self.entries.reversed()
-                {
-                    $0[.li]
-                    {
-                        $0[.h3] = type(of: entry.event).name
-                        $0[.p] = entry.time(now: now)
-
-                        $0[.dl] { $0 *= entry.event }
-                    }
-                }
-            }
+            $0[.ol] { $0.class = "events" } = self.events
         }
     }
 }

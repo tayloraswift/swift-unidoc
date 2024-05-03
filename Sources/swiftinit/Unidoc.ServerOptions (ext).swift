@@ -17,8 +17,9 @@ extension Unidoc.ServerOptions
         }
         else
         {
+            list.append(Unidoc.GraphLinkerPlugin.init(bucket: self.bucket.graphs))
+
             list.append(Swiftinit.AirdropPlugin.init())
-            list.append(Swiftinit.LinkerPlugin.init(bucket: self.bucket.graphs))
             list.append(Swiftinit.LinterPlugin.init())
         }
 

@@ -32,7 +32,7 @@ extension Swiftinit.Linter:Unidoc.CollectionVisitor
 
     func publish()
     {
-        self.status.replace(value: .init(from: self.buffer))
+        self.status.replace(value: .init(list: .init(from: self.buffer)))
     }
 
     mutating

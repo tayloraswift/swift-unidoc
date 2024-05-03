@@ -3,13 +3,15 @@ import UnixTime
 
 extension Unidoc
 {
+    @frozen public
     struct EventBuffer<Event>
     {
-        private(set)
+        @usableFromInline
         var entries:Deque<Entry>
-        private
+        @usableFromInline
         let limit:Int
 
+        @inlinable public
         init(minimumCapacity limit:Int)
         {
             self.entries = .init(minimumCapacity: limit)
@@ -22,7 +24,7 @@ extension Unidoc.EventBuffer:Sendable where Event:Sendable
 }
 extension Unidoc.EventBuffer
 {
-    mutating
+    @inlinable public mutating
     func push(event:Event)
     {
         if  self.entries.count == self.limit

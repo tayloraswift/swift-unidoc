@@ -2,9 +2,9 @@ import GitHubAPI
 import HTML
 import Symbols
 
-extension GitHub.RepoTelescope
+extension GitHub.RepoTelescope.Event
 {
-    struct DiscoveryEvent
+    struct Discovery:Sendable
     {
         let package:Symbol.Package
 
@@ -14,12 +14,7 @@ extension GitHub.RepoTelescope
         }
     }
 }
-extension GitHub.RepoTelescope.DiscoveryEvent:Unidoc.ServerPluginEvent
-{
-    static
-    var name:String { "Discovered package" }
-}
-extension GitHub.RepoTelescope.DiscoveryEvent:HTML.OutputStreamable
+extension GitHub.RepoTelescope.Event.Discovery:HTML.OutputStreamable
 {
     static
     func += (dl:inout HTML.ContentEncoder, self:Self)
