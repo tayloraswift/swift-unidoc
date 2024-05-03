@@ -7,8 +7,9 @@ let package:Package = .init(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
-        .executable(name: "unidoc-deploy", targets: ["unidoc-deploy"]),
         .executable(name: "unidoc-build", targets: ["unidoc-build"]),
+        .executable(name: "unidoc-deploy", targets: ["unidoc-deploy"]),
+        .executable(name: "unidoc-preview", targets: ["unidoc-preview"]),
         .executable(name: "swiftinit", targets: ["swiftinit"]),
         .executable(name: "swiftinit-relay", targets: ["swiftinit-relay"]),
 
@@ -142,6 +143,15 @@ let package:Package = .init(
                 .target(name: "SymbolGraphBuilder"),
             ]),
 
+        .executableTarget(name: "unidoc-build",
+            dependencies: [
+                .target(name: "ArgumentParsing"),
+                .target(name: "HTTPClient"),
+                .target(name: "SymbolGraphBuilder"),
+                .target(name: "UnidocRecords_LZ77"),
+                .target(name: "UnidocRecords"),
+            ]),
+
         .executableTarget(name: "unidoc-deploy",
             dependencies: [
                 .target(name: "ArgumentParsing"),
@@ -153,13 +163,10 @@ let package:Package = .init(
                 .target(name: "UnidocUI"),
             ]),
 
-        .executableTarget(name: "unidoc-build",
+        .executableTarget(name: "unidoc-preview",
             dependencies: [
                 .target(name: "ArgumentParsing"),
-                .target(name: "HTTPClient"),
-                .target(name: "SymbolGraphBuilder"),
-                .target(name: "UnidocRecords_LZ77"),
-                .target(name: "UnidocRecords"),
+                .target(name: "UnidocServer"),
             ]),
 
         .executableTarget(name: "swiftinit",

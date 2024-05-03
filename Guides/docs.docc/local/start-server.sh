@@ -1,2 +1,2 @@
 swift --version
-swift run -c release swiftinit
+swift run -c release unidoc-preview
