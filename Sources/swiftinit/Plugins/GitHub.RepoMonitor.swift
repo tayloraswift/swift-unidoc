@@ -21,7 +21,7 @@ extension GitHub
         private
         var tagsUpdated:Int
         private
-        var buffer:Unidoc.EventBuffer<any Unidoc.ServerPluginEvent>
+        var buffer:Unidoc.EventBuffer<Event>
 
         var error:(any Error)?
 
@@ -44,7 +44,7 @@ extension GitHub.RepoMonitor:GitHub.Crawler
             reposCrawled: self.reposCrawled,
             tagsCrawled: self.tagsCrawled,
             tagsUpdated: self.tagsUpdated,
-            buffer: self.buffer)
+            events: .init(from: self.buffer))
     }
 
     mutating
@@ -78,10 +78,10 @@ extension GitHub.RepoMonitor:GitHub.Crawler
             let now:BSON.Millisecond = .now()
 
             self.reposCrawled += 1
-            self.buffer.push(event: CrawlingEvent.init(package: package.symbol,
+            self.buffer.push(event: .crawl(.init(package: package.symbol,
                 sinceExpected: old.expires?.duration(to: now),
                 sinceActual: old.crawled.duration(to: now),
-                repo: response.repo))
+                repo: response.repo)))
 
             if  let repo:GitHub.Repo = response.repo
             {
@@ -102,7 +102,7 @@ extension GitHub.RepoMonitor:GitHub.Crawler
 
             //  Import tags in chronological order. The last tag in the GraphQL response
             //  is the most recent.
-            var indexed:IndexTagsEvent = .init(package: package.symbol)
+            var event:Event.Fetch = .init(package: package.symbol)
             for tag:GitHub.Tag in response.tags
             {
                 guard
@@ -121,27 +121,27 @@ extension GitHub.RepoMonitor:GitHub.Crawler
                     with: session)
                 {
                 case (let edition, new: true):
-                    indexed.updated += 1
+                    event.updated += 1
 
                     switch version.suffix
                     {
-                    case .prerelease:   indexed.prerelease = edition
-                    case .release:      indexed.release = edition
+                    case .prerelease:   event.prerelease = edition
+                    case .release:      event.release = edition
                     }
 
                     fallthrough
 
                 case (_, new: false):
-                    indexed.crawled += 1
+                    event.crawled += 1
                 }
             }
 
-            self.tagsCrawled += indexed.crawled
-            self.tagsUpdated += indexed.updated
+            self.tagsCrawled += event.crawled
+            self.tagsUpdated += event.updated
 
-            if  indexed.crawled > 0
+            if  event.crawled > 0
             {
-                self.buffer.push(event: indexed)
+                self.buffer.push(event: .fetch(event))
             }
 
             if  package.hidden
@@ -149,7 +149,7 @@ extension GitHub.RepoMonitor:GitHub.Crawler
                 continue
             }
 
-            if  let interesting:String = (indexed.release ?? indexed.prerelease)?.name
+            if  let interesting:String = (event.release ?? event.prerelease)?.name
             {
                 let activity:Unidoc.DB.RepoFeed.Activity = .init(discovered: now,
                     package: package.symbol,

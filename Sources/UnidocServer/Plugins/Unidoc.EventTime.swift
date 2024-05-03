@@ -1,14 +1,19 @@
+import DynamicTime
 import HTML
 import UnidocUI
 import UnixTime
 
 extension Unidoc
 {
+    @frozen @usableFromInline
     struct EventTime
     {
+        @usableFromInline
         let components:Timestamp.Components
+        @usableFromInline
         let dynamicAge:Duration.DynamicFormat
 
+        @inlinable
         init(components:Timestamp.Components, dynamicAge:Duration.DynamicFormat)
         {
             self.components = components
@@ -18,7 +23,7 @@ extension Unidoc
 }
 extension Unidoc.EventTime:HTML.OutputStreamable
 {
-    static
+    @inlinable static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
         html[.time]

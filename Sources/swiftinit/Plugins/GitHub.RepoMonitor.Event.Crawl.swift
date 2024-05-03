@@ -4,9 +4,9 @@ import HTML
 import UnidocUI
 import Symbols
 
-extension GitHub.RepoMonitor
+extension GitHub.RepoMonitor.Event
 {
-    struct CrawlingEvent
+    struct Crawl
     {
         let package:Symbol.Package
 
@@ -26,12 +26,7 @@ extension GitHub.RepoMonitor
         }
     }
 }
-extension GitHub.RepoMonitor.CrawlingEvent:Unidoc.ServerPluginEvent
-{
-    static
-    var name:String { "Repo crawled" }
-}
-extension GitHub.RepoMonitor.CrawlingEvent:HTML.OutputStreamable
+extension GitHub.RepoMonitor.Event.Crawl:HTML.OutputStreamable
 {
     static
     func += (dl:inout HTML.ContentEncoder, self:Self)

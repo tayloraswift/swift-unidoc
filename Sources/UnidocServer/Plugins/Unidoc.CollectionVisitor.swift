@@ -3,6 +3,7 @@ import MongoDB
 
 extension Unidoc
 {
+    public
     protocol CollectionVisitor
     {
         associatedtype Event:CollectionEvent
@@ -21,7 +22,7 @@ extension Unidoc
 }
 extension Unidoc.CollectionVisitor
 {
-    mutating
+    public mutating
     func watch(db unidoc:Unidoc.DB, with pool:Mongo.SessionPool) async throws
     {
         //  Otherwise the page will be empty until something is queued.

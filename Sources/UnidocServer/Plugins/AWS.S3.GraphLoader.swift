@@ -5,7 +5,7 @@ import S3Client
 import SymbolGraphs
 import UnidocRecords
 
-extension Swiftinit
+extension AWS.S3
 {
     struct GraphLoader
     {
@@ -18,7 +18,7 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.GraphLoader:Unidoc.GraphLoader
+extension AWS.S3.GraphLoader:Unidoc.GraphLoader
 {
     func load(graph:Unidoc.GraphPath) async throws -> ArraySlice<UInt8>
     {

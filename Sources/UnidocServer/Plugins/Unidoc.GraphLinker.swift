@@ -1,20 +1,20 @@
 import MongoDB
 import S3Client
 import UnidocDB
-import UnidocServer
 
-extension Swiftinit
+extension Unidoc
 {
-    struct Linker
+    public
+    struct GraphLinker
     {
         private
-        let status:AtomicPointer<Unidoc.CollectionEventsPage<Self>>
+        let status:AtomicPointer<CollectionEventsPage<Self>>
         private
         let graphs:AWS.S3.Client?
         private
-        var buffer:Unidoc.EventBuffer<Event>
+        var buffer:EventBuffer<Event>
 
-        init(updating status:AtomicPointer<Unidoc.CollectionEventsPage<Self>>,
+        init(updating status:AtomicPointer<CollectionEventsPage<Self>>,
             graphs:AWS.S3.Client?)
         {
             self.status = status
@@ -23,24 +23,25 @@ extension Swiftinit
         }
     }
 }
-extension Swiftinit.Linker:Unidoc.CollectionVisitor
+extension Unidoc.GraphLinker:Unidoc.CollectionVisitor
 {
-    static
+    @inlinable public static
     var title:String { "Linker" }
 
-    mutating
+    public mutating
     func publish(event:Event)
     {
         self.buffer.push(event: event)
         self.publish()
     }
 
+    public
     func publish()
     {
-        self.status.replace(value: .init(from: self.buffer))
+        self.status.replace(value: .init(list: .init(from: self.buffer)))
     }
 
-    mutating
+    public mutating
     func tour(in db:Unidoc.DB, with session:Mongo.Session) async throws
     {
         while true
@@ -66,7 +67,7 @@ extension Swiftinit.Linker:Unidoc.CollectionVisitor
         }
     }
 }
-extension Swiftinit.Linker
+extension Unidoc.GraphLinker
 {
     private mutating
     func perform(operation:Unidoc.DB.Snapshots.QueuedOperation,

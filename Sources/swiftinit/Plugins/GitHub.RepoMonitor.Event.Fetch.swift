@@ -2,9 +2,9 @@ import GitHubAPI
 import HTML
 import Symbols
 
-extension GitHub.RepoMonitor
+extension GitHub.RepoMonitor.Event
 {
-    struct IndexTagsEvent
+    struct Fetch
     {
         let package:Symbol.Package
         var prerelease:Unidoc.EditionMetadata?
@@ -22,12 +22,7 @@ extension GitHub.RepoMonitor
         }
     }
 }
-extension GitHub.RepoMonitor.IndexTagsEvent:Unidoc.ServerPluginEvent
-{
-    static
-    var name:String { "Tags indexed" }
-}
-extension GitHub.RepoMonitor.IndexTagsEvent:HTML.OutputStreamable
+extension GitHub.RepoMonitor.Event.Fetch:HTML.OutputStreamable
 {
     static
     func += (dl:inout HTML.ContentEncoder, self:Self)
