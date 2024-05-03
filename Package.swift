@@ -14,6 +14,7 @@ let package:Package = .init(
 
         .library(name: "CasesByIntegerEncodingMacro", targets: ["CasesByIntegerEncodingMacro"]),
 
+        .library(name: "ArgumentParsing", targets: ["ArgumentParsing"]),
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
         .library(name: "FNV1", targets: ["FNV1"]),
@@ -73,6 +74,8 @@ let package:Package = .init(
 
         .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
+        .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
+        .library(name: "UnidocAssets_System", targets: ["UnidocAssets_System"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
