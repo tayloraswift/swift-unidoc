@@ -91,27 +91,13 @@ extension Unidoc.Preview
 
         let authority:Localhost = .init(tls: try .init(configuration: configuration))
 
-        let assets:FilePath = "Assets"
-        let github:GitHub.Integration?
-        do
-        {
-            github = try .load(secrets: assets / "secrets", localhost: true)
-        }
-        catch let error
-        {
-            //  TODO: this is currently always disabled unless the user has gone through the
-            //  trouble of creating a personal GitHub App.
-            Log[.debug] = "GitHub integration disabled (\(error))"
-            github = nil
-        }
-
         return .init(authority: authority,
-            github: github,
+            github: nil,
             mirror: self.mirror,
             bucket: .init(
                 assets: self.development.bucket,
                 graphs: self.development.bucket),
-            mode: .development(.init(source: assets), self.development))
+            mode: .development(.init(source: "Assets"), self.development))
     }
 
     private consuming
