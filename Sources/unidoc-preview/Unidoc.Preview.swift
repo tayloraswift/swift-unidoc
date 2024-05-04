@@ -21,7 +21,7 @@ extension Unidoc
         private
         init() throws
         {
-            self.certificates = "Local/Server/Certificates"
+            self.certificates = "Assets/certificates"
             self.development = .init()
             self.mirror = false
             self.mongo = "unidoc-mongod"
