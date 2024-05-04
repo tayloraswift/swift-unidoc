@@ -22,28 +22,60 @@ extension Unidoc
         private
         var cache:Cache
 
+        public
+        let media:PackageMedia?
+
         private
-        init(canonical:CanonicalVersion?, packages:PackageContext, cache:Cache)
+        init(canonical:CanonicalVersion?,
+            packages:PackageContext,
+            cache:Cache,
+            media:PackageMedia?)
         {
             self.canonical = canonical
             self.packages = packages
             self.cache = cache
+            self.media = media
         }
 
         public convenience required
-        init(canonical:Unidoc.CanonicalVersion?,
-            principal:Unidoc.VolumeMetadata,
-            secondary:borrowing [Unidoc.VolumeMetadata],
-            packages:__shared [Unidoc.PackageMetadata],
+        init(canonical:CanonicalVersion?,
+            principal:VolumeMetadata,
+            secondary:borrowing [VolumeMetadata],
+            packages:__shared [PackageMetadata],
             vertices:Table)
         {
+            let packages:PackageContext = .init(principal: principal.id.package,
+                metadata: packages)
+            let media:PackageMedia?
+
+            if  let override:PackageMedia = packages.principal?.media
+            {
+                media = override
+            }
+            else if
+                let repo:PackageRepo = packages.principal?.repo
+            {
+                let ref:String = principal.refname ?? repo.master ?? "master"
+                let path:String
+                switch repo.origin
+                {
+                case .github(let origin):   path = "/\(origin.owner)/\(origin.name)/\(ref)"
+                }
+
+                media = .init(prefix: "raw.githubusercontent.com\(path)",
+                    webp: "media.githubusercontent.com/media\(path)")
+            }
+            else
+            {
+                media = nil
+            }
+
             self.init(canonical: canonical,
-                packages: .init(
-                    principal: principal.id.package,
-                    metadata: packages),
+                packages: packages,
                 cache: .init(
                     vertices: vertices,
-                    volumes: .init(principal: principal, secondary: secondary)))
+                    volumes: .init(principal: principal, secondary: secondary)),
+                media: media)
         }
 
         public

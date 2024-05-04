@@ -35,6 +35,10 @@ extension Unidoc
         public
         var platformPreference:Triple?
 
+        /// Overrides the default repo-based media origins. This is mostly used for previewing
+        /// documentation locally.
+        public
+        var media:PackageMedia?
         /// The remote git repo this package tracks.
         ///
         /// Currently only GitHub repos are supported.
@@ -48,6 +52,7 @@ extension Unidoc
             realm:Unidoc.Realm? = nil,
             realmAligning:Bool = false,
             platformPreference:Triple? = nil,
+            media:PackageMedia? = nil,
             repo:PackageRepo? = nil)
         {
             self.id = id
@@ -56,6 +61,7 @@ extension Unidoc
             self.realm = realm
             self.realmAligning = realmAligning
             self.platformPreference = platformPreference
+            self.media = media
             self.repo = repo
         }
     }
@@ -71,6 +77,7 @@ extension Unidoc.PackageMetadata
         case realm = "r"
         case realmAligning = "A"
         case platformPreference = "O"
+        case media = "M"
         case repo = "G"
 
         @available(*, unavailable)
@@ -93,6 +100,7 @@ extension Unidoc.PackageMetadata:BSONDocumentEncodable
         bson[.realm] = self.realm
         bson[.realmAligning] = self.realmAligning ? true : nil
         bson[.platformPreference] = self.platformPreference
+        bson[.media] = self.media
         bson[.repo] = self.repo
     }
 }
@@ -107,6 +115,7 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
             realm: try bson[.realm]?.decode(),
             realmAligning: try bson[.realmAligning]?.decode() ?? false,
             platformPreference: try bson[.platformPreference]?.decode(),
+            media: try bson[.media]?.decode(),
             repo: try bson[.repo]?.decode())
     }
 }
