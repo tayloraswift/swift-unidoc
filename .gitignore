@@ -11,12 +11,11 @@ swiftpm/
 build-aarch64.sh
 
 Aarch64/
+Assets/certificates/*.pem
 Assets/secrets/
 Assets/icons/*.jpg
 
 /crash*
-
-Local/Server/Certificates/*.pem
 
 node_modules/
 
