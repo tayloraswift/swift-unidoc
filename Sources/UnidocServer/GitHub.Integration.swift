@@ -13,6 +13,7 @@ extension GitHub
         public
         let pat:String
 
+        @inlinable public
         init(oauth:GitHub.OAuth, app:GitHub.App, pat:String)
         {
             self.oauth = oauth
