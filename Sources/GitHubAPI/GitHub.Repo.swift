@@ -20,7 +20,7 @@ extension GitHub
         var topics:[String]
         /// The name of the repo’s default branch.
         public
-        var master:String
+        var master:String?
 
         /// The number of subscribers this repo has.
         public
@@ -70,7 +70,7 @@ extension GitHub
             name:String,
             license:License? = nil,
             topics:[String] = [],
-            master:String,
+            master:String?,
             watchers:Int,
             forks:Int,
             stars:Int,
@@ -143,7 +143,7 @@ extension GitHub.Repo:JSONObjectDecodable
             name: try json[.name].decode(),
             license: try json[.license]?.decode(),
             topics: try json[.topics]?.decode() ?? [],
-            master: try json[.master].decode(),
+            master: try json[.master]?.decode(),
             watchers: try json[.watchers].decode(),
             forks: try json[.forks].decode(),
             stars: try json[.stars].decode(),

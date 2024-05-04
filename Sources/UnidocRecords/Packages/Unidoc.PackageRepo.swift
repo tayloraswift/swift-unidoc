@@ -50,9 +50,9 @@ extension Unidoc
         /// The repo’s topic memberships. Both GitHub and GitLab have topics.
         public
         var topics:[String]
-        /// The repo’s master branch. All Git repos have the concept of a master branch.
+        /// The repo’s master branch, if configured.
         public
-        var master:String
+        var master:String?
 
         /// Information specific to the repo’s hosting provider.
         public
@@ -74,7 +74,7 @@ extension Unidoc
             updated:BSON.Millisecond,
             license:PackageLicense?,
             topics:[String],
-            master:String,
+            master:String?,
             origin:PackageOrigin,
             forks:Int = 0,
             stars:Int = 0)
@@ -159,7 +159,7 @@ extension Unidoc.PackageRepo:BSONDocumentDecodable
             updated: try bson[.updated].decode(),
             license: try bson[.license]?.decode(),
             topics: try bson[.topics]?.decode() ?? [],
-            master: try bson[.master].decode(),
+            master: try bson[.master]?.decode(),
             origin: origin,
             forks: try bson[.forks].decode(),
             stars: try bson[.stars].decode())

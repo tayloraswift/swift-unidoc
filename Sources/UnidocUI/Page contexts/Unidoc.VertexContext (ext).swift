@@ -108,7 +108,7 @@ extension Unidoc.VertexContext
             return nil
         }
 
-        let refname:String = self[file.id.edition]?.refname ?? repo.master
+        let refname:String = self[file.id.edition]?.refname ?? repo.master ?? "master"
 
         switch repo.origin
         {
