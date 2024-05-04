@@ -98,45 +98,4 @@ extension Unidoc.VertexContext
             file: vertex.symbol.last,
             line: line)
     }
-
-    func link(media file:Unidoc.FileVertex) -> String?
-    {
-        guard
-        let repo:Unidoc.PackageRepo = self.repo
-        else
-        {
-            return nil
-        }
-
-        let refname:String = self[file.id.edition]?.refname ?? repo.master ?? "master"
-
-        switch repo.origin
-        {
-        case .github(let origin):
-            //  Files that lack a valid extension will not carry the correct `Content-Type`
-            //  header, and won’t display correctly in the browser. There is no simple way to
-            //  override this behavior, so files will just need to have the correct extension.
-            guard
-            let type:Substring = file.symbol.type
-            else
-            {
-                return nil
-            }
-
-            let prefix:String
-
-            switch type
-            {
-            case "gif":     prefix = "https://raw.githubusercontent.com"
-            case "jpg":     prefix = "https://raw.githubusercontent.com"
-            case "jpeg":    prefix = "https://raw.githubusercontent.com"
-            case "png":     prefix = "https://raw.githubusercontent.com"
-            case "svg":     prefix = "https://raw.githubusercontent.com"
-            case "webp":    prefix = "https://media.githubusercontent.com/media"
-            default:        return nil
-            }
-
-            return "\(prefix)/\(origin.owner)/\(origin.name)/\(refname)/\(file.symbol)"
-        }
-    }
 }

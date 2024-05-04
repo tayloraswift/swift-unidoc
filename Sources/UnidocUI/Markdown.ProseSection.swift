@@ -55,13 +55,13 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
 
             case .src:
                 guard
-                let vertex:Unidoc.FileVertex = self.context[file: id]
+                let file:Unidoc.FileVertex = self.context[file: id]
                 else
                 {
                     return nil
                 }
 
-                return self.context.link(media: vertex)
+                return self.context.media?.link(media: file.symbol)
 
             default:
                 return nil
@@ -130,13 +130,13 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             //  This needs to be here for backwards compatibility with older symbol graphs.
             case .src:
                 guard
-                let vertex:Unidoc.FileVertex = self.context[file: target]
+                let file:Unidoc.FileVertex = self.context[file: target]
                 else
                 {
                     return nil
                 }
 
-                return self.context.link(media: vertex)
+                return self.context.media?.link(media: file.symbol)
 
             default:
                 return nil
