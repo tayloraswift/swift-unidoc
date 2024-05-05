@@ -37,13 +37,23 @@ extension SSGC.PackageSources
 
         self.init(include: include, root: root)
 
+        let count:[SSGC.NominalSources.DefaultDirectory: Int] = package.modules.reduce(
+            into: [:])
+        {
+            if  case nil = $1.location,
+                let directory:SSGC.NominalSources.DefaultDirectory = .init(for: $1.type)
+            {
+                $0[directory, default: 0] += 1
+            }
+        }
         for i:Int in package.modules.indices
         {
             self.cultures.append(try .init(
                 include: &self.include,
                 exclude: package.exclude[i],
                 package: root,
-                module: package.modules[i]))
+                module: package.modules[i],
+                count: count))
         }
 
         guard

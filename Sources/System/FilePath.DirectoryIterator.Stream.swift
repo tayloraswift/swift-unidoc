@@ -40,7 +40,7 @@ extension FilePath.DirectoryIterator.Stream
                     return nil
 
                 case let error:
-                    throw error
+                    throw FileError.opening(path, error)
                 }
             }
             self = .opened(pointer)
