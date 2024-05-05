@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $(dirname $0))
+sass --style compressed --watch Stylesheets/:Assets/css/
