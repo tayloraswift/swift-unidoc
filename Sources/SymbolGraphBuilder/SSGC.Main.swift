@@ -179,6 +179,7 @@ extension SSGC.Main
             {
                 switch error
                 {
+                case .scanning: return .failedToLoadSymbolGraph
                 case .loading:  return .failedToLoadSymbolGraph
                 case .linking:  return .failedToLinkSymbolGraph
                 }
