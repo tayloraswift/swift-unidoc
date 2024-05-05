@@ -37,7 +37,8 @@ extension SSGC.NominalSources
     init(include:inout [FilePath],
         exclude:borrowing [String],
         package:borrowing SSGC.PackageRoot,
-        module:consuming SymbolGraph.Module) throws
+        module:consuming SymbolGraph.Module,
+        count:[DefaultDirectory: Int]) throws
     {
         self.init(module)
 
@@ -48,20 +49,33 @@ extension SSGC.NominalSources
         }
         else
         {
-            let directory:String
-            switch self.module.type
+            guard
+            let directory:DefaultDirectory = .init(for: self.module.type)
+            else
             {
-            case .binary:       break locations
-            case .executable:   directory = "Sources"
-            case .regular:      directory = "Sources"
-            case .macro:        directory = "Sources"
-            case .plugin:       directory = "Plugins"
-            case .snippet:      directory = "Snippets"
-            case .system:       directory = "Sources"
-            case .test:         directory = "Tests"
+                //  This is a binary module, which has no sources.
+                break locations
             }
 
-            self.origin = .sources(package.path / directory / self.module.name)
+            let sources:FilePath = package.path / directory.name
+            let path:FilePath = sources / self.module.name
+
+            if  path.directory.exists()
+            {
+                self.origin = .sources(path)
+            }
+            else if case 1? = count[directory]
+            {
+                //  If there is only one module that should be in this directory, we can
+                //  try scanning the directory itself.
+                self.origin = .sources(sources)
+            }
+            else
+            {
+                //  Artifically synthesize the error we would have caught if we had tried to
+                //  scan the nonexistent directory.
+                throw FileError.opening(path, .noSuchFileOrDirectory)
+            }
         }
 
         try self.scan(include: &include, exclude: exclude, package: package)
