@@ -9,6 +9,40 @@ function nonce(): string {
     return Array.from(window.crypto.getRandomValues(uint64), hex).join('')
 }
 
+function textfield(element: Element | null): boolean {
+    if (element === null) {
+        return false;
+    }
+
+    if (element instanceof HTMLInputElement) {
+        switch (element.type) {
+            case 'text':
+            case 'search':
+            case 'password':
+            case 'number':
+            case 'email':
+            case 'tel':
+            case 'url':
+            case 'search':
+            case 'date':
+            case 'datetime':
+            case 'datetime-local':
+            case 'time':
+            case 'month':
+            case 'week':
+                return true;
+
+            default:
+                return false;
+        }
+    }
+    if (element instanceof HTMLTextAreaElement) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 const search: HTMLElement | null = document.getElementById('search');
 const login: HTMLElement | null = document.getElementById('login');
 
@@ -44,22 +78,24 @@ if (search !== null) {
         mode?.addEventListener('click', (event: Event) => searchbar.suggest());
 
         document.addEventListener('keydown', function (event: KeyboardEvent) {
+            let active: Element | null = document.activeElement;
             switch (event.key) {
                 case 'Escape': {
-                    if (document.activeElement === input) {
+                    if (active === input) {
                         input.blur();
                     }
                     break;
                 }
                 case '/': {
-                    if (document.activeElement !== input) {
+                    //  This should only be in effect if no text input is already focused.
+                    if (active !== input && !textfield(active)) {
                         input.focus();
                         event.preventDefault();
                     }
                     break;
                 }
                 case ',': {
-                    if (searchbar.mode !== null) {
+                    if (searchbar.mode !== null && (active === input || !textfield(active))) {
                         searchbar.mode.checked = !searchbar.mode.checked;
                         searchbar.suggest();
                         input.focus();

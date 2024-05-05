@@ -62,8 +62,8 @@ extension Unidoc
                 case .github(let origin):   path = "/\(origin.owner)/\(origin.name)/\(ref)"
                 }
 
-                media = .init(prefix: "raw.githubusercontent.com\(path)",
-                    webp: "media.githubusercontent.com/media\(path)")
+                media = .init(prefix: "https://raw.githubusercontent.com\(path)",
+                    webp: "https://media.githubusercontent.com/media\(path)")
             }
             else
             {
