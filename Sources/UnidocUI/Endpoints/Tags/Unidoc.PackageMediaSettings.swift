@@ -37,7 +37,16 @@ extension Unidoc.PackageMediaSettings:HTML.OutputStreamable
                         $0.name = "\(setting)"
 
                         $0.placeholder = "https://raw.githubusercontent.com/owner/repo/master"
-                        $0.value = self.package.media?.prefix
+
+                        switch setting
+                        {
+                        case .media:        $0.value = self.package.media?.prefix
+                        case .media_gif:    $0.value = self.package.media?.gif
+                        case .media_jpg:    $0.value = self.package.media?.jpg
+                        case .media_png:    $0.value = self.package.media?.png
+                        case .media_svg:    $0.value = self.package.media?.svg
+                        case .media_webp:   $0.value = self.package.media?.webp
+                        }
                     }
                 }
             }
