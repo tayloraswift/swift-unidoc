@@ -2,7 +2,8 @@ import BSON
 
 extension Unidoc
 {
-    /// Custom origins for package media. None of the URLs should contain the `https://` prefix.
+    /// Custom origins for package media. Unlike most URL fields in this code base, these URLs
+    /// should contain a scheme. This allows us to use `file://` URLs for local development.
     @frozen public
     struct PackageMedia:Equatable, Sendable
     {

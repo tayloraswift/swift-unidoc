@@ -501,31 +501,6 @@ extension Mongo.CollectionModel
     /// Sets the value of the specified field in the document with the specified identifier,
     /// returning true if the document was modified, false if the document was not modified,
     /// and nil if the document was not found.
-    private
-    func update(field:Mongo.AnyKeyPath,
-        of target:Element.ID,
-        to value:some BSONEncodable,
-        with session:Mongo.Session) async throws -> Bool?
-    {
-        try await self.update(field: field, by: "_id", of: target, to: value, with: session)
-    }
-    private
-    func update(field:Mongo.AnyKeyPath,
-        by index:Mongo.AnyKeyPath,
-        of key:some BSONEncodable,
-        to value:some BSONEncodable,
-        with session:Mongo.Session) async throws -> Bool?
-    {
-        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
-            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
-            {
-                $0.update(field: field, by: index, of: key, to: value)
-            },
-            against: self.database)
-
-        let updates:Mongo.Updates<Element.ID> = try response.updates()
-        return updates.selected == 0 ? nil : updates.modified == 1
-    }
     @inlinable package
     func update(with session:Mongo.Session,
         do encode:(inout Mongo.UpdateListEncoder<Mongo.One>) throws -> ()) async throws -> Bool?
@@ -550,11 +525,10 @@ extension Mongo.CollectionModel where Element:Mongo.MasterCodingModel
         to value:some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?
     {
-        try await self.update(
-            field: Element[field],
-            of: target,
-            to: value,
-            with: session)
+        try await self.update(with: session)
+        {
+            $0.update(field: Element[field], by: "_id", of: target, to: value)
+        }
     }
 
     @discardableResult
@@ -564,12 +538,43 @@ extension Mongo.CollectionModel where Element:Mongo.MasterCodingModel
         to value:some BSONEncodable,
         with session:Mongo.Session) async throws -> Bool?
     {
-        try await self.update(
-            field: Element[field],
-            by: Element[index],
-            of: key,
-            to: value,
-            with: session)
+        try await self.update(with: session)
+        {
+            $0.update(field: Element[field], by: Element[index], of: key, to: value)
+        }
+    }
+}
+extension Mongo.CollectionModel where Element:Mongo.MasterCodingModel, Element:BSONDecodable
+{
+    @discardableResult
+    func reset<Value>(field:Element.CodingKey,
+        of existing:Element.ID,
+        to value:Value?,
+        with session:Mongo.Session) async throws -> Element? where Value:BSONEncodable
+    {
+        let (after, _):(Element?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Element>>.init(Self.name,
+            returning: .new)
+            {
+                $0[.query]
+                {
+                    $0["_id"] = existing
+                }
+                $0[.update]
+                {
+                    if  let value:Value
+                    {
+                        $0[.set] { $0[Element[field]] = value }
+                    }
+                    else
+                    {
+                        $0[.unset] { $0[Element[field]] = () }
+                    }
+                }
+            },
+            against: self.database)
+
+        return after
     }
 }
 
