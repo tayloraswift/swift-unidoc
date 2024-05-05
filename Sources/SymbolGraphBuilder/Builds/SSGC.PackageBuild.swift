@@ -314,6 +314,14 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
             display: manifest.name,
             root: manifest.root)
 
-        return (metadata, try .init(scanning: flatNode, include: include))
+        //  This step is considered part of documentation building.
+        do
+        {
+            return (metadata, try .init(scanning: flatNode, include: include))
+        }
+        catch let error
+        {
+            throw SSGC.DocumentationBuildError.scanning(error)
+        }
     }
 }
