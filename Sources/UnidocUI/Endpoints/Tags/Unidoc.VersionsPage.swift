@@ -78,6 +78,19 @@ extension Unidoc.VersionsPage:Unidoc.ApplicationPage
 
         main[.section, { $0.class = "details" }]
         {
+            if  case .localhost = format.server
+            {
+                $0[.h2] = "Local preview settings"
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Unidoc.Post[.packageConfig, really: true])"
+                    $0.method = "post"
+
+                    $0.class = "config"
+                } = Unidoc.PackageMediaSettings.init(package: self.package)
+            }
+
             self.section(tags: &$0, now: now, dormancy: dormancy)
         }
     }
@@ -372,12 +385,12 @@ extension Unidoc.VersionsPage
                         $0.name = "package"
                         $0.value = "\(self.package.id)"
                     }
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
-                        $0.name = "from"
-                        $0.value = "\(self.location)"
-                    }
+                    // $0[.input]
+                    // {
+                    //     $0.type = "hidden"
+                    //     $0.name = "from"
+                    //     $0.value = "\(self.location)"
+                    // }
                     $0[.input]
                     {
                         $0.type = "text"

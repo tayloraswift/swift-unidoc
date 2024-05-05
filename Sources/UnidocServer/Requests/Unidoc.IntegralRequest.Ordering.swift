@@ -387,8 +387,7 @@ extension Unidoc.IntegralRequest.Ordering
                 }
 
             case .packageConfig:
-                if  let account:Unidoc.Account,
-                    let package:String = form["package"],
+                if  let package:String = form["package"],
                     let package:Unidoc.Package = .init(package),
                     let update:Unidoc.PackageConfigOperation.Update = .init(from: form)
                 {
@@ -607,8 +606,8 @@ extension Unidoc.IntegralRequest.Ordering
             case .build(_?):
                 return .syncResource(Unidoc.BuildRequestPage.init(action: action))
 
-            case .platformPreference:
-                //  Doesn’t need a confirmation page.
+            case .reset:
+                //  These don’t need a confirmation page.
                 return nil
             }
 

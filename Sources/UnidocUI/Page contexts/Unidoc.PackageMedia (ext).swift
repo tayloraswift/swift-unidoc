@@ -26,6 +26,6 @@ extension Unidoc.PackageMedia
         default:        return nil
         }
 
-        return "https://\(prefix ?? self.prefix)/\(file)"
+        return "\(prefix ?? self.prefix)/\(file)"
     }
 }

@@ -61,8 +61,9 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
 
             /// A successful (labeled) build also sets the platform preference, since we now
             /// know that the package can be built on that platform.
-            let _:Bool? = try await server.db.packages.update(package: snapshot.id.package,
+            let _:Unidoc.PackageMetadata? = try await server.db.packages.reset(
                 platformPreference: snapshot.metadata.triple,
+                of: snapshot.id.package,
                 with: session)
 
             if  let bucket:AWS.S3.Bucket = server.bucket.graphs

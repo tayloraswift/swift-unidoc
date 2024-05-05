@@ -115,6 +115,30 @@ extension Unidoc.DB.Packages:Mongo.RecodableModel
 }
 extension Unidoc.DB.Packages
 {
+    public
+    func reset(media:Unidoc.PackageMedia?,
+        of package:Unidoc.Package,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        try await self.reset(field: .media,
+            of: package,
+            to: media,
+            with: session)
+    }
+
+    public
+    func reset(platformPreference triple:Triple?,
+        of package:Unidoc.Package,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        try await self.reset(field: .platformPreference,
+            of: package,
+            to: triple,
+            with: session)
+    }
+}
+extension Unidoc.DB.Packages
+{
     func findGitHub(repo id:Int32,
         with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
@@ -150,17 +174,6 @@ extension Unidoc.DB.Packages
         with session:Mongo.Session) async throws -> Bool?
     {
         try await self.update(field: .symbol, of: package, to: symbol, with: session)
-    }
-
-    public
-    func update(package:Unidoc.Package,
-        platformPreference triple:Triple,
-        with session:Mongo.Session) async throws -> Bool?
-    {
-        try await self.update(field: .platformPreference,
-            of: package,
-            to: triple,
-            with: session)
     }
 
     @discardableResult
