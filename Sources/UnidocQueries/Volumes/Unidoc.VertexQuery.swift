@@ -318,6 +318,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     Unidoc.AnyVertex[.constituents],
                     Unidoc.AnyVertex[.superforms],
                     Unidoc.AnyVertex[.details],
+                    Unidoc.AnyVertex[.census],
                 ]
             }
 
