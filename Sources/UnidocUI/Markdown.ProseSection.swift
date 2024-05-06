@@ -183,22 +183,26 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                 """
             } = url
 
-        case .path(let display, let path):
+        case .path(let display, let vector):
             //  We never started using path outlines for inline file elements, so we don’t need
             //  any backwards compatibility adaptors here.
             guard
-            let id:Unidoc.Scalar = path.last
+            let id:Unidoc.Scalar = vector.last
             else
             {
                 html[.code] = "<empty codelink>"
                 return
             }
+
             if  reference.card
             {
                 html ?= self.context.card(id)
+                return
             }
-            else if SymbolGraph.Plane.article.contains(id.citizen)
+
+            switch SymbolGraph.Plane.of(id.citizen)
             {
+            case .article?:
                 guard
                 let link:Unidoc.LinkReference<Unidoc.ArticleVertex> = self.context[article: id]
                 else
@@ -240,16 +244,32 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                     //  This is a link to the current page.
                     html[.a] = link.vertex.headline.safe
                 }
-            }
-            else
-            {
-                //  Take the suffix of the stem, because it may include a module namespace,
-                //  and we never render the module namespace, even if it was written in the
-                //  codelink text.
+
+            case .module?:
+                guard
+                let link:Unidoc.LinkReference<Unidoc.CultureVertex> = self.context[culture: id]
+                else
+                {
+                    html[.code] = display.path
+                    return
+                }
 
                 //  TODO: support URL fragment?
-                html[.code] = self.context.vector(path,
-                    display: display.vector.suffix(path.count))
+                html[.code] = link
+
+            default:
+                guard
+                let components:Unidoc.LinkVector = .init(self.context,
+                    display: display.vector,
+                    scalars: vector)
+                else
+                {
+                    html[.code] = display.path
+                    return
+                }
+
+                //  TODO: support URL fragment?
+                html[.code] = components
             }
 
         case .fragment(let text):
