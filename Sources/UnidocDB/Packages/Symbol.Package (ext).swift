@@ -11,7 +11,7 @@ extension Symbol.Package
         //  These are the *only* packages that are allowed to use toolchain versions.
         //  SwiftSyntax is not allowed to use them, because it also publishes normal
         //  semver releases.
-        case .swift, .swiftPM:
+        case .swift, .swiftPM, .indexstoreDB:
             guard
             let i:String.Index = tag.firstIndex(of: "-"),
             let j:String.Index = tag.lastIndex(of: "-"),
