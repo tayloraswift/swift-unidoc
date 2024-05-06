@@ -24,7 +24,7 @@ $ ./mkcert-v1.4.4-linux-amd64 -install
 If the `mkcert-v1.4.4-linux-amd64` binary is located in your home directory, you can generate a certificate for `localhost` by running the following from the repository root:
 
 ```bash
-$ cd Local/Server/Certificates
+$ cd Assets/certificates
 $ ~/mkcert-v1.4.4-linux-amd64 localhost
 
 ```
