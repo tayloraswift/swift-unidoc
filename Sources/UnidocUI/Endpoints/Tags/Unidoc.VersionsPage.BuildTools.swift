@@ -91,7 +91,11 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                     view: self.view)
             }
 
-            section[.div] { $0.class = "phase" } = "Queued (\(request.series))"
+            section[.div]
+            {
+                $0.class = "phase"
+                $0.title = "The builder will build the latest \(request.series) version."
+            } = "Queued (\(request.series))"
             section[.div]
         }
         else
