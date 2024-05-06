@@ -66,6 +66,7 @@ extension Unidoc.RedirectEndpoint:HTTP.ServerEndpoint
                 principal: output.volume,
                 secondary: [],
                 packages: [],
+                tooltips: .init(),
                 vertices: .init(secondary: output.matches))
 
             let display:Unidoc.DocsEndpoint.NotFoundPage = .init(context, sidebar: nil)
