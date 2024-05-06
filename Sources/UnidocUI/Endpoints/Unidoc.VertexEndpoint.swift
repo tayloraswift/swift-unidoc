@@ -88,6 +88,7 @@ extension Unidoc.VertexEndpoint where Self:HTTP.ServerEndpoint
                 principal: principal.volume,
                 secondary: output.volumes,
                 packages: output.packages,
+                tooltips: .init(filtering: output.vertices),
                 vertices: .init(principal: vertex, secondary: output.vertices))
 
             _ = consume output
@@ -110,6 +111,7 @@ extension Unidoc.VertexEndpoint where Self:HTTP.ServerEndpoint
                 principal: principal.volume,
                 secondary: output.volumes,
                 packages: output.packages,
+                tooltips: .init(filtering: principal.matches),
                 vertices: .init(secondary: principal.matches))
 
             return try self.failure(matches: principal.matches,

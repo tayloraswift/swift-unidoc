@@ -1,3 +1,4 @@
+import HTML
 import Symbols
 import UnidocRecords
 
@@ -12,6 +13,7 @@ extension Unidoc
             principal:VolumeMetadata,
             secondary:borrowing [VolumeMetadata],
             packages:borrowing [PackageMetadata],
+            tooltips:Tooltips,
             vertices:Table)
 
         var canonical:CanonicalVersion? { get }
@@ -19,6 +21,8 @@ extension Unidoc
         var volume:VolumeMetadata { get }
         var media:PackageMedia? { get }
         var repo:PackageRepo? { get }
+
+        var tooltips:Tooltips { get }
 
         subscript(package id:Package) -> PackageMetadata? { get }
 

@@ -16,6 +16,8 @@ extension Unidoc
     {
         public
         let canonical:CanonicalVersion?
+        public
+        let tooltips:Tooltips
 
         private(set)
         var packages:PackageContext
@@ -28,11 +30,13 @@ extension Unidoc
         private
         init(canonical:CanonicalVersion?,
             packages:PackageContext,
+            tooltips:Tooltips,
             cache:Cache,
             media:PackageMedia?)
         {
             self.canonical = canonical
             self.packages = packages
+            self.tooltips = tooltips
             self.cache = cache
             self.media = media
         }
@@ -42,6 +46,7 @@ extension Unidoc
             principal:VolumeMetadata,
             secondary:borrowing [VolumeMetadata],
             packages:__shared [PackageMetadata],
+            tooltips:Tooltips,
             vertices:Table)
         {
             let packages:PackageContext = .init(principal: principal.id.package,
@@ -72,6 +77,7 @@ extension Unidoc
 
             self.init(canonical: canonical,
                 packages: packages,
+                tooltips: tooltips,
                 cache: .init(
                     vertices: vertices,
                     volumes: .init(principal: principal, secondary: secondary)),
