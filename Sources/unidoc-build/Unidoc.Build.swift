@@ -153,8 +153,14 @@ extension Unidoc.Build
 
         //  On macOS, `/proc/self/exe` is not available, so we must fall back to using the
         //  path supplied by `argv[0]`.
+        //
+        //  FIXME: according to Alastair Houghton, we should be using `_NSGetExecutablePath`
+        //  https://swift-open-source.slack.com/archives/C5FAE2LL9/p1714118940393719?thread_ts=1714079460.781409&cid=C5FAE2LL9
         #if os(macOS)
         options.executablePath = arguments.tool
+
+        //  Guess the SDK if not specified.
+        options.swiftSDK = options.swiftSDK ?? .macOS
         #endif
 
         return options
