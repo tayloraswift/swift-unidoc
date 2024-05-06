@@ -68,8 +68,6 @@ Once you have a `unidoc-mongod-container` running in the background, you can sta
 
 @Code(file: start-server.sh, title: start-server.sh)
 
->   Note:
-    You might get a warning about missing GitHub credentials. This is expected, since you most likely have not added any GitHub credentials to the `Assets/secrets` directory of your cloned repo. You can ignore this warning for the purposes of this tutorial.
 
 ### Generating certificates
 
