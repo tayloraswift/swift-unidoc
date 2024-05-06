@@ -73,7 +73,7 @@ Once you have a `unidoc-mongod-container` running in the background, you can sta
 
 ### Generating certificates
 
-If you are starting the server for the first time, you likely need to populate the `Local/Server/Certificates/` directory with TLS certificates. See <doc:GeneratingCertificates> for instructions on how to do this.
+If you are starting the server for the first time, you likely need to populate the `Assets/certificates/` directory with TLS certificates. See <doc:GeneratingCertificates> for instructions on how to do this.
 
 
 If you did all of these steps correctly, you should be able to navigate to [`localhost:8443/`](https://localhost:8443/) and view a blank homepage.
