@@ -7,15 +7,6 @@ import Symbols
 
 extension Unidoc.VertexContext
 {
-    func vector<Display, Vector>(_ vector:Vector,
-        display:Display) -> HTML.VectorLink<Display, Vector>?
-        where Vector:Collection<Unidoc.Scalar>
-    {
-        vector.isEmpty ? nil : .init(self, display: display, scalars: vector)
-    }
-}
-extension Unidoc.VertexContext
-{
     func card(decl id:Unidoc.Scalar) -> Unidoc.DeclCard?
     {
         guard

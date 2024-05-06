@@ -87,8 +87,12 @@ extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.VertexPage
                     culture: self.vertex.culture)
             }
 
-            $0[.nav] { $0.class = "breadcrumbs" } = self.context.vector(self.vertex.scope,
-                display: self.stem.scope)
+            $0[.nav]
+            {
+                $0.class = "breadcrumbs"
+            } = Unidoc.LinkVector.init(self.context,
+                display: self.stem.scope,
+                scalars: self.vertex.scope)
 
             $0[.h1] = name
 

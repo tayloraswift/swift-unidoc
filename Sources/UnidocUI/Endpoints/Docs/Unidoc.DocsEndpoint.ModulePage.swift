@@ -103,16 +103,9 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
         case .binary, .regular, .macro, .system:
             main[.section, { $0.class = "declaration" }]
             {
-                $0[.pre]
-                {
-                    $0[.code]
-                    {
-                        $0[.span] { $0.highlight = .keyword } = "import"
-                        $0 += " "
-                        $0[.span] { $0.highlight = .identifier } = self.stem.first
-                    }
-                }
+                $0[.pre, .code] = Unidoc.ImportSection.init(module: self.apex.module.id)
             }
+
         case .executable, .plugin, .snippet, .test:
             main[.section, { $0.class = "notice" }]
             {

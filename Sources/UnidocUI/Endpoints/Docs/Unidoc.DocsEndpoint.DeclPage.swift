@@ -102,8 +102,12 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
                     culture: self.apex.culture)
             }
 
-            $0[.nav] { $0.class = "breadcrumbs" } = self.context.vector(self.apex.scope,
-                display: self.stem.scope)
+            $0[.nav]
+            {
+                $0.class = "breadcrumbs"
+            } = Unidoc.LinkVector.init(self.context,
+                display: self.stem.scope,
+                scalars: self.apex.scope)
 
             $0[.h1] = self.stem.last
 
