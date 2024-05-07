@@ -80,6 +80,8 @@ enum Main:TestMain, TestBattery
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
 
+        //  https://github.com/tayloraswift/swift-unidoc/issues/211
+        #if !os(macOS)
         if  let tests:TestGroup = tests / "swift-nio",
             let docs:SymbolGraphObject<Void> = (tests.do
             {
@@ -101,8 +103,8 @@ enum Main:TestMain, TestBattery
             ])
 
             docs.roundtrip(for: tests, in: workspace.artifacts)
-
         }
+        #endif
 
         //  SwiftNIO has lots of dependencies. If we can handle SwiftNIO,
         //  we can handle anything!
