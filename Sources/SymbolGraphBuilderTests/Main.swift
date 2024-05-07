@@ -80,13 +80,15 @@ enum Main:TestMain, TestBattery
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
 
+        //  https://github.com/tayloraswift/swift-unidoc/issues/211
+        #if !os(macOS)
         if  let tests:TestGroup = tests / "swift-nio",
             let docs:SymbolGraphObject<Void> = (tests.do
             {
                 try workspace.build(package: try .remote(
                         package: "swift-nio",
                         from: "https://github.com/apple/swift-nio.git",
-                        at: "2.63.0",
+                        at: "2.65.0",
                         in: workspace),
                     with: toolchain)
             })
@@ -101,8 +103,8 @@ enum Main:TestMain, TestBattery
             ])
 
             docs.roundtrip(for: tests, in: workspace.artifacts)
-
         }
+        #endif
 
         //  SwiftNIO has lots of dependencies. If we can handle SwiftNIO,
         //  we can handle anything!
