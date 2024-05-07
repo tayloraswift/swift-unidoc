@@ -61,7 +61,7 @@ extension Unidoc.PackageOutput
             {
                 $0[stage: .match] = .init
                 {
-                    $0[Unidoc.EditionMetadata[.series]] = Unidoc.VersionSeries.release
+                    $0[Unidoc.EditionMetadata[.release]] = true
                 }
                 $0[stage: .sort] = .init
                 {

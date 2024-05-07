@@ -62,16 +62,16 @@ extension Unidoc.TagsTable:HTML.OutputStreamable
             {
                 let row:Row = .init(
                     volume: tagged.volume,
-                    tagged: .init(commit: tagged.edition.sha1,
-                        series: tagged.edition.series,
-                        patch: tagged.edition.patch,
+                    tagged: .init(
+                        release: tagged.edition.release,
+                        version: tagged.edition.patch,
+                        commit: tagged.edition.sha1,
                         name: tagged.edition.name),
                     package: self.package,
                     graph: tagged.graph,
                     view: self.view)
 
-                //  Only releases and prereleases appear in ``tagged``.
-                if  case .release? = tagged.edition.series
+                if  tagged.edition.release
                 {
                     $0[.tr] { $0.class = modern.release ? "modern" : nil } = row
 

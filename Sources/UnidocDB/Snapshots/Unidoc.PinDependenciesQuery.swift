@@ -112,10 +112,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
                             $0[.expr] { $0[.eq] = (Unidoc.EditionMetadata[.patch], v) }
                         }
 
-                        $0
-                        {
-                            $0[Unidoc.EditionMetadata[.series]] = Unidoc.VersionSeries.release
-                        }
+                        $0 { $0[Unidoc.EditionMetadata[.release]] = true }
                     }
                 }
             }
