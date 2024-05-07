@@ -50,7 +50,7 @@ extension Unidoc.DB.Editions
     }
         where:
     {
-        $0[Unidoc.EditionMetadata[.release]] { $0[.eq] = false }
+        $0[Unidoc.EditionMetadata[.series]] { $0[.eq] = Unidoc.VersionSeries.prerelease }
     }
 
     public static
@@ -63,7 +63,7 @@ extension Unidoc.DB.Editions
     }
         where:
     {
-        $0[Unidoc.EditionMetadata[.release]] { $0[.eq] = true }
+        $0[Unidoc.EditionMetadata[.series]] { $0[.eq] = Unidoc.VersionSeries.release }
     }
 }
 extension Unidoc.DB.Editions:Mongo.CollectionModel
