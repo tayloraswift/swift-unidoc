@@ -194,7 +194,7 @@ extension SSGC.TypeChecker
         //  implementations that implement requirements from protocols in the current module.
         for decl:SSGC.DeclObject in others
         {
-            guard case nil = decl.scope,
+            guard decl.scopes.isEmpty,
             let parent:UnqualifiedPath = .init(decl.value.path.prefix),
             let parent:Symbol.Decl = protocols[parent]
             else
