@@ -47,18 +47,14 @@ extension SSGC.SpecialBuild:SSGC.DocumentationBuild
                     dependencies: 0, 3),
 
                 //  5:
-                .toolchain(module: "Cxx",
-                    dependencies: 0),
-
-                //  6:
                 .toolchain(module: "Dispatch",
                     dependencies: 0),
-                //  7:
+                //  6:
                 .toolchain(module: "DispatchIntrospection",
                     dependencies: 0),
-                //  8:
+                //  7:
                 .toolchain(module: "Foundation",
-                    dependencies: 0, 6),
+                    dependencies: 0, 5),
             ]
 
         case .linux:
