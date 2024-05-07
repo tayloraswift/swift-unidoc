@@ -355,7 +355,15 @@ extension SSGC.Toolchain
                 "-skip-inherited-docs",
             ]
 
-            if  let swiftSDK:SSGC.AppleSDK = self.swiftSDK
+            #if os(macOS)
+            //  On macOS, dumping symbols without specifying the SDK will always fail.
+            //  Therefore, we always provide a default SDK.
+            let swiftSDK:SSGC.AppleSDK? = self.swiftSDK ?? .macOS
+            #else
+            let swiftSDK:SSGC.AppleSDK? = self.swiftSDK
+            #endif
+
+            if  let swiftSDK:SSGC.AppleSDK
             {
                 arguments.append("-sdk")
                 arguments.append(swiftSDK.path)
