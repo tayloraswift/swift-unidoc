@@ -17,10 +17,10 @@ extension Unidoc.Versions
         public
         var volume:Unidoc.VolumeMetadata?
         public
-        var graph:Graph?
+        var graph:Unidoc.VersionState.Graph?
 
         @inlinable public
-        init(volume:Unidoc.VolumeMetadata?, graph:Graph?)
+        init(volume:Unidoc.VolumeMetadata?, graph:Unidoc.VersionState.Graph?)
         {
             self.volume = volume
             self.graph = graph
@@ -30,7 +30,7 @@ extension Unidoc.Versions
 extension Unidoc.Versions.TopOfTree:Mongo.MasterCodingModel
 {
     public
-    typealias CodingKey = Unidoc.Versions.Tag.CodingKey
+    typealias CodingKey = Unidoc.VersionState.CodingKey
 }
 extension Unidoc.Versions.TopOfTree:BSONDocumentDecodable
 {

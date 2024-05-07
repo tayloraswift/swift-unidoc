@@ -20,8 +20,10 @@ extension Unidoc
         /// The patch version associated with this edition. This might not be
         /// trivially-computable from the ``name`` property, for example, `5.9.0` from
         /// `swift-5.9-RELEASE`.
+        ///
+        /// TODO: This should also include the trailing components, for prereleases.
         public
-        var patch:PatchVersion
+        var semver:PatchVersion?
 
         /// The exact ref name associated with this edition.
         public
@@ -40,14 +42,14 @@ extension Unidoc
         @inlinable public
         init(id:Edition,
             release:Bool,
-            patch:PatchVersion,
+            semver:PatchVersion?,
             name:String,
             sha1:SHA1?)
         {
             self.id = id
 
             self.release = release
-            self.patch = patch
+            self.semver = semver
 
             self.name = name
             self.sha1 = sha1
@@ -74,7 +76,7 @@ extension Unidoc.EditionMetadata:Mongo.MasterCodingModel
         case version = "v"
 
         case release = "R"
-        case patch = "A"
+        case semver = "A"
 
         case name = "T"
         case sha1 = "S"
@@ -91,7 +93,7 @@ extension Unidoc.EditionMetadata:BSONDocumentEncodable
         bson[.version] = self.id.version
 
         bson[.release] = self.release
-        bson[.patch] = self.patch
+        bson[.semver] = self.semver
 
         bson[.name] = self.name
         bson[.sha1] = self.sha1
@@ -104,7 +106,7 @@ extension Unidoc.EditionMetadata:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             release: try bson[.release].decode(),
-            patch: try bson[.patch].decode(),
+            semver: try bson[.semver]?.decode(),
             name: try bson[.name].decode(),
             sha1: try bson[.sha1]?.decode())
     }

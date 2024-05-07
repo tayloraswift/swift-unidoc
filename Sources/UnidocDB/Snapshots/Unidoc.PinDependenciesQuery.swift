@@ -109,9 +109,10 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
 
                         $0
                         {
-                            $0[.expr] { $0[.eq] = (Unidoc.EditionMetadata[.patch], v) }
+                            $0[.expr] { $0[.eq] = (Unidoc.EditionMetadata[.semver], v) }
                         }
 
+                        $0 { $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true } }
                         $0 { $0[Unidoc.EditionMetadata[.release]] = true }
                     }
                 }
