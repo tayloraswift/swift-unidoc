@@ -55,7 +55,7 @@ extension Unidoc.DB.Editions
     }
 
     public static
-    let indexReleases:Mongo.CollectionIndex = .init("Releases/2",
+    let indexReleases:Mongo.CollectionIndex = .init("Releases",
         unique: true)
     {
         $0[Unidoc.EditionMetadata[.package]] = (-)
@@ -64,7 +64,6 @@ extension Unidoc.DB.Editions
     }
         where:
     {
-        $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
         $0[Unidoc.EditionMetadata[.release]] { $0[.eq] = true }
     }
 }
