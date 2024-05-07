@@ -66,9 +66,9 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
         case .tags(limit: let limit, page: let index, series: let series):
             let table:Unidoc.TagsTable = .init(
                 package: output.package.symbol,
-                versions: output.versions.list,
+                rows: output.versions,
                 view: view,
-                more: output.versions.list.count == limit)
+                more: output.versions.count == limit)
 
             let page:Unidoc.TagsPage = .init(package: output.package,
                 series: series,
@@ -79,7 +79,7 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
             return .ok(page.resource(format: format))
 
         case .none(limit: let limit):
-            let releases:Int = output.versions.list.reduce(into: 0)
+            let releases:Int = output.versions.reduce(into: 0)
             {
                 if  $1.edition.release
                 {
@@ -89,8 +89,7 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
 
             let table:Unidoc.TagsTable = .init(
                 package: output.package.symbol,
-                _tagless: output.versions.top,
-                versions: output.versions.list.sorted
+                rows: output.versions.sorted
                 {
                     $0.edition.ordering < $1.edition.ordering
                 },

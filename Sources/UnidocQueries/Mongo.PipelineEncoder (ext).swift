@@ -54,38 +54,6 @@ extension Mongo.PipelineEncoder
         }
     }
 
-    mutating
-    func loadTopOfTree(from package:Mongo.AnyKeyPath, into top:Mongo.AnyKeyPath)
-    {
-        //  Compute id of local snapshot, if one were to exist.
-        let id:Mongo.AnyKeyPath = "_top_id"
-
-        self[stage: .set] = .init
-        {
-            $0[id] = .expr
-            {
-                $0[.add] = .init
-                {
-                    $0.expr
-                    {
-                        $0[.multiply] =
-                        (
-                            package / Unidoc.PackageMetadata[.id],
-                            0x0000_0001_0000_0000 as Int64
-                        )
-                    }
-                    $0.append(0x0000_0000_ffff_ffff as Int64)
-                }
-            }
-        }
-
-        self.loadResources(associatedTo: id,
-            volume: top / Unidoc.Versions.TopOfTree[.volume],
-            graph: top / Unidoc.Versions.TopOfTree[.graph])
-
-        self[stage: .unset] = id
-    }
-
     /// Load information about any associated documentation volume or symbol graph for a
     /// particular package edition.
     private mutating

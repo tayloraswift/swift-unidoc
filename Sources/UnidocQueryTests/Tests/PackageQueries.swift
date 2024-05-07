@@ -140,8 +140,8 @@ struct PackageQueries:UnidocDatabaseTestBattery
                         return
                     }
 
-                    tests.expect(value: output.versions.top?.graph)
-                    tests.expect(output.versions.list ..? [])
+                    tests.expect(output.versions.count ==? 1)
+                    tests.expect(output.versions[0].edition.id ==? status.debut.edition)
                     tests.expect(output.package.id ==? status.debut.package)
                 }
             }
@@ -160,18 +160,16 @@ struct PackageQueries:UnidocDatabaseTestBattery
                         return
                     }
 
-                    tests.expect(nil: output.versions.top?.graph)
-
-                    guard tests.expect(output.versions.list.count ==? 2)
+                    guard tests.expect(output.versions.count ==? 2)
                     else
                     {
                         return
                     }
 
                     //  Reverse chronological order!
-                    tests.expect(output.versions.list[0].edition.id ==?
+                    tests.expect(output.versions[0].edition.id ==?
                         status.fearless.1.edition)
-                    tests.expect(output.versions.list[1].edition.id ==?
+                    tests.expect(output.versions[1].edition.id ==?
                         status.fearless.0.edition)
                 }
             }
@@ -190,15 +188,15 @@ struct PackageQueries:UnidocDatabaseTestBattery
                         return
                     }
 
-                    tests.expect(value: output.versions.top?.graph)
-
-                    guard tests.expect(output.versions.list.count ==? 1)
+                    guard tests.expect(output.versions.count ==? 2)
                     else
                     {
                         return
                     }
 
-                    tests.expect(output.versions.list[0].edition.id ==?
+                    tests.expect(output.versions[0].edition.id ==?
+                        status.speakNow.0.edition)
+                    tests.expect(output.versions[1].edition.id ==?
                         status.speakNow.1.edition)
                 }
             }
@@ -217,15 +215,13 @@ struct PackageQueries:UnidocDatabaseTestBattery
                         return
                     }
 
-                    tests.expect(nil: output.versions.top?.graph)
-
-                    guard tests.expect(output.versions.list.count ==? 1)
+                    guard tests.expect(output.versions.count ==? 1)
                     else
                     {
                         return
                     }
 
-                    tests.expect(output.versions.list[0].edition.id ==? status.red.edition)
+                    tests.expect(output.versions[0].edition.id ==? status.red.edition)
                 }
             }
         }

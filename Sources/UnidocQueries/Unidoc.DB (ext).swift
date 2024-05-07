@@ -96,7 +96,7 @@ extension Unidoc.DB
             guard
             let output:Unidoc.VersionsQuery.Output = pipeline.value,
             let repo:Unidoc.PackageRepo = output.package.repo,
-            let tag:Unidoc.VersionState = output.versions.list.first
+            let tag:Unidoc.VersionState = output.versions.first
             else
             {
                 return nil

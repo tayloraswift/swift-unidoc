@@ -40,19 +40,6 @@ extension Unidoc.TagsTable
 extension Unidoc.TagsTable.Row
 {
     init(package:Symbol.Package,
-        version:Unidoc.Versions.TopOfTree,
-        view:Unidoc.Permissions)
-    {
-        self.init(
-            volume: version.volume,
-            series: nil,
-            patch: nil,
-            graph: version.graph.map { .init(package: package, graph: $0, view: view) },
-            sha1: nil,
-            name: "")
-    }
-
-    init(package:Symbol.Package,
         version:Unidoc.VersionState,
         view:Unidoc.Permissions)
     {

@@ -8,22 +8,18 @@ extension Unidoc
         private
         let package:Symbol.Package
         private
-        let _tagless:Unidoc.Versions.TopOfTree?
-        private
-        let versions:[Unidoc.VersionState]
+        let rows:[Unidoc.VersionState]
         let view:Permissions
         let more:Bool
 
         init(
             package:Symbol.Package,
-            _tagless:Unidoc.Versions.TopOfTree? = nil,
-            versions:[Unidoc.VersionState],
+            rows:[Unidoc.VersionState],
             view:Permissions,
             more:Bool)
         {
             self.package = package
-            self._tagless = _tagless
-            self.versions = versions
+            self.rows = rows
             self.view = view
             self.more = more
         }
@@ -47,18 +43,10 @@ extension Unidoc.TagsTable:HTML.OutputStreamable
 
         table[.tbody]
         {
-            if  let _tagless:Unidoc.Versions.TopOfTree = self._tagless
-            {
-                $0[.tr] { $0.class = "tagless" } = Row.init(
-                    package: self.package,
-                    version: _tagless,
-                    view: self.view)
-            }
-
             var modern:(prerelease:Bool, release:Bool) = (true, true)
-            for version:Unidoc.VersionState in self.versions
+            for row:Unidoc.VersionState in self.rows
             {
-                let row:Row = .init(package: self.package, version: version, view: self.view)
+                let row:Row = .init(package: self.package, version: row, view: self.view)
 
                 $0[.tr]
                 {
