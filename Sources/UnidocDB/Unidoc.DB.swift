@@ -265,7 +265,7 @@ extension Unidoc.DB
                     package: package,
                     version: id),
                 release: version.release,
-                patch: version.number,
+                semver: version.number,
                 name: name,
                 sha1: sha1)
             //  This can fail if we race with another process.
