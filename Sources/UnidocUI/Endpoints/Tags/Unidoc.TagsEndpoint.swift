@@ -91,7 +91,8 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
                 package: output.package.symbol,
                 rows: output.versions.sorted
                 {
-                    $0.edition.ordering < $1.edition.ordering
+                    //  Reverse order, because we want the latest versions to come first.
+                    $0.edition.ordering > $1.edition.ordering
                 },
                 view: view,
                 more: releases == limit)
