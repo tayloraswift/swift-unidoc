@@ -25,8 +25,8 @@ extension Mongo.PipelineEncoder
             {
                 $0[stage: .match] = .init
                 {
-                    $0[Unidoc.EditionMetadata[.release]] = series == .release
-                    $0[Unidoc.EditionMetadata[.release]] { $0[.exists] = true }
+                    $0[Unidoc.EditionMetadata[.series]] = series
+                    $0[Unidoc.EditionMetadata[.series]] { $0[.exists] = true }
                 }
 
                 $0[stage: .sort] = .init
