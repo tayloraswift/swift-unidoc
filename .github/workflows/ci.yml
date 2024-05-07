@@ -51,7 +51,15 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
-            -   name: Build only
+            -   name: Build debug
                 run: |
                     swift --version
                     swift build
+
+            -   name: Build release
+                run: |
+                    swift build -c release
+
+            -   name: Test SymbolGraphBuilder
+                run: |
+                    swift run -c release SymbolGraphBuilderTests
