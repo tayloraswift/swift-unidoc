@@ -11,7 +11,7 @@ extension Unidoc.VersionsQuery
     struct Output:Sendable
     {
         public
-        var versions:Unidoc.Versions
+        var versions:[Unidoc.VersionState]
         public
         var aliases:[Symbol.Package]
         public
@@ -24,7 +24,7 @@ extension Unidoc.VersionsQuery
         var user:Unidoc.User?
 
         @inlinable public
-        init(versions:Unidoc.Versions,
+        init(versions:[Unidoc.VersionState],
             aliases:[Symbol.Package],
             package:Unidoc.PackageMetadata,
             build:Unidoc.BuildMetadata?,
@@ -45,8 +45,7 @@ extension Unidoc.VersionsQuery.Output:Mongo.MasterCodingModel
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case versions_list
-        case versions_top
+        case versions
         case aliases
         case package
         case build
@@ -59,18 +58,7 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        var top:Unidoc.Versions.TopOfTree? = try bson[.versions_top]?.decode()
-
-        if  let container:Unidoc.Versions.TopOfTree = top,
-            case nil = container.graph,
-            case nil = container.volume
-        {
-            top = nil
-        }
-
-        self.init(versions: .init(
-                list: try bson[.versions_list]?.decode() ?? [],
-                top: top),
+        self.init(versions: try bson[.versions]?.decode() ?? [],
             aliases: try bson[.aliases]?.decode() ?? [],
             package: try bson[.package].decode(),
             build: try bson[.build]?.decode(),
