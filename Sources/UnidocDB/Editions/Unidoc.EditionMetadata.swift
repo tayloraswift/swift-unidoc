@@ -4,7 +4,6 @@ import SemanticVersions
 import SHA1
 import SymbolGraphs
 import Unidoc
-import UnidocAPI
 import UnidocRecords
 
 extension Unidoc
@@ -17,7 +16,7 @@ extension Unidoc
 
         /// Whether or not this edition is a release.
         public
-        var series:VersionSeries?
+        var release:Bool
         /// The patch version associated with this edition. This might not be
         /// trivially-computable from the ``name`` property, for example, `5.9.0` from
         /// `swift-5.9-RELEASE`.
@@ -40,14 +39,14 @@ extension Unidoc
 
         @inlinable public
         init(id:Edition,
-            series:VersionSeries?,
+            release:Bool,
             patch:PatchVersion,
             name:String,
             sha1:SHA1?)
         {
             self.id = id
 
-            self.series = series
+            self.release = release
             self.patch = patch
 
             self.name = name
@@ -74,15 +73,11 @@ extension Unidoc.EditionMetadata:Mongo.MasterCodingModel
         /// Duplicates the low 32 bits of the ``id`` property.
         case version = "v"
 
-        case series = "R"
+        case release = "R"
         case patch = "A"
 
         case name = "T"
         case sha1 = "S"
-
-        @available(*, deprecated, renamed: "series")
-        @inlinable public static
-        var release:Self { .series }
     }
 }
 extension Unidoc.EditionMetadata:BSONDocumentEncodable
@@ -95,7 +90,7 @@ extension Unidoc.EditionMetadata:BSONDocumentEncodable
         bson[.package] = self.id.package
         bson[.version] = self.id.version
 
-        bson[.series] = self.series
+        bson[.release] = self.release
         bson[.patch] = self.patch
 
         bson[.name] = self.name
@@ -108,7 +103,7 @@ extension Unidoc.EditionMetadata:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
-            series: try bson[.series]?.decode(),
+            release: try bson[.release].decode(),
             patch: try bson[.patch].decode(),
             name: try bson[.name].decode(),
             sha1: try bson[.sha1]?.decode())

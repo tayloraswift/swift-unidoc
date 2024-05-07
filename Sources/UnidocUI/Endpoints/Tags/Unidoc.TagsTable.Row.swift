@@ -45,7 +45,7 @@ extension Unidoc.TagsTable.Row:HTML.OutputStreamable
     func += (tr:inout HTML.ContentEncoder, self:Self)
     {
         let version:PatchVersion
-        let series:Unidoc.VersionSeries?
+        let release:Bool?
 
         if  let tag:Tagged = self.tagged
         {
@@ -58,8 +58,8 @@ extension Unidoc.TagsTable.Row:HTML.OutputStreamable
 
             } = sha1?.prefix(7) ?? ""
 
-            version = tag.patch
-            series = tag.series
+            version = tag.version
+            release = tag.release
         }
         else
         {
@@ -67,7 +67,7 @@ extension Unidoc.TagsTable.Row:HTML.OutputStreamable
             tr[.td]
 
             version = .v(0, 0, 0)
-            series = nil
+            release = nil
         }
 
         tr[.td, { $0.class = "version" }]
@@ -86,12 +86,12 @@ extension Unidoc.TagsTable.Row:HTML.OutputStreamable
                 return
             }
 
-            switch series
+            switch release
             {
-            case .release?:
+            case true?:
                 break
 
-            case .prerelease?:
+            case false?:
                 $0 += " "
                 $0[.span]
                 {
