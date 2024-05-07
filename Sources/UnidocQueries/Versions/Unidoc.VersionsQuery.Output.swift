@@ -45,8 +45,7 @@ extension Unidoc.VersionsQuery.Output:Mongo.MasterCodingModel
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case versions_prereleases
-        case versions_releases
+        case versions_list
         case versions_top
         case aliases
         case package
@@ -70,8 +69,7 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
         }
 
         self.init(versions: .init(
-                prereleases: try bson[.versions_prereleases]?.decode() ?? [],
-                releases: try bson[.versions_releases]?.decode() ?? [],
+                list: try bson[.versions_list]?.decode() ?? [],
                 top: top),
             aliases: try bson[.aliases]?.decode() ?? [],
             package: try bson[.package].decode(),

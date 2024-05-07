@@ -4,19 +4,14 @@ extension Unidoc
     struct Versions:Sendable
     {
         public
-        var prereleases:[Tag]
-        public
-        var releases:[Tag]
+        var list:[VersionState]
         public
         var top:TopOfTree?
 
         @inlinable public
-        init(prereleases:[Tag] = [],
-            releases:[Tag] = [],
-            top:TopOfTree? = nil)
+        init(list:[VersionState] = [], top:TopOfTree? = nil)
         {
-            self.prereleases = prereleases
-            self.releases = releases
+            self.list = list
             self.top = top
         }
     }

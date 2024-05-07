@@ -1,5 +1,6 @@
 import HTTP
 import MongoDB
+import SemanticVersions
 import Symbols
 import UnidocAPI
 import UnidocDB
@@ -63,66 +64,44 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
         switch self.query.filter
         {
         case .tags(limit: let limit, page: let index, series: let series):
-            let list:[Unidoc.Versions.Tag]
-            switch series
-            {
-            case .release:      list = output.versions.releases
-            case .prerelease:   list = output.versions.prereleases
-            }
-
-            let tags:Unidoc.TagsTable = .init(
+            let table:Unidoc.TagsTable = .init(
                 package: output.package.symbol,
-                tagged: list,
+                versions: output.versions.list,
                 view: view,
-                more: list.count == limit)
+                more: output.versions.list.count == limit)
 
             let page:Unidoc.TagsPage = .init(package: output.package,
                 series: series,
                 index: index,
                 limit: limit,
-                table: tags)
+                table: table)
 
             return .ok(page.resource(format: format))
 
         case .none(limit: let limit):
-            var prereleases:ArraySlice<Unidoc.Versions.Tag> = output.versions.prereleases[...]
-            var releases:ArraySlice<Unidoc.Versions.Tag> = output.versions.releases[...]
-
-            //  Merge the two pre-sorted arrays into a single sorted array.
-            var list:[Unidoc.Versions.Tag] = []
-                list.reserveCapacity(prereleases.count + releases.count)
-            while
-                let prerelease:Unidoc.Versions.Tag = prereleases.first,
-                let release:Unidoc.Versions.Tag = releases.first
+            let releases:Int = output.versions.list.reduce(into: 0)
             {
-                if  release.edition.patch < prerelease.edition.patch
+                if  $1.edition.release
                 {
-                    list.append(prerelease)
-                    prereleases.removeFirst()
-                }
-                else
-                {
-                    list.append(release)
-                    releases.removeFirst()
+                    $0 += 1
                 }
             }
 
-            //  Append any remaining items.
-            list += prereleases
-            list += releases
-
-            let tags:Unidoc.TagsTable = .init(
+            let table:Unidoc.TagsTable = .init(
                 package: output.package.symbol,
-                tagless: output.versions.top,
-                tagged: list,
+                _tagless: output.versions.top,
+                versions: output.versions.list.sorted
+                {
+                    $0.edition.ordering < $1.edition.ordering
+                },
                 view: view,
-                more: output.versions.releases.count == limit)
+                more: releases == limit)
 
             let page:Unidoc.VersionsPage = .init(package: output.package,
                 aliases: output.aliases,
                 build: output.build,
                 realm: output.realm,
-                table: tags)
+                table: table)
 
             return .ok(page.resource(format: format))
         }

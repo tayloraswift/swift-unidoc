@@ -1,5 +1,6 @@
 import BSON
 import HTML
+import SemanticVersions
 import UnixTime
 
 extension Unidoc
@@ -74,9 +75,9 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
                 $0[.span] { $0.class = "placeholder" } = "Archived!"
             }
             else if
-                let release:Unidoc.EditionMetadata = self.package.release
+                let patch:PatchVersion = self.package.release?.semver
             {
-                $0[.span] { $0.class = "release" } = "\(release.patch)"
+                $0[.span] { $0.class = "release" } = "\(patch)"
             }
             else
             {

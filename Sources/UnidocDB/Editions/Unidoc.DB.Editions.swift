@@ -41,28 +41,30 @@ extension Unidoc.DB.Editions
     }
 
     public static
-    let indexNonreleases:Mongo.CollectionIndex = .init("Nonreleases",
+    let indexPrereleases:Mongo.CollectionIndex = .init("Prereleases",
         unique: true)
     {
         $0[Unidoc.EditionMetadata[.package]] = (-)
-        $0[Unidoc.EditionMetadata[.patch]] = (-)
+        $0[Unidoc.EditionMetadata[.semver]] = (-)
         $0[Unidoc.EditionMetadata[.version]] = (-)
     }
         where:
     {
+        $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
         $0[Unidoc.EditionMetadata[.release]] { $0[.eq] = false }
     }
 
     public static
-    let indexReleases:Mongo.CollectionIndex = .init("Releases",
+    let indexReleases:Mongo.CollectionIndex = .init("Releases/2",
         unique: true)
     {
         $0[Unidoc.EditionMetadata[.package]] = (-)
-        $0[Unidoc.EditionMetadata[.patch]] = (-)
+        $0[Unidoc.EditionMetadata[.semver]] = (-)
         $0[Unidoc.EditionMetadata[.version]] = (-)
     }
         where:
     {
+        $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
         $0[Unidoc.EditionMetadata[.release]] { $0[.eq] = true }
     }
 }
@@ -80,7 +82,7 @@ extension Unidoc.DB.Editions:Mongo.CollectionModel
         [
             Self.indexEditionName,
             Self.indexEditionCoordinate,
-            Self.indexNonreleases,
+            Self.indexPrereleases,
             Self.indexReleases,
         ]
     }

@@ -9,11 +9,11 @@ extension Unidoc.TagsTable
         private
         let package:Symbol.Package
         private
-        let graph:Unidoc.Versions.Graph
+        let graph:Unidoc.VersionState.Graph
         let view:Unidoc.Permissions
 
         init(package:Symbol.Package,
-            graph:Unidoc.Versions.Graph,
+            graph:Unidoc.VersionState.Graph,
             view:Unidoc.Permissions)
         {
             self.package = package

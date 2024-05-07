@@ -95,21 +95,14 @@ extension Unidoc.DB
 
             guard
             let output:Unidoc.VersionsQuery.Output = pipeline.value,
-            let repo:Unidoc.PackageRepo = output.package.repo
+            let repo:Unidoc.PackageRepo = output.package.repo,
+            let tag:Unidoc.VersionState = output.versions.list.first
             else
             {
                 return nil
             }
 
-            let tag:Unidoc.Versions.Tag?
-
-            switch series
-            {
-            case .release:      tag = output.versions.releases.first
-            case .prerelease:   tag = output.versions.prereleases.first
-            }
-
-            if  let tag:Unidoc.Versions.Tag, force || tag.graph == nil
+            if  force || tag.graph == nil
             {
                 return .init(coordinate: tag.edition.id,
                     package: output.package.symbol,

@@ -12,9 +12,9 @@ extension Mongo.PipelineEncoder
         from package:Mongo.AnyKeyPath,
         into tags:Mongo.AnyKeyPath)
     {
-        let edition:Mongo.AnyKeyPath = Unidoc.Versions.Tag[.edition]
-        let volume:Mongo.AnyKeyPath = Unidoc.Versions.Tag[.volume]
-        let graph:Mongo.AnyKeyPath = Unidoc.Versions.Tag[.graph]
+        let edition:Mongo.AnyKeyPath = Unidoc.VersionState[.edition]
+        let volume:Mongo.AnyKeyPath = Unidoc.VersionState[.volume]
+        let graph:Mongo.AnyKeyPath = Unidoc.VersionState[.graph]
 
         self[stage: .lookup] = Mongo.LookupDocument.init
         {
@@ -26,12 +26,14 @@ extension Mongo.PipelineEncoder
                 $0[stage: .match] = .init
                 {
                     $0[Unidoc.EditionMetadata[.release]] = series == .release
+                    //  TODO: do we actually need this for `release`?
                     $0[Unidoc.EditionMetadata[.release]] { $0[.exists] = true }
+                    $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
                 }
 
                 $0[stage: .sort] = .init
                 {
-                    $0[Unidoc.EditionMetadata[.patch]] = (-)
+                    $0[Unidoc.EditionMetadata[.semver]] = (-)
                     $0[Unidoc.EditionMetadata[.version]] = (-)
                 }
 
@@ -108,7 +110,7 @@ extension Mongo.PipelineEncoder
             $0[.foreignField] = Unidoc.Snapshot[.id]
             $0[.pipeline] = .init
             {
-                $0[stage: .replaceWith] = .init(Unidoc.Versions.Graph.CodingKey.self)
+                $0[stage: .replaceWith] = .init(Unidoc.VersionState.Graph.CodingKey.self)
                 {
                     $0[.id] = Unidoc.Snapshot[.id]
                     $0[.inlineBytes] = .expr

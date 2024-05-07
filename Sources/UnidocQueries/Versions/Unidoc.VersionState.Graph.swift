@@ -9,9 +9,9 @@ extension Unidoc.VersionsQuery
 {
     @available(*, deprecated)
     public
-    typealias Graph = Unidoc.Versions.Graph
+    typealias Graph = Unidoc.VersionState.Graph
 }
-extension Unidoc.Versions
+extension Unidoc.VersionState
 {
     @frozen public
     struct Graph:Equatable, Sendable
@@ -43,7 +43,7 @@ extension Unidoc.Versions
         }
     }
 }
-extension Unidoc.Versions.Graph:Mongo.MasterCodingModel
+extension Unidoc.VersionState.Graph:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
@@ -55,7 +55,7 @@ extension Unidoc.Versions.Graph:Mongo.MasterCodingModel
         case abi
     }
 }
-extension Unidoc.Versions.Graph:BSONDocumentDecodable
+extension Unidoc.VersionState.Graph:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

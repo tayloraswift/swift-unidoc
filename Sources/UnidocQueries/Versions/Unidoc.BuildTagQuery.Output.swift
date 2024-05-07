@@ -7,9 +7,9 @@ extension Unidoc.BuildTagQuery
     struct Output:Sendable
     {
         let package:Unidoc.PackageMetadata
-        let version:Unidoc.Versions.Tag
+        let version:Unidoc.VersionState
 
-        init(package:Unidoc.PackageMetadata, version:Unidoc.Versions.Tag)
+        init(package:Unidoc.PackageMetadata, version:Unidoc.VersionState)
         {
             self.package = package
             self.version = version
