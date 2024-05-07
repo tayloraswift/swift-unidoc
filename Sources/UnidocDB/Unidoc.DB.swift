@@ -264,7 +264,7 @@ extension Unidoc.DB
             let edition:Unidoc.EditionMetadata = .init(id: .init(
                     package: package,
                     version: id),
-                release: version.release,
+                series: version.release ? .release : .prerelease,
                 patch: version.number,
                 name: name,
                 sha1: sha1)
