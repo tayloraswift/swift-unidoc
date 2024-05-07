@@ -18,9 +18,13 @@ extension SSGC
 
         /// The type of the superforms tracked by ``\.value.superforms``.
         var superforms:(any SuperformRelationship.Type)?
-        /// The symbol this scalar is lexically-nested in. This may
-        /// be an extension block symbol.
-        var scope:Symbol.USR?
+        /// The symbols this scalar is lexically-nested in. This may include an extension block
+        /// symbol.
+        ///
+        /// Remarkably, it is possible for certain (Objective C) declarations to have more than
+        /// one lexical parent. For example, base class methods can be shared by multiple
+        /// subclasses in addition to the base class.
+        var scopes:Set<Symbol.USR>
 
         private(set)
         var value:Decl
@@ -35,7 +39,7 @@ extension SSGC
             self.culture = culture
 
             self.superforms = nil
-            self.scope = nil
+            self.scopes = []
 
             self.value = value
         }
@@ -77,16 +81,16 @@ extension SSGC.DeclObject
             throw SSGC.SemanticError.cannot(have: .scope, as: self.value.phylum)
         }
 
-        //  It is okay to restate the exact same nesting relationship multiple times. This
-        //  sometimes happens when compiling C modules.
-        if  let scope:Symbol.USR = self.scope,
+        //  Only (Objective) C declarations can have multiple lexical scopes.
+        if  case .s = self.id.language,
+            let scope:Symbol.USR = self.scopes.first,
                 scope != relationship.scope
         {
             throw SSGC.SemanticError.already(has: .scope(scope))
         }
         else
         {
-            self.scope = relationship.scope
+            self.scopes.insert(relationship.scope)
             self.kinks += relationship.kinks
         }
 
