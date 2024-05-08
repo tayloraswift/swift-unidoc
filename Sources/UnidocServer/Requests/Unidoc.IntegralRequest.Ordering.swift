@@ -416,7 +416,7 @@ extension Unidoc.IntegralRequest.Ordering
                 if  let account:Unidoc.Account,
                     let package:String = form["package"],
                     let package:Unidoc.Package = .init(package),
-                    let ref:String = form["tag"]
+                    let ref:String = form["ref"]
                 {
                     return .actor(Unidoc.PackageIndexRefOperation.init(
                         account: account,
