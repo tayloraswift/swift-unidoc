@@ -196,6 +196,59 @@ extension Unidoc.VersionsPage
                 type: .branches)
         }
 
+        section[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Unidoc.Post[.packageIndexTag])"
+            $0.method = "post"
+
+            $0.class = "config"
+        }
+            content:
+        {
+            $0[.dl]
+            {
+                $0[.dt] = "Branch name"
+                $0[.dd]
+                {
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "package"
+                        $0.value = "\(self.package.id)"
+                    }
+
+                    $0[.input]
+                    {
+                        $0.type = "text"
+                        $0.name = "ref"
+                        $0.required = true
+                        $0.readonly = !self.view.editor
+
+                        $0.placeholder = "master"
+                        $0.pattern = #"^[a-zA-Z0-9_\-\./]+$"#
+                    }
+                }
+            }
+
+            $0[.button]
+            {
+                $0.class = "area"
+                $0.type = "submit"
+
+                if  case nil = self.view.global
+                {
+                    $0.disabled = true
+                    $0.title = "You are not logged in!"
+                }
+                else if !self.view.editor
+                {
+                    $0.disabled = true
+                    $0.title = "You are not an editor for this package!"
+                }
+            } = "Import ref"
+        }
+
         section[.h2] = Heading.settings
 
         if  case nil = self.view.global
@@ -406,26 +459,16 @@ extension Unidoc.VersionsPage
                         $0.name = "package"
                         $0.value = "\(self.package.id)"
                     }
-                    // $0[.input]
-                    // {
-                    //     $0.type = "hidden"
-                    //     $0.name = "from"
-                    //     $0.value = "\(self.location)"
-                    // }
                     $0[.input]
                     {
                         $0.type = "text"
                         $0.name = "platform-preference"
                         $0.required = true
+                        $0.readonly = !self.view.editor
 
                         $0.placeholder = "aarch64-unknown-linux-gnu"
                         $0.pattern = #"^[a-zA-Z0-9_\-\.]+$"#
                         $0.value = self.package.platformPreference?.description
-
-                        if !self.view.editor
-                        {
-                            $0.readonly = true
-                        }
                     }
                 }
             }
@@ -568,36 +611,6 @@ extension Unidoc.VersionsPage
             $0[.p]
             {
                 $0[.button] { $0.type = "submit" } = "Alias package"
-            }
-        }
-
-        section[.form]
-        {
-            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Unidoc.Post[.packageIndexTag])"
-            $0.method = "post"
-        }
-            content:
-        {
-            $0[.p]
-            {
-                $0[.input]
-                {
-                    $0.type = "hidden"
-                    $0.name = "package"
-                    $0.value = "\(self.package.id)"
-                }
-
-                $0[.input]
-                {
-                    $0.type = "text"
-                    $0.name = "tag"
-                    $0.placeholder = "tag"
-                }
-            }
-            $0[.p]
-            {
-                $0[.button] { $0.type = "submit" } = "Index package tag (GitHub)"
             }
         }
     }
