@@ -17,19 +17,24 @@ extension Unidoc
         private
         let limit:Int
         private
-        let table:TagsTable
+        let table:RefsTable
+
+        private
+        let more:Bool
 
         init(package:PackageMetadata,
             series:VersionSeries,
             index:Int,
             limit:Int,
-            table:TagsTable)
+            table:RefsTable,
+            more:Bool)
         {
             self.package = package
             self.series = series
             self.index = index
             self.limit = limit
             self.table = table
+            self.more = more
         }
     }
 }
@@ -77,7 +82,7 @@ extension Unidoc.TagsPage:Unidoc.ApplicationPage
                     $0[.span] = "prev"
                 }
 
-                if  self.table.more
+                if  self.more
                 {
                     $0[.a] { $0.href = "\(self.next)" } = "next"
                 }

@@ -2,7 +2,7 @@ import HTML
 import Media
 import Symbols
 
-extension Unidoc.TagsTable
+extension Unidoc.RefsTable
 {
     struct GraphCell
     {
@@ -22,7 +22,7 @@ extension Unidoc.TagsTable
         }
     }
 }
-extension Unidoc.TagsTable.GraphCell
+extension Unidoc.RefsTable.GraphCell
 {
     private
     var uplink:Tool
@@ -42,7 +42,7 @@ extension Unidoc.TagsTable.GraphCell
         .init(edition: self.graph.id, package: self.package, label: "Delete")
     }
 }
-extension Unidoc.TagsTable.GraphCell:HTML.OutputStreamable
+extension Unidoc.RefsTable.GraphCell:HTML.OutputStreamable
 {
     static
     func += (td:inout HTML.ContentEncoder, self:Self)

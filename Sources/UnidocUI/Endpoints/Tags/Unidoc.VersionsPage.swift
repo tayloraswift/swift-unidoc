@@ -11,6 +11,10 @@ extension Unidoc
     struct VersionsPage
     {
         private
+        let versions:RefsTable
+        private
+        let branches:[VersionState]
+        private
         let package:PackageMetadata
         private
         let aliases:[Symbol.Package]
@@ -19,26 +23,31 @@ extension Unidoc
         private
         let realm:RealmMetadata?
         private
-        let table:TagsTable
+        let more:Bool
 
-        init(package:PackageMetadata,
+        init(
+            versions:RefsTable,
+            branches:[VersionState],
+            package:PackageMetadata,
             aliases:[Symbol.Package] = [],
             build:BuildMetadata? = nil,
             realm:RealmMetadata? = nil,
-            table:TagsTable)
+            more:Bool)
         {
+            self.versions = versions
+            self.branches = branches
             self.package = package
             self.aliases = aliases
             self.build = build
             self.realm = realm
-            self.table = table
+            self.more = more
         }
     }
 }
 extension Unidoc.VersionsPage
 {
     private
-    var view:Unidoc.Permissions { self.table.view }
+    var view:Unidoc.Permissions { self.versions.view }
 }
 extension Unidoc.VersionsPage:Unidoc.RenderablePage
 {
@@ -164,15 +173,27 @@ extension Unidoc.VersionsPage
 
         section[.h2] = Heading.tags
 
-        section[.table] { $0.class = "tags" } = self.table
+        section[.table] { $0.class = "tags" } = self.versions
 
-        if  self.table.more
+        if  self.more
         {
             section[.a]
             {
                 $0.class = "area"
                 $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol, .release, page: 0])"
             } = "Browse more tags"
+        }
+
+        if !self.branches.isEmpty
+        {
+            section[.h2] = Heading.branches
+            section[.table]
+            {
+                $0.class = "tags"
+            } = Unidoc.RefsTable.init(package: self.package.symbol,
+                rows: self.branches,
+                view: self.view,
+                type: .branches)
         }
 
         section[.h2] = Heading.settings

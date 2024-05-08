@@ -139,6 +139,7 @@ extension Mongo.PipelineEncoder
                         $0[.coalesce] = (Unidoc.Snapshot[.size], 0)
                     }
                     $0[.action] = Unidoc.Snapshot[.action]
+                    $0[.commit] = Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.commit_hash]
                     $0[.abi] = Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]
                 }
             }

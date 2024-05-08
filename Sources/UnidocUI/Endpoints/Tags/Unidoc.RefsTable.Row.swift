@@ -7,7 +7,7 @@ import UnidocDB
 import UnidocQueries
 import UnidocRecords
 
-extension Unidoc.TagsTable
+extension Unidoc.RefsTable
 {
     struct Row
     {
@@ -37,7 +37,7 @@ extension Unidoc.TagsTable
         }
     }
 }
-extension Unidoc.TagsTable.Row
+extension Unidoc.RefsTable.Row
 {
     init(package:Symbol.Package,
         version:Unidoc.VersionState,
@@ -58,11 +58,12 @@ extension Unidoc.TagsTable.Row
             series: series,
             patch: version.edition.semver,
             graph: version.graph.map { .init(package: package, graph: $0, view: view) },
-            sha1: version.edition.sha1,
+            //  These might be different for a variety of reasons.
+            sha1: version.edition.sha1 ?? version.graph?.commit,
             name: version.edition.name)
     }
 }
-extension Unidoc.TagsTable.Row:HTML.OutputStreamable
+extension Unidoc.RefsTable.Row:HTML.OutputStreamable
 {
     static
     func += (tr:inout HTML.ContentEncoder, self:Self)
@@ -117,7 +118,7 @@ extension Unidoc.TagsTable.Row:HTML.OutputStreamable
             }
         }
 
-        if  let cell:Unidoc.TagsTable.GraphCell = self.graph
+        if  let cell:Unidoc.RefsTable.GraphCell = self.graph
         {
             tr[.td] { $0.class = "graph" } = cell
         }

@@ -13,6 +13,8 @@ extension Unidoc.VersionsQuery
         public
         var versions:[Unidoc.VersionState]
         public
+        var branches:[Unidoc.VersionState]
+        public
         var aliases:[Symbol.Package]
         public
         var package:Unidoc.PackageMetadata
@@ -24,7 +26,9 @@ extension Unidoc.VersionsQuery
         var user:Unidoc.User?
 
         @inlinable public
-        init(versions:[Unidoc.VersionState],
+        init(
+            versions:[Unidoc.VersionState],
+            branches:[Unidoc.VersionState],
             aliases:[Symbol.Package],
             package:Unidoc.PackageMetadata,
             build:Unidoc.BuildMetadata?,
@@ -32,6 +36,7 @@ extension Unidoc.VersionsQuery
             user:Unidoc.User?)
         {
             self.versions = versions
+            self.branches = branches
             self.aliases = aliases
             self.package = package
             self.build = build
@@ -46,6 +51,7 @@ extension Unidoc.VersionsQuery.Output:Mongo.MasterCodingModel
     enum CodingKey:String, Sendable
     {
         case versions
+        case branches
         case aliases
         case package
         case build
@@ -58,7 +64,9 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(versions: try bson[.versions]?.decode() ?? [],
+        self.init(
+            versions: try bson[.versions]?.decode() ?? [],
+            branches: try bson[.branches]?.decode() ?? [],
             aliases: try bson[.aliases]?.decode() ?? [],
             package: try bson[.package].decode(),
             build: try bson[.build]?.decode(),

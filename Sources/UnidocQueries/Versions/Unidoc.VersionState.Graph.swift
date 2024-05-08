@@ -1,6 +1,7 @@
 import BSON
 import MongoQL
 import SemanticVersions
+import SHA1
 import SymbolGraphs
 import UnidocAPI
 import UnidocRecords
@@ -26,6 +27,8 @@ extension Unidoc.VersionState
         public
         let action:Unidoc.Snapshot.PendingAction?
         public
+        let commit:SHA1?
+        public
         let abi:PatchVersion
 
         @inlinable public
@@ -33,12 +36,14 @@ extension Unidoc.VersionState
             inlineBytes:Int?,
             remoteBytes:Int,
             action:Unidoc.Snapshot.PendingAction?,
+            commit:SHA1?,
             abi:PatchVersion)
         {
             self.id = id
             self.inlineBytes = inlineBytes
             self.remoteBytes = remoteBytes
             self.action = action
+            self.commit = commit
             self.abi = abi
         }
     }
@@ -52,6 +57,7 @@ extension Unidoc.VersionState.Graph:Mongo.MasterCodingModel
         case inlineBytes
         case remoteBytes
         case action
+        case commit
         case abi
     }
 }
@@ -64,6 +70,7 @@ extension Unidoc.VersionState.Graph:BSONDocumentDecodable
             inlineBytes: try bson[.inlineBytes]?.decode(),
             remoteBytes: try bson[.remoteBytes].decode(),
             action: try bson[.action]?.decode(),
+            commit: try bson[.commit]?.decode(),
             abi: try bson[.abi].decode())
     }
 }
