@@ -5,18 +5,18 @@ extension GitHub
 {
     /// Models a GraphQL crawler response.
     @frozen public
-    struct TagResponse
+    struct RefResponse
     {
         public
-        var tag:Tag?
+        var ref:Ref?
 
-        init(tag:Tag?)
+        init(ref:Ref?)
         {
-            self.tag = tag
+            self.ref = ref
         }
     }
 }
-extension GitHub.TagResponse:JSONObjectDecodable
+extension GitHub.RefResponse:JSONObjectDecodable
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -33,7 +33,7 @@ extension GitHub.TagResponse:JSONObjectDecodable
     {
         self = try json[.repository].decode(using: CodingKey.Repository.self)
         {
-            .init(tag: try $0[.ref]?.decode(to: GitHub.Tag?.self))
+            .init(ref: try $0[.ref]?.decode(to: GitHub.Ref?.self))
         }
     }
 }

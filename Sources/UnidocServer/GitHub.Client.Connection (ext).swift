@@ -5,7 +5,7 @@ import JSON
 extension GitHub.Client<GitHub.API<String>>.Connection
 {
     public
-    func inspect(tag:String, owner:String, repo:String) async throws -> GitHub.TagResponse
+    func inspect(ref:String, owner:String, repo:String) async throws -> GitHub.RefResponse
     {
         let query:JSON = .object
         {
@@ -14,16 +14,16 @@ extension GitHub.Client<GitHub.API<String>>.Connection
             {
                 repository(owner: "\(owner)", name: "\(repo)")
                 {
-                    ref(qualifiedName: "\(tag)")
+                    ref(qualifiedName: "\(ref)")
                     {
-                        name, commit: target { sha: oid }
+                        name, prefix, commit: target { sha: oid }
                     }
                 }
             }
             """
         }
 
-        let response:GraphQL.Response<GitHub.TagResponse> = try await self.post(
+        let response:GraphQL.Response<GitHub.RefResponse> = try await self.post(
             query: "\(query)")
 
         if  let error:GraphQL.ServerError = response.errors.first
