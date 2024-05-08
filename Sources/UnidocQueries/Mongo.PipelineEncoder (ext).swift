@@ -5,6 +5,54 @@ import SymbolGraphs
 extension Mongo.PipelineEncoder
 {
     mutating
+    func loadBranches(
+        limit:Int = 1,
+        skip:Int = 0,
+        from package:Mongo.AnyKeyPath,
+        into branches:Mongo.AnyKeyPath)
+    {
+        let edition:Mongo.AnyKeyPath = Unidoc.VersionState[.edition]
+        let volume:Mongo.AnyKeyPath = Unidoc.VersionState[.volume]
+        let graph:Mongo.AnyKeyPath = Unidoc.VersionState[.graph]
+
+        self[stage: .lookup] = Mongo.LookupDocument.init
+        {
+            $0[.from] = Unidoc.DB.Editions.name
+            $0[.localField] = package / Unidoc.PackageMetadata[.id]
+            $0[.foreignField] = Unidoc.EditionMetadata[.package]
+            $0[.pipeline] = .init
+            {
+                $0[stage: .match] = .init
+                {
+                    $0[Unidoc.EditionMetadata[.release]] = false
+                    //  This needs to be ``BSON.Null`` and not just `{ $0[.exists] = false }`,
+                    //  otherwise it will not use the partial index.
+                    $0[Unidoc.EditionMetadata[.semver]] = BSON.Null.init()
+                }
+
+                $0[stage: .sort] = .init
+                {
+                    $0[Unidoc.EditionMetadata[.name]] = (+)
+                }
+
+                $0[stage: .skip] = skip == 0 ? nil : skip
+
+                $0[stage: .limit] = limit
+
+                $0[stage: .replaceWith] = .init
+                {
+                    $0[edition] = Mongo.Pipeline.ROOT
+                }
+
+                $0.loadResources(associatedTo: edition / Unidoc.EditionMetadata[.id],
+                    volume: volume,
+                    graph: graph)
+            }
+            $0[.as] = branches
+        }
+    }
+
+    mutating
     func loadTags(
         series:Unidoc.VersionSeries,
         limit:Int = 1,
@@ -26,8 +74,6 @@ extension Mongo.PipelineEncoder
                 $0[stage: .match] = .init
                 {
                     $0[Unidoc.EditionMetadata[.release]] = series == .release
-                    //  TODO: do we actually need this for `release`?
-                    $0[Unidoc.EditionMetadata[.release]] { $0[.exists] = true }
                     $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
                 }
 

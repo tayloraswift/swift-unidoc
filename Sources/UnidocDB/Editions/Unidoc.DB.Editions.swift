@@ -51,7 +51,7 @@ extension Unidoc.DB.Editions
         where:
     {
         $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
-        $0[Unidoc.EditionMetadata[.release]] { $0[.eq] = false }
+        $0[Unidoc.EditionMetadata[.release]] = false
     }
 
     public static
@@ -64,7 +64,21 @@ extension Unidoc.DB.Editions
     }
         where:
     {
-        $0[Unidoc.EditionMetadata[.release]] { $0[.eq] = true }
+        $0[Unidoc.EditionMetadata[.release]] = true
+    }
+
+    public static
+    let indexBranches:Mongo.CollectionIndex = .init("Branches",
+        unique: true)
+    {
+        $0[Unidoc.EditionMetadata[.package]] = (+)
+        $0[Unidoc.EditionMetadata[.name]] = (+)
+    }
+        where:
+    {
+        //  No better way to specify `$0[.exists] = false`
+        $0[Unidoc.EditionMetadata[.semver]] = BSON.Null.init()
+        $0[Unidoc.EditionMetadata[.release]] = false
     }
 }
 extension Unidoc.DB.Editions:Mongo.CollectionModel
@@ -83,6 +97,7 @@ extension Unidoc.DB.Editions:Mongo.CollectionModel
             Self.indexEditionCoordinate,
             Self.indexPrereleases,
             Self.indexReleases,
+            Self.indexBranches,
         ]
     }
 }

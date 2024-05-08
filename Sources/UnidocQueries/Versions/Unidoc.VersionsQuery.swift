@@ -56,6 +56,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         case .none(limit: let limit):
             let prereleases:Mongo.AnyKeyPath = "prereleases"
             let releases:Mongo.AnyKeyPath = "releases"
+            let branches:Mongo.AnyKeyPath = "branches"
 
             pipeline.loadTags(series: .prerelease,
                 limit: limit,
@@ -67,15 +68,19 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
                 from: Self.target,
                 into: releases)
 
-            //  Concatenate the two lists.
+            pipeline.loadBranches(limit: limit,
+                from: Self.target,
+                into: branches)
+
+            //  Concatenate the three lists.
             pipeline[stage: .set] = .init
             {
                 $0[Output[.versions]] = .expr
                 {
-                    $0[.concatArrays] = (prereleases, releases)
+                    $0[.concatArrays] = (prereleases, releases, branches)
                 }
             }
-            pipeline[stage: .unset] = [prereleases, releases]
+            pipeline[stage: .unset] = [prereleases, releases, branches]
 
             //  Lookup other aliases for this package.
             let aliases:Mongo.List<Unidoc.PackageAlias, Mongo.AnyKeyPath> = .init(
