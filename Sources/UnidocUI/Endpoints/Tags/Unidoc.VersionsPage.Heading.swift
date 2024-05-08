@@ -8,6 +8,7 @@ extension Unidoc.VersionsPage
         case branches
         case settings
         case settingsAdmin
+        case importRefs
     }
 }
 extension Unidoc.VersionsPage.Heading:Identifiable
@@ -20,6 +21,7 @@ extension Unidoc.VersionsPage.Heading:Identifiable
         case .branches:         "ss:branches"
         case .settings:         "ss:settings"
         case .settingsAdmin:    "ss:settings-admin"
+        case .importRefs:       "ss:import-refs"
         }
     }
 }
@@ -33,6 +35,7 @@ extension Unidoc.VersionsPage.Heading:HTML.OutputStreamableHeading
         case .branches:         "Package branches"
         case .settings:         "Package settings"
         case .settingsAdmin:    "Admin actions"
+        case .importRefs:       "Add branches"
         }
     }
 }
