@@ -64,17 +64,16 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
         switch self.query.filter
         {
         case .tags(limit: let limit, page: let index, series: let series):
-            let table:Unidoc.TagsTable = .init(
-                package: output.package.symbol,
+            let table:Unidoc.RefsTable = .init(package: output.package.symbol,
                 rows: output.versions,
-                view: view,
-                more: output.versions.count == limit)
+                view: view)
 
             let page:Unidoc.TagsPage = .init(package: output.package,
                 series: series,
                 index: index,
                 limit: limit,
-                table: table)
+                table: table,
+                more: output.versions.count == limit)
 
             return .ok(page.resource(format: format))
 
@@ -87,21 +86,20 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
                 }
             }
 
-            let table:Unidoc.TagsTable = .init(
+            let versions:Unidoc.RefsTable = .init(
                 package: output.package.symbol,
-                rows: output.versions.sorted
-                {
-                    //  Reverse order, because we want the latest versions to come first.
-                    $0.edition.ordering > $1.edition.ordering
-                },
-                view: view,
-                more: releases == limit)
+                //  Reverse order, because we want the latest versions to come first.
+                rows: output.versions.sorted { $0.edition.ordering > $1.edition.ordering },
+                view: view)
 
-            let page:Unidoc.VersionsPage = .init(package: output.package,
+            let page:Unidoc.VersionsPage = .init(
+                versions: versions,
+                branches: output.branches,
+                package: output.package,
                 aliases: output.aliases,
                 build: output.build,
                 realm: output.realm,
-                table: table)
+                more: releases == limit)
 
             return .ok(page.resource(format: format))
         }

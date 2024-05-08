@@ -3,29 +3,28 @@ import Symbols
 
 extension Unidoc
 {
-    struct TagsTable
+    struct RefsTable
     {
         private
         let package:Symbol.Package
         private
-        let rows:[Unidoc.VersionState]
+        let rows:[VersionState]
         let view:Permissions
-        let more:Bool
+        let type:RefsTableType
 
-        init(
-            package:Symbol.Package,
-            rows:[Unidoc.VersionState],
+        init(package:Symbol.Package,
+            rows:[VersionState],
             view:Permissions,
-            more:Bool)
+            type:RefsTableType = .tags)
         {
             self.package = package
             self.rows = rows
             self.view = view
-            self.more = more
+            self.type = type
         }
     }
 }
-extension Unidoc.TagsTable:HTML.OutputStreamable
+extension Unidoc.RefsTable:HTML.OutputStreamable
 {
     static
     func += (table:inout HTML.ContentEncoder, self:Self)
@@ -34,7 +33,12 @@ extension Unidoc.TagsTable:HTML.OutputStreamable
         {
             $0[.tr]
             {
-                $0[.th] = "Tag"
+                $0[.th] = switch self.type
+                {
+                case .branches: "Branch"
+                case .tags:     "Tag"
+                }
+
                 $0[.th] = "Commit"
                 $0[.th] = "Docs"
                 $0[.th] = "Symbol Graph"
