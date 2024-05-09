@@ -6,15 +6,18 @@ extension Unidoc
     struct BuildMetadataDelta:Sendable
     {
         var progress:BuildProgress?
-        var request:BuildRequest?
+        var selector:BuildSelector?
+        var edition:Edition?
         var failure:BuildFailure?
 
         init(progress:BuildProgress? = nil,
-            request:BuildRequest? = nil,
+            selector:BuildSelector? = nil,
+            edition:Edition? = nil,
             failure:BuildFailure? = nil)
         {
             self.progress = progress
-            self.request = request
+            self.selector = selector
+            self.edition = edition
             self.failure = failure
         }
     }
@@ -29,7 +32,8 @@ extension Unidoc.BuildMetadataDelta:BSONDocumentDecodable
     {
         self.init(
             progress: try bson[.progress]?.decode(),
-            request: try bson[.request]?.decode(),
+            selector: try bson[.selector]?.decode(),
+            edition: try bson[.edition]?.decode(),
             failure: try bson[.failure]?.decode())
     }
 }

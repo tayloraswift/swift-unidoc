@@ -13,15 +13,15 @@ extension Unidoc
         public
         let repo:String
         public
-        let tag:String
+        let ref:String
 
         @inlinable public
-        init(coordinate:Edition, package:Symbol.Package, repo:String, tag:String)
+        init(coordinate:Edition, package:Symbol.Package, repo:String, ref:String)
         {
             self.coordinate = coordinate
             self.package = package
             self.repo = repo
-            self.tag = tag
+            self.ref = ref
         }
     }
 }
@@ -33,7 +33,7 @@ extension Unidoc.BuildLabels
         case coordinate
         case symbol
         case repo
-        case tag
+        case ref
     }
 }
 extension Unidoc.BuildLabels:JSONObjectEncodable
@@ -44,7 +44,7 @@ extension Unidoc.BuildLabels:JSONObjectEncodable
         json[.coordinate] = self.coordinate
         json[.symbol] = self.package
         json[.repo] = self.repo
-        json[.tag] = self.tag
+        json[.ref] = self.ref
     }
 }
 extension Unidoc.BuildLabels:JSONObjectDecodable
@@ -55,6 +55,6 @@ extension Unidoc.BuildLabels:JSONObjectDecodable
         self.init(coordinate: try json[.coordinate].decode(),
             package: try json[.symbol].decode(),
             repo: try json[.repo].decode(),
-            tag: try json[.tag].decode())
+            ref: try json[.ref].decode())
     }
 }

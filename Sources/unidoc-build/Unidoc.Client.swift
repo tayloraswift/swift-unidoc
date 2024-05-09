@@ -216,7 +216,7 @@ extension Unidoc.Client
 
             "--package-name", "\(labels.package)",
             "--package-repo", labels.repo,
-            "--tag", labels.tag,
+            "--ref", labels.ref,
             "--workspace", "\(workspace.path)",
             "--status", "\(status)",
             "--output", "\(docs)",
