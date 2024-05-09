@@ -59,17 +59,29 @@ extension Unidoc.BuildButton:HTML.OutputStreamable
             $0.name = "selector"
             $0.value = "\(self.selector)"
         }
+
+        form[.input]
+        {
+            $0.type = "hidden"
+            $0.name = "build"
+            $0.value = self.cancel ? "cancel" : "request"
+        }
+
         form[.input]
         {
             $0.type = "hidden"
             $0.name = "package"
             $0.value = "\(self.package)"
         }
-        form[.input]
+
+        if  let version:Unidoc.Version = self.version
         {
-            $0.type = "hidden"
-            $0.name = "build"
-            $0.value = self.cancel ? "cancel" : "request"
+            form[.input]
+            {
+                $0.type = "hidden"
+                $0.name = "version"
+                $0.value = "\(version)"
+            }
         }
 
         form[.button]
