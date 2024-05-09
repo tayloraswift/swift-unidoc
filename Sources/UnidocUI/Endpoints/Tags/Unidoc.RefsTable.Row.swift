@@ -98,30 +98,6 @@ extension Unidoc.RefsTable.Row:HTML.OutputStreamable
                 {
                     $0.title = "No documentation has been generated for this version."
                 } = "\(self.graph.version)"
-
-                return
-            }
-
-            switch self.series
-            {
-            case nil:
-                $0 += " "
-                $0[.span]
-                {
-                    $0.class = "parenthetical"
-                    $0.title = "This documentation is unversioned."
-                } = "unversioned"
-
-            case .prerelease?:
-                $0 += " "
-                $0[.span]
-                {
-                    $0.class = "parenthetical"
-                    $0.title = "This documentation is a prerelease version."
-                } = "prerelease"
-
-            case .release?:
-                break
             }
         }
 
