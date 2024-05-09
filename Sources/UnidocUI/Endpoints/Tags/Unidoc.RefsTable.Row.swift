@@ -15,7 +15,7 @@ extension Unidoc.RefsTable
         let series:Unidoc.VersionSeries?
         let patch:PatchVersion?
 
-        let graph:GraphCell?
+        let graph:Graph
 
         let sha1:SHA1?
         let name:String
@@ -24,7 +24,7 @@ extension Unidoc.RefsTable
         init(volume:Unidoc.VolumeMetadata?,
             series:Unidoc.VersionSeries?,
             patch:PatchVersion?,
-            graph:GraphCell?,
+            graph:Graph,
             sha1:SHA1?,
             name:String)
         {
@@ -57,7 +57,10 @@ extension Unidoc.RefsTable.Row
             volume: version.volume,
             series: series,
             patch: version.edition.semver,
-            graph: version.graph.map { .init(package: package, graph: $0, view: view) },
+            graph: .init(package: package,
+                version: version.edition.semver?.description ?? version.edition.name,
+                state: version.graph.map(Graph.State.some(_:)) ?? .none(version.edition.id),
+                view: view),
             //  These might be different for a variety of reasons.
             sha1: version.edition.sha1 ?? version.graph?.commit,
             name: version.edition.name)
@@ -68,7 +71,11 @@ extension Unidoc.RefsTable.Row:HTML.OutputStreamable
     static
     func += (tr:inout HTML.ContentEncoder, self:Self)
     {
-        tr[.td] { $0.class = "refname" } = self.name
+        tr[.td]
+        {
+            $0.class = "ref"
+            $0.title = self.name
+        } = self.name
 
         let sha1:String? = self.sha1?.description
 
@@ -90,7 +97,7 @@ extension Unidoc.RefsTable.Row:HTML.OutputStreamable
                 $0[.span]
                 {
                     $0.title = "No documentation has been generated for this version."
-                } = "\(self.patch?.description ?? self.name)"
+                } = "\(self.graph.version)"
 
                 return
             }
@@ -118,19 +125,6 @@ extension Unidoc.RefsTable.Row:HTML.OutputStreamable
             }
         }
 
-        if  let cell:Unidoc.RefsTable.GraphCell = self.graph
-        {
-            tr[.td] { $0.class = "graph" } = cell
-        }
-        else
-        {
-            tr[.td, { $0.class = "graph" }]
-            {
-                $0[.span]
-                {
-                    $0.title = "No symbol graph has been built for this version."
-                }
-            }
-        }
+        tr[.td] { $0.class = "graph" } = self.graph
     }
 }

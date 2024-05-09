@@ -1,7 +1,7 @@
 import HTML
 import Symbols
 
-extension Unidoc.RefsTable.GraphCell
+extension Unidoc.RefsTable.Row.Graph
 {
     struct Tool
     {
@@ -17,7 +17,7 @@ extension Unidoc.RefsTable.GraphCell
         }
     }
 }
-extension Unidoc.RefsTable.GraphCell.Tool:HTML.OutputStreamable
+extension Unidoc.RefsTable.Row.Graph.Tool:HTML.OutputStreamable
 {
     static
     func += (form:inout HTML.ContentEncoder, self:Self)

@@ -83,13 +83,9 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                 section[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
+                    $0.action = "\(Unidoc.Post[.build, really: false])"
                     $0.method = "post"
-                } = Unidoc.VersionsPage.ConfigButton.init(package: self.package.id,
-                    update: "build",
-                    value: "cancel",
-                    label: "Cancel build",
-                    from: self.back)
+                } = Unidoc.BuildButton.latest(of: self.package, cancel: true)
             }
             else
             {
@@ -124,13 +120,9 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                 section[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
+                    $0.action = "\(Unidoc.Post[.build, really: false])"
                     $0.method = "post"
-                } = Unidoc.VersionsPage.ConfigButton.init(package: self.package.id,
-                    update: "build",
-                    value: "request",
-                    label: "Request build",
-                    from: self.back)
+                } = Unidoc.BuildButton.latest(of: self.package)
             }
             else
             {
