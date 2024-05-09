@@ -51,7 +51,7 @@ extension Unidoc.DB
             return .init(coordinate: id,
                 package: output.package.symbol,
                 repo: repo.origin.https,
-                tag: output.edition.name)
+                ref: output.edition.name)
 
         case .package(let package, series: let series, force: let force):
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.BuildTagQuery> = .init(
@@ -72,7 +72,7 @@ extension Unidoc.DB
                 return .init(coordinate: output.version.edition.id,
                     package: output.package.symbol,
                     repo: repo.origin.https,
-                    tag: output.version.edition.name)
+                    ref: output.version.edition.name)
             }
             else
             {
@@ -107,7 +107,7 @@ extension Unidoc.DB
                 return .init(coordinate: tag.edition.id,
                     package: output.package.symbol,
                     repo: repo.origin.https,
-                    tag: tag.edition.name)
+                    ref: tag.edition.name)
             }
             else
             {

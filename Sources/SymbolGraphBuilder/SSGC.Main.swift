@@ -36,7 +36,7 @@ extension SSGC
 
         var name:Symbol.Package?
         var repo:String?
-        var tag:String?
+        var ref:String?
 
         /// If true, SSGC will remove the Swift build directory (usually `.build.ssgc`) after
         /// it finishes building documentation.
@@ -63,7 +63,7 @@ extension SSGC
 
             self.name = nil
             self.repo = nil
-            self.tag = nil
+            self.ref = nil
             self.removeBuild = false
             self.removeClone = false
             self.pretty = false
@@ -106,8 +106,8 @@ extension SSGC.Main
             case "--package-repo", "-r":
                 self.repo = try arguments.next(for: option)
 
-            case "--tag", "-t":
-                self.tag = try arguments.next(for: option)
+            case "--ref", "-t":
+                self.ref = try arguments.next(for: option)
 
             case "--output", "-o":
                 self.output = try .init(arguments.next(for: option))
@@ -232,7 +232,7 @@ extension SSGC.Main
         }
         else if
             let repo:String = self.repo,
-            let tag:String = self.tag
+            let ref:String = self.ref
         {
             defer
             {
@@ -252,7 +252,7 @@ extension SSGC.Main
             let build:SSGC.PackageBuild = try .remote(
                 package: package,
                 from: repo,
-                at: tag,
+                at: ref,
                 in: workspace)
 
             try status?.send(.didCloneRepository)

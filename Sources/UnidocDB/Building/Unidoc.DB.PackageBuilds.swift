@@ -22,11 +22,11 @@ extension Unidoc.DB.PackageBuilds
     public static
     let indexQueue:Mongo.CollectionIndex = .init("Queued", unique: false)
     {
-        $0[Unidoc.BuildMetadata[.request]] = (+)
+        $0[Unidoc.BuildMetadata[.selector]] = (+)
     }
         where:
     {
-        $0[Unidoc.BuildMetadata[.request]] { $0[.exists] = true }
+        $0[Unidoc.BuildMetadata[.selector]] { $0[.exists] = true }
     }
 
     public static
@@ -69,7 +69,7 @@ extension Unidoc.DB.PackageBuilds
                 $0[.hint] = Self.indexQueue.id
                 $0[.filter]
                 {
-                    $0[Unidoc.BuildMetadata[.request]] { $0[.exists] = true }
+                    $0[Unidoc.BuildMetadata[.selector]] { $0[.exists] = true }
                 }
             },
             against: self.database)
@@ -137,7 +137,7 @@ extension Unidoc.DB.PackageBuilds
                     $0[.query]
                     {
                         $0[Unidoc.BuildMetadata[.id]] = package
-                        $0[Unidoc.BuildMetadata[.request]] { $0[.exists] = false }
+                        $0[Unidoc.BuildMetadata[.selector]] { $0[.exists] = false }
                         $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = false }
                     }
                     $0[.update] = Unidoc.BuildMetadata.init(id: package, request: request)
@@ -185,7 +185,7 @@ extension Unidoc.DB.PackageBuilds
 
     public
     func assignBuild(
-        request:Unidoc.BuildRequest,
+        request:Unidoc.BuildSelector,
         package:Unidoc.Package,
         builder:Unidoc.Account,
         with session:Mongo.Session) async throws -> Bool
@@ -203,7 +203,7 @@ extension Unidoc.DB.PackageBuilds
                 {
                     $0[.unset]
                     {
-                        $0[Unidoc.BuildMetadata[.request]] = ()
+                        $0[Unidoc.BuildMetadata[.selector]] = ()
                     }
                     $0[.set]
                     {
