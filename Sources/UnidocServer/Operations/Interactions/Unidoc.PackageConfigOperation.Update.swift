@@ -36,8 +36,7 @@ extension Unidoc.PackageConfigOperation.Update
         else if
             case "request" = form["build"]
         {
-            self = .build(.init(
-                series: form["series"] == "prerelease" ? .prerelease : .release,
+            self = .build(.latest(form["series"] == "prerelease" ? .prerelease : .release,
                 force: form["force"] == "true"))
         }
         else if

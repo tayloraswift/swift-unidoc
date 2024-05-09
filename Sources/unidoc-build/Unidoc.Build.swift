@@ -190,7 +190,7 @@ extension Unidoc.Build
                 }
 
                 print("""
-                    Building package '\(labels.package)' at '\(labels.tag)' \
+                    Building package '\(labels.package)' at '\(labels.ref)' \
                     (\(labels.coordinate))
                     """)
 

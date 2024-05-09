@@ -35,7 +35,14 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                 $0.title = "You cannot cancel a build that has already started!"
             } = "Cancel build"
 
-            section[.div] = "Queued (\(progress.request.series))"
+            switch progress.request
+            {
+            case .latest(let series, force: _):
+                section[.div] = "Queued (\(series))"
+
+            case .id:
+                section[.div] = "Queued (ref)"
+            }
 
             switch progress.stage
             {
@@ -91,11 +98,23 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                     view: self.view)
             }
 
-            section[.div]
+            switch request
             {
-                $0.class = "phase"
-                $0.title = "The builder will build the latest \(request.series) version."
-            } = "Queued (\(request.series))"
+            case .latest(let series, force: _):
+                section[.div]
+                {
+                    $0.class = "phase"
+                    $0.title = "The builder will build the latest \(series) version."
+                } = "Queued (\(series))"
+
+            case .id:
+                section[.div]
+                {
+                    $0.class = "phase"
+                    $0.title = "The builder will build the specified git ref."
+                } = "Queued (ref)"
+            }
+
             section[.div]
         }
         else
