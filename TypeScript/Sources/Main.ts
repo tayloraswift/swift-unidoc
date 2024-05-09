@@ -194,3 +194,49 @@ document.querySelectorAll('form.sort-controls').forEach((
         }
     });
 });
+
+//  This is the best way to implement blurable web menus, see
+//  https://css-tricks.com/dangers-stopping-event-propagation/#aa-what-to-do-instead
+//
+//  Note: we didn’t use `<details>`, because toggling that element causes CLS on Firefox.
+//  Note: we didn’t use `<input type='checkbox'>` because the semantics of the toggle are
+//  closer to `<button>`.
+document.querySelectorAll('div.menu').forEach((
+        div: Element,
+        key: number,
+        all: NodeListOf<Element>
+    ) => {
+
+    //  The `<div>` should contain one `<button>` direct child.
+    let button: HTMLButtonElement | null = null;
+
+    for (const child of div.children) {
+        if (child instanceof HTMLButtonElement) {
+            button = child;
+            break;
+        }
+    }
+
+    if (button !== null) {
+        button.addEventListener('click', (event: Event) => {
+            div.classList.toggle('open');
+        });
+    }
+});
+document.addEventListener('click', (event: Event) => {
+    //  Check if the target of the click event is inside a `div.menu` element.
+    let menu: Element | null = null;
+    if  (event.target instanceof Element) {
+        menu = event.target.closest('div.menu');
+    }
+    //  Remove the `open` class from all `div.menu` elements that are not `menu`.
+    document.querySelectorAll('div.menu').forEach((
+            div: Element,
+            key: number,
+            all: NodeListOf<Element>
+        ) => {
+        if (div !== menu) {
+            div.classList.remove('open');
+        }
+    });
+});
