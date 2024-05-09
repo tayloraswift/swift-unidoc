@@ -37,7 +37,7 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
             else if
                 let version:Substring = self.selector.version
             {
-                $0 += "A builder will build the package"
+                $0 += "A builder will build the package "
                 $0[.a] { $0.href = "\(package)" } = "\(self.selector.package)"
                 $0 += " at "
                 $0[.code] = "\(version)"
@@ -78,6 +78,10 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
         }
 
         if  self.cancel
+        {
+            return
+        }
+        if  case _? = self.selector.version
         {
             return
         }
