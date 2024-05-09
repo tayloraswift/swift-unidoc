@@ -1,0 +1,19 @@
+details.menu
+{
+    display: inline-block;
+    position: relative;
+
+    > summary::marker
+    {
+        content: '';
+    }
+    > summary::-webkit-details-marker
+    {
+        display: none;
+    }
+
+    > div
+    {
+        position: absolute;
+    }
+}
