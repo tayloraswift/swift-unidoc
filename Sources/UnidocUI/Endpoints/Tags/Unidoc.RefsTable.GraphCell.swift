@@ -91,36 +91,45 @@ extension Unidoc.RefsTable.GraphCell:HTML.OutputStreamable
             return
         }
 
-        td[.form]
+        td[.details, { $0.class = "menu" }]
         {
-            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Unidoc.Post[.uplink])"
-            $0.method = "post"
-        } = self.uplink
+            $0[.summary] = "..."
 
-        td[.form]
-        {
-            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Unidoc.Post[.unlink, really: false])"
-            $0.method = "post"
-        } = self.unlink
+            $0[.div]
+            {
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Unidoc.Post[.uplink])"
+                    $0.method = "post"
+                } = self.uplink
 
-        td[.form]
-        {
-            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Unidoc.Post[.delete, really: false])"
-            $0.method = "post"
-        } = self.delete
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Unidoc.Post[.unlink, really: false])"
+                    $0.method = "post"
+                } = self.unlink
 
-        td[.a]
-        {
-            let path:Unidoc.GraphPath = .init(edition: self.graph.id, type: .bson_zz)
+                $0[.form]
+                {
+                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                    $0.action = "\(Unidoc.Post[.delete, really: false])"
+                    $0.method = "post"
+                } = self.delete
 
-            $0.target = "_blank"
-            $0.href = """
-            https://s3.console.aws.amazon.com/s3/object/symbolgraphs\
-            ?region=us-east-1&bucketType=general&prefix=\(path.prefix)
-            """
-        } = "S3"
+                $0[.a]
+                {
+                    let path:Unidoc.GraphPath = .init(edition: self.graph.id,
+                        type: .bson_zz)
+
+                    $0.target = "_blank"
+                    $0.href = """
+                    https://s3.console.aws.amazon.com/s3/object/symbolgraphs\
+                    ?region=us-east-1&bucketType=general&prefix=\(path.prefix)
+                    """
+                } = "S3"
+            }
+        }
     }
 }

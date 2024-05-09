@@ -34,13 +34,31 @@ extension Unidoc.PackageConfigOperation.Update
             self = .expires(already)
         }
         else if
-            case "request" = form["build"]
+            case "request"? = form["build"]
         {
-            self = .build(.latest(form["series"] == "prerelease" ? .prerelease : .release,
-                force: form["force"] == "true"))
+            //  TODO: stop re-parsing the package id here, it is so stupid!
+            if  let version:String = form["version"],
+                let version:Unidoc.Version = .init(version),
+                let package:String = form["package"],
+                let package:Unidoc.Package = .init(package)
+            {
+                self = .build(.id(.init(package: package, version: version)))
+                return
+            }
+
+            let force:Bool = form["force"] == "true"
+
+            if  case "prerelease"? = form["series"]
+            {
+                self = .build(.latest(.prerelease, force: force))
+            }
+            else
+            {
+                self = .build(.latest(.release, force: force))
+            }
         }
         else if
-            case "cancel" = form["build"]
+            case "cancel"? = form["build"]
         {
             self = .build(nil)
         }
