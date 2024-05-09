@@ -366,6 +366,15 @@ extension Unidoc.IntegralRequest.Ordering
 
             switch trunk
             {
+            case .build:
+                if  let account:Unidoc.Account,
+                    let build:Unidoc.PackageBuildOperation.Parameters = .init(from: form)
+                {
+                    return .actor(Unidoc.PackageBuildOperation.init(
+                        account: account,
+                        build: build))
+                }
+
             case .packageAlias:
                 if  let package:String = form["package"],
                     let package:Unidoc.Package = .init(package),
@@ -542,6 +551,18 @@ extension Unidoc.IntegralRequest.Ordering
 
         switch trunk
         {
+        case .build:
+            guard
+            let build:Unidoc.PackageBuildOperation.Parameters = .init(from: form)
+            else
+            {
+                return nil
+            }
+
+            return .syncResource(Unidoc.BuildRequestPage.init(selector: build.selector,
+                cancel: build.request == nil,
+                action: action))
+
         case .unlink:
             heading = "Unlink symbol graph?"
             prompt = """
@@ -597,16 +618,6 @@ extension Unidoc.IntegralRequest.Ordering
                 This will not affect documentation that has already been generated.
                 """
                 button = "Rename package"
-
-            case .build(nil):
-                heading = "Cancel build?"
-                prompt = """
-                You can cancel a build if it has not started yet.
-                """
-                button = "Cancel build"
-
-            case .build(_?):
-                return .syncResource(Unidoc.BuildRequestPage.init(action: action))
 
             case .reset:
                 //  These don’t need a confirmation page.

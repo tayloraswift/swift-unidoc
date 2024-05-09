@@ -3,8 +3,9 @@
     {
         "lib":
         [
-            "dom",
-            "es2021"
+            "DOM",
+            "DOM.Iterable",
+            "ES2021"
         ],
         "removeComments": true,
         "preserveConstEnums": true,

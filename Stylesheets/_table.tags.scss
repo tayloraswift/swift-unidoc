@@ -2,50 +2,86 @@ table.tags
 {
     width: 100%;
 
-    tr.modern
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 3fr;
+    border-collapse: collapse;
+
+    > thead,
+    > thead > tr,
+    > tbody,
+    > tbody > tr
     {
-        font-weight: 700;
+        display: contents;
     }
 
-    td.graph
+    > tbody > tr
     {
-        font-weight: 700;
-        color: var(--fg-semi);
-
-        span.kb
+        > td.ref
         {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: '...';
+        }
+
+        > td.graph
+        {
+            display: flex;
+            justify-content: space-between;
+
             font-weight: normal;
-        }
 
-        form
-        {
-            display: inline-block;
-            margin-left: 0.5em;
+            > div:first-child
+            {
+                color: var(--fg-semi);
+
+                > span.graph:first-child::before
+                {
+                    content: '✓';
+                    color: var(--fg-accent);
+                    margin-right: 0.5rem;
+                }
+                > span.graph.uplinking:first-child::before
+                {
+                    content: '⟳';
+                }
+                > span.graph.unlinking:first-child::before
+                {
+                    content: '▼';
+                }
+                > span.graph.deleting:first-child::before
+                {
+                    content: '✗';
+                }
+                > span:first-child::before
+                {
+                    content: '✗';
+                    color: var(--fg-semi);
+                    margin-right: 0.5rem;
+                }
+                > span:first-child
+                {
+                    font-weight: 700;
+                }
+
+                > span.kb
+                {
+                    font-weight: normal;
+                }
+            }
+
+            > div.menu
+            {
+                > ul
+                {
+                    right: 0;
+                    min-width: 15rem;
+                }
+            }
         }
     }
 
-    td.graph > span:first-child::before
+    > tbody > tr.modern
     {
-        content: '✗';
-        color: var(--fg-semi);
-        margin-right: 0.5rem;
-    }
-    td.graph > .abi:first-child::before
-    {
-        content: '✓';
-        color: var(--fg-accent);
-        margin-right: 0.5rem;
-    }
-    td.graph > .abi.uplinking:first-child::before
-    {
-        content: '⟳';
-    }
-    td.graph > .abi.unlinking:first-child::before
-    {
-        content: '▼';
-    }
-    td.graph > .abi.deleting:first-child::before
-    {
-        content: '✗';
+        font-weight: 700;
     }
 }
