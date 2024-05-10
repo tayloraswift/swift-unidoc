@@ -6,10 +6,15 @@ span.tooltip
 
     > span.card
     {
+        all: initial;
+
         position: absolute;
         display: block;
-        width: 10rem;
-        height: 10rem;
+        width: 30rem;
+
+        @include backdrop-blur;
+
+        color: var(--fg);
 
         span.pre,
         span.p
