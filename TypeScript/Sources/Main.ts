@@ -147,18 +147,6 @@ if (tooltips !== null) {
         const tooltip: HTMLSpanElement = document.createElement('div');
         tooltip.innerHTML = anchor.innerHTML;
 
-        //  Sanitize block-level elements.
-        //  <pre> → <span class="pre">
-        //  <p> → <span class="p">
-        // for (const block of ['pre', 'p']) {
-        //     tooltip.querySelectorAll(block).forEach((element: Element) => {
-        //         const span: HTMLSpanElement = document.createElement('span');
-        //         span.className = block;
-        //         span.innerHTML = element.innerHTML;
-        //         element.replaceWith(span);
-        //     });
-        // }
-
         cards[id] = tooltip;
         frame.appendChild(tooltip);
     }
@@ -180,9 +168,6 @@ if (tooltips !== null) {
             }
             const tooltip: HTMLSpanElement | undefined = cards[id];
 
-            // if (tooltip !== undefined) {
-            //     anchor.appendChild(tooltip.cloneNode(true));
-            // }
             if (tooltip === undefined) {
                 return;
             }
@@ -194,7 +179,7 @@ if (tooltips !== null) {
                 const r: DOMRect = anchor.getBoundingClientRect();
 
                 tooltip.style.left = r.x.toString() + 'px';
-                tooltip.style.top = r.y.toString() + 'px';
+                tooltip.style.top = r.bottom.toString() + 'px';
 
                 tooltip.classList.add('visible');
             });
