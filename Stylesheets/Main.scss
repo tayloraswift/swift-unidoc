@@ -63,7 +63,7 @@ body
     > *.app > *.content
     {
         flex: 0 1 48rem;
-
+        max-width: 48rem;
         overflow-wrap: break-word;
     }
     > *.app > *.sidebar
