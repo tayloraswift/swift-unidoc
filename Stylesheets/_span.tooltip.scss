@@ -1,25 +1,22 @@
-span.tooltip
+div.tooltips
 {
-    width: 0;
-    height: 0;
-    position: relative;
+    position: fixed;
+    z-index: 1;
 
-    > span.card
+    > div
     {
-        all: initial;
+        display: none;
+        pointer-events: none;
+    }
 
-        position: absolute;
+    > div.visible
+    {
+        position: fixed;
         display: block;
         width: 30rem;
 
         @include backdrop-blur;
 
         color: var(--fg);
-
-        span.pre,
-        span.p
-        {
-            display: block;
-        }
     }
 }

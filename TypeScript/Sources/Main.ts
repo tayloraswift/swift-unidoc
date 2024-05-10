@@ -127,9 +127,9 @@ if (login !== null) {
 
 if (tooltips !== null) {
     tooltips.remove();
-
     //  The tooltips `<div>` contains `<a>` elements only.
-    var cards: { [id: string] : HTMLSpanElement; } = {};
+    let cards: { [id: string] : HTMLSpanElement; } = {};
+    let frame: HTMLDivElement = document.createElement('div');
 
     for (const anchor of tooltips.children) {
         if (!(anchor instanceof HTMLAnchorElement)) {
@@ -143,28 +143,24 @@ if (tooltips !== null) {
             continue;
         }
 
-        //  Change the tooltip into a `<span>` with `class="tooltip"`.
-        const tooltip: HTMLSpanElement = document.createElement('span');
-        const card: HTMLSpanElement = document.createElement('span');
-
-        tooltip.appendChild(card);
-        tooltip.className = 'tooltip';
-        card.className = 'card';
-        card.innerHTML = anchor.innerHTML;
+        //  Change the tooltip into a `<div>` with `class="tooltip"`.
+        const tooltip: HTMLSpanElement = document.createElement('div');
+        tooltip.innerHTML = anchor.innerHTML;
 
         //  Sanitize block-level elements.
         //  <pre> → <span class="pre">
         //  <p> → <span class="p">
-        for (const block of ['pre', 'p']) {
-            tooltip.querySelectorAll(block).forEach((element: Element) => {
-                const span: HTMLSpanElement = document.createElement('span');
-                span.className = block;
-                span.innerHTML = element.innerHTML;
-                element.replaceWith(span);
-            });
-        }
+        // for (const block of ['pre', 'p']) {
+        //     tooltip.querySelectorAll(block).forEach((element: Element) => {
+        //         const span: HTMLSpanElement = document.createElement('span');
+        //         span.className = block;
+        //         span.innerHTML = element.innerHTML;
+        //         element.replaceWith(span);
+        //     });
+        // }
 
         cards[id] = tooltip;
+        frame.appendChild(tooltip);
     }
 
     //  Inject the tooltips into every `<a>` element with the same `href` attribute.
@@ -184,10 +180,32 @@ if (tooltips !== null) {
             }
             const tooltip: HTMLSpanElement | undefined = cards[id];
 
-            if (tooltip !== undefined) {
-                anchor.appendChild(tooltip.cloneNode(true));
+            // if (tooltip !== undefined) {
+            //     anchor.appendChild(tooltip.cloneNode(true));
+            // }
+            if (tooltip === undefined) {
+                return;
             }
+
+            //  When you hover over the anchor, show the tooltip by loading the (x, y) position
+            //  of the anchor on the screen, and then adding the tooltip to the document as
+            //  a fixed-position element.
+            anchor.addEventListener('mouseenter', (event: MouseEvent) => {
+                const r: DOMRect = anchor.getBoundingClientRect();
+
+                tooltip.style.left = r.x.toString() + 'px';
+                tooltip.style.top = r.y.toString() + 'px';
+
+                tooltip.classList.add('visible');
+            });
+            anchor.addEventListener('mouseleave', (event: MouseEvent) => {
+                tooltip.classList.remove('visible');
+            });
         });
+
+        //  Make the tooltips list visible; it was originally hidden to prevent FOUC.
+        frame.className = 'tooltips';
+        document.body.appendChild(frame);
     }
 }
 
