@@ -79,6 +79,5 @@ a > span.tooltip
 a:hover > span.tooltip
 {
     display: inline-block;
-    width: 10rem;
-    height: 10rem;
+    inline-size: 0;
 }
