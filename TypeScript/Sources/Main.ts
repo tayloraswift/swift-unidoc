@@ -43,6 +43,7 @@ function textfield(element: Element | null): boolean {
     }
 }
 
+const tooltips: HTMLElement | null = document.getElementById('ss:tooltips');
 const search: HTMLElement | null = document.getElementById('search');
 const login: HTMLElement | null = document.getElementById('login');
 
@@ -122,6 +123,72 @@ if (login !== null) {
     login.appendChild(input);
 
     document.cookie = 'login_state=' + state + '; Path=/ ; SameSite=Lax ; Secure';
+}
+
+if (tooltips !== null) {
+    tooltips.remove();
+
+    //  The tooltips `<div>` contains `<a>` elements only.
+    var cards: { [id: string] : HTMLSpanElement; } = {};
+
+    for (const anchor of tooltips.children) {
+        if (!(anchor instanceof HTMLAnchorElement)) {
+            continue;
+        }
+
+        //  Cannot use `anchor.href`, we want the exact value of the `href` attribute.
+        const id: string | null = anchor.getAttribute("href")
+
+        if (id === null) {
+            continue;
+        }
+
+        //  Change the tooltip into a `<span>` with `class="tooltip"`.
+        const tooltip: HTMLSpanElement = document.createElement('span');
+        const card: HTMLSpanElement = document.createElement('span');
+
+        tooltip.appendChild(card);
+        tooltip.className = 'tooltip';
+        card.className = 'card';
+        card.innerHTML = anchor.innerHTML;
+
+        //  Sanitize block-level elements.
+        //  <pre> → <span class="pre">
+        //  <p> → <span class="p">
+        for (const block of ['pre', 'p']) {
+            tooltip.querySelectorAll(block).forEach((element: Element) => {
+                const span: HTMLSpanElement = document.createElement('span');
+                span.className = block;
+                span.innerHTML = element.innerHTML;
+                element.replaceWith(span);
+            });
+        }
+
+        cards[id] = tooltip;
+    }
+
+    //  Inject the tooltips into every `<a>` element with the same `href` attribute.
+    //  This should only be done within the `<main>` element.
+    const main: HTMLElement | null = document.querySelector('main');
+    if (main !== null) {
+        main.querySelectorAll('a').forEach((
+                anchor: HTMLAnchorElement,
+                key: number,
+                all: NodeListOf<Element>
+            ) => {
+
+            const id: string | null = anchor.getAttribute("href")
+
+            if (id === null) {
+                return;
+            }
+            const tooltip: HTMLSpanElement | undefined = cards[id];
+
+            if (tooltip !== undefined) {
+                anchor.appendChild(tooltip.cloneNode(true));
+            }
+        });
+    }
 }
 
 document.querySelectorAll('form.sort-controls').forEach((
