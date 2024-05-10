@@ -40,7 +40,7 @@ extension Unidoc.Client.Connection
     {
         do
         {
-            let prompt:Unidoc.BuildLabelsPrompt = .edition(id)
+            let prompt:Unidoc.BuildLabelsPrompt = .edition(id, force: true)
             return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
         }
         catch let error as HTTP.StatusError
