@@ -6,7 +6,7 @@ extension Unidoc
     enum BuildRequest:Equatable, Sendable
     {
         case latest(VersionSeries, force:Bool)
-        case id(Edition)
+        case id(Edition, force:Bool)
     }
 }
 extension Unidoc.BuildRequest
@@ -17,7 +17,7 @@ extension Unidoc.BuildRequest
         switch self
         {
         case .latest(_, force: _):  nil
-        case .id(let edition):      edition
+        case .id(let edition, _):   edition
         }
     }
 
@@ -27,7 +27,7 @@ extension Unidoc.BuildRequest
         switch self
         {
         case .latest(let series, force: let force): .latest(series, force: force)
-        case .id:                                   .id
+        case .id(_, force: let force):              .id(force: force)
         }
     }
 }
