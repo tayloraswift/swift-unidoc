@@ -7,22 +7,22 @@ extension Unidoc
     public
     protocol VertexContext:AnyObject
     {
+        associatedtype Tooltips:HTML.OutputStreamable
         associatedtype Table:VertexContextTable
 
         init(canonical:CanonicalVersion?,
             principal:VolumeMetadata,
             secondary:borrowing [VolumeMetadata],
             packages:borrowing [PackageMetadata],
-            tooltips:Tooltips,
             vertices:Table)
 
         var canonical:CanonicalVersion? { get }
+        var tooltips:Tooltips? { get }
+
         /// Returns the metadata document for the principal volume of the associated page.
         var volume:VolumeMetadata { get }
         var media:PackageMedia? { get }
         var repo:PackageRepo? { get }
-
-        var tooltips:Tooltips { get }
 
         subscript(package id:Package) -> PackageMetadata? { get }
 
