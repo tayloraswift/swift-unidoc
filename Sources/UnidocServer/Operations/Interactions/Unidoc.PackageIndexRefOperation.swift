@@ -85,10 +85,10 @@ extension Unidoc.PackageIndexRefOperation:Unidoc.MeteredOperation
         switch tag.prefix
         {
 
-        case .remotes:
+        case nil, .remotes?:
             return .ok("Ignored remote '\(tag.name)': not a tag or branch")
 
-        case .tags:
+        case .tags?:
             guard case _? = version
             else
             {
@@ -97,7 +97,7 @@ extension Unidoc.PackageIndexRefOperation:Unidoc.MeteredOperation
 
             sha1 = tag.hash
 
-        case .heads:
+        case .heads?:
             sha1 = nil
         }
 
