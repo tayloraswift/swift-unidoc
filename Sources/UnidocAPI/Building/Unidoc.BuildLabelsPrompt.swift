@@ -8,7 +8,7 @@ extension Unidoc
     enum BuildLabelsPrompt:Sendable
     {
         /// Build a specific edition of a package.
-        case edition(Edition)
+        case edition(Edition, force:Bool)
         /// Build the latest version of a package.
         case package(Package, series:VersionSeries, force:Bool)
         /// Build the latest version of a package by name.
@@ -42,7 +42,7 @@ extension Unidoc.BuildLabelsPrompt
         if  let package:Unidoc.Package,
             let version:Unidoc.Version
         {
-            self = .edition(.init(package: package, version: version))
+            self = .edition(.init(package: package, version: version), force: force)
         }
         else if
             let package:Unidoc.Package,
@@ -67,13 +67,17 @@ extension Unidoc.BuildLabelsPrompt
     {
         switch self
         {
-        case .edition(let edition):
-            ["package": "\(edition.package)", "version": "\(edition.version)"]
+        case .edition(let edition, force: let force):
+            [
+                "package": "\(edition.package)",
+                "version": "\(edition.version)",
+                "force": "\(force)"
+            ]
 
-        case .package(let package, let series, let force):
+        case .package(let package, series: let series, force: let force):
             ["package": "\(package)", "series": "\(series)", "force": "\(force)"]
 
-        case .packageNamed(let package, let series, let force):
+        case .packageNamed(let package, series: let series, force: let force):
             ["package-symbol": "\(package)", "series": "\(series)", "force": "\(force)"]
         }
     }

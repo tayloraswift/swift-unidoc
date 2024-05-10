@@ -102,7 +102,7 @@ extension Mongo.PipelineEncoder
 
     /// Load information about any associated documentation volume or symbol graph for a
     /// particular package edition.
-    private mutating
+    mutating
     func loadResources(associatedTo id:Mongo.AnyKeyPath,
         volume:Mongo.AnyKeyPath,
         graph:Mongo.AnyKeyPath)
