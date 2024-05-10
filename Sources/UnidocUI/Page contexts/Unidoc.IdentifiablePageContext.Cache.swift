@@ -13,15 +13,24 @@ extension Unidoc.IdentifiablePageContext
 
         private
         var uris:[Unidoc.Scalar: String]
+        private(set)
+        var used:[Unidoc.Scalar]
 
         init(vertices:Table,
-            volumes:Unidoc.VolumeContext,
-            uris:[Unidoc.Scalar: String] = [:])
+            volumes:Unidoc.VolumeContext)
         {
             self.vertices = vertices
             self.volumes = volumes
-            self.uris = uris
+            self.uris = [:]
+            self.used = []
         }
+    }
+}
+extension Unidoc.IdentifiablePageContext.Cache
+{
+    var tooltips:Unidoc.IdentifiablePageContext<Table>.Tooltips?
+    {
+        .init(vertices: self.vertices, uris: self.uris, list: self.used)
     }
 }
 extension Unidoc.IdentifiablePageContext.Cache
@@ -38,6 +47,7 @@ extension Unidoc.IdentifiablePageContext.Cache
                 let volume:Unidoc.VolumeMetadata = self.volumes[id.edition],
                 let uri:URI = uri(volume)
             {
+                self.used.append(id)
                 let target:String = "\(uri)"
                 $0 = target
                 return .init(location: target)
