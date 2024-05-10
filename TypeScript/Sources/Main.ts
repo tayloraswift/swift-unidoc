@@ -161,6 +161,16 @@ if (tooltips !== null) {
                 all: NodeListOf<Element>
             ) => {
 
+            //  If the anchor is inside a card preview, the tooltip would be redundant.
+            if (anchor.parentElement?.tagName === 'CODE' &&
+                anchor.parentElement.classList.contains('decl')) {
+                return;
+            }
+            if (anchor.parentElement?.tagName === 'H3' &&
+                anchor.parentElement.classList.contains('module')) {
+                return;
+            }
+
             const id: string | null = anchor.getAttribute("href")
 
             if (id === null) {
