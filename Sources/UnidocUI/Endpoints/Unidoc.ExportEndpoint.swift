@@ -89,6 +89,12 @@ extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
                 $0 ?= overview
                 $0 ?= details
             }
+
+            $0[.div]
+            {
+                $0.style = "display: none;"
+                $0.id = "ss:tooltips"
+            } = context.tooltips
         }
 
         return .ok(.init(
