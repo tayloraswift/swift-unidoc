@@ -70,14 +70,3 @@ a[rel~='external']::after
     -webkit-mask-image: var(--leaving-icon);
     -webkit-mask-size: 100% 100%;
 }
-
-//  Tooltips
-a > span.tooltip
-{
-    display: none;
-}
-a:hover > span.tooltip
-{
-    display: inline-block;
-    inline-size: 0;
-}
