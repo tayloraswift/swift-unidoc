@@ -7,12 +7,14 @@ extension Unidoc.BuildEditionQuery
     struct Output:Sendable
     {
         let package:Unidoc.PackageMetadata
-        let edition:Unidoc.EditionMetadata
+        let version:Unidoc.VersionState
 
-        init(package:Unidoc.PackageMetadata, edition:Unidoc.EditionMetadata)
+        init(
+            package:Unidoc.PackageMetadata,
+            version:Unidoc.VersionState)
         {
             self.package = package
-            self.edition = edition
+            self.version = version
         }
     }
 }
@@ -21,7 +23,7 @@ extension Unidoc.BuildEditionQuery.Output:Mongo.MasterCodingModel
     enum CodingKey:String, Sendable
     {
         case package
-        case edition
+        case version
     }
 }
 extension Unidoc.BuildEditionQuery.Output:BSONDocumentDecodable
@@ -30,6 +32,6 @@ extension Unidoc.BuildEditionQuery.Output:BSONDocumentDecodable
     {
         self.init(
             package: try bson[.package].decode(),
-            edition: try bson[.edition].decode())
+            version: try bson[.version].decode())
     }
 }

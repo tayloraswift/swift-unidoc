@@ -43,11 +43,21 @@ extension Unidoc.BuildEditionQuery:Mongo.PipelineQuery
                 {
                     $0[Unidoc.EditionMetadata[.id]] = self.edition
                 }
+
+                $0[stage: .replaceWith] = .init
+                {
+                    $0[Unidoc.VersionState[.edition]] = Mongo.Pipeline.ROOT
+                }
+
+                $0.loadResources(
+                    associatedTo: Unidoc.VersionState[.edition] / Unidoc.EditionMetadata[.id],
+                    volume: Unidoc.VersionState[.volume],
+                    graph: Unidoc.VersionState[.graph])
             }
 
-            $0[.as] = Output[.edition]
+            $0[.as] = Output[.version]
         }
 
-        pipeline[stage: .unwind] = Output[.edition]
+        pipeline[stage: .unwind] = Output[.version]
     }
 }

@@ -7,7 +7,7 @@ extension Unidoc
     enum BuildSelector:Equatable, Sendable
     {
         case latest(VersionSeries, force:Bool)
-        case id
+        case id(force:Bool)
     }
 }
 extension Unidoc.BuildSelector:RawRepresentable
@@ -21,7 +21,8 @@ extension Unidoc.BuildSelector:RawRepresentable
         case 1:     self = .latest(.release, force: true)
         case 2:     self = .latest(.prerelease, force: false)
         case 3:     self = .latest(.prerelease, force: true)
-        case 256:   self = .id
+        case 256:   self = .id(force: false)
+        case 257:   self = .id(force: true)
         default:    return nil
         }
     }
@@ -35,7 +36,8 @@ extension Unidoc.BuildSelector:RawRepresentable
         case .latest(.release, true):       1
         case .latest(.prerelease, false):   2
         case .latest(.prerelease, true):    3
-        case .id:                           256
+        case .id(false):                    256
+        case .id(true):                     257
         }
     }
 }

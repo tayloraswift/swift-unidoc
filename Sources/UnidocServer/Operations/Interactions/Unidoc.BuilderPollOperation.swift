@@ -49,8 +49,8 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
             case .latest(let series, force: let force):
                 prompt = .package(build.id, series: series, force: force)
 
-            case .id(let id):
-                prompt = .edition(id)
+            case .id(let id, force: let force):
+                prompt = .edition(id, force: force)
             }
 
             if  let labels:Unidoc.BuildLabels = try await server.db.unidoc.answer(

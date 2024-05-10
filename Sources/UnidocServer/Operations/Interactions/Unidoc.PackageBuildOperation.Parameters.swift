@@ -35,10 +35,12 @@ extension Unidoc.PackageBuildOperation.Parameters
         switch form["build"]
         {
         case "request"?:
+            let force:Bool = form["force"] == "true"
+
             if  let version:String = form["version"],
                 let version:Unidoc.Version = .init(version)
             {
-                request = .id(.init(package: package, version: version))
+                request = .id(.init(package: package, version: version), force: force)
                 break
             }
 
@@ -52,7 +54,7 @@ extension Unidoc.PackageBuildOperation.Parameters
                 series = .release
             }
 
-            request = .latest(series, force: form["force"] == "true")
+            request = .latest(series, force: force)
 
         case "cancel"?:
             request = nil

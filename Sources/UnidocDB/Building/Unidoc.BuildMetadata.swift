@@ -77,8 +77,8 @@ extension Unidoc.BuildMetadata:BSONDocumentDecodable
             case .latest(let series, force: let force):
                 request = .latest(series, force: force)
 
-            case .id:
-                request = .id(try bson[.edition].decode())
+            case .id(force: let force):
+                request = .id(try bson[.edition].decode(), force: force)
             }
         }
         else
