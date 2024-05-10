@@ -3,4 +3,18 @@ span.tooltip
     width: 0;
     height: 0;
     position: relative;
+
+    > span.card
+    {
+        position: absolute;
+        display: block;
+        width: 10rem;
+        height: 10rem;
+
+        span.pre,
+        span.p
+        {
+            display: block;
+        }
+    }
 }
