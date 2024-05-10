@@ -33,7 +33,7 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
                 return nil
             }
 
-            guard try await server.db.packageBuilds.assignBuild(request: type,
+            guard try await server.db.packageBuilds.assignBuild(request: type.selector,
                 package: build.id,
                 builder: self.id,
                 with: session)
@@ -43,10 +43,18 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
                 continue polling
             }
 
+            let prompt:Unidoc.BuildLabelsPrompt
+            switch type
+            {
+            case .latest(let series, force: let force):
+                prompt = .package(build.id, series: series, force: force)
+
+            case .id(let id, force: let force):
+                prompt = .edition(id, force: force)
+            }
+
             if  let labels:Unidoc.BuildLabels = try await server.db.unidoc.answer(
-                    prompt: .package(build.id,
-                        series: type.series,
-                        force: type.force),
+                    prompt: prompt,
                     with: session)
             {
                 return .object(with: labels.encode(to:))

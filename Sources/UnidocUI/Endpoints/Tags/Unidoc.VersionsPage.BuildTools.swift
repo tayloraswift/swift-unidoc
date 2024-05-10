@@ -35,7 +35,14 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                 $0.title = "You cannot cancel a build that has already started!"
             } = "Cancel build"
 
-            section[.div] = "Queued (\(progress.request.series))"
+            switch progress.request
+            {
+            case .latest(let series, force: _):
+                section[.div] = "Queued (\(series))"
+
+            case .id:
+                section[.div] = "Queued (ref)"
+            }
 
             switch progress.stage
             {
@@ -76,13 +83,9 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                 section[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
+                    $0.action = "\(Unidoc.Post[.build, really: false])"
                     $0.method = "post"
-                } = Unidoc.VersionsPage.ConfigButton.init(package: self.package.id,
-                    update: "build",
-                    value: "cancel",
-                    label: "Cancel build",
-                    from: self.back)
+                } = Unidoc.BuildButton.latest(of: self.package, cancel: true)
             }
             else
             {
@@ -91,11 +94,23 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                     view: self.view)
             }
 
-            section[.div]
+            switch request
             {
-                $0.class = "phase"
-                $0.title = "The builder will build the latest \(request.series) version."
-            } = "Queued (\(request.series))"
+            case .latest(let series, force: _):
+                section[.div]
+                {
+                    $0.class = "phase"
+                    $0.title = "The builder will build the latest \(series) version."
+                } = "Queued (\(series))"
+
+            case .id:
+                section[.div]
+                {
+                    $0.class = "phase"
+                    $0.title = "The builder will build the specified git ref."
+                } = "Queued (ref)"
+            }
+
             section[.div]
         }
         else
@@ -105,13 +120,9 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                 section[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
+                    $0.action = "\(Unidoc.Post[.build, really: false])"
                     $0.method = "post"
-                } = Unidoc.VersionsPage.ConfigButton.init(package: self.package.id,
-                    update: "build",
-                    value: "request",
-                    label: "Request build",
-                    from: self.back)
+                } = Unidoc.BuildButton.latest(of: self.package)
             }
             else
             {

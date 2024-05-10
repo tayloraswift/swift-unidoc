@@ -41,9 +41,14 @@ extension Unidoc.BuildMetadata:Mongo.MasterCodingModel
     {
         case id = "_id"
         case progress = "P"
-        case request = "Q"
+        case selector = "Q"
+        case edition = "e"
         case failure = "F"
         case logs = "L"
+
+        @available(*, deprecated, renamed: "selector")
+        @inlinable public static
+        var request:Self { .selector }
     }
 }
 extension Unidoc.BuildMetadata:BSONDocumentEncodable
@@ -53,7 +58,8 @@ extension Unidoc.BuildMetadata:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.progress] = self.progress
-        bson[.request] = self.request
+        bson[.selector] = self.request?.selector
+        bson[.edition] = self.request?.edition
         bson[.failure] = self.failure
         bson[.logs] = self.logs.isEmpty ? nil : self.logs
     }
@@ -63,9 +69,26 @@ extension Unidoc.BuildMetadata:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
+        let request:Unidoc.BuildRequest?
+        if  let selector:Unidoc.BuildSelector = try bson[.selector]?.decode()
+        {
+            switch selector
+            {
+            case .latest(let series, force: let force):
+                request = .latest(series, force: force)
+
+            case .id(force: let force):
+                request = .id(try bson[.edition].decode(), force: force)
+            }
+        }
+        else
+        {
+            request = nil
+        }
+
         self.init(id: try bson[.id].decode(),
             progress: try bson[.progress]?.decode(),
-            request: try bson[.request]?.decode(),
+            request: request,
             failure: try bson[.failure]?.decode(),
             logs: try bson[.logs]?.decode() ?? [])
     }

@@ -1,4 +1,6 @@
 import GitHubAPI
+import HTTP
+import MongoDB
 import UnidocRender
 import UnidocProfiling
 
@@ -38,4 +40,39 @@ extension Unidoc.Server
     var format:Unidoc.RenderFormat { self.loop.format }
     @inlinable public
     var db:Unidoc.Database { self.loop.db }
+}
+extension Unidoc.Server
+{
+    func authorize(package:Unidoc.Package,
+        account:Unidoc.Account?,
+        level:Unidoc.User.Level,
+        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+    {
+        guard
+        let id:Unidoc.Account = account
+        else
+        {
+            return self.secure ? .unauthorized("""
+                You must be logged in to perform this operation!
+                """) : nil
+        }
+
+        guard
+        let rights:Unidoc.PackageRights = try await self.db.unidoc.rights(account: id,
+            package: package,
+            with: session)
+        else
+        {
+            return .notFound("No such package")
+        }
+
+        if  case .human = level, rights < .editor
+        {
+            return .forbidden("You are not authorized to edit this package!")
+        }
+        else
+        {
+            return nil
+        }
+    }
 }

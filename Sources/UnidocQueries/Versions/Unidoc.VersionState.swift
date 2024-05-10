@@ -8,24 +8,24 @@ extension Unidoc.VersionsQuery
 {
     @available(*, deprecated)
     public
-    typealias Tag = Unidoc.Versions.Tag
+    typealias Tag = Unidoc.VersionState
 }
-extension Unidoc.Versions
+extension Unidoc
 {
     @frozen public
-    struct Tag:Equatable, Sendable
+    struct VersionState:Equatable, Sendable
     {
         public
-        var edition:Unidoc.EditionMetadata
+        var edition:EditionMetadata
 
         public
-        var volume:Unidoc.VolumeMetadata?
+        var volume:VolumeMetadata?
         public
         var graph:Graph?
 
         @inlinable public
-        init(edition:Unidoc.EditionMetadata,
-            volume:Unidoc.VolumeMetadata?,
+        init(edition:EditionMetadata,
+            volume:VolumeMetadata?,
             graph:Graph?)
         {
             self.edition = edition
@@ -34,7 +34,7 @@ extension Unidoc.Versions
         }
     }
 }
-extension Unidoc.Versions.Tag:Mongo.MasterCodingModel
+extension Unidoc.VersionState:Mongo.MasterCodingModel
 {
     public
     enum CodingKey:String, Sendable
@@ -44,7 +44,7 @@ extension Unidoc.Versions.Tag:Mongo.MasterCodingModel
         case graph
     }
 }
-extension Unidoc.Versions.Tag:BSONDocumentDecodable
+extension Unidoc.VersionState:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

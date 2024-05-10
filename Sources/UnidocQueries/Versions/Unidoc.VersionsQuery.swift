@@ -47,31 +47,39 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         switch self.filter
         {
         case .tags(limit: let limit, page: let page, series: let series):
-            let list:Output.CodingKey
-            switch series
-            {
-            case .prerelease:   list = .versions_prereleases
-            case .release:      list = .versions_releases
-            }
-
             pipeline.loadTags(series: series,
                 limit: limit,
                 skip: limit * page,
                 from: Self.target,
-                into: Output[list])
+                into: Output[.versions])
 
         case .none(limit: let limit):
+            let prereleases:Mongo.AnyKeyPath = "prereleases"
+            let releases:Mongo.AnyKeyPath = "releases"
+
             pipeline.loadTags(series: .prerelease,
                 limit: limit,
                 from: Self.target,
-                into: Output[.versions_prereleases])
+                into: prereleases)
 
             pipeline.loadTags(series: .release,
                 limit: limit,
                 from: Self.target,
-                into: Output[.versions_releases])
+                into: releases)
 
-            pipeline.loadTopOfTree(from: Self.target, into: Output[.versions_top])
+            pipeline.loadBranches(limit: limit,
+                from: Self.target,
+                into: Output[.branches])
+
+            //  Concatenate the two lists.
+            pipeline[stage: .set] = .init
+            {
+                $0[Output[.versions]] = .expr
+                {
+                    $0[.concatArrays] = (prereleases, releases)
+                }
+            }
+            pipeline[stage: .unset] = [prereleases, releases]
 
             //  Lookup other aliases for this package.
             let aliases:Mongo.List<Unidoc.PackageAlias, Mongo.AnyKeyPath> = .init(

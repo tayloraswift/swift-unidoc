@@ -247,7 +247,7 @@ extension Unidoc.DB
     public
     func index(
         package:Unidoc.Package,
-        version:SemanticVersion,
+        version:SemanticVersion?,
         name:String,
         sha1:SHA1?,
         with session:Mongo.Session) async throws -> (edition:Unidoc.EditionMetadata, new:Bool)
@@ -264,8 +264,8 @@ extension Unidoc.DB
             let edition:Unidoc.EditionMetadata = .init(id: .init(
                     package: package,
                     version: id),
-                release: version.release,
-                patch: version.number,
+                release: version?.release ?? false,
+                semver: version?.number,
                 name: name,
                 sha1: sha1)
             //  This can fail if we race with another process.
@@ -362,29 +362,32 @@ extension Unidoc.DB
             repo: nil,
             with: session)
 
-        //  Is this a version-controlled package?
-        let version:Unidoc.Version
-        if  let commit:SymbolGraphMetadata.Commit = documentation.metadata.commit,
-            let semver:SemanticVersion = documentation.metadata.package.name.version(
-                tag: commit.name)
+        let edition:Unidoc.EditionMetadata
+        if  let commit:SymbolGraphMetadata.Commit = documentation.metadata.commit
         {
-            let (edition, _):(Unidoc.EditionMetadata, Bool) = try await self.index(
+            (edition, _) = try await self.index(
                 package: package.id,
-                version: semver,
+                version: documentation.metadata.package.name.version(tag: commit.name),
                 name: commit.name,
                 sha1: commit.sha1,
                 with: session)
-
-            version = edition.version
         }
         else
         {
-            version = -1
+            //  Local documentation bypasses edition placement!
+            //
+            //  Local documentation is always considered release documentation, because usually
+            //  one’s intent is to preview how the documentation will look when it is released.
+            edition = .init(id: .init(package: package.id, version: -1),
+                release: true,
+                semver: .max,
+                name: "__local",
+                sha1: nil)
+
+            try await self.editions.upsert(some: edition, with: session)
         }
 
-        let snapshot:Unidoc.Snapshot = .init(id: .init(
-                package: package.id,
-                version: version),
+        let snapshot:Unidoc.Snapshot = .init(id: edition.id,
             metadata: documentation.metadata,
             inline: documentation.graph,
             action: action)
@@ -692,6 +695,8 @@ extension Unidoc.DB
         let thisRelease:PatchVersion?
         let version:String
 
+        //  Yes, the standard library always has a commit, although we don’t always have a
+        //  commit hash.
         versioning:
         if  let commit:SymbolGraphMetadata.Commit = snapshot.metadata.commit
         {
@@ -706,7 +711,7 @@ extension Unidoc.DB
             {
                 latestRelease = formerRelease?.id
                 thisRelease = nil
-                version = "0.0.0"
+                version = commit.name
 
                 break versioning
             }

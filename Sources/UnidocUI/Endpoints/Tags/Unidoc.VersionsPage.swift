@@ -11,6 +11,10 @@ extension Unidoc
     struct VersionsPage
     {
         private
+        let versions:RefsTable
+        private
+        let branches:[VersionState]
+        private
         let package:PackageMetadata
         private
         let aliases:[Symbol.Package]
@@ -19,26 +23,31 @@ extension Unidoc
         private
         let realm:RealmMetadata?
         private
-        let table:TagsTable
+        let more:Bool
 
-        init(package:PackageMetadata,
+        init(
+            versions:RefsTable,
+            branches:[VersionState],
+            package:PackageMetadata,
             aliases:[Symbol.Package] = [],
             build:BuildMetadata? = nil,
             realm:RealmMetadata? = nil,
-            table:TagsTable)
+            more:Bool)
         {
+            self.versions = versions
+            self.branches = branches
             self.package = package
             self.aliases = aliases
             self.build = build
             self.realm = realm
-            self.table = table
+            self.more = more
         }
     }
 }
 extension Unidoc.VersionsPage
 {
     private
-    var view:Unidoc.Permissions { self.table.view }
+    var view:Unidoc.Permissions { self.versions.view }
 }
 extension Unidoc.VersionsPage:Unidoc.RenderablePage
 {
@@ -164,15 +173,27 @@ extension Unidoc.VersionsPage
 
         section[.h2] = Heading.tags
 
-        section[.table] { $0.class = "tags" } = self.table
+        section[.table] { $0.class = "tags" } = self.versions
 
-        if  self.table.more
+        if  self.more
         {
             section[.a]
             {
                 $0.class = "area"
                 $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol, .release, page: 0])"
             } = "Browse more tags"
+        }
+
+        if !self.branches.isEmpty
+        {
+            section[.h2] = Heading.branches
+            section[.table]
+            {
+                $0.class = "tags"
+            } = Unidoc.RefsTable.init(package: self.package.symbol,
+                rows: self.branches,
+                view: self.view,
+                type: .branches)
         }
 
         section[.h2] = Heading.settings
@@ -362,8 +383,61 @@ extension Unidoc.VersionsPage
             }
         }
 
-        section[.h3] = "Build configuration"
+        section[.h3] = Heading.importRefs
+        section[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Unidoc.Post[.packageIndexTag])"
+            $0.method = "post"
 
+            $0.class = "config"
+        }
+            content:
+        {
+            $0[.dl]
+            {
+                $0[.dt] = "Branch name"
+                $0[.dd]
+                {
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "package"
+                        $0.value = "\(self.package.id)"
+                    }
+
+                    $0[.input]
+                    {
+                        $0.type = "text"
+                        $0.name = "ref"
+                        $0.required = true
+                        $0.readonly = !self.view.editor
+
+                        $0.placeholder = "master"
+                        $0.pattern = #"^[a-zA-Z0-9_\-\./]+$"#
+                    }
+                }
+            }
+
+            $0[.button]
+            {
+                $0.class = "area"
+                $0.type = "submit"
+
+                if  case nil = self.view.global
+                {
+                    $0.disabled = true
+                    $0.title = "You are not logged in!"
+                }
+                else if !self.view.editor
+                {
+                    $0.disabled = true
+                    $0.title = "You are not an editor for this package!"
+                }
+            } = "Import ref"
+        }
+
+        section[.h3] = "Build configuration"
         section[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
@@ -385,26 +459,16 @@ extension Unidoc.VersionsPage
                         $0.name = "package"
                         $0.value = "\(self.package.id)"
                     }
-                    // $0[.input]
-                    // {
-                    //     $0.type = "hidden"
-                    //     $0.name = "from"
-                    //     $0.value = "\(self.location)"
-                    // }
                     $0[.input]
                     {
                         $0.type = "text"
                         $0.name = "platform-preference"
                         $0.required = true
+                        $0.readonly = !self.view.editor
 
                         $0.placeholder = "aarch64-unknown-linux-gnu"
                         $0.pattern = #"^[a-zA-Z0-9_\-\.]+$"#
                         $0.value = self.package.platformPreference?.description
-
-                        if !self.view.editor
-                        {
-                            $0.readonly = true
-                        }
                     }
                 }
             }
@@ -547,36 +611,6 @@ extension Unidoc.VersionsPage
             $0[.p]
             {
                 $0[.button] { $0.type = "submit" } = "Alias package"
-            }
-        }
-
-        section[.form]
-        {
-            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Unidoc.Post[.packageIndexTag])"
-            $0.method = "post"
-        }
-            content:
-        {
-            $0[.p]
-            {
-                $0[.input]
-                {
-                    $0.type = "hidden"
-                    $0.name = "package"
-                    $0.value = "\(self.package.id)"
-                }
-
-                $0[.input]
-                {
-                    $0.type = "text"
-                    $0.name = "tag"
-                    $0.placeholder = "tag"
-                }
-            }
-            $0[.p]
-            {
-                $0[.button] { $0.type = "submit" } = "Index package tag (GitHub)"
             }
         }
     }

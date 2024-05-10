@@ -1,5 +1,6 @@
 import JSON
 import MongoDB
+import SHA1
 import Symbols
 import UnidocAPI
 import UnidocDB
@@ -32,54 +33,47 @@ extension Unidoc.DB
     func answer(prompt:Unidoc.BuildLabelsPrompt,
         with session:Mongo.Session) async throws -> Unidoc.BuildLabels?
     {
+        let package:Unidoc.PackageMetadata
+        let version:Unidoc.VersionState
+        let rebuild:Bool
+
         switch prompt
         {
-        case .edition(let id):
+        case .edition(let id, force: let force):
             var endpoint:Mongo.SingleOutputFromPrimary<Unidoc.BuildEditionQuery> = .init(
                 query: .init(edition: id))
 
             try await endpoint.pull(from: self.id, with: session)
 
             guard
-            let output:Unidoc.BuildEditionQuery.Output = endpoint.value,
-            let repo:Unidoc.PackageRepo = output.package.repo
+            let output:Unidoc.BuildEditionQuery.Output = endpoint.value
             else
             {
                 return nil
             }
 
-            return .init(coordinate: id,
-                package: output.package.symbol,
-                repo: repo.origin.https,
-                tag: output.edition.name)
+            package = output.package
+            version = output.version
+            rebuild = force
 
-        case .package(let package, series: let series, force: let force):
+        case .package(let id, series: let series, force: let force):
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.BuildTagQuery> = .init(
-                query: .init(package: package, version: series))
+                query: .init(package: id, version: series))
 
             try await pipeline.pull(from: self.id, with: session)
 
             guard
-            let output:Unidoc.BuildTagQuery.Output = pipeline.value,
-            let repo:Unidoc.PackageRepo = output.package.repo
+            let output:Unidoc.BuildTagQuery.Output = pipeline.value
             else
             {
                 return nil
             }
 
-            if  force || output.version.graph == nil
-            {
-                return .init(coordinate: output.version.edition.id,
-                    package: output.package.symbol,
-                    repo: repo.origin.https,
-                    tag: output.version.edition.name)
-            }
-            else
-            {
-                return nil
-            }
+            package = output.package
+            version = output.version
+            rebuild = force
 
-        case .packageNamed(let package, series: let series, force: let force):
+        case .packageNamed(let symbol, series: let series, force: let force):
             let filter:Unidoc.VersionsQuery.Predicate
 
             switch series
@@ -89,37 +83,52 @@ extension Unidoc.DB
             }
 
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.VersionsQuery> = .init(
-                query: .init(symbol: package, filter: filter))
+                query: .init(symbol: symbol, filter: filter))
 
             try await pipeline.pull(from: self.id, with: session)
 
             guard
             let output:Unidoc.VersionsQuery.Output = pipeline.value,
-            let repo:Unidoc.PackageRepo = output.package.repo
+            let tag:Unidoc.VersionState = output.versions.first
             else
             {
                 return nil
             }
 
-            let tag:Unidoc.Versions.Tag?
+            package = output.package
+            version = tag
+            rebuild = force
+        }
 
-            switch series
+        guard
+        let repo:Unidoc.PackageRepo = package.repo
+        else
+        {
+            return nil
+        }
+
+        skipping:
+        if  let graph:Unidoc.VersionState.Graph = version.graph
+        {
+            if  rebuild
             {
-            case .release:      tag = output.versions.releases.first
-            case .prerelease:   tag = output.versions.prereleases.first
+                break skipping
             }
-
-            if  let tag:Unidoc.Versions.Tag, force || tag.graph == nil
+            if  let built:SHA1 = graph.commit,
+                let commit:SHA1 = version.edition.sha1,
+                    commit != built
             {
-                return .init(coordinate: tag.edition.id,
-                    package: output.package.symbol,
-                    repo: repo.origin.https,
-                    tag: tag.edition.name)
+                break skipping
             }
             else
             {
                 return nil
             }
         }
+
+        return .init(coordinate: version.edition.id,
+            package: package.symbol,
+            repo: repo.origin.https,
+            ref: version.edition.name)
     }
 }

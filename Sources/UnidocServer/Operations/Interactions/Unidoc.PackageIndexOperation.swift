@@ -12,15 +12,14 @@ extension Unidoc
 {
     struct PackageIndexOperation:Sendable
     {
-        let account:Unidoc.Account
+        let account:Account
         let owner:String
         let repo:String
         let from:String?
 
-        private
-        var privileges:Unidoc.User.Level
+        var privileges:User.Level
 
-        init(account:Unidoc.Account, owner:String, repo:String, from:String? = nil)
+        init(account:Account, owner:String, repo:String, from:String? = nil)
         {
             self.account = account
             self.owner = owner
@@ -31,16 +30,8 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackageIndexOperation:Unidoc.RestrictedOperation
+extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
 {
-    /// Everyone can use this endpoint, as long as they are authenticated.
-    mutating
-    func admit(level:Unidoc.User.Level) -> Bool
-    {
-        self.privileges = level
-        return true
-    }
-
     func load(from server:borrowing Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
@@ -56,18 +47,11 @@ extension Unidoc.PackageIndexOperation:Unidoc.RestrictedOperation
             return nil
         }
 
-        //  The cost for administratrices is not *zero*, mainly so that it’s easier for us to
-        //  tell if the rate limiting system is working.
-        guard
-        let _:Int = try await server.db.users.charge(apiKey: nil,
-            user: self.account,
-            cost: self.privileges == .administratrix ? 1 : 8,
-            with: session)
-        else
+        if  let error:HTTP.ServerResponse = try await self.charge(cost: 8,
+                from: server,
+                with: session)
         {
-            let display:Unidoc.PolicyErrorPage = .init(illustration: .error4xx_jpg,
-                message: "Inactive or nonexistent API key")
-            return .resource(display.resource(format: server.format), status: 429)
+            return error
         }
 
         let response:GitHub.RepoMonitorResponse = try await github.connect

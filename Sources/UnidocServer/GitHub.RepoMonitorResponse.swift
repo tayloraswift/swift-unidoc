@@ -10,9 +10,9 @@ extension GitHub
         public
         var repo:GitHub.Repo?
         public
-        var tags:[GitHub.Tag]
+        var tags:[GitHub.Ref]
 
-        init(repo:GitHub.Repo?, tags:[GitHub.Tag])
+        init(repo:GitHub.Repo?, tags:[GitHub.Ref])
         {
             self.repo = repo
             self.tags = tags
@@ -39,7 +39,7 @@ extension GitHub.RepoMonitorResponse:JSONObjectDecodable
         self = try json[.repository].decode(using: GitHub.RepoNode.CodingKey.self)
         {
             let node:GitHub.RepoNode = try .init(json: $0)
-            let tags:[GitHub.Tag] = try $0[.refs].decode(
+            let tags:[GitHub.Ref] = try $0[.refs].decode(
                 using: GitHub.RepoNode.CodingKey.Refs.self)
             {
                 try $0[.nodes].decode()

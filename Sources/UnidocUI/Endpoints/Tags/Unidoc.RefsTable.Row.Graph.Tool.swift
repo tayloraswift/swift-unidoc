@@ -1,7 +1,7 @@
 import HTML
 import Symbols
 
-extension Unidoc.TagsTable.GraphCell
+extension Unidoc.RefsTable.Row.Graph
 {
     struct Tool
     {
@@ -17,7 +17,7 @@ extension Unidoc.TagsTable.GraphCell
         }
     }
 }
-extension Unidoc.TagsTable.GraphCell.Tool:HTML.OutputStreamable
+extension Unidoc.RefsTable.Row.Graph.Tool:HTML.OutputStreamable
 {
     static
     func += (form:inout HTML.ContentEncoder, self:Self)
@@ -41,6 +41,6 @@ extension Unidoc.TagsTable.GraphCell.Tool:HTML.OutputStreamable
             $0.value = "\(Unidoc.TagsEndpoint[self.package])"
         }
 
-        form[.button] { $0.type = "submit" } = self.label
+        form[.button] { $0.type = "submit"; $0.class = "text" } = self.label
     }
 }

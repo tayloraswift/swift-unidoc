@@ -1,51 +1,33 @@
-import BSON
 import UnidocAPI
 
 extension Unidoc
 {
     @frozen public
-    struct BuildRequest:Equatable, Sendable
+    enum BuildRequest:Equatable, Sendable
     {
-        public
-        let series:VersionSeries
-        public
-        let force:Bool
-
-        @inlinable public
-        init(series:VersionSeries, force:Bool)
-        {
-            self.series = series
-            self.force = force
-        }
+        case latest(VersionSeries, force:Bool)
+        case id(Edition, force:Bool)
     }
 }
-extension Unidoc.BuildRequest:RawRepresentable
+extension Unidoc.BuildRequest
 {
     @inlinable public
-    init?(rawValue:Int32)
+    var edition:Unidoc.Edition?
     {
-        switch rawValue
+        switch self
         {
-        case 0:     self = .init(series: .release, force: false)
-        case 1:     self = .init(series: .release, force: true)
-        case 2:     self = .init(series: .prerelease, force: false)
-        case 3:     self = .init(series: .prerelease, force: true)
-        default:    return nil
+        case .latest(_, force: _):  nil
+        case .id(let edition, _):   edition
         }
     }
 
     @inlinable public
-    var rawValue:Int32
+    var selector:Unidoc.BuildSelector
     {
-        switch (self.series, self.force)
+        switch self
         {
-        case (.release, false):     0
-        case (.release, true):      1
-        case (.prerelease, false):  2
-        case (.prerelease, true):   3
+        case .latest(let series, force: let force): .latest(series, force: force)
+        case .id(_, force: let force):              .id(force: force)
         }
     }
-}
-extension Unidoc.BuildRequest:BSONDecodable, BSONEncodable
-{
 }

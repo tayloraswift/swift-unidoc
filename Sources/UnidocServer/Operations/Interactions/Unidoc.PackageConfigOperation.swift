@@ -30,38 +30,6 @@ extension Unidoc
 extension Unidoc.PackageConfigOperation
 {
     private
-    func authorize(from server:borrowing Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
-    {
-        guard
-        let id:Unidoc.Account = self.account
-        else
-        {
-            return server.secure ? .unauthorized("""
-                You must be logged in to perform this operation!
-                """) : nil
-        }
-
-        guard
-        let rights:Unidoc.PackageRights = try await server.db.unidoc.rights(account: id,
-            package: self.package,
-            with: session)
-        else
-        {
-            return .notFound("No such package")
-        }
-
-        if  case .human = self.privileges, rights < .editor
-        {
-            return .forbidden("You are not authorized to edit this package!")
-        }
-        else
-        {
-            return nil
-        }
-    }
-
-    private
     func reset(field:Update.Field,
         from packages:borrowing Unidoc.DB.Packages,
         with session:Mongo.Session) async throws -> Symbol.Package?
@@ -100,7 +68,10 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
     func load(from server:borrowing Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        if  let rejection:HTTP.ServerResponse = try await self.authorize(from: server,
+        if  let rejection:HTTP.ServerResponse = try await server.authorize(
+                package: self.package,
+                account: self.account,
+                level: self.privileges,
                 with: session)
         {
             return rejection
@@ -135,31 +106,11 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
             updated = changed != nil ? symbol : nil
             rebuildPackageList = changed ?? false
 
-        case .build(let request?):
-            _ = try await server.db.packageBuilds.submitBuild(request: request,
-                package: self.package,
-                with: session)
-
-            updated = nil
-            rebuildPackageList = false
-
-        case .build(nil):
-            guard try await server.db.packageBuilds.cancelBuild(package: self.package,
-                with: session)
-            else
-            {
-                return .resource("Cannot cancel a build that has already started", status: 409)
-            }
-
-            updated = nil
-            rebuildPackageList = false
-
         case .reset(let field):
             updated = try await self.reset(field: field,
                 from: server.db.packages,
                 with: session)
             rebuildPackageList = false
-
         }
 
         if  rebuildPackageList

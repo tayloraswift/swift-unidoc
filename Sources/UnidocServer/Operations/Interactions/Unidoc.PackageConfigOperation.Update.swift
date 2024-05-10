@@ -8,8 +8,6 @@ extension Unidoc.PackageConfigOperation
         case hidden(Bool)
         case symbol(Symbol.Package)
         case expires(BSON.Millisecond)
-        case build(Unidoc.BuildRequest?)
-
         case reset(Field)
     }
 }
@@ -32,18 +30,6 @@ extension Unidoc.PackageConfigOperation.Update
         {
             let already:BSON.Millisecond = .init(0)
             self = .expires(already)
-        }
-        else if
-            case "request" = form["build"]
-        {
-            self = .build(.init(
-                series: form["series"] == "prerelease" ? .prerelease : .release,
-                force: form["force"] == "true"))
-        }
-        else if
-            case "cancel" = form["build"]
-        {
-            self = .build(nil)
         }
         else if
             let field:Field = .init(from: form)

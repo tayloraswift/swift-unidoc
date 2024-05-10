@@ -62,10 +62,11 @@ extension Unidoc.PackageOutput
                 $0[stage: .match] = .init
                 {
                     $0[Unidoc.EditionMetadata[.release]] = true
+                    $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
                 }
                 $0[stage: .sort] = .init
                 {
-                    $0[Unidoc.EditionMetadata[.patch]] = (-)
+                    $0[Unidoc.EditionMetadata[.semver]] = (-)
                     $0[Unidoc.EditionMetadata[.version]] = (-)
                 }
                 $0[stage: .limit] = 1
