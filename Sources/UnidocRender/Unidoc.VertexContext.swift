@@ -18,6 +18,7 @@ extension Unidoc
 
         var canonical:CanonicalVersion? { get }
         var tooltips:Tooltips? { get }
+        var vertices:Table { get }
 
         /// Returns the metadata document for the principal volume of the associated page.
         var volume:VolumeMetadata { get }
@@ -28,8 +29,6 @@ extension Unidoc
 
         /// Returns the metadata document for the specified volume, if available.
         subscript(volume:Edition) -> VolumeMetadata? { get }
-        /// Returns the vertex document for the specified vertex, if available.
-        subscript(vertex:Scalar) -> AnyVertex? { get }
 
         /// Returns the vertex document for the specified vertex and its URL, if available.
         subscript(vertex id:Scalar) -> LinkReference<AnyVertex>? { get }
@@ -37,7 +36,5 @@ extension Unidoc
         subscript(culture id:Scalar) -> LinkReference<CultureVertex>? { get }
         subscript(article id:Scalar) -> LinkReference<ArticleVertex>? { get }
         subscript(decl id:Scalar) -> LinkReference<DeclVertex>? { get }
-
-        subscript(file id:Scalar) -> FileVertex? { get }
     }
 }

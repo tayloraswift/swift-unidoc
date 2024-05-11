@@ -32,7 +32,10 @@ extension Unidoc._LegacyTopic:HTML.OutputStreamable
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        section ?= self.caption.map { Markdown.ProseSection.init(self.context, overview: $0) }
+        section ?= self.caption.map
+        {
+            Unidoc.ProseSection.init(overview: $0, context: self.context)
+        }
 
         section[.ul, { $0.class = "cards" }]
         {

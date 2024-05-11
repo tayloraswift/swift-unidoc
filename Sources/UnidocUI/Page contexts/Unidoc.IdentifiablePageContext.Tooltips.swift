@@ -49,7 +49,10 @@ extension Unidoc.IdentifiablePageContext.Tooltips:HTML.OutputStreamable
                 {
                     $0[.pre, .code] = Unidoc.ImportSection.init(module: vertex.module.id)
 
-                    $0 ?= vertex.overview?.markdown.safe
+                    $0 ?= vertex.overview.map
+                    {
+                        Unidoc.InertSection<Table>.init(overview: $0, vertices: self.vertices)
+                    }
                 }
 
             case .decl(let vertex):
@@ -57,7 +60,10 @@ extension Unidoc.IdentifiablePageContext.Tooltips:HTML.OutputStreamable
                 {
                     $0[.pre, .code] = vertex.signature.expanded.bytecode.safe
 
-                    $0 ?= vertex.overview?.markdown.safe
+                    $0 ?= vertex.overview.map
+                    {
+                        Unidoc.InertSection<Table>.init(overview: $0, vertices: self.vertices)
+                    }
                 }
 
             default:

@@ -3,7 +3,7 @@ import UnidocRecords
 
 extension Unidoc
 {
-    struct ProductCard
+    struct ProductCard:PreviewCard
     {
         let context:any VertexContext
 
@@ -19,10 +19,6 @@ extension Unidoc
             self.target = target
         }
     }
-}
-extension Unidoc.ProductCard:Unidoc.PreviewCard
-{
-    var passage:Unidoc.Passage? { nil }
 }
 extension Unidoc.ProductCard:HTML.OutputStreamable
 {

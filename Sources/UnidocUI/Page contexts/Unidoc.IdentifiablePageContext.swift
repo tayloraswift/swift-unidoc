@@ -114,6 +114,9 @@ extension Unidoc.IdentifiablePageContext:Unidoc.VertexContext
     var tooltips:Tooltips? { self.cache.tooltips }
 
     public final
+    var vertices:Table { self.cache.vertices }
+
+    public final
     var volume:Unidoc.VolumeMetadata { self.cache.volumes.principal }
 
     public final
@@ -126,26 +129,17 @@ extension Unidoc.IdentifiablePageContext:Unidoc.VertexContext
     }
 
     public final
-    subscript(secondary volume:Unidoc.Edition) -> Unidoc.VolumeMetadata?
-    {
-        self.cache.volumes.secondary[volume]
-    }
-    public final
     subscript(volume:Unidoc.Edition) -> Unidoc.VolumeMetadata?
     {
         self.cache.volumes[volume]
     }
-
+}
+extension Unidoc.IdentifiablePageContext
+{
     public final
-    subscript(vertex:Unidoc.Scalar) -> Unidoc.AnyVertex?
+    subscript(secondary volume:Unidoc.Edition) -> Unidoc.VolumeMetadata?
     {
-        self.cache.vertices[vertex]?.vertex
-    }
-
-    public final
-    subscript(file id:Unidoc.Scalar) -> Unidoc.FileVertex?
-    {
-        self.cache.vertices[id]?.vertex.file
+        self.cache.volumes.secondary[volume]
     }
 }
 extension Unidoc.IdentifiablePageContext

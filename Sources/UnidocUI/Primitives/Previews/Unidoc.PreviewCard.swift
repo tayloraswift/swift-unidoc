@@ -3,16 +3,18 @@ import MarkdownABI
 
 extension Unidoc
 {
-    protocol PreviewCard:HTML.OutputStreamable
+    protocol PreviewCard<Vertex>:HTML.OutputStreamable
     {
+        associatedtype Vertex:PrincipalVertex
+
         var context:any VertexContext { get }
-        var passage:Passage? { get }
+        var vertex:Vertex { get }
     }
 }
 extension Unidoc.PreviewCard
 {
-    var overview:Markdown.ProseSection?
+    var overview:Unidoc.ProseSection?
     {
-        self.passage.map { .init(self.context, overview: $0) }
+        self.vertex.overview.map { .init(overview: $0, context: self.context) }
     }
 }

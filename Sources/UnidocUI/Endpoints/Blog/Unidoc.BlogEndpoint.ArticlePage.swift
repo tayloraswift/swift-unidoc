@@ -29,7 +29,7 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.apex.headline.safe)" }
 
-    var description:String? { self.cone.overview?.description }
+    var description:String? { self.cone.overviewText?.description }
 }
 extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
 {
