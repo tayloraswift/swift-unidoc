@@ -47,6 +47,7 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
         {
             $0[.div, { $0.class = "content" }] { $0[.nav] = HTML.Logo.init() }
         }
+
         body[.div, { $0.class = "app" }]
         {
             $0[.main, { $0.class = "content" }]
@@ -63,5 +64,11 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
                 }
             }
         }
+
+        body[.div]
+        {
+            $0.style = "display: none;"
+            $0.id = "ss:tooltips"
+        } = self.cone.context.tooltips
     }
 }
