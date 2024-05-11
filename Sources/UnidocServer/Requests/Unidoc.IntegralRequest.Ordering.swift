@@ -411,26 +411,11 @@ extension Unidoc.IntegralRequest.Ordering
 
             case .packageIndex:
                 if  let account:Unidoc.Account,
-                    let owner:String = form["owner"],
-                    let repo:String = form["repo"]
+                    let subject:Unidoc.PackageIndexOperation.Subject = .init(from: form)
                 {
                     return .actor(Unidoc.PackageIndexOperation.init(
                         account: account,
-                        owner: owner,
-                        repo: repo,
-                        from: form["from"]))
-                }
-
-            case .packageIndexTag:
-                if  let account:Unidoc.Account,
-                    let package:String = form["package"],
-                    let package:Unidoc.Package = .init(package),
-                    let ref:String = form["ref"]
-                {
-                    return .actor(Unidoc.PackageIndexRefOperation.init(
-                        account: account,
-                        package: package,
-                        ref: ref))
+                        subject: subject))
                 }
 
             case .telescope:

@@ -48,8 +48,9 @@ extension Unidoc.MeteredOperation
         else
         {
             let display:Unidoc.PolicyErrorPage = .init(illustration: .error4xx_jpg,
-                message: "Inactive or nonexistent API key")
-            return .resource(display.resource(format: server.format), status: 429)
+                message: "Inactive or nonexistent API key",
+                status: 429)
+            return display.response(format: server.format)
         }
     }
 }

@@ -3,6 +3,8 @@ import GitHubClient
 import HTTP
 import MongoDB
 import UnidocUI
+import SemanticVersions
+import SHA1
 import SymbolGraphs
 import Symbols
 import UnidocDB
@@ -13,18 +15,14 @@ extension Unidoc
     struct PackageIndexOperation:Sendable
     {
         let account:Account
-        let owner:String
-        let repo:String
-        let from:String?
+        let subject:Subject
 
         var privileges:User.Level
 
-        init(account:Account, owner:String, repo:String, from:String? = nil)
+        init(account:Account, subject:Subject)
         {
             self.account = account
-            self.owner = owner
-            self.repo = repo
-            self.from = from
+            self.subject = subject
 
             self.privileges = .human
         }
@@ -47,51 +45,137 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
             return nil
         }
 
-        if  let error:HTTP.ServerResponse = try await self.charge(cost: 8,
-                from: server,
+        let package:Unidoc.PackageMetadata
+
+        switch self.subject
+        {
+        case .repo(owner: let owner, name: let repo):
+            if  let error:HTTP.ServerResponse = try await self.charge(cost: 8,
+                    from: server,
+                    with: session)
+            {
+                return error
+            }
+
+            let response:GitHub.RepoMonitorResponse = try await github.connect
+            {
+                try await $0.crawl(owner: owner, repo: repo, tags: 0)
+            }
+
+            guard
+            let repo:GitHub.Repo = response.repo
+            else
+            {
+                let display:Unidoc.PolicyErrorPage = .init(illustration: .error404_jpg,
+                    message: "No such GitHub repository!",
+                    status: 404)
+                return display.response(format: server.format)
+            }
+
+            if  let failure:Unidoc.PolicyErrorPage = try await self.validate(repo: repo)
+            {
+                return failure.response(format: server.format)
+            }
+
+            (package, _) = try await server.db.unidoc.index(
+                package: .init("\(repo.owner.login).\(repo.name)"),
+                repo: .github(repo, crawled: .now()),
+                mode: .automatic,
                 with: session)
-        {
-            return error
+
+
+        case .ref(let id, ref: let ref):
+            if  let metadata:Unidoc.PackageMetadata = try await server.db.packages.find(id: id,
+                    with: session)
+            {
+                package = metadata
+            }
+            else
+            {
+                return .notFound("No such package")
+            }
+
+            guard
+            case .github(let origin) = package.repo?.origin
+            else
+            {
+                return .notFound("Not a GitHub repository")
+            }
+
+            if  let error:HTTP.ServerResponse = try await self.charge(cost: 8,
+                    from: server,
+                    with: session)
+            {
+                return error
+            }
+
+            let response:GitHub.RefResponse = try await github.connect
+            {
+                try await $0.inspect(ref: ref, owner: origin.owner, repo: origin.name)
+            }
+
+            guard
+            let ref:GitHub.Ref = response.ref
+            else
+            {
+                return .notFound("No such ref")
+            }
+
+            let version:SemanticVersion? = package.symbol.version(tag: ref.name)
+            let sha1:SHA1?
+
+            switch ref.prefix
+            {
+
+            case nil, .remotes?:
+                return .ok("Ignored remote '\(ref.name)': not a tag or branch")
+
+            case .tags?:
+                guard case _? = version
+                else
+                {
+                    return .ok("Ignored tag '\(ref.name)': not a semantic or swift version")
+                }
+
+                sha1 = ref.hash
+
+            case .heads?:
+                sha1 = nil
+            }
+
+            let (_, _):(Unidoc.EditionMetadata, Bool) = try await server.db.unidoc.index(
+                package: package.id,
+                version: version,
+                name: ref.name,
+                sha1: sha1,
+                with: session)
         }
 
-        let response:GitHub.RepoMonitorResponse = try await github.connect
-        {
-            try await $0.crawl(owner: self.owner, repo: self.repo, tags: 0)
-        }
-
-        guard
-        let repo:GitHub.Repo = response.repo
-        else
-        {
-            let display:Unidoc.PolicyErrorPage = .init(illustration: .error404_jpg,
-                message: "No such GitHub repository!")
-            return .notFound(display.resource(format: server.format))
-        }
-
+        return .redirect(.seeOther("\(Unidoc.TagsEndpoint[package.symbol])"))
+    }
+}
+extension Unidoc.PackageIndexOperation
+{
+    private
+    func validate(repo:GitHub.Repo) async throws -> Unidoc.PolicyErrorPage?
+    {
         if  case .human = self.privileges,
             self.account != .init(type: .github, user: repo.owner.id)
         {
-            let display:Unidoc.PolicyErrorPage = .init(illustration: .error4xx_jpg,
-                message: "You are not the owner of this repository!")
-            return .forbidden(display.resource(format: server.format))
+            return .init(illustration: .error4xx_jpg,
+                message: "You are not the owner of this repository!",
+                status: 403)
         }
 
-        guard repo.owner.login.allSatisfy({ $0 != "." })
+        if  repo.owner.login.allSatisfy({ $0 != "." })
+        {
+            return nil
+        }
         else
         {
-            let display:Unidoc.PolicyErrorPage = .init(illustration: .error4xx_jpg,
-                message: "Cannot index a repository with a dot in the owner’s name!")
-            return .resource(display.resource(format: server.format), status: 400)
+            return .init(illustration: .error4xx_jpg,
+                message: "Cannot index a repository with a dot in the owner’s name!",
+                status: 400)
         }
-
-        let symbol:Symbol.Package = .init("\(repo.owner.login).\(repo.name)")
-
-        let (package, _):(Unidoc.PackageMetadata, new:Bool) = try await server.db.unidoc.index(
-            package: symbol,
-            repo: .github(repo, crawled: .now()),
-            mode: .automatic,
-            with: session)
-
-        return .redirect(.seeOther("\(Unidoc.TagsEndpoint[package.symbol])"))
     }
 }

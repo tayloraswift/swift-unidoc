@@ -7,13 +7,18 @@ extension Unidoc
     {
         let illustration:Unidoc.Asset
         let message:String
+        let status:UInt
 
-        init(illustration:Unidoc.Asset, message:String)
+        init(illustration:Unidoc.Asset, message:String, status:UInt)
         {
             self.illustration = illustration
             self.message = message
+            self.status = status
         }
     }
+}
+extension Unidoc.PolicyErrorPage:Unidoc.StatusBearingPage
+{
 }
 extension Unidoc.PolicyErrorPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
