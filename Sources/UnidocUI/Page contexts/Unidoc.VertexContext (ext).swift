@@ -67,7 +67,7 @@ extension Unidoc.VertexContext
     {
         guard
         let refname:String = self[file.edition]?.refname,
-        let vertex:Unidoc.FileVertex = self[file: file],
+        let vertex:Unidoc.FileVertex = self.vertices[file]?.vertex.file,
         let origin:Unidoc.PackageOrigin = self.repo?.origin
         else
         {

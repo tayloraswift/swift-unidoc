@@ -7,35 +7,33 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Markdown
+extension Unidoc
 {
     struct ProseSection
     {
-        private
-        let context:any Unidoc.VertexContext
-
         let bytecode:Markdown.Bytecode
-        let outlines:[Unidoc.Outline]
+        let outlines:[Outline]
+        let context:any VertexContext
 
-        init(_ context:any Unidoc.VertexContext,
+        init(
             bytecode:Markdown.Bytecode,
-            outlines:[Unidoc.Outline])
+            outlines:[Outline],
+            context:any VertexContext)
         {
-            self.context = context
-
             self.bytecode = bytecode
             self.outlines = outlines
+            self.context = context
         }
     }
 }
-extension Markdown.ProseSection
+extension Unidoc.ProseSection
 {
-    init(_ context:any Unidoc.VertexContext, overview:Unidoc.Passage)
+    init(overview:Unidoc.Passage, context:any Unidoc.VertexContext)
     {
-        self.init(context, bytecode: overview.markdown, outlines: overview.outlines)
+        self.init(bytecode: overview.markdown, outlines: overview.outlines, context: context)
     }
 }
-extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
+extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
 {
     func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
     {
@@ -55,7 +53,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
 
             case .src:
                 guard
-                let file:Unidoc.FileVertex = self.context[file: id]
+                let file:Unidoc.FileVertex = self.context.vertices[id]?.vertex.file
                 else
                 {
                     return nil
@@ -130,7 +128,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
             //  This needs to be here for backwards compatibility with older symbol graphs.
             case .src:
                 guard
-                let file:Unidoc.FileVertex = self.context[file: target]
+                let file:Unidoc.FileVertex = self.context.vertices[target]?.vertex.file
                 else
                 {
                     return nil
@@ -207,7 +205,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                 let link:Unidoc.LinkReference<Unidoc.ArticleVertex> = self.context[article: id]
                 else
                 {
-                    html[.code] = display.path
+                    html[.code] = display
                     return
                 }
                 guard
@@ -250,7 +248,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                 let link:Unidoc.LinkReference<Unidoc.CultureVertex> = self.context[culture: id]
                 else
                 {
-                    html[.code] = display.path
+                    html[.code] = display
                     return
                 }
 
@@ -264,7 +262,7 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
                     scalars: vector)
                 else
                 {
-                    html[.code] = display.path
+                    html[.code] = display
                     return
                 }
 
@@ -277,67 +275,6 @@ extension Markdown.ProseSection:HTML.OutputStreamableMarkdown
 
         case .fallback(text: let text):
             html[.code] = text
-        }
-    }
-}
-extension Markdown.ProseSection:TextOutputStreamableMarkdown
-{
-    func load(_ reference:Int, into utf8:inout [UInt8])
-    {
-        let reference:Markdown.ProseReference = .init(reference)
-        let index:Int = reference.index
-
-        guard self.outlines.indices.contains(index)
-        else
-        {
-            return
-        }
-        switch self.outlines[index]
-        {
-        case .file(line: let line, let id):
-            guard
-            let file:Unidoc.FileVertex = self.context[file: id]
-            else
-            {
-                break
-            }
-
-            utf8 += file.symbol.last.utf8
-
-            if  let line:Int = line
-            {
-                utf8 += ":\(line + 1)".utf8
-            }
-
-        case .link(https: let url, safe: true):
-            utf8 += "https://\(url)".utf8
-
-        case .link(https: _, safe: false):
-            //  We are probably better off not printing the URL at all.
-            return
-
-        case .path(let display, let path):
-            let components:[Substring] = display.vector.suffix(path.count)
-            var first:Bool = true
-            for component:Substring in components
-            {
-                if  first
-                {
-                    first = false
-                }
-                else
-                {
-                    utf8.append(0x2E)
-                }
-
-                utf8 += component.utf8
-            }
-
-        case .fragment(let text):
-            utf8 += text.utf8
-
-        case .fallback(text: let text):
-            utf8 += text.utf8
         }
     }
 }

@@ -85,19 +85,27 @@ extension Unidoc.Cone
 {
     var context:Unidoc.RelativePageContext { self.halo.context }
 
-    var overview:Markdown.ProseSection?
+    var overviewText:Unidoc.InertSection<Unidoc.IdentifiableVertices>?
     {
         self.writings.overview.map
         {
-            .init(self.context, bytecode: $0, outlines: self.outlines)
+            .init(bytecode: $0, outlines: self.outlines, vertices: self.context.vertices)
         }
     }
 
-    var details:Markdown.ProseSection?
+    var overview:Unidoc.ProseSection?
+    {
+        self.writings.overview.map
+        {
+            .init(bytecode: $0, outlines: self.outlines, context: self.context)
+        }
+    }
+
+    var details:Unidoc.ProseSection?
     {
         self.writings.details.map
         {
-            .init(self.context, bytecode: $0, outlines: self.outlines)
+            .init(bytecode: $0, outlines: self.outlines, context: self.context)
         }
     }
 }

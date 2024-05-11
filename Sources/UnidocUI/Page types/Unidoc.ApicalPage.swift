@@ -18,7 +18,10 @@ extension Unidoc.ApicalPage
     var descriptionFallback:String { "No overview available" }
 
     /// This needs to be optional, to prevent the default implementation from being used.
-    var description:String? { self.cone.overview?.description ?? self.descriptionFallback }
+    var description:String?
+    {
+        self.cone.overviewText?.description ?? self.descriptionFallback
+    }
 }
 extension Unidoc.ApicalPage
     where Context == Unidoc.RelativePageContext

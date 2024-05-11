@@ -204,7 +204,7 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
                 $0[.code]
                 {
                     $0.class = width > 80 ? "multiline" : nil
-                } = Markdown.CodeSection.init(self.context,
+                } = Unidoc.CodeSection.init(self.context,
                     bytecode: self.apex.signature.expanded.bytecode,
                     scalars: self.apex.signature.expanded.scalars)
             }

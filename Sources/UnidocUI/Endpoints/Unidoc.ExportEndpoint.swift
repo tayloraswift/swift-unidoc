@@ -68,13 +68,13 @@ extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         }
 
         let outlines:[Unidoc.Outline] = article.outlinesConcatenated
-        let overview:Markdown.ProseSection? = article.overview.map
+        let overview:Unidoc.ProseSection? = article.overview.map
         {
-            .init(context, bytecode: $0.markdown, outlines: outlines)
+            .init(bytecode: $0.markdown, outlines: outlines, context: context)
         }
-        let details:Markdown.ProseSection? = article.details.map
+        let details:Unidoc.ProseSection? = article.details.map
         {
-            .init(context, bytecode: $0.markdown, outlines: outlines)
+            .init(bytecode: $0.markdown, outlines: outlines, context: context)
         }
 
         let html:HTML = .init

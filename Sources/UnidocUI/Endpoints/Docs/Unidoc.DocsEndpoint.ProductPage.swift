@@ -68,7 +68,7 @@ extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
         for id:Unidoc.Scalar in self.apex.constituents
         {
             guard
-            case .culture(let vertex)? = self.context[id],
+            let vertex:Unidoc.CultureVertex = self.context.vertices[id]?.vertex.culture,
                 vertex.module.name == self.apex.symbol
             else
             {
@@ -140,7 +140,7 @@ extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
                     {
                         guard
                         let volume:Unidoc.VolumeMetadata = self.context[id.edition],
-                        let vertex:Unidoc.AnyVertex = self.context[id]
+                        let vertex:Unidoc.AnyVertex = self.context.vertices[id]?.vertex
                         else
                         {
                             continue

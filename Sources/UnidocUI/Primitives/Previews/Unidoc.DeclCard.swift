@@ -3,7 +3,7 @@ import UnidocRecords
 
 extension Unidoc
 {
-    struct DeclCard
+    struct DeclCard:PreviewCard
     {
         let context:any VertexContext
 
@@ -17,10 +17,6 @@ extension Unidoc
             self.target = target
         }
     }
-}
-extension Unidoc.DeclCard:Unidoc.PreviewCard
-{
-    var passage:Unidoc.Passage? { self.vertex.overview }
 }
 extension Unidoc.DeclCard:HTML.OutputStreamableAnchor
 {

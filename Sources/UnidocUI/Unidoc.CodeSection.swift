@@ -3,7 +3,7 @@ import MarkdownABI
 import MarkdownRendering
 import UnidocRecords
 
-extension Markdown
+extension Unidoc
 {
     struct CodeSection
     {
@@ -11,9 +11,9 @@ extension Markdown
         private
         let scalars:[Unidoc.Scalar?]
         private
-        let context:any Unidoc.VertexContext
+        let context:any VertexContext
 
-        init(_ context:any Unidoc.VertexContext,
+        init(_ context:any VertexContext,
             bytecode:Markdown.Bytecode,
             scalars:[Unidoc.Scalar?])
         {
@@ -23,7 +23,7 @@ extension Markdown
         }
     }
 }
-extension Markdown.CodeSection:HTML.OutputStreamableMarkdown
+extension Unidoc.CodeSection:HTML.OutputStreamableMarkdown
 {
     func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
     {
