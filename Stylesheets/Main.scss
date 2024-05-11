@@ -62,10 +62,19 @@ body
 
     > *.app > *.content
     {
+        //  max-width takes effect when `overflow` becomes `visible`
         flex: 0 1 48rem;
         max-width: 48rem;
+        overflow: hidden;
         overflow-wrap: break-word;
     }
+    > header.app > div.content
+    {
+        //  48rem + 4 rem + 1 rem = 53rem
+        flex: 0 1 53rem;
+        max-width: 53rem;
+    }
+
     > *.app > *.sidebar
     {
         display: none;
@@ -97,11 +106,11 @@ body
         width: 16rem;
     }
 
-    body > header.app > div.content
+    body > *.app > *.content
     {
-        //  48rem + 4 rem + 1 rem = 53rem
-        flex: 0 1 53rem;
+        overflow: visible;
     }
+
     body > header.app > div.content > *,
     body > div.app > main.content
     {
