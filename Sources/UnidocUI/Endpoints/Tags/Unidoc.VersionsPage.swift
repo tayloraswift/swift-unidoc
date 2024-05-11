@@ -387,7 +387,7 @@ extension Unidoc.VersionsPage
         section[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Unidoc.Post[.packageIndexTag])"
+            $0.action = "\(Unidoc.Post[.packageIndex])"
             $0.method = "post"
 
             $0.class = "config"
@@ -414,7 +414,7 @@ extension Unidoc.VersionsPage
                         $0.readonly = !self.view.editor
 
                         $0.placeholder = "master"
-                        $0.pattern = #"^[a-zA-Z0-9_\-\./]+$"#
+                        $0.pattern = #"^[a-zA-Z0-9_\-\.\/]+$"#
                     }
                 }
             }

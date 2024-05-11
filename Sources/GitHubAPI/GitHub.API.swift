@@ -1,10 +1,3 @@
-extension GitHub.OAuth
-{
-    @available(*, deprecated, renamed: "GitHub.API")
-    public
-    typealias API = GitHub.API
-}
-
 extension GitHub
 {
     @frozen public
