@@ -25,7 +25,11 @@ extension Unidoc.CultureCard:HTML.OutputStreamable
     {
         li[.h3, { $0.class = "module" }]
         {
-            $0[.a] { $0.href = self.target } = self.vertex.module.name
+            $0[.a]
+            {
+                $0.tooltip = .declaration
+                $0.href = self.target
+            } = self.vertex.module.name
 
             let tag:String
             switch self.vertex.module.type

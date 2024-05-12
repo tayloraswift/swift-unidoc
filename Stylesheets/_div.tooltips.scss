@@ -13,6 +13,7 @@ div.tooltips
         opacity: 0;
         margin-top: 0;
         margin-left: -1rem;
+        margin-right: -1rem;
 
         transition: all 0.25s;
 
@@ -21,7 +22,7 @@ div.tooltips
         padding: 0.5rem 1rem;
         box-shadow: 0 1rem 3rem var(--blur-shadow);
         border-radius: 0.5rem;
-        width: 30rem;
+        max-width: 30rem;
 
         pre
         {
@@ -33,6 +34,8 @@ div.tooltips
         {
             font-size: 90.625%;
             line-height: 1.4em;
+
+            display: none;
         }
     }
 
@@ -43,5 +46,12 @@ div.tooltips
 
         transition: opacity 0.25s;
         transition: margin-top 0.15s;
+    }
+    > div.overview
+    {
+        p
+        {
+            display: block;
+        }
     }
 }

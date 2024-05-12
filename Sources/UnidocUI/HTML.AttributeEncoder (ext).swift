@@ -2,6 +2,15 @@ import HTML
 
 extension HTML.AttributeEncoder
 {
+    var tooltip:Unidoc.TooltipMode?
+    {
+        get { nil }
+        set (value)
+        {
+            self[data: "tooltip"] = value?.code
+        }
+    }
+
     @inlinable mutating
     func external(safe:Bool)
     {

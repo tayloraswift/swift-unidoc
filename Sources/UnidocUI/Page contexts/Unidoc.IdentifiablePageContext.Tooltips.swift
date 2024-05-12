@@ -44,6 +44,19 @@ extension Unidoc.IdentifiablePageContext.Tooltips:HTML.OutputStreamable
 
             switch vertex
             {
+            case .article(let vertex):
+                guard
+                let overview:Unidoc.Passage = vertex.overview
+                else
+                {
+                    continue
+                }
+
+                div[.a]
+                {
+                    $0.href = uri
+                } = Unidoc.InertSection<Table>.init(overview: overview, vertices: self.vertices)
+
             case .culture(let vertex):
                 div[.a, { $0.href = uri }]
                 {

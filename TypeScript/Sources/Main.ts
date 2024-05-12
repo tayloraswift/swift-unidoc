@@ -161,14 +161,16 @@ if (tooltips !== null) {
                 all: NodeListOf<Element>
             ) => {
 
-            //  If the anchor is inside a card preview, the tooltip would be redundant.
-            if (anchor.parentElement?.tagName === 'CODE' &&
-                anchor.parentElement.classList.contains('decl')) {
-                return;
-            }
-            if (anchor.parentElement?.tagName === 'H3' &&
-                anchor.parentElement.classList.contains('module')) {
-                return;
+            let overview: boolean = true;
+
+            //  Check if the anchor has a `data-tooltip` mode set.
+            if (anchor.dataset.tooltip !== undefined) {
+                if  (anchor.dataset.tooltip === 'n') {
+                    return;
+                }
+                if  (anchor.dataset.tooltip === 'd') {
+                    overview = false;
+                }
             }
 
             const id: string | null = anchor.getAttribute("href")
@@ -188,8 +190,26 @@ if (tooltips !== null) {
             anchor.addEventListener('mouseenter', (event: MouseEvent) => {
                 const r: DOMRect = anchor.getBoundingClientRect();
 
-                tooltip.style.left = r.x.toString() + 'px';
+                const width: number = window.innerWidth
+                //  If the anchor is more than halfway across the screen, flow the tooltip to
+                //  the left instead of the right.
+
+                if (r.left > width / 2) {
+                    tooltip.style.right = (width - r.right).toString() + 'px';
+                    tooltip.style.left = 'auto';
+                } else {
+                    tooltip.style.right = 'auto';
+                    tooltip.style.left = r.x.toString() + 'px';
+                }
+
                 tooltip.style.top = r.bottom.toString() + 'px';
+
+                if (overview) {
+                    tooltip.classList.add('overview');
+                } else {
+
+                    tooltip.classList.remove('overview');
+                }
 
                 tooltip.classList.add('visible');
             });
