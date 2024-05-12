@@ -89,6 +89,12 @@ ul.cards
         {
             text-indent: 0;
             margin-left: 0;
+
+            a
+            {
+                //  Needed to prevent gaps between lines
+                display: inline-block;
+            }
         }
 
         > code.decl + p
