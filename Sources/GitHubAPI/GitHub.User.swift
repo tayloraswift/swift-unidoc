@@ -20,7 +20,7 @@ extension GitHub
 }
 extension GitHub.User
 {
-    public
+    @frozen public
     enum CodingKey:String, Sendable
     {
         case id
