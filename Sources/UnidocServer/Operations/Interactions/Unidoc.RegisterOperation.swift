@@ -41,6 +41,12 @@ extension Unidoc.RegisterOperation:Unidoc.InteractiveOperation
         let user:Unidoc.User = try await github.connect
         {
             let user:GitHub.User = try await $0.get(from: "/user", with: self.token)
+            let orgs:[GitHub.OrganizationMembership] = try await $0.get(
+                from: "/user/memberships/orgs",
+                with: self.token)
+
+            print(orgs)
+
             /// r u taylor swift?
             let level:Unidoc.User.Level = user.id == 2556986 ? .administratrix : .human
             let id:Unidoc.Account = .init(type: .github, user: user.id)
