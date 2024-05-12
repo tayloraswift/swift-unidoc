@@ -43,6 +43,7 @@ extension Unidoc.DeclCard:HTML.OutputStreamable
         {
             $0[link: self.target]
             {
+                $0.tooltip = .declaration
                 $0.class = self.vertex.signature.availability.isGenerallyRecommended ?
                     nil : "discouraged"
             } = self.vertex.signature.abridged

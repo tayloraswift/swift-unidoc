@@ -25,9 +25,14 @@ extension Unidoc.ArticleCard:HTML.OutputStreamable
     {
         li[.h3, { $0.class = "article" }]
         {
-            $0[.a] { $0.href = self.target } = self.vertex.headline.safe
+            $0[.a] { $0.tooltip = .omit ; $0.href = self.target } = self.vertex.headline.safe
         }
         li ?= self.overview
-        li[.a] { $0.href = self.target ; $0.class = "read-more" } = "Read More"
+        li[.a]
+        {
+            $0.tooltip = .omit
+            $0.href = self.target
+            $0.class = "read-more"
+        } = "Read More"
     }
 }
