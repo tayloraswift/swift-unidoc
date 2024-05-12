@@ -74,8 +74,7 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
             //  even though the GitHub OAuth documentation suggests it should.
             //  https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#loopback-redirect-urls
 
-            //  Don’t actually need this yet.
-            // $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "user:email" }
+            $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "read:org" }
 
             $0[.button] { $0.class = "area" ; $0.type = "submit" } = "Authenticate with GitHub"
         }
