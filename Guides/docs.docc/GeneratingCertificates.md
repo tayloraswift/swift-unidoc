@@ -6,28 +6,46 @@ For a seamless development experience, we recommend using [mkcert](https://githu
 
 ## Installing mkcert
 
-The easiest way to install `mkcert` is to download one of its prebuilt binaries.
+### Linux
+
+On Linux, the easiest way to install `mkcert` is to download one of its prebuilt binaries.
 
 ```bash
 $ curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
 chmod +x mkcert-v*-linux-amd64
 ```
 
+### macOS
+
+On macOS, the easiest way to install `mkcert` is to use Homebrew.
+
+```bash
+$ brew install mkcert
+```
+
 ## Generating a local certificate authority
 
 ```bash
 $ ./mkcert-v1.4.4-linux-amd64 -install
-``````
+```
+
+On macOS, you can use the `mkcert` command directly.
+
+```bash
+$ mkcert -install
+```
 
 ## Generating a local certificate
 
 If the `mkcert-v1.4.4-linux-amd64` binary is located in your home directory, you can generate a certificate for `localhost` by running the following from the repository root:
 
 ```bash
+$ mkdir -p Assets/certificates
 $ cd Assets/certificates
 $ ~/mkcert-v1.4.4-linux-amd64 localhost
-
 ```
+
+(On macOS, you can use the `mkcert` command directly.)
 
 Then, rename the generated files to `fullchain.pem` and `privkey.pem`.
 
