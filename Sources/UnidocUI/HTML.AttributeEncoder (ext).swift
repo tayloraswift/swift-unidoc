@@ -1,4 +1,5 @@
 import HTML
+import UnidocRender
 
 extension HTML.AttributeEncoder
 {
@@ -8,6 +9,28 @@ extension HTML.AttributeEncoder
         set (value)
         {
             self[data: "tooltip"] = value?.code
+        }
+    }
+
+    @inlinable
+    var link:Unidoc.LinkTarget?
+    {
+        get { nil }
+        set (value)
+        {
+            guard
+            let value:Unidoc.LinkTarget
+            else
+            {
+                return
+            }
+
+            self.href = value.url ?? "."
+
+            if  case .exported = value
+            {
+                self.external(safe: true)
+            }
         }
     }
 
