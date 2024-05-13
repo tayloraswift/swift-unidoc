@@ -8,9 +8,9 @@ extension Unidoc
         let context:any VertexContext
 
         let vertex:CultureVertex
-        let target:String
+        let target:LinkTarget
 
-        init(_ context:any VertexContext, vertex:CultureVertex, target:String)
+        init(_ context:any VertexContext, vertex:CultureVertex, target:LinkTarget)
         {
             self.context = context
             self.vertex = vertex
@@ -28,7 +28,7 @@ extension Unidoc.CultureCard:HTML.OutputStreamable
             $0[.a]
             {
                 $0.tooltip = .declaration
-                $0.href = self.target
+                $0.link = self.target
             } = self.vertex.module.name
 
             let tag:String

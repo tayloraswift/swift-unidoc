@@ -8,11 +8,11 @@ extension Unidoc
         let context:any VertexContext
 
         let vertex:ProductVertex
-        let target:String
+        let target:LinkTarget
 
         init(_ context:any VertexContext,
             vertex:ProductVertex,
-            target:String)
+            target:LinkTarget)
         {
             self.context = context
             self.vertex = vertex
@@ -27,7 +27,7 @@ extension Unidoc.ProductCard:HTML.OutputStreamable
     {
         li[.h3, { $0.class = "product" }]
         {
-            $0[.a] { $0.href = self.target } = self.vertex.symbol
+            $0[.a] { $0.link = self.target } = self.vertex.symbol
 
             let tag:String
             switch self.vertex.type
