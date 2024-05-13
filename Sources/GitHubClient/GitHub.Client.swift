@@ -14,56 +14,56 @@ extension GitHub
         @usableFromInline internal
         let http2:HTTP.Client2
         public
+        let agent:String
+        public
         let app:Application
 
         private
-        init(http2:HTTP.Client2, app:Application)
+        init(http2:HTTP.Client2, agent:String, app:Application)
         {
             self.http2 = http2
+            self.agent = agent
             self.app = app
         }
     }
 }
-extension GitHub.Client<GitHub.API<String>>
+extension GitHub.Client<GitHub.PersonalAccessToken>
 {
     public static
-    func graphql(api:consuming GitHub.API<String>,
+    func graphql(pat:consuming GitHub.PersonalAccessToken,
         threads:consuming MultiThreadedEventLoopGroup,
-        niossl:consuming NIOSSLContext) -> GitHub.Client<GitHub.API<String>>
+        niossl:consuming NIOSSLContext,
+        as agent:String) -> GitHub.Client<GitHub.PersonalAccessToken>
     {
-        .init(http2: .init(
-                threads: threads,
-                niossl: niossl,
-                remote: "api.github.com"),
-            app: api)
-    }
-}
-extension GitHub.Client<GitHub.API<Void>>
-{
-    public static
-    func rest(api:consuming GitHub.API<Void>,
-        threads:consuming MultiThreadedEventLoopGroup,
-        niossl:consuming NIOSSLContext) -> GitHub.Client<GitHub.API<Void>>
-    {
-        .init(http2: .init(
-                threads: threads,
-                niossl: niossl,
-                remote: "api.github.com"),
-            app: api)
+        .init(http2: .init(threads: threads, niossl: niossl, remote: "api.github.com"),
+            agent: agent,
+            app: pat)
     }
 }
 extension GitHub.Client<GitHub.OAuth>
 {
     public static
-    func oauth(_ oauth:consuming GitHub.OAuth,
+    func rest(app:consuming GitHub.OAuth,
         threads:consuming MultiThreadedEventLoopGroup,
-        niossl:consuming NIOSSLContext) -> GitHub.Client<GitHub.OAuth>
+        niossl:consuming NIOSSLContext,
+        as agent:String) -> GitHub.Client<GitHub.OAuth>
     {
-        .init(http2: .init(
-                threads: threads,
-                niossl: niossl,
-                remote: "github.com"),
-            app: oauth)
+        .init(http2: .init(threads: threads, niossl: niossl, remote: "api.github.com"),
+            agent: agent,
+            app: app)
+    }
+
+    /// This is almost the same as ``rest(app:threads:niossl:as:)``, but it is bound to
+    /// the `github.com` apex domain, which is used for initial authentication.
+    public static
+    func auth(app:consuming GitHub.OAuth,
+        threads:consuming MultiThreadedEventLoopGroup,
+        niossl:consuming NIOSSLContext,
+        as agent:String) -> GitHub.Client<GitHub.OAuth>
+    {
+        .init(http2: .init(threads: threads, niossl: niossl, remote: "github.com"),
+            agent: agent,
+            app: app)
     }
 }
 extension GitHub.Client:Identifiable where Application:GitHubApplication
@@ -157,7 +157,7 @@ extension GitHub.Client
     {
         try await self.http2.connect
         {
-            try await body(Connection.init(http2: $0, app: self.app))
+            try await body(Connection.init(http2: $0, agent: self.agent, app: self.app))
         }
     }
 }

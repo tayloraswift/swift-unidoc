@@ -25,13 +25,14 @@ extension Unidoc.RegisterOperation:Unidoc.InteractiveOperation
         with _:Unidoc.Credentials,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let github:GitHub.Client<GitHub.API<Void>>
+        let github:GitHub.Client<GitHub.OAuth>
 
-        if  let api:GitHub.API<Void> = server.github?.oauth.api
+        if  let integration:GitHub.Integration = server.github
         {
-            github = .rest(api: api,
+            github = .rest(app: integration.oauth,
                 threads: server.context.threads,
-                niossl: server.context.niossl)
+                niossl: server.context.niossl,
+                as: integration.agent)
         }
         else
         {

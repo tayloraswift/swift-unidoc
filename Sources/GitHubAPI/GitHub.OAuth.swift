@@ -23,19 +23,3 @@ extension GitHub
         }
     }
 }
-extension GitHub.OAuth
-{
-    /// The GitHub REST API.
-    @inlinable public
-    var api:GitHub.API<Void>
-    {
-        .init(agent: "swift-unidoc (by tayloraswift)", oauth: self, pat: ())
-    }
-
-    /// The GitHub GraphQL API.
-    @inlinable public
-    func api(pat:String) -> GitHub.API<String>
-    {
-        .init(agent: "swift-unidoc (by tayloraswift)", oauth: self, pat: pat)
-    }
-}

@@ -27,11 +27,12 @@ extension Unidoc.AuthOperation:Unidoc.InteractiveOperation
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let github:GitHub.Client<GitHub.OAuth>
-        if  let oauth:GitHub.OAuth = server.github?.oauth
+        if  let integration:GitHub.Integration = server.github
         {
-            github = .oauth(oauth,
+            github = .auth(app: integration.oauth,
                 threads: server.context.threads,
-                niossl: server.context.niossl)
+                niossl: server.context.niossl,
+                as: integration.agent)
         }
         else
         {

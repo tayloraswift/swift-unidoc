@@ -10,20 +10,23 @@ extension GitHub.Client
     @frozen public
     struct Connection
     {
-        @usableFromInline internal
+        @usableFromInline
         let http2:HTTP.Client2.Connection
-        @usableFromInline internal
+        @usableFromInline
+        let agent:String
+        @usableFromInline
         let app:Application
 
         @inlinable internal
-        init(http2:HTTP.Client2.Connection, app:Application)
+        init(http2:HTTP.Client2.Connection, agent:String, app:Application)
         {
             self.http2 = http2
+            self.agent = agent
             self.app = app
         }
     }
 }
-extension GitHub.Client<GitHub.API<String>>.Connection
+extension GitHub.Client<GitHub.PersonalAccessToken>.Connection
 {
     /// Run a GraphQL API request.
     ///
@@ -41,10 +44,10 @@ extension GitHub.Client<GitHub.API<String>>.Connection
                 ":authority": self.http2.remote,
                 ":path": "/graphql",
 
-                "authorization": "Bearer \(self.app.pat)",
+                "authorization": "Bearer \(self.app)",
 
                 //  GitHub will reject the API request if the user-agent is not set.
-                "user-agent": self.app.agent,
+                "user-agent": self.agent,
                 "accept": "application/vnd.github+json"
             ],
             body: self.http2.buffer(string: query))
@@ -67,7 +70,7 @@ extension GitHub.Client<GitHub.API<String>>.Connection
             if  let second:String = response.headers?["x-ratelimit-reset"].first,
                 let second:Int64 = .init(second)
             {
-                throw GitHub.Client<GitHub.API<String>>.RateLimitError.init(
+                throw GitHub.Client<GitHub.PersonalAccessToken>.RateLimitError.init(
                     until: .second(second))
             }
             else
@@ -80,7 +83,7 @@ extension GitHub.Client<GitHub.API<String>>.Connection
         }
     }
 }
-extension GitHub.Client<GitHub.API<Void>>.Connection
+extension GitHub.Client<GitHub.OAuth>.Connection
 {
     /// Run a REST API request.
     @inlinable public
@@ -102,10 +105,10 @@ extension GitHub.Client<GitHub.API<Void>>.Connection
                 ":path": endpoint,
 
                 "authorization": token.map { "Bearer \($0)" } ??
-                    "Basic \(self.app.oauth.authorization)",
+                    "Basic \(self.app.authorization)",
 
                 //  GitHub will reject the API request if the user-agent is not set.
-                "user-agent": self.app.agent,
+                "user-agent": self.agent,
                 "accept": "application/vnd.github+json"
             ]
 
@@ -134,7 +137,7 @@ extension GitHub.Client<GitHub.API<Void>>.Connection
                 if  let second:String = response.headers?["x-ratelimit-reset"].first,
                     let second:Int64 = .init(second)
                 {
-                    throw GitHub.Client<GitHub.API<Void>>.RateLimitError.init(
+                    throw GitHub.Client<GitHub.OAuth>.RateLimitError.init(
                         until: .second(second))
                 }
 
