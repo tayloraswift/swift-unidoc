@@ -109,8 +109,12 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                 {
                     .init(decoded: String.init($0))
                 }
+                if  case .exported = target
+                {
+                    attribute = .safelink
+                }
 
-                switch (target.location, fragment)
+                switch (target.url, fragment)
                 {
                 case (let url?, nil):
                     return url
@@ -122,7 +126,7 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                     return "\(fragment)"
 
                 case (nil, nil):
-                    return nil
+                    return "#"
                 }
 
             //  This needs to be here for backwards compatibility with older symbol graphs.
@@ -223,7 +227,7 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                     .init(decoded: String.init($0))
                 }
 
-                switch (target.location, fragment)
+                switch (target.url, fragment)
                 {
                 case (let url?, nil):
                     //  This is a link to another page.
@@ -239,8 +243,9 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                     html[.a] { $0.href = "\(fragment)" } = display.fragment
 
                 case (nil, nil):
-                    //  This is a link to the current page.
-                    html[.a] = link.vertex.headline.safe
+                    //  This is a link to the current page. We should emit `#` for `href`, so
+                    //  that we don’t display a broken link icon.
+                    html[.a] { $0.href = "#" } = link.vertex.headline.safe
                 }
 
             case .module?:
