@@ -10,32 +10,32 @@ extension Unidoc.VertexContext
     func card(decl id:Unidoc.Scalar) -> Unidoc.DeclCard?
     {
         guard
-        let link:Unidoc.LinkReference<Unidoc.DeclVertex> = self[decl: id],
-        let url:String = link.target?.location
+        let reference:Unidoc.LinkReference<Unidoc.DeclVertex> = self[decl: id],
+        let target:Unidoc.LinkTarget = reference.target
         else
         {
             return nil
         }
 
-        return .init(self, vertex: link.vertex, target: url)
+        return .init(self, vertex: reference.vertex, target: target)
     }
 
     func card(_ id:Unidoc.Scalar) -> Unidoc.AnyCard?
     {
         guard
-        let link:Unidoc.LinkReference<Unidoc.AnyVertex> = self[vertex: id],
-        let url:String = link.target?.location
+        let reference:Unidoc.LinkReference<Unidoc.AnyVertex> = self[vertex: id],
+        let target:Unidoc.LinkTarget = reference.target
         else
         {
             return nil
         }
 
-        switch link.vertex
+        switch reference.vertex
         {
-        case .article(let vertex):  return .article(.init(self, vertex: vertex, target: url))
-        case .culture(let vertex):  return .culture(.init(self, vertex: vertex, target: url))
-        case .decl(let vertex):     return .decl(.init(self, vertex: vertex, target: url))
-        case .product(let vertex):  return .product(.init(self, vertex: vertex, target: url))
+        case .article(let vertex):  return .article(.init(self, vertex: vertex, target: target))
+        case .culture(let vertex):  return .culture(.init(self, vertex: vertex, target: target))
+        case .decl(let vertex):     return .decl(.init(self, vertex: vertex, target: target))
+        case .product(let vertex):  return .product(.init(self, vertex: vertex, target: target))
         default:                    return nil
         }
     }
@@ -46,7 +46,7 @@ extension Unidoc.VertexContext
     {
         self[culture: module].map
         {
-            .init(display: $0.vertex.module.id, target: $0.target?.location)
+            .init(display: $0.vertex.module.id, target: $0.target?.url)
         }
     }
 
@@ -60,7 +60,7 @@ extension Unidoc.VertexContext
             return nil
         }
 
-        return .init(display: path, target: link.target?.location)
+        return .init(display: path, target: link.target?.url)
     }
 
     func link(source file:Unidoc.Scalar, line:Int? = nil) -> Unidoc.SourceLink?

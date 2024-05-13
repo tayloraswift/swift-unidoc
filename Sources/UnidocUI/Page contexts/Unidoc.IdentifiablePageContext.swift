@@ -162,7 +162,7 @@ extension Unidoc.IdentifiablePageContext
         culture:Unidoc.Scalar) -> Unidoc.VolumeMetadata.Subdomain?
     {
         guard
-        let url:String = self[culture: culture]?.target?.location
+        let url:String = self[culture: culture]?.target?.url
         else
         {
             return nil
@@ -184,7 +184,7 @@ extension Unidoc.IdentifiablePageContext
         }
 
         guard
-        let namespace:String = self[culture: culture]?.target?.location,
+        let namespace:String = self[culture: culture]?.target?.url,
         let culture:HTML.Link<Symbol.Module> = self.link(module: culture)
         else
         {

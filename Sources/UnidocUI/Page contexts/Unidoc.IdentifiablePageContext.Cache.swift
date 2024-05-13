@@ -41,7 +41,7 @@ extension Unidoc.IdentifiablePageContext.Cache
         {
             if  let target:String = $0
             {
-                return .init(location: target)
+                return .location(target)
             }
             else if
                 let volume:Unidoc.VolumeMetadata = self.volumes[id.edition],
@@ -50,7 +50,7 @@ extension Unidoc.IdentifiablePageContext.Cache
                 self.used.append(id)
                 let target:String = "\(uri)"
                 $0 = target
-                return .init(location: target)
+                return .location(target)
             }
             else
             {
@@ -65,7 +65,7 @@ extension Unidoc.IdentifiablePageContext.Cache
         principal:Bool) -> Unidoc.LinkReference<Vertex>
         where Vertex:Unidoc.PrincipalVertex
     {
-        let target:Unidoc.LinkTarget? = principal ? .init(location: nil) : self.load(id)
+        let target:Unidoc.LinkTarget? = principal ? .loopback : self.load(id)
         {
             Unidoc.DocsEndpoint[$0, vertex.route]
         }
@@ -146,7 +146,7 @@ extension Unidoc.IdentifiablePageContext.Cache
                     return .init(vertex: vertex, target: target)
 
                 case (let vertex, principal: true):
-                    return .init(vertex: vertex, target: .init(location: nil))
+                    return .init(vertex: vertex, target: .loopback)
                 }
             }
         }

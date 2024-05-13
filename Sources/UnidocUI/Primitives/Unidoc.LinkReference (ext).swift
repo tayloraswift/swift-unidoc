@@ -8,6 +8,6 @@ extension Unidoc.LinkReference<Unidoc.CultureVertex>:HTML.OutputStreamable
     @inlinable public static
     func += (code:inout HTML.ContentEncoder, self:Self)
     {
-        code[link: self.target?.location] = self.vertex.module.id
+        code[.a] { $0.link = self.target } = self.vertex.module.id
     }
 }

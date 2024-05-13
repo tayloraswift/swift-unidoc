@@ -27,21 +27,25 @@ extension Unidoc.CodeSection:HTML.OutputStreamableMarkdown
 {
     func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
     {
-        switch attribute
+        guard case .href = attribute
+        else
         {
-        case .href:
-            if  self.scalars.indices.contains(reference),
-                let target:Unidoc.Scalar = self.scalars[reference]
-            {
-                self.context[vertex: target]?.target?.location
-            }
-            else
-            {
-                nil
-            }
-
-        case _:
-            nil
+            return nil
         }
+
+        guard self.scalars.indices.contains(reference),
+        let target:Unidoc.Scalar = self.scalars[reference],
+        let target:Unidoc.LinkTarget = self.context[vertex: target]?.target
+        else
+        {
+            return nil
+        }
+
+        if  case .exported = target
+        {
+            attribute = .safelink
+        }
+
+        return target.url ?? "."
     }
 }

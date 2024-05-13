@@ -8,9 +8,9 @@ extension Unidoc
         let context:any VertexContext
 
         let vertex:DeclVertex
-        let target:String
+        let target:LinkTarget
 
-        init(_ context:any VertexContext, vertex:DeclVertex, target:String)
+        init(_ context:any VertexContext, vertex:DeclVertex, target:LinkTarget)
         {
             self.context = context
             self.vertex = vertex
@@ -41,9 +41,10 @@ extension Unidoc.DeclCard:HTML.OutputStreamable
         }
             content:
         {
-            $0[link: self.target]
+            $0[.a]
             {
                 $0.tooltip = .declaration
+                $0.link = self.target
                 $0.class = self.vertex.signature.availability.isGenerallyRecommended ?
                     nil : "discouraged"
             } = self.vertex.signature.abridged

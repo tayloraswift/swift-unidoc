@@ -8,9 +8,9 @@ extension Unidoc
         let context:any VertexContext
 
         let vertex:ArticleVertex
-        let target:String
+        let target:LinkTarget
 
-        init(_ context:any VertexContext, vertex:ArticleVertex, target:String)
+        init(_ context:any VertexContext, vertex:ArticleVertex, target:LinkTarget)
         {
             self.context = context
             self.vertex = vertex
@@ -25,13 +25,13 @@ extension Unidoc.ArticleCard:HTML.OutputStreamable
     {
         li[.h3, { $0.class = "article" }]
         {
-            $0[.a] { $0.tooltip = .omit ; $0.href = self.target } = self.vertex.headline.safe
+            $0[.a] { $0.tooltip = .omit ; $0.link = self.target } = self.vertex.headline.safe
         }
         li ?= self.overview
         li[.a]
         {
             $0.tooltip = .omit
-            $0.href = self.target
+            $0.link = self.target
             $0.class = "read-more"
         } = "Read More"
     }

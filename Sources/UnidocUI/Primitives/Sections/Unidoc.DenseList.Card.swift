@@ -7,13 +7,13 @@ extension Unidoc.DenseList
 {
     struct Card
     {
-        let target:String
+        let target:Unidoc.LinkTarget
         let decl:Unidoc.DeclVertex
         let path:UnqualifiedPath
         let constraints:Unidoc.ConstraintsList?
 
         private
-        init(target:String,
+        init(target:Unidoc.LinkTarget,
             decl:Unidoc.DeclVertex,
             path:UnqualifiedPath,
             constraints:Unidoc.ConstraintsList?)
@@ -32,16 +32,16 @@ extension Unidoc.DenseList.Card
         with context:some Unidoc.VertexContext)
     {
         guard
-        let link:Unidoc.LinkReference<Unidoc.DeclVertex> = context[decl: type],
-        let url:String = link.target?.location,
-        let path:UnqualifiedPath = .init(splitting: link.vertex.stem)
+        let reference:Unidoc.LinkReference<Unidoc.DeclVertex> = context[decl: type],
+        let target:Unidoc.LinkTarget = reference.target,
+        let path:UnqualifiedPath = .init(splitting: reference.vertex.stem)
         else
         {
             return nil
         }
 
-        self.init(target: url,
-            decl: link.vertex,
+        self.init(target: target,
+            decl: reference.vertex,
             path: path,
             constraints: .init(context, constraints: constraints))
     }
@@ -56,7 +56,7 @@ extension Unidoc.DenseList.Card:HTML.OutputStreamable
     func += (li:inout HTML.ContentEncoder, self:Self)
     {
         li[.a] { $0.href = "#\(self.id)" }
-        li[.code, { $0.class = "decl" }] { $0[.a] { $0.href = self.target } = self.path }
+        li[.code, { $0.class = "decl" }] { $0[.a] { $0.link = self.target } = self.path }
         li[.div, .code] { $0.class = "constraints" } = self.constraints
     }
 }

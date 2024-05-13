@@ -57,12 +57,19 @@ extension Unidoc.LinkVector:HTML.OutputStreamable
         for id:Unidoc.Scalar in self.scalars
         {
             //  This could be a link to something that is not a declaration, such as a module.
-            code[link: self.context[vertex: id]?.target?.location] = display.next()
+            code[.a]
+            {
+                $0.link = self.context[vertex: id]?.target
+            } = display.next()
+
             code += "."
         }
         if  let last:Substring = display.next()
         {
-            code[link: self.last.target?.location] = last
+            code[.a]
+            {
+                $0.link = self.last.target
+            } = last
         }
     }
 }
