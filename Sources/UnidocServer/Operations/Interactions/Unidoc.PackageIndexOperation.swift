@@ -33,12 +33,13 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
     func load(from server:borrowing Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        let github:GitHub.Client<GitHub.API<String>>
-        if  let api:GitHub.API<String> = server.github?.api
+        let github:GitHub.Client<GitHub.PersonalAccessToken>
+        if  let integration:GitHub.Integration = server.github
         {
-            github = .graphql(api: api,
+            github = .graphql(pat: integration.pat,
                 threads: server.context.threads,
-                niossl: server.context.niossl)
+                niossl: server.context.niossl,
+                as: integration.agent)
         }
         else
         {

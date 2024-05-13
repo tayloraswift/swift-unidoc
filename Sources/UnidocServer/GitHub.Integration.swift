@@ -7,14 +7,14 @@ extension GitHub
     struct Integration:Sendable
     {
         public
-        let oauth:GitHub.OAuth
+        let oauth:OAuth
         public
-        let app:GitHub.App
+        let app:App
         public
-        let pat:String
+        let pat:PersonalAccessToken
 
         @inlinable public
-        init(oauth:GitHub.OAuth, app:GitHub.App, pat:String)
+        init(oauth:OAuth, app:App, pat:PersonalAccessToken)
         {
             self.oauth = oauth
             self.app = app
@@ -25,5 +25,5 @@ extension GitHub
 extension GitHub.Integration
 {
     @inlinable public
-    var api:GitHub.API<String> { self.oauth.api(pat: self.pat) }
+    var agent:String { "unidoc (by tayloraswift)" }
 }

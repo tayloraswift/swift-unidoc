@@ -2,7 +2,7 @@ import GitHubAPI
 import GitHubClient
 import JSON
 
-extension GitHub.Client<GitHub.API<String>>.Connection
+extension GitHub.Client<GitHub.PersonalAccessToken>.Connection
 {
     public
     func inspect(ref:String, owner:String, repo:String) async throws -> GitHub.RefResponse
