@@ -126,7 +126,7 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                     return "\(fragment)"
 
                 case (nil, nil):
-                    return "."
+                    return "#"
                 }
 
             //  This needs to be here for backwards compatibility with older symbol graphs.
@@ -243,9 +243,9 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                     html[.a] { $0.href = "\(fragment)" } = display.fragment
 
                 case (nil, nil):
-                    //  This is a link to the current page. We should emit the `.` for `href`,
-                    //  so that we don’t display a broken link icon.
-                    html[.a] { $0.href = "." } = link.vertex.headline.safe
+                    //  This is a link to the current page. We should emit `#` for `href`, so
+                    //  that we don’t display a broken link icon.
+                    html[.a] { $0.href = "#" } = link.vertex.headline.safe
                 }
 
             case .module?:
