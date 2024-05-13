@@ -25,7 +25,7 @@ extension HTML.AttributeEncoder
                 return
             }
 
-            self.href = value.url ?? "."
+            self.href = value.url ?? "#"
 
             if  case .exported = value
             {

@@ -46,6 +46,6 @@ extension Unidoc.CodeSection:HTML.OutputStreamableMarkdown
             attribute = .safelink
         }
 
-        return target.url ?? "."
+        return target.url ?? "#"
     }
 }
