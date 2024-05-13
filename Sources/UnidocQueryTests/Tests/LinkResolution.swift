@@ -57,6 +57,18 @@ struct LinkResolution:UnidocDatabaseTestBattery
                         "Internal-links#Level four heading",
                         "Internal-links#Level four heading with hashtag (#)",
                     ],
+
+                    "LinkAnchors.LinkAnchors": [
+                        //  This is a known bug:
+                        //  https://github.com/tayloraswift/swift-unidoc/issues/196
+
+                        "LinkAnchors",
+                        //"LinkAnchors#Using the LinkAnchors enum",
+                    ],
+
+                    "LinkAnchors.LinkAnchors.a": [
+                        "LinkAnchors a",
+                    ],
                 ],
                 fragmentLinks: [
                     "Using the LinkAnchors enum"
@@ -64,6 +76,11 @@ struct LinkResolution:UnidocDatabaseTestBattery
 
             .init(name: "InternalLinks",
                 path: ["LinkAnchors", "Internal-links"],
+                internalLinks: [
+                    "LinkAnchors.Internal-links": [
+                        "Internal-links",
+                    ],
+                ],
                 //  Both the roundabout link and the direct link should be optimized to a single
                 //  direct link.
                 fragmentLinks: [

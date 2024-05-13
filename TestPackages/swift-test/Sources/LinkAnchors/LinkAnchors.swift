@@ -12,7 +12,10 @@
 /// Link to current page: <doc:LinkAnchors#Using-the-LinkAnchors-enum>
 ///
 /// ## Using the `LinkAnchors` enum
+///
+/// Link to a member: ``LinkAnchors.a``
 public
 enum LinkAnchors
 {
+    case a
 }
