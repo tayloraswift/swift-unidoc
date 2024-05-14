@@ -7,12 +7,12 @@ import UnidocQueries
 extension Unidoc
 {
     @frozen public
-    struct UserAccountEndpoint
+    struct UserSettingsEndpoint
     {
         public
         let query:UserAccountQuery
         public
-        var value:User?
+        var value:UserAccountQuery.Output?
 
         @inlinable public
         init(query:UserAccountQuery)
@@ -22,24 +22,25 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.UserAccountEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.UserSettingsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Unidoc.UserAccountEndpoint:HTTP.ServerEndpoint
+extension Unidoc.UserSettingsEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         guard
-        let user:Unidoc.User = self.value
+        let output:Unidoc.UserAccountQuery.Output = self.value
         else
         {
             return .notFound("No such user")
         }
 
-        let page:Unidoc.UserAccountPage = .init(user: user)
+        let page:Unidoc.UserSettingsPage = .init(user: output.user,
+            organizations: output.organizations)
         return .ok(page.resource(format: format))
     }
 }
