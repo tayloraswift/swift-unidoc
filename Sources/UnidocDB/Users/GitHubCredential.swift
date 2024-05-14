@@ -21,14 +21,6 @@ extension GitHubCredential:Equatable where Instant:Equatable
 extension GitHubCredential:Hashable where Instant:Hashable
 {
 }
-extension GitHubCredential<BSON.Millisecond>
-{
-    init(token:GitHub.App.Token, created:BSON.Millisecond)
-    {
-        self.init(expires: .init(created.value + 1000 * token.secondsRemaining),
-            token: token.value)
-    }
-}
 extension GitHubCredential
 {
     enum CodingKey:String, Sendable

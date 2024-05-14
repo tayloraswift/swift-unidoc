@@ -88,8 +88,19 @@ extension GitHub.Client<GitHub.OAuth>.Connection
     /// Run a REST API request.
     @inlinable public
     func get<Response>(_:Response.Type = Response.self,
+        from endpoint:String) async throws -> Response where Response:JSONDecodable
+    {
+        try await self.get(from: endpoint, with: .basic(self.app))
+    }
+}
+extension GitHub.Client.Connection
+{
+    /// Run a REST API request with the given credentials.
+    @inlinable public
+    func get<Response>(_:Response.Type = Response.self,
         from endpoint:String,
-        with token:String? = nil) async throws -> Response where Response:JSONDecodable
+        with authorization:GitHub.ClientAuthorization) async throws -> Response
+        where Response:JSONDecodable
     {
         var endpoint:String = endpoint
         var status:UInt? = nil
@@ -104,9 +115,7 @@ extension GitHub.Client<GitHub.OAuth>.Connection
                 ":authority": self.http2.remote,
                 ":path": endpoint,
 
-                "authorization": token.map { "Bearer \($0)" } ??
-                    "Basic \(self.app.authorization)",
-
+                "authorization": authorization.header,
                 //  GitHub will reject the API request if the user-agent is not set.
                 "user-agent": self.agent,
                 "accept": "application/vnd.github+json"

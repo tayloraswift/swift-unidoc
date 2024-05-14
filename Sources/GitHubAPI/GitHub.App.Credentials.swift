@@ -6,15 +6,24 @@ extension GitHub.App
     struct Credentials:Equatable, Hashable, Sendable
     {
         public
-        let refresh:Token
+        var accessToken:String
         public
-        let access:Token
+        var accessTokenSecondsRemaining:Int64?
+        public
+        var refreshToken:String?
+        public
+        var refreshTokenSecondsRemaining:Int64?
 
         @inlinable public
-        init(refresh:Token, access:Token)
+        init(accessToken:String,
+            accessTokenSecondsRemaining:Int64? = nil,
+            refreshToken:String? = nil,
+            refreshTokenSecondsRemaining:Int64? = nil)
         {
-            self.refresh = refresh
-            self.access = access
+            self.accessToken = accessToken
+            self.accessTokenSecondsRemaining = accessTokenSecondsRemaining
+            self.refreshToken = refreshToken
+            self.refreshTokenSecondsRemaining = refreshTokenSecondsRemaining
         }
     }
 }
@@ -23,19 +32,18 @@ extension GitHub.App.Credentials:JSONObjectDecodable
     public
     enum CodingKey:String, Sendable
     {
-        case access_value = "access_token"
-        case access_secondsRemaining = "expires_in"
-        case refresh_value = "refresh_token"
-        case refresh_secondsRemaining = "refresh_token_expires_in"
+        case accessToken = "access_token"
+        case accessTokenSecondsRemaining = "expires_in"
+        case refreshToken = "refresh_token"
+        case refreshTokenSecondsRemaining = "refresh_token_expires_in"
     }
 
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        self.init(
-            refresh: .init(value: try json[.refresh_value].decode(),
-                secondsRemaining: try json[.refresh_secondsRemaining].decode()),
-            access:  .init(value: try json[.access_value].decode(),
-                secondsRemaining: try json[.access_secondsRemaining].decode()))
+        self.init(accessToken: try json[.accessToken].decode(),
+            accessTokenSecondsRemaining: try json[.accessTokenSecondsRemaining]?.decode(),
+            refreshToken: try json[.refreshToken]?.decode(),
+            refreshTokenSecondsRemaining: try json[.refreshTokenSecondsRemaining]?.decode())
     }
 }
