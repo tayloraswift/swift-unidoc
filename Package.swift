@@ -93,8 +93,8 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.14.1")),
-        //.package(path: "../swift-mongodb"),
+            from: "0.15.0")),
+        // .package(path: "../swift-mongodb"),
 
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "1.0.1")),
@@ -756,8 +756,10 @@ for target:PackageDescription.Target in package.targets
 
         settings.append(.enableUpcomingFeature("BareSlashRegexLiterals"))
         settings.append(.enableUpcomingFeature("ConciseMagicFile"))
+        settings.append(.enableUpcomingFeature("DeprecateApplicationMain"))
         settings.append(.enableUpcomingFeature("ExistentialAny"))
-        settings.append(.enableExperimentalFeature("NestedProtocols"))
+        settings.append(.enableUpcomingFeature("GlobalConcurrency"))
+        settings.append(.enableUpcomingFeature("IsolatedDefaultValues"))
         settings.append(.enableExperimentalFeature("StrictConcurrency"))
 
         settings.append(.define("DEBUG", .when(configuration: .debug)))

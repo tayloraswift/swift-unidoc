@@ -18,6 +18,7 @@ extension Unidoc.AdministrativeOperation
         case .administratrix:   true
         case .machine:          false
         case .human:            false
+        case .guest:            false
         }
     }
 }

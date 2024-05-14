@@ -12,6 +12,9 @@ extension Unidoc.User
         case machine = 1
         /// A human user.
         case human = 2
+        /// The lowest level of access, which is used for non-playable entities like
+        /// organizations.
+        case guest = 256
     }
 }
 extension Unidoc.User.Level:BSONDecodable, BSONEncodable
