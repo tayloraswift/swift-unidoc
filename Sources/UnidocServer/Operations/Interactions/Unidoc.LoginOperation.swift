@@ -7,10 +7,12 @@ extension Unidoc
 {
     struct LoginOperation:Sendable
     {
+        let flow:LoginFlow
         let path:String
 
-        init(from path:String = "\(ServerRoot.account)")
+        init(flow:LoginFlow, from path:String = "\(ServerRoot.account)")
         {
+            self.flow = flow
             self.path = path
         }
     }
@@ -20,14 +22,21 @@ extension Unidoc.LoginOperation:Unidoc.PublicOperation
     func load(from server:borrowing Unidoc.Server,
         as _:Unidoc.RenderFormat) -> HTTP.ServerResponse?
     {
-        if  let oauth:GitHub.OAuth = server.github?.oauth
-        {
-            let page:Unidoc.LoginPage = .init(oauth: oauth, from: self.path)
-            return .ok(page.resource(format: server.format))
-        }
+        guard
+        let oauth:GitHub.OAuth = server.github?.oauth
         else
         {
             return nil
         }
+
+        /// Theoretically, we could also use a GitHub App for the permissions sync flow.
+        /// However, that is much more complicated to get working, as it requires the App to
+        /// be installed on both the user’s and the organization’s account, and also requires
+        /// additional configuration.
+        let page:Unidoc.LoginPage = .init(client: oauth.client,
+            flow: self.flow,
+            from: self.path)
+
+        return .ok(page.resource(format: server.format))
     }
 }

@@ -11,6 +11,8 @@ extension Unidoc
         /// Defined by us and parroted back by GitHub.
         var from:String?
 
+        var flow:LoginFlow?
+
         private
         init()
         {
@@ -18,6 +20,7 @@ extension Unidoc
             self.state = nil
             self.code = nil
             self.from = nil
+            self.flow = nil
         }
     }
 }
@@ -42,6 +45,7 @@ extension Unidoc.AuthParameters
             case "state":   self.state = value
             case "code":    self.code = value
             case "from":    self.from = value
+            case "flow":    self.flow = .init(value)
             case _:         continue
             }
         }

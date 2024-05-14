@@ -18,16 +18,6 @@ struct GitHubCredentials
 @available(*, unavailable, message: "Not needed yet.")
 extension GitHubCredentials
 {
-    init(tokens:GitHub.App.Credentials, created:BSON.Millisecond)
-    {
-        self.init(
-            refresh: .init(token: tokens.refresh, created: created),
-            access:  .init(token: tokens.access, created: created))
-    }
-}
-@available(*, unavailable, message: "Not needed yet.")
-extension GitHubCredentials
-{
     enum CodingKey:String, Sendable
     {
         case refresh = "R"
