@@ -57,31 +57,12 @@ extension Unidoc.AuthOperation:Unidoc.InteractiveOperation
             return .unauthorized("Authentication failed")
         }
 
-        switch self.flow
-        {
-        case .sso:
-            let registration:Unidoc.RegisterOperation = .init(token: access.token,
-                from: self.from)
+        let operation:Unidoc.UserIndexOperation = .init(token: access.token,
+            flow: self.flow,
+            from: self.from)
 
-            //  We must not reuse the same client, as this step must be performed against
-            //  `api.github.com` and not `github.com`.
-            return try await registration.perform(on: server)
-
-        case .sync:
-            let restAPI:GitHub.Client<GitHub.OAuth> = .rest(app: integration.oauth,
-                threads: server.context.threads,
-                niossl: server.context.niossl,
-                as: integration.agent)
-
-            let orgs:[GitHub.OrganizationMembership] = try await restAPI.connect
-            {
-                try await $0.get(from: "/user/memberships/orgs",
-                    with: .token(access.token))
-            }
-
-            print(orgs)
-
-            return .redirect(.temporary(self.from))
-        }
+        //  We must not reuse the same client, as this step must be performed against
+        //  `api.github.com` and not `github.com`.
+        return try await operation.perform(on: server)
     }
 }

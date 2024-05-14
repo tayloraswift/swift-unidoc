@@ -83,32 +83,9 @@ extension Unidoc.DB.Users
                 Mongo.Upserting<Unidoc.UserSecrets, Unidoc.Account>>.init(Self.name,
                 returning: .new)
             {
-                $0[.hint]
-                {
-                    $0[Element[.id]] = (+)
-                }
-                $0[.query]
-                {
-                    $0[Element[.id]] = user.id
-                }
-                $0[.update]
-                {
-                    //  Set the fields individually, to avoid overwriting session cookie and/or
-                    //  generated API keys.
-                    $0[.set]
-                    {
-                        $0[Element[.id]] = user.id
-                        $0[Element[.level]] = user.level
-                        $0[Element[.github]] = user.github
-                    }
-                    $0[.setOnInsert]
-                    {
-                        $0[Element[.apiLimitLeft]] = user.apiLimitLeft
-                        $0[Element[.apiKey]] = user.apiKey
-
-                        $0[Element[.cookie]] = Int64.random(in: .min ... .max)
-                    }
-                }
+                $0[.hint] { $0[Element[.id]] = (+) }
+                $0[.query] { $0[Element[.id]] = user.id }
+                $0[.update] { $0 += user }
                 $0[.fields] = .init
                 {
                     $0[Element[.id]] = true
@@ -119,6 +96,38 @@ extension Unidoc.DB.Users
             against: self.database)
 
         return secrets
+    }
+
+    public
+    func update(users:[Unidoc.User],
+        with session:Mongo.Session) async throws -> Mongo.Updates<Unidoc.Account>
+    {
+        let updated:Mongo.UpdateResponse<Unidoc.Account> = try await session.run(
+            command: Mongo.Update<Mongo.Many, Unidoc.Account>.init(Self.name)
+            {
+                for user:Unidoc.User in users
+                {
+                    $0
+                    {
+                        $0[.upsert] = true
+                        $0[.q] { $0[Element[.id]] = user.id }
+                        $0[.u] { $0 += user }
+                    }
+                }
+            },
+            against: self.database)
+
+        return try updated.updates()
+    }
+
+    /// **Replaces** the access list for the given user with the specified list, returning
+    /// true if the user exists and the list was modified from its previous value.
+    public
+    func update(access:[Unidoc.Account],
+        user:Unidoc.Account,
+        with session:Mongo.Session) async throws -> Bool?
+    {
+        try await self.update(field: .access, of: user, to: access, with: session)
     }
 }
 extension Unidoc.DB.Users

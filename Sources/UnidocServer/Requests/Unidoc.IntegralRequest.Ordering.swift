@@ -119,7 +119,7 @@ extension Unidoc.IntegralRequest.Ordering
         case "register":
             if  let token:String = parameters.token
             {
-                return .actor(Unidoc.RegisterOperation.init(token: token))
+                return .actor(Unidoc.UserIndexOperation.init(token: token, flow: .sso))
             }
 
         case _:

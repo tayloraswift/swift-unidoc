@@ -134,6 +134,7 @@ extension Unidoc.ServerLoop
         case .administratrix:   return nil
         case .machine:          return nil
         case .human:            return .forbidden("")
+        case .guest:            return .unauthorized("")
         }
     }
 }
