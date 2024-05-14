@@ -23,6 +23,7 @@ extension Unidoc.MachineOperation
         case .administratrix:   true
         case .machine:          true
         case .human:            false
+        case .guest:            false
         }
     }
 
