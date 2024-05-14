@@ -7,7 +7,7 @@ import UnidocRecords
 
 extension Unidoc
 {
-    /// `RegisterOperation` is rarely used on its own; it’s main purpose is to assist the
+    /// `RegisterOperation` is rarely used on its own; its main purpose is to assist the
     /// ``AuthOperation`` type in registering a new user. It is a standalone operation to aid
     /// debugging and testing.
     struct RegisterOperation:Sendable
