@@ -40,13 +40,13 @@ extension GitHub.Client<GitHub.PersonalAccessToken>
             app: pat)
     }
 }
-extension GitHub.Client<GitHub.OAuth>
+extension GitHub.Client where Application:GitHubApplication
 {
     public static
-    func rest(app:consuming GitHub.OAuth,
+    func rest(app:consuming Application,
         threads:consuming MultiThreadedEventLoopGroup,
         niossl:consuming NIOSSLContext,
-        as agent:String) -> GitHub.Client<GitHub.OAuth>
+        as agent:String) -> GitHub.Client<Application>
     {
         .init(http2: .init(threads: threads, niossl: niossl, remote: "api.github.com"),
             agent: agent,
@@ -56,10 +56,10 @@ extension GitHub.Client<GitHub.OAuth>
     /// This is almost the same as ``rest(app:threads:niossl:as:)``, but it is bound to
     /// the `github.com` apex domain, which is used for initial authentication.
     public static
-    func auth(app:consuming GitHub.OAuth,
+    func auth(app:consuming Application,
         threads:consuming MultiThreadedEventLoopGroup,
         niossl:consuming NIOSSLContext,
-        as agent:String) -> GitHub.Client<GitHub.OAuth>
+        as agent:String) -> GitHub.Client<Application>
     {
         .init(http2: .init(threads: threads, niossl: niossl, remote: "github.com"),
             agent: agent,

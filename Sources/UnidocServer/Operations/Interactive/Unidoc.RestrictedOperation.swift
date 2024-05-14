@@ -36,7 +36,8 @@ extension Unidoc.RestrictedOperation
             {
                 if  let oauth:GitHub.OAuth = server.github?.oauth
                 {
-                    let login:Unidoc.LoginPage = .init(oauth: oauth,
+                    let login:Unidoc.LoginPage = .init(client: oauth.client,
+                        flow: .sso,
                         from: credentials.request)
                     return .ok(login.resource(format: server.format))
                 }

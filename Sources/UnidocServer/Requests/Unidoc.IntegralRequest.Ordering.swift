@@ -107,10 +107,12 @@ extension Unidoc.IntegralRequest.Ordering
         case "github":
             if  let state:String = parameters.state,
                 let code:String = parameters.code,
-                let from:String = parameters.from
+                let from:String = parameters.from,
+                let flow:Unidoc.LoginFlow = parameters.flow
             {
                 return .actor(Unidoc.AuthOperation.init(state: state,
                     code: code,
+                    flow: flow,
                     from: from))
             }
 

@@ -9,6 +9,7 @@ extension Unidoc
         case admin
         case api
         case asset
+        case auth
         case blog
         case docs
         case docc
@@ -56,6 +57,7 @@ extension Unidoc.ServerRoot:Identifiable
         case .admin:        "admin"
         case .api:          "api"
         case .asset:        "asset"
+        case .auth:         "auth"
         case .blog:         "articles"
         case .docs:         "docs"
         case .docc:         "docc"

@@ -10,12 +10,15 @@ extension Unidoc
     {
         let state:String
         let code:String
+
+        let flow:LoginFlow
         let from:String
 
-        init(state:String, code:String, from:String)
+        init(state:String, code:String, flow:LoginFlow, from:String)
         {
             self.state = state
             self.code = code
+            self.flow = flow
             self.from = from
         }
     }
@@ -26,40 +29,59 @@ extension Unidoc.AuthOperation:Unidoc.InteractiveOperation
         with credentials:Unidoc.Credentials,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let github:GitHub.Client<GitHub.OAuth>
-        if  let integration:GitHub.Integration = server.github
-        {
-            github = .auth(app: integration.oauth,
-                threads: server.context.threads,
-                niossl: server.context.niossl,
-                as: integration.agent)
-        }
-        else
-        {
-            return nil
-        }
-
         guard case self.state? = credentials.cookies.login
         else
         {
             return .resource("Authentication failed: state mismatch", status: 400)
         }
 
-        let registration:Unidoc.RegisterOperation
+        guard
+        let integration:GitHub.Integration = server.github
+        else
+        {
+            return nil
+        }
+
+        let client:GitHub.Client<GitHub.OAuth> = .auth(app: integration.oauth,
+                threads: server.context.threads,
+                niossl: server.context.niossl,
+                as: integration.agent)
+
+        let access:GitHub.OAuth.Credentials
         do
         {
-            let access:GitHub.OAuth.Credentials = try await github.exchange(code: self.code)
-            registration = .init(token: access.token, from: self.from)
+            access = try await client.exchange(code: self.code)
         }
         catch is GitHub.Client<GitHub.OAuth>.AuthenticationError
         {
             return .unauthorized("Authentication failed")
         }
-        catch
-        {
-            throw error
-        }
 
-        return try await registration.load(from: server, with: credentials, as: format)
+        switch self.flow
+        {
+        case .sso:
+            let registration:Unidoc.RegisterOperation = .init(token: access.token,
+                from: self.from)
+
+            //  We must not reuse the same client, as this step must be performed against
+            //  `api.github.com` and not `github.com`.
+            return try await registration.perform(on: server)
+
+        case .sync:
+            let restAPI:GitHub.Client<GitHub.OAuth> = .rest(app: integration.oauth,
+                threads: server.context.threads,
+                niossl: server.context.niossl,
+                as: integration.agent)
+
+            let orgs:[GitHub.OrganizationMembership] = try await restAPI.connect
+            {
+                try await $0.get(from: "/user/memberships/orgs",
+                    with: .token(access.token))
+            }
+
+            print(orgs)
+
+            return .redirect(.temporary(self.from))
+        }
     }
 }

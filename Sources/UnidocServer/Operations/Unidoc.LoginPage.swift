@@ -7,31 +7,25 @@ import URI
 
 extension Unidoc
 {
-    @frozen public
     struct LoginPage
     {
-        @usableFromInline
-        let oauth:GitHub.OAuth
-        @usableFromInline
-        let path:String
+        let client:String
+        let from:String
 
-        @inlinable public
-        init(oauth:GitHub.OAuth, from path:String)
+        let flow:LoginFlow
+
+        init(client:String, flow:LoginFlow, from:String)
         {
-            self.oauth = oauth
-            self.path = path
+            self.client = client
+            self.flow = flow
+            self.from = from
         }
     }
 }
-extension Unidoc.LoginPage:Unidoc.StaticPage
-{
-    @inlinable public
-    var location:URI { Unidoc.ServerRoot.login.uri }
-}
-extension Unidoc.LoginPage:Unidoc.RenderablePage
+extension Unidoc.LoginPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 {
     public
-    var title:String { "Log in with GitHub" }
+    var title:String { "Authenticate with GitHub" }
 }
 extension Unidoc.LoginPage:Unidoc.ApplicationPage
 {
@@ -40,18 +34,27 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
     {
         main[.section, { $0.class = "introduction" }]
         {
-            $0[.h1] = "Verify your identity"
+            $0[.h1] = switch self.flow
+            {
+            case .sso:  "Verify your identity"
+            case .sync: "Synchronize permissions"
+            }
         }
 
         main[.section, { $0.class = "details" }]
         {
-            $0[.p] = "Authenticate with GitHub to manage package documentation."
+            $0[.p] = switch self.flow
+            {
+            case .sso:  "Authenticate with GitHub to access your account."
+            case .sync: "Authenticate with GitHub to synchronize your permissions."
+            }
         }
 
         main[.form]
         {
             $0.id = "login"
             $0.method = "get"
+            //  This is the same for both OAuth and GitHub Apps.
             $0.action = "https://github.com/login/oauth/authorize"
         }
             content:
@@ -60,21 +63,24 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
             {
                 $0.type = "hidden"
                 $0.name = "client_id"
-                $0.value = self.oauth.client
+                $0.value = self.client
             }
 
             $0[.input]
             {
                 $0.type = "hidden"
                 $0.name = "redirect_uri"
-                $0.value = "\(format.server)/auth/github?from=\(self.path)"
+                $0.value = "\(format.server)/auth/github?from=\(self.from)&flow=\(self.flow)"
             }
 
             //  Note, for some reason, setting the `redirect_uri` to 127.0.0.1 does not work,
             //  even though the GitHub OAuth documentation suggests it should.
             //  https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#loopback-redirect-urls
 
-            $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "read:org" }
+            if  case .sync = self.flow
+            {
+                $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "read:org" }
+            }
 
             $0[.button] { $0.class = "area" ; $0.type = "submit" } = "Authenticate with GitHub"
         }

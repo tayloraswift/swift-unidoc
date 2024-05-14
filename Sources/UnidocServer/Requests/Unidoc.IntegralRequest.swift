@@ -73,7 +73,7 @@ extension Unidoc.IntegralRequest
                 ordering = .actor(Unidoc.LoadDashboardOperation.master)
 
             case Unidoc.ServerRoot.login.id:
-                ordering = .actor(Unidoc.LoginOperation.init())
+                ordering = .actor(Unidoc.LoginOperation.init(flow: .sso))
 
             case "robots.txt":
                 let parameters:Unidoc.PipelineParameters = .init(uri.query?.parameters,
@@ -110,13 +110,23 @@ extension Unidoc.IntegralRequest
 
         switch root
         {
+        case Unidoc.ServerRoot.account.id:
+            if  trunk == "sync"
+            {
+                ordering = .actor(Unidoc.LoginOperation.init(flow: .sync))
+            }
+            else
+            {
+                ordering = nil
+            }
+
         case Unidoc.ServerRoot.admin.id:
             ordering = .get(admin: trunk, path, tag: tag)
 
         case Unidoc.ServerRoot.asset.id:
             ordering = .get(asset: trunk, tag: tag)
 
-        case "auth":
+        case Unidoc.ServerRoot.auth.id:
             ordering = .get(auth: trunk,
                 with: .init(uri.query?.parameters))
 
@@ -263,7 +273,7 @@ extension Unidoc.IntegralRequest
             let query:URI.Query = try? .parse(parameters: body),
             let path:String = query.parameters.first?.value
         {
-            ordering = .actor(Unidoc.LoginOperation.init(from: path))
+            ordering = .actor(Unidoc.LoginOperation.init(flow: .sso, from: path))
         }
         else
         {
