@@ -19,6 +19,7 @@ extension Unidoc
         case build
 
         case userConfig = "user-config"
+        case userSyncPermissions = "user-sync-permissions"
     }
 }
 extension Unidoc.PostAction:LosslessStringConvertible

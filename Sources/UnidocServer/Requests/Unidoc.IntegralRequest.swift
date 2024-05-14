@@ -65,7 +65,7 @@ extension Unidoc.IntegralRequest
                     break
                 }
 
-                ordering = .explainable(Unidoc.UserAccountEndpoint.init(
+                ordering = .explainable(Unidoc.UserSettingsEndpoint.init(
                         query: .init(session: user)),
                     parameters: .init(uri.query?.parameters, tag: tag))
 
@@ -110,16 +110,6 @@ extension Unidoc.IntegralRequest
 
         switch root
         {
-        case Unidoc.ServerRoot.account.id:
-            if  trunk == "sync"
-            {
-                ordering = .actor(Unidoc.LoginOperation.init(flow: .sync))
-            }
-            else
-            {
-                ordering = nil
-            }
-
         case Unidoc.ServerRoot.admin.id:
             ordering = .get(admin: trunk, path, tag: tag)
 

@@ -475,6 +475,9 @@ extension Unidoc.IntegralRequest.Ordering
                         update: update))
                 }
 
+            case .userSyncPermissions:
+                return .actor(Unidoc.LoginOperation.init(flow: .sync))
+
             default:
                 break
             }

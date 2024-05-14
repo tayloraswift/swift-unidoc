@@ -37,16 +37,21 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
             $0[.h1] = switch self.flow
             {
             case .sso:  "Verify your identity"
-            case .sync: "Synchronize permissions"
+            case .sync: "Verify your organizations"
             }
         }
 
         main[.section, { $0.class = "details" }]
         {
-            $0[.p] = switch self.flow
+            switch self.flow
             {
-            case .sso:  "Authenticate with GitHub to access your account."
-            case .sync: "Authenticate with GitHub to synchronize your permissions."
+            case .sso:
+                $0[.p] = "Authenticate with GitHub to access your account."
+            case .sync:
+                $0[.p] = "Authenticate with GitHub to verify your organizations."
+                $0[.p] { $0.class = "note" } = """
+                We will ask you for read-only access to your teams and organizations!
+                """
             }
         }
 
