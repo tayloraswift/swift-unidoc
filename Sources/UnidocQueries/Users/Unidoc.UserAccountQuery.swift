@@ -27,7 +27,7 @@ extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
     typealias Collation = SimpleCollation
 
     public
-    typealias Iteration = Mongo.Single<Unidoc.User>
+    typealias Iteration = Mongo.Single<Output>
 
     @inlinable public
     var hint:Mongo.CollectionIndex? { nil }
@@ -40,5 +40,25 @@ extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
             $0[Unidoc.User[.id]] = self.session.account
             $0[Unidoc.User[.cookie]] = self.session.cookie
         }
+
+        pipeline[stage: .facet] = .init
+        {
+            $0[Output[.user]] = []
+            $0[Output[.organizations]] = .init
+            {
+                $0[stage: .unwind] = Unidoc.User[.access]
+                $0[stage: .lookup] = .init
+                {
+                    $0[.from] = Unidoc.DB.Users.name
+                    $0[.localField] = Unidoc.User[.access]
+                    $0[.foreignField] = Unidoc.User[.id]
+                    $0[.as] = Unidoc.User[.access]
+                }
+                $0[stage: .unwind] = Unidoc.User[.access]
+                $0[stage: .replaceWith] = Unidoc.User[.access]
+            }
+        }
+
+        pipeline[stage: .unwind] = Output[.user]
     }
 }

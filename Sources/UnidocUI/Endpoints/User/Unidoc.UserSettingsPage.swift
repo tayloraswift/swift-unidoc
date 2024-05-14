@@ -5,26 +5,33 @@ import URI
 
 extension Unidoc
 {
-    struct UserAccountPage
+    struct UserSettingsPage
     {
         private
         let user:User
+        private
+        let organizations:[User]
 
-        init(user:User)
+        init(user:User, organizations:[User])
         {
             self.user = user
+            self.organizations = organizations
         }
     }
 }
-extension Unidoc.UserAccountPage:Unidoc.RenderablePage
+extension Unidoc.UserSettingsPage
+{
+
+}
+extension Unidoc.UserSettingsPage:Unidoc.RenderablePage
 {
     var title:String { "Account settings" }
 }
-extension Unidoc.UserAccountPage:Unidoc.StaticPage
+extension Unidoc.UserSettingsPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.ServerRoot.account.uri }
 }
-extension Unidoc.UserAccountPage:Unidoc.ApplicationPage
+extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
@@ -38,7 +45,13 @@ extension Unidoc.UserAccountPage:Unidoc.ApplicationPage
             $0[.dl]
             {
                 $0[.dt] = "User ID"
-                $0[.dd] = "\(self.user.id)"
+                $0[.dd]
+                {
+                    $0[.a]
+                    {
+                        $0.href = "\(Unidoc.UserPropertyEndpoint[self.user.id])"
+                    } = "\(self.user.id)"
+                }
 
                 $0[.dt] = "User type"
                 $0[.dd] = switch (self.user.id.type, self.user.level)
@@ -51,8 +64,7 @@ extension Unidoc.UserAccountPage:Unidoc.ApplicationPage
 
             if  let github:GitHub.User.Profile = self.user.github
             {
-                $0[.h2] = "GitHub profile"
-
+                $0[.h2] = Heading.profile
                 $0[.dl]
                 {
                     $0[.dt] = "GitHub name"
@@ -72,8 +84,7 @@ extension Unidoc.UserAccountPage:Unidoc.ApplicationPage
                     $0[.dd] = github.email
                 }
 
-                $0[.h2] = "Repositories"
-
+                $0[.h2] = Heading.repositories
                 $0[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
@@ -128,7 +139,54 @@ extension Unidoc.UserAccountPage:Unidoc.ApplicationPage
                 }
             }
 
-            $0[.h2] = "API keys"
+            $0[.h2] = Heading.organizations
+            switch self.organizations.count
+            {
+            case 0:
+                $0[.p] { $0.class = "note" } = """
+                You are not a verified member of any GitHub organizations!
+                """
+
+            case 1:
+                $0[.p] { $0.class = "note" } = """
+                You have verified your membership in one GitHub organization.
+                """
+
+            case let count:
+                $0[.p] { $0.class = "note" } = """
+                You have verified your membership in \(count) GitHub organizations.
+                """
+            }
+            $0[.ul]
+            {
+                for organization:Unidoc.User in self.organizations
+                {
+                    $0[.li]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "\(Unidoc.UserPropertyEndpoint[organization.id])"
+                        } = organization.name ?? "\(organization.id)"
+                    }
+                }
+            }
+            $0[.form]
+            {
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Unidoc.Post[.userSyncPermissions])"
+                $0.method = "post"
+            }
+                content:
+            {
+                //  We’re not passing any parameters right now, but in the future we might.
+                $0[.button]
+                {
+                    $0.class = "area" ;
+                    $0.type = "submit"
+                } = "Sync GitHub permissions"
+            }
+
+            $0[.h2] = Heading.apiKeys
 
             let button:String
 
