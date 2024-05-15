@@ -17,17 +17,22 @@ extension SSGC
         /// Where the package root directory is. There should be a `Package.swift`
         /// manifest at the top level of this directory.
         var root:FilePath
+        /// Additional flags to pass to the Swift compiler.
+        var flags:Flags
 
-        init(id:ID, root:FilePath)
+        private
+        init(id:ID, root:FilePath, flags:Flags)
         {
             self.id = id
             self.root = root
+            self.flags = flags
         }
     }
 }
 extension SSGC.PackageBuild
 {
     /// Always returns ``Configuration/debug``.
+    private
     var configuration:Configuration { .debug }
 }
 extension SSGC.PackageBuild
@@ -68,10 +73,14 @@ extension SSGC.PackageBuild
     ///     -   packages:
     ///         The location in which this function will search for a directory
     ///         named `"\(package)"`.
+    ///     -   flags:
+    ///         Additional flags to pass to the Swift compiler.
     public static
-    func local(package:Symbol.Package, from packages:FilePath) -> Self
+    func local(package:Symbol.Package,
+        among packages:FilePath,
+        flags:Flags = .init()) -> Self
     {
-        return .init(id: .unversioned(package), root: packages / "\(package)")
+        return .init(id: .unversioned(package), root: packages / "\(package)", flags: flags)
     }
 
     /// Clones or pulls the specified package from a git repository, checking out
@@ -93,6 +102,7 @@ extension SSGC.PackageBuild
         from repository:String,
         at reference:String,
         in workspace:SSGC.Workspace,
+        flags:Flags = .init(),
         clean:Bool = false) throws -> Self
     {
         //  The directory layout looks something like:
@@ -156,7 +166,7 @@ extension SSGC.PackageBuild
                 location: .remote(url: repository),
                 revision: revision,
                 version: version)
-            return .init(id: .versioned(pin, reference: reference), root: clone)
+            return .init(id: .versioned(pin, reference: reference), root: clone, flags: flags)
         }
         else
         {
@@ -209,7 +219,9 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let scratch:SSGC.PackageBuildDirectory
         do
         {
-            scratch = try swift.build(package: self.root)
+            scratch = try swift.build(package: self.root,
+                configuration: self.configuration,
+                flags: self.flags)
         }
         catch SystemProcessError.exit(let code, let invocation)
         {

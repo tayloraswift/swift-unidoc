@@ -24,7 +24,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
 
         let example:SymbolGraphObject<Void> = try workspace.build(package: .local(
                 package: "swift-malibu",
-                from: "TestPackages"),
+                among: "TestPackages"),
             with: toolchain)
 
         example.roundtrip(for: tests, in: workspace.path)

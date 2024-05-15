@@ -9,16 +9,10 @@ extension SSGC.PackageBuild
 extension SSGC.PackageBuild.Configuration:CustomStringConvertible
 {
     @inlinable public
-    var description:String
-    {
-        self.rawValue
-    }
+    var description:String { self.rawValue }
 }
 extension SSGC.PackageBuild.Configuration:LosslessStringConvertible
 {
     @inlinable public
-    init?(_ description:String)
-    {
-        self.init(rawValue: description)
-    }
+    init?(_ description:String) { self.init(rawValue: description) }
 }

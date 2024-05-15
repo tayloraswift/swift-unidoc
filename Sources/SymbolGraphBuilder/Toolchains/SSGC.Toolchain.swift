@@ -261,16 +261,16 @@ extension SSGC.Toolchain
         }
     }
 
-    func build(
-        package:FilePath,
-        release:Bool = false) throws -> SSGC.PackageBuildDirectory
+    func build(package:FilePath,
+        configuration:SSGC.PackageBuild.Configuration = .debug,
+        flags:SSGC.PackageBuild.Flags = .init()) throws -> SSGC.PackageBuildDirectory
     {
         let scratch:SSGC.PackageBuildDirectory = .init(path: package / self.scratch)
 
         var arguments:[String] =
         [
             "build",
-            "--configuration", release ? "release" : "debug",
+            "--configuration", "\(configuration)",
             "--package-path", "\(package)",
             "--scratch-path", "\(scratch.path)",
         ]
@@ -278,6 +278,21 @@ extension SSGC.Toolchain
         {
             arguments.append("--cache-path")
             arguments.append("\(path)")
+        }
+        for flag:String in flags.swift
+        {
+            arguments.append("-Xswiftc")
+            arguments.append(flag)
+        }
+        for flag:String in flags.cxx
+        {
+            arguments.append("-Xcxx")
+            arguments.append(flag)
+        }
+        for flag:String in flags.c
+        {
+            arguments.append("-Xcc")
+            arguments.append(flag)
         }
 
         try SystemProcess.init(command: self.swiftCommand, arguments: arguments)()
