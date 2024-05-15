@@ -45,34 +45,45 @@ extension Unidoc.Server
 {
     func authorize(package:Unidoc.Package,
         account:Unidoc.Account?,
-        level:Unidoc.User.Level,
+        rights:Unidoc.UserRights,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        guard
-        let id:Unidoc.Account = account
+        guard case .human = rights.level, self.secure
         else
         {
-            return self.secure ? .unauthorized("""
-                You must be logged in to perform this operation!
-                """) : nil
+            //  Only enforce ownership rules for humans.
+            return nil
         }
 
         guard
-        let rights:Unidoc.PackageRights = try await self.db.unidoc.rights(account: id,
-            package: package,
+        let account:Unidoc.Account
+        else
+        {
+            return .unauthorized("You must be logged in to perform this operation!")
+        }
+
+        //  Don’t really have a smarter way to check this except loading the entire package
+        //  metadata.
+        guard
+        let package:Unidoc.PackageMetadata = try await self.db.packages.find(id: package,
             with: session)
         else
         {
             return .notFound("No such package")
         }
 
-        if  case .human = level, rights < .editor
+        if  let owner:Unidoc.Account = package.repo?.account
         {
-            return .forbidden("You are not authorized to edit this package!")
+            let rights:Unidoc.PackageRights = .of(account: account,
+                access: rights.access,
+                owner: owner)
+
+            if  rights >= .editor
+            {
+                return nil
+            }
         }
-        else
-        {
-            return nil
-        }
+
+        return .forbidden("You are not authorized to edit this package!")
     }
 }

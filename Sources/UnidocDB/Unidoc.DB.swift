@@ -774,34 +774,6 @@ extension Unidoc.DB
 }
 extension Unidoc.DB
 {
-    public
-    func rights(
-        account:Unidoc.Account,
-        package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Unidoc.PackageRights?
-    {
-        //  Don’t really have a smarter way to check this except loading the entire package
-        //  metadata.
-        guard
-        let package:Unidoc.PackageMetadata = try await self.packages.find(id: package,
-            with: session)
-        else
-        {
-            return nil
-        }
-
-        if  case account? = package.repo?.account
-        {
-            return .owner
-        }
-        else
-        {
-            return .reader
-        }
-    }
-}
-extension Unidoc.DB
-{
     //  Regenerates the JSON list of all packages.
     public
     func rebuildPackageList(with session:Mongo.Session) async throws

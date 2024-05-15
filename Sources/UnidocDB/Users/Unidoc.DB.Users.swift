@@ -42,10 +42,10 @@ extension Unidoc.DB.Users
     /// access level if the cookie is valid.
     public
     func validate(user:Unidoc.UserSession,
-        with session:Mongo.Session) async throws -> Unidoc.User.Level?
+        with session:Mongo.Session) async throws -> Unidoc.UserRights?
     {
-        let matches:[LevelView] = try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<LevelView>>.init(Self.name, limit: 1)
+        try await session.run(
+            command: Mongo.Find<Mongo.Single<Unidoc.UserRights>>.init(Self.name, limit: 1)
             {
                 $0[.hint]
                 {
@@ -58,13 +58,11 @@ extension Unidoc.DB.Users
                 }
                 $0[.projection] = .init
                 {
-                    $0[Element[.id]] = true
+                    $0[Element[.access]] = true
                     $0[Element[.level]] = true
                 }
             },
             against: self.database)
-
-        return matches.first?.level
     }
 
     /// Upserts the given account into the database, returning a new, randomly-generated

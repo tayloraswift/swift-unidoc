@@ -12,7 +12,7 @@ extension Unidoc
     protocol RestrictedOperation:InteractiveOperation
     {
         mutating
-        func admit(level:Unidoc.User.Level) -> Bool
+        func admit(user:Unidoc.UserRights) -> Bool
 
         /// Obtains the response for this endpoint. The provided session is sequentially
         /// consistent with any authentication that took place before calling this witness.
@@ -51,14 +51,23 @@ extension Unidoc.RestrictedOperation
             let session:Mongo.Session = try await .init(from: server.db.sessions)
 
             guard
-            let level:Unidoc.User.Level = try await server.db.users.validate(user: user,
+            let rights:Unidoc.UserRights = try await server.db.users.validate(user: user,
                 with: session)
             else
             {
                 return .notFound("No such user")
             }
 
-            guard self.admit(level: level)
+            //  We ban this here, so that we can conditionally enforce permissions later by
+            //  checking if the user is human.
+            if  case .guest = rights.level
+            {
+                return .unauthorized("""
+                    It looks like you are somehow logged in as a non-player entity.
+                    """)
+            }
+
+            guard self.admit(user: rights)
             else
             {
                 return .forbidden("Regrettably, you are not a mighty It Girl.")
@@ -70,7 +79,7 @@ extension Unidoc.RestrictedOperation
         {
             let session:Mongo.Session = try await .init(from: server.db.sessions)
             //  Yes, we need to call this, even though we ignore the result.
-            let _:Bool = self.admit(level: .administratrix)
+            let _:Bool = self.admit(user: .init(access: [], level: .administratrix))
             return try await self.load(from: server, with: session)
         }
     }

@@ -16,9 +16,9 @@ extension Unidoc.MachineOperation
 {
     /// The machine endpoints are restricted to administratrices and machine users.
     @inlinable public
-    func admit(level:Unidoc.User.Level) -> Bool
+    func admit(user:Unidoc.UserRights) -> Bool
     {
-        switch level
+        switch user.level
         {
         case .administratrix:   true
         case .machine:          true

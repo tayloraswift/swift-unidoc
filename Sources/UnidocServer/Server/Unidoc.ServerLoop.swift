@@ -122,14 +122,14 @@ extension Unidoc.ServerLoop
         let session:Mongo.Session = try await .init(from: self.db.sessions)
 
         guard
-        let level:Unidoc.User.Level = try await self.db.users.validate(user: user,
+        let rights:Unidoc.UserRights = try await self.db.users.validate(user: user,
             with: session)
         else
         {
             return .notFound("No such user")
         }
 
-        switch level
+        switch rights.level
         {
         case .administratrix:   return nil
         case .machine:          return nil

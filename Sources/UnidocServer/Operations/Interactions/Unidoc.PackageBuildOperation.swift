@@ -11,14 +11,14 @@ extension Unidoc
         let account:Account
         let build:Parameters
 
-        var privileges:Unidoc.User.Level
+        var rights:Unidoc.UserRights
 
         init(account:Account, build:Parameters)
         {
             self.account = account
             self.build = build
 
-            self.privileges = .human
+            self.rights = .init()
         }
     }
 }
@@ -30,7 +30,7 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
         if  let rejection:HTTP.ServerResponse = try await server.authorize(
                 package: self.build.package,
                 account: self.account,
-                level: self.privileges,
+                rights: self.rights,
                 with: session)
         {
             return rejection
