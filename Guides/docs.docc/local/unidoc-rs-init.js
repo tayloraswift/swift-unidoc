@@ -6,7 +6,7 @@ db.runCommand({'replSetInitiate': {
     "members": [
         {
             "_id": 0,
-            "host": "unidoc-mongod:27017",
+            "host": "localhost:27017",
             "tags": {},
             "priority": 1
         }
