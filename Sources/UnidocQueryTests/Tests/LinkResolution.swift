@@ -19,7 +19,7 @@ struct LinkResolution:UnidocDatabaseTestBattery
 
         let example:SymbolGraphObject<Void> = try workspace.build(package: .local(
                 package: "swift-test",
-                from: "TestPackages"),
+                among: "TestPackages"),
             with: toolchain)
 
         example.roundtrip(for: tests, in: workspace.path)

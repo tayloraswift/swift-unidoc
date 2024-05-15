@@ -215,7 +215,7 @@ extension SSGC.Main
         else if
             let search:FilePath = self.search
         {
-            let build:SSGC.PackageBuild = .local(package: package, from: search)
+            let build:SSGC.PackageBuild = .local(package: package, among: search)
 
             defer
             {
