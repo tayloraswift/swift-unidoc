@@ -14,7 +14,7 @@ extension Unidoc
         let from:String?
 
         private
-        var privileges:Unidoc.User.Level
+        var rights:Unidoc.UserRights
 
         init(account:Unidoc.Account?, package:Unidoc.Package, update:Update, from:String? = nil)
         {
@@ -23,7 +23,7 @@ extension Unidoc
             self.update = update
             self.from = from
 
-            self.privileges = .human
+            self.rights = .init()
         }
     }
 }
@@ -59,9 +59,9 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
     /// Everyone can use this endpoint, as long as they are authenticated. The user’s
     /// relationship to the package will be checked later.
     mutating
-    func admit(level:Unidoc.User.Level) -> Bool
+    func admit(user:Unidoc.UserRights) -> Bool
     {
-        self.privileges = level
+        self.rights = user
         return true
     }
 
@@ -71,7 +71,7 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
         if  let rejection:HTTP.ServerResponse = try await server.authorize(
                 package: self.package,
                 account: self.account,
-                level: self.privileges,
+                rights: self.rights,
                 with: session)
         {
             return rejection

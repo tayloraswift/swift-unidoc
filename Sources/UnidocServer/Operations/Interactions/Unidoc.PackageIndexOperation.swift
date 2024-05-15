@@ -17,14 +17,14 @@ extension Unidoc
         let account:Account
         let subject:Subject
 
-        var privileges:User.Level
+        var rights:UserRights
 
         init(account:Account, subject:Subject)
         {
             self.account = account
             self.subject = subject
 
-            self.privileges = .human
+            self.rights = .init()
         }
     }
 }
@@ -160,12 +160,18 @@ extension Unidoc.PackageIndexOperation
     private
     func validate(repo:GitHub.Repo) async throws -> Unidoc.PolicyErrorPage?
     {
-        if  case .human = self.privileges,
-            self.account != .init(type: .github, user: repo.owner.id)
+        if  case .human = self.rights.level
         {
-            return .init(illustration: .error4xx_jpg,
-                message: "You are not the owner of this repository!",
-                status: 403)
+            let rights:Unidoc.PackageRights = .of(account: self.account,
+                access: self.rights.access,
+                owner: .init(type: .github, user: repo.owner.id))
+
+            if  rights < .editor
+            {
+                return .init(illustration: .error4xx_jpg,
+                    message: "You are not authorized to index this repository!",
+                    status: 403)
+            }
         }
 
         if  repo.owner.login.allSatisfy({ $0 != "." })

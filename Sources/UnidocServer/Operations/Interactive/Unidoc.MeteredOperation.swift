@@ -8,17 +8,17 @@ extension Unidoc
     public
     protocol MeteredOperation:RestrictedOperation
     {
-        var privileges:Unidoc.User.Level { get set }
         var account:Unidoc.Account { get }
+        var rights:Unidoc.UserRights { get set }
     }
 }
 extension Unidoc.MeteredOperation
 {
     /// Everyone can use this endpoint, as long as they are authenticated.
     @inlinable public mutating
-    func admit(level:Unidoc.User.Level) -> Bool
+    func admit(user:Unidoc.UserRights) -> Bool
     {
-        self.privileges = level
+        self.rights = user
         return true
     }
 }
@@ -40,7 +40,7 @@ extension Unidoc.MeteredOperation
         //  tell if the rate limiting system is working.
         if  let _:Int = try await server.db.users.charge(apiKey: nil,
                 user: self.account,
-                cost: self.privileges == .administratrix ? 1 : 8,
+                cost: self.rights.level == .administratrix ? 1 : 8,
                 with: session)
         {
             return nil
