@@ -46,11 +46,30 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
             switch self.flow
             {
             case .sso:
-                $0[.p] = "Authenticate with GitHub to access your account."
+                $0[.p] = """
+                Authenticate with GitHub to access your account. \
+                We will ask you for read-only access to your teams and organizations.
+                """
             case .sync:
                 $0[.p] = "Authenticate with GitHub to verify your organizations."
+                $0[.p, { $0.class = "note" }]
+                {
+                    $0 += "Some of your organizations may have policies that "
+                    $0[.a]
+                    {
+                        $0.target = "_blank"
+                        $0.href = """
+                        https://docs.github.com/en/organizations/\
+                        managing-oauth-access-to-your-organizations-data/\
+                        about-oauth-app-access-restrictions#about-oauth-app-access-restrictions
+                        """
+                    } = "restrict"
+                    $0 += " their visibility to third-party applications."
+                }
+
                 $0[.p] { $0.class = "note" } = """
-                We will ask you for read-only access to your teams and organizations!
+                If your organizations are not showing up, you may need additional approvals \
+                from the owners of each organization!
                 """
             }
         }

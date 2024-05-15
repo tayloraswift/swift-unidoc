@@ -85,6 +85,10 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
                 }
 
                 $0[.h2] = Heading.repositories
+                $0[.p] { $0.class = "note" } = """
+                You can index any GitHub repository that belongs to you or an organization you \
+                have verified your membership in.
+                """
                 $0[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
@@ -105,15 +109,7 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
                                 $0.type = "text"
                                 $0.name = "owner"
                                 $0.value = github.login
-
-                                if  case .human = self.user.level
-                                {
-                                    $0.readonly = true
-                                }
-                                else
-                                {
-                                    $0.required = true
-                                }
+                                $0.required = true
                             }
                         }
 

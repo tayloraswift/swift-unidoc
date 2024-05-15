@@ -20,7 +20,7 @@ extension Unidoc.UserConfigOperation:Unidoc.RestrictedOperation
 {
     /// Everyone can use this endpoint, as long as they are authenticated. This endpoint can
     /// only modify the currently authenticated user.
-    func admit(level:Unidoc.User.Level) -> Bool { true }
+    func admit(user:Unidoc.UserRights) -> Bool { true }
 
     func load(from server:borrowing Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?

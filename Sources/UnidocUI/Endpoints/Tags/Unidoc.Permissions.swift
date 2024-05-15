@@ -35,16 +35,17 @@ extension Unidoc.Permissions
     init(package:Unidoc.PackageMetadata, user:Unidoc.User?)
     {
         guard
-        let user:Unidoc.User = user
+        let user:Unidoc.User
         else
         {
             self.init(global: nil, rights: .reader)
             return
         }
-
-        if  case user.id? = package.repo?.account
+        if  let owner:Unidoc.Account = package.repo?.account
         {
-            self.init(global: user.level, rights: .owner)
+            self.init(global: user.level, rights: .of(account: user.id,
+                access: user.access,
+                owner: owner))
         }
         else
         {

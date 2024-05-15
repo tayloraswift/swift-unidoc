@@ -65,15 +65,12 @@ extension Unidoc.User
 extension Unidoc.User
 {
     @inlinable public
-    var name:String?
-    {
-        self.github?.name ?? self.symbol
-    }
+    var rights:Unidoc.UserRights { .init(access: self.access, level: self.level) }
+
     @inlinable public
-    var bio:String?
-    {
-        self.github?.bio
-    }
+    var name:String? { self.github?.name ?? self.symbol }
+    @inlinable public
+    var bio:String? { self.github?.bio }
 }
 extension Unidoc.User:Mongo.MasterCodingModel
 {
