@@ -581,31 +581,34 @@ extension HTTP.ServerLoop
             }
 
             var body:[UInt8] = []
+            if  length > 0 
+            {
                 body.reserveCapacity(length)
 
-            while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
-            {
-                guard
-                case .data(let payload)? = payload,
-                case .byteBuffer(let buffer) = payload.data
-                else
+                while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
                 {
-                    continue
-                }
+                    guard
+                    case .data(let payload)? = payload,
+                    case .byteBuffer(let buffer) = payload.data
+                    else
+                    {
+                        continue
+                    }
 
-                if  buffer.readableBytes <= length - body.count
-                {
-                    buffer.withUnsafeReadableBytes { body += $0 }
-                }
-                else
-                {
-                    return .resource("Content too large", status: 413)
-                }
+                    if  buffer.readableBytes <= length - body.count
+                    {
+                        buffer.withUnsafeReadableBytes { body += $0 }
+                    }
+                    else
+                    {
+                        return .resource("Content too large", status: 413)
+                    }
 
-                //  Why can’t NIO do this for us?
-                if  payload.endStream
-                {
-                    break
+                    //  Why can’t NIO do this for us?
+                    if  payload.endStream
+                    {
+                        break
+                    }
                 }
             }
 
