@@ -170,5 +170,27 @@ enum Main:TestMain, TestBattery
 
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
+
+        //  IndexstoreDB links the LLVM Blocks runtime, so this tests that we handle that.
+        //  Since it involves specifying the location of the Swift runtime, we can only expect
+        //  this to work within a particular Docker container.
+        #if false
+        if  let tests:TestGroup = tests / "indexstore-db",
+            let docs:SymbolGraphObject<Void> = (tests.do
+            {
+                try workspace.build(package: try .remote(
+                        package: "indexstore-db",
+                        from: "https://github.com/apple/indexstore-db.git",
+                        at: "swift-5.10-RELEASE",
+                        in: workspace,
+                        flags: .init(cxx: ["-I/usr/lib/swift", "-I/usr/lib/swift/Block"])),
+                    with: toolchain)
+            })
+        {
+            tests.expect(docs.metadata.dependencies.map(\.package.name) **? [])
+
+            docs.roundtrip(for: tests, in: workspace.artifacts)
+        }
+        #endif
     }
 }
