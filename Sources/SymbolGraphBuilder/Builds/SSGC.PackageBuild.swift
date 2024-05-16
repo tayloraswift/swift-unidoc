@@ -31,12 +31,6 @@ extension SSGC
 }
 extension SSGC.PackageBuild
 {
-    /// Always returns ``Configuration/debug``.
-    private
-    var configuration:Configuration { .debug }
-}
-extension SSGC.PackageBuild
-{
     func listExtraManifests() throws -> [MinorVersion]
     {
         var versions:[MinorVersion] = []
@@ -219,9 +213,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let scratch:SSGC.PackageBuildDirectory
         do
         {
-            scratch = try swift.build(package: self.root,
-                configuration: self.configuration,
-                flags: self.flags)
+            scratch = try swift.build(package: self.root, flags: self.flags)
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
@@ -231,7 +223,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let platform:SymbolGraphMetadata.Platform = try swift.platform()
 
         var dependencies:[PackageNode] = []
-        var include:[FilePath] = [ scratch.path / "\(self.configuration)" ]
+        var include:[FilePath] = [scratch.include]
 
         //  Nominal dependencies mean we need to perform two passes.
         var packageContainingProduct:[String: Symbol.Package] = [:]
@@ -329,7 +321,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         //  This step is considered part of documentation building.
         do
         {
-            return (metadata, try .init(scanning: flatNode, include: include))
+            return (metadata, try .init(scanning: flatNode, include: include, scratch: scratch))
         }
         catch let error
         {

@@ -1,3 +1,12 @@
+#if canImport(IndexStoreDB)
+
+import class IndexStoreDB.IndexStoreDB
+import class IndexStoreDB.IndexStoreLibrary
+import MarkdownPluginSwift_IndexStoreDB
+
+#endif
+
+import MarkdownABI
 import SymbolGraphs
 import System
 
@@ -76,9 +85,31 @@ extension SSGC.Workspace
             include: package.include,
             output: output)
 
+        #if canImport(IndexStoreDB)
+
+        let index:(any Markdown.SwiftLanguage.IndexStore)? = try package.scratch.map
+        {
+            let libIndexStore:IndexStoreLibrary = try swift.libIndexStore()
+            let indexPath:FilePath = $0.include / "index"
+            return try IndexStoreDB.init(storePath: "\(indexPath)/store",
+                databasePath: "\(indexPath)/db",
+                library: libIndexStore,
+                waitUntilDoneInitializing: true,
+                readonly: false,
+                listenToUnitEvents: true)
+        }
+
+        #else
+
+        let index:(any Markdown.SwiftLanguage.IndexStore)? = nil
+
+        #endif
+
         let compiled:SymbolGraph = try .compile(artifacts: artifacts,
             package: package,
-            logger: logger)
+            logger: logger,
+            index: index)
+
 
         return .init(metadata: metadata, graph: compiled)
     }

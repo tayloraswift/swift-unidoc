@@ -12,12 +12,14 @@ extension SSGC
 
         var include:[FilePath]
 
+        let scratch:PackageBuildDirectory?
         let root:PackageRoot?
 
         init(
             cultures:[NominalSources] = [],
             snippets:[LazyFile] = [],
             include:[FilePath] = [],
+            scratch:PackageBuildDirectory? = nil,
             root:PackageRoot? = nil)
         {
             self.cultures = cultures
@@ -25,17 +27,20 @@ extension SSGC
 
             self.include = include
 
+            self.scratch = scratch
             self.root = root
         }
     }
 }
 extension SSGC.PackageSources
 {
-    init(scanning package:borrowing PackageNode, include:consuming [FilePath] = []) throws
+    init(scanning package:borrowing PackageNode,
+        include:consuming [FilePath] = [],
+        scratch:consuming SSGC.PackageBuildDirectory? = nil) throws
     {
         let root:SSGC.PackageRoot = .init(normalizing: package.root)
 
-        self.init(include: include, root: root)
+        self.init(include: include, scratch: scratch, root: root)
 
         let count:[SSGC.NominalSources.DefaultDirectory: Int] = package.modules.reduce(
             into: [:])

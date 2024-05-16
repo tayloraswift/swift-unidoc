@@ -28,6 +28,8 @@ extension SSGC
         let swiftParser:Markdown.SwiftLanguage?
         private
         let nominations:SSGC.Nominations
+        private
+        let root:Symbol.FileBase?
 
         private
         var symbolizer:Symbolizer
@@ -48,7 +50,8 @@ extension SSGC
         public
         init(nominations:SSGC.Nominations,
             modules:[SymbolGraph.Module],
-            plugins:[any Markdown.CodeLanguageType] = [])
+            plugins:[any Markdown.CodeLanguageType] = [],
+            root:Symbol.FileBase? = nil)
         {
             let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
             //  If we were given a plugin that says it can highlight swift,
@@ -57,6 +60,7 @@ extension SSGC
             self.markdownParser = .init(plugins: plugins)
             self.swiftParser = swift as? Markdown.SwiftLanguage
             self.nominations = nominations
+            self.root = root
 
             self.symbolizer = .init(modules: modules)
             self.resources = []
@@ -294,8 +298,20 @@ extension SSGC.Linker
         //  snippets from other snippets.
         return try snippets.reduce(into: [:])
         {
+            let indexID:String?
+
+            if  let root:Symbol.FileBase = self.root
+            {
+                indexID = "\(root.path)/\($1.path)"
+            }
+            else
+            {
+                indexID = nil
+            }
+
             let snippet:(caption:String, slices:[Markdown.SnippetSlice]) = swift.parse(
-                snippet: try $1.read(as: [UInt8].self))
+                snippet: try $1.read(as: [UInt8].self),
+                from: indexID)
 
             $0[$1.name] = .init(id: self.symbolizer.intern($1.path),
                 caption: snippet.caption,
@@ -933,10 +949,10 @@ extension SSGC.Linker
     }
 
     public consuming
-    func status(root:Symbol.FileBase?) -> DiagnosticMessages
+    func status() -> DiagnosticMessages
     {
         self.tables.diagnostics.symbolicated(with: .init(
             graph: self.symbolizer.graph,
-            root: root))
+            root: self.root))
     }
 }

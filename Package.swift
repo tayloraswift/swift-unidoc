@@ -102,9 +102,11 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.1")),
 
+        // .package(url: "https://github.com/apple/indexstore-db",
+        //     branch: "swift-5.10-RELEASE"),
+
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
-
         .package(url: "https://github.com/apple/swift-collections.git", .upToNextMinor(
             from: "1.1.0")),
 
@@ -120,7 +122,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.2.1")),
         .package(url: "https://github.com/apple/swift-syntax",
-            exact: "510.0.1"),
+            exact: "510.0.2"),
     ],
     targets: [
         .macro(name: "UnidocMacros",
@@ -299,6 +301,12 @@ let package:Package = .init(
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ]),
 
+        .target(name: "MarkdownPluginSwift_IndexStoreDB",
+            dependencies: [
+                .target(name: "MarkdownPluginSwift"),
+                // .product(name: "IndexStoreDB", package: "indexstore-db"),
+            ]),
+
         .target(name: "MarkdownSemantics",
             dependencies: [
                 .target(name: "MarkdownAST"),
@@ -384,6 +392,7 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "ArgumentParsing"),
                 .target(name: "MarkdownPluginSwift"),
+                .target(name: "MarkdownPluginSwift_IndexStoreDB"),
                 .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphLinker"),

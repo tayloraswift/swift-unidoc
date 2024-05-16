@@ -1,3 +1,9 @@
+#if canImport(IndexStoreDB)
+
+import class IndexStoreDB.IndexStoreLibrary
+
+#endif
+
 import JSON
 import PackageGraphs
 import PackageMetadata
@@ -168,6 +174,16 @@ extension SSGC.Toolchain
 }
 extension SSGC.Toolchain
 {
+    #if canImport(IndexStoreDB)
+
+    func libIndexStore() throws -> IndexStoreLibrary
+    {
+        /// FIXME: this is almost certain to fail on macOS
+        try .init(dylibPath: "/usr/lib/libIndexStore.so")
+    }
+
+    #endif
+
     func platform() throws -> SymbolGraphMetadata.Platform
     {
         if      self.triple.os.starts(with: "linux")
@@ -261,16 +277,17 @@ extension SSGC.Toolchain
         }
     }
 
-    func build(package:FilePath,
-        configuration:SSGC.PackageBuild.Configuration = .debug,
+    func build(
+        package:FilePath,
         flags:SSGC.PackageBuild.Flags = .init()) throws -> SSGC.PackageBuildDirectory
     {
-        let scratch:SSGC.PackageBuildDirectory = .init(path: package / self.scratch)
+        let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
+            path: package / self.scratch)
 
         var arguments:[String] =
         [
             "build",
-            "--configuration", "\(configuration)",
+            "--configuration", "\(scratch.configuration)",
             "--package-path", "\(package)",
             "--scratch-path", "\(scratch.path)",
         ]

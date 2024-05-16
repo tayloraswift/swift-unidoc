@@ -12,18 +12,18 @@ extension SSGC
         private(set)
         var loadingTime:Duration
         private
-        let location:FilePath
-        private
         var content:[UInt8]?
 
+        let location:FilePath
         let path:Symbol.File
         let name:String
 
         init(location:FilePath, path:Symbol.File, name:String)
         {
             self.loadingTime = .zero
-            self.location = location
             self.content = nil
+
+            self.location = location
             self.path = path
             self.name = name
         }
