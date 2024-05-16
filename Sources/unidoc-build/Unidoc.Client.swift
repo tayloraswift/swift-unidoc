@@ -148,6 +148,9 @@ extension Unidoc.Client
                 case .failedToLinkSymbolGraph:
                     report.failure = .failedToLinkSymbolGraph
 
+                case .failedForUnknownReason:
+                    report.failure = .failedForUnknownReason
+
                 case .success:
                     return report
                 }

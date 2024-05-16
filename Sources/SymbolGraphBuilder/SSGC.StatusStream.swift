@@ -33,12 +33,12 @@ extension SSGC.StatusStream
 extension SSGC.StatusStream
 {
     static
-    func write(to fifo:FilePath, with body:(Self) throws -> SSGC.StatusUpdate) throws
+    func write(to fifo:FilePath, with body:(Self) -> SSGC.StatusUpdate) throws
     {
         try fifo.open(.writeOnly, permissions: (.rw, .r, .r))
         {
             let status:Self = .init(file: $0)
-            let last:SSGC.StatusUpdate = try body(status)
+            let last:SSGC.StatusUpdate = body(status)
             try status.send(last)
         }
     }
