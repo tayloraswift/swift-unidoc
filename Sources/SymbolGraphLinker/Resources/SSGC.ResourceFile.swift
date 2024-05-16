@@ -14,8 +14,8 @@ extension SSGC
         /// The path to the resource file, relative to the package root.
         var path:Symbol.File { get }
 
-        /// The name of the resource file. This is a scalar string and should not include any path
-        /// separators. It only needs to be unique within a single module.
+        /// The name of the resource file. This is a scalar string and should not include any
+        /// path separators. It only needs to be unique within a single module.
         var name:String { get }
     }
 }

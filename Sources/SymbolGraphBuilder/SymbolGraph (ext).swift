@@ -14,7 +14,8 @@ extension SymbolGraph
     static
     func compile(artifacts:[Artifacts],
         package:SSGC.PackageSources,
-        logger:SSGC.DocumentationLogger?) throws -> Self
+        logger:SSGC.DocumentationLogger?,
+        index:(any Markdown.SwiftLanguage.IndexStore)? = nil) throws -> Self
     {
         precondition(package.cultures.count == artifacts.count,
             "Mismatched cultures and artifacts!")
@@ -72,7 +73,8 @@ extension SymbolGraph
         {
             var linker:SSGC.Linker = .init(nominations: nominations,
                 modules: package.cultures.map(\.module),
-                plugins: [.swift])
+                plugins: [.swift(index: index)],
+                root: root)
 
             let namespacePositions:[[SymbolGraph.Namespace]] = profiler.measure(\.linking)
             {
@@ -126,11 +128,11 @@ extension SymbolGraph
 
             if  let logger:SSGC.DocumentationLogger
             {
-                try logger.emit(messages: linker.status(root: root))
+                try logger.emit(messages: linker.status())
             }
             else
             {
-                linker.status(root: root).emit(colors: .enabled)
+                linker.status().emit(colors: .enabled)
             }
 
             print("""
