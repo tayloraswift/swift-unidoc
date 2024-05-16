@@ -16,5 +16,7 @@ extension SSGC
         case failedToExtractSymbolGraph
         case failedToLoadSymbolGraph
         case failedToLinkSymbolGraph
+
+        case failedForUnknownReason
     }
 }

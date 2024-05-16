@@ -15,6 +15,8 @@ extension Unidoc
         case failedToExtractSymbolGraph = 7
         case failedToLoadSymbolGraph = 8
         case failedToLinkSymbolGraph = 9
+
+        case failedForUnknownReason = 256
     }
 }
 extension Unidoc.BuildFailure

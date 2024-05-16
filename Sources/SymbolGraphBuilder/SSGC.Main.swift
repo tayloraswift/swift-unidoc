@@ -6,14 +6,6 @@ import System
 
 extension SSGC
 {
-    enum ScratchPolicy:String, Equatable
-    {
-        case keep
-        case remove
-    }
-}
-extension SSGC
-{
     struct Main:Sendable
     {
         /// A path to the workspace directory. SSGC will **create** this workspace unless
@@ -183,6 +175,11 @@ extension SSGC.Main
                 case .loading:  return .failedToLoadSymbolGraph
                 case .linking:  return .failedToLinkSymbolGraph
                 }
+            }
+            catch let error
+            {
+                print(error)
+                return .failedForUnknownReason
             }
         }
     }

@@ -215,6 +215,14 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                     """
                 } = "Failed (ssgc)"
 
+            case .failedForUnknownReason?:
+                section[.div]
+                {
+                    $0.title = """
+                    The builder crashed for an unknown reason.
+                    """
+                } = "Failed (ssgc)"
+
             case nil:
                 section[.div]
             }
