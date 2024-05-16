@@ -1,17 +1,17 @@
-extension SSGC.PackageBuild
+extension SSGC
 {
     @frozen public
-    enum Configuration:String
+    enum PackageBuildConfiguration:String
     {
         case debug = "debug"
     }
 }
-extension SSGC.PackageBuild.Configuration:CustomStringConvertible
+extension SSGC.PackageBuildConfiguration:CustomStringConvertible
 {
     @inlinable public
     var description:String { self.rawValue }
 }
-extension SSGC.PackageBuild.Configuration:LosslessStringConvertible
+extension SSGC.PackageBuildConfiguration:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String) { self.init(rawValue: description) }

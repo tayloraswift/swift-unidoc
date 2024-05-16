@@ -3,15 +3,20 @@ import Snippets
 import SwiftIDEUtils
 import SwiftParser
 import SwiftSyntax
+import Symbols
 
 extension Markdown
 {
     @frozen public
     struct SwiftLanguage
     {
-        @inlinable internal
-        init()
+        @usableFromInline
+        let index:(any IndexStore)?
+
+        @inlinable
+        init(index:(any IndexStore)? = nil)
         {
+            self.index = index
         }
     }
 }
@@ -26,8 +31,14 @@ extension Markdown.SwiftLanguage:Markdown.CodeLanguageType
 extension Markdown.SwiftLanguage
 {
     public
-    func parse(snippet utf8:[UInt8]) -> (caption:String, slices:[Markdown.SnippetSlice])
+    func parse(snippet utf8:[UInt8],
+        from indexID:String? = nil) -> (caption:String, slices:[Markdown.SnippetSlice])
     {
+        if  let indexID:String
+        {
+            self.index?.load(for: indexID)
+        }
+
         //  It is safe to escape the pointer to ``Parser.parse(source:maximumNestingLevel:)``,
         //  see: https://swiftinit.org/docs/swift-syntax/swiftparser/parser.init(_:maximumnestinglevel:parsetransition:arena:)
         let parsed:SourceFileSyntax = utf8.withUnsafeBufferPointer
