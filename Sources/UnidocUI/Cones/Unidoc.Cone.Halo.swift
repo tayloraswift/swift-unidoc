@@ -107,7 +107,6 @@ extension Unidoc.Cone.Halo
         generics:Generics = .init([])) throws
     {
         var extensions:[(Unidoc.ExtensionGroup, Partisanship, Generality)] = []
-
         for group:Unidoc.AnyGroup in groups
         {
             switch group
@@ -158,13 +157,6 @@ extension Unidoc.Cone.Halo
                 let plane:SymbolGraph.Plane = first.plane
                 else
                 {
-                    continue
-                }
-
-                if  first == self.context.id,
-                    group.items.count == 1
-                {
-                    //  This is a polygon that contains this page only.
                     continue
                 }
 
@@ -223,6 +215,12 @@ extension Unidoc.Cone.Halo
             ($0.1, $0.0.culture.citizen, $0.2, $0.0.id) <
             ($1.1, $1.0.culture.citizen, $1.2, $1.0.id)
         }
+
+        //  Prevent the currently-shown page from appearing in the “See Also” section.
+        let apex:Unidoc.Scalar = self.context.id
+
+        curated.insert(apex)
+        self.curation.removeAll { $0 == apex }
 
         self.extensions = extensions.map { $0.0.subtracting(curated) }
 
