@@ -87,7 +87,7 @@ let package:Package = .init(
     ],
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
-            from: "1.0.0-alpha.1")),
+            from: "1.0.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
@@ -100,7 +100,7 @@ let package:Package = .init(
             from: "1.0.1")),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-            from: "4.4.1")),
+            from: "4.4.2")),
 
         // .package(url: "https://github.com/apple/indexstore-db",
         //     branch: "swift-5.10-RELEASE"),
@@ -116,11 +116,11 @@ let package:Package = .init(
             from: "2.26.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
-            from: "1.30.0")),
+            from: "1.31.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.3.0")),
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
-            from: "1.2.1")),
+            from: "1.3.0")),
         .package(url: "https://github.com/apple/swift-syntax",
             exact: "510.0.2"),
     ],
