@@ -174,7 +174,7 @@ extension Unidoc.DB.Volumes
                 $0[Unidoc.VolumeMetadata[.id]] = (+)
                 $0[Unidoc.VolumeMetadata[.patch]] = (-)
             }
-            $0[.projection] = .init
+            $0[.projection]
             {
                 $0[Unidoc.VolumeMetadata[.id]] = true
                 $0[Unidoc.VolumeMetadata[.patch]] = true

@@ -56,7 +56,7 @@ extension Unidoc.DB.Users
                     $0[Element[.id]] = user.account
                     $0[Element[.cookie]] = user.cookie
                 }
-                $0[.projection] = .init
+                $0[.projection]
                 {
                     $0[Element[.access]] = true
                     $0[Element[.level]] = true
@@ -84,7 +84,7 @@ extension Unidoc.DB.Users
                 $0[.hint] { $0[Element[.id]] = (+) }
                 $0[.query] { $0[Element[.id]] = user.id }
                 $0[.update] { $0 += user }
-                $0[.fields] = .init
+                $0[.fields]
                 {
                     $0[Element[.id]] = true
                     $0[Element[.cookie]] = true
@@ -157,7 +157,7 @@ extension Unidoc.DB.Users
                         $0[Element[secret]] = Int64.random(in: .min ... .max)
                     }
                 }
-                $0[.fields] = .init
+                $0[.fields]
                 {
                     $0[Element[.cookie]] = true
                     $0[Element[.apiKey]] = true
@@ -186,7 +186,7 @@ extension Unidoc.DB.Users
                 {
                     $0[Element[.apiLimitLeft]] { $0[.ne] = reset }
                 }
-                $0[.projection] = .init
+                $0[.projection]
                 {
                     $0[Element[.id]] = true
                 }
@@ -253,7 +253,7 @@ extension Unidoc.DB.Users
                 {
                     $0[.inc] { $0[Element[.apiLimitLeft]] = -cost }
                 }
-                $0[.fields] = .init
+                $0[.fields]
                 {
                     $0[Element[.apiLimitLeft]] = true
                     $0[Element[.apiKey]] = true
