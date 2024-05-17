@@ -5,7 +5,9 @@ import URI
 
 extension Unidoc.CanonicalVersion
 {
-    init?(principal:Unidoc.PrincipalOutput, layer:(some Unidoc.VertexLayer).Type)
+    init?(principal:Unidoc.PrincipalOutput,
+        vertex:__shared Unidoc.AnyVertex?,
+        layer:(some Unidoc.VertexLayer).Type)
     {
         guard
         let volumeOfLatest:Unidoc.VolumeMetadata = principal.volumeOfLatest,
@@ -33,7 +35,7 @@ extension Unidoc.CanonicalVersion
 
         let target:Target
 
-        if  let vertex:Unidoc.AnyVertex = principal.vertexInLatest
+        if  let vertex:Unidoc.AnyVertex
         {
             switch vertex
             {

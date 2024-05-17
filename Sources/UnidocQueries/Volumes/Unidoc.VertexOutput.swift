@@ -11,6 +11,8 @@ extension Unidoc
         public
         let principal:PrincipalOutput?
         public
+        let canonical:Unidoc.AnyVertex?
+        public
         let vertices:[Unidoc.AnyVertex]
         public
         let volumes:[Unidoc.VolumeMetadata]
@@ -19,11 +21,13 @@ extension Unidoc
 
         @inlinable public
         init(principal:PrincipalOutput?,
+            canonical:Unidoc.AnyVertex?,
             vertices:[Unidoc.AnyVertex],
             volumes:[Unidoc.VolumeMetadata],
             packages:[Unidoc.PackageMetadata])
         {
             self.principal = principal
+            self.canonical = canonical
             self.vertices = vertices
             self.volumes = volumes
             self.packages = packages
@@ -36,6 +40,7 @@ extension Unidoc.VertexOutput:Mongo.MasterCodingModel
     enum CodingKey:String, Sendable
     {
         case principal
+        case canonical
         case vertices
         case volumes
         case packages
@@ -48,6 +53,7 @@ extension Unidoc.VertexOutput:BSONDocumentDecodable
     {
         self.init(
             principal: try bson[.principal]?.decode(),
+            canonical: try bson[.canonical]?.decode(),
             vertices: try bson[.vertices].decode(),
             volumes: try bson[.volumes].decode(),
             packages: try bson[.packages].decode())
