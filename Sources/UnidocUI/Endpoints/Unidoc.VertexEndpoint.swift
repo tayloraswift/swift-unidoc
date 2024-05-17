@@ -84,6 +84,7 @@ extension Unidoc.VertexEndpoint where Self:HTTP.ServerEndpoint
         if  let vertex:Unidoc.AnyVertex = principal.vertex
         {
             let vertexContext:VertexContext = .init(canonical: .init(principal: principal,
+                    vertex: output.canonical,
                     layer: VertexLayer.self),
                 principal: principal.volume,
                 secondary: output.volumes,
