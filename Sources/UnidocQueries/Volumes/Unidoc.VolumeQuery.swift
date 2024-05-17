@@ -142,12 +142,12 @@ extension Unidoc.VolumeQuery
                 }
                 $0[.as] = volumeOfLatest
             }
-            //  Unbox the single-element array. It must contain at least one element for the
-            //  query to have been successful, so we can simply use an `$unwind`.
-            //
-            //  One of the implications of this is that it is *impossible* to access unreleased
-            //  documentation if the package does not have at least one release in the database.
-            pipeline[stage: .unwind] = volumeOfLatest
+
+            //  Unbox the single-element array.
+            pipeline[stage: .set] = .init
+            {
+                $0[volumeOfLatest] = .expr { $0[.first] = volumeOfLatest }
+            }
         }
     }
 }

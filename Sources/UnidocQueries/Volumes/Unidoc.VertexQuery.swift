@@ -6,16 +6,12 @@ import UnidocAPI
 import UnidocDB
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Unidoc.VertexQuery")
-public
-typealias WideQuery = Unidoc.VertexQuery
-
 extension Unidoc
 {
     /// Performs a vertex query within a volume, with additional lookups as determined by
     /// the specialized `Context`.
     @frozen public
-    struct VertexQuery<Context>:Sendable where Context:Unidoc.LookupContext & Sendable
+    struct VertexQuery<Context>:Sendable where Context:LookupContext & Sendable
     {
         public
         let volume:VolumeSelector
@@ -107,86 +103,6 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
             }
         }
 
-        //  Look up the vertex in the volume of the latest stable release of its home package.
-        //  The lookup correlates verticies by symbol.
-        //
-        //  This stage is a lot like the ``Symbol.Decl`` extension, but `symbol` and `hash`
-        //  are variables obtained from the principal `vertex` record.
-        pipeline[stage: .lookup] = .init
-        {
-            let symbol:Mongo.Variable<Unidoc.Scalar> = "symbol"
-            let hash:Mongo.Variable<Unidoc.Scalar> = "hash"
-
-            let min:Mongo.Variable<Unidoc.Scalar> = "min"
-            let max:Mongo.Variable<Unidoc.Scalar> = "max"
-
-            $0[.from] = Unidoc.DB.Vertices.name
-            $0[.let] = .init
-            {
-                $0[let: symbol] = .expr
-                {
-                    $0[.coalesce] =
-                    (
-                        Unidoc.PrincipalOutput[.vertex] / Unidoc.AnyVertex[.symbol],
-                        BSON.Max.init()
-                    )
-                }
-                $0[let: hash] = .expr
-                {
-                    $0[.coalesce] =
-                    (
-                        Unidoc.PrincipalOutput[.vertex] / Unidoc.AnyVertex[.hash],
-                        BSON.Max.init()
-                    )
-                }
-                //  ``volumeOfLatest`` is always non-nil, so we don’t need to worry about
-                //  degenerate index behavior.
-                $0[let: min] =
-                    Unidoc.PrincipalOutput[.volumeOfLatest] / Unidoc.VolumeMetadata[.min]
-                $0[let: max] =
-                    Unidoc.PrincipalOutput[.volumeOfLatest] / Unidoc.VolumeMetadata[.max]
-            }
-            $0[.pipeline] = .init
-            {
-                $0[stage: .match] = .init
-                {
-                    $0[.expr]
-                    {
-                        $0[.and]
-                        {
-                            //  The first three of these clauses should be able to use
-                            //  a compound index.
-                            $0.expr { $0[.eq] = (Unidoc.AnyVertex[.hash], hash) }
-                            $0.expr { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
-                            $0.expr { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
-
-                            $0.expr { $0[.eq] = (Unidoc.AnyVertex[.symbol], symbol) }
-                        }
-                    }
-                }
-
-                $0[stage: .limit] = 1
-
-                //  We do not need to load *any* markdown for this record.
-                $0[stage: .unset] =
-                [
-                    Unidoc.AnyVertex[.constituents],
-                    Unidoc.AnyVertex[.superforms],
-                    Unidoc.AnyVertex[.overview],
-                    Unidoc.AnyVertex[.details],
-                ]
-            }
-            $0[.as] = Unidoc.PrincipalOutput[.vertexInLatest]
-        }
-        //  Unbox single-element array.
-        pipeline[stage: .set] = .init
-        {
-            $0[Unidoc.PrincipalOutput[.vertexInLatest]] = .expr
-            {
-                $0[.first] = Unidoc.PrincipalOutput[.vertexInLatest]
-            }
-        }
-
         //  Gather all the extensions to the principal vertex.
         self.lookup.groups(&pipeline,
             volume: Unidoc.PrincipalOutput[.volume],
@@ -215,7 +131,6 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     [
                         .matches,
                         .vertex,
-                        .vertexInLatest,
                         .groups,
                     ]
                     {
@@ -292,6 +207,85 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                         $0[.first] = Unidoc.PrincipalOutput[.tree]
                     }
                 }
+            }
+
+            $0[Unidoc.VertexOutput[.canonical]] = .init
+            {
+                let volume:Mongo.AnyKeyPath = Unidoc.PrincipalOutput[.volumeOfLatest]
+                //  Conveniently, `$unwind` can be used to skip null values even if the field
+                //  is not an array. We need to skip the field if it is null because otherwise
+                //  the lookups in the next stage will traverse *all* vertices with the same
+                //  hash, which has complexity that scales with the number of linked volumes.
+                $0[stage: .unwind] = volume
+
+                //  Look up the vertex in the volume of the latest stable release of its home
+                //  package. The lookup correlates verticies by symbol.
+                $0[stage: .lookup] = .init
+                {
+                    let symbol:Mongo.Variable<Unidoc.Scalar> = "symbol"
+                    let hash:Mongo.Variable<Unidoc.Scalar> = "hash"
+
+                    let min:Mongo.Variable<Unidoc.Scalar> = "min"
+                    let max:Mongo.Variable<Unidoc.Scalar> = "max"
+
+                    $0[.from] = Unidoc.DB.Vertices.name
+                    $0[.let] = .init
+                    {
+                        $0[let: symbol] = .expr
+                        {
+                            $0[.coalesce] =
+                            (
+                                Unidoc.PrincipalOutput[.vertex] / Unidoc.AnyVertex[.symbol],
+                                BSON.Max.init()
+                            )
+                        }
+                        $0[let: hash] = .expr
+                        {
+                            $0[.coalesce] =
+                            (
+                                Unidoc.PrincipalOutput[.vertex] / Unidoc.AnyVertex[.hash],
+                                BSON.Max.init()
+                            )
+                        }
+
+                        $0[let: min] = volume / Unidoc.VolumeMetadata[.min]
+                        $0[let: max] = volume / Unidoc.VolumeMetadata[.max]
+                    }
+                    $0[.pipeline] = .init
+                    {
+                        $0[stage: .match] = .init
+                        {
+                            $0[.expr]
+                            {
+                                $0[.and]
+                                {
+                                    //  The first three of these clauses should be able to use
+                                    //  a compound index.
+                                    $0.expr { $0[.eq] = (Unidoc.AnyVertex[.hash], hash) }
+                                    $0.expr { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
+                                    $0.expr { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
+
+                                    $0.expr { $0[.eq] = (Unidoc.AnyVertex[.symbol], symbol) }
+                                }
+                            }
+                        }
+
+                        $0[stage: .limit] = 1
+
+                        //  We do not need to load *any* markdown for this record.
+                        $0[stage: .unset] =
+                        [
+                            Unidoc.AnyVertex[.constituents],
+                            Unidoc.AnyVertex[.superforms],
+                            Unidoc.AnyVertex[.overview],
+                            Unidoc.AnyVertex[.details],
+                        ]
+                    }
+                    $0[.as] = Unidoc.PrincipalOutput[.vertex]
+                }
+                //  Unbox single-element array.
+                $0[stage: .unwind] = Unidoc.PrincipalOutput[.vertex]
+                $0[stage: .replaceWith] = Unidoc.PrincipalOutput[.vertex]
             }
 
             $0[Unidoc.VertexOutput[.vertices]] = .init
@@ -387,6 +381,10 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
             $0[Unidoc.VertexOutput[.principal]] = .expr
             {
                 $0[.first] = Unidoc.VertexOutput[.principal]
+            }
+            $0[Unidoc.VertexOutput[.canonical]] = .expr
+            {
+                $0[.first] = Unidoc.VertexOutput[.canonical]
             }
         }
     }
