@@ -185,7 +185,7 @@ extension Unidoc.DB.Snapshots
                 {
                     $0[Unidoc.Snapshot[.action]] { $0[.exists] = true }
                 }
-                $0[.projection] = .init
+                $0[.projection]
                 {
                     $0[Unidoc.Snapshot[.action]] = true
                     $0[Unidoc.Snapshot[.type]] = true
@@ -221,7 +221,7 @@ extension Unidoc.DB.Snapshots
                     $0[Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]] = (+)
                 }
 
-                $0[.projection] = .init
+                $0[.projection]
                 {
                     $0[Unidoc.Snapshot[.id]] = true
                 }

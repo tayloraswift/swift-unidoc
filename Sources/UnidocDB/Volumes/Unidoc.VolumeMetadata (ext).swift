@@ -7,7 +7,7 @@ extension Unidoc.VolumeMetadata:Mongo.MasterCodingModel
 extension Unidoc.VolumeMetadata
 {
     public static
-    func names(_ project:inout Mongo.ProjectionDocument)
+    func names(_ project:inout Mongo.ProjectionEncoder)
     {
         project[Unidoc.VolumeMetadata[.id]] = true
         project[Unidoc.VolumeMetadata[.package]] = true
