@@ -11,52 +11,54 @@ extension HTTP
     {
         init?(get path:String,
             headers:borrowing HPACKHeaders,
-            address:IP.V6,
-            service:IP.Service?)
+            origin:IP.Origin)
 
         init?(get path:String,
             headers:borrowing HTTPHeaders,
-            address:IP.V6,
-            service:IP.Service?)
+            origin:IP.Origin)
 
         init?(post path:String,
             headers:borrowing HPACKHeaders,
-            address:IP.V6,
-            service:IP.Service?,
+            origin:IP.Origin,
             body:borrowing [UInt8])
 
         init?(post path:String,
             headers:borrowing HTTPHeaders,
-            address:IP.V6,
-            service:IP.Service?,
+            origin:IP.Origin,
             body:consuming [UInt8])
     }
 }
 extension HTTP.ServerIntegralRequest
 {
+    /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
+    /// for ``init?(get:headers:origin:)``.
+    ///
+    /// Servers that expect to handle a lot of HTTP/1.1 GET requests should override this with
+    /// a more efficient implementation.
     @inlinable public
     init?(get path:String,
         headers:borrowing HTTPHeaders,
-        address:IP.V6,
-        service:IP.Service?)
+        origin:IP.Origin)
     {
         self.init(get: path,
             headers: .init(httpHeaders: copy headers),
-            address: address,
-            service: service)
+            origin: origin)
     }
 
+    /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
+    /// for ``init?(post:headers:origin:body:)``.
+    ///
+    /// Servers that expect to handle a lot of HTTP/1.1 POST requests should override this with
+    /// a more efficient implementation.
     @inlinable public
     init?(post path:String,
         headers:borrowing HTTPHeaders,
-        address:IP.V6,
-        service:IP.Service?,
+        origin:IP.Origin,
         body:consuming [UInt8])
     {
         self.init(post: path,
             headers: .init(httpHeaders: copy headers),
-            address: address,
-            service: service,
+            origin: origin,
             body: body)
     }
 }

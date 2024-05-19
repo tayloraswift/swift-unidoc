@@ -20,12 +20,8 @@ extension Unidoc.IntegralRequest
         let version:HTTP
         public
         let headers:HTTP.ProfileHeaders
-        /// What IP address did the request come from?
         public
-        let address:IP.V6
-        /// Who owns the IP ``address``?
-        public
-        let service:IP.Service?
+        let origin:IP.Origin
         public
         let host:String?
         public
@@ -37,8 +33,7 @@ extension Unidoc.IntegralRequest
             cookies:Unidoc.Cookies,
             version:HTTP,
             headers:HTTP.ProfileHeaders,
-            address:IP.V6,
-            service:IP.Service?,
+            origin:IP.Origin,
             host:String?,
             path:String)
         {
@@ -47,8 +42,7 @@ extension Unidoc.IntegralRequest
 
             self.version = version
             self.headers = headers
-            self.address = address
-            self.service = service
+            self.origin = origin
             self.host = host
             self.path = path
         }
@@ -70,8 +64,7 @@ extension Unidoc.IntegralRequest.Metadata
         .init(
             version: self.version,
             headers: self.headers,
-            address: self.address,
-            service: self.service,
+            origin: self.origin,
             path: self.path)
     }
 
@@ -83,11 +76,7 @@ extension Unidoc.IntegralRequest.Metadata
 extension Unidoc.IntegralRequest.Metadata
 {
     public
-    init(
-        headers:borrowing HPACKHeaders,
-        address:IP.V6,
-        service:IP.Service?,
-        path:String)
+    init(headers:borrowing HPACKHeaders, origin:IP.Origin, path:String)
     {
         let cookies:[String] = headers["cookie"]
         let host:String? = headers[":authority"].last.map
@@ -108,22 +97,17 @@ extension Unidoc.IntegralRequest.Metadata
             referer: headers["referer"].last)
 
         self.init(
-            annotation: .guess(service: service, headers: headers),
+            annotation: .guess(headers: headers, owner: origin.owner),
             cookies: .init(header: cookies),
             version: .http2,
             headers: headers,
-            address: address,
-            service: service,
+            origin: origin,
             host: host,
             path: path)
     }
 
     public
-    init(
-        headers:borrowing HTTPHeaders,
-        address:IP.V6,
-        service:IP.Service?,
-        path:String)
+    init(headers:borrowing HTTPHeaders, origin:IP.Origin, path:String)
     {
         let host:String? = headers["host"].last
         let headers:HTTP.ProfileHeaders = .init(
@@ -134,12 +118,11 @@ extension Unidoc.IntegralRequest.Metadata
         //  None of our authenticated endpoints support HTTP/1.1, so there is no
         //  need to load cookies.
         self.init(
-            annotation: .guess(service: service, headers: headers),
+            annotation: .guess(headers: headers, owner: origin.owner),
             cookies: .init(),
             version: .http1_1,
             headers: headers,
-            address: address,
-            service: service,
+            origin: origin,
             host: host,
             path: path)
 
@@ -148,7 +131,7 @@ extension Unidoc.IntegralRequest.Metadata
             Log[.debug] = """
             Approved possible Swift Forums robot
                 User-Agent: '\(headers.userAgent ?? "")'
-                IP Address: \(address)
+                IP Address: \(origin.address)
             """
         }
     }

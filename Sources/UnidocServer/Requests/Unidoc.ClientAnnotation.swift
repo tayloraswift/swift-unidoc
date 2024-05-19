@@ -56,12 +56,12 @@ extension Unidoc.ClientAnnotation
 extension Unidoc.ClientAnnotation
 {
     static
-    func guess(service:IP.Service?, headers:HTTP.ProfileHeaders) -> Self
+    func guess(headers:HTTP.ProfileHeaders, owner:IP.Owner) -> Self
     {
-        switch service
+        switch owner
         {
-        case .googlebot?:   return .robot(.googlebot)
-        case .bingbot?:     return .robot(.bingbot)
+        case .googlebot:    return .robot(.googlebot)
+        case .bingbot:      return .robot(.bingbot)
         case _:             break
         }
 

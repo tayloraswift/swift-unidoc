@@ -217,7 +217,7 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
                 $0[.dd] = last.headers.userAgent ?? "none"
 
                 $0[.dt] = "IP address"
-                $0[.dd] = "\(last.address)"
+                $0[.dd] = "\(last.origin.address)"
 
                 $0[.dt] = "Accept Language"
                 $0[.dd] = last.headers.acceptLanguage ?? "none"
@@ -236,7 +236,7 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
                 $0[.dd] = last.headers.userAgent ?? "none"
 
                 $0[.dt] = "IP address"
-                $0[.dd] = "\(last.address)"
+                $0[.dd] = "\(last.origin.address)"
 
                 $0[.dt] = "Accept Language"
                 $0[.dd] = last.headers.acceptLanguage ?? "none"
@@ -252,7 +252,7 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
                 $0[.dd] = last.headers.userAgent ?? "none"
 
                 $0[.dt] = "IP address"
-                $0[.dd] = "\(last.address)"
+                $0[.dd] = "\(last.origin.address)"
 
                 $0[.dt] = "Accept Language"
                 $0[.dd] = last.headers.acceptLanguage ?? "none"
