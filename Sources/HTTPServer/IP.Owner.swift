@@ -3,7 +3,7 @@ import IP
 extension IP
 {
     @frozen public
-    enum Service:Equatable, Hashable, Sendable
+    enum Owner:Equatable, Hashable, Sendable
     {
         case amazon
         /// Something running on an EC2 instance. Almost always harmful, but a human
@@ -16,7 +16,12 @@ extension IP
         case google
         case googlebot
 
-        /// The IP address could not be mapped to a service because the tables have
+        case github
+
+        /// The IP address is known to belong to a service, but the owner itself is not known.
+        case known
+
+        /// The IP address could not be mapped to an owner because the tables have
         /// not been initialized yet. This is a distinct state from the nil case, because
         /// the IP might still belong to one of the enumerated services.
         case unknown

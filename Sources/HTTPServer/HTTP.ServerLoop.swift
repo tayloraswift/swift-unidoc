@@ -168,13 +168,13 @@ extension HTTP.ServerLoop
                             return
                         }
 
-                        let service:IP.Service? = policylist[address]
+                        let origin:IP.Origin = .init(address: address,
+                            owner: policylist[address])
 
                         do
                         {
                             try await self.handle(connection: connection,
-                                address: address,
-                                service: service,
+                                origin: origin,
                                 as: Authority.self)
                         }
                         catch NIOSSLError.uncleanShutdown
@@ -205,14 +205,14 @@ extension HTTP.ServerLoop
                             return
                         }
 
-                        let service:IP.Service? = policylist[address]
+                        let origin:IP.Origin = .init(address: address,
+                            owner: policylist[address])
 
                         do
                         {
                             try await self.handle(connection: channel,
                                 streams: streams.inbound,
-                                address: address,
-                                service: service,
+                                origin: origin,
                                 as: Authority.self)
                         }
                         catch let error
@@ -246,8 +246,7 @@ extension HTTP.ServerLoop
         connection:NIOAsyncChannel<
             HTTPPart<HTTPRequestHead, ByteBuffer>,
             HTTPPart<HTTPResponseHead, ByteBuffer>>,
-        address:IP.V6,
-        service:IP.Service?,
+        origin:IP.Origin,
         as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
     {
         try await connection.executeThenClose
@@ -286,8 +285,7 @@ extension HTTP.ServerLoop
                     message = .init(
                         response: try await self.respond(to: part,
                             inbound: &parts,
-                            address: address,
-                            service: service,
+                            origin: origin,
                             as: Authority.self),
                         using: connection.channel.allocator)
                 }
@@ -321,8 +319,7 @@ extension HTTP.ServerLoop
     func respond<Authority>(to h1:HTTPRequestHead,
         inbound:inout AsyncThrowingChannel<
             HTTPPart<HTTPRequestHead, ByteBuffer>, any Error>.Iterator,
-        address:IP.V6,
-        service:IP.Service?,
+        origin:IP.Origin,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:HTTP.ServerAuthority
     {
@@ -334,8 +331,7 @@ extension HTTP.ServerLoop
         case .GET:
             if  let request:IntegralRequest = .init(get: h1.uri,
                     headers: h1.headers,
-                    address: address,
-                    service: service)
+                    origin: origin)
             {
                 return try await self.response(for: request)
             }
@@ -383,8 +379,7 @@ extension HTTP.ServerLoop
 
             if  let request:IntegralRequest = .init(post: h1.uri,
                     headers: h1.headers,
-                    address: address,
-                    service: service,
+                    origin: origin,
                     body: /* consume */ body) // https://github.com/apple/swift/issues/71605
             {
                 return try await self.response(for: request)
@@ -406,8 +401,7 @@ extension HTTP.ServerLoop
     func handle<Authority>(
         connection:any Channel,
         streams:NIOHTTP2AsyncSequence<HTTP.Stream>,
-        address:IP.V6,
-        service:IP.Service?,
+        origin:IP.Origin,
         as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
     {
         //  I am not sure why the sequence of streams has no backpressure. Out of an abundance
@@ -457,10 +451,7 @@ extension HTTP.ServerLoop
 
                     let request:Task<HTTP.ServerResponse, any Error> = .init
                     {
-                        try await self.respond(to: inbound,
-                                address: address,
-                                service: service,
-                                as: Authority.self)
+                        try await self.respond(to: inbound, origin: origin, as: Authority.self)
                     }
                     stream.frames.channel.closeFuture.whenComplete
                     {
@@ -479,7 +470,7 @@ extension HTTP.ServerLoop
                     }
                     catch let error
                     {
-                        Log[.error] = "(application: \(address)) \(error)"
+                        Log[.error] = "(application: \(origin.address)) \(error)"
 
                         message = .init(
                             redacting: error,
@@ -512,7 +503,7 @@ extension HTTP.ServerLoop
                 else
                 {
                     Log[.warning] = """
-                    (HTTP/2: \(address)) \
+                    (HTTP/2: \(origin.address)) \
                     Connection timed out before peer initiated any streams.
                     """
                 }
@@ -528,8 +519,7 @@ extension HTTP.ServerLoop
 
     private
     func respond<Authority>(to h2:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
-        address:IP.V6,
-        service:IP.Service?,
+        origin:IP.Origin,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:HTTP.ServerAuthority
     {
@@ -572,7 +562,7 @@ extension HTTP.ServerLoop
 
             case nil, nil?:
                 Log[.error] = """
-                (HTTP/2: \(address)) Stream timed out before peer sent any headers.
+                (HTTP/2: \(origin.address)) Stream timed out before peer sent any headers.
                 """
 
                 return .resource("Time limit exceeded", status: 408)
@@ -595,10 +585,7 @@ extension HTTP.ServerLoop
             fallthrough
 
         case "GET":
-            if  let request:IntegralRequest = .init(get: path,
-                    headers: headers,
-                    address: address,
-                    service: service)
+            if  let request:IntegralRequest = .init(get: path, headers: headers, origin: origin)
             {
                 return try await self.response(for: request)
             }
@@ -704,8 +691,7 @@ extension HTTP.ServerLoop
 
             if  let request:IntegralRequest = .init(post: path,
                     headers: headers,
-                    address: address,
-                    service: service,
+                    origin: origin,
                     body: /* consume */ body) // https://github.com/apple/swift/issues/71605
             {
                 return try await self.response(for: request)

@@ -11,9 +11,7 @@ extension ServerTour
         public
         var headers:HTTP.ProfileHeaders
         public
-        var address:IP.V6
-        public
-        var service:IP.Service?
+        var origin:IP.Origin
         public
         var path:String
 
@@ -21,14 +19,12 @@ extension ServerTour
         init(
             version:HTTP,
             headers:HTTP.ProfileHeaders,
-            address:IP.V6,
-            service:IP.Service?,
+            origin:IP.Origin,
             path:String)
         {
             self.version = version
             self.headers = headers
-            self.address = address
-            self.service = service
+            self.origin = origin
             self.path = path
         }
     }
