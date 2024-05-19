@@ -48,7 +48,7 @@ extension Unidoc
 extension Unidoc.ServerLoop
 {
     @inlinable public nonisolated
-    var authority:any ServerAuthority { self.options.authority }
+    var authority:any HTTP.ServerAuthority { self.options.authority }
 
     @inlinable public nonisolated
     var port:Int { self.options.port }

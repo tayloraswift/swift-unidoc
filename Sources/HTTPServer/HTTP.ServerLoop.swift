@@ -35,6 +35,7 @@ extension HTTP
         func response(for request:IntegralRequest) async throws -> HTTP.ServerResponse
     }
 }
+
 extension HTTP.ServerLoop
 {
     public
@@ -43,7 +44,7 @@ extension HTTP.ServerLoop
         as authority:Authority,
         on threads:MultiThreadedEventLoopGroup,
         policy:(some HTTP.ServerPolicy)? = nil) async throws
-        where Authority:ServerAuthority
+        where Authority:HTTP.ServerAuthority
     {
         let bootstrap:ServerBootstrap = .init(group: threads)
             .serverChannelOption(ChannelOptions.backlog, value: 256)
@@ -51,66 +52,95 @@ extension HTTP.ServerLoop
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
 
-        let listener:
-            NIOAsyncChannel<
-                EventLoopFuture<NIONegotiatedHTTPVersion<
-                    NIOAsyncChannel<
-                        HTTPPart<HTTPRequestHead, ByteBuffer>,
-                        HTTPPart<HTTPResponseHead, ByteBuffer>>,
-                    (
-                        any Channel,
-                        NIOHTTP2Handler.AsyncStreamMultiplexer<HTTP.Stream>
-                    )>>,
-                Never> = try await bootstrap.bind(
-            host: binding.address,
-            port: binding.port)
+        var listener:NIOAsyncChannel<EventLoopFuture<
+            NIONegotiatedHTTPVersion<
+                NIOAsyncChannel<
+                    HTTPPart<HTTPRequestHead, ByteBuffer>,
+                    HTTPPart<HTTPResponseHead, ByteBuffer>>,
+                (any Channel, NIOHTTP2Handler.AsyncStreamMultiplexer<HTTP.Stream>)>>, Never>
+
+        if  case let context as NIOSSLContext = authority.context
         {
-            (channel:any Channel) in
-
-            channel.pipeline.addHandler(NIOSSLServerHandler.init(context: authority.tls))
-                .flatMap
+            listener = try await bootstrap.bind(
+                host: binding.address,
+                port: binding.port)
             {
-                channel.configureAsyncHTTPServerPipeline
-                {
-                    (connection:any Channel) in
+                (channel:any Channel) in
 
-                    connection.eventLoop.makeCompletedFuture
+                channel.pipeline.addHandler(NIOSSLServerHandler.init(context: context))
+                    .flatMap
+                {
+                    channel.configureAsyncHTTPServerPipeline
                     {
-                        try connection.pipeline.syncOperations.addHandler(
-                            HTTP.OutboundShimHandler.init())
+                        (connection:any Channel) in
 
-                        return try NIOAsyncChannel<
-                            HTTPPart<HTTPRequestHead, ByteBuffer>,
-                            HTTPPart<HTTPResponseHead, ByteBuffer>>.init(
-                            wrappingChannelSynchronously: connection,
-                            configuration: .init())
-                    }
-                }
-                    http2ConnectionInitializer:
-                {
-                    (connection:any Channel) in
-
-                    connection.eventLoop.makeCompletedFuture { connection }
-                }
-                    http2StreamInitializer:
-                {
-                    (stream:any Channel) in
-
-                    stream.eventLoop.makeCompletedFuture
-                    {
-                        guard
-                        let id:HTTP2StreamID = try stream.syncOptions?.getOption(
-                            HTTP2StreamChannelOptions.streamID)
-                        else
+                        connection.eventLoop.makeCompletedFuture
                         {
-                            throw HTTP.StreamIdentifierError.missing
-                        }
+                            try connection.pipeline.syncOperations.addHandler(
+                                HTTP.OutboundShimHandler.init())
 
-                        return .init(frames: try .init(
-                                wrappingChannelSynchronously: stream,
-                                configuration: .init()),
-                            id: id)
+                            return try NIOAsyncChannel<
+                                HTTPPart<HTTPRequestHead, ByteBuffer>,
+                                HTTPPart<HTTPResponseHead, ByteBuffer>>.init(
+                                wrappingChannelSynchronously: connection,
+                                configuration: .init())
+                        }
                     }
+                        http2ConnectionInitializer:
+                    {
+                        (connection:any Channel) in
+
+                        connection.eventLoop.makeCompletedFuture { connection }
+                    }
+                        http2StreamInitializer:
+                    {
+                        (stream:any Channel) in
+
+                        stream.eventLoop.makeCompletedFuture
+                        {
+                            guard
+                            let id:HTTP2StreamID = try stream.syncOptions?.getOption(
+                                HTTP2StreamChannelOptions.streamID)
+                            else
+                            {
+                                throw HTTP.StreamIdentifierError.missing
+                            }
+
+                            return .init(frames: try .init(
+                                    wrappingChannelSynchronously: stream,
+                                    configuration: .init()),
+                                id: id)
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            listener = try await bootstrap.bind(
+                host: binding.address,
+                port: binding.port)
+            {
+                (connection:any Channel) in
+
+                connection.eventLoop.makeCompletedFuture
+                {
+                    let decoder:HTTPRequestDecoder = .init(leftOverBytesStrategy: .dropBytes)
+                    let handlers:[any ChannelHandler] = [
+                        HTTPResponseEncoder.init(configuration: .init()),
+                        ByteToMessageHandler.init(decoder),
+                        HTTP.OutboundShimHandler.init()
+                    ]
+
+                    try connection.pipeline.syncOperations.addHandlers(handlers)
+
+                    let channel:NIOAsyncChannel<
+                        HTTPPart<HTTPRequestHead, ByteBuffer>,
+                        HTTPPart<HTTPResponseHead, ByteBuffer>> = try .init(
+                        wrappingChannelSynchronously: connection,
+                        configuration: .init())
+
+                    return connection.eventLoop.makeSucceededFuture(.http1_1(channel))
                 }
             }
         }
@@ -218,7 +248,7 @@ extension HTTP.ServerLoop
             HTTPPart<HTTPResponseHead, ByteBuffer>>,
         address:IP.V6,
         service:IP.Service?,
-        as _:Authority.Type) async throws where Authority:ServerAuthority
+        as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
     {
         try await connection.executeThenClose
         {
@@ -239,13 +269,23 @@ extension HTTP.ServerLoop
                 inbound.finish()
             } ()
 
-            for try await case .head(let part) in inbound
+            var parts:AsyncThrowingChannel<HTTPPart<HTTPRequestHead, ByteBuffer>,
+                any Error>.Iterator = inbound.makeAsyncIterator()
+
+            while let part:HTTPPart<HTTPRequestHead, ByteBuffer> = try await parts.next()
             {
+                guard case .head(let part) = part
+                else
+                {
+                    continue
+                }
+
                 var message:HTTP.ServerMessage<Authority, HTTPHeaders>
                 do
                 {
                     message = .init(
                         response: try await self.respond(to: part,
+                            inbound: &parts,
                             address: address,
                             service: service,
                             as: Authority.self),
@@ -255,8 +295,7 @@ extension HTTP.ServerLoop
                 {
                     Log[.error] = "(application) \(error)"
 
-                    message = .init(
-                        redacting: error,
+                    message = .init(redacting: error,
                         using: connection.channel.allocator)
                 }
 
@@ -280,15 +319,16 @@ extension HTTP.ServerLoop
 
     private
     func respond<Authority>(to h1:HTTPRequestHead,
+        inbound:inout AsyncThrowingChannel<
+            HTTPPart<HTTPRequestHead, ByteBuffer>, any Error>.Iterator,
         address:IP.V6,
         service:IP.Service?,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
-        where Authority:ServerAuthority
+        where Authority:HTTP.ServerAuthority
     {
         switch h1.method
         {
         case .HEAD:
-            // return .resource("Method not allowed", status: 405)
             fallthrough
 
         case .GET:
@@ -296,6 +336,56 @@ extension HTTP.ServerLoop
                     headers: h1.headers,
                     address: address,
                     service: service)
+            {
+                return try await self.response(for: request)
+            }
+            else
+            {
+                return .resource("Malformed request", status: 400)
+            }
+
+        case .POST:
+            guard
+            let length:String = h1.headers["content-length"].first,
+            let length:Int = .init(length)
+            else
+            {
+                return .resource("Content length required", status: 411)
+            }
+
+            if  length > 1_000_000
+            {
+                return .resource("Content too large", status: 413)
+            }
+
+            var body:[UInt8] = []
+            if  length > 0
+            {
+                body.reserveCapacity(length)
+
+                while case .body(let buffer)? = try await inbound.next()
+                {
+                    if  buffer.readableBytes <= length - body.count
+                    {
+                        buffer.withUnsafeReadableBytes { body += $0 }
+                    }
+                    else
+                    {
+                        return .resource("Content too large", status: 413)
+                    }
+
+                    if  buffer.readableBytes == length
+                    {
+                        break
+                    }
+                }
+            }
+
+            if  let request:IntegralRequest = .init(post: h1.uri,
+                    headers: h1.headers,
+                    address: address,
+                    service: service,
+                    body: /* consume */ body) // https://github.com/apple/swift/issues/71605
             {
                 return try await self.response(for: request)
             }
@@ -318,7 +408,7 @@ extension HTTP.ServerLoop
         streams:NIOHTTP2AsyncSequence<HTTP.Stream>,
         address:IP.V6,
         service:IP.Service?,
-        as _:Authority.Type) async throws where Authority:ServerAuthority
+        as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
     {
         //  I am not sure why the sequence of streams has no backpressure. Out of an abundance
         //  of caution, there is a hard limit of 128 buffered streams. A sane peer should never
@@ -441,7 +531,7 @@ extension HTTP.ServerLoop
         address:IP.V6,
         service:IP.Service?,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
-        where Authority:ServerAuthority
+        where Authority:HTTP.ServerAuthority
     {
         /// We should use a channel and not just a stream, in order to preserve backpressure.
         let frames:AsyncThrowingChannel<HTTP2Frame.FramePayload?, any Error> = .init()
@@ -581,7 +671,7 @@ extension HTTP.ServerLoop
             }
 
             var body:[UInt8] = []
-            if  length > 0 
+            if  length > 0
             {
                 body.reserveCapacity(length)
 

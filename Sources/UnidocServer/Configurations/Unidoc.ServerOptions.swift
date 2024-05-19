@@ -8,7 +8,7 @@ extension Unidoc
     struct ServerOptions:Sendable
     {
         public
-        let authority:any ServerAuthority
+        let authority:any HTTP.ServerAuthority
         public
         var github:GitHub.Integration?
         public
@@ -19,7 +19,7 @@ extension Unidoc
         var mode:Mode
 
         @inlinable public
-        init(authority:any ServerAuthority,
+        init(authority:any HTTP.ServerAuthority,
             github:GitHub.Integration? = nil,
             mirror:Bool = false,
             bucket:Buckets,

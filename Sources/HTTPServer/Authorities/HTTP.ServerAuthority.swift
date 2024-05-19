@@ -6,22 +6,27 @@ import NIOPosix
 import NIOSSL
 import TraceableErrors
 
-public
-protocol ServerAuthority:Sendable
+extension HTTP
 {
-    static
-    var scheme:ServerScheme { get }
-    static
-    var domain:String { get }
+    public
+    protocol ServerAuthority<SecurityContext>:Sendable
+    {
+        associatedtype SecurityContext
 
-    var tls:NIOSSLContext { get }
+        static
+        var scheme:Scheme { get }
+        static
+        var domain:String { get }
 
-    init(tls:NIOSSLContext)
+        var context:SecurityContext { get }
 
-    static
-    func redact(error:any Error) -> String
+        init(context:SecurityContext)
+
+        static
+        func redact(error:any Error) -> String
+    }
 }
-extension ServerAuthority
+extension HTTP.ServerAuthority
 {
     /// Dumps detailed information about the caught error. This information will be shown to
     /// *anyone* accessing the server. In production, we strongly recommend overriding this
@@ -51,7 +56,7 @@ extension ServerAuthority
         }
     }
 }
-extension ServerAuthority
+extension HTTP.ServerAuthority
 {
     /// Formats a URL from the given URI. The URI should begin with a slash.
     static
@@ -59,6 +64,8 @@ extension ServerAuthority
     {
         switch self.scheme
         {
+        case .http(port: 80):           "http://\(self.domain)\(uri)"
+        case .http(port: let port):     "http://\(self.domain):\(port)\(uri)"
         case .https(port: 443):         "https://\(self.domain)\(uri)"
         case .https(port: let port):    "https://\(self.domain):\(port)\(uri)"
         }
@@ -69,7 +76,7 @@ extension ServerAuthority
         "<\(Self.url(uri))>; rel=\"\(rel)\""
     }
 }
-extension ServerAuthority
+extension HTTP.ServerAuthority
 {
     public static
     func redirect(
