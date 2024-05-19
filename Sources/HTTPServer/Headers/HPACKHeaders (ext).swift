@@ -1,8 +1,8 @@
 import NIOHPACK
 
-extension HPACKHeaders:HTTPHeaderFormat
+extension HPACKHeaders:HTTP.HeaderFormat
 {
-    init(authority _:(some ServerAuthority).Type, status:UInt)
+    init(authority _:(some HTTP.ServerAuthority).Type, status:UInt)
     {
         self = [":status": "\(status)"]
     }

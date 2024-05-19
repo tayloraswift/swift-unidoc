@@ -1,8 +1,8 @@
 import NIOHTTP1
 
-extension HTTPHeaders:HTTPHeaderFormat
+extension HTTPHeaders:HTTP.HeaderFormat
 {
-    init(authority:(some ServerAuthority).Type, status _:UInt)
+    init(authority:(some HTTP.ServerAuthority).Type, status _:UInt)
     {
         self = ["host": authority.domain]
     }

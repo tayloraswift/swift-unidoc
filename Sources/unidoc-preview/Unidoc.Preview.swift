@@ -14,8 +14,8 @@ extension Unidoc
         var certificates:String
 
         var development:Unidoc.ServerOptions.Development
-
         var mirror:Bool
+        var https:Bool
         var mongo:Mongo.Host
 
         private
@@ -24,6 +24,7 @@ extension Unidoc
             self.certificates = "Assets/certificates"
             self.development = .init()
             self.mirror = false
+            self.https = true
             self.mongo = "unidoc-mongod"
         }
     }
@@ -48,10 +49,15 @@ extension Unidoc.Preview
             case "-s", "--replica-set":
                 self.development.replicaSet = try arguments.next(for: "replica-set")
 
+            case "--http":
+                self.https = false
+                self.development.port = 8080
+
             case "-m", "--mongo":
                 self.mongo = .init(try arguments.next(for: "mongo"))
 
             case "-p", "--port":
+                self.https = true
                 self.development.port = try arguments.next(for: "port")
 
             case let option:
@@ -77,19 +83,28 @@ extension Unidoc.Preview
     private consuming
     func options() throws -> Unidoc.ServerOptions
     {
-        let privateKey:NIOSSLPrivateKey =
-            try .init(file: "\(self.certificates)/privkey.pem", format: .pem)
-        let fullChain:[NIOSSLCertificate] =
-            try NIOSSLCertificate.fromPEMFile("\(self.certificates)/fullchain.pem")
+        let authority:any HTTP.ServerAuthority
+        if  self.https
+        {
+            let privateKey:NIOSSLPrivateKey =
+                try .init(file: "\(self.certificates)/privkey.pem", format: .pem)
+            let fullChain:[NIOSSLCertificate] =
+                try NIOSSLCertificate.fromPEMFile("\(self.certificates)/fullchain.pem")
 
-        var configuration:TLSConfiguration = .makeServerConfiguration(
-            certificateChain: fullChain.map(NIOSSLCertificateSource.certificate(_:)),
-            privateKey: .privateKey(privateKey))
+            var configuration:TLSConfiguration = .makeServerConfiguration(
+                certificateChain: fullChain.map(NIOSSLCertificateSource.certificate(_:)),
+                privateKey: .privateKey(privateKey))
 
-            // configuration.applicationProtocols = ["h2", "http/1.1"]
-            configuration.applicationProtocols = ["h2"]
+                // configuration.applicationProtocols = ["h2", "http/1.1"]
+                configuration.applicationProtocols = ["h2"]
 
-        let authority:Localhost = .init(tls: try .init(configuration: configuration))
+            authority = HTTP.LocalhostSecure.init(
+                context: try .init(configuration: configuration))
+        }
+        else
+        {
+            authority = HTTP.Localhost.init()
+        }
 
         return .init(authority: authority,
             github: nil,
