@@ -15,6 +15,7 @@ extension Unidoc
         case docc
         case help
         case hist
+        case hook
         case login
         case lunr
         case plugin
@@ -63,6 +64,7 @@ extension Unidoc.ServerRoot:Identifiable
         case .docc:         "docc"
         case .help:         "help"
         case .hist:         "hist"
+        case .hook:         "hook"
         case .login:        "login"
         case .lunr:         "lunr"
         case .plugin:       "plugin"

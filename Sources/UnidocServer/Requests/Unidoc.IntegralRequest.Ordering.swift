@@ -509,6 +509,19 @@ extension Unidoc.IntegralRequest.Ordering
     }
 
     static
+    func post(hook:String, body:consuming [UInt8], type:ContentType) -> Self?
+    {
+        switch hook
+        {
+        case "github":
+            return .actor(Unidoc.PackageWebhookOperation.init())
+
+        default:
+            return nil
+        }
+    }
+
+    static
     func post(really trunk:String,
         body:consuming [UInt8],
         type:ContentType) throws -> Self?
