@@ -118,6 +118,19 @@ extension IP.V6
 
     @inlinable public static
     var ones:Self { .init(prefix: ~0, subnet: ~0) }
+
+    /// The logical value of the address. The high byte of the first tuple element is the high
+    /// byte of the first hextet.
+    @inlinable public
+    var value:(UInt64, UInt64)
+    {
+        (UInt64.init(bigEndian: self.prefix), UInt64.init(bigEndian: self.subnet))
+    }
+}
+extension IP.V6:Comparable
+{
+    @inlinable public static
+    func < (a:Self, b:Self) -> Bool { a.value < b.value }
 }
 extension IP.V6:IP.Address
 {

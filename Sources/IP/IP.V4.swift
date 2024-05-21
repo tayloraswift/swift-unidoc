@@ -16,6 +16,17 @@ extension IP
         }
     }
 }
+extension IP.V4
+{
+    /// The logical value of the address. The high byte is the first octet.
+    @inlinable public
+    var value:UInt32 { UInt32.init(bigEndian: self.storage) }
+}
+extension IP.V4:Comparable
+{
+    @inlinable public static
+    func < (a:Self, b:Self) -> Bool { a.storage < b.storage }
+}
 extension IP.V4:IP.Address
 {
     @inlinable public static

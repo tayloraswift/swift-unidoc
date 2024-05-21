@@ -5,9 +5,11 @@ extension IP
     @frozen public
     struct Policylist:Sendable
     {
-        @usableFromInline
+        /// IPv4 CIDR blocks, sorted by mask length.
+        public
         let v4:[(UInt8, [IP.V4: IP.Owner])]
-        @usableFromInline
+        /// IPv6 CIDR blocks, sorted by mask length.
+        public
         let v6:[(UInt8, [IP.V6: IP.Owner])]
 
         @inlinable internal
