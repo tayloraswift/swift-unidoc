@@ -252,6 +252,9 @@ extension Unidoc.IntegralRequest
                     type: type,
                     user: metadata.cookies.session?.account)
 
+            case Unidoc.ServerRoot.hook.id:
+                ordering = .post(hook: trunk, body: body, type: type)
+
             case Unidoc.ServerRoot.really.id:
                 ordering = try? .post(really: trunk, body: body, type: type)
 
