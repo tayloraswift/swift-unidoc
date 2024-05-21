@@ -7,35 +7,19 @@ extension Unidoc.Sitemap
     struct Elements:Equatable, Sendable
     {
         @usableFromInline internal
-        var bytes:[UInt8]
+        var bytes:ArraySlice<UInt8>
 
         @inlinable internal
-        init(bytes:[UInt8])
+        init(bytes:ArraySlice<UInt8>)
         {
             self.bytes = bytes
         }
     }
 }
-extension Unidoc.Sitemap.Elements:ExpressibleByArrayLiteral
-{
-    @inlinable public
-    init(arrayLiteral:Unidoc.Shoot...)
-    {
-        self.init(bytes: [])
-
-        for element:Unidoc.Shoot in arrayLiteral
-        {
-            self.append(element)
-        }
-    }
-}
 extension Unidoc.Sitemap.Elements
 {
-    @inlinable internal mutating
-    func append(_ shoot:Unidoc.Shoot)
-    {
-        shoot.serialize(into: &self.bytes) ; self.bytes.append(0x0A)
-    }
+    @inlinable static
+    var separator:UInt8 { 0x0A }
 }
 extension Unidoc.Sitemap.Elements:Sequence
 {
@@ -45,19 +29,19 @@ extension Unidoc.Sitemap.Elements:Sequence
         .init(bytes: self.bytes)
     }
 }
-extension Unidoc.Sitemap.Elements:BSONEncodable
-{
-    public
-    func encode(to field:inout BSON.FieldEncoder)
-    {
-        BSON.BinaryView<[UInt8]>.init(subtype: .generic, bytes: self.bytes).encode(to: &field)
-    }
-}
-extension Unidoc.Sitemap.Elements:BSONDecodable, BSONBinaryViewDecodable
+extension Unidoc.Sitemap.Elements:BSONBinaryEncodable
 {
     @inlinable public
-    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
+    func encode(to bson:inout BSON.BinaryEncoder)
     {
-        self.init(bytes: [UInt8].init(bson.bytes))
+        bson += self.bytes
+    }
+}
+extension Unidoc.Sitemap.Elements:BSONBinaryDecodable
+{
+    @inlinable public
+    init(bson:BSON.BinaryDecoder)
+    {
+        self.init(bytes: bson.bytes)
     }
 }

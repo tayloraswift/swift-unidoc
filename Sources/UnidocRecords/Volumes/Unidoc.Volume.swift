@@ -1,6 +1,7 @@
+import BSON
 import JSON
 import Symbols
-import Unidoc
+import UnidocAPI
 
 extension Unidoc
 {
@@ -65,29 +66,34 @@ extension Unidoc.Volume
             }
         }
 
-        var elements:Unidoc.Sitemap.Elements = []
-        for vertex:Unidoc.CultureVertex in self.vertices.cultures
+        let lines:BSON.BinaryView<ArraySlice<UInt8>> = .init
         {
-            elements.append(vertex.shoot)
-        }
-        for vertex:Unidoc.ArticleVertex in self.vertices.articles
-        {
-            elements.append(vertex.shoot)
-        }
-        for vertex:Unidoc.DeclVertex in self.vertices.decls
-        {
-            //  Skip C and C++ declarations.
-            guard !ignoredModules.contains(vertex.culture),
-            case .swift = vertex.flags.language,
-            case .s = vertex.symbol.language
-            else
+            for vertex:Unidoc.CultureVertex in self.vertices.cultures
             {
-                continue
+                $0 += vertex.shoot
+                $0.append(Unidoc.Sitemap.Elements.separator)
             }
+            for vertex:Unidoc.ArticleVertex in self.vertices.articles
+            {
+                $0 += vertex.shoot
+                $0.append(Unidoc.Sitemap.Elements.separator)
+            }
+            for vertex:Unidoc.DeclVertex in self.vertices.decls
+            {
+                //  Skip C and C++ declarations.
+                guard !ignoredModules.contains(vertex.culture),
+                case .swift = vertex.flags.language,
+                case .s = vertex.symbol.language
+                else
+                {
+                    continue
+                }
 
-            elements.append(vertex.shoot)
+                $0 += vertex.shoot
+                $0.append(Unidoc.Sitemap.Elements.separator)
+            }
         }
 
-        return .init(id: self.metadata.id.package, elements: elements)
+        return .init(id: self.metadata.id.package, elements: .init(bytes: lines.bytes))
     }
 }

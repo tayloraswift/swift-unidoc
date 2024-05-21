@@ -6,13 +6,6 @@ import Unidoc
 
 extension Unidoc
 {
-    @available(*, deprecated, renamed: "Unidoc.Sitemap")
-    public
-    typealias SiteMap = Unidoc.Sitemap
-
-}
-extension Unidoc
-{
     /// A sitemap is a list of all the pages in a volume.
     ///
     /// This type is namespaced to ``Unidoc`` and not ``Volume`` because we generally only

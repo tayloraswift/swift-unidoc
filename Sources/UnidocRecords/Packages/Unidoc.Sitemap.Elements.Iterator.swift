@@ -5,13 +5,13 @@ extension Unidoc.Sitemap.Elements
     @frozen public
     struct Iterator
     {
-        @usableFromInline internal
-        let bytes:[UInt8]
-        @usableFromInline internal
+        @usableFromInline
+        let bytes:ArraySlice<UInt8>
+        @usableFromInline
         var index:Int
 
-        @inlinable internal
-        init(bytes:[UInt8])
+        @inlinable
+        init(bytes:ArraySlice<UInt8>)
         {
             self.bytes = bytes
             self.index = bytes.startIndex
@@ -24,7 +24,7 @@ extension Unidoc.Sitemap.Elements.Iterator:IteratorProtocol
     func next() -> Unidoc.Shoot?
     {
         guard
-        let i:Int = self.bytes[self.index...].firstIndex(of: 0x0A)
+        let i:Int = self.bytes[self.index...].firstIndex(of: Unidoc.Sitemap.Elements.separator)
         else
         {
             return nil
@@ -34,6 +34,6 @@ extension Unidoc.Sitemap.Elements.Iterator:IteratorProtocol
             self.index = self.bytes.index(after: i)
         }
 
-        return .deserialize(from: self.bytes[self.index ..< i])
+        return .init(from: self.bytes[self.index ..< i])
     }
 }

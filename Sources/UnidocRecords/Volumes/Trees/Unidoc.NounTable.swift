@@ -36,15 +36,16 @@ extension Unidoc.NounTable
     @inlinable internal static
     var version:BSON.BinarySubtype { .custom(code: 0x80) }
 }
-extension Unidoc.NounTable:BSONEncodable
+extension Unidoc.NounTable:BSONBinaryEncodable
 {
     @usableFromInline
-    func encode(to field:inout BSON.FieldEncoder)
+    func encode(to bson:inout BSON.BinaryEncoder)
     {
-        var buffer:[UInt8] = []
+        bson.subtype = Self.version
+
         for row:Unidoc.Noun in self.rows
         {
-            row.shoot.serialize(into: &buffer)
+            bson += row.shoot
 
             let trailer:(UInt8, Int32?)
             switch row.type
@@ -59,28 +60,23 @@ extension Unidoc.NounTable:BSONEncodable
                 trailer = (Discriminator.foreign.rawValue, decl?.rawValue)
 
             case .text(let text):
-                buffer.append(Discriminator.custom.rawValue)
-                buffer += text.utf8
+                bson.append(Discriminator.custom.rawValue)
+                bson += text.utf8
                 //  `0xFF` is a good choice for a terminator because it never appears in a
                 //  valid UTF-8 sequence, and Swift strings never contain invalid UTF-8.
-                buffer.append(0xFF)
+                bson.append(0xFF)
                 continue
             }
 
-            buffer.append(trailer.0)
-            withUnsafeBytes(of: (trailer.1 ?? -1).bigEndian)
-            {
-                buffer += $0
-            }
+            bson.append(trailer.0)
+            withUnsafeBytes(of: (trailer.1 ?? -1).bigEndian) { bson += $0 }
         }
-
-        BSON.BinaryView<[UInt8]>.init(subtype: Self.version, bytes: buffer).encode(to: &field)
     }
 }
-extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
+extension Unidoc.NounTable:BSONBinaryDecodable
 {
     @inlinable
-    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
+    init(bson:BSON.BinaryDecoder) throws
     {
         if  case Self.version = bson.subtype
         {
@@ -106,7 +102,7 @@ extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
                 continue
             }
 
-            let shoot:Unidoc.Shoot = .deserialize(from: bson.bytes[i ..< j])
+            let shoot:Unidoc.Shoot = .init(from: bson.bytes[i ..< j])
             let citizenship:Unidoc.Citizenship
 
             switch discriminator
@@ -168,7 +164,7 @@ extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
     }
 
     @inlinable
-    init(legacy bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
+    init(legacy bson:BSON.BinaryDecoder) throws
     {
         self.init(rows: [])
 
@@ -186,7 +182,7 @@ extension Unidoc.NounTable:BSONDecodable, BSONBinaryViewDecodable
                 continue
             }
 
-            let shoot:Unidoc.Shoot = .deserialize(from: bson.bytes[i ..< j])
+            let shoot:Unidoc.Shoot = .init(from: bson.bytes[i ..< j])
             let type:Unidoc.NounType
 
             switch discriminator
