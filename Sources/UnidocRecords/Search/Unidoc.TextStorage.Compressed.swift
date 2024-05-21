@@ -15,23 +15,21 @@ extension Unidoc.TextStorage
         }
     }
 }
-extension Unidoc.TextStorage.Compressed:BSONEncodable
+extension Unidoc.TextStorage.Compressed:BSONBinaryEncodable
 {
     @inlinable public
-    func encode(to bson:inout BSON.FieldEncoder)
+    func encode(to bson:inout BSON.BinaryEncoder)
     {
-        //  Do NOT use `compressed` here. That has a special meaning to MongoDB, and newer
-        //  versions of `mongod` will reject it.
-        let binary:BSON.BinaryView<ArraySlice<UInt8>> = .init(subtype: .generic,
-            bytes: self.bytes)
-        binary.encode(to: &bson)
+        //  Do NOT use `compressed` subtype here. That has a special meaning to MongoDB, and
+        //  newer versions of `mongod` will reject it.
+        bson += self.bytes
     }
 }
-extension Unidoc.TextStorage.Compressed:BSONDecodable, BSONBinaryViewDecodable
+extension Unidoc.TextStorage.Compressed:BSONBinaryDecodable
 {
     @inlinable public
-    init(bson:BSON.BinaryView<ArraySlice<UInt8>>)
+    init(bson:BSON.BinaryDecoder)
     {
-        self.bytes = bson.bytes
+        self.init(bytes: bson.bytes)
     }
 }

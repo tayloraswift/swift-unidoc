@@ -35,72 +35,47 @@ extension SymbolGraph.Buffer
         }
     }
 }
-extension SymbolGraph.Buffer:BSONEncodable
+
+extension SymbolGraph.Buffer:RandomAccessCollection
 {
-    @usableFromInline internal
-    func encode(to field:inout BSON.FieldEncoder)
+    @inlinable
+    var startIndex:Int { self.elements.startIndex }
+
+    @inlinable
+    var endIndex:Int { self.elements.endIndex }
+
+    @inlinable
+    subscript(position:Int) -> CodingElement
     {
-        let bson:BSON.BinaryView<[UInt8]> = .init(subtype: .generic, bytes: .init(
-            unsafeUninitializedCapacity: self.elements.count * 3)
+        get
         {
-            for (i, scalar):(Int, Int32) in self.elements.enumerated()
-            {
-                $0[i * 3 + 0] = UInt8.init(truncatingIfNeeded: scalar)
-                $0[i * 3 + 1] = UInt8.init(truncatingIfNeeded: scalar >> 8)
-                $0[i * 3 + 2] = UInt8.init(truncatingIfNeeded: scalar >> 16)
-            }
-
-            $1 = $0.count
-        })
-
-        bson.encode(to: &field)
+            let scalar:Int32 = self.elements[position]
+            return
+                (
+                    UInt8.init(truncatingIfNeeded: scalar),
+                    UInt8.init(truncatingIfNeeded: scalar >> 8),
+                    UInt8.init(truncatingIfNeeded: scalar >> 16)
+                )
+        }
     }
 }
-extension SymbolGraph.Buffer:BSONBinaryViewDecodable
+extension SymbolGraph.Buffer:BSONArrayEncodable
 {
-    @inlinable internal
-    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
+}
+extension SymbolGraph.Buffer:BSONArrayDecodable
+{
+    @usableFromInline
+    typealias CodingElement = (UInt8, UInt8, UInt8)
+
+    @inlinable
+    init(from bson:borrowing BSON.BinaryArray<CodingElement>) throws
     {
-        self = try bson.bytes.withUnsafeBytes(Self.init(bytes:))
-    }
-
-    /// Is there even a measurable benefit from using `UnsafeRawBufferPointer` here?
-    @inlinable internal
-    init(bytes compact:UnsafeRawBufferPointer) throws
-    {
-        guard compact.startIndex < compact.endIndex
-        else
+        self.init(bson.map
         {
-            self.init([])
-            return
-        }
-
-        guard case (let count, 0) = compact.count.quotientAndRemainder(dividingBy: 3)
-        else
-        {
-            throw SymbolGraph.BufferError.init()
-        }
-
-        self.init(.init(unsafeUninitializedCapacity: count)
-        {
-            var a:Int = compact.startIndex
-            for i:Int in 0 ..< count
-            {
-                let b:Int = compact.index(after: a)
-                let c:Int = compact.index(after: b)
-                defer
-                {
-                    a = compact.index(after: c)
-                }
-
-                $0[i] = .decl
-                    | Int32.init(compact[a])
-                    | Int32.init(compact[b]) << 8
-                    | Int32.init(compact[c]) << 16
-
-            }
-
-            $1 = count
+            .decl
+                | Int32.init($0)
+                | Int32.init($1) << 8
+                | Int32.init($2) << 16
         })
     }
 }

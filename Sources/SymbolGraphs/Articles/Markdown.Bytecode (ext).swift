@@ -1,19 +1,19 @@
 import BSON
 import MarkdownABI
 
-extension Markdown.Bytecode:BSONEncodable
+extension Markdown.Bytecode:BSONBinaryEncodable
 {
     public
-    func encode(to field:inout BSON.FieldEncoder)
+    func encode(to bson:inout BSON.BinaryEncoder)
     {
-        let view:BSON.BinaryView<[UInt8]> = .init(subtype: .generic, bytes: self.bytes)
-        view.encode(to: &field)
+        bson.reserve(another: self.bytes.count)
+        bson += self.bytes
     }
 }
-extension Markdown.Bytecode:BSONDecodable, BSONBinaryViewDecodable
+extension Markdown.Bytecode:BSONBinaryDecodable
 {
     @inlinable public
-    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
+    init(bson:BSON.BinaryDecoder) throws
     {
         self.init(bytes: [UInt8].init(bson.bytes))
     }

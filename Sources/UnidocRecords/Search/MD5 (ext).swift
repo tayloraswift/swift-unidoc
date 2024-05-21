@@ -1,18 +1,19 @@
 import BSON
 import MD5
 
-extension MD5:BSONEncodable
+extension MD5:BSONBinaryEncodable
 {
     @inlinable public
-    func encode(to bson:inout BSON.FieldEncoder)
+    func encode(to bson:inout BSON.BinaryEncoder)
     {
-        BSON.BinaryView<Self>.init(subtype: .md5, bytes: self).encode(to: &bson)
+        bson.subtype = .md5
+        bson += self
     }
 }
-extension MD5:BSONDecodable, BSONBinaryViewDecodable
+extension MD5:BSONBinaryDecodable
 {
     @inlinable public
-    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
+    init(bson:BSON.BinaryDecoder) throws
     {
         try bson.subtype.expect(.md5)
 

@@ -4,10 +4,6 @@ import MD5
 import SymbolGraphs
 import Unidoc
 
-@available(*, deprecated, renamed: "Unidoc.TextResource")
-public
-typealias SearchIndex = Unidoc.TextResource
-
 extension Unidoc
 {
     @frozen public

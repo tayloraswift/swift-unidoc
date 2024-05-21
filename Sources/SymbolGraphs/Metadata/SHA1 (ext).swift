@@ -1,19 +1,18 @@
 import BSON
 import SHA1
 
-extension SHA1:BSONEncodable
+extension SHA1:BSONBinaryEncodable
 {
     public
-    func encode(to field:inout BSON.FieldEncoder)
+    func encode(to bson:inout BSON.BinaryEncoder)
     {
-        let view:BSON.BinaryView<SHA1> = .init(subtype: .generic, bytes: self)
-            view.encode(to: &field)
+        bson += self
     }
 }
-extension SHA1:BSONDecodable, BSONBinaryViewDecodable
+extension SHA1:BSONBinaryDecodable
 {
     @inlinable public
-    init(bson:BSON.BinaryView<ArraySlice<UInt8>>) throws
+    init(bson:BSON.BinaryDecoder) throws
     {
         try bson.subtype.expect(.generic)
 
