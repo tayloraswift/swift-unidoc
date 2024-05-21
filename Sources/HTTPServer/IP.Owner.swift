@@ -27,3 +27,22 @@ extension IP
         case unknown
     }
 }
+extension IP.Owner:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        switch self
+        {
+        case .amazon:       "Amazon"
+        case .amazonEC2:    "Amazon EC2"
+        case .bingbot:      "Bingbot"
+        case .gcp:          "Google Cloud Platform"
+        case .google:       "Google"
+        case .googlebot:    "Googlebot"
+        case .github:       "GitHub"
+        case .known:        "Known"
+        case .unknown:      "Unknown"
+        }
+    }
+}
