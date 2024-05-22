@@ -2,7 +2,6 @@ import BSON
 import SemanticVersions
 import SymbolGraphs
 import Symbols
-import Unidoc
 
 extension Unidoc
 {
@@ -10,7 +9,7 @@ extension Unidoc
     struct Snapshot:Identifiable, Equatable, Sendable
     {
         public
-        let id:Unidoc.Edition
+        let id:Edition
 
         public
         var metadata:SymbolGraphMetadata
@@ -28,7 +27,7 @@ extension Unidoc
         var swift:PatchVersion?
         /// Any dependencies that have been pinned for this snapshot.
         public
-        var pins:[Unidoc.Edition?]
+        var pins:[Edition?]
 
         /// Indicates the format (compressed or not) of the symbol graph. This is currently only
         /// meaningful for symbol graphs stored in Amazon S3.
@@ -40,12 +39,12 @@ extension Unidoc
         var size:Int64
 
         @inlinable internal
-        init(id:Unidoc.Edition,
+        init(id:Edition,
             metadata:SymbolGraphMetadata,
             inline:SymbolGraph?,
             action:PendingAction?,
             swift:PatchVersion?,
-            pins:[Unidoc.Edition?],
+            pins:[Edition?],
             type:GraphType,
             size:Int64)
         {

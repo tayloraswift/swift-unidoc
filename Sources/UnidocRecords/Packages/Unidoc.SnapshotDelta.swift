@@ -1,0 +1,52 @@
+import BSON
+import SemanticVersions
+import SymbolGraphs
+
+extension Unidoc
+{
+    @frozen public
+    struct SnapshotDelta:Equatable, Sendable
+    {
+        public
+        let metadata:SymbolGraphMetadata?
+        public
+        let action:Snapshot.PendingAction?
+        public
+        let swift:PatchVersion?
+        public
+        let pins:[Edition?]?
+        public
+        let type:GraphType?
+        public
+        let size:Int64?
+
+        @inlinable public
+        init(metadata:SymbolGraphMetadata?,
+            action:Snapshot.PendingAction?,
+            swift:PatchVersion?,
+            pins:[Edition?]?,
+            type:GraphType?,
+            size:Int64?)
+        {
+            self.metadata = metadata
+            self.action = action
+            self.swift = swift
+            self.pins = pins
+            self.type = type
+            self.size = size
+        }
+    }
+}
+extension Unidoc.SnapshotDelta:BSONDocumentDecodable
+{
+    @inlinable public
+    init(bson:BSON.DocumentDecoder<Unidoc.Snapshot.CodingKey>) throws
+    {
+        self.init(metadata: try bson[.metadata]?.decode(),
+            action: try bson[.action]?.decode(),
+            swift: try bson[.swift]?.decode(),
+            pins: try bson[.pins]?.decode(),
+            type: try bson[.type]?.decode(),
+            size: try bson[.size]?.decode())
+    }
+}
