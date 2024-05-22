@@ -1,6 +1,7 @@
 import BSON
 import FNV1
 import HTTP
+import IP
 import MD5
 import Media
 import MongoDB
@@ -27,6 +28,7 @@ extension Unidoc.IntegralRequest
         /// Runs on the update loop, which is ordered with respect to other updates.
         case update(any Unidoc.ProceduralOperation)
 
+        case syncError(String)
         case syncResource(any Unidoc.RenderablePage & Sendable)
         case syncRedirect(HTTP.Redirect)
         case syncLoad(Unidoc.Cache<Unidoc.Asset>.Request)
@@ -509,12 +511,33 @@ extension Unidoc.IntegralRequest.Ordering
     }
 
     static
-    func post(hook:String, body:consuming [UInt8], type:ContentType) -> Self?
+    func post(hook:String,
+        body:consuming [UInt8],
+        type:ContentType,
+        from origin:IP.Origin) -> Self?
     {
         switch hook
         {
         case "github":
-            return .actor(Unidoc.PackageWebhookOperation.init())
+            //  Did this request actually come from GitHub? (Anyone can POST over HTTP/2.)
+            //
+            //  FIXME: there is a security hole during the (hopefully brief) interval between
+            //  when the server restarts and the whitelists are initialized.
+            switch origin.owner
+            {
+            case .github:   break
+            case .unknown:  break
+            default:        return nil
+            }
+
+            do
+            {
+                return .actor(try Unidoc.PackageWebhookOperation.init(parsing: body))
+            }
+            catch let error
+            {
+                return .syncError("Failed to parse webhook event: \(error)")
+            }
 
         default:
             return nil

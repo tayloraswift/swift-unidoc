@@ -171,6 +171,12 @@ extension Unidoc.ServerLoop
 
             return await self.submit(update: procedural)
 
+        case .syncError(let message):
+            return .resource(.init(content: .init(
+                    body: .string(message),
+                    type: .text(.plain, charset: .utf8))),
+                status: 400)
+
         case .syncResource(let renderable):
             return .ok(renderable.resource(format: self.format))
 

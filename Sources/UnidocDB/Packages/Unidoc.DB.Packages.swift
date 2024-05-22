@@ -139,6 +139,7 @@ extension Unidoc.DB.Packages
 }
 extension Unidoc.DB.Packages
 {
+    public
     func findGitHub(repo id:Int32,
         with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
