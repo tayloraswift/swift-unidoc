@@ -86,11 +86,9 @@ extension Unidoc.DB.PackageBuilds
         let startTime:BSON.Timestamp? = session.preconditionTime
 
         //  Open a change stream and wait for a build to be enqueued...
-        typealias ChangeEvent = Mongo.ChangeEvent<Unidoc.BuildMetadata,
-            Mongo.ChangeUpdate<Unidoc.BuildMetadataDelta, Unidoc.Package>>
-
         return try await session.run(
-            command: Mongo.Aggregate<Mongo.Cursor<ChangeEvent>>.init(Self.name,
+            command: Mongo.Aggregate<Mongo.Cursor<Mongo.ChangeEvent<
+                Unidoc.BuildMetadataDelta>>>.init(Self.name,
                 tailing: .init(timeout: 30_000, awaits: true))
             {
                 $0[stage: .changeStream]
@@ -103,11 +101,11 @@ extension Unidoc.DB.PackageBuilds
             },
             against: self.database)
         {
-            for try await events:[ChangeEvent] in $0
+            for try await events:[Mongo.ChangeEvent<Unidoc.BuildMetadataDelta>] in $0
             {
-                for event:ChangeEvent in events
+                for event:Mongo.ChangeEvent<Unidoc.BuildMetadataDelta> in events
                 {
-                    switch event.operation
+                    switch event.change
                     {
                     case .replace(_, before: _, after: let build):  return build
                     case .insert(let build):                        return build

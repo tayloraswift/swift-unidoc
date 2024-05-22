@@ -24,11 +24,11 @@ extension Unidoc
 }
 extension Unidoc.BuildMetadataDelta:Mongo.MasterCodingDelta
 {
-    typealias CodingKey = Unidoc.BuildMetadata.CodingKey
+    typealias Model = Unidoc.BuildMetadata
 }
 extension Unidoc.BuildMetadataDelta:BSONDocumentDecodable
 {
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
+    init(bson:BSON.DocumentDecoder<Unidoc.BuildMetadata.CodingKey>) throws
     {
         self.init(
             progress: try bson[.progress]?.decode(),
