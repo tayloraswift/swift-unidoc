@@ -14,11 +14,18 @@ extension Unidoc.PackageRepo
     func github(_ repo:GitHub.Repo, crawled:BSON.Millisecond) throws -> Self
     {
         guard
+        let watchers:Int = repo.watchers
+        else
+        {
+            throw Unidoc.GitHubRepoMetadataError.watchers
+        }
+
+        guard
         let created:Timestamp.Components = .init(iso8601: repo.created),
         let created:UnixInstant = .init(utc: .date(created))
         else
         {
-            throw Unidoc.GitHubTimestampError.created(repo.created)
+            throw Unidoc.GitHubRepoMetadataError.created(repo.created)
         }
 
         guard
@@ -26,7 +33,7 @@ extension Unidoc.PackageRepo
         let updated:UnixInstant = .init(utc: updated)
         else
         {
-            throw Unidoc.GitHubTimestampError.updated(repo.updated)
+            throw Unidoc.GitHubRepoMetadataError.updated(repo.updated)
         }
 
         guard
@@ -34,7 +41,7 @@ extension Unidoc.PackageRepo
         let pushed:UnixInstant = .init(utc: pushed)
         else
         {
-            throw Unidoc.GitHubTimestampError.pushed(repo.pushed)
+            throw Unidoc.GitHubRepoMetadataError.pushed(repo.pushed)
         }
 
         return .init(crawled: crawled,
@@ -53,7 +60,7 @@ extension Unidoc.PackageRepo
                 name: repo.name,
                 homepage: repo.homepage,
                 about: repo.about,
-                watchers: repo.watchers,
+                watchers: watchers,
                 size: repo.size,
                 archived: repo.archived,
                 disabled: repo.disabled,

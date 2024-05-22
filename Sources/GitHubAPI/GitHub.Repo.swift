@@ -22,9 +22,10 @@ extension GitHub
         public
         var master:String?
 
-        /// The number of subscribers this repo has.
+        /// The number of subscribers this repo has. Depending on the endpoint, this field
+        /// might be missing. For example, it is missing from the webhook repo events.
         public
-        var watchers:Int
+        var watchers:Int?
         /// The number of forks this repo has.
         public
         var forks:Int
@@ -71,7 +72,7 @@ extension GitHub
             license:License? = nil,
             topics:[String] = [],
             master:String?,
-            watchers:Int,
+            watchers:Int?,
             forks:Int,
             stars:Int,
             size:Int,
@@ -144,7 +145,7 @@ extension GitHub.Repo:JSONObjectDecodable
             license: try json[.license]?.decode(),
             topics: try json[.topics]?.decode() ?? [],
             master: try json[.master]?.decode(),
-            watchers: try json[.watchers].decode(),
+            watchers: try json[.watchers]?.decode(),
             forks: try json[.forks].decode(),
             stars: try json[.stars].decode(),
             size: try json[.size].decode(),

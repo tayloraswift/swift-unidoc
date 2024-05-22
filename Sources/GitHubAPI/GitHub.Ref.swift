@@ -15,7 +15,6 @@ extension GitHub
         public
         var hash:SHA1
 
-
         @inlinable public
         init(prefix:Prefix?, name:String, hash:SHA1)
         {
