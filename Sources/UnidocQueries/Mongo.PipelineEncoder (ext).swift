@@ -54,7 +54,7 @@ extension Mongo.PipelineEncoder
 
     mutating
     func loadTags(
-        matching predicate:Unidoc.EditionPredicate,
+        matching predicate:Unidoc.VersionPredicate,
         limit:Int = 1,
         skip:Int = 0,
         from package:Mongo.AnyKeyPath,
