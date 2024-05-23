@@ -47,7 +47,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         switch self.filter
         {
         case .tags(limit: let limit, page: let page, series: let series):
-            pipeline.loadTags(series: series,
+            pipeline.loadTags(matching: .latest(series),
                 limit: limit,
                 skip: limit * page,
                 from: Self.target,
@@ -57,12 +57,12 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             let prereleases:Mongo.AnyKeyPath = "prereleases"
             let releases:Mongo.AnyKeyPath = "releases"
 
-            pipeline.loadTags(series: .prerelease,
+            pipeline.loadTags(matching: .latest(.prerelease),
                 limit: limit,
                 from: Self.target,
                 into: prereleases)
 
-            pipeline.loadTags(series: .release,
+            pipeline.loadTags(matching: .latest(.release),
                 limit: limit,
                 from: Self.target,
                 into: releases)
