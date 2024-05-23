@@ -9,14 +9,18 @@ extension Unidoc
     struct EditionState:Sendable
     {
         public
-        let package:Unidoc.PackageMetadata
+        let package:PackageMetadata
         public
-        let version:Unidoc.VersionState
+        let version:VersionState
 
-        init(package:Unidoc.PackageMetadata, version:Unidoc.VersionState)
+        public
+        let builds:[BuildMetadata]
+
+        init(package:PackageMetadata, version:VersionState, builds:[BuildMetadata] = [])
         {
             self.package = package
             self.version = version
+            self.builds = builds
         }
     }
 }
@@ -27,6 +31,7 @@ extension Unidoc.EditionState:Mongo.MasterCodingModel
     {
         case package
         case version
+        case builds
     }
 }
 extension Unidoc.EditionState:BSONDocumentDecodable
@@ -36,6 +41,7 @@ extension Unidoc.EditionState:BSONDocumentDecodable
     {
         self.init(
             package: try bson[.package].decode(),
-            version: try bson[.version].decode())
+            version: try bson[.version].decode(),
+            builds: try bson[.builds]?.decode() ?? [])
     }
 }
