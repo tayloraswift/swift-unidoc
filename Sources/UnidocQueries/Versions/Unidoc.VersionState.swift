@@ -4,12 +4,6 @@ import UnidocAPI
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc.VersionsQuery
-{
-    @available(*, deprecated)
-    public
-    typealias Tag = Unidoc.VersionState
-}
 extension Unidoc
 {
     @frozen public

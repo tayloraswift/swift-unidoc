@@ -1,33 +1,37 @@
 import BSON
 import MongoQL
 import UnidocDB
+import UnidocRecords
 
-extension Unidoc.BuildEditionQuery
+extension Unidoc
 {
-    struct Output:Sendable
+    @frozen public
+    struct EditionState:Sendable
     {
+        public
         let package:Unidoc.PackageMetadata
+        public
         let version:Unidoc.VersionState
 
-        init(
-            package:Unidoc.PackageMetadata,
-            version:Unidoc.VersionState)
+        init(package:Unidoc.PackageMetadata, version:Unidoc.VersionState)
         {
             self.package = package
             self.version = version
         }
     }
 }
-extension Unidoc.BuildEditionQuery.Output:Mongo.MasterCodingModel
+extension Unidoc.EditionState:Mongo.MasterCodingModel
 {
+    @frozen public
     enum CodingKey:String, Sendable
     {
         case package
         case version
     }
 }
-extension Unidoc.BuildEditionQuery.Output:BSONDocumentDecodable
+extension Unidoc.EditionState:BSONDocumentDecodable
 {
+    public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
