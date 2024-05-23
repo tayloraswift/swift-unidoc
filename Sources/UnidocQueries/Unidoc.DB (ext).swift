@@ -28,11 +28,13 @@ extension Unidoc.DB
 
     public
     func state(package:Unidoc.Package,
-        edition:Unidoc.EditionPredicate,
+        version:Unidoc.VersionPredicate,
         with session:Mongo.Session) async throws -> Unidoc.EditionState?
     {
         try await session.query(database: self.id,
-            with: Unidoc.EditionStateQuery.matching(package, edition))
+            with: Unidoc.EditionStateQuery.init(package: package,
+                version: .match(version),
+                builds: true))
     }
 }
 extension Unidoc.DB
@@ -49,7 +51,7 @@ extension Unidoc.DB
         {
         case .edition(let id, force: let force):
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateQuery> = .init(
-                query: .id(id))
+                query: .init(package: id.package, version: .exact(id.version)))
 
             try await pipeline.pull(from: self.id, with: session)
 
@@ -66,7 +68,7 @@ extension Unidoc.DB
 
         case .package(let id, series: let series, force: let force):
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateQuery> = .init(
-                query: .matching(id, .latest(series)))
+                query: .init(package: id, version: .match(.latest(series))))
 
             try await pipeline.pull(from: self.id, with: session)
 

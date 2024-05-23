@@ -4,21 +4,18 @@ import UnidocDB
 
 extension Unidoc
 {
-    enum EditionStateQuery
+    struct EditionStateQuery
     {
-        case matching(Package, EditionPredicate)
-        case id(Edition)
-    }
-}
-extension Unidoc.EditionStateQuery
-{
-    private
-    var package:Unidoc.Package
-    {
-        switch self
+        let package:Package
+        let version:VersionSelector
+
+        let builds:Bool
+
+        init(package:Package, version:VersionSelector, builds:Bool = false)
         {
-        case .matching(let package, _): package
-        case .id(let edition):          edition.package
+            self.package = package
+            self.version = version
+            self.builds = builds
         }
     }
 }
@@ -41,14 +38,16 @@ extension Unidoc.EditionStateQuery:Mongo.PipelineQuery
             $0[.package] = Mongo.Pipeline.ROOT
         }
 
-        switch self
+        switch self.version
         {
-        case .matching(_, let predicate):
+        case .match(let predicate):
             pipeline.loadTags(matching: predicate,
                 from: Unidoc.EditionState[.package],
                 into: Unidoc.EditionState[.version])
 
-        case .id(let id):
+        case .exact(let id):
+            let id:Unidoc.Edition = .init(package: self.package, version: id)
+
             pipeline[stage: .lookup] = .init
             {
                 $0[.from] = Unidoc.DB.Editions.name
@@ -76,5 +75,21 @@ extension Unidoc.EditionStateQuery:Mongo.PipelineQuery
 
         //  Unbox single-element array.
         pipeline[stage: .unwind] = Unidoc.EditionState[.version]
+
+        if  self.builds
+        {
+            pipeline[stage: .lookup] = .init
+            {
+                $0[.from] = Unidoc.DB.PackageBuilds.name
+                $0[.pipeline] = .init
+                {
+                    $0[stage: .match] = .init
+                    {
+                        $0[Unidoc.BuildMetadata[.id]] = self.package
+                    }
+                }
+                $0[.as] = Unidoc.EditionState[.builds]
+            }
+        }
     }
 }
