@@ -23,19 +23,35 @@ extension Unidoc
         let updateQueue:AsyncStream<Update>.Continuation,
             updates:AsyncStream<Update>
 
+        private nonisolated
+        let graphState:GraphStateLoop
+
+        nonisolated
+        let policy:(any HTTP.ServerPolicy)?
+
         public
         var tour:ServerTour
 
         public
         init(
-            plugins:[String: any ServerPlugin],
+            plugins:[any ServerPlugin],
             context:ServerPluginContext,
             options:ServerOptions,
+            graphState:GraphStateLoop,
             db:Database)
         {
-            self.plugins = plugins
+            var policy:(any HTTP.ServerPolicy)? = nil
+            for case let plugin as any HTTP.ServerPolicy in plugins
+            {
+                policy = plugin
+                break
+            }
+
+            self.plugins = plugins.reduce(into: [:]) { $0[$1.id] = $1 }
             self.context = context
             self.options = options
+            self.graphState = graphState
+            self.policy = policy
             self.db = db
 
             self.tour = .init()
@@ -47,12 +63,6 @@ extension Unidoc
 }
 extension Unidoc.ServerLoop
 {
-    @inlinable public nonisolated
-    var authority:any HTTP.ServerAuthority { self.options.authority }
-
-    @inlinable public nonisolated
-    var port:Int { self.options.port }
-
     @inlinable public nonisolated
     var secure:Bool
     {
@@ -85,7 +95,19 @@ extension Unidoc.ServerLoop
 }
 extension Unidoc.ServerLoop
 {
-    public
+    //  TODO: this really should be manually-triggered and should not run every time.
+    nonisolated
+    func _setup() async throws
+    {
+        let session:Mongo.Session = try await .init(from: self.db.sessions)
+
+        //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
+        //  want to be able to change it without restarting the server.
+        let _:Unidoc.UserSecrets = try await self.db.users.update(user: .machine(0),
+            with: session)
+    }
+
+    nonisolated
     func update() async throws
     {
         for await update:Update in self.updates
@@ -95,7 +117,7 @@ extension Unidoc.ServerLoop
             let promise:Promise = update.promise
             let payload:[UInt8] = update.payload
 
-            await (/* consume */ update).operation.perform(on: .init(self, tour: self.tour),
+            await (/* consume */ update).operation.perform(on: self,
                 payload: payload,
                 request: promise)
         }

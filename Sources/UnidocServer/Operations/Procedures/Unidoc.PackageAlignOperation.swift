@@ -24,7 +24,7 @@ extension Unidoc
 }
 extension Unidoc.PackageAlignOperation:Unidoc.NonblockingOperation
 {
-    func enqueue(on server:borrowing Unidoc.Server,
+    func enqueue(on server:borrowing Unidoc.ServerLoop,
         payload:consuming [UInt8],
         session:Mongo.Session) async throws -> Status
     {
@@ -67,7 +67,7 @@ extension Unidoc.PackageAlignOperation:Unidoc.NonblockingOperation
         return .align(package, to: realm)
     }
 
-    func perform(on server:borrowing Unidoc.Server,
+    func perform(on server:borrowing Unidoc.ServerLoop,
         session:Mongo.Session,
         status:Status) async
     {
