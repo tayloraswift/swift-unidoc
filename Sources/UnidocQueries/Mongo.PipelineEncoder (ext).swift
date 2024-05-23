@@ -6,7 +6,7 @@ extension Mongo.PipelineEncoder
 {
     mutating
     func loadBranches(
-        limit:Int = 1,
+        limit:Int,
         skip:Int = 0,
         from package:Mongo.AnyKeyPath,
         into branches:Mongo.AnyKeyPath)
@@ -54,7 +54,7 @@ extension Mongo.PipelineEncoder
 
     mutating
     func loadTags(
-        series:Unidoc.VersionSeries,
+        matching predicate:Unidoc.VersionPredicate,
         limit:Int = 1,
         skip:Int = 0,
         from package:Mongo.AnyKeyPath,
@@ -71,16 +71,26 @@ extension Mongo.PipelineEncoder
             $0[.foreignField] = Unidoc.EditionMetadata[.package]
             $0[.pipeline] = .init
             {
-                $0[stage: .match] = .init
+                switch predicate
                 {
-                    $0[Unidoc.EditionMetadata[.release]] = series == .release
-                    $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
-                }
+                case .latest(let series):
+                    $0[stage: .match] = .init
+                    {
+                        $0[Unidoc.EditionMetadata[.release]] = series == .release
+                        $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
+                    }
 
-                $0[stage: .sort] = .init
-                {
-                    $0[Unidoc.EditionMetadata[.semver]] = (-)
-                    $0[Unidoc.EditionMetadata[.version]] = (-)
+                    $0[stage: .sort] = .init
+                    {
+                        $0[Unidoc.EditionMetadata[.semver]] = (-)
+                        $0[Unidoc.EditionMetadata[.version]] = (-)
+                    }
+
+                case .name(let name):
+                    $0[stage: .match] = .init
+                    {
+                        $0[Unidoc.EditionMetadata[.name]] = name
+                    }
                 }
 
                 $0[stage: .skip] = skip == 0 ? nil : skip

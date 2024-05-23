@@ -1,9 +1,9 @@
-import BSON
+import JSON
 
 extension Unidoc
 {
     @frozen public
-    enum BuildStage:Int32, BSONDecodable, BSONEncodable, Equatable, Sendable
+    enum BuildStage:Int32, Equatable, Sendable
     {
         /// The server is waiting for the builder to acknowledge the build request.
         case initializing = 0
@@ -14,4 +14,7 @@ extension Unidoc
         /// The server is compiling the package's source code.
         case compilingCode = 3
     }
+}
+extension Unidoc.BuildStage:JSONDecodable, JSONEncodable
+{
 }

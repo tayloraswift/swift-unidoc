@@ -1,9 +1,9 @@
-import BSON
+import JSON
 
 extension Unidoc
 {
     @frozen public
-    enum BuildFailure:Int32, BSONEncodable, BSONDecodable, Equatable, Sendable
+    enum BuildFailure:Int32, Equatable, Sendable
     {
         case timeout = 0
         case noValidVersion = 1
@@ -19,9 +19,6 @@ extension Unidoc
         case failedForUnknownReason = 256
     }
 }
-extension Unidoc.BuildFailure
+extension Unidoc.BuildFailure:JSONDecodable, JSONEncodable
 {
-    @available(*, deprecated, renamed: "Unidoc.BuildFailure")
-    public
-    typealias Reason = Unidoc.BuildFailure
 }
