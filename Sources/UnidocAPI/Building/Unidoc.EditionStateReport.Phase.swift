@@ -28,7 +28,7 @@ extension Unidoc.EditionStateReport
         /// The previous build was skipped because the selected version had already been built.
         case SKIPPED
         /// The package is being assigned a builder and a version to build.
-        case ASSIGNING
+        case MATCHING
 
         /// A builder is cloning some version of the package.
         case ASSIGNED_CLONING_REPOSITORY
