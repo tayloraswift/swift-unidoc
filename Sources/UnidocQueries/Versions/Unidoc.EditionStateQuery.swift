@@ -88,7 +88,15 @@ extension Unidoc.EditionStateQuery:Mongo.PipelineQuery
                         $0[Unidoc.BuildMetadata[.id]] = self.package
                     }
                 }
-                $0[.as] = Unidoc.EditionState[.builds]
+                $0[.as] = Unidoc.EditionState[.build]
+            }
+
+            pipeline[stage: .set] = .init
+            {
+                $0[Unidoc.EditionState[.build]] = .expr
+                {
+                    $0[.first] = Unidoc.EditionState[.build]
+                }
             }
         }
     }

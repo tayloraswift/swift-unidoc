@@ -14,13 +14,13 @@ extension Unidoc
         let version:VersionState
 
         public
-        let builds:[BuildMetadata]
+        let build:BuildMetadata?
 
-        init(package:PackageMetadata, version:VersionState, builds:[BuildMetadata] = [])
+        init(package:PackageMetadata, version:VersionState, build:BuildMetadata?)
         {
             self.package = package
             self.version = version
-            self.builds = builds
+            self.build = build
         }
     }
 }
@@ -31,7 +31,7 @@ extension Unidoc.EditionState:Mongo.MasterCodingModel
     {
         case package
         case version
-        case builds
+        case build
     }
 }
 extension Unidoc.EditionState:BSONDocumentDecodable
@@ -42,6 +42,6 @@ extension Unidoc.EditionState:BSONDocumentDecodable
         self.init(
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
-            builds: try bson[.builds]?.decode() ?? [])
+            build: try bson[.build]?.decode())
     }
 }
