@@ -58,7 +58,7 @@ extension Unidoc.EditionStateReport
         {
             switch stage
             {
-            case .initializing:                         return .ASSIGNING
+            case .initializing:                         return .MATCHING
             case .cloningRepository:                    return .ASSIGNED_CLONING_REPOSITORY
             case .resolvingDependencies:                return .ASSIGNED_BUILDING
             case .compilingCode:                        return .ASSIGNED_BUILDING
