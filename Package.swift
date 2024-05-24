@@ -97,7 +97,7 @@ let package:Package = .init(
         // .package(path: "../swift-mongodb"),
 
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-            from: "1.0.1")),
+            from: "1.1.0")),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.2")),
