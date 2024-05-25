@@ -28,14 +28,6 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.AdminPage
-{
-    static
-    subscript(action:Action) -> URI
-    {
-        Unidoc.ServerRoot.admin / action.rawValue
-    }
-}
 extension Unidoc.AdminPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.ServerRoot.admin.uri }
@@ -74,31 +66,6 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
                         $0[.a] { $0.href = "/plugin/\(plugin.id)" } = plugin.id
                     }
                 }
-            }
-        }
-
-        main[.hr]
-
-        main[.form]
-        {
-            $0.enctype = "\(MultipartType.form_data)"
-            $0.action = "\(Self[.upload])"
-            $0.method = "post"
-        }
-            content:
-        {
-            $0[.p]
-            {
-                $0[.input]
-                {
-                    $0.multiple = true
-                    $0.name = "documentation-binary"
-                    $0.type = "file"
-                }
-            }
-            $0[.p]
-            {
-                $0[.button] { $0.type = "submit" } = Action.upload.label
             }
         }
 
@@ -143,30 +110,6 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
             }
         }
 
-        //  Destructive actions.
-        for action:Action in
-        [
-            .dropUnidocDB,
-            .restart,
-        ]
-        {
-            main[.hr]
-
-            main[.form]
-            {
-                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Self[action])"
-                $0.method = "get"
-            }
-                content:
-            {
-                $0[.p]
-                {
-                    $0[.button] { $0.type = "submit" } = action.label
-                }
-            }
-        }
-
         main[.hr]
 
         main[.h2] = "Database servers"
@@ -202,68 +145,36 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
             $0[.dd] = "\(self.tour.errors)"
         }
 
+        main[.h2] = "Headers"
+
+        if  let last:ServerTour.Request = self.tour.lastImpression
+        {
+            main[.h3] = "Last Impression"
+            main[.dl] = last
+        }
+        if  let last:ServerTour.Request = self.tour.lastSearchbot
+        {
+            main[.h3] = "Last Searchbot"
+            main[.dl] = last
+        }
+        if  let last:ServerTour.Request = self.tour.lastRequest
+        {
+            main[.h3] = "Last Request"
+            main[.dl] = last
+        }
+
         main[.h2] = "Performance"
 
         main[.dl]
         {
-            if  let last:ServerTour.Request = self.tour.lastImpression
-            {
-                $0[.h3] = "Last Impression"
-
-                $0[.dt] = "Path"
-                $0[.dd] { $0[.a] { $0.href = last.path } = last.path }
-
-                $0[.dt] = "User Agent"
-                $0[.dd] = last.headers.userAgent ?? "none"
-
-                $0[.dt] = "IP address"
-                $0[.dd] = "\(last.origin.address)"
-
-                $0[.dt] = "Accept Language"
-                $0[.dd] = last.headers.acceptLanguage ?? "none"
-
-                $0[.dt] = "Referrer"
-                $0[.dd] = last.headers.referer ?? "none"
-            }
-            if  let last:ServerTour.Request = self.tour.lastSearchbot
-            {
-                $0[.h3] = "Last Searchbot"
-
-                $0[.dt] = "Path"
-                $0[.dd] { $0[.a] { $0.href = last.path } = last.path }
-
-                $0[.dt] = "User Agent"
-                $0[.dd] = last.headers.userAgent ?? "none"
-
-                $0[.dt] = "IP address"
-                $0[.dd] = "\(last.origin.address)"
-
-                $0[.dt] = "Accept Language"
-                $0[.dd] = last.headers.acceptLanguage ?? "none"
-            }
-            if  let last:ServerTour.Request = self.tour.lastRequest
-            {
-                $0[.h3] = "Last Request"
-
-                $0[.dt] = "Path"
-                $0[.dd] { $0[.a] { $0.href = last.path } = last.path }
-
-                $0[.dt] = "User Agent"
-                $0[.dd] = last.headers.userAgent ?? "none"
-
-                $0[.dt] = "IP address"
-                $0[.dd] = "\(last.origin.address)"
-
-                $0[.dt] = "Accept Language"
-                $0[.dd] = last.headers.acceptLanguage ?? "none"
-            }
-
             if  let query:ServerTour.SlowestQuery = self.tour.slowestQuery
             {
+                let uri:String = "\(query.uri)"
+
                 $0[.dt] = "slowest query"
                 $0[.dd]
                 {
-                    $0[.a] { $0.href = "\(query.path)" } = query.path
+                    $0[.a] { $0.href = "\(uri)" } = "\(uri)"
                     $0 += " (\(query.time))"
                 }
             }

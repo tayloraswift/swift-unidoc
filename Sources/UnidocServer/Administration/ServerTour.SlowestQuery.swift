@@ -1,3 +1,5 @@
+import URI
+
 extension ServerTour
 {
     @frozen public
@@ -6,13 +8,13 @@ extension ServerTour
         public
         let time:Duration
         public
-        let path:String
+        let uri:URI
 
         @inlinable public
-        init(time:Duration, path:String)
+        init(time:Duration, uri:URI)
         {
             self.time = time
-            self.path = path
+            self.uri = uri
         }
     }
 }

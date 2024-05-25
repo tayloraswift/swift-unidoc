@@ -2,15 +2,16 @@ import GitHubAPI
 import GitHubClient
 import HTTP
 import UnidocUI
+import URI
 
 extension Unidoc
 {
     struct LoginOperation:Sendable
     {
         let flow:LoginFlow
-        let path:String
+        let path:URI
 
-        init(flow:LoginFlow, from path:String = "\(ServerRoot.account)")
+        init(flow:LoginFlow, from path:URI = ServerRoot.account.uri)
         {
             self.flow = flow
             self.path = path

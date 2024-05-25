@@ -10,11 +10,11 @@ extension Unidoc
     struct LoginPage
     {
         let client:String
-        let from:String
+        let from:URI
 
         let flow:LoginFlow
 
-        init(client:String, flow:LoginFlow, from:String)
+        init(client:String, flow:LoginFlow, from:URI)
         {
             self.client = client
             self.flow = flow

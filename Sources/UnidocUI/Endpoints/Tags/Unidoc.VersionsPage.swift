@@ -249,10 +249,12 @@ extension Unidoc.VersionsPage
 
                 if  case .administratrix? = self.view.global
                 {
+                    //  If package is hidden, we can unhide it without confirmation.
+                    let really:Bool = self.package.hidden
                     $0[.form]
                     {
                         $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
+                        $0.action = "\(Unidoc.Post[.packageConfig, really: really])"
                         $0.method = "post"
                     } = ConfigButton.init(package: self.package.id,
                         update: "hidden",

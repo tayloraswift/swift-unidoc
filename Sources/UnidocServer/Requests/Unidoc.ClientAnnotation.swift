@@ -56,7 +56,7 @@ extension Unidoc.ClientAnnotation
 extension Unidoc.ClientAnnotation
 {
     static
-    func guess(headers:HTTP.ProfileHeaders, owner:IP.Owner) -> Self
+    func guess(headers:HTTP.Headers, owner:IP.Owner) -> Self
     {
         switch owner
         {
@@ -65,21 +65,38 @@ extension Unidoc.ClientAnnotation
         case _:             break
         }
 
+        let acceptLanguage:String?
+        let userAgent:String?
+        let referer:String?
+
+        switch headers
+        {
+        case .http1_1(let headers):
+            acceptLanguage = headers["accept-language"].last
+            userAgent = headers["user-agent"].last
+            referer = headers["referer"].last
+
+        case .http2(let headers):
+            acceptLanguage = headers["accept-language"].last
+            userAgent = headers["user-agent"].last
+            referer = headers["referer"].last
+        }
+
         guard
-        let agent:String = headers.userAgent
+        let userAgent:String
         else
         {
             return .robot(.tool)
         }
 
-        if  agent.starts(with: "Discourse Forum Onebox")
+        if  userAgent.starts(with: "Discourse Forum Onebox")
         {
             // This is *probably* the Swift Forums bot.
             return .robot(.discoursebot)
         }
 
         guard
-        let agent:UA = .init(agent)
+        let userAgent:UA = .init(userAgent)
         else
         {
             return .robot(.tool)
@@ -88,7 +105,7 @@ extension Unidoc.ClientAnnotation
         /// Base suspicion level.
         var suspicion:Int = 100
 
-        for component:UA.Component in agent.components
+        for component:UA.Component in userAgent.components
         {
             switch component
             {
@@ -148,9 +165,9 @@ extension Unidoc.ClientAnnotation
         }
 
         guard
-        let locale:String = headers.acceptLanguage,
-        let locale:HTTP.AcceptLanguage = .init(locale),
-        let locale:HTTP.Locale = locale.dominant
+        let acceptLanguage:String,
+        let acceptLanguage:HTTP.AcceptLanguage = .init(acceptLanguage),
+        let locale:HTTP.Locale = acceptLanguage.dominant
         else
         {
             //  Didn’t send a locale: definitely a bot.
@@ -158,12 +175,12 @@ extension Unidoc.ClientAnnotation
         }
 
         //  Sent a referrer: might be a Barbie.
-        if  case _? = headers.referer
+        if  case _? = referer
         {
             suspicion -= 1
         }
 
-        for component:UA.Component in agent.components
+        for component:UA.Component in userAgent.components
         {
             switch component
             {

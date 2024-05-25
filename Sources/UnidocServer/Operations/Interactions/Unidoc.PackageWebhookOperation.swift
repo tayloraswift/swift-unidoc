@@ -1,5 +1,6 @@
 import GitHubAPI
 import HTTP
+import IP
 import JSON
 import MongoDB
 import SemanticVersions
@@ -7,24 +8,47 @@ import UnidocRender
 
 extension Unidoc
 {
-    struct PackageWebhookOperation:Sendable
+    enum PackageWebhookOperation:Sendable
     {
-        private
-        let event:GitHub.WebhookCreate
-
-        private
-        init(event:GitHub.WebhookCreate)
-        {
-            self.event = event
-        }
+        case create(GitHub.WebhookCreate)
+        case ignore(String)
     }
 }
 extension Unidoc.PackageWebhookOperation
 {
-    init(parsing body:[UInt8]) throws
+    init(json:JSON, from origin:IP.Origin, with headers:__shared HTTP.Headers) throws
     {
-        let json:JSON = .init(utf8: body[...])
-        self.init(event: try json.decode())
+        //  Did this request actually come from GitHub? (Anyone can POST over HTTP/2.)
+        //
+        //  FIXME: there is a security hole during the (hopefully brief) interval between
+        //  when the server restarts and the whitelists are initialized.
+        switch origin.owner
+        {
+        case .github:   break
+        case .unknown:  break
+        default:        throw Unidoc.PackageWebhookError.unverifiedOrigin
+        }
+
+        let type:String?
+
+        switch headers
+        {
+        case .http1_1(let headers): type = headers["X-GitHub-Event"].first
+        case .http2(let headers):   type = headers["X-GitHub-Event"].first
+        }
+
+        switch type
+        {
+        case "create"?:
+            self = .create(try json.decode())
+
+        case let type?:
+            self = .ignore(type)
+
+        case nil:
+            throw Unidoc.PackageWebhookError.missingEventType
+        }
+
     }
 }
 extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
@@ -33,12 +57,18 @@ extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
     func load(from server:borrowing Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
+        var event:GitHub.WebhookCreate
+        switch self
+        {
+        case .create(let value):    event = value
+        case .ignore(let type):     return .ok("Ignored event type '\(type)'\n")
+        }
+
         let session:Mongo.Session = try await .init(from: server.db.sessions)
-        var event:GitHub.WebhookCreate = self.event
 
         guard
         let package:Unidoc.PackageMetadata = try await server.db.packages.findGitHub(
-            repo: self.event.repo.id,
+            repo: event.repo.id,
             with: session)
         else
         {

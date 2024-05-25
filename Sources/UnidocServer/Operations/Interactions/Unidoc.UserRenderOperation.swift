@@ -28,18 +28,11 @@ extension Unidoc.UserRenderOperation
 {
     init(volume:Unidoc.VolumeSelector,
         shoot:Unidoc.Shoot,
-        query parameters:__shared [(key:String, value:String)]?)
+        query:__shared URI.Query)
     {
         self.init(request: .init(volume: volume, vertex: shoot))
 
-        guard
-        let parameters:[(key:String, value:String)]
-        else
-        {
-            return
-        }
-
-        for (key, value):(String, String) in parameters
+        for (key, value):(String, String) in query.parameters
         {
             switch key
             {

@@ -1,6 +1,5 @@
 import FNV1
-import MD5
-import UnidocRecords
+import URI
 
 extension Unidoc
 {
@@ -11,38 +10,23 @@ extension Unidoc
         var hash:FNV24?
         var page:Int?
 
-        let user:Unidoc.Account?
-        let tag:MD5?
-
         private
-        init(user:Unidoc.Account?, tag:MD5?)
+        init()
         {
             self.explain = false
             self.beta = false
             self.hash = nil
             self.page = nil
-
-            self.user = user
-            self.tag = tag
         }
     }
 }
 extension Unidoc.PipelineParameters
 {
-    init(_ parameters:[(key:String, value:String)]?,
-        user:Unidoc.Account? = nil,
-        tag:MD5? = nil)
+    init(_ query:URI.Query)
     {
-        self.init(user: user, tag: tag)
+        self.init()
 
-        guard
-        let parameters:[(key:String, value:String)]
-        else
-        {
-            return
-        }
-
-        for (key, value):(String, String) in parameters
+        for (key, value):(String, String) in query.parameters
         {
             switch key
             {
@@ -63,5 +47,5 @@ extension Unidoc.PipelineParameters
     }
 
     static
-    var none:Self { .init(user: nil, tag: nil) }
+    var none:Self { .init() }
 }
