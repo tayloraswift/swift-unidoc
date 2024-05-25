@@ -23,7 +23,6 @@ extension Unidoc
         let updateQueue:AsyncStream<Update>.Continuation,
             updates:AsyncStream<Update>
 
-        public
         var tour:ServerTour
 
         public
@@ -246,7 +245,7 @@ extension Unidoc.ServerLoop
             self.tour.errors += 1
 
             Log[.error] = "\(error)"
-            Log[.error] = "request = \(metadata.path)"
+            Log[.error] = "request = \(metadata.uri)"
 
             let page:Unidoc.ServerErrorPage = .init(error: error)
             return .error(page.resource(format: self.format))
@@ -269,12 +268,12 @@ extension Unidoc.ServerLoop
 
         if  self.tour.slowestQuery?.time ?? .zero < duration
         {
-            self.tour.slowestQuery = .init(time: duration, path: metadata.path)
+            self.tour.slowestQuery = .init(time: duration, uri: metadata.uri)
         }
         if  duration > .seconds(1)
         {
             Log[.warning] = """
-            query '\(metadata.path)' took \(duration) to complete!
+            query '\(metadata.uri)' took \(duration) to complete!
             """
         }
 

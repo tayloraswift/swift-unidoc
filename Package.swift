@@ -223,6 +223,7 @@ let package:Package = .init(
                 .target(name: "HTTP"),
                 .target(name: "IP"),
                 .target(name: "UA"),
+                .target(name: "URI"),
 
                 .product(name: "HTML", package: "swift-dom"),
                 .product(name: "Atomics", package: "swift-atomics"),
@@ -531,6 +532,7 @@ let package:Package = .init(
                 .target(name: "MarkdownRendering"),
                 .target(name: "Media"),
                 .target(name: "UA"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "UnidocQueries",

@@ -23,18 +23,19 @@ extension Unidoc
 extension Unidoc.StreamedRequest
 {
     public
-    init?(put path:String, headers:HPACKHeaders)
+    init?(put uri:URI, headers:HPACKHeaders)
     {
-        guard let uri:URI = .init(path)
+        var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
+
+        guard
+        let root:String = path.popFirst(),
+        let root:Unidoc.ServerRoot = .init(rawValue: root)
         else
         {
             return nil
         }
 
-        var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
-
-        guard
-        case Unidoc.ServerRoot.ssgc.id? = path.popFirst(),
+        guard case .ssgc = root,
         let route:String = path.popFirst(),
         let route:Unidoc.BuildRoute = .init(route)
         else
