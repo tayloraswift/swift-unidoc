@@ -1,6 +1,7 @@
 import Symbols
+import URI
 
-extension Unidoc
+extension Unidoc.Router
 {
     struct LegacyParameters
     {
@@ -15,20 +16,13 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.LegacyParameters
+extension Unidoc.Router.LegacyParameters
 {
-    init(_ parameters:[(key:String, value:String)]?)
+    init(_ query:__shared URI.Query)
     {
         self.init()
 
-        guard
-        let parameters:[(key:String, value:String)]
-        else
-        {
-            return
-        }
-
-        for (key, value):(String, String) in parameters
+        for (key, value):(String, String) in query.parameters
         {
             switch key
             {

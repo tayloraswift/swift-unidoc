@@ -1,5 +1,5 @@
 {
-  "originHash" : "464ce8461c27506af8a93cc7c7799582725d3589798b044d64129a6cdee67132",
+  "originHash" : "25883f12cf4eb759ed4a7b02bac9272cad664cd8aabefb3cc5928b2793c7845f",
   "pins" : [
     {
       "identity" : "swift-atomics",
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-json",
       "state" : {
-        "revision" : "22ffd76580e58d8e99dcabc8521d80bbf71eaffa",
-        "version" : "1.0.1"
+        "revision" : "ffa0271c63109ca995b585e75b3dd82c1465d76d",
+        "version" : "1.1.0"
       }
     },
     {

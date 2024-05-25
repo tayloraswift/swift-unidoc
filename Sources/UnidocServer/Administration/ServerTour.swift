@@ -1,26 +1,19 @@
 import HTTP
+import UnidocProfiling
 
-@frozen public
+@frozen @usableFromInline
 struct ServerTour
 {
-    public
     let started:ContinuousClock.Instant
-    public
     var profile:ServerProfile
-    public
     var errors:Int
 
-    public
     var lastImpression:Request?
-    public
     var lastSearchbot:Request?
-    public
     var lastRequest:Request?
 
-    public
     var slowestQuery:SlowestQuery?
 
-    @inlinable public
     init(started:ContinuousClock.Instant = .now)
     {
         self.started = started

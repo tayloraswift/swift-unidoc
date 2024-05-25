@@ -6,6 +6,7 @@ import NIOHTTP1
 import UA
 import UnidocProfiling
 import UnidocRecords
+import URI
 
 extension Unidoc.IntegralRequest
 {
@@ -14,69 +15,71 @@ extension Unidoc.IntegralRequest
     {
         public
         let annotation:Unidoc.ClientAnnotation
+
+        let headers:HTTP.Headers
         let cookies:Unidoc.Cookies
 
-        public
-        let version:HTTP
-        public
-        let headers:HTTP.ProfileHeaders
         public
         let origin:IP.Origin
         public
         let host:String?
         public
-        let path:String
+        let uri:URI
 
         private
         init(
-            annotation:Unidoc.ClientAnnotation,
+            headers:HTTP.Headers,
             cookies:Unidoc.Cookies,
-            version:HTTP,
-            headers:HTTP.ProfileHeaders,
             origin:IP.Origin,
             host:String?,
-            path:String)
+            uri:URI)
         {
-            self.annotation = annotation
-            self.cookies = cookies
-
-            self.version = version
+            self.annotation = .guess(headers: headers, owner: origin.owner)
             self.headers = headers
+            self.cookies = cookies
             self.origin = origin
             self.host = host
-            self.path = path
+            self.uri = uri
         }
     }
 }
 extension Unidoc.IntegralRequest.Metadata
 {
-    var hostSupportsPublicAPI:Bool
+    /// Computes and returns the case-folded, normalized path from the ``uri``.
+    var path:ArraySlice<String>
     {
-        switch self.host
+        self.uri.path.normalized(lowercase: true)[...]
+    }
+}
+extension Unidoc.IntegralRequest.Metadata
+{
+    var version:HTTP
+    {
+        switch self.headers
         {
-        case "api.swiftinit.org"?:   true
-        case "localhost"?:           true
-        default:                     false
+        case .http1_1:  .http1_1
+        case .http2:    .http2
         }
     }
+
     var logged:ServerTour.Request
     {
         .init(
             version: self.version,
             headers: self.headers,
             origin: self.origin,
-            path: self.path)
+            uri: self.uri)
     }
 
     var credentials:Unidoc.Credentials
     {
-        .init(cookies: self.cookies, request: self.path)
+        .init(cookies: self.cookies, request: self.uri)
     }
 }
 extension Unidoc.IntegralRequest.Metadata
 {
     public
-    init(headers:borrowing HPACKHeaders, origin:IP.Origin, path:String)
+    init(headers:HPACKHeaders, origin:IP.Origin, uri:URI)
     {
         let cookies:[String] = headers["cookie"]
         let host:String? = headers[":authority"].last.map
@@ -91,48 +94,24 @@ extension Unidoc.IntegralRequest.Metadata
             }
         }
 
-        let headers:HTTP.ProfileHeaders = .init(
-            acceptLanguage: headers["accept-language"].last,
-            userAgent: headers["user-agent"].last,
-            referer: headers["referer"].last)
-
-        self.init(
-            annotation: .guess(headers: headers, owner: origin.owner),
+        self.init(headers: .http2(headers),
             cookies: .init(header: cookies),
-            version: .http2,
-            headers: headers,
             origin: origin,
             host: host,
-            path: path)
+            uri: uri)
     }
 
     public
-    init(headers:borrowing HTTPHeaders, origin:IP.Origin, path:String)
+    init(headers:HTTPHeaders, origin:IP.Origin, uri:URI)
     {
         let host:String? = headers["host"].last
-        let headers:HTTP.ProfileHeaders = .init(
-            acceptLanguage: headers["accept-language"].last,
-            userAgent: headers["user-agent"].last,
-            referer: headers["referer"].last)
 
         //  None of our authenticated endpoints support HTTP/1.1, so there is no
         //  need to load cookies.
-        self.init(
-            annotation: .guess(headers: headers, owner: origin.owner),
+        self.init(headers: .http1_1(headers),
             cookies: .init(),
-            version: .http1_1,
-            headers: headers,
             origin: origin,
             host: host,
-            path: path)
-
-        if  case .robot(.discoursebot) = self.annotation
-        {
-            Log[.debug] = """
-            Approved possible Swift Forums robot
-                User-Agent: '\(headers.userAgent ?? "")'
-                IP Address: \(origin.address)
-            """
-        }
+            uri: uri)
     }
 }

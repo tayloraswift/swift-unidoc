@@ -1,3 +1,5 @@
+import URI
+
 extension Unidoc
 {
     @frozen public
@@ -6,10 +8,10 @@ extension Unidoc
         public
         let cookies:Cookies
         public
-        let request:String
+        let request:URI
 
         @inlinable public
-        init(cookies:Cookies, request:String)
+        init(cookies:Cookies, request:URI)
         {
             self.cookies = cookies
             self.request = request

@@ -3,29 +3,18 @@ import IP
 import NIOCore
 import NIOHPACK
 import NIOHTTP1
+import URI
 
 extension HTTP
 {
     public
     protocol ServerIntegralRequest:Sendable
     {
-        init?(get path:String,
-            headers:borrowing HPACKHeaders,
-            origin:IP.Origin)
+        init?(get uri:URI, headers:HPACKHeaders, origin:IP.Origin)
+        init?(get uri:URI, headers:HTTPHeaders, origin:IP.Origin)
 
-        init?(get path:String,
-            headers:borrowing HTTPHeaders,
-            origin:IP.Origin)
-
-        init?(post path:String,
-            headers:borrowing HPACKHeaders,
-            origin:IP.Origin,
-            body:borrowing [UInt8])
-
-        init?(post path:String,
-            headers:borrowing HTTPHeaders,
-            origin:IP.Origin,
-            body:consuming [UInt8])
+        init?(post path:URI, headers:HPACKHeaders, origin:IP.Origin, body:borrowing [UInt8])
+        init?(post path:URI, headers:HTTPHeaders, origin:IP.Origin, body:borrowing [UInt8])
     }
 }
 extension HTTP.ServerIntegralRequest
@@ -36,12 +25,10 @@ extension HTTP.ServerIntegralRequest
     /// Servers that expect to handle a lot of HTTP/1.1 GET requests should override this with
     /// a more efficient implementation.
     @inlinable public
-    init?(get path:String,
-        headers:borrowing HTTPHeaders,
-        origin:IP.Origin)
+    init?(get uri:URI, headers:HTTPHeaders, origin:IP.Origin)
     {
-        self.init(get: path,
-            headers: .init(httpHeaders: copy headers),
+        self.init(get: uri,
+            headers: .init(httpHeaders: headers),
             origin: origin)
     }
 
@@ -51,13 +38,10 @@ extension HTTP.ServerIntegralRequest
     /// Servers that expect to handle a lot of HTTP/1.1 POST requests should override this with
     /// a more efficient implementation.
     @inlinable public
-    init?(post path:String,
-        headers:borrowing HTTPHeaders,
-        origin:IP.Origin,
-        body:consuming [UInt8])
+    init?(post uri:URI, headers:HTTPHeaders, origin:IP.Origin, body:borrowing [UInt8])
     {
-        self.init(post: path,
-            headers: .init(httpHeaders: copy headers),
+        self.init(post: uri,
+            headers: .init(httpHeaders: headers),
             origin: origin,
             body: body)
     }
