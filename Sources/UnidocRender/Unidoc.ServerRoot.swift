@@ -3,14 +3,14 @@ import URI
 extension Unidoc
 {
     @frozen public
-    enum ServerRoot
+    enum ServerRoot:String, Sendable
     {
         case account
         case admin
         case api
         case asset
         case auth
-        case blog
+        case blog = "articles"
         case docs
         case docc
         case help
@@ -23,11 +23,20 @@ extension Unidoc
         case pdct
         case realm
         case really
+        case robots_txt = "robots.txt"
+        case sitemap_xml = "sitemap.xml"
         case ssgc
         case stats
         case tags
         case telescope
         case user
+
+        /// Deprecated.
+        case guides
+        /// Deprecated.
+        case reference
+        /// Deprecated.
+        case sitemaps
     }
 }
 extension Unidoc.ServerRoot
@@ -45,43 +54,10 @@ extension Unidoc.ServerRoot
 extension Unidoc.ServerRoot:CustomStringConvertible
 {
     @inlinable public
-    var description:String { "/\(self.id)" }
-}
-extension Unidoc.ServerRoot:Identifiable
-{
-    @inlinable public
-    var id:String
-    {
-        switch self
-        {
-        case .account:      "account"
-        case .admin:        "admin"
-        case .api:          "api"
-        case .asset:        "asset"
-        case .auth:         "auth"
-        case .blog:         "articles"
-        case .docs:         "docs"
-        case .docc:         "docc"
-        case .help:         "help"
-        case .hist:         "hist"
-        case .hook:         "hook"
-        case .login:        "login"
-        case .lunr:         "lunr"
-        case .plugin:       "plugin"
-        case .ptcl:         "ptcl"
-        case .pdct:         "pdct"
-        case .realm:        "realm"
-        case .really:       "really"
-        case .ssgc:         "ssgc"
-        case .stats:        "stats"
-        case .tags:         "tags"
-        case .telescope:    "telescope"
-        case .user:         "user"
-        }
-    }
+    var description:String { "/\(self.rawValue)" }
 }
 extension Unidoc.ServerRoot
 {
     @inlinable public
-    var uri:URI { [.push(self.id)] }
+    var uri:URI { [.push(self.rawValue)] }
 }

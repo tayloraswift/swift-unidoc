@@ -1,4 +1,6 @@
-extension Unidoc
+import URI
+
+extension Unidoc.Router
 {
     struct AuthParameters
     {
@@ -11,7 +13,7 @@ extension Unidoc
         /// Defined by us and parroted back by GitHub.
         var from:String?
 
-        var flow:LoginFlow?
+        var flow:Unidoc.LoginFlow?
 
         private
         init()
@@ -24,20 +26,13 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.AuthParameters
+extension Unidoc.Router.AuthParameters
 {
-    init(_ parameters:[(key:String, value:String)]?)
+    init(_ query:__shared URI.Query)
     {
         self.init()
 
-        guard
-        let parameters:[(key:String, value:String)]
-        else
-        {
-            return
-        }
-
-        for (key, value):(String, String) in parameters
+        for (key, value):(String, String) in query.parameters
         {
             switch key
             {

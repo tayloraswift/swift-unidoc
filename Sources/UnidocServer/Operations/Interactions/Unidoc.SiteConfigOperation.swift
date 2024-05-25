@@ -11,7 +11,6 @@ extension Unidoc
 {
     enum SiteConfigOperation
     {
-        case perform(Unidoc.AdminPage.Action, MultipartForm?)
         case recode(Unidoc.AdminPage.Recode.Target)
         case telescope(days:Int)
     }
@@ -21,8 +20,6 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
     func load(from server:borrowing Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        let page:Unidoc.AdminPage.Action.Complete
-
         switch self
         {
         case .recode(let target):
@@ -44,25 +41,11 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
 
             return .ok(complete.resource(format: server.format))
 
-        case .perform(.dropUnidocDB, _):
-            try await server.db.unidoc.drop(with: session)
-
-            page = .init(action: .dropUnidocDB, text: "Reinitialized Unidoc database!")
-
-        case .perform(.restart, _):
-            fatalError("Restarting server...")
-
-        case .perform(.upload, _):
-            //  No longer supported.
-            return nil
-
         case .telescope(days: let days):
             let updates:Mongo.Updates = try await server.db.crawlingWindows.create(days: days,
                 with: session)
 
             return .ok("Updated \(updates.modified) of \(updates.selected) crawling windows.")
         }
-
-        return .ok(page.resource(format: server.format))
     }
 }

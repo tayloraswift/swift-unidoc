@@ -97,7 +97,7 @@ let package:Package = .init(
         // .package(path: "../swift-mongodb"),
 
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-            from: "1.0.1")),
+            from: "1.1.0")),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.2")),
@@ -223,6 +223,7 @@ let package:Package = .init(
                 .target(name: "HTTP"),
                 .target(name: "IP"),
                 .target(name: "UA"),
+                .target(name: "URI"),
 
                 .product(name: "HTML", package: "swift-dom"),
                 .product(name: "Atomics", package: "swift-atomics"),
@@ -531,6 +532,7 @@ let package:Package = .init(
                 .target(name: "MarkdownRendering"),
                 .target(name: "Media"),
                 .target(name: "UA"),
+                .target(name: "URI"),
             ]),
 
         .target(name: "UnidocQueries",

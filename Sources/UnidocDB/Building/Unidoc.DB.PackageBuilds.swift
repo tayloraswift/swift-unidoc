@@ -1,5 +1,6 @@
 import BSON
 import MongoDB
+import UnidocAPI
 import UnidocRecords
 
 extension Unidoc.DB

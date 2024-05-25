@@ -8,6 +8,7 @@ import NIOHTTP1
 import NIOHTTP2
 import NIOPosix
 import NIOSSL
+import URI
 
 extension NIOHTTP2Handler.AsyncStreamMultiplexer:@unchecked Sendable
 {
@@ -323,13 +324,19 @@ extension HTTP.ServerLoop
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:HTTP.ServerAuthority
     {
+        guard let path:URI = .init(h1.uri)
+        else
+        {
+            return .resource("Malformed URI", status: 400)
+        }
+
         switch h1.method
         {
         case .HEAD:
             fallthrough
 
         case .GET:
-            if  let request:IntegralRequest = .init(get: h1.uri,
+            if  let request:IntegralRequest = .init(get: path,
                     headers: h1.headers,
                     origin: origin)
             {
@@ -377,7 +384,7 @@ extension HTTP.ServerLoop
                 }
             }
 
-            if  let request:IntegralRequest = .init(post: h1.uri,
+            if  let request:IntegralRequest = .init(post: path,
                     headers: h1.headers,
                     origin: origin,
                     body: /* consume */ body) // https://github.com/apple/swift/issues/71605
@@ -576,6 +583,13 @@ extension HTTP.ServerLoop
         else
         {
             return .resource("Missing headers", status: 400)
+        }
+
+        guard
+        let path:URI = .init(path)
+        else
+        {
+            return .resource("Malformed URI", status: 400)
         }
 
         switch method

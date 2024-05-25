@@ -4,41 +4,28 @@ import Multiparts
 import NIOHPACK
 import NIOHTTP1
 import UnidocServer
+import URI
 
 extension Unidoc.IntegralRequest:HTTP.ServerIntegralRequest
 {
     public
-    init?(get path:String,
-        headers:borrowing HTTPHeaders,
-        origin:IP.Origin)
+    init?(get uri:URI, headers:HTTPHeaders, origin:IP.Origin)
     {
-        self.init(get: .init(headers: headers, origin: origin, path: path), tag: nil)
+        let metadata:Metadata = .init(headers: headers, origin: origin, uri: uri)
+        self.init(get: metadata)
     }
 
     public
-    init?(get path:String,
-        headers:borrowing HPACKHeaders,
-        origin:IP.Origin)
+    init?(get uri:URI, headers:HPACKHeaders, origin:IP.Origin)
     {
-        self.init(get: .init(headers: headers, origin: origin, path: path), tag: nil)
+        let metadata:Metadata = .init(headers: headers, origin: origin, uri: uri)
+        self.init(get: metadata)
     }
 
     public
-    init?(post path:String,
-        headers:borrowing HPACKHeaders,
-        origin:IP.Origin,
-        body:consuming [UInt8])
+    init?(post uri:URI, headers:HPACKHeaders, origin:IP.Origin, body:borrowing [UInt8])
     {
-        let metadata:Metadata = .init(headers: headers, origin: origin, path: path)
-
-        guard
-        let type:String = headers["content-type"].first,
-        let type:ContentType = .init(type)
-        else
-        {
-            return nil
-        }
-
-        self.init(post: metadata, body: body, type: type)
+        let metadata:Metadata = .init(headers: headers, origin: origin, uri: uri)
+        self.init(post: metadata, body: body)
     }
 }
