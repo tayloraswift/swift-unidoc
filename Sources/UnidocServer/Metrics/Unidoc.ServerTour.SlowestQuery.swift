@@ -1,6 +1,6 @@
 import URI
 
-extension ServerTour
+extension Unidoc.ServerTour
 {
     @frozen public
     struct SlowestQuery:Sendable

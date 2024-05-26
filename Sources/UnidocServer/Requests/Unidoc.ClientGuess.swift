@@ -1,92 +1,32 @@
 import HTTP
 import HTTPServer
-import IP
+import NIOHPACK
+import NIOHTTP1
 import UA
 import UnidocProfiling
 
 extension Unidoc
 {
     @frozen public
-    enum ClientAnnotation:Equatable, Hashable, Sendable
+    enum ClientGuess:Equatable, Hashable, Sendable
     {
         case barbie(HTTP.Locale)
         case bratz
         case robot(Robot)
     }
 }
-extension Unidoc.ClientAnnotation
+extension Unidoc.ClientGuess
 {
-    var locale:HTTP.Locale?
+    private static
+    func from(acceptLanguage:String?,
+        userAgent:String?,
+        referer:String?) -> Self
     {
-        switch self
-        {
-        case .barbie(let locale):   locale
-        case .bratz:                nil
-        case .robot(_):             nil
-        }
-    }
-
-    var field:WritableKeyPath<ServerProfile.ByClient, Int>
-    {
-        switch self
-        {
-        case .barbie:                   \.barbie
-        case .bratz:                    \.bratz
-        case .robot(.ahrefsbot):        \.likelyAhrefsbot
-        case .robot(.amazonbot):        \.likelyMinorSearchEngine
-        case .robot(.baiduspider):      \.likelyBaiduspider
-        case .robot(.bingbot):          \.verifiedBingbot
-        case .robot(.cloudfront):       \.tooling
-        case .robot(.bytespider):       \.otherRobot
-        case .robot(.discoursebot):     \.likelyDiscoursebot
-        case .robot(.duckduckbot):      \.likelyMinorSearchEngine
-        case .robot(.google):           \.otherRobot
-        case .robot(.googlebot):        \.verifiedGooglebot
-        case .robot(.quant):            \.likelyMinorSearchEngine
-        case .robot(.naver):            \.likelyMinorSearchEngine
-        case .robot(.petal):            \.likelyMinorSearchEngine
-        case .robot(.seznam):           \.likelyMinorSearchEngine
-        case .robot(.yandexbot):        \.likelyYandexbot
-        case .robot(.unknown):          \.otherRobot
-        case .robot(.other):            \.otherRobot
-        case .robot(.tool):             \.tooling
-        }
-    }
-}
-extension Unidoc.ClientAnnotation
-{
-    static
-    func guess(headers:HTTP.Headers, owner:IP.Owner) -> Self
-    {
-        switch owner
-        {
-        case .googlebot:    return .robot(.googlebot)
-        case .bingbot:      return .robot(.bingbot)
-        case _:             break
-        }
-
-        let acceptLanguage:String?
-        let userAgent:String?
-        let referer:String?
-
-        switch headers
-        {
-        case .http1_1(let headers):
-            acceptLanguage = headers["accept-language"].last
-            userAgent = headers["user-agent"].last
-            referer = headers["referer"].last
-
-        case .http2(let headers):
-            acceptLanguage = headers["accept-language"].last
-            userAgent = headers["user-agent"].last
-            referer = headers["referer"].last
-        }
-
         guard
         let userAgent:String
         else
         {
-            return .robot(.tool)
+            return .robot(.anonymous)
         }
 
         if  userAgent.starts(with: "Discourse Forum Onebox")
@@ -238,6 +178,37 @@ extension Unidoc.ClientAnnotation
         case Int.min ..<  0:    return .barbie(locale)
         case 0       ... 10:    return .bratz
         case _:                 return .robot(.other)
+        }
+    }
+}
+extension Unidoc.ClientGuess
+{
+    static
+    func from(_ headers:HTTPHeaders) -> Self
+    {
+        .from(
+            acceptLanguage: headers["accept-language"].last,
+            userAgent: headers["user-agent"].last,
+            referer: headers["referer"].last)
+    }
+    static
+    func from(_ headers:HPACKHeaders) -> Self
+    {
+        .from(
+            acceptLanguage: headers["accept-language"].last,
+            userAgent: headers["user-agent"].last,
+            referer: headers["referer"].last)
+    }
+}
+extension Unidoc.ClientGuess
+{
+    var locale:HTTP.Locale?
+    {
+        switch self
+        {
+        case .barbie(let locale):   locale
+        case .bratz:                nil
+        case .robot(_):             nil
         }
     }
 }

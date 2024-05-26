@@ -7,39 +7,49 @@ extension Unidoc
     struct UserRenderOperation:Sendable
     {
         private
-        let request:Unidoc.VertexQuery<Unidoc.LookupAdjacent>
-
-        //  We do as little validation as possible here, because we want to return helpful error
-        //  messages to the client.
-        var account:String?
-        var apiKey:String?
-
+        let authorization:Authorization
 
         private
-        init(request:Unidoc.VertexQuery<Unidoc.LookupAdjacent>)
+        let request:VertexQuery<LookupAdjacent>
+
+        private
+        init(authorization:Authorization, request:VertexQuery<LookupAdjacent>)
         {
+            self.authorization = authorization
             self.request = request
-            self.account = nil
-            self.apiKey = nil
         }
     }
 }
 extension Unidoc.UserRenderOperation
 {
-    init(volume:Unidoc.VolumeSelector,
-        shoot:Unidoc.Shoot,
-        query:__shared URI.Query)
+    init(authorization:Unidoc.Authorization,
+        request:Unidoc.VertexQuery<Unidoc.LookupAdjacent>,
+        _query:__shared URI.Query)
     {
-        self.init(request: .init(volume: volume, vertex: shoot))
-
-        for (key, value):(String, String) in query.parameters
+        //  Backwards compatibility with the previous API
+        var account:Unidoc.Account?
+        var apiKey:UInt64?
+        for (key, value):(String, String) in _query.parameters
         {
             switch key
             {
-            case "account": self.account = value
-            case "api_key": self.apiKey = value
+            case "account": account = .init(value)
+            case "api_key": apiKey = .init(value, radix: 16)
             case _:         continue
             }
+        }
+
+        if  let account:Unidoc.Account,
+            let apiKey:UInt64,
+            case .web = authorization
+        {
+            self.init(
+                authorization: .api(account, .init(bitPattern: apiKey)),
+                request: request)
+        }
+        else
+        {
+            self.init(authorization: authorization, request: request)
         }
     }
 }
@@ -48,38 +58,26 @@ extension Unidoc.UserRenderOperation:Unidoc.PublicOperation
     func load(from server:borrowing Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        guard
-        let account:String = self.account
-        else
+        let session:Mongo.Session
+        let remaining:Int?
+
+        switch self.authorization
         {
-            return .resource("Missing required parameter 'account'\n", status: 400)
-        }
-        guard
-        let account:Unidoc.Account = .init(account)
-        else
-        {
-            return .resource("Invalid format for parameter 'account'\n", status: 400)
-        }
-        guard
-        let apiKey:String = self.apiKey
-        else
-        {
-            return .resource("Missing required parameter 'api_key'\n", status: 400)
-        }
-        guard
-        let apiKey:UInt64 = .init(apiKey, radix: 16)
-        else
-        {
-            return .resource("Invalid format for parameter 'api_key'\n", status: 400)
+        case .invalid(let error):
+            return .unauthorized("\(error)\n")
+
+        case .web:
+            return .unauthorized("Missing authorization header\n")
+
+        case .api(let account, let apiKey):
+            session = try await .init(from: server.db.sessions)
+            remaining = try await server.db.users.charge(apiKey: apiKey,
+                user: account,
+                with: session)
         }
 
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
-
         guard
-        let remaining:Int = try await server.db.users.charge(
-            apiKey: .init(bitPattern: apiKey),
-            user: account,
-            with: session)
+        let remaining:Int
         else
         {
             return .resource("Inactive or nonexistent API key\n", status: 429)

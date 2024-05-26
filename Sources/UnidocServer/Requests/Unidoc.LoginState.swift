@@ -3,7 +3,7 @@ import URI
 extension Unidoc
 {
     @frozen public
-    struct Credentials:Sendable
+    struct LoginState:Sendable
     {
         public
         let cookies:Cookies

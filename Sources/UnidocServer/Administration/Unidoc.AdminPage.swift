@@ -131,47 +131,20 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
             $0[.dt] = "Uptime"
             $0[.dd] = "\(self.tour.started.duration(to: .now))"
 
-            let requests:Int =
-                self.tour.profile.requests.http1.total +
-                self.tour.profile.requests.http2.total
-
             $0[.dt] = "Requests"
-            $0[.dd] = "\(requests)"
+            $0[.dd] = "\(self.tour.metrics.requests.sum())"
 
             $0[.dt] = "Requests (Barbies)"
-            $0[.dd] = "\(self.tour.profile.requests.http2.barbie)"
+            $0[.dd] = "\(self.tour.metrics.requests[.barbie])"
 
             $0[.dt] = "Server errors"
             $0[.dd] = "\(self.tour.errors)"
-        }
 
-        main[.h2] = "Headers"
-
-        if  let last:ServerTour.Request = self.tour.lastImpression
-        {
-            main[.h3] = "Last Impression"
-            main[.dl] = last
-        }
-        if  let last:ServerTour.Request = self.tour.lastSearchbot
-        {
-            main[.h3] = "Last Searchbot"
-            main[.dl] = last
-        }
-        if  let last:ServerTour.Request = self.tour.lastRequest
-        {
-            main[.h3] = "Last Request"
-            main[.dl] = last
-        }
-
-        main[.h2] = "Performance"
-
-        main[.dl]
-        {
-            if  let query:ServerTour.SlowestQuery = self.tour.slowestQuery
+            if  let query:Unidoc.ServerTour.SlowestQuery = self.tour.slowestQuery
             {
                 let uri:String = "\(query.uri)"
 
-                $0[.dt] = "slowest query"
+                $0[.dt] = "Slowest query"
                 $0[.dd]
                 {
                     $0[.a] { $0.href = "\(uri)" } = "\(uri)"
@@ -179,10 +152,54 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
                 }
             }
 
-            $0[.dt] = "bytes transferred (content only)"
-            $0[.dd] = "\(self.tour.profile.requests.bytes.total)"
+            $0[.dt] = "Bytes transferred (content only)"
+            $0[.dd] = "\(self.tour.metrics.transfer.sum())"
         }
 
-        main += self.tour.profile
+        main[.h3] = "Requests"
+        main[.figure] { $0.class = "chart client" } = self.tour.metrics.requests.chart
+        {
+            """
+            \($1) percent of the pages served during this tour were served to \($0.name)
+            """
+        }
+
+        main[.h3] = "Data Transfer"
+        main[.figure] { $0.class = "chart client" } = self.tour.metrics.transfer.chart
+        {
+            """
+            \($1) percent of the bytes transferred \
+            during this tour were served to \($0.name)
+            """
+        }
+
+        main[.h3] = "Languages"
+        main[.figure] { $0.class = "chart language" } = self.tour.metrics.languages.chart
+        {
+            """
+            \($1) percent of the pages served during this tour \
+            were served to Barbies who spoke \($0.id)
+            """
+        }
+
+        for (crosstab, responses):
+            (Unidoc.ServerMetrics.Crosstab, Pie<Unidoc.ServerMetrics.Status>.Accumulator) in
+            self.tour.metrics.responses.sorted(by: { $0.key < $1.key })
+        {
+            main[.h2] = "Responses (\(crosstab.name))"
+            main[.figure] { $0.class = "chart status" } = responses.chart
+            {
+                """
+                \($1) percent of the responses to \(crosstab.name) \
+                during this tour were \($0.name)
+                """
+            }
+
+            if  let request:Unidoc.ServerTour.Request = self.tour.last[crosstab]
+            {
+                main[.h3] = "Last request"
+                main[.dl] = request
+            }
+        }
     }
 }
