@@ -8,7 +8,7 @@ extension Unidoc
     {
         consuming
         func load(from server:borrowing Server,
-            with credentials:Credentials,
+            with state:LoginState,
             as format:RenderFormat) async throws -> HTTP.ServerResponse?
     }
 }

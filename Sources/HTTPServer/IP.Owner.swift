@@ -22,7 +22,7 @@ extension IP
         case known
 
         /// The IP address could not be mapped to an owner because the tables have
-        /// not been initialized yet. This is a distinct state from the nil case, because
+        /// not been initialized yet. This is a distinct state from the ``known`` case, because
         /// the IP might still belong to one of the enumerated services.
         case unknown
     }

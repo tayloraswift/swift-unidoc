@@ -25,20 +25,20 @@ extension Unidoc.RestrictedOperation
 {
     public consuming
     func load(from server:borrowing Unidoc.Server,
-        with credentials:Unidoc.Credentials,
+        with state:Unidoc.LoginState,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         if  server.secure
         {
             guard
-            let user:Unidoc.UserSession = credentials.cookies.session
+            let user:Unidoc.UserSession = state.cookies.session
             else
             {
                 if  let oauth:GitHub.OAuth = server.github?.oauth
                 {
                     let login:Unidoc.LoginPage = .init(client: oauth.client,
                         flow: .sso,
-                        from: credentials.request)
+                        from: state.request)
                     return .ok(login.resource(format: server.format))
                 }
                 else

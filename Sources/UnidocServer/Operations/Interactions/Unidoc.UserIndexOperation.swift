@@ -27,7 +27,7 @@ extension Unidoc
 extension Unidoc.UserIndexOperation:Unidoc.InteractiveOperation
 {
     func load(from server:borrowing Unidoc.Server,
-        with _:Unidoc.Credentials,
+        with _:Unidoc.LoginState,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         try await self.perform(on: server)

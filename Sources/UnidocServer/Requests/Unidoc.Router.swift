@@ -14,7 +14,7 @@ extension Unidoc
     struct Router
     {
         let headers:HTTP.Headers
-        let session:Unidoc.UserSession?
+        let authorization:Authorization
         let origin:IP.Origin
         let host:String?
 
@@ -26,14 +26,14 @@ extension Unidoc
         private
         init(
             headers:HTTP.Headers,
-            session:Unidoc.UserSession?,
+            authorization:Authorization,
             origin:IP.Origin,
             host:String?,
             stem:ArraySlice<String>,
             query:URI.Query)
         {
             self.headers = headers
-            self.session = session
+            self.authorization = authorization
             self.origin = origin
             self.host = host
             self.stem = stem
@@ -43,15 +43,15 @@ extension Unidoc
 }
 extension Unidoc.Router
 {
-    init(_ metadata:Unidoc.IntegralRequest.Metadata)
+    init(routing request:Unidoc.IncomingRequest)
     {
         self.init(
-            headers: metadata.headers,
-            session: metadata.cookies.session,
-            origin: metadata.origin,
-            host: metadata.host,
-            stem: metadata.path,
-            query: metadata.uri.query ?? [:])
+            headers: request.headers,
+            authorization: request.authorization,
+            origin: request.origin.ip,
+            host: request.host,
+            stem: request.path,
+            query: request.uri.query ?? [:])
     }
 }
 extension Unidoc.Router
@@ -76,6 +76,18 @@ extension Unidoc.Router
         }
 
         return contentType
+    }
+
+    private
+    var session:Unidoc.UserSession?
+    {
+        //  TODO: support API key in more places.
+        switch self.authorization
+        {
+        case .web(let cookies): return cookies.session
+        case .api:              return nil
+        case .invalid:          return nil
+        }
     }
 
     private
@@ -152,14 +164,19 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     mutating
-    func get() -> Unidoc.IntegralRequest.Ordering?
+    func get() -> Unidoc.AnyOperation?
     {
-        guard let root:Unidoc.ServerRoot = self.descend()
-        else
+        if  self.stem.isEmpty
         {
             return .explainable(Unidoc.HomeEndpoint.init(query: .init(limit: 16)),
                     parameters: .init(self.query),
                     etag: self.etag)
+        }
+
+        guard let root:Unidoc.ServerRoot = self.descend()
+        else
+        {
+            return nil
         }
 
         switch root
@@ -184,6 +201,7 @@ extension Unidoc.Router
         case .really:       return nil // POST only
         case .realm:        return self.realm()
         case .reference:    return self.docsLegacy()
+        case .render:       return self.render()
         case .robots_txt:   return self.robots()
         case .sitemap_xml:  return self.sitemap()
         case .sitemaps:     return self.sitemaps()
@@ -196,7 +214,7 @@ extension Unidoc.Router
     }
 
     mutating
-    func post(body:[UInt8]) -> Unidoc.IntegralRequest.Ordering?
+    func post(body:[UInt8]) -> Unidoc.AnyOperation?
     {
         switch self.contentType
         {
@@ -232,7 +250,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func post(json:JSON) -> Unidoc.IntegralRequest.Ordering?
+    func post(json:JSON) -> Unidoc.AnyOperation?
     {
         switch self.descend(into: Unidoc.ServerRoot.self)
         {
@@ -242,7 +260,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func post(form:URI.Query) -> Unidoc.IntegralRequest.Ordering?
+    func post(form:URI.Query) -> Unidoc.AnyOperation?
     {
         switch self.descend(into: Unidoc.ServerRoot.self)
         {
@@ -254,7 +272,7 @@ extension Unidoc.Router
         }
     }
     private mutating
-    func post(form:MultipartForm) -> Unidoc.IntegralRequest.Ordering?
+    func post(form:MultipartForm) -> Unidoc.AnyOperation?
     {
         switch self.descend(into: Unidoc.ServerRoot.self)
         {
@@ -267,7 +285,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private
-    func account() -> Unidoc.IntegralRequest.Ordering
+    func account() -> Unidoc.AnyOperation
     {
         guard
         let user:Unidoc.UserSession = self.session
@@ -285,7 +303,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func admin() -> Unidoc.IntegralRequest.Ordering?
+    func admin() -> Unidoc.AnyOperation?
     {
         guard let next:String = self.descend()
         else
@@ -320,7 +338,7 @@ extension Unidoc.Router
     }
     //  These are kind of a mess right now.
     private mutating
-    func admin(form:URI.Query) -> Unidoc.IntegralRequest.Ordering?
+    func admin(form:URI.Query) -> Unidoc.AnyOperation?
     {
         guard case Unidoc.CookiePage.name? = self.descend() as String?
         else
@@ -331,7 +349,7 @@ extension Unidoc.Router
         return .actor(Unidoc.LoadDashboardOperation.cookie(scramble: true))
     }
     private mutating
-    func admin(form:MultipartForm) -> Unidoc.IntegralRequest.Ordering?
+    func admin(form:MultipartForm) -> Unidoc.AnyOperation?
     {
         guard let action:String = self.descend()
         else
@@ -353,7 +371,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func api(form:URI.Query) -> Unidoc.IntegralRequest.Ordering?
+    func api(form:URI.Query) -> Unidoc.AnyOperation?
     {
         guard
         let action:Unidoc.PostAction = self.descend()
@@ -486,7 +504,7 @@ extension Unidoc.Router
         return nil
     }
     private mutating
-    func api(form:MultipartForm) -> Unidoc.IntegralRequest.Ordering?
+    func api(form:MultipartForm) -> Unidoc.AnyOperation?
     {
         guard
         let action:Unidoc.PostAction = self.descend()
@@ -516,7 +534,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func asset() -> Unidoc.IntegralRequest.Ordering?
+    func asset() -> Unidoc.AnyOperation?
     {
         guard
         let asset:Unidoc.Asset = self.descend()
@@ -531,7 +549,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func auth() -> Unidoc.IntegralRequest.Ordering?
+    func auth() -> Unidoc.AnyOperation?
     {
         let parameters:AuthParameters = .init(self.query)
 
@@ -565,7 +583,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func blog(module:String) -> Unidoc.IntegralRequest.Ordering?
+    func blog(module:String) -> Unidoc.AnyOperation?
     {
         guard let article:String = self.descend()
         else
@@ -581,7 +599,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func docs() -> Unidoc.IntegralRequest.Ordering?
+    func docs() -> Unidoc.AnyOperation?
     {
         guard
         let volume:Unidoc.VolumeSelector = self.descend().map(Unidoc.VolumeSelector.init)
@@ -616,7 +634,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func hook(json:JSON) -> Unidoc.IntegralRequest.Ordering?
+    func hook(json:JSON) -> Unidoc.AnyOperation?
     {
         switch self.descend()
         {
@@ -640,12 +658,12 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private
-    func login() -> Unidoc.IntegralRequest.Ordering
+    func login() -> Unidoc.AnyOperation
     {
         .actor(Unidoc.LoginOperation.init(flow: .sso))
     }
     private
-    func login(form:URI.Query) -> Unidoc.IntegralRequest.Ordering
+    func login(form:URI.Query) -> Unidoc.AnyOperation
     {
         if  let path:String = form.parameters.first?.value,
             let path:URI = .init(path)
@@ -661,7 +679,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func lunr() -> Unidoc.IntegralRequest.Ordering?
+    func lunr() -> Unidoc.AnyOperation?
     {
         guard let next:String = self.descend()
         else
@@ -693,7 +711,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func plugin() -> Unidoc.IntegralRequest.Ordering?
+    func plugin() -> Unidoc.AnyOperation?
     {
         guard let next:String = self.descend()
         else
@@ -705,7 +723,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func ptcl() -> Unidoc.IntegralRequest.Ordering?
+    func ptcl() -> Unidoc.AnyOperation?
     {
         guard
         let volume:Unidoc.VolumeSelector = self.descend()
@@ -725,7 +743,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func realm() -> Unidoc.IntegralRequest.Ordering?
+    func realm() -> Unidoc.AnyOperation?
     {
         guard
         let realm:String = self.descend()
@@ -741,7 +759,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func render() -> Unidoc.IntegralRequest.Ordering?
+    func render() -> Unidoc.AnyOperation?
     {
         guard self.hostSupportsPublicAPI
         else
@@ -756,15 +774,15 @@ extension Unidoc.Router
             return nil
         }
 
-        return .actor(Unidoc.UserRenderOperation.init(volume: volume,
-            shoot: .init(path: self.stem),
-            query: self.query))
+        return .actor(Unidoc.UserRenderOperation.init(authorization: self.authorization,
+            request: .init(volume: volume, vertex: .init(path: self.stem)),
+            _query: self.query))
     }
 }
 extension Unidoc.Router
 {
     private mutating
-    func really(form:URI.Query) -> Unidoc.IntegralRequest.Ordering?
+    func really(form:URI.Query) -> Unidoc.AnyOperation?
     {
         guard
         let confirm:Unidoc.PostAction = self.descend()
@@ -838,7 +856,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private
-    func robots() -> Unidoc.IntegralRequest.Ordering
+    func robots() -> Unidoc.AnyOperation
     {
         let etag:MD5? = self.etag
         return .explainable(Unidoc.TextEndpoint.init(query: .init(
@@ -849,14 +867,14 @@ extension Unidoc.Router
     }
 
     private
-    func sitemap() -> Unidoc.IntegralRequest.Ordering
+    func sitemap() -> Unidoc.AnyOperation
     {
         .actor(Unidoc.LoadSitemapIndexOperation.init(tag: self.etag))
     }
 
     /// Deprecated route.
     private mutating
-    func sitemaps() -> Unidoc.IntegralRequest.Ordering?
+    func sitemaps() -> Unidoc.AnyOperation?
     {
         guard let next:String = self.descend()
         else
@@ -870,7 +888,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func ssgc() -> Unidoc.IntegralRequest.Ordering?
+    func ssgc() -> Unidoc.AnyOperation?
     {
         switch self.descend()
         {
@@ -898,7 +916,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func stats() -> Unidoc.IntegralRequest.Ordering?
+    func stats() -> Unidoc.AnyOperation?
     {
         guard let volume:Unidoc.VolumeSelector = self.descend()
         else
@@ -916,7 +934,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func tags() -> Unidoc.IntegralRequest.Ordering?
+    func tags() -> Unidoc.AnyOperation?
     {
         guard let symbol:Symbol.Package = self.descend()
         else
@@ -948,7 +966,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func telescope() -> Unidoc.IntegralRequest.Ordering?
+    func telescope() -> Unidoc.AnyOperation?
     {
         guard let next:String = self.descend()
         else
@@ -974,7 +992,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func user() -> Unidoc.IntegralRequest.Ordering?
+    func user() -> Unidoc.AnyOperation?
     {
         guard
         let account:String = self.descend(),
@@ -991,7 +1009,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func docsLegacy() -> Unidoc.IntegralRequest.Ordering?
+    func docsLegacy() -> Unidoc.AnyOperation?
     {
         guard let next:String = self.descend()
         else

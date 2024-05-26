@@ -13,8 +13,8 @@ extension HTTP
         init?(get uri:URI, headers:HPACKHeaders, origin:IP.Origin)
         init?(get uri:URI, headers:HTTPHeaders, origin:IP.Origin)
 
-        init?(post path:URI, headers:HPACKHeaders, origin:IP.Origin, body:borrowing [UInt8])
-        init?(post path:URI, headers:HTTPHeaders, origin:IP.Origin, body:borrowing [UInt8])
+        init?(post uri:URI, headers:HPACKHeaders, origin:IP.Origin, body:borrowing [UInt8])
+        init?(post uri:URI, headers:HTTPHeaders, origin:IP.Origin, body:borrowing [UInt8])
     }
 }
 extension HTTP.ServerIntegralRequest
