@@ -15,10 +15,6 @@ import UnidocLinker
 import UnidocRecords
 import UnixTime
 
-@available(*, deprecated, renamed: "Unidoc.DB")
-public
-typealias UnidocDatabase = Unidoc.DB
-
 extension Unidoc
 {
     @frozen public

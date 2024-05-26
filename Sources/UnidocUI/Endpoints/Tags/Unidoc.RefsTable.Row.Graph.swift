@@ -1,5 +1,6 @@
 import HTML
 import Media
+import SemanticVersions
 import Symbols
 
 extension Unidoc.RefsTable.Row
@@ -46,7 +47,8 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
     {
         td[.div]
         {
-            guard case .some(let graph) = self.state
+            guard case .some(let graph) = self.state,
+            let abi:PatchVersion = graph.abi
             else
             {
                 $0[.span] { $0.title = "No symbol graph has been built for this version." }
@@ -80,7 +82,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                     This symbol graph is currently queued for deletion.
                     """
                 }
-            } = "\(graph.abi)"
+            } = "\(abi)"
 
             $0 += " "
 

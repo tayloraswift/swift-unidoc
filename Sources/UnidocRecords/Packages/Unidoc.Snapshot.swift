@@ -117,7 +117,8 @@ extension Unidoc.Snapshot
     }
 
     /// Wraps and returns the inline symbol graph from this snapshot document if present,
-    /// delegates to the provided symbol graph loader otherwise.
+    /// delegates to the provided symbol graph loader otherwise. Returns nil if the symbol graph
+    /// has not been built yet.
     public
     func load<Loader>(with loader:Loader?) async throws -> SymbolGraphObject<Unidoc.Edition>
         where Loader:Unidoc.GraphLoader

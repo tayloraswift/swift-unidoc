@@ -37,10 +37,14 @@ extension Unidoc.DB.Snapshots
     }
 
     public static
-    let indexSymbolGraphABI:Mongo.CollectionIndex = .init("ABI",
+    let indexSymbolGraphABI:Mongo.CollectionIndex = .init("ABI/2",
         unique: false)
     {
         $0[Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.Snapshot[.metadata]] { $0[.exists] = true }
     }
 
     public static
@@ -211,6 +215,7 @@ extension Unidoc.DB.Snapshots
             {
                 $0[.filter]
                 {
+                    $0[Unidoc.Snapshot[.metadata]] { $0[.exists] = true }
                     $0[Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]]
                     {
                         $0[.lt] = version

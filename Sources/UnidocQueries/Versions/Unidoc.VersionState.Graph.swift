@@ -29,7 +29,7 @@ extension Unidoc.VersionState
         public
         let commit:SHA1?
         public
-        let abi:PatchVersion
+        let abi:PatchVersion?
 
         @inlinable public
         init(id:Unidoc.Edition,
@@ -37,7 +37,7 @@ extension Unidoc.VersionState
             remoteBytes:Int,
             action:Unidoc.Snapshot.PendingAction?,
             commit:SHA1?,
-            abi:PatchVersion)
+            abi:PatchVersion?)
         {
             self.id = id
             self.inlineBytes = inlineBytes
@@ -71,6 +71,6 @@ extension Unidoc.VersionState.Graph:BSONDocumentDecodable
             remoteBytes: try bson[.remoteBytes].decode(),
             action: try bson[.action]?.decode(),
             commit: try bson[.commit]?.decode(),
-            abi: try bson[.abi].decode())
+            abi: try bson[.abi]?.decode())
     }
 }
