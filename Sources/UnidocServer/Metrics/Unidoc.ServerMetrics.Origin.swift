@@ -72,7 +72,6 @@ extension Unidoc.ServerMetrics.Origin
             case .petal:                return .search
             case .seznam:               return .search
             case .yandexbot:            return .yandexbot
-            case .unknown:              return .script
             case .other:                return .script
             case .tool:                 return .script
             case .facebookexternalhit:  return .facebookexternalhit

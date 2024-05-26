@@ -50,10 +50,6 @@ extension Unidoc.ClientGuess
         /// Crawler belonging to Yandex, a Russian search engine.
         case yandexbot
 
-        /// A bot whose provenance is unknown because our policylists are incomplete.
-        /// Don’t use this to represent a generic research bot; use ``other`` instead.
-        case unknown
-
         /// Some other bot.
         case other
 
