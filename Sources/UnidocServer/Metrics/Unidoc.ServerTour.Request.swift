@@ -5,7 +5,7 @@ import IP
 import NIOHPACK
 import URI
 
-extension ServerTour
+extension Unidoc.ServerTour
 {
     @frozen @usableFromInline
     struct Request:Equatable, Sendable
@@ -28,7 +28,7 @@ extension ServerTour
         }
     }
 }
-extension ServerTour.Request:HTML.OutputStreamable
+extension Unidoc.ServerTour.Request:HTML.OutputStreamable
 {
     @usableFromInline static
     func += (dl:inout HTML.ContentEncoder, self:Self)

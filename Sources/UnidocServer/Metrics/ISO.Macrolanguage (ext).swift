@@ -1,4 +1,5 @@
 import ISO
+import UnidocProfiling
 
 extension ISO.Macrolanguage:Identifiable
 {

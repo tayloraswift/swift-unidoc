@@ -1,3 +1,5 @@
+import BSON
+import Durations
 import MongoDB
 
 extension Mongo.Session
@@ -17,6 +19,38 @@ extension Mongo.Session
         where Update:Mongo.UpdateQuery, Update.Effect.ExecutionPolicy:Mongo.ExecutionPolicy
     {
         try await self.run(command: update.command, against: database)
+    }
+}
+extension Mongo.Session
+{
+    @inlinable public
+    func observe<Source, Delta>(collection:Source,
+        every interval:Milliseconds = 30_000,
+        since start:inout BSON.Timestamp?,
+        yield:(Mongo.ChangeEvent<Delta>) async throws -> ()) async throws where
+        Source:Mongo.CollectionModel<Delta.Model>,
+        Delta:Mongo.MasterCodingDelta,
+        Delta:Sendable,
+        Delta.Model.CodingKey:Sendable,
+        Delta.Model:BSONDecodable
+    {
+        try await self.run(
+            command: Mongo.Aggregate<Mongo.Cursor<Mongo.ChangeEvent<Delta>>>.init(Source.name,
+                tailing: .init(timeout: interval, awaits: true))
+            {
+                $0[stage: .changeStream] { $0[.startAtOperationTime] = start }
+            },
+            against: collection.database)
+        {
+            for try await events:[Mongo.ChangeEvent<Delta>] in $0
+            {
+                for event:Mongo.ChangeEvent<Delta> in events
+                {
+                    try await yield(event)
+                    start = event.clusterTime
+                }
+            }
+        }
     }
 }
 extension Mongo.Session

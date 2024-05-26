@@ -44,7 +44,7 @@ extension HTTP.ServerLoop
         from binding:(address:String, port:Int),
         as authority:Authority,
         on threads:MultiThreadedEventLoopGroup,
-        policy:(some HTTP.ServerPolicy)? = nil) async throws
+        policy:(any HTTP.ServerPolicy)? = nil) async throws
         where Authority:HTTP.ServerAuthority
     {
         let bootstrap:ServerBootstrap = .init(group: threads)

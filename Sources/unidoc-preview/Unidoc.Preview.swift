@@ -150,12 +150,25 @@ extension Unidoc.Preview
             @Sendable (pool:Mongo.SessionPool) in
             do
             {
-                let server:Unidoc.ServerLoop = try await .init(
-                    context: context,
-                    options: options,
-                    mongodb: pool)
+                let database:Unidoc.Database = .init(sessions: pool,
+                    unidoc: await .setup(as: "unidoc", in: pool))
+                {
+                    $0.apiLimitInterval = .seconds(60)
+                    $0.apiLimitPerReset = 10000
+                }
 
-                try await server.run()
+                try await Unidoc.GraphStateLoop.run(watching: database)
+                {
+                    let linker:Unidoc.GraphLinkerPlugin = .init(bucket: nil)
+                    let server:Unidoc.ServerLoop = .init(
+                        plugins: [linker],
+                        context: context,
+                        options: options,
+                        graphState: $0,
+                        db: database)
+
+                    try await server.run()
+                }
             }
             catch let error
             {
