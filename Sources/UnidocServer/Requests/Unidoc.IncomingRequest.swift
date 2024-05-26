@@ -8,19 +8,19 @@ import UnidocProfiling
 import UnidocRecords
 import URI
 
-extension Unidoc.IntegralRequest
+extension Unidoc
 {
+    /// An `IncomingRequest` is a request that has not yet been routed to an operation through
+    /// a ``Router``.
     @frozen public
-    struct Metadata:Sendable
+    struct IncomingRequest:Sendable
     {
-        public
-        let annotation:Unidoc.ClientAnnotation
-
         let headers:HTTP.Headers
-        let cookies:Unidoc.Cookies
 
         public
-        let origin:IP.Origin
+        let authorization:Authorization
+        public
+        let origin:Origin
         public
         let host:String?
         public
@@ -29,21 +29,20 @@ extension Unidoc.IntegralRequest
         private
         init(
             headers:HTTP.Headers,
-            cookies:Unidoc.Cookies,
-            origin:IP.Origin,
+            authorization:Authorization,
+            origin:Origin,
             host:String?,
             uri:URI)
         {
-            self.annotation = .guess(headers: headers, owner: origin.owner)
             self.headers = headers
-            self.cookies = cookies
+            self.authorization = authorization
             self.origin = origin
             self.host = host
             self.uri = uri
         }
     }
 }
-extension Unidoc.IntegralRequest.Metadata
+extension Unidoc.IncomingRequest
 {
     /// Computes and returns the case-folded, normalized path from the ``uri``.
     var path:ArraySlice<String>
@@ -51,7 +50,7 @@ extension Unidoc.IntegralRequest.Metadata
         self.uri.path.normalized(lowercase: true)[...]
     }
 }
-extension Unidoc.IntegralRequest.Metadata
+extension Unidoc.IncomingRequest
 {
     var version:HTTP
     {
@@ -62,26 +61,25 @@ extension Unidoc.IntegralRequest.Metadata
         }
     }
 
-    var logged:ServerTour.Request
+    var logged:Unidoc.ServerTour.Request
     {
         .init(
             version: self.version,
             headers: self.headers,
-            origin: self.origin,
+            origin: self.origin.ip,
             uri: self.uri)
     }
 
-    var credentials:Unidoc.Credentials
+    var loginState:Unidoc.LoginState
     {
-        .init(cookies: self.cookies, request: self.uri)
+        .init(cookies: self.authorization.cookies, request: self.uri)
     }
 }
-extension Unidoc.IntegralRequest.Metadata
+extension Unidoc.IncomingRequest
 {
     public
     init(headers:HPACKHeaders, origin:IP.Origin, uri:URI)
     {
-        let cookies:[String] = headers["cookie"]
         let host:String? = headers[":authority"].last.map
         {
             if  let colon:String.Index = $0.lastIndex(of: ":")
@@ -95,8 +93,8 @@ extension Unidoc.IntegralRequest.Metadata
         }
 
         self.init(headers: .http2(headers),
-            cookies: .init(header: cookies),
-            origin: origin,
+            authorization: .from(headers),
+            origin: .init(ip: origin) ?? .init(ip: origin, client: .from(headers)),
             host: host,
             uri: uri)
     }
@@ -104,14 +102,10 @@ extension Unidoc.IntegralRequest.Metadata
     public
     init(headers:HTTPHeaders, origin:IP.Origin, uri:URI)
     {
-        let host:String? = headers["host"].last
-
-        //  None of our authenticated endpoints support HTTP/1.1, so there is no
-        //  need to load cookies.
         self.init(headers: .http1_1(headers),
-            cookies: .init(),
-            origin: origin,
-            host: host,
+            authorization: .from(headers),
+            origin: .init(ip: origin) ?? .init(ip: origin, client: .from(headers)),
+            host: headers["host"].last,
             uri: uri)
     }
 }

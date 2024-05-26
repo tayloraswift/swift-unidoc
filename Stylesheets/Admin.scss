@@ -31,49 +31,61 @@ nav.admin
 
 figure.client svg > g
 {
-    > *.googlebot
+    > *.origin-googlebot
     {
         fill: #5b82ff;
     }
-    > *.bingbot
+    > *.origin-bingbot
     {
         fill: #3e6bff;
     }
-    > *.baiduspider
+    > *.origin-baiduspider
     {
         fill: #5c51ff;
     }
-    > *.yandexbot
+    > *.origin-yandexbot
     {
         fill: #6953ff;
     }
-    > *.minor-search-engine
+    > *.origin-search
     {
         fill: #ae6aff;
     }
-    > *.discoursebot
+    > *.origin-discoursebot
     {
         fill: #ff1e69;
     }
-    > *.barbie
+    > *.origin-barbiebot
+    {
+        fill: #ff4885;
+    }
+    > *.origin-barbie
     {
         fill: #ff73a1;
     }
-    > *.bratz
+    > *.origin-bratz
     {
         fill: #f2bbcd;
     }
-    > *.ahrefsbot
+    > *.origin-ahrefsbot
     {
         fill: #e1e1e1;
     }
-    > *.robot
+    > *.origin-facebookexternalhit
     {
         fill: #afafaf;
     }
-    > *.tooling
+    > *.origin-script
     {
         fill: #999;
+    }
+    > *.origin-github
+    {
+        fill: #616161;
+    }
+    > *.origin-cloudfront
+    {
+        fill: #e09c6f;
     }
 }
 figure.language div.pie-color > svg g
@@ -213,40 +225,33 @@ figure.language div.pie-color > svg g
 }
 figure.status div.pie-color > svg g
 {
-    > *.multiple-choices
-    {
-        fill: rgb(255, 154, 38);
-    }
-    > *.not-modified
-    {
-        fill: rgb(253, 39, 110);
-    }
-    > *.ok
+    > *.status-200
     {
         fill: var(--fg-accent);
     }
-    > *.redirected-permanently
+    > *.status-300
     {
-        fill: rgb(130, 255, 249);
+        fill: rgb(255, 50, 136);
     }
-    > *.redirected-temporarily
+    > *.status-304
+    {
+        fill: rgb(253, 39, 110);
+    }
+    > *.status-303,
+    > *.status-307
     {
         fill: rgb(171, 255, 244);
     }
-    > *.not-found
+    > *.status-308
+    {
+        fill: rgb(130, 255, 249);
+    }
+    > *.status-404
     {
         fill: rgb(255, 244, 94);
     }
-    > *.gone
+    > *.status-410
     {
         fill: rgb(255, 206, 70);
-    }
-    > *.errored
-    {
-        fill: rgb(255, 154, 38);
-    }
-    > *.unauthorized
-    {
-        fill: rgb(255, 103, 103);
     }
 }

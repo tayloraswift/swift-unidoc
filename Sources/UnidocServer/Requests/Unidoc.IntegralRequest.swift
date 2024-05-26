@@ -8,28 +8,28 @@ extension Unidoc
     struct IntegralRequest:Sendable
     {
         public
-        let metadata:Metadata
+        let incoming:IncomingRequest
         public
-        let ordering:Ordering
+        let assignee:AnyOperation
 
         private
-        init(metadata:Metadata, ordering:Ordering)
+        init(incoming:IncomingRequest, assignee:AnyOperation)
         {
-            self.metadata = metadata
-            self.ordering = ordering
+            self.incoming = incoming
+            self.assignee = assignee
         }
     }
 }
 extension Unidoc.IntegralRequest
 {
     public
-    init?(get metadata:Metadata)
+    init?(get request:Unidoc.IncomingRequest)
     {
-        var router:Unidoc.Router = .init(metadata)
+        var router:Unidoc.Router = .init(routing: request)
 
-        if  let ordering:Unidoc.IntegralRequest.Ordering = router.get()
+        if  let assignee:Unidoc.AnyOperation = router.get()
         {
-            self.init(metadata: metadata, ordering: ordering)
+            self.init(incoming: request, assignee: assignee)
         }
         else
         {
@@ -38,13 +38,13 @@ extension Unidoc.IntegralRequest
     }
 
     public
-    init?(post metadata:Metadata, body:borrowing [UInt8])
+    init?(post request:Unidoc.IncomingRequest, body:borrowing [UInt8])
     {
-        var router:Unidoc.Router = .init(metadata)
+        var router:Unidoc.Router = .init(routing: request)
 
-        if  let ordering:Unidoc.IntegralRequest.Ordering = router.post(body: body)
+        if  let assignee:Unidoc.AnyOperation = router.post(body: body)
         {
-            self.init(metadata: metadata, ordering: ordering)
+            self.init(incoming: request, assignee: assignee)
         }
         else
         {

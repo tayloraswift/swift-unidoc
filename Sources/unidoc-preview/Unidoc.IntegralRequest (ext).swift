@@ -11,21 +11,21 @@ extension Unidoc.IntegralRequest:HTTP.ServerIntegralRequest
     public
     init?(get uri:URI, headers:HTTPHeaders, origin:IP.Origin)
     {
-        let metadata:Metadata = .init(headers: headers, origin: origin, uri: uri)
-        self.init(get: metadata)
+        let incoming:Unidoc.IncomingRequest = .init(headers: headers, origin: origin, uri: uri)
+        self.init(get: incoming)
     }
 
     public
     init?(get uri:URI, headers:HPACKHeaders, origin:IP.Origin)
     {
-        let metadata:Metadata = .init(headers: headers, origin: origin, uri: uri)
-        self.init(get: metadata)
+        let incoming:Unidoc.IncomingRequest = .init(headers: headers, origin: origin, uri: uri)
+        self.init(get: incoming)
     }
 
     public
     init?(post uri:URI, headers:HPACKHeaders, origin:IP.Origin, body:borrowing [UInt8])
     {
-        let metadata:Metadata = .init(headers: headers, origin: origin, uri: uri)
-        self.init(post: metadata, body: body)
+        let incoming:Unidoc.IncomingRequest = .init(headers: headers, origin: origin, uri: uri)
+        self.init(post: incoming, body: body)
     }
 }

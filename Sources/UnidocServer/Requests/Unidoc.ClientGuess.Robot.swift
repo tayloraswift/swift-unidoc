@@ -1,10 +1,13 @@
 import HTTP
 
-extension Unidoc.ClientAnnotation
+extension Unidoc.ClientGuess
 {
     @frozen public
     enum Robot:Equatable, Hashable, Sendable
     {
+        /// A bot that sent no User-Agent header at all.
+        case anonymous
+
         case ahrefsbot
 
         case amazonbot
@@ -26,6 +29,8 @@ extension Unidoc.ClientAnnotation
         /// Crawler belonging to DuckDuckGo, an American search engine. Only the favicon
         /// bot is active today.
         case duckduckbot
+
+        case facebookexternalhit
 
         /// AdsBot, or possible Google employee.
         case google
@@ -55,7 +60,7 @@ extension Unidoc.ClientAnnotation
         case tool
     }
 }
-extension Unidoc.ClientAnnotation.Robot
+extension Unidoc.ClientGuess.Robot
 {
     static
     func match(in string:String) -> Self?
@@ -72,6 +77,10 @@ extension Unidoc.ClientAnnotation.Robot
         {
             return .baiduspider
         }
+        else if string.contains("bing")
+        {
+            return .bingbot
+        }
         else if string.contains("bytedance")
         {
             return .bytespider
@@ -79,6 +88,14 @@ extension Unidoc.ClientAnnotation.Robot
         else if string.contains("duckduck")
         {
             return .duckduckbot
+        }
+        else if string.contains("facebookexternalhit")
+        {
+            return .facebookexternalhit
+        }
+        else if string.contains("google")
+        {
+            return .googlebot
         }
         else if string.contains("naver")
         {

@@ -4,10 +4,10 @@ import MongoDB
 import UnidocAssets
 import UnidocRender
 
-extension Unidoc.IntegralRequest
+extension Unidoc
 {
     @frozen public
-    enum Ordering:Sendable
+    enum AnyOperation:Sendable
     {
         /// Runs directly on the actor, which provides no ordering guarantees. Suspensions while
         /// serving the request might interleave with other requests.
@@ -21,7 +21,7 @@ extension Unidoc.IntegralRequest
         case syncLoad(Unidoc.Cache<Unidoc.Asset>.Request)
     }
 }
-extension Unidoc.IntegralRequest.Ordering
+extension Unidoc.AnyOperation
 {
     static
     func explainable<Base>(_ endpoint:Base,
