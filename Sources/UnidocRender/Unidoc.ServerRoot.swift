@@ -23,6 +23,7 @@ extension Unidoc
         case pdct
         case realm
         case really
+        case render
         case robots_txt = "robots.txt"
         case sitemap_xml = "sitemap.xml"
         case ssgc

@@ -166,12 +166,17 @@ extension Unidoc.Router
     mutating
     func get() -> Unidoc.AnyOperation?
     {
-        guard let root:Unidoc.ServerRoot = self.descend()
-        else
+        if  self.stem.isEmpty
         {
             return .explainable(Unidoc.HomeEndpoint.init(query: .init(limit: 16)),
                     parameters: .init(self.query),
                     etag: self.etag)
+        }
+
+        guard let root:Unidoc.ServerRoot = self.descend()
+        else
+        {
+            return nil
         }
 
         switch root
@@ -196,6 +201,7 @@ extension Unidoc.Router
         case .really:       return nil // POST only
         case .realm:        return self.realm()
         case .reference:    return self.docsLegacy()
+        case .render:       return self.render()
         case .robots_txt:   return self.robots()
         case .sitemap_xml:  return self.sitemap()
         case .sitemaps:     return self.sitemaps()
