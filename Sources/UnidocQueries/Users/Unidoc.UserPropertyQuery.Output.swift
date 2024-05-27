@@ -11,11 +11,11 @@ extension Unidoc.UserPropertyQuery
         public
         let user:Unidoc.User?
         public
-        let packages:[Unidoc.PackageOutput]
+        let packages:[Unidoc.EditionOutput]
 
         @inlinable public
         init(user:Unidoc.User?,
-            packages:[Unidoc.PackageOutput])
+            packages:[Unidoc.EditionOutput])
         {
             self.user = user
             self.packages = packages

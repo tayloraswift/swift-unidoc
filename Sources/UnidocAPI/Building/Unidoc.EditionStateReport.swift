@@ -11,14 +11,14 @@ extension Unidoc
         public
         let id:Edition
         public
-        let volume:Symbol.Edition?
+        let volume:Symbol.Volume?
         public
         let build:BuildStatus?
         public
         let graph:Graph?
 
         @inlinable public
-        init(id:Edition, volume:Symbol.Edition?, build:BuildStatus?, graph:Graph?)
+        init(id:Edition, volume:Symbol.Volume?, build:BuildStatus?, graph:Graph?)
         {
             self.id = id
             self.volume = volume
@@ -113,5 +113,16 @@ extension Unidoc.EditionStateReport:JSONObjectEncodable
         json[.build] = self.build
         json[.graph] = self.graph
         json[.phase] = self.phase
+    }
+}
+extension Unidoc.EditionStateReport:JSONObjectDecodable
+{
+    public
+    init(json:JSON.ObjectDecoder<CodingKey>) throws
+    {
+        self.init(id: try json[.id].decode(),
+            volume: try json[.volume]?.decode(),
+            build: try json[.build]?.decode(),
+            graph: try json[.graph]?.decode())
     }
 }

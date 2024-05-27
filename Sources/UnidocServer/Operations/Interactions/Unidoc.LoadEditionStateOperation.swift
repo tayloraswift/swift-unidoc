@@ -6,7 +6,7 @@ import URI
 
 extension Unidoc
 {
-    struct UserRefStateOperation:Sendable
+    struct LoadEditionStateOperation:Sendable
     {
         private
         let authorization:Authorization
@@ -23,7 +23,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.UserRefStateOperation:Unidoc.PublicOperation
+extension Unidoc.LoadEditionStateOperation:Unidoc.PublicOperation
 {
     func load(from server:borrowing Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
@@ -39,14 +39,11 @@ extension Unidoc.UserRefStateOperation:Unidoc.PublicOperation
         case .web:
             return .unauthorized("Missing authorization header\n")
 
-        case .api(let account, let apiKey):
+        case .api(let authorization):
             session = try await .init(from: server.db.sessions)
-            //  FIXME:
-            //  Charging a cost of 0 is inefficient; there should be a way verify the API key
-            //  without performing a unreachable write on the primary replica.
-            remaining = try await server.db.users.charge(apiKey: apiKey,
-                user: account,
-                cost: 0,
+            remaining = try await server.db.users.charge(apiKey: authorization.apiKey,
+                user: authorization.id,
+                cost: 1,
                 with: session)
         }
 
@@ -58,7 +55,8 @@ extension Unidoc.UserRefStateOperation:Unidoc.PublicOperation
         }
 
         guard
-        let state:Unidoc.EditionState = try await server.db.unidoc.state(package: self.package,
+        let edition:Unidoc.EditionState = try await server.db.unidoc.editionState(
+            package: self.package,
             version: self.version,
             with: session)
         else
@@ -66,13 +64,13 @@ extension Unidoc.UserRefStateOperation:Unidoc.PublicOperation
             return .resource("No such edition\n", status: 404)
         }
 
-        let report:Unidoc.EditionStateReport = .init(id: state.version.edition.id,
-            volume: state.version.volume?.symbol,
-            build: state.build.map
+        let report:Unidoc.EditionStateReport = .init(id: edition.version.edition.id,
+            volume: edition.version.volume?.symbol,
+            build: edition.build.map
             {
                 .init(request: $0.request, stage: $0.progress?.stage, failure: $0.failure)
             },
-            graph: state.version.graph.map
+            graph: edition.version.graph.map
             {
                 .init(action: $0.action, commit: $0.commit)
             })

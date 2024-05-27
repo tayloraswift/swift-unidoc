@@ -1,18 +1,19 @@
 import HTML
 import Symbols
+import UnidocRecords
 
 extension Unidoc
 {
     struct BuildButton
     {
-        let selector:VolumeSelector
+        let selector:EditionSelector
         let package:Package
         let version:Version?
         let cancel:Bool
         let area:Bool
 
         private
-        init(selector:VolumeSelector,
+        init(selector:EditionSelector,
             package:Package,
             version:Version?,
             cancel:Bool,
@@ -29,9 +30,9 @@ extension Unidoc
 extension Unidoc.BuildButton
 {
     static
-    func edition(id:Unidoc.Edition, package:Symbol.Package, version:String) -> Self
+    func edition(id:Unidoc.Edition, package:Symbol.Package, ref:String) -> Self
     {
-        return .init(selector: .init(package: package, version: version[...]),
+        return .init(selector: .init(package: package, ref: ref[...]),
             package: id.package,
             version: id.version,
             cancel: false,
@@ -41,7 +42,7 @@ extension Unidoc.BuildButton
     static
     func latest(of package:Unidoc.PackageMetadata, cancel:Bool = false) -> Self
     {
-        return .init(selector: .init(package: package.symbol, version: nil),
+        return .init(selector: .init(package: package.symbol, ref: nil),
             package: package.id,
             version: nil,
             cancel: cancel,

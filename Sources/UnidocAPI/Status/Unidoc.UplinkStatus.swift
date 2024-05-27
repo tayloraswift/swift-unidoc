@@ -8,7 +8,7 @@ extension Unidoc
         public
         let edition:Edition
         public
-        let volume:Symbol.Edition
+        let volume:Symbol.Volume
         public
         let hidden:Bool
         public
@@ -16,7 +16,7 @@ extension Unidoc
 
         @inlinable public
         init(edition:Edition,
-            volume:Symbol.Edition,
+            volume:Symbol.Volume,
             hidden:Bool,
             delta:SitemapDelta?)
         {

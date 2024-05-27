@@ -30,7 +30,7 @@ extension Unidoc
 }
 extension Unidoc.PackageGroups
 {
-    init(organizing packages:consuming [Unidoc.PackageOutput], heading:Heading? = nil)
+    init(organizing packages:consuming [Unidoc.EditionOutput], heading:Heading? = nil)
     {
         let now:UnixInstant = .now()
 
@@ -41,12 +41,12 @@ extension Unidoc.PackageGroups
             free:[Unidoc.PackageCard]
         ) = packages.reduce(into: ([], [], []))
         {
-            if  case false? = $1.metadata.repo?.origin.alive
+            if  case false? = $1.package.repo?.origin.alive
             {
                 $0.inactive.append(.init($1, now: now))
             }
             else if
-                case true? = $1.metadata.repo?.license?.free
+                case true? = $1.package.repo?.license?.free
             {
                 $0.free.append(.init($1, now: now))
             }

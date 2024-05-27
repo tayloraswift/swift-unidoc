@@ -25,7 +25,12 @@ extension Unidoc
 extension Unidoc.UserSecrets
 {
     @inlinable public
-    var session:Unidoc.UserSession { .init(account: account, cookie: cookie) }
+    var web:Unidoc.UserSession.Web { .init(id: self.account, cookie: self.cookie) }
+    @inlinable public
+    var api:Unidoc.UserSession.API?
+    {
+        self.apiKey.map { .init(id: self.account, apiKey: $0) }
+    }
 }
 extension Unidoc.UserSecrets:BSONDocumentDecodable
 {

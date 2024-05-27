@@ -9,10 +9,10 @@ extension Unidoc
     struct UserAccountQuery:Sendable
     {
         public
-        let session:UserSession
+        let session:UserSession.Web
 
         @inlinable public
-        init(session:UserSession)
+        init(session:UserSession.Web)
         {
             self.session = session
         }
@@ -37,7 +37,7 @@ extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
     {
         pipeline[stage: .match] = .init
         {
-            $0[Unidoc.User[.id]] = self.session.account
+            $0[Unidoc.User[.id]] = self.session.id
             $0[Unidoc.User[.cookie]] = self.session.cookie
         }
 

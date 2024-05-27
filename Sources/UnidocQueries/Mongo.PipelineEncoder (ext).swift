@@ -5,6 +5,34 @@ import SymbolGraphs
 extension Mongo.PipelineEncoder
 {
     mutating
+    func loadEdition(matching predicate:Unidoc.VersionPredicate,
+        from package:Mongo.AnyKeyPath,
+        into edition:Mongo.AnyKeyPath)
+    {
+        //  Lookup the latest release of each package.
+        self[stage: .lookup] = .init
+        {
+            $0[.from] = Unidoc.DB.Editions.name
+            $0[.localField] = package / Unidoc.PackageMetadata[.id]
+            $0[.foreignField] = Unidoc.EditionMetadata[.package]
+            $0[.pipeline] = .init
+            {
+                $0 += predicate
+                $0[stage: .limit] = 1
+            }
+            $0[.as] = edition
+        }
+
+        //  Unbox single-element array.
+        self[stage: .set] = .init
+        {
+            $0[edition] = .expr { $0[.first] = edition }
+        }
+    }
+}
+extension Mongo.PipelineEncoder
+{
+    mutating
     func loadBranches(
         limit:Int,
         skip:Int = 0,
@@ -71,27 +99,7 @@ extension Mongo.PipelineEncoder
             $0[.foreignField] = Unidoc.EditionMetadata[.package]
             $0[.pipeline] = .init
             {
-                switch predicate
-                {
-                case .latest(let series):
-                    $0[stage: .match] = .init
-                    {
-                        $0[Unidoc.EditionMetadata[.release]] = series == .release
-                        $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
-                    }
-
-                    $0[stage: .sort] = .init
-                    {
-                        $0[Unidoc.EditionMetadata[.semver]] = (-)
-                        $0[Unidoc.EditionMetadata[.version]] = (-)
-                    }
-
-                case .name(let name):
-                    $0[stage: .match] = .init
-                    {
-                        $0[Unidoc.EditionMetadata[.name]] = name
-                    }
-                }
+                $0 += predicate
 
                 $0[stage: .skip] = skip == 0 ? nil : skip
 
