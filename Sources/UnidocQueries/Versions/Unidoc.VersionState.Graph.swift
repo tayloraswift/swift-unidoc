@@ -6,12 +6,6 @@ import SymbolGraphs
 import UnidocAPI
 import UnidocRecords
 
-extension Unidoc.VersionsQuery
-{
-    @available(*, deprecated)
-    public
-    typealias Graph = Unidoc.VersionState.Graph
-}
 extension Unidoc.VersionState
 {
     @frozen public
@@ -25,7 +19,7 @@ extension Unidoc.VersionState
         let remoteBytes:Int
 
         public
-        let action:Unidoc.Snapshot.PendingAction?
+        let action:Unidoc.LinkerAction?
         public
         let commit:SHA1?
         public
@@ -35,7 +29,7 @@ extension Unidoc.VersionState
         init(id:Unidoc.Edition,
             inlineBytes:Int?,
             remoteBytes:Int,
-            action:Unidoc.Snapshot.PendingAction?,
+            action:Unidoc.LinkerAction?,
             commit:SHA1?,
             abi:PatchVersion)
         {

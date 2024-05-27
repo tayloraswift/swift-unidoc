@@ -27,14 +27,12 @@ extension Unidoc.DB
     }
 
     public
-    func state(package:Unidoc.Package,
+    func state(package:Symbol.Package,
         version:Unidoc.VersionPredicate,
         with session:Mongo.Session) async throws -> Unidoc.EditionState?
     {
         try await session.query(database: self.id,
-            with: Unidoc.EditionStateQuery.init(package: package,
-                version: .match(version),
-                builds: true))
+            with: Unidoc.UserRefStateQuery.init(package: package, version: version))
     }
 }
 extension Unidoc.DB

@@ -350,7 +350,7 @@ extension Unidoc.DB
     public
     func label(
         documentation:consuming SymbolGraphObject<Void>,
-        action:Unidoc.Snapshot.PendingAction?,
+        action:Unidoc.LinkerAction?,
         with session:Mongo.Session) async throws ->
         (
             snapshot:Unidoc.Snapshot,

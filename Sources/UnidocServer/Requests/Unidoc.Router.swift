@@ -942,8 +942,15 @@ extension Unidoc.Router
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.query)
+        if  self.hostSupportsPublicAPI,
+            let ref:String = self.descend()
+        {
+            return .actor(Unidoc.UserRefStateOperation.init(authorization: self.authorization,
+                package: symbol,
+                version: .name(ref)))
+        }
 
+        let parameters:Unidoc.PipelineParameters = .init(self.query)
         let filter:Unidoc.VersionsQuery.Predicate
 
         if  let page:Int = parameters.page

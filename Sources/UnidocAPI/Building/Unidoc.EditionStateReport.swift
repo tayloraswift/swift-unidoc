@@ -3,6 +3,8 @@ import Symbols
 
 extension Unidoc
 {
+    /// An `EditionStateReport` summarizes what you would see on a package’s `/tags` page, in a
+    /// more machine-readable format.
     @frozen public
     struct EditionStateReport:Sendable
     {
@@ -12,12 +14,16 @@ extension Unidoc
         let volume:Symbol.Edition?
         public
         let build:BuildStatus?
+        public
+        let graph:Graph?
 
-        init(id:Edition, volume:Symbol.Edition?, build:BuildStatus?)
+        @inlinable public
+        init(id:Edition, volume:Symbol.Edition?, build:BuildStatus?, graph:Graph?)
         {
             self.id = id
             self.volume = volume
             self.build = build
+            self.graph = graph
         }
     }
 }
@@ -25,10 +31,12 @@ extension Unidoc.EditionStateReport
 {
     var phase:Phase
     {
-        if  case _? = self.volume
+        if  let graph:Graph = self.graph,
+            case nil = graph.action
         {
             return .ACTIVE
         }
+
         guard
         let build:Unidoc.BuildStatus = self.build
         else
@@ -91,6 +99,7 @@ extension Unidoc.EditionStateReport
         case id
         case volume
         case build
+        case graph
         case phase
     }
 }
@@ -102,6 +111,7 @@ extension Unidoc.EditionStateReport:JSONObjectEncodable
         json[.id] = self.id.version
         json[.volume] = self.volume
         json[.build] = self.build
+        json[.graph] = self.graph
         json[.phase] = self.phase
     }
 }
