@@ -10,13 +10,10 @@ extension Unidoc
         let package:Symbol.Package
         let version:VersionPredicate
 
-        let includeBuild:Bool
-
-        init(package:Symbol.Package, version:VersionPredicate, includeBuild:Bool)
+        init(package:Symbol.Package, version:VersionPredicate)
         {
             self.package = package
             self.version = version
-            self.includeBuild = includeBuild
         }
     }
 }
@@ -43,22 +40,11 @@ extension Unidoc.EditionStateSymbolicQuery:Unidoc.AliasingQuery
         //  Unbox single-element array.
         pipeline[stage: .unwind] = Unidoc.EditionState[.version]
 
-        guard self.includeBuild
-        else
-        {
-            return
-        }
-
         pipeline[stage: .lookup] = .init
         {
             $0[.from] = Unidoc.DB.PackageBuilds.name
-            $0[.pipeline] = .init
-            {
-                $0[stage: .match] = .init
-                {
-                    $0[Unidoc.BuildMetadata[.id]] = self.package
-                }
-            }
+            $0[.localField] = Unidoc.EditionState[.package] / Unidoc.PackageMetadata[.id]
+            $0[.foreignField] = Unidoc.BuildMetadata[.id]
             $0[.as] = Unidoc.EditionState[.build]
         }
 
