@@ -820,15 +820,15 @@ extension Unidoc.Router
         {
         case "build":
             guard
-            let account:Unidoc.Account = self.authorization.account,
-            let form:URI.Query,
-            let form:Unidoc.PackageBuildOperation.SymbolicParameters = .init(from: form)
+            let account:Unidoc.Account = self.authorization.account
             else
             {
                 return nil
             }
 
-            return .actor(Unidoc.PackageBuildOperation.init(account: account, build: form))
+            return .actor(Unidoc.PackageBuildOperation.init(account: account,
+                action: .submitSymbolic(.init(package: symbol, ref: name)),
+                redirect: symbol))
 
         case "state":
             return .actor(Unidoc.LoadEditionStateOperation.init(
