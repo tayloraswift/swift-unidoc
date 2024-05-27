@@ -2,6 +2,7 @@ import BSON
 import SemanticVersions
 import SymbolGraphs
 import Symbols
+import UnidocAPI
 
 extension Unidoc
 {
@@ -19,7 +20,7 @@ extension Unidoc
         var inline:SymbolGraph?
 
         public
-        var action:PendingAction?
+        var action:LinkerAction?
 
         /// Only present for standard library snapshots. This is used to automatically load the
         /// latest version of the standard library without querying git tags.
@@ -42,7 +43,7 @@ extension Unidoc
         init(id:Edition,
             metadata:SymbolGraphMetadata,
             inline:SymbolGraph?,
-            action:PendingAction?,
+            action:LinkerAction?,
             swift:PatchVersion?,
             pins:[Edition?],
             type:GraphType,
@@ -65,7 +66,7 @@ extension Unidoc.Snapshot
     init(id:Unidoc.Edition,
         metadata:SymbolGraphMetadata,
         inline:SymbolGraph,
-        action:PendingAction?)
+        action:Unidoc.LinkerAction?)
     {
         //  Is this the standard library? If so, is it a release version?
         let swift:PatchVersion?

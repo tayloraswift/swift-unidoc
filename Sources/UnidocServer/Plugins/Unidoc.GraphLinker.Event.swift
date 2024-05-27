@@ -11,7 +11,7 @@ extension Unidoc.GraphLinker
         case uplinked(Unidoc.UplinkStatus)
         case unlinked(Unidoc.UnlinkStatus)
         case deleted(Unidoc.DeleteStatus)
-        case failed(Unidoc.Edition, action:Unidoc.Snapshot.PendingAction)
+        case failed(Unidoc.Edition, action:Unidoc.LinkerAction)
         case caught(any Error)
     }
 }
