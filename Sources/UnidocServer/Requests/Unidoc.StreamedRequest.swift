@@ -8,15 +8,15 @@ extension Unidoc
     struct StreamedRequest:Sendable
     {
         public
-        let endpoint:any ProceduralOperation
+        let authorization:Authorization
         public
-        let cookies:Cookies
+        let endpoint:any ProceduralOperation
 
         @inlinable public
-        init(endpoint:any ProceduralOperation, cookies:Cookies)
+        init(authorization:Authorization, endpoint:any ProceduralOperation)
         {
+            self.authorization = authorization
             self.endpoint = endpoint
-            self.cookies = cookies
         }
     }
 }
@@ -53,8 +53,7 @@ extension Unidoc.StreamedRequest
             return nil
         }
 
-        self.init(
-            endpoint: Unidoc.BuilderUploadOperation.init(route: route),
-            cookies: .init(header: headers["cookie"]))
+        self.init(authorization: .from(headers),
+            endpoint: Unidoc.BuilderUploadOperation.init(route: route))
     }
 }

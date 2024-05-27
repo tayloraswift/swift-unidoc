@@ -69,11 +69,6 @@ extension Unidoc.IncomingRequest
             origin: self.origin.ip,
             uri: self.uri)
     }
-
-    var loginState:Unidoc.LoginState
-    {
-        .init(cookies: self.authorization.cookies, request: self.uri)
-    }
 }
 extension Unidoc.IncomingRequest
 {

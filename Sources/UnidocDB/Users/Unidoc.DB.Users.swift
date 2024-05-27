@@ -38,33 +38,6 @@ extension Unidoc.DB.Users:Mongo.CollectionModel
 }
 extension Unidoc.DB.Users
 {
-    /// Checks if the given cookie matches the associated user, returning the user's ID and
-    /// access level if the cookie is valid.
-    public
-    func validate(user:Unidoc.UserSession,
-        with session:Mongo.Session) async throws -> Unidoc.UserRights?
-    {
-        try await session.run(
-            command: Mongo.Find<Mongo.Single<Unidoc.UserRights>>.init(Self.name, limit: 1)
-            {
-                $0[.hint]
-                {
-                    $0[Element[.id]] = (+)
-                }
-                $0[.filter]
-                {
-                    $0[Element[.id]] = user.account
-                    $0[Element[.cookie]] = user.cookie
-                }
-                $0[.projection]
-                {
-                    $0[Element[.access]] = true
-                    $0[Element[.level]] = true
-                }
-            },
-            against: self.database)
-    }
-
     /// Upserts the given account into the database, returning a new, randomly-generated
     /// session cookie if the account was inserted, or the existing cookie if the account
     /// already exists.
@@ -220,7 +193,9 @@ extension Unidoc.DB.Users
 
         return updated.selected
     }
-
+}
+extension Unidoc.DB.Users
+{
     /// Charges the given API key by the specified amount, returning the amount of API calls
     /// left after the charge.
     ///
@@ -262,5 +237,40 @@ extension Unidoc.DB.Users
             against: self.database)
 
         return meter?.apiLimitLeft
+    }
+
+    /// Checks if the given credentials matches the associated user, returning the user's ID and
+    /// access level if the credentials are valid.
+    public
+    func validate(user:Unidoc.UserSession,
+        with session:Mongo.Session) async throws -> Unidoc.UserRights?
+    {
+        try await session.run(
+            command: Mongo.Find<Mongo.Single<Unidoc.UserRights>>.init(Self.name, limit: 1)
+            {
+                $0[.hint]
+                {
+                    $0[Element[.id]] = (+)
+                }
+                $0[.filter]
+                {
+                    switch user
+                    {
+                    case .web(let user):
+                        $0[Element[.id]] = user.id
+                        $0[Element[.cookie]] = user.cookie
+
+                    case .api(let user):
+                        $0[Element[.id]] = user.id
+                        $0[Element[.apiKey]] = user.apiKey
+                    }
+                }
+                $0[.projection]
+                {
+                    $0[Element[.access]] = true
+                    $0[Element[.level]] = true
+                }
+            },
+            against: self.database)
     }
 }

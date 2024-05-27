@@ -3,61 +3,42 @@ import UnidocRecords
 
 extension Unidoc
 {
-    @frozen public
-    struct Cookies:Equatable, Hashable, Sendable
+    struct Cookie
     {
-        public
-        var session:UserSession?
-        public
-        var login:String?
+        let name:Substring
+        let value:Substring
 
-        init()
+        init(name:Substring = "", value:Substring)
         {
-            self.session = nil
-            self.login = nil
+            self.name = name
+            self.value = value
         }
     }
 }
-extension Unidoc.Cookies
+extension Unidoc.Cookie
+{
+    init?(_ cookie:Substring)
+    {
+        if  let equals:String.Index = cookie.firstIndex(of: "=")
+        {
+            let start:String.Index = cookie.index(after: equals)
+            self.init(name: cookie[..<equals], value: cookie[start...])
+        }
+        else if !cookie.isEmpty
+        {
+            self.init(value: cookie)
+        }
+        else
+        {
+            return nil
+        }
+    }
+}
+extension Unidoc.Cookie
 {
     static
     var session:String { "__Host-session" }
 
     static
     var login:String { "login_state" }
-}
-extension Unidoc.Cookies
-{
-    public
-    init(header lines:[String])
-    {
-        self.init()
-        for line:String in lines
-        {
-            for cookie:Substring in line.split(separator: ";")
-            {
-                let cookie:Substring = cookie.drop(while: \.isWhitespace)
-                if  let equals:Substring.Index = cookie.firstIndex(of: "=")
-                {
-                    let start:Substring.Index = cookie.index(after: equals)
-                    self.update(cookie[..<equals], with: cookie[start...])
-                }
-                else if !cookie.isEmpty
-                {
-                    self.update(with: cookie)
-                }
-            }
-        }
-    }
-
-    private mutating
-    func update(_ name:Substring = "", with value:Substring)
-    {
-        switch name
-        {
-        case Self.session:  self.session = .init(value)
-        case Self.login:    self.login = .init(value)
-        case _:             break
-        }
-    }
 }

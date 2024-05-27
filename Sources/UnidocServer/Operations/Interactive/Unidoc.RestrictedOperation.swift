@@ -25,37 +25,49 @@ extension Unidoc.RestrictedOperation
 {
     public consuming
     func load(from server:borrowing Unidoc.Server,
-        with state:Unidoc.LoginState,
+        with state:Unidoc.UserSessionState,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
+        let session:Mongo.Session
         if  server.secure
         {
-            guard
-            let user:Unidoc.UserSession = state.cookies.session
-            else
+            let user:Unidoc.UserSession
+
+            switch state.authorization
             {
-                if  let oauth:GitHub.OAuth = server.github?.oauth
-                {
-                    let login:Unidoc.LoginPage = .init(client: oauth.client,
-                        flow: .sso,
-                        from: state.request)
-                    return .ok(login.resource(format: server.format))
-                }
+            case .invalid(let error):
+                return .unauthorized("\(error)\n")
+
+            case .web(nil, _):
+                guard
+                let oauth:GitHub.OAuth = server.github?.oauth
                 else
                 {
-                    //  Somehow we are running in secure mode without any OAuth capability.
-                    return nil
+                    return .error("""
+                        Server is running in secure mode with no OAuth capability!\n
+                        """)
                 }
+
+                let login:Unidoc.LoginPage = .init(client: oauth.client,
+                    flow: .sso,
+                    from: state.request)
+                return .ok(login.resource(format: server.format))
+
+            case .web(let session?, _):
+                user = .web(session)
+
+            case .api(let session):
+                user = .api(session)
             }
 
-            let session:Mongo.Session = try await .init(from: server.db.sessions)
+            session = try await .init(from: server.db.sessions)
 
             guard
             let rights:Unidoc.UserRights = try await server.db.users.validate(user: user,
                 with: session)
             else
             {
-                return .notFound("No such user")
+                return .notFound("No such user\n")
             }
 
             //  We ban this here, so that we can conditionally enforce permissions later by
@@ -63,24 +75,23 @@ extension Unidoc.RestrictedOperation
             if  case .guest = rights.level
             {
                 return .unauthorized("""
-                    It looks like you are somehow logged in as a non-player entity.
+                    It looks like you are somehow logged in as a non-player entity.\n
                     """)
             }
 
             guard self.admit(user: rights)
             else
             {
-                return .forbidden("Regrettably, you are not a mighty It Girl.")
+                return .forbidden("Regrettably, you are not a mighty It Girl.\n")
             }
-
-            return try await self.load(from: server, with: session)
         }
         else
         {
-            let session:Mongo.Session = try await .init(from: server.db.sessions)
+            session = try await .init(from: server.db.sessions)
             //  Yes, we need to call this, even though we ignore the result.
             let _:Bool = self.admit(user: .init(access: [], level: .administratrix))
-            return try await self.load(from: server, with: session)
         }
+
+        return try await self.load(from: server, with: session)
     }
 }

@@ -4,22 +4,19 @@ import UnidocDB
 
 extension Unidoc
 {
-    struct EditionStateQuery
+    struct EditionStateDirectQuery
     {
         let package:Package
         let version:VersionSelector
 
-        let builds:Bool
-
-        init(package:Package, version:VersionSelector, builds:Bool = false)
+        init(package:Package, version:VersionSelector)
         {
             self.package = package
             self.version = version
-            self.builds = builds
         }
     }
 }
-extension Unidoc.EditionStateQuery:Mongo.PipelineQuery
+extension Unidoc.EditionStateDirectQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Unidoc.DB.Packages
     typealias Collation = SimpleCollation
@@ -75,29 +72,5 @@ extension Unidoc.EditionStateQuery:Mongo.PipelineQuery
 
         //  Unbox single-element array.
         pipeline[stage: .unwind] = Unidoc.EditionState[.version]
-
-        if  self.builds
-        {
-            pipeline[stage: .lookup] = .init
-            {
-                $0[.from] = Unidoc.DB.PackageBuilds.name
-                $0[.pipeline] = .init
-                {
-                    $0[stage: .match] = .init
-                    {
-                        $0[Unidoc.BuildMetadata[.id]] = self.package
-                    }
-                }
-                $0[.as] = Unidoc.EditionState[.build]
-            }
-
-            pipeline[stage: .set] = .init
-            {
-                $0[Unidoc.EditionState[.build]] = .expr
-                {
-                    $0[.first] = Unidoc.EditionState[.build]
-                }
-            }
-        }
     }
 }

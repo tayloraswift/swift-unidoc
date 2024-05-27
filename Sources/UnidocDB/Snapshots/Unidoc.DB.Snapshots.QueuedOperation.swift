@@ -1,4 +1,5 @@
 import BSON
+import UnidocAPI
 import UnidocRecords
 
 extension Unidoc.DB.Snapshots
@@ -9,7 +10,7 @@ extension Unidoc.DB.Snapshots
         public
         let edition:Unidoc.Edition
         public
-        let action:Unidoc.Snapshot.PendingAction
+        let action:Unidoc.LinkerAction
         public
         let graphType:Unidoc.GraphType
         public
@@ -17,7 +18,7 @@ extension Unidoc.DB.Snapshots
 
         @inlinable
         init(edition:Unidoc.Edition,
-            action:Unidoc.Snapshot.PendingAction,
+            action:Unidoc.LinkerAction,
             graphType:Unidoc.GraphType,
             graphSize:Int64)
         {

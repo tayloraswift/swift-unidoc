@@ -1,6 +1,7 @@
 import BSON
 import SemanticVersions
 import SymbolGraphs
+import UnidocAPI
 
 extension Unidoc
 {
@@ -10,7 +11,7 @@ extension Unidoc
         public
         let metadata:SymbolGraphMetadata?
         public
-        let action:Snapshot.PendingAction?
+        let action:LinkerAction?
         public
         let swift:PatchVersion?
         public
@@ -22,7 +23,7 @@ extension Unidoc
 
         @inlinable public
         init(metadata:SymbolGraphMetadata?,
-            action:Snapshot.PendingAction?,
+            action:LinkerAction?,
             swift:PatchVersion?,
             pins:[Edition?]?,
             type:GraphType?,

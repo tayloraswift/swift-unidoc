@@ -149,7 +149,7 @@ extension Unidoc.GraphStateLoop
         {
         case .replace(let document, before: _, after: let snapshot):
             let _:Unidoc.Edition = document.id
-            let _:Unidoc.Snapshot.PendingAction? = snapshot.action
+            let _:Unidoc.LinkerAction? = snapshot.action
 
         case .update(let document, before: _, after: _):
             let subject:Unidoc.Edition = document.id
@@ -172,12 +172,12 @@ extension Unidoc.GraphStateLoop
             }
             else
             {
-                let _:Unidoc.Snapshot.PendingAction? = document.updatedFields?.action
+                let _:Unidoc.LinkerAction? = document.updatedFields?.action
             }
 
         case .insert(let snapshot):
             let _:Unidoc.Edition = snapshot.id
-            let _:Unidoc.Snapshot.PendingAction? = snapshot.action
+            let _:Unidoc.LinkerAction? = snapshot.action
 
         case .delete(let deleted):
             let _:Unidoc.Edition = deleted.id

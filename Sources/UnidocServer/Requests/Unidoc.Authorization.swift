@@ -1,5 +1,6 @@
 import NIOHPACK
 import NIOHTTP1
+import UnidocDB
 import UnidocRecords
 
 extension Unidoc
@@ -7,13 +8,42 @@ extension Unidoc
     @frozen public
     enum Authorization:Sendable
     {
-        case web(Cookies)
-        case api(Account, Int64)
+        case web(UserSession.Web?, login:String?)
+        case api(UserSession.API)
         case invalid(AuthorizationHeaderError)
     }
 }
 extension Unidoc.Authorization
 {
+    private static
+    func web(header lines:[String]) -> Self
+    {
+        var session:Unidoc.UserSession.Web? = nil
+        var login:String? = nil
+
+        for line:String in lines
+        {
+            for cookie:Substring in line.split(separator: ";")
+            {
+                guard
+                let cookie:Unidoc.Cookie = .init(cookie.drop(while: \.isWhitespace))
+                else
+                {
+                    continue
+                }
+
+                switch cookie.name
+                {
+                case Unidoc.Cookie.session: session = .init(cookie.value)
+                case Unidoc.Cookie.login:   login = .init(cookie.value)
+                case _:                     continue
+                }
+            }
+        }
+
+        return .web(session, login: login)
+    }
+
     private static
     func api(header:String) -> Self
     {
@@ -34,17 +64,17 @@ extension Unidoc.Authorization
             while: \.isWhitespace)
 
         guard
-        let separator:String.Index = credentials.firstIndex(of: "_"),
-        let account:Unidoc.Account = .init(credentials[..<separator]),
-        let key:UInt64 = .init(credentials[credentials.index(after: separator)...], radix: 16)
+        let session:Unidoc.UserSession.API = .init(credentials)
         else
         {
             return .invalid(.format(credentials))
         }
 
-        return .api(account, .init(bitPattern: key))
+        return .api(session)
     }
-
+}
+extension Unidoc.Authorization
+{
     static
     func from(_ headers:HTTPHeaders) -> Self
     {
@@ -54,7 +84,7 @@ extension Unidoc.Authorization
         }
         else
         {
-            .web(.init(header: headers["cookie"]))
+            .web(header: headers["cookie"])
         }
     }
 
@@ -67,19 +97,19 @@ extension Unidoc.Authorization
         }
         else
         {
-            .web(.init(header: headers["cookie"]))
+            .web(header: headers["cookie"])
         }
     }
 }
 extension Unidoc.Authorization
 {
-    var cookies:Unidoc.Cookies
+    var account:Unidoc.Account?
     {
         switch self
         {
-        case .web(let cookies): return cookies
-        case .api:              return .init()
-        case .invalid:          return .init()
+        case .web(let session, _):  session?.id
+        case .api(let session):     session.id
+        case .invalid:              nil
         }
     }
 }

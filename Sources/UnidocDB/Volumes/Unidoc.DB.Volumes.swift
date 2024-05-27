@@ -106,7 +106,7 @@ extension Unidoc.DB.Volumes:Mongo.RecodableModel
 }
 extension Unidoc.DB.Volumes
 {
-    func find(named symbol:Symbol.Edition,
+    func find(named symbol:Symbol.Volume,
         with session:Mongo.Session) async throws -> Unidoc.VolumeMetadata?
     {
         try await session.run(

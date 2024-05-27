@@ -10,13 +10,13 @@ extension Unidoc.RealmQuery
         public
         let metadata:Unidoc.RealmMetadata
         public
-        let packages:[Unidoc.PackageOutput]
+        let packages:[Unidoc.EditionOutput]
         public
         let user:Unidoc.User?
 
         @inlinable public
         init(metadata:Unidoc.RealmMetadata,
-            packages:[Unidoc.PackageOutput],
+            packages:[Unidoc.EditionOutput],
             user:Unidoc.User?)
         {
             self.metadata = metadata

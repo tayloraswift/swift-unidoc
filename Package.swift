@@ -479,6 +479,7 @@ let package:Package = .init(
         .target(name: "UnidocAPI",
             dependencies: [
                 .target(name: "SemanticVersions"),
+                .target(name: "SHA1"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
                 .target(name: "URI"),

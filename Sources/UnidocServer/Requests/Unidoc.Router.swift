@@ -79,35 +79,12 @@ extension Unidoc.Router
     }
 
     private
-    var session:Unidoc.UserSession?
-    {
-        //  TODO: support API key in more places.
-        switch self.authorization
-        {
-        case .web(let cookies): return cookies.session
-        case .api:              return nil
-        case .invalid:          return nil
-        }
-    }
-
-    private
     var etag:MD5?
     {
         switch self.headers
         {
         case .http1_1(let headers): .init(header: headers["if-none-match"])
         case .http2(let headers):   .init(header: headers["if-none-match"])
-        }
-    }
-
-    private
-    var hostSupportsPublicAPI:Bool
-    {
-        switch self.host
-        {
-        case "api.swiftinit.org"?:   true
-        case "localhost"?:           true
-        default:                     false
         }
     }
 }
@@ -163,20 +140,72 @@ extension Unidoc.Router
 }
 extension Unidoc.Router
 {
+    private
+    func redirect(root:Unidoc.ServerRoot) -> String?
+    {
+        let subdomain:Unidoc.ServerRoot.Subdomain?
+        switch self.host
+        {
+        case "swiftinit.org"?:
+            switch root.subdomain
+            {
+            case nil:           return nil
+            case let target?:   subdomain = target
+            }
+
+        case "api.swiftinit.org"?:
+            switch root.subdomain
+            {
+            case .api?:         return nil
+            case let target:    subdomain = target
+            }
+
+        default:
+            return nil
+        }
+
+        var path:URI.Path = root.path
+        for component:String in self.stem
+        {
+            path.append(component)
+        }
+
+        let uri:URI = .init(path: path, query: self.query)
+
+        if  let subdomain:Unidoc.ServerRoot.Subdomain
+        {
+            return "https://\(subdomain).swiftinit.org\(uri)"
+        }
+        else
+        {
+            return "https://swiftinit.org\(uri)"
+        }
+    }
+}
+extension Unidoc.Router
+{
     mutating
     func get() -> Unidoc.AnyOperation?
     {
-        if  self.stem.isEmpty
+        guard
+        let root:String = self.descend()
+        else
         {
             return .explainable(Unidoc.HomeEndpoint.init(query: .init(limit: 16)),
                     parameters: .init(self.query),
                     etag: self.etag)
         }
 
-        guard let root:Unidoc.ServerRoot = self.descend()
+        guard
+        let root:Unidoc.ServerRoot = .init(rawValue: root)
         else
         {
-            return nil
+            return .syncRedirect(.temporary("/"))
+        }
+
+        if  let redirect:String = self.redirect(root: root)
+        {
+            return .syncRedirect(.permanent(external: redirect))
         }
 
         switch root
@@ -201,6 +230,7 @@ extension Unidoc.Router
         case .really:       return nil // POST only
         case .realm:        return self.realm()
         case .reference:    return self.docsLegacy()
+        case .ref:          return self.ref(form: nil)
         case .render:       return self.render()
         case .robots_txt:   return self.robots()
         case .sitemap_xml:  return self.sitemap()
@@ -216,10 +246,22 @@ extension Unidoc.Router
     mutating
     func post(body:[UInt8]) -> Unidoc.AnyOperation?
     {
+        guard
+        let root:Unidoc.ServerRoot = self.descend()
+        else
+        {
+            return nil
+        }
+
+        if  let redirect:String = self.redirect(root: root)
+        {
+            return .syncRedirect(.permanent(external: redirect))
+        }
+
         switch self.contentType
         {
         case .media(.application(.json, charset: _))?:
-            return self.post(json: .init(utf8: body[...]))
+            return self.post(root: root, json: .init(utf8: body[...]))
 
         case .media(.application(.x_www_form_urlencoded, charset: _))?:
             guard
@@ -229,7 +271,7 @@ extension Unidoc.Router
                 return .syncError("Cannot parse URL-encoded form data\n")
             }
 
-            return self.post(form: form)
+            return self.post(root: root, form: form)
 
         case .multipart(.form_data(boundary: let boundary?))?:
             guard
@@ -239,7 +281,7 @@ extension Unidoc.Router
                 return .syncError("Cannot parse multipart form data\n")
             }
 
-            return self.post(form: form)
+            return self.post(root: root, form: form)
 
         case let other?:
             return .syncError("Cannot POST content type '\(other)'\n")
@@ -250,34 +292,34 @@ extension Unidoc.Router
     }
 
     private mutating
-    func post(json:JSON) -> Unidoc.AnyOperation?
+    func post(root:Unidoc.ServerRoot, json:JSON) -> Unidoc.AnyOperation?
     {
-        switch self.descend(into: Unidoc.ServerRoot.self)
+        switch root
         {
-        case .hook?:    return self.hook(json: json)
-        default:        return nil
-        }
-    }
-
-    private mutating
-    func post(form:URI.Query) -> Unidoc.AnyOperation?
-    {
-        switch self.descend(into: Unidoc.ServerRoot.self)
-        {
-        case .admin?:   return self.admin(form: form)
-        case .api?:     return self.api(form: form)
-        case .login?:   return self.login(form: form)
-        case .really?:  return self.really(form: form)
+        case .hook:     return self.hook(json: json)
         default:        return nil
         }
     }
     private mutating
-    func post(form:MultipartForm) -> Unidoc.AnyOperation?
+    func post(root:Unidoc.ServerRoot, form:URI.Query) -> Unidoc.AnyOperation?
     {
-        switch self.descend(into: Unidoc.ServerRoot.self)
+        switch root
         {
-        case .admin?:   return self.admin(form: form)
-        case .api?:     return self.api(form: form)
+        case .admin:    return self.admin(form: form)
+        case .api:      return self.api(form: form)
+        case .login:    return self.login(form: form)
+        case .really:   return self.really(form: form)
+        case .ref:      return self.ref(form: form)
+        default:        return nil
+        }
+    }
+    private mutating
+    func post(root:Unidoc.ServerRoot, form:MultipartForm) -> Unidoc.AnyOperation?
+    {
+        switch root
+        {
+        case .admin:    return self.admin(form: form)
+        case .api:      return self.api(form: form)
         default:        return nil
         }
     }
@@ -287,15 +329,14 @@ extension Unidoc.Router
     private
     func account() -> Unidoc.AnyOperation
     {
-        guard
-        let user:Unidoc.UserSession = self.session
+        guard case .web(let session?, _) = self.authorization
         else
         {
             return .syncRedirect(.temporary("\(Unidoc.ServerRoot.login)"))
         }
 
         return .explainable(Unidoc.UserSettingsEndpoint.init(
-                query: .init(session: user)),
+                query: .init(session: session)),
             parameters: .init(self.query),
             etag: self.etag)
     }
@@ -388,8 +429,8 @@ extension Unidoc.Router
         switch action
         {
         case .build:
-            if  let account:Unidoc.Account = self.session?.account,
-                let build:Unidoc.PackageBuildOperation.Parameters = .init(from: form)
+            if  let account:Unidoc.Account = self.authorization.account,
+                let build:Unidoc.PackageBuildOperation.DirectParameters = .init(from: form)
             {
                 return .actor(Unidoc.PackageBuildOperation.init(
                     account: account,
@@ -422,7 +463,7 @@ extension Unidoc.Router
                 let update:Unidoc.PackageConfigOperation.Update = .init(from: form)
             {
                 let endpoint:Unidoc.PackageConfigOperation = .init(
-                    account: self.session?.account,
+                    account: self.authorization.account,
                     package: package,
                     update: update,
                     from: form["from"])
@@ -431,7 +472,7 @@ extension Unidoc.Router
             }
 
         case .packageIndex:
-            if  let account:Unidoc.Account = self.session?.account,
+            if  let account:Unidoc.Account = self.authorization.account,
                 let subject:Unidoc.PackageIndexOperation.Subject = .init(from: form)
             {
                 return .actor(Unidoc.PackageIndexOperation.init(
@@ -486,7 +527,7 @@ extension Unidoc.Router
             }
 
         case .userConfig:
-            if  let account:Unidoc.Account = self.session?.account,
+            if  let account:Unidoc.Account = self.authorization.account,
                 let update:Unidoc.UserConfigOperation.Update = .init(from: form)
             {
                 return .actor(Unidoc.UserConfigOperation.init(
@@ -689,7 +730,7 @@ extension Unidoc.Router
 
         let etag:MD5? = self.etag
 
-        if  let id:Symbol.Edition = .init(next)
+        if  let id:Symbol.Volume = .init(next)
         {
             return .explainable(Unidoc.LunrEndpoint.init(query: .init(tag: etag, id: id)),
                 parameters: .init(self.query),
@@ -753,20 +794,56 @@ extension Unidoc.Router
         }
 
         return .explainable(Unidoc.RealmEndpoint.init(query: .init(realm: realm,
-                user: self.session?.account)),
+                user: self.authorization.account)),
             parameters: .init(self.query),
             etag: self.etag)
     }
 
     private mutating
-    func render() -> Unidoc.AnyOperation?
+    func ref(form:URI.Query?) -> Unidoc.AnyOperation?
     {
-        guard self.hostSupportsPublicAPI
+        guard
+        let symbol:Symbol.Package = self.descend(),
+        let name:String = self.descend()
         else
         {
-            return .syncRedirect(.permanent(external: "https://api.swiftinit.org/render"))
+            return nil
         }
 
+        guard let next:String = self.descend()
+        else
+        {
+            return nil
+        }
+
+        switch next
+        {
+        case "build":
+            guard
+            let account:Unidoc.Account = self.authorization.account
+            else
+            {
+                return nil
+            }
+
+            return .actor(Unidoc.PackageBuildOperation.init(account: account,
+                action: .submitSymbolic(.init(package: symbol, ref: name)),
+                redirect: symbol))
+
+        case "state":
+            return .actor(Unidoc.LoadEditionStateOperation.init(
+                authorization: self.authorization,
+                package: symbol,
+                version: .name(name)))
+
+        default:
+            return nil
+        }
+    }
+
+    private mutating
+    func render() -> Unidoc.AnyOperation?
+    {
         guard
         let volume:Unidoc.VolumeSelector = self.descend()
         else
@@ -774,7 +851,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .actor(Unidoc.UserRenderOperation.init(authorization: self.authorization,
+        return .actor(Unidoc.ExportOperation.init(authorization: self.authorization,
             request: .init(volume: volume, vertex: .init(path: self.stem)),
             _query: self.query))
     }
@@ -803,7 +880,7 @@ extension Unidoc.Router
         {
         case .build:
             guard
-            let build:Unidoc.PackageBuildOperation.Parameters = .init(from: table)
+            let build:Unidoc.PackageBuildOperation.DirectParameters = .init(from: table)
             else
             {
                 return nil
@@ -902,13 +979,13 @@ extension Unidoc.Router
             return .actor(Unidoc.BuilderLabelOperation.init(prompt: build))
 
         case "poll"?:
-            guard let user:Unidoc.UserSession = self.session
+            guard let account:Unidoc.Account = self.authorization.account
             else
             {
                 return nil
             }
 
-            return .actor(Unidoc.BuilderPollOperation.init(id: user.account))
+            return .actor(Unidoc.BuilderPollOperation.init(id: account))
 
         default:
             return nil
@@ -943,7 +1020,6 @@ extension Unidoc.Router
         }
 
         let parameters:Unidoc.PipelineParameters = .init(self.query)
-
         let filter:Unidoc.VersionsQuery.Predicate
 
         if  let page:Int = parameters.page
@@ -960,7 +1036,7 @@ extension Unidoc.Router
         return .explainable(Unidoc.TagsEndpoint.init(query: .init(
                 symbol: symbol,
                 filter: filter,
-                as: self.session?.account)),
+                as: self.authorization.account)),
             parameters: parameters,
             etag: self.etag)
     }
