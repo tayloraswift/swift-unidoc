@@ -23,6 +23,7 @@ extension Unidoc
         case pdct
         case realm
         case really
+        case ref
         case render
         case robots_txt = "robots.txt"
         case sitemap_xml = "sitemap.xml"
@@ -42,14 +43,25 @@ extension Unidoc
 }
 extension Unidoc.ServerRoot
 {
+    @inlinable public
+    var subdomain:Subdomain?
+    {
+        switch self
+        {
+        case .ref:      .api
+        case .render:   .api
+        default:        nil
+        }
+    }
+}
+extension Unidoc.ServerRoot
+{
     @inlinable public static
     func / (self:consuming Self, next:consuming String) -> URI
     {
-        var uri:URI = self.uri
-
-        uri.path.append(next)
-
-        return uri
+        var path:URI.Path = self.path
+        path.append(next)
+        return .init(path: path)
     }
 }
 extension Unidoc.ServerRoot:CustomStringConvertible
@@ -60,5 +72,8 @@ extension Unidoc.ServerRoot:CustomStringConvertible
 extension Unidoc.ServerRoot
 {
     @inlinable public
-    var uri:URI { [.push(self.rawValue)] }
+    var path:URI.Path { [.push(self.rawValue)] }
+
+    @inlinable public
+    var uri:URI { .init(path: self.path) }
 }

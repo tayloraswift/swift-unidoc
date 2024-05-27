@@ -26,7 +26,16 @@ extension Unidoc
 }
 extension Unidoc.PackageBuildOperation
 {
-    init(account:Unidoc.Account, build:Parameters)
+    init(account:Unidoc.Account, build:SymbolicParameters)
+    {
+        self.init(account: account,
+            action: build.ref.map
+            {
+                .submitSymbolic(.init(package: build.package, ref: $0))
+            } ?? .cancelSymbolic(build.package),
+            redirect: build.package)
+    }
+    init(account:Unidoc.Account, build:DirectParameters)
     {
         self.init(account: account,
             action: build.request.map { .submit(build.package, $0) } ?? .cancel(build.package),

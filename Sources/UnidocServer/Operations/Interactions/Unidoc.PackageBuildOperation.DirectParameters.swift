@@ -1,6 +1,6 @@
 extension Unidoc.PackageBuildOperation
 {
-    struct Parameters
+    struct DirectParameters
     {
         let selector:Unidoc.EditionSelector
         let package:Unidoc.Package
@@ -17,7 +17,7 @@ extension Unidoc.PackageBuildOperation
         }
     }
 }
-extension Unidoc.PackageBuildOperation.Parameters
+extension Unidoc.PackageBuildOperation.DirectParameters
 {
     init?(from form:borrowing [String: String])
     {
