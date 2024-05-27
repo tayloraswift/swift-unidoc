@@ -33,7 +33,7 @@ extension Unidoc.PackagesQuery:Mongo.PipelineQuery
     public
     typealias Collation = SimpleCollation
     public
-    typealias Iteration = Mongo.SingleBatch<Unidoc.PackageOutput>
+    typealias Iteration = Mongo.SingleBatch<Unidoc.EditionOutput>
 
     @inlinable public
     var hint:Mongo.CollectionIndex? { self.package.hint }
@@ -43,6 +43,13 @@ extension Unidoc.PackagesQuery:Mongo.PipelineQuery
     {
         self.package.extend(pipeline: &pipeline)
 
-        Unidoc.PackageOutput.extend(pipeline: &pipeline, from: Mongo.Pipeline.ROOT)
+        pipeline[stage: .replaceWith] = .init
+        {
+            $0[Unidoc.EditionOutput[.package]] = Mongo.Pipeline.ROOT
+        }
+
+        pipeline.loadEdition(matching: .latest(.release),
+            from: Unidoc.EditionOutput[.package],
+            into: Unidoc.EditionOutput[.edition])
     }
 }

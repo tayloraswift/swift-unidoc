@@ -3,17 +3,17 @@ import URI
 extension Unidoc
 {
     @frozen public
-    struct LoginState:Sendable
+    struct UserSessionState:Sendable
     {
         public
-        let cookies:Cookies
+        let authorization:Authorization
         public
         let request:URI
 
         @inlinable public
-        init(cookies:Cookies, request:URI)
+        init(authorization:Authorization, request:URI)
         {
-            self.cookies = cookies
+            self.authorization = authorization
             self.request = request
         }
     }

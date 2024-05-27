@@ -124,9 +124,8 @@ extension Unidoc.ServerLoop
 }
 extension Unidoc.ServerLoop
 {
-    //  TODO: support header-based authentication
     private nonisolated
-    func clearance(by cookies:Unidoc.Cookies) async throws -> HTTP.ServerResponse?
+    func clearance(by authorization:Unidoc.Authorization) async throws -> HTTP.ServerResponse?
     {
         guard case .production = self.options.mode
         else
@@ -134,11 +133,14 @@ extension Unidoc.ServerLoop
             return nil
         }
 
-        guard
-        let user:Unidoc.UserSession = cookies.session
-        else
+        let user:Unidoc.UserSession
+
+        switch authorization
         {
-            return .unauthorized("")
+        case .invalid(let error):   return .unauthorized("\(error)\n")
+        case .web(nil, _):          return .unauthorized("Unauthorized\n")
+        case .web(let session?, _): user = .web(session)
+        case .api(let session):     user = .api(session)
         }
 
         let session:Mongo.Session = try await .init(from: self.db.sessions)
@@ -148,7 +150,7 @@ extension Unidoc.ServerLoop
             with: session)
         else
         {
-            return .notFound("No such user")
+            return .notFound("No such user\n")
         }
 
         switch rights.level
@@ -166,7 +168,7 @@ extension Unidoc.ServerLoop
     public nonisolated
     func clearance(for request:Unidoc.StreamedRequest) async throws -> HTTP.ServerResponse?
     {
-        try await self.clearance(by: request.cookies)
+        try await self.clearance(by: request.authorization)
     }
 
     public nonisolated
@@ -186,7 +188,7 @@ extension Unidoc.ServerLoop
 
         case .update(let procedural):
             if  let failure:HTTP.ServerResponse = try await self.clearance(
-                    by: request.incoming.authorization.cookies)
+                    by: request.incoming.authorization)
             {
                 return failure
             }
@@ -253,7 +255,7 @@ extension Unidoc.ServerLoop
 
             response = try await operation.load(
                 from: .init(self, tour: self.tour),
-                with: request.loginState,
+                with: .init(authorization: request.authorization, request: request.uri),
                 as: self.format(locale: request.origin.guess?.locale)) ?? .notFound("not found")
 
             duration = .now - initiated
@@ -283,7 +285,7 @@ extension Unidoc.ServerLoop
         }
         //  Don’t increment stats from administrators,
         //  they will really skew the results.
-        if  case _? = request.authorization.cookies.session
+        if  case .web(_?, _) = request.authorization
         {
             return response
         }

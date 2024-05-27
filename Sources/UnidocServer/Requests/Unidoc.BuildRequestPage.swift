@@ -6,11 +6,11 @@ extension Unidoc
 {
     struct BuildRequestPage
     {
-        let selector:Unidoc.VolumeSelector
+        let selector:Unidoc.EditionSelector
         let cancel:Bool
         let action:URI
 
-        init(selector:Unidoc.VolumeSelector, cancel:Bool, action:URI)
+        init(selector:Unidoc.EditionSelector, cancel:Bool, action:URI)
         {
             self.selector = selector
             self.cancel = cancel
@@ -35,12 +35,12 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
                 $0 += " if it has not started yet."
             }
             else if
-                let version:Substring = self.selector.version
+                let ref:Substring = self.selector.ref
             {
                 $0 += "A builder will build the package "
                 $0[.a] { $0.href = "\(package)" } = "\(self.selector.package)"
                 $0 += " at "
-                $0[.code] = "\(version)"
+                $0[.code] = "\(ref)"
                 $0 += """
                  once one becomes available. If you move the ref in the meantime, it might \
                 build the new commit instead.
@@ -81,7 +81,7 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
         {
             return
         }
-        if  case _? = self.selector.version
+        if  case _? = self.selector.ref
         {
             return
         }

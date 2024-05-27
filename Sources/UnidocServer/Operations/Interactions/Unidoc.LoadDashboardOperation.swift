@@ -45,7 +45,7 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
                     with: session)
             }
 
-            let page:Unidoc.CookiePage = .init(cookie: "\(secrets.session)")
+            let page:Unidoc.CookiePage = .init(secrets: secrets)
             return .ok(page.resource(format: server.format))
 
         case .master:

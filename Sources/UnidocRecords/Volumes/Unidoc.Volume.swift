@@ -48,7 +48,7 @@ extension Unidoc.Volume
 extension Unidoc.Volume
 {
     @inlinable public
-    var id:Symbol.Edition { self.metadata.symbol }
+    var id:Symbol.Volume { self.metadata.symbol }
 }
 extension Unidoc.Volume
 {

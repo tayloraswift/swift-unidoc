@@ -79,18 +79,6 @@ extension Unidoc.Router
     }
 
     private
-    var session:Unidoc.UserSession?
-    {
-        //  TODO: support API key in more places.
-        switch self.authorization
-        {
-        case .web(let cookies): return cookies.session
-        case .api:              return nil
-        case .invalid:          return nil
-        }
-    }
-
-    private
     var etag:MD5?
     {
         switch self.headers
@@ -287,15 +275,14 @@ extension Unidoc.Router
     private
     func account() -> Unidoc.AnyOperation
     {
-        guard
-        let user:Unidoc.UserSession = self.session
+        guard case .web(let session?, _) = self.authorization
         else
         {
             return .syncRedirect(.temporary("\(Unidoc.ServerRoot.login)"))
         }
 
         return .explainable(Unidoc.UserSettingsEndpoint.init(
-                query: .init(session: user)),
+                query: .init(session: session)),
             parameters: .init(self.query),
             etag: self.etag)
     }
@@ -388,7 +375,7 @@ extension Unidoc.Router
         switch action
         {
         case .build:
-            if  let account:Unidoc.Account = self.session?.account,
+            if  let account:Unidoc.Account = self.authorization.account,
                 let build:Unidoc.PackageBuildOperation.Parameters = .init(from: form)
             {
                 return .actor(Unidoc.PackageBuildOperation.init(
@@ -422,7 +409,7 @@ extension Unidoc.Router
                 let update:Unidoc.PackageConfigOperation.Update = .init(from: form)
             {
                 let endpoint:Unidoc.PackageConfigOperation = .init(
-                    account: self.session?.account,
+                    account: self.authorization.account,
                     package: package,
                     update: update,
                     from: form["from"])
@@ -431,7 +418,7 @@ extension Unidoc.Router
             }
 
         case .packageIndex:
-            if  let account:Unidoc.Account = self.session?.account,
+            if  let account:Unidoc.Account = self.authorization.account,
                 let subject:Unidoc.PackageIndexOperation.Subject = .init(from: form)
             {
                 return .actor(Unidoc.PackageIndexOperation.init(
@@ -486,7 +473,7 @@ extension Unidoc.Router
             }
 
         case .userConfig:
-            if  let account:Unidoc.Account = self.session?.account,
+            if  let account:Unidoc.Account = self.authorization.account,
                 let update:Unidoc.UserConfigOperation.Update = .init(from: form)
             {
                 return .actor(Unidoc.UserConfigOperation.init(
@@ -689,7 +676,7 @@ extension Unidoc.Router
 
         let etag:MD5? = self.etag
 
-        if  let id:Symbol.Edition = .init(next)
+        if  let id:Symbol.Volume = .init(next)
         {
             return .explainable(Unidoc.LunrEndpoint.init(query: .init(tag: etag, id: id)),
                 parameters: .init(self.query),
@@ -753,7 +740,7 @@ extension Unidoc.Router
         }
 
         return .explainable(Unidoc.RealmEndpoint.init(query: .init(realm: realm,
-                user: self.session?.account)),
+                user: self.authorization.account)),
             parameters: .init(self.query),
             etag: self.etag)
     }
@@ -774,7 +761,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .actor(Unidoc.UserRenderOperation.init(authorization: self.authorization,
+        return .actor(Unidoc.ExportOperation.init(authorization: self.authorization,
             request: .init(volume: volume, vertex: .init(path: self.stem)),
             _query: self.query))
     }
@@ -902,13 +889,13 @@ extension Unidoc.Router
             return .actor(Unidoc.BuilderLabelOperation.init(prompt: build))
 
         case "poll"?:
-            guard let user:Unidoc.UserSession = self.session
+            guard let account:Unidoc.Account = self.authorization.account
             else
             {
                 return nil
             }
 
-            return .actor(Unidoc.BuilderPollOperation.init(id: user.account))
+            return .actor(Unidoc.BuilderPollOperation.init(id: account))
 
         default:
             return nil
@@ -945,7 +932,7 @@ extension Unidoc.Router
         if  self.hostSupportsPublicAPI,
             let ref:String = self.descend()
         {
-            return .actor(Unidoc.UserRefStateOperation.init(authorization: self.authorization,
+            return .actor(Unidoc.LoadEditionStateOperation.init(authorization: self.authorization,
                 package: symbol,
                 version: .name(ref)))
         }
@@ -967,7 +954,7 @@ extension Unidoc.Router
         return .explainable(Unidoc.TagsEndpoint.init(query: .init(
                 symbol: symbol,
                 filter: filter,
-                as: self.session?.account)),
+                as: self.authorization.account)),
             parameters: parameters,
             etag: self.etag)
     }

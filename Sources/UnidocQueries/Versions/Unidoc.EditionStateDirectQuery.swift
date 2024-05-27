@@ -4,7 +4,7 @@ import UnidocDB
 
 extension Unidoc
 {
-    struct EditionStateQuery
+    struct EditionStateDirectQuery
     {
         let package:Package
         let version:VersionSelector
@@ -16,7 +16,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.EditionStateQuery:Mongo.PipelineQuery
+extension Unidoc.EditionStateDirectQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Unidoc.DB.Packages
     typealias Collation = SimpleCollation

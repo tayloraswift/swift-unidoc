@@ -11,26 +11,32 @@ extension Unidoc.RefsTable
 {
     struct Row
     {
+        private
+        let version:String
+        private
         let volume:Unidoc.VolumeMetadata?
-        let series:Unidoc.VersionSeries?
-        let patch:PatchVersion?
 
+        let series:Unidoc.VersionSeries?
+
+        private
         let graph:Graph
 
+        private
         let sha1:SHA1?
+        private
         let name:String
 
         private
-        init(volume:Unidoc.VolumeMetadata?,
+        init(version:String,
+            volume:Unidoc.VolumeMetadata?,
             series:Unidoc.VersionSeries?,
-            patch:PatchVersion?,
             graph:Graph,
             sha1:SHA1?,
             name:String)
         {
+            self.version = version
             self.volume = volume
             self.series = series
-            self.patch = patch
             self.graph = graph
             self.sha1 = sha1
             self.name = name
@@ -53,12 +59,10 @@ extension Unidoc.RefsTable.Row
             series = nil
         }
 
-        self.init(
+        self.init(version: version.edition.semver?.description ?? version.edition.name,
             volume: version.volume,
             series: series,
-            patch: version.edition.semver,
-            graph: .init(package: package,
-                version: version.edition.semver?.description ?? version.edition.name,
+            graph: .init(symbol: .init(package: package, ref: version.edition.name),
                 state: version.graph.map(Graph.State.some(_:)) ?? .none(version.edition.id),
                 view: view),
             //  These might be different for a variety of reasons.
@@ -97,7 +101,7 @@ extension Unidoc.RefsTable.Row:HTML.OutputStreamable
                 $0[.span]
                 {
                     $0.title = "No documentation has been generated for this version."
-                } = "\(self.graph.version)"
+                } = "\(self.version)"
             }
         }
 

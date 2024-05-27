@@ -27,7 +27,7 @@ extension Unidoc
 extension Unidoc.UserIndexOperation:Unidoc.InteractiveOperation
 {
     func load(from server:borrowing Unidoc.Server,
-        with _:Unidoc.LoginState,
+        with _:Unidoc.UserSessionState,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         try await self.perform(on: server)
@@ -72,7 +72,7 @@ extension Unidoc.UserIndexOperation
             let secrets:Unidoc.UserSecrets = try await server.db.users.update(user: user,
                 with: session)
 
-            cookies = [Unidoc.Cookies.session: "\(secrets.session)"] // meet taylor swift
+            cookies = [Unidoc.Cookie.session: "\(secrets.web)"]
 
         case .sync:
             cookies = [:]

@@ -26,10 +26,10 @@ extension Unidoc
 extension Unidoc.AuthOperation:Unidoc.InteractiveOperation
 {
     func load(from server:borrowing Unidoc.Server,
-        with state:Unidoc.LoginState,
+        with state:Unidoc.UserSessionState,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        guard case self.state? = state.cookies.login
+        guard case .web(_, login: self.state?) = state.authorization
         else
         {
             return .resource("Authentication failed: state mismatch", status: 400)

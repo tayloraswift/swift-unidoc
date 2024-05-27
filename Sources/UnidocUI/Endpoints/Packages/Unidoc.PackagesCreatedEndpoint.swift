@@ -14,7 +14,7 @@ extension Unidoc
         public
         let query:PackagesQuery<PackageCreated>
         public
-        var batch:[PackageOutput]
+        var batch:[EditionOutput]
 
         @usableFromInline
         let date:Timestamp.Date
@@ -53,7 +53,7 @@ extension Unidoc.PackagesCreatedEndpoint:HTTP.ServerEndpoint
         //  If we access `self.batch` directly, it dispatches through the protocol witness to
         //  avoid consuming `self`, so we need to use the closure to make `self` `borrowing`
         //  which will cause the compiler to choose the stored property accessor.
-        let batch:[Unidoc.PackageOutput] = { $0.batch } (self)
+        let batch:[Unidoc.EditionOutput] = { $0.batch } (self)
         //  This consumes `self` because it is accessing a stored property that witnesses no
         //  protocol requirements.
         let date:Timestamp.Date = self.date

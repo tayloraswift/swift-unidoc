@@ -50,7 +50,14 @@ extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
         {
             $0[Output[.packages]] = .init
             {
-                Unidoc.PackageOutput.extend(pipeline: &$0, from: Mongo.Pipeline.ROOT)
+                $0[stage: .replaceWith] = .init
+                {
+                    $0[Unidoc.EditionOutput[.package]] = Mongo.Pipeline.ROOT
+                }
+
+                $0.loadEdition(matching: .latest(.release),
+                    from: Unidoc.EditionOutput[.package],
+                    into: Unidoc.EditionOutput[.edition])
             }
         }
 

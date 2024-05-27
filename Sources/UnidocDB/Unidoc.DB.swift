@@ -314,7 +314,7 @@ extension Unidoc.DB
             loader: nil as NoLoader?,
             realm: realm,
             with: session)
-        let symbol:Symbol.Edition = volume.metadata.symbol
+        let symbol:Symbol.Volume = volume.metadata.symbol
 
         let uploaded:Unidoc.UploadStatus = try await self.snapshots.upsert(
             snapshot: /* consume */ snapshot, // https://github.com/apple/swift/issues/71605
@@ -423,7 +423,7 @@ extension Unidoc.DB
             loader: loader,
             realm: package.realm,
             with: session)
-        let symbol:Symbol.Edition = volume.metadata.symbol
+        let symbol:Symbol.Volume = volume.metadata.symbol
 
         if  stored != snapshot
         {
@@ -457,7 +457,7 @@ extension Unidoc.DB
     }
 
     private
-    func unlink(volume:Symbol.Edition,
+    func unlink(volume:Symbol.Volume,
         with session:Mongo.Session) async throws -> Unidoc.UnlinkStatus?
     {
         guard
@@ -537,7 +537,7 @@ extension Unidoc.DB
         //  We could get the best of both worlds by decompressing the search index before
         //  transferring it out to Amazon CloudFront. But that just doesn’t seem worth the CPU
         //  cycles, either for us or for Amazon.
-        let search:Unidoc.TextResource<Symbol.Edition> = .init(id: volume.id,
+        let search:Unidoc.TextResource<Symbol.Volume> = .init(id: volume.id,
             text: .init(compressing: volume.index.utf8))
 
         if  clear

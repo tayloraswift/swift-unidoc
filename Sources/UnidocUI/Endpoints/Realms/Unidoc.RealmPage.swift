@@ -25,7 +25,7 @@ extension Unidoc.RealmPage
     init(from output:consuming Unidoc.RealmQuery.Output)
     {
         //  5.9 compiler bug :(
-        let packages:[Unidoc.PackageOutput] = output.packages
+        let packages:[Unidoc.EditionOutput] = output.packages
         let metadata:Unidoc.RealmMetadata = output.metadata
         let user:Unidoc.User? = (consume output).user
 

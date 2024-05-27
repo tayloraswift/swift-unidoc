@@ -5,23 +5,26 @@ import UnidocDB
 
 extension Unidoc
 {
-    struct UserRefStateQuery
+    struct EditionStateSymbolicQuery
     {
         let package:Symbol.Package
         let version:VersionPredicate
 
-        init(package:Symbol.Package, version:VersionPredicate)
+        let includeBuild:Bool
+
+        init(package:Symbol.Package, version:VersionPredicate, includeBuild:Bool)
         {
             self.package = package
             self.version = version
+            self.includeBuild = includeBuild
         }
     }
 }
-extension Unidoc.UserRefStateQuery:Mongo.PipelineQuery
+extension Unidoc.EditionStateSymbolicQuery:Mongo.PipelineQuery
 {
     typealias Iteration = Mongo.Single<Unidoc.EditionState>
 }
-extension Unidoc.UserRefStateQuery:Unidoc.AliasingQuery
+extension Unidoc.EditionStateSymbolicQuery:Unidoc.AliasingQuery
 {
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
     typealias CollectionTarget = Unidoc.DB.Packages
@@ -39,6 +42,12 @@ extension Unidoc.UserRefStateQuery:Unidoc.AliasingQuery
 
         //  Unbox single-element array.
         pipeline[stage: .unwind] = Unidoc.EditionState[.version]
+
+        guard self.includeBuild
+        else
+        {
+            return
+        }
 
         pipeline[stage: .lookup] = .init
         {

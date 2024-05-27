@@ -6,22 +6,19 @@ extension Unidoc.RefsTable.Row
 {
     struct Graph
     {
-        let package:Symbol.Package
-        let version:String
+        private
+        let symbol:Symbol.Edition
 
         private
         let state:State
         private
         let view:Unidoc.Permissions
 
-        init(
-            package:Symbol.Package,
-            version:String,
+        init(symbol:Symbol.Edition,
             state:State,
             view:Unidoc.Permissions)
         {
-            self.package = package
-            self.version = version
+            self.symbol = symbol
             self.state = state
             self.view = view
         }
@@ -111,8 +108,8 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                         $0.action = "\(Unidoc.Post[.build, really: false])"
                         $0.method = "post"
                     } = Unidoc.BuildButton.edition(id: self.id,
-                        package: self.package,
-                        version: self.version)
+                        package: self.symbol.package,
+                        ref: self.symbol.ref)
                 }
 
                 guard
@@ -136,7 +133,9 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
                             $0.action = "\(Unidoc.Post[action, really: proceed])"
                             $0.method = "post"
-                        } = Tool.init(edition: graph.id, package: self.package, label: label)
+                        } = Tool.init(edition: graph.id,
+                            package: self.symbol.package,
+                            label: label)
                     }
                 }
 
