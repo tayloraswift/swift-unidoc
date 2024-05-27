@@ -4,7 +4,7 @@ import URI
 
 extension Unidoc
 {
-    struct UserRenderOperation:Sendable
+    struct ExportOperation:Sendable
     {
         private
         let authorization:Authorization
@@ -20,7 +20,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.UserRenderOperation
+extension Unidoc.ExportOperation
 {
     init(authorization:Unidoc.Authorization,
         request:Unidoc.VertexQuery<Unidoc.LookupAdjacent>,
@@ -44,7 +44,7 @@ extension Unidoc.UserRenderOperation
             case .web = authorization
         {
             self.init(
-                authorization: .api(account, .init(bitPattern: apiKey)),
+                authorization: .api(.init(id: account, apiKey: .init(bitPattern: apiKey))),
                 request: request)
         }
         else
@@ -53,7 +53,7 @@ extension Unidoc.UserRenderOperation
         }
     }
 }
-extension Unidoc.UserRenderOperation:Unidoc.PublicOperation
+extension Unidoc.ExportOperation:Unidoc.PublicOperation
 {
     func load(from server:borrowing Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
@@ -69,10 +69,10 @@ extension Unidoc.UserRenderOperation:Unidoc.PublicOperation
         case .web:
             return .unauthorized("Missing authorization header\n")
 
-        case .api(let account, let apiKey):
+        case .api(let authorization):
             session = try await .init(from: server.db.sessions)
-            remaining = try await server.db.users.charge(apiKey: apiKey,
-                user: account,
+            remaining = try await server.db.users.charge(apiKey: authorization.apiKey,
+                user: authorization.id,
                 with: session)
         }
 

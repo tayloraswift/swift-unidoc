@@ -21,7 +21,7 @@ extension Unidoc
         var refname:String?
 
         public
-        var symbol:Symbol.Edition
+        var symbol:Symbol.Volume
         public
         var latest:Bool
         public
@@ -43,7 +43,7 @@ extension Unidoc
             dependencies:[Dependency] = [],
             display:String? = nil,
             refname:String? = nil,
-            symbol:Symbol.Edition,
+            symbol:Symbol.Volume,
             latest:Bool,
             realm:Unidoc.Realm?,
             patch:PatchVersion? = nil,

@@ -8,31 +8,31 @@ extension Unidoc
     struct PackageCard
     {
         private
-        let package:Unidoc.PackageOutput
+        let metadata:Unidoc.EditionOutput
         private
         let now:UnixInstant
 
         /// Cached for sort performance.
         let order:String
 
-        init(_ package:Unidoc.PackageOutput, now:UnixInstant)
+        init(_ metadata:Unidoc.EditionOutput, now:UnixInstant)
         {
-            self.package = package
+            self.metadata = metadata
             self.now = now
 
-            let name:String = package.metadata.repo?.origin.name
-                ?? package.metadata.symbol.identifier
+            let name:String = metadata.package.repo?.origin.name
+                ?? metadata.package.symbol.identifier
             self.order = name.lowercased()
         }
     }
 }
 extension Unidoc.PackageCard
 {
-    var owner:String? { self.package.metadata.repo?.origin.owner }
-    var stars:Int? { self.package.metadata.repo?.stars }
+    var owner:String? { self.metadata.package.repo?.origin.owner }
+    var stars:Int? { self.metadata.package.repo?.stars }
     var name:String
     {
-        self.package.metadata.repo?.origin.name ?? self.package.metadata.symbol.identifier
+        self.metadata.package.repo?.origin.name ?? self.metadata.package.symbol.identifier
     }
 }
 extension Unidoc.PackageCard:HTML.OutputStreamable
@@ -40,7 +40,7 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
     static
     func += (li:inout HTML.ContentEncoder, self:Self)
     {
-        let dead:Bool = self.package.metadata.repo?.origin.alive == false
+        let dead:Bool = self.metadata.package.repo?.origin.alive == false
 
         li[.p]
         {
@@ -48,15 +48,15 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
             {
                 $0[.a]
                 {
-                    $0.href = "\(Unidoc.TagsEndpoint[self.package.metadata.symbol])"
+                    $0.href = "\(Unidoc.TagsEndpoint[self.metadata.package.symbol])"
                     $0.class = dead ? "dead" : nil
 
                 } = self.name
 
-                $0[.span] { $0.class = "owner" } = self.package.metadata.repo?.origin.owner
+                $0[.span] { $0.class = "owner" } = self.metadata.package.repo?.origin.owner
             }
 
-            if  let repo:Unidoc.PackageRepo = self.package.metadata.repo
+            if  let repo:Unidoc.PackageRepo = self.metadata.package.repo
             {
                 $0[.span] { $0.class = "license" } = repo.license?.name ?? "Unknown License"
             }
@@ -66,7 +66,7 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
             }
         }
 
-        li[.p] = self.package.metadata.repo?.origin.about
+        li[.p] = self.metadata.package.repo?.origin.about
 
         li[.p, { $0.class = "chyron" }]
         {
@@ -75,7 +75,7 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
                 $0[.span] { $0.class = "placeholder" } = "Archived!"
             }
             else if
-                let patch:PatchVersion = self.package.release?.semver
+                let patch:PatchVersion = self.metadata.edition?.semver
             {
                 $0[.span] { $0.class = "release" } = "\(patch)"
             }
@@ -85,7 +85,7 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
             }
 
             guard
-            let repo:Unidoc.PackageRepo = self.package.metadata.repo
+            let repo:Unidoc.PackageRepo = self.metadata.package.repo
             else
             {
                 return

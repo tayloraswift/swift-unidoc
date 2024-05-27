@@ -15,7 +15,7 @@ extension Unidoc.PublicOperation
 {
     public consuming
     func load(from server:borrowing Unidoc.Server,
-        with _:Unidoc.LoginState,
+        with _:Unidoc.UserSessionState,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         try await self.load(from: server, as: format)

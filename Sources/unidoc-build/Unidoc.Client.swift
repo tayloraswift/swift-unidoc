@@ -173,7 +173,7 @@ extension Unidoc.Client
     @discardableResult
     func buildAndUpload(
         labels:Unidoc.BuildLabels,
-        action:Unidoc.Snapshot.PendingAction,
+        action:Unidoc.LinkerAction,
         remove:Bool = false,
         cache:FilePath? = nil) async throws -> Bool
     {

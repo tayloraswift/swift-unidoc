@@ -5,35 +5,33 @@ extension Symbol
     {
         public
         var package:Package
-        /// A string identifying the package version within the database.
-        /// If the ``refname`` is a `v`-prefixed semantic version, this
-        /// string encodes the version without the `v` prefix.
+        /// A name corresponding to a git ref.
         public
-        var version:String
+        var ref:String
 
         @inlinable public
-        init(package:Package, version:String)
+        init(package:Package, ref:String)
         {
             self.package = package
-            self.version = version
+            self.ref = ref
         }
     }
 }
 extension Symbol.Edition:CustomStringConvertible
 {
     @inlinable public
-    var description:String { "\(self.package):\(self.version)" }
+    var description:String { "\(self.package)/\(self.ref)" }
 }
 extension Symbol.Edition:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:some StringProtocol)
     {
-        if  let colon:String.Index = description.firstIndex(of: ":")
+        if  let slash:String.Index = description.firstIndex(of: "/")
         {
             self.init(
-                package: .init(description[..<colon]),
-                version: .init(description[description.index(after: colon)...]))
+                package: .init(description[..<slash]),
+                ref: .init(description[description.index(after: slash)...]))
         }
         else
         {

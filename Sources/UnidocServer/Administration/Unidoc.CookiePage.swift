@@ -7,11 +7,11 @@ extension Unidoc
 {
     struct CookiePage
     {
-        var cookie:String
+        var secrets:UserSecrets
 
-        init(cookie:String)
+        init(secrets:UserSecrets)
         {
-            self.cookie = cookie
+            self.secrets = secrets
         }
     }
 }
@@ -54,7 +54,7 @@ extension Unidoc.CookiePage:Unidoc.AdministrativePage
                     $0[.dt] = "Cookie"
                     $0[.dd]
                     {
-                        $0[.p] { $0.class = "cookie" } = self.cookie
+                        $0[.p] { $0.class = "cookie" } = "\(self.secrets.web)"
                         $0[.button] { $0.type = "submit" } = "Change"
                     }
                 }

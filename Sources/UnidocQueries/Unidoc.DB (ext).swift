@@ -27,14 +27,21 @@ extension Unidoc.DB
     }
 
     public
-    func state(package:Unidoc.Package,
+    func edition(package:Symbol.Package,
+        version:Unidoc.VersionPredicate,
+        with session:Mongo.Session) async throws -> Unidoc.EditionOutput?
+    {
+        try await session.query(database: self.id,
+            with: Unidoc.EditionMetadataSymbolicQuery.init(package: package, version: version))
+    }
+
+    public
+    func editionState(package:Symbol.Package,
         version:Unidoc.VersionPredicate,
         with session:Mongo.Session) async throws -> Unidoc.EditionState?
     {
         try await session.query(database: self.id,
-            with: Unidoc.EditionStateQuery.init(package: package,
-                version: .match(version),
-                builds: true))
+            with: Unidoc.EditionStateSymbolicQuery.init(package: package, version: version))
     }
 }
 extension Unidoc.DB
@@ -50,7 +57,7 @@ extension Unidoc.DB
         switch prompt
         {
         case .edition(let id, force: let force):
-            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateQuery> = .init(
+            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateDirectQuery> = .init(
                 query: .init(package: id.package, version: .exact(id.version)))
 
             try await pipeline.pull(from: self.id, with: session)
@@ -67,7 +74,7 @@ extension Unidoc.DB
             rebuild = force
 
         case .package(let id, series: let series, force: let force):
-            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateQuery> = .init(
+            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateDirectQuery> = .init(
                 query: .init(package: id, version: .match(.latest(series))))
 
             try await pipeline.pull(from: self.id, with: session)

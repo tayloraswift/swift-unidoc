@@ -1,5 +1,6 @@
 import MongoDB
 import MongoQL
+import UnidocAPI
 import UnidocRecords
 
 extension Unidoc.DB.Snapshots
@@ -8,13 +9,13 @@ extension Unidoc.DB.Snapshots
     enum QueueAction
     {
         case all
-        case one(Unidoc.Edition, action:Unidoc.Snapshot.PendingAction = .uplinkRefresh)
+        case one(Unidoc.Edition, action:Unidoc.LinkerAction = .uplinkRefresh)
     }
 }
 extension Unidoc.DB.Snapshots.QueueAction
 {
     private
-    var action:Unidoc.Snapshot.PendingAction
+    var action:Unidoc.LinkerAction
     {
         switch self
         {
