@@ -36,14 +36,5 @@ extension Unidoc.EditionMetadataSymbolicQuery:Unidoc.AliasingQuery
         pipeline.loadEdition(matching: self.version,
             from: Unidoc.EditionOutput[.package],
             into: Unidoc.EditionOutput[.edition])
-
-        //  Unbox single-element array.
-        pipeline[stage: .set] = .init
-        {
-            $0[Unidoc.EditionOutput[.edition]] = .expr
-            {
-                $0[.first] = Unidoc.EditionOutput[.edition]
-            }
-        }
     }
 }
