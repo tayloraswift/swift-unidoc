@@ -41,8 +41,7 @@ extension Unidoc.DB
         with session:Mongo.Session) async throws -> Unidoc.EditionState?
     {
         try await session.query(database: self.id,
-            with: Unidoc.EditionStateSymbolicQuery.init(package: package, version: version,
-                includeBuild: true))
+            with: Unidoc.EditionStateSymbolicQuery.init(package: package, version: version))
     }
 }
 extension Unidoc.DB
