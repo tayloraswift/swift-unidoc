@@ -59,7 +59,7 @@ extension Unidoc.Server
         let account:Unidoc.Account
         else
         {
-            return .unauthorized("You must be logged in to perform this operation!")
+            return .unauthorized("You must be logged in to perform this operation!\n")
         }
 
         //  Don’t really have a smarter way to check this except loading the entire package
@@ -69,7 +69,7 @@ extension Unidoc.Server
             with: session)
         else
         {
-            return .notFound("No such package")
+            return .notFound("No such package\n")
         }
 
         if  let owner:Unidoc.Account = package.repo?.account
@@ -84,6 +84,6 @@ extension Unidoc.Server
             }
         }
 
-        return .forbidden("You are not authorized to edit this package!")
+        return .forbidden("You are not authorized to edit this package!\n")
     }
 }
