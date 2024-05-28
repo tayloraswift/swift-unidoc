@@ -46,7 +46,7 @@ extension Unidoc.SegregatedBody:Unidoc.CollapsibleContent
 }
 extension Unidoc.SegregatedBody
 {
-    init?(_ context:Unidoc.RelativePageContext,
+    init?(_ context:Unidoc.InternalPageContext,
         group:__shared [Unidoc.Scalar])
     {
         if  group.isEmpty

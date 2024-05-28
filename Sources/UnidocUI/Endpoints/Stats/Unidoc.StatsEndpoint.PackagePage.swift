@@ -9,14 +9,14 @@ extension Unidoc.StatsEndpoint
 {
     struct PackagePage
     {
-        let context:Unidoc.RelativePageContext
+        let context:Unidoc.InternalPageContext
 
         let sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>?
 
         private
         let vertex:Unidoc.LandingVertex
 
-        init(_ context:Unidoc.RelativePageContext,
+        init(_ context:Unidoc.InternalPageContext,
             sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>?,
             vertex:Unidoc.LandingVertex)
         {

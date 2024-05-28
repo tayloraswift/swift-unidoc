@@ -54,7 +54,7 @@ extension Unidoc.ExtensionBody
     //     + self.lists.defaultImplementations.visible.count
     // }
 
-    init?(_ context:Unidoc.RelativePageContext,
+    init?(_ context:Unidoc.InternalPageContext,
         group:borrowing Unidoc.ExtensionGroup,
         decl:Phylum.DeclFlags)
     {

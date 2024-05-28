@@ -9,13 +9,16 @@ extension Unidoc.BlogEndpoint
     struct ArticlePage
     {
         private
-        let cone:Unidoc.Cone
+        let context:Unidoc.InternalBlogContext
+        private
+        let prose:Unidoc.Prose
         private
         let apex:Unidoc.ArticleVertex
 
-        init(cone:Unidoc.Cone, apex:Unidoc.ArticleVertex)
+        init(context:Unidoc.InternalBlogContext, apex:Unidoc.ArticleVertex)
         {
-            self.cone = cone
+            self.context = context
+            self.prose = .init(apex: apex)
             self.apex = apex
         }
     }
@@ -23,13 +26,16 @@ extension Unidoc.BlogEndpoint
 extension Unidoc.BlogEndpoint.ArticlePage
 {
     private
-    var volume:Unidoc.VolumeMetadata { self.cone.halo.context.volume }
+    var volume:Unidoc.VolumeMetadata { self.context.volume }
 }
 extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.RenderablePage
 {
     var title:String { "\(self.apex.headline.safe)" }
 
-    var description:String? { self.cone.overviewText?.description }
+    var description:String?
+    {
+        self.prose.overviewText(with: self.context.vertices)?.description
+    }
 }
 extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
 {
@@ -59,8 +65,8 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
                 }
                 $0[.section, { $0.class = "details literature" }]
                 {
-                    $0 ?= self.cone.overview
-                    $0 ?= self.cone.details
+                    $0 ?= self.prose.overview(with: self.context)
+                    $0 ?= self.prose.details(with: self.context)
                 }
             }
         }
@@ -69,6 +75,6 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
         {
             $0.style = "display: none;"
             $0.id = "ss:tooltips"
-        } = self.cone.context.tooltips
+        } = self.context.tooltips
     }
 }

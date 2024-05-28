@@ -46,7 +46,7 @@ extension Unidoc.StatsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         vertex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:Unidoc.RelativePageContext,
+        with context:Unidoc.InternalPageContext,
         format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         let route:Unidoc.Route

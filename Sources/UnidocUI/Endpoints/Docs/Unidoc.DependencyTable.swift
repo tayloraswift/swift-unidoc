@@ -7,9 +7,9 @@ extension Unidoc
     struct DependencyTable
     {
         let dependencies:[VolumeMetadata.Dependency]
-        let context:RelativePageContext
+        let context:InternalPageContext
 
-        init(dependencies:[VolumeMetadata.Dependency], context:RelativePageContext)
+        init(dependencies:[VolumeMetadata.Dependency], context:InternalPageContext)
         {
             self.dependencies = dependencies
             self.context = context
