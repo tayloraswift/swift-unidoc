@@ -36,6 +36,12 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.RenderablePage
     {
         self.prose.overviewText(with: self.context.vertices)?.description
     }
+
+    func head(augmenting head:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
+    {
+        //  We need this for the relative links to work.
+        head[.base] { $0.href = "\(self.location)/" ; $0.target = "_self" }
+    }
 }
 extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
 {
