@@ -227,11 +227,15 @@ figure.status div.pie-color > svg g
 {
     > *.status-200
     {
-        fill: var(--fg-accent);
+        fill: rgb(255, 86, 158);
+    }
+    > *.status-201
+    {
+        fill: rgb(255, 79, 155);
     }
     > *.status-300
     {
-        fill: rgb(255, 50, 136);
+        fill: rgb(255, 61, 142);
     }
     > *.status-304
     {
@@ -245,6 +249,14 @@ figure.status div.pie-color > svg g
     > *.status-308
     {
         fill: rgb(130, 255, 249);
+    }
+    > *.status-401
+    {
+        fill: rgb(220, 255, 94);
+    }
+    > *.status-403
+    {
+        fill: rgb(187, 241, 59);
     }
     > *.status-404
     {
