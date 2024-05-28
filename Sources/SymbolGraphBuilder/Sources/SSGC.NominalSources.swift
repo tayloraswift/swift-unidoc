@@ -108,7 +108,11 @@ extension SSGC.NominalSources
         defer
         {
             self.markdown.sort { $0.id < $1.id }
-            include += headers.sorted { $0.string < $1.string }
+
+            if  self.module.type != .executable
+            {
+                include += headers.sorted { $0.string < $1.string }
+            }
         }
 
         try path.directory.walk
@@ -180,6 +184,12 @@ extension SSGC.NominalSources
                 {
                 case "swift":
                     self.module.language |= .swift
+                    //  All extant versions of SwiftPM use the `main.swift` file name to
+                    //  indicate an executable module.
+                    if  $1.stem.lowercased() == "main"
+                    {
+                        self.module.type = .executable
+                    }
 
                 case "h":
                     //  Header files don’t indicate a C or C++ module on their own.
