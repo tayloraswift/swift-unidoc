@@ -67,14 +67,21 @@ extension Unidoc.RestrictedOperation
                 with: session)
             else
             {
-                return .notFound("No such user\n")
+                if  case .web = state.authorization
+                {
+                    return .unauthorized("Expired session!\n")
+                }
+                else
+                {
+                    return .unauthorized("Expired or nonexistent API key!\n")
+                }
             }
 
             //  We ban this here, so that we can conditionally enforce permissions later by
             //  checking if the user is human.
             if  case .guest = rights.level
             {
-                return .unauthorized("""
+                return .forbidden("""
                     It looks like you are somehow logged in as a non-player entity.\n
                     """)
             }
