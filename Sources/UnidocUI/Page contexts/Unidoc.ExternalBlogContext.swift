@@ -18,7 +18,7 @@ extension Unidoc
 
             if  case .article(let article) = link.vertex
             {
-                link.target?.export(as: article, in: self.volume.id)
+                link.target?.export(as: article, base: self.vertices.principal)
             }
             else
             {
@@ -33,7 +33,7 @@ extension Unidoc
         {
             if  var link:Unidoc.LinkReference<Unidoc.ArticleVertex> = super[article: id]
             {
-                link.target?.export(as: link.vertex, in: self.volume.id)
+                link.target?.export(as: link.vertex, base: self.vertices.principal)
                 return link
             }
             else
