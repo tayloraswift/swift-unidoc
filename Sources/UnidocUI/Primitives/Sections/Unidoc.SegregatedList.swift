@@ -36,7 +36,7 @@ extension Unidoc.SegregatedList:ExpressibleByArrayLiteral
 }
 extension Unidoc.SegregatedList
 {
-    init?(_ context:borrowing Unidoc.RelativePageContext,
+    init?(_ context:borrowing Unidoc.InternalPageContext,
         group:__shared [Unidoc.Scalar])
     {
         if  group.isEmpty
@@ -49,7 +49,7 @@ extension Unidoc.SegregatedList
 
     static
     func partition(_ items:[Unidoc.Scalar],
-        with context:Unidoc.RelativePageContext) -> Self
+        with context:Unidoc.InternalPageContext) -> Self
     {
         items.reduce(into: []) { $0.append(context.card(decl: $1)) }
     }

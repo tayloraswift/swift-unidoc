@@ -11,7 +11,7 @@ extension Unidoc.Cone
 {
     struct Halo
     {
-        let context:Unidoc.RelativePageContext
+        let context:Unidoc.InternalPageContext
 
         private
         var uncategorized:[Unidoc.Scalar]
@@ -45,7 +45,7 @@ extension Unidoc.Cone
         let bias:Unidoc.Bias
 
         private
-        init(_ context:Unidoc.RelativePageContext,
+        init(_ context:Unidoc.InternalPageContext,
             decl:Phylum.DeclFlags?,
             bias:Unidoc.Bias)
         {
@@ -71,7 +71,7 @@ extension Unidoc.Cone
 }
 extension Unidoc.Cone.Halo
 {
-    init(_ context:Unidoc.RelativePageContext,
+    init(_ context:Unidoc.InternalPageContext,
         curated:consuming Set<Unidoc.Scalar>,
         groups:borrowing [Unidoc.AnyGroup],
         apex:borrowing Unidoc.DeclVertex) throws
@@ -87,7 +87,7 @@ extension Unidoc.Cone.Halo
             generics: .init(apex.signature.generics.parameters))
     }
 
-    init(_ context:Unidoc.RelativePageContext,
+    init(_ context:Unidoc.InternalPageContext,
         curated:consuming Set<Unidoc.Scalar>,
         groups:borrowing [Unidoc.AnyGroup],
         decl:Phylum.DeclFlags? = nil,

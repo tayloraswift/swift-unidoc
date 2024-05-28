@@ -23,8 +23,7 @@ extension Unidoc.ApicalPage
         self.cone.overviewText?.description ?? self.descriptionFallback
     }
 }
-extension Unidoc.ApicalPage
-    where Context == Unidoc.RelativePageContext
+extension Unidoc.ApicalPage where Context == Unidoc.InternalPageContext
 {
-    var context:Unidoc.RelativePageContext { self.cone.halo.context }
+    var context:Unidoc.InternalPageContext { self.cone.halo.context }
 }
