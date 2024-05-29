@@ -172,7 +172,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     mutating
     func compile(updating status:SSGC.StatusStream?,
-        into artifacts:FilePath,
+        into artifacts:FilePath.Directory,
         with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         switch self.id
@@ -187,7 +187,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 
         let manifestVersions:[MinorVersion] = try self.listExtraManifests()
         var manifest:SPM.Manifest = try swift.manifest(package: self.root,
-            json: artifacts / "\(self.id.package).package.json",
+            json: artifacts.path / "\(self.id.package).package.json",
             leaf: true)
 
         print("""
@@ -213,7 +213,9 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let scratch:SSGC.PackageBuildDirectory
         do
         {
-            scratch = try swift.build(package: self.root, flags: self.flags)
+            scratch = try swift.build(package: self.root, flags: self.flags.dumping(
+                symbols: .default,
+                to: artifacts))
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
@@ -223,7 +225,6 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let platform:SymbolGraphMetadata.Platform = try swift.platform()
 
         var dependencies:[PackageNode] = []
-        var include:[FilePath] = [scratch.include]
 
         //  Nominal dependencies mean we need to perform two passes.
         var packageContainingProduct:[String: Symbol.Package] = [:]
@@ -237,7 +238,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
 
             let manifest:SPM.Manifest = try swift.manifest(package: checkout,
-                json: artifacts / "\(pin.identity).package.json",
+                json: artifacts.path / "\(pin.identity).package.json",
                 leaf: false)
 
             for product:SPM.Manifest.Product in manifest.products
@@ -257,10 +258,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
                 on: platform,
                 as: pin.identity)
 
-            let sources:SSGC.PackageSources = try .init(scanning: dependency)
-
             dependencies.append(dependency)
-            include += sources.include
         }
 
         //  Now it is time to normalize the leaf manifest.
@@ -321,7 +319,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         //  This step is considered part of documentation building.
         do
         {
-            return (metadata, try .init(scanning: flatNode, include: include, scratch: scratch))
+            return (metadata, try .init(scanning: flatNode, scratch: scratch))
         }
         catch let error
         {

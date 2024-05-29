@@ -1,6 +1,4 @@
-import JSONDecoding
-
-extension SymbolGraphPart.Vertex
+extension Symbol
 {
     @frozen public
     enum ACL:Hashable, Comparable, Sendable
@@ -13,7 +11,7 @@ extension SymbolGraphPart.Vertex
         case  open
     }
 }
-extension SymbolGraphPart.Vertex.ACL:CustomStringConvertible
+extension Symbol.ACL:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -32,7 +30,7 @@ extension SymbolGraphPart.Vertex.ACL:CustomStringConvertible
 //  Manual conformance needed, because a raw type would inhibit
 //  the synthesized ``Comparable`` conformance. And implementing
 //  this manually is easier than implementing `<`.
-extension SymbolGraphPart.Vertex.ACL:LosslessStringConvertible
+extension Symbol.ACL:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String)
@@ -48,7 +46,4 @@ extension SymbolGraphPart.Vertex.ACL:LosslessStringConvertible
         default:            return nil
         }
     }
-}
-extension SymbolGraphPart.Vertex.ACL:JSONStringDecodable
-{
 }

@@ -34,8 +34,12 @@ extension SSGC
 }
 extension SSGC.NominalSources
 {
-    init(include:inout [FilePath],
-        exclude:borrowing [String],
+    init(toolchain module:consuming SymbolGraph.Module)
+    {
+        self.init(module)
+    }
+
+    init(exclude:borrowing [String],
         package:borrowing SSGC.PackageRoot,
         module:consuming SymbolGraph.Module,
         count:[DefaultDirectory: Int]) throws
@@ -78,22 +82,13 @@ extension SSGC.NominalSources
             }
         }
 
-        try self.scan(include: &include, exclude: exclude, package: package)
-    }
-
-    static
-    func toolchain(module name:String, dependencies:Int...) -> Self
-    {
-        .init(.init(name: name,
-                type: .binary,
-                dependencies: .init(modules: dependencies)),
-            origin: .toolchain)
+        try self.scan(exclude: exclude, package: package)
     }
 }
 extension SSGC.NominalSources
 {
     private mutating
-    func scan(include:inout [FilePath], exclude:[String], package root:SSGC.PackageRoot) throws
+    func scan(exclude:[String], package root:SSGC.PackageRoot) throws
     {
         guard
         case .sources(let path) = self.origin
@@ -103,16 +98,10 @@ extension SSGC.NominalSources
         }
 
         let exclude:[FilePath] = exclude.map { path / $0 }
-        var headers:Set<FilePath> = []
 
         defer
         {
             self.markdown.sort { $0.id < $1.id }
-
-            if  self.module.type != .executable
-            {
-                include += headers.sorted { $0.string < $1.string }
-            }
         }
 
         try path.directory.walk
@@ -193,18 +182,16 @@ extension SSGC.NominalSources
 
                 case "h":
                     //  Header files don’t indicate a C or C++ module on their own.
-                    headers.update(with: $0)
+                    break
 
                 case "modulemap":
                     //  But modulemaps do.
-                    headers.update(with: $0)
                     fallthrough
 
                 case "c":
                     self.module.language |= .c
 
                 case "hpp", "hxx":
-                    headers.update(with: $0)
                     fallthrough
 
                 case "cc", "cpp", "cxx":

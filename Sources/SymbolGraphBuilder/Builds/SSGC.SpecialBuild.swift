@@ -20,15 +20,15 @@ extension SSGC.SpecialBuild
 extension SSGC.SpecialBuild:SSGC.DocumentationBuild
 {
     func compile(updating _:SSGC.StatusStream?,
-        into _:FilePath,
-        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
+        into artifacts:FilePath.Directory,
+        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.SpecialSources)
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
-        let sources:[SSGC.NominalSources]
+        let modules:[SymbolGraph.Module]
         switch try swift.platform()
         {
         case .macOS:
-            sources =
+            modules =
             [
                 //  0:
                 .toolchain(module: "Swift"),
@@ -61,7 +61,7 @@ extension SSGC.SpecialBuild:SSGC.DocumentationBuild
             fallthrough
 
         default:
-            sources =
+            modules =
             [
                 //  0:
                 .toolchain(module: "Swift"),
@@ -121,9 +121,11 @@ extension SSGC.SpecialBuild:SSGC.DocumentationBuild
                     cultures: [Int].init(0 ... 7)),
                 .init(name: "__corelibs__", type: .library(.automatic),
                     dependencies: [],
-                    cultures: [Int].init(sources.indices)),
+                    cultures: [Int].init(modules.indices)),
             ])
 
-        return (metadata, .init(cultures: sources))
+        try swift.dump(modules: modules, to: artifacts)
+
+        return (metadata, .init(modules: modules))
     }
 }

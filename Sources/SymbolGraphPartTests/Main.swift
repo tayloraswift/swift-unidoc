@@ -92,7 +92,7 @@ enum Main:TestMain, TestBattery
             let part:SymbolGraphPart = tests.load(
                 part: "TestModules/SymbolGraphs/ACL.symbols.json")
         {
-            for (symbol, level):([String], SymbolGraphPart.Vertex.ACL?) in
+            for (symbol, level):([String], Symbol.ACL?) in
             [
                 (["Public"],    .public),
                 (["Package"],   .package),

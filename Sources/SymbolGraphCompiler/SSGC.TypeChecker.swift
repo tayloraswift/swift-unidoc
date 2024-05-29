@@ -8,7 +8,7 @@ extension SSGC
     struct TypeChecker
     {
         private
-        let threshold:SymbolGraphPart.Vertex.ACL
+        let threshold:Symbol.ACL
 
         public private(set)
         var declarations:Declarations
@@ -16,7 +16,7 @@ extension SSGC
         var extensions:Extensions
 
         public
-        init(root:Symbol.FileBase?, threshold:SymbolGraphPart.Vertex.ACL = .public)
+        init(root:Symbol.FileBase?, threshold:Symbol.ACL = .public)
         {
             self.threshold = threshold
 

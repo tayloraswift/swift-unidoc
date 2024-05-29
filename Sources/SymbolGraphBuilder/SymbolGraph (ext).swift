@@ -13,14 +13,14 @@ extension SymbolGraph
 {
     static
     func compile(artifacts:[Artifacts],
-        package:SSGC.PackageSources,
+        package:some SSGC.DocumentationSources,
         logger:SSGC.DocumentationLogger?,
         index:(any Markdown.SwiftLanguage.IndexStore)? = nil) throws -> Self
     {
         precondition(package.cultures.count == artifacts.count,
             "Mismatched cultures and artifacts!")
 
-        let root:Symbol.FileBase? = (package.root?.path.string).map(Symbol.FileBase.init(_:))
+        let prefix:Symbol.FileBase? = package.prefix
 
         let (namespaces, nominations):([[SSGC.Namespace]], SSGC.Nominations)
         let (extensions):[SSGC.Extension]
@@ -28,7 +28,7 @@ extension SymbolGraph
         var profiler:BuildProfiler = .init()
         do
         {
-            var checker:SSGC.TypeChecker = .init(root: root)
+            var checker:SSGC.TypeChecker = .init(root: prefix)
 
             for (culture, artifacts):(SSGC.NominalSources, Artifacts) in zip(
                 package.cultures,
@@ -74,7 +74,7 @@ extension SymbolGraph
             var linker:SSGC.Linker = .init(nominations: nominations,
                 modules: package.cultures.map(\.module),
                 plugins: [.swift(index: index)],
-                root: root)
+                root: prefix)
 
             let namespacePositions:[[SymbolGraph.Namespace]] = profiler.measure(\.linking)
             {
