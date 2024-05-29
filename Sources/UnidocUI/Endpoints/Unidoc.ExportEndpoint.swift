@@ -57,7 +57,7 @@ extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         vertex apex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:Unidoc.AbsolutePageContext,
+        with context:Unidoc.ExternalBlogContext,
         format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         let article:Unidoc.ArticleVertex

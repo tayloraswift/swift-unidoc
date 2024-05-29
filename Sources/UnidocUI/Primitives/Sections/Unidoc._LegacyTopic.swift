@@ -6,13 +6,13 @@ extension Unidoc
     struct _LegacyTopic
     {
         private
-        let context:Unidoc.RelativePageContext
+        let context:Unidoc.InternalPageContext
         private
         let caption:Unidoc.Passage?
         private
         let members:[Unidoc.TopicMember]
 
-        init(_ context:Unidoc.RelativePageContext,
+        init(_ context:Unidoc.InternalPageContext,
             caption:Unidoc.Passage? = nil,
             members:[Unidoc.TopicMember])
         {

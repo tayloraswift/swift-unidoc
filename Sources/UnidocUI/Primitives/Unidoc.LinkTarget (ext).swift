@@ -12,19 +12,44 @@ extension Unidoc.LinkTarget
     }
 
     mutating
-    func export(as article:Unidoc.ArticleVertex, in volume:Unidoc.Edition)
+    func export(as article:Unidoc.ArticleVertex, base principal:Unidoc.AnyVertex)
     {
-        guard volume == article.id.edition
+        if  let link:Self = .relative(target: article, base: principal)
+        {
+            self = link
+        }
         else
         {
             self.export()
-            return
+        }
+    }
+
+    /// Returns a link to the `target` article relative to the `principal` vertex, if one could
+    /// be constructed.
+    ///
+    /// We only perform this transformation if both vertices are articles in the same volume,
+    /// because we know article paths are at most one component deep.
+    static
+    func relative(target article:Unidoc.ArticleVertex, base principal:Unidoc.AnyVertex) -> Self?
+    {
+        guard case .article(let principal) = principal,
+        case article.id.edition = principal.id.edition
+        else
+        {
+            //  Articles do not belong to the same volume.
+            return nil
         }
 
-        //  This is a link to an article in the same volume. Most likely, the API
-        //  user wants to also host the other article under the same domain. Because
-        //  we know article paths are at most one component deep, we can just return
-        //  the last component of the other article’s path as a relative URI.
-        self = .location("../\(URI.Path.Component.push(article.stem.last.lowercased()))")
+        if  article.stem.first == principal.stem.first
+        {
+            //  Both articles are within the same module.
+            return .location("../\(URI.Path.Component.push(article.stem.last.lowercased()))")
+        }
+        else
+        {
+            var uri:URI.Path = [.pop, .pop]
+                uri += article.stem
+            return .location("\(uri)")
+        }
     }
 }

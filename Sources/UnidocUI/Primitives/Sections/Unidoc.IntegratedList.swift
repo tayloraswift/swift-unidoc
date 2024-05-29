@@ -5,12 +5,12 @@ extension Unidoc
     struct IntegratedList
     {
         private
-        let context:Unidoc.RelativePageContext
+        let context:Unidoc.InternalPageContext
         private
         let items:[Unidoc.Scalar]
 
         private
-        init(context:Unidoc.RelativePageContext, items:[Unidoc.Scalar])
+        init(context:Unidoc.InternalPageContext, items:[Unidoc.Scalar])
         {
             self.context = context
             self.items = items
@@ -19,7 +19,7 @@ extension Unidoc
 }
 extension Unidoc.IntegratedList
 {
-    init?(_ context:Unidoc.RelativePageContext,
+    init?(_ context:Unidoc.InternalPageContext,
         items:[Unidoc.Scalar])
     {
         if  items.isEmpty

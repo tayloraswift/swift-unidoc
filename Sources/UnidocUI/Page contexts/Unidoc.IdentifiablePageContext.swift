@@ -25,19 +25,9 @@ extension Unidoc
         public
         let media:PackageMedia?
 
-        private
-        init(canonical:CanonicalVersion?,
-            packages:PackageContext,
-            cache:Cache,
-            media:PackageMedia?)
-        {
-            self.canonical = canonical
-            self.packages = packages
-            self.cache = cache
-            self.media = media
-        }
-
-        public convenience required
+        /// This likely cannot be a `convenience` initializer due to
+        /// <https://github.com/apple/swift/issues/73962>
+        public required
         init(canonical:CanonicalVersion?,
             principal:VolumeMetadata,
             secondary:borrowing [VolumeMetadata],
@@ -70,12 +60,11 @@ extension Unidoc
                 media = nil
             }
 
-            self.init(canonical: canonical,
-                packages: packages,
-                cache: .init(
-                    vertices: vertices,
-                    volumes: .init(principal: principal, secondary: secondary)),
-                media: media)
+            self.canonical = canonical
+            self.packages = packages
+            self.cache = .init(vertices: vertices,
+                volumes: .init(principal: principal, secondary: secondary))
+            self.media = media
         }
 
         public

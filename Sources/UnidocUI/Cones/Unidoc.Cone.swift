@@ -7,31 +7,24 @@ extension Unidoc
     struct Cone
     {
         private
-        let writings:(overview:Markdown.Bytecode?, details:Markdown.Bytecode?)
-        private
-        let outlines:[Unidoc.Outline]
-
+        let prose:Prose
         let halo:Halo
 
         private
-        init(
-            writings:(overview:Markdown.Bytecode?, details:Markdown.Bytecode?),
-            outlines:[Unidoc.Outline],
-            halo:Halo)
+        init(prose:Prose, halo:Halo)
         {
-            self.writings = writings
-            self.outlines = outlines
+            self.prose = prose
             self.halo = halo
         }
     }
 }
 extension Unidoc.Cone
 {
-    init(_ context:Unidoc.RelativePageContext,
+    init(_ context:Unidoc.InternalPageContext,
         groups:borrowing [Unidoc.AnyGroup],
         apex:__shared some Unidoc.PrincipalVertex) throws
     {
-        let outlines:[Unidoc.Outline] = apex.outlinesConcatenated
+        let prose:Unidoc.Prose = .init(apex: apex)
 
         var curated:Set<Unidoc.Scalar> = [context.id]
         if  let markdown:Markdown.Bytecode = apex.details?.markdown
@@ -48,8 +41,8 @@ extension Unidoc.Cone
 
                 let index:Int = reference.index
 
-                if  outlines.indices.contains(index),
-                    case .path(_, let path) = outlines[index],
+                if  prose.outlines.indices.contains(index),
+                    case .path(_, let path) = prose.outlines[index],
                     case let last? = path.last
                 {
                     curated.insert(last)
@@ -75,37 +68,18 @@ extension Unidoc.Cone
                 bias: apex.bias)
         }
 
-        self.init(
-            writings: (apex.overview?.markdown, apex.details?.markdown),
-            outlines: outlines,
-            halo: halo)
+        self.init(prose: prose, halo: halo)
     }
 }
 extension Unidoc.Cone
 {
-    var context:Unidoc.RelativePageContext { self.halo.context }
-
     var overviewText:Unidoc.InertSection<Unidoc.IdentifiableVertices>?
     {
-        self.writings.overview.map
-        {
-            .init(bytecode: $0, outlines: self.outlines, vertices: self.context.vertices)
-        }
+        self.prose.overviewText(with: self.context.vertices)
     }
 
-    var overview:Unidoc.ProseSection?
-    {
-        self.writings.overview.map
-        {
-            .init(bytecode: $0, outlines: self.outlines, context: self.context)
-        }
-    }
+    var overview:Unidoc.ProseSection? { self.prose.overview(with: self.context) }
+    var details:Unidoc.ProseSection? { self.prose.details(with: self.context) }
 
-    var details:Unidoc.ProseSection?
-    {
-        self.writings.details.map
-        {
-            .init(bytecode: $0, outlines: self.outlines, context: self.context)
-        }
-    }
+    var context:Unidoc.InternalPageContext { self.halo.context }
 }
