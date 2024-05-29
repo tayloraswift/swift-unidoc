@@ -29,6 +29,7 @@ extension Unidoc
 }
 extension Unidoc.EditionStateReport
 {
+    public
     var phase:Phase
     {
         if  let graph:Graph = self.graph,
