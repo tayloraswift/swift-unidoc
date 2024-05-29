@@ -1,13 +1,7 @@
-#if canImport(IndexStoreDB)
-
-import class IndexStoreDB.IndexStoreDB
-import class IndexStoreDB.IndexStoreLibrary
-import MarkdownPluginSwift_IndexStoreDB
-
-#endif
-
 import MarkdownABI
+import SymbolGraphParts
 import SymbolGraphs
+import Symbols
 import System
 
 extension SSGC
@@ -74,42 +68,61 @@ extension SSGC.Workspace
         where Build:SSGC.DocumentationBuild
     {
         let metadata:SymbolGraphMetadata
-        let package:SSGC.PackageSources
+        let package:Build.Sources
 
         let output:FilePath = self.artifacts
         try output.directory.create(clean: true)
 
-        (metadata, package) = try build.compile(updating: status, into: output, with: swift)
+        (metadata, package) = try build.compile(updating: status,
+            into: output.directory,
+            with: swift)
 
-        let artifacts:[Artifacts] = try swift.dump(modules: package.cultures,
-            include: package.include,
-            output: output)
-
-        #if canImport(IndexStoreDB)
-
-        let index:(any Markdown.SwiftLanguage.IndexStore)? = try package.scratch.map
+        let symbols:[Symbol.Module: [SymbolGraphPart.ID]] = try output.directory.reduce(
+            into: [:])
         {
-            let libIndexStore:IndexStoreLibrary = try swift.libIndexStore()
-            let indexPath:FilePath = $0.include / "index"
-            return try IndexStoreDB.init(storePath: "\(indexPath)/store",
-                databasePath: "\(indexPath)/db",
-                library: libIndexStore,
-                waitUntilDoneInitializing: true,
-                readonly: false,
-                listenToUnitEvents: true)
+            //  We don’t want to *parse* the JSON yet to discover the culture,
+            //  because the JSON can be very large, and parsing JSON is very
+            //  expensive (compared to parsing BSON). So we trust that the file
+            //  name is correct and indicates what is contained within the file.
+            let filename:FilePath.Component = try $1.get()
+            guard
+            let id:SymbolGraphPart.ID = .init("\(filename)")
+            else
+            {
+                return
+            }
+
+            switch id.namespace
+            {
+            case    "CDispatch",                    // too low-level
+                    "CFURLSessionInterface",        // too low-level
+                    "CFXMLInterface",               // too low-level
+                    "CoreFoundation",               // too low-level
+                    "Glibc",                        // linux-gnu specific
+                    "SwiftGlibc",                   // linux-gnu specific
+                    "SwiftOnoneSupport",            // contains no symbols
+                    "SwiftOverlayShims",            // too low-level
+                    "SwiftShims",                   // contains no symbols
+                    "_Builtin_intrinsics",          // contains only one symbol, free(_:)
+                    "_Builtin_stddef_max_align_t",  // contains only two symbols
+                    "_InternalStaticMirror",        // unbuildable
+                    "_InternalSwiftScan",           // unbuildable
+                    "_SwiftConcurrencyShims",       // contains only two symbols
+                    "std":                          // unbuildable
+                return
+
+            default:
+                $0[id.culture, default: []].append(id)
+            }
         }
 
-        #else
-
-        let index:(any Markdown.SwiftLanguage.IndexStore)? = nil
-
-        #endif
-
-        let compiled:SymbolGraph = try .compile(artifacts: artifacts,
+        let compiled:SymbolGraph = try .compile(artifacts: package.cultures.map
+            {
+                .init(parts: symbols[$0.module.id, default: []], in: output)
+            },
             package: package,
             logger: logger,
-            index: index)
-
+            index: try package.indexStore(for: swift))
 
         return .init(metadata: metadata, graph: compiled)
     }

@@ -1,5 +1,15 @@
+#if canImport(IndexStoreDB)
+
+import class IndexStoreDB.IndexStoreDB
+import class IndexStoreDB.IndexStoreLibrary
+import MarkdownPluginSwift_IndexStoreDB
+
+#endif
+
 import MarkdownABI
+import SymbolGraphs
 import PackageGraphs
+import Symbols
 import System
 
 extension SSGC
@@ -10,23 +20,17 @@ extension SSGC
         var cultures:[NominalSources]
         var snippets:[LazyFile]
 
-        var include:[FilePath]
-
-        let scratch:PackageBuildDirectory?
-        let root:PackageRoot?
+        let scratch:PackageBuildDirectory
+        let root:PackageRoot
 
         init(
             cultures:[NominalSources] = [],
             snippets:[LazyFile] = [],
-            include:[FilePath] = [],
-            scratch:PackageBuildDirectory? = nil,
-            root:PackageRoot? = nil)
+            scratch:PackageBuildDirectory,
+            root:PackageRoot)
         {
             self.cultures = cultures
             self.snippets = snippets
-
-            self.include = include
-
             self.scratch = scratch
             self.root = root
         }
@@ -35,12 +39,9 @@ extension SSGC
 extension SSGC.PackageSources
 {
     init(scanning package:borrowing PackageNode,
-        include:consuming [FilePath] = [],
-        scratch:consuming SSGC.PackageBuildDirectory? = nil) throws
+        scratch:consuming SSGC.PackageBuildDirectory) throws
     {
-        let root:SSGC.PackageRoot = .init(normalizing: package.root)
-
-        self.init(include: include, scratch: scratch, root: root)
+        self.init(scratch: scratch, root: .init(normalizing: package.root))
 
         let count:[SSGC.NominalSources.DefaultDirectory: Int] = package.modules.reduce(
             into: [:])
@@ -54,9 +55,8 @@ extension SSGC.PackageSources
         for i:Int in package.modules.indices
         {
             self.cultures.append(try .init(
-                include: &self.include,
                 exclude: package.exclude[i],
-                package: root,
+                package: self.root,
                 module: package.modules[i],
                 count: count))
         }
@@ -68,7 +68,7 @@ extension SSGC.PackageSources
             throw SSGC.SnippetDirectoryError.invalid(package.snippets)
         }
 
-        let snippets:FilePath = root.path.appending(snippetsDirectory)
+        let snippets:FilePath = self.root.path.appending(snippetsDirectory)
         if !snippets.directory.exists()
         {
             return
@@ -93,11 +93,35 @@ extension SSGC.PackageSources
             {
                 //  Should we be mangling URL-unsafe characters?
                 let snippet:SSGC.LazyFile = .init(location: file.path,
-                    path: root.rebase(file.path),
+                    path: self.root.rebase(file.path),
                     name: $1.stem)
 
                 self.snippets.append(snippet)
             }
         }
+    }
+}
+extension SSGC.PackageSources:SSGC.DocumentationSources
+{
+    var prefix:Symbol.FileBase? { .init(self.root.path.string) }
+
+    func indexStore(for swift:SSGC.Toolchain) throws -> (any Markdown.SwiftLanguage.IndexStore)?
+    {
+        #if canImport(IndexStoreDB)
+
+        let libIndexStore:IndexStoreLibrary = try swift.libIndexStore()
+        let indexPath:FilePath = self.scratch.include / "index"
+        return try IndexStoreDB.init(storePath: "\(indexPath)/store",
+            databasePath: "\(indexPath)/db",
+            library: libIndexStore,
+            waitUntilDoneInitializing: true,
+            readonly: false,
+            listenToUnitEvents: true)
+
+        #else
+
+        return nil
+
+        #endif
     }
 }

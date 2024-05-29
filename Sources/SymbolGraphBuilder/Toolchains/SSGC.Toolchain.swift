@@ -5,10 +5,8 @@ import class IndexStoreDB.IndexStoreLibrary
 #endif
 
 import JSON
-import PackageGraphs
 import PackageMetadata
 import SemanticVersions
-import SymbolGraphParts
 import SymbolGraphs
 import Symbols
 import System
@@ -277,8 +275,7 @@ extension SSGC.Toolchain
         }
     }
 
-    func build(
-        package:FilePath,
+    func build(package:FilePath,
         flags:SSGC.PackageBuild.Flags = .init()) throws -> SSGC.PackageBuildDirectory
     {
         let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
@@ -321,58 +318,16 @@ extension SSGC.Toolchain
 {
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
-    func dump(modules:[SSGC.NominalSources],
-        include:[FilePath],
-        output:FilePath) throws -> [Artifacts]
+    func dump(modules:[SymbolGraph.Module],
+        to output:FilePath.Directory,
+        options:SymbolDumpOptions = .default,
+        include:[FilePath] = []) throws
     {
-        for sources:SSGC.NominalSources in modules
+        for module:SymbolGraph.Module in modules
         {
-            let label:String
-            if  case .toolchain? = sources.origin
-            {
-                label = "toolchain"
-            }
-            else
-            {
-                //  Only dump symbols for library targets.
-                switch sources.module.type
-                {
-                case .binary:       break
-                case .executable:   continue
-                case .regular:      break
-                case .macro:        break
-                case .plugin:       continue
-                case .snippet:      continue
-                case .system:       continue
-                case .test:         continue
-                }
+            let module:Symbol.Module = module.id
 
-                label = """
-                \(sources.module.language?.description ?? "?"), \(sources.module.type)
-                """
-            }
-
-            let module:Symbol.Module = sources.module.id
-
-            print("Dumping symbols for module '\(module)' (\(label))")
-
-            // https://github.com/apple/swift/issues/71635
-            let _minimumACL:String
-            if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
-            {
-                switch module
-                {
-                case "_Concurrency":        _minimumACL = "public"
-                case "_Differentiation":    _minimumACL = "public"
-                case "_StringProcessing":   _minimumACL = "internal"
-                case "Foundation":          _minimumACL = "internal"
-                default:                    _minimumACL = "internal"
-                }
-            }
-            else
-            {
-                _minimumACL = "internal"
-            }
+            print("Dumping symbols for module '\(module)'")
 
             var arguments:[String] =
             [
@@ -380,12 +335,24 @@ extension SSGC.Toolchain
 
                 "-module-name",                     "\(module)",
                 "-target",                          "\(self.triple)",
-                "-minimum-access-level",            _minimumACL,
-                "-output-dir",                      "\(output)",
-                // "-emit-extension-block-symbols",
-                "-include-spi-symbols",
-                "-skip-inherited-docs",
+                "-output-dir",                      "\(output.path)",
             ]
+
+            arguments.append("-minimum-access-level")
+            arguments.append("\(options.minimumACL)")
+
+            if  options.emitExtensionBlockSymbols
+            {
+                arguments.append("-emit-extension-block-symbols")
+            }
+            if  options.includeInterfaceSymbols
+            {
+                arguments.append("-include-spi-symbols")
+            }
+            if  options.skipInheritedDocs
+            {
+                arguments.append("-skip-inherited-docs")
+            }
 
             #if os(macOS)
             //  On macOS, dumping symbols without specifying the SDK will always fail.
@@ -399,21 +366,6 @@ extension SSGC.Toolchain
             {
                 arguments.append("-sdk")
                 arguments.append(swiftSDK.path)
-            }
-
-            if  case .DEVELOPMENT_SNAPSHOT? = self.version.nightly
-            {
-                switch module
-                {
-                case "_StringProcessing":   break
-                case "Foundation":          break
-                default:
-                    arguments.append("-emit-extension-block-symbols")
-                }
-            }
-            else
-            {
-                arguments.append("-emit-extension-block-symbols")
             }
 
             if  self.pretty
@@ -451,45 +403,6 @@ extension SSGC.Toolchain
             {
                 throw SSGC.PackageBuildError.swift_symbolgraph_extract(code, invocation)
             }
-        }
-
-        var parts:[Symbol.Module: [SymbolGraphPart.ID]] = [:]
-        for part:Result<FilePath.Component, any Error> in output.directory
-        {
-            //  We don’t want to *parse* the JSON yet to discover the culture,
-            //  because the JSON can be very large, and parsing JSON is very
-            //  expensive (compared to parsing BSON). So we trust that the file
-            //  name is correct and indicates what is contained within the file.
-            if  let id:SymbolGraphPart.ID = .init("\(try part.get())")
-            {
-                switch id.namespace
-                {
-                case    "CDispatch",                    // too low-level
-                        "CFURLSessionInterface",        // too low-level
-                        "CFXMLInterface",               // too low-level
-                        "CoreFoundation",               // too low-level
-                        "Glibc",                        // linux-gnu specific
-                        "SwiftGlibc",                   // linux-gnu specific
-                        "SwiftOnoneSupport",            // contains no symbols
-                        "SwiftOverlayShims",            // too low-level
-                        "SwiftShims",                   // contains no symbols
-                        "_Builtin_intrinsics",          // contains only one symbol, free(_:)
-                        "_Builtin_stddef_max_align_t",  // contains only two symbols
-                        "_InternalStaticMirror",        // unbuildable
-                        "_InternalSwiftScan",           // unbuildable
-                        "_SwiftConcurrencyShims",       // contains only two symbols
-                        "std":                          // unbuildable
-                    continue
-
-                default:
-                    parts[id.culture, default: []].append(id)
-                }
-            }
-        }
-
-        return modules.map
-        {
-            .init(parts: parts[$0.module.id, default: []], in: output)
         }
     }
 }

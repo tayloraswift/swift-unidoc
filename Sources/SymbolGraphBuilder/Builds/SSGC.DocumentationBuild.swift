@@ -3,11 +3,13 @@ import System
 
 extension SSGC
 {
-    protocol DocumentationBuild
+    protocol DocumentationBuild<Sources>
     {
+        associatedtype Sources:DocumentationSources
+
         mutating
         func compile(updating status:SSGC.StatusStream?,
-            into artifacts:FilePath,
-            with swift:Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
+            into artifacts:FilePath.Directory,
+            with swift:Toolchain) throws -> (SymbolGraphMetadata, Sources)
     }
 }
