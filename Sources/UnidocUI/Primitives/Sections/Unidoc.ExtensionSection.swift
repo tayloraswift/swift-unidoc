@@ -7,14 +7,14 @@ extension Unidoc
     struct ExtensionSection
     {
         private
-        let context:Unidoc.RelativePageContext
+        let context:Unidoc.InternalPageContext
         let heading:ExtensionHeading
         let constraints:[GenericConstraint<Unidoc.Scalar?>]
         let body:ExtensionBody
 
         private
         init(
-            context:Unidoc.RelativePageContext,
+            context:Unidoc.InternalPageContext,
             heading:ExtensionHeading,
             constraints:[GenericConstraint<Unidoc.Scalar?>],
             body:ExtensionBody)
@@ -28,7 +28,7 @@ extension Unidoc
 }
 extension Unidoc.ExtensionSection
 {
-    init?(_ context:Unidoc.RelativePageContext,
+    init?(_ context:Unidoc.InternalPageContext,
         group:borrowing Unidoc.ExtensionGroup,
         decl:Phylum.DeclFlags,
         bias:Unidoc.Bias)

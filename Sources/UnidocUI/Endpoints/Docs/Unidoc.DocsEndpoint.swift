@@ -44,7 +44,7 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         vertex apex:consuming Unidoc.AnyVertex,
         groups:consuming [Unidoc.AnyGroup],
         tree:consuming Unidoc.TypeTree?,
-        with context:Unidoc.RelativePageContext,
+        with context:Unidoc.InternalPageContext,
         format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         let resource:HTTP.Resource
