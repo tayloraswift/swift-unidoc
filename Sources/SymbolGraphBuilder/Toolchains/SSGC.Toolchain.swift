@@ -323,7 +323,7 @@ extension SSGC.Toolchain
     func dump(modules:[SymbolGraph.Module],
         to output:FilePath.Directory,
         options:SymbolDumpOptions = .default,
-        include:[FilePath] = []) throws
+        include:[FilePath.Directory] = []) throws
     {
         for module:SymbolGraph.Module in modules
         {
@@ -374,7 +374,7 @@ extension SSGC.Toolchain
             {
                 arguments.append("-pretty-print")
             }
-            for include:FilePath in include
+            for include:FilePath.Directory in include
             {
                 arguments.append("-I")
                 arguments.append("\(include)")

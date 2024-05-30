@@ -14,17 +14,18 @@ import System
 
 extension SSGC
 {
-    /// Stores information about the source files for a package.
+    /// Stores information about the layout, snippets, and build directory for a package.
     struct PackageSources
     {
-        var cultures:[NominalSources]
+        let cultures:[NominalSources]
         var snippets:[LazyFile]
 
         let scratch:PackageBuildDirectory
         let root:PackageRoot
 
+        private
         init(
-            cultures:[NominalSources] = [],
+            cultures:[NominalSources],
             snippets:[LazyFile] = [],
             scratch:PackageBuildDirectory,
             root:PackageRoot)
@@ -38,28 +39,17 @@ extension SSGC
 }
 extension SSGC.PackageSources
 {
-    init(scanning package:borrowing PackageNode,
-        scratch:consuming SSGC.PackageBuildDirectory) throws
+    private
+    init(layout:Layout, scratch:consuming SSGC.PackageBuildDirectory)
     {
-        self.init(scratch: scratch, root: .init(normalizing: package.root))
+        self.init(cultures: layout.cultures, scratch: scratch, root: layout.root)
+    }
 
-        let count:[SSGC.NominalSources.DefaultDirectory: Int] = package.modules.reduce(
-            into: [:])
-        {
-            if  case nil = $1.location,
-                let directory:SSGC.NominalSources.DefaultDirectory = .init(for: $1.type)
-            {
-                $0[directory, default: 0] += 1
-            }
-        }
-        for i:Int in package.modules.indices
-        {
-            self.cultures.append(try .init(
-                exclude: package.exclude[i],
-                package: self.root,
-                module: package.modules[i],
-                count: count))
-        }
+    init(scanning package:borrowing PackageNode,
+        scratch:consuming SSGC.PackageBuildDirectory,
+        include:inout [FilePath.Directory]) throws
+    {
+        self.init(layout: try .init(scanning: package, include: &include), scratch: scratch)
 
         guard
         let snippetsDirectory:FilePath.Component = .init(package.snippets)

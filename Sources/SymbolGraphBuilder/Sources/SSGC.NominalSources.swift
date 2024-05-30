@@ -39,7 +39,9 @@ extension SSGC.NominalSources
         self.init(module)
     }
 
-    init(exclude:borrowing [String],
+    init(
+        include:inout [FilePath.Directory],
+        exclude:borrowing [String],
         package:borrowing SSGC.PackageRoot,
         module:consuming SymbolGraph.Module,
         count:[DefaultDirectory: Int]) throws
@@ -82,22 +84,23 @@ extension SSGC.NominalSources
             }
         }
 
-        try self.scan(exclude: exclude, package: package)
+        include += try self.scan(exclude: exclude, package: package)
     }
 }
 extension SSGC.NominalSources
 {
     private mutating
-    func scan(exclude:[String], package root:SSGC.PackageRoot) throws
+    func scan(exclude:[String], package root:SSGC.PackageRoot) throws -> [FilePath.Directory]
     {
         guard
         case .sources(let path) = self.origin
         else
         {
-            return
+            return []
         }
 
         let exclude:[FilePath] = exclude.map { path / $0 }
+        var headers:Set<FilePath.Directory> = []
 
         defer
         {
@@ -182,16 +185,18 @@ extension SSGC.NominalSources
 
                 case "h":
                     //  Header files don’t indicate a C or C++ module on their own.
-                    break
+                    headers.update(with: $0)
 
                 case "modulemap":
                     //  But modulemaps do.
+                    headers.update(with: $0)
                     fallthrough
 
                 case "c":
                     self.module.language |= .c
 
                 case "hpp", "hxx":
+                    headers.update(with: $0)
                     fallthrough
 
                 case "cc", "cpp", "cxx":
@@ -210,6 +215,11 @@ extension SSGC.NominalSources
                     print("Unknown file type: \(file.path)")
                 }
             }
+        }
+
+        return self.module.type == .executable ? [] : headers.sorted
+        {
+            $0.path.string < $1.path.string
         }
     }
 }

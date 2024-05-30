@@ -19,7 +19,7 @@ extension FilePath
     /// requests the first element, and `Directory`  (but not
     /// ``DirectoryIterator``) supports multi-pass iteration.
     @frozen public
-    struct Directory:Equatable, Sendable
+    struct Directory:Equatable, Hashable, Sendable
     {
         public
         var path:FilePath
