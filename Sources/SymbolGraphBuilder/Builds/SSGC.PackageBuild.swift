@@ -213,9 +213,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let scratch:SSGC.PackageBuildDirectory
         do
         {
-            scratch = try swift.build(package: self.root, flags: self.flags.dumping(
-                symbols: .default,
-                to: artifacts))
+            scratch = try swift.build(package: self.root, flags: self.flags)
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
@@ -225,6 +223,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let platform:SymbolGraphMetadata.Platform = try swift.platform()
 
         var dependencies:[PackageNode] = []
+        var include:[FilePath.Directory] = [scratch.include]
 
         //  Nominal dependencies mean we need to perform two passes.
         var packageContainingProduct:[String: Symbol.Package] = [:]
@@ -256,6 +255,9 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
             let dependency:PackageNode = try .all(flattening: manifests[manifest],
                 on: platform,
                 as: pin.identity)
+
+            let _:SSGC.PackageSources.Layout = try .init(scanning: dependency,
+                include: &include)
 
             dependencies.append(dependency)
         }
@@ -316,13 +318,20 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
             root: manifest.root)
 
         //  This step is considered part of documentation building.
+        let sources:SSGC.PackageSources
         do
         {
-            return (metadata, try .init(scanning: flatNode, scratch: scratch))
+            sources = try .init(scanning: flatNode, scratch: scratch, include: &include)
         }
         catch let error
         {
             throw SSGC.DocumentationBuildError.scanning(error)
         }
+
+        try swift.dump(modules: sources.cultures.lazy.map(\.module),
+            to: artifacts,
+            include: include)
+
+        return (metadata, sources)
     }
 }

@@ -17,5 +17,5 @@ extension SSGC
 }
 extension SSGC.PackageBuildDirectory
 {
-    var include:FilePath { self.location / "\(self.configuration)" }
+    var include:FilePath.Directory { self.location / "\(self.configuration)" }
 }
