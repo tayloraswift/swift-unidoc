@@ -10,36 +10,54 @@ extension SSGC
     struct Workspace:Equatable
     {
         public
-        let path:FilePath
+        let location:FilePath.Directory
 
         private
-        init(path:FilePath)
+        init(absolute location:FilePath.Directory)
         {
-            self.path = path
+            self.location = location
         }
     }
 }
 extension SSGC.Workspace
 {
     @inlinable public
-    var artifacts:FilePath { self.path / "artifacts" }
+    var artifacts:FilePath.Directory { self.location / "artifacts" }
     @inlinable public
-    var checkouts:FilePath { self.path / "checkouts" }
+    var checkouts:FilePath.Directory { self.location / "checkouts" }
 }
 extension SSGC.Workspace
 {
-    public static
-    func existing(at location:FilePath) -> Self
+    private
+    init(location:FilePath.Directory)
     {
-        .init(path: location)
+        if  location.path.isAbsolute
+        {
+            self.init(absolute: location)
+        }
+        else if
+            let current:FilePath.Directory = .current()
+        {
+            self.init(absolute: .init(path: current.path.appending(location.path.components)))
+        }
+        else
+        {
+            fatalError("Couldn’t determine the current working directory.")
+        }
     }
 
     public static
-    func create(at location:FilePath) throws -> Self
+    func existing(at location:FilePath.Directory) -> Self
     {
-        let workspace:Self = .init(path: location)
-        try workspace.artifacts.directory.create()
-        try workspace.checkouts.directory.create()
+        .init(location: location)
+    }
+
+    public static
+    func create(at location:FilePath.Directory) throws -> Self
+    {
+        let workspace:Self = .init(location: location)
+        try workspace.artifacts.create()
+        try workspace.checkouts.create()
         return workspace
     }
 }
@@ -70,14 +88,14 @@ extension SSGC.Workspace
         let metadata:SymbolGraphMetadata
         let package:Build.Sources
 
-        let output:FilePath = self.artifacts
-        try output.directory.create(clean: true)
+        let output:FilePath.Directory = self.artifacts
+        try output.create(clean: true)
 
         (metadata, package) = try build.compile(updating: status,
-            into: output.directory,
+            into: output,
             with: swift)
 
-        let symbols:[Symbol.Module: [SymbolGraphPart.ID]] = try output.directory.reduce(
+        let symbols:[Symbol.Module: [SymbolGraphPart.ID]] = try output.reduce(
             into: [:])
         {
             //  We don’t want to *parse* the JSON yet to discover the culture,
@@ -118,7 +136,7 @@ extension SSGC.Workspace
 
         let compiled:SymbolGraph = try .compile(artifacts: package.cultures.map
             {
-                .init(parts: symbols[$0.module.id, default: []], in: output)
+                .init(location: output, parts: symbols[$0.module.id, default: []])
             },
             package: package,
             logger: logger,

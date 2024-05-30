@@ -21,7 +21,7 @@ extension CompilerTestBattery
     static
     func run(tests:TestGroup)
     {
-        let directory:FilePath = "TestModules/SymbolGraphs"
+        let directory:FilePath.Directory = "TestModules/SymbolGraphs"
         var checker:SSGC.TypeChecker = .init(root: "/swift/swift-unidoc/TestModules")
 
         let parts:[SymbolGraphPart] = Self.inputs.compactMap

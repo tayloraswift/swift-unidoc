@@ -6,16 +6,16 @@ extension SSGC
     struct PackageBuildDirectory
     {
         let configuration:PackageBuildConfiguration
-        let path:FilePath
+        let location:FilePath.Directory
 
-        init(configuration:PackageBuildConfiguration, path:FilePath)
+        init(configuration:PackageBuildConfiguration, location:FilePath.Directory)
         {
             self.configuration = configuration
-            self.path = path
+            self.location = location
         }
     }
 }
 extension SSGC.PackageBuildDirectory
 {
-    var include:FilePath { self.path / "\(self.configuration)" }
+    var include:FilePath { self.location / "\(self.configuration)" }
 }

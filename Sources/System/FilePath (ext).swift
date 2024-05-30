@@ -6,11 +6,13 @@ extension FilePath:@unchecked Sendable
 }
 extension FilePath
 {
+    @available(*, unavailable, message: "Use the `directory` view instead")
     @inlinable public static
     func / (lhs:Self, rhs:Component) -> Self
     {
         lhs.appending(rhs)
     }
+    @available(*, unavailable, message: "Use the `directory` view instead")
     @inlinable public static
     func / (lhs:Self, rhs:String) -> Self
     {
@@ -201,8 +203,5 @@ extension FilePath
 extension FilePath
 {
     @inlinable public
-    var directory:Directory
-    {
-        .init(self)
-    }
+    var directory:Directory { .init(path: self) }
 }

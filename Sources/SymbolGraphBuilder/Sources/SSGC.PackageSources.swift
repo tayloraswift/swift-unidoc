@@ -68,13 +68,13 @@ extension SSGC.PackageSources
             throw SSGC.SnippetDirectoryError.invalid(package.snippets)
         }
 
-        let snippets:FilePath = self.root.path.appending(snippetsDirectory)
-        if !snippets.directory.exists()
+        let snippets:FilePath.Directory = self.root.location / snippetsDirectory
+        if !snippets.exists()
         {
             return
         }
 
-        try snippets.directory.walk
+        try snippets.walk
         {
             let file:(path:FilePath, extension:String)
 
@@ -103,7 +103,7 @@ extension SSGC.PackageSources
 }
 extension SSGC.PackageSources:SSGC.DocumentationSources
 {
-    var prefix:Symbol.FileBase? { .init(self.root.path.string) }
+    var prefix:Symbol.FileBase? { .init(self.root.location.path.string) }
 
     func indexStore(for swift:SSGC.Toolchain) throws -> (any Markdown.SwiftLanguage.IndexStore)?
     {

@@ -21,7 +21,7 @@ extension SSGC
         let swiftCommand:String
         /// A path to the SwiftPM cache directory to use.
         private
-        let swiftCache:FilePath?
+        let swiftCache:FilePath.Directory?
         private
         let swiftSDK:AppleSDK?
 
@@ -41,7 +41,7 @@ extension SSGC
 
         private
         init(swiftCommand:String,
-            swiftCache:FilePath?,
+            swiftCache:FilePath.Directory?,
             swiftSDK:AppleSDK?,
             scratch:FilePath.Component,
             version:SwiftVersion,
@@ -65,7 +65,7 @@ extension SSGC.Toolchain
     public
     init(parsing splash:String,
         swiftCommand:String = "swift",
-        swiftCache:FilePath? = nil,
+        swiftCache:FilePath.Directory? = nil,
         swiftSDK:SSGC.AppleSDK? = nil,
         scratch:FilePath.Component = ".build.ssgc",
         pretty:Bool = false) throws
@@ -147,7 +147,7 @@ extension SSGC.Toolchain
 
     public static
     func detect(
-        swiftCache:FilePath? = nil,
+        swiftCache:FilePath.Directory? = nil,
         swiftPath:FilePath? = nil,
         swiftSDK:SSGC.AppleSDK? = nil,
         pretty:Bool = false) throws -> Self
@@ -217,7 +217,9 @@ extension SSGC.Toolchain
 
 extension SSGC.Toolchain
 {
-    func manifest(package:FilePath, json file:FilePath, leaf:Bool) throws -> SPM.Manifest
+    func manifest(package:FilePath.Directory,
+        json file:FilePath,
+        leaf:Bool) throws -> SPM.Manifest
     {
         //  The manifest can be very large, possibly larger than the 64 KB pipe buffer
         //  limit. So instead of getting the `dump-package` output from a pipe, we
@@ -247,7 +249,7 @@ extension SSGC.Toolchain
         return try json.decode()
     }
 
-    func resolve(package:FilePath) throws -> [SPM.DependencyPin]
+    func resolve(package:FilePath.Directory) throws -> [SPM.DependencyPin]
     {
         var arguments:[String] =
         [
@@ -255,7 +257,7 @@ extension SSGC.Toolchain
             "update",
             "--package-path", "\(package)"
         ]
-        if  let path:FilePath = self.swiftCache
+        if  let path:FilePath.Directory = self.swiftCache
         {
             arguments.append("--cache-path")
             arguments.append("\(path)")
@@ -275,20 +277,20 @@ extension SSGC.Toolchain
         }
     }
 
-    func build(package:FilePath,
+    func build(package:FilePath.Directory,
         flags:SSGC.PackageBuild.Flags = .init()) throws -> SSGC.PackageBuildDirectory
     {
         let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
-            path: package / self.scratch)
+            location: package / self.scratch)
 
         var arguments:[String] =
         [
             "build",
             "--configuration", "\(scratch.configuration)",
             "--package-path", "\(package)",
-            "--scratch-path", "\(scratch.path)",
+            "--scratch-path", "\(scratch.location)",
         ]
-        if  let path:FilePath = self.swiftCache
+        if  let path:FilePath.Directory = self.swiftCache
         {
             arguments.append("--cache-path")
             arguments.append("\(path)")
@@ -309,7 +311,7 @@ extension SSGC.Toolchain
             arguments.append(flag)
         }
 
-        try SystemProcess.init(command: self.swiftCommand, arguments: arguments)()
+        try SystemProcess.init(command: self.swiftCommand, arguments: arguments, echo: true)()
 
         return scratch
     }
