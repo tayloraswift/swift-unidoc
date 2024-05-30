@@ -1,6 +1,15 @@
 {
-  "originHash" : "25883f12cf4eb759ed4a7b02bac9272cad664cd8aabefb3cc5928b2793c7845f",
+  "originHash" : "0c04c8df0571a4795562655875b6a18b9c74a5e3ac13781dbd39f81c6b122a5d",
   "pins" : [
+    {
+      "identity" : "indexstore-db",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/indexstore-db",
+      "state" : {
+        "branch" : "swift-5.10-RELEASE",
+        "revision" : "89ec16c2ac1bb271614e734a2ee792224809eb20"
+      }
+    },
     {
       "identity" : "swift-atomics",
       "kind" : "remoteSourceControl",

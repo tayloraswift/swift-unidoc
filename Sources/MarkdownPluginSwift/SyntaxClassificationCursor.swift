@@ -3,12 +3,13 @@ import SwiftSyntax
 
 struct SyntaxClassificationCursor
 {
-    var spans:SyntaxClassifications.Iterator
+    var spans:SpanIterator
     var span:SyntaxClassifiedRange?
 
-    init(_ spans:consuming SyntaxClassifications)
+    init(_ spans:consuming SyntaxClassifications,
+        links:[Int: Markdown.SwiftLanguage.IndexMarker] = [:])
     {
-        self.spans = spans.makeIterator()
+        self.spans = .init(spans, links: links)
         self.span = self.spans.next()
     }
 
