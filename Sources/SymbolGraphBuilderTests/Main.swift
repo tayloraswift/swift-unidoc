@@ -77,6 +77,9 @@ enum Main:TestMain, TestBattery
                     with: toolchain)
             })
         {
+            tests.expect(docs.graph.cultures.count >? 0)
+            tests.expect(docs.graph.decls.nodes.count >? 0)
+
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
 
@@ -102,6 +105,9 @@ enum Main:TestMain, TestBattery
                 "swift-system",
             ])
 
+            tests.expect(docs.graph.cultures.count >? 0)
+            tests.expect(docs.graph.decls.nodes.count >? 0)
+
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
         #endif
@@ -126,6 +132,9 @@ enum Main:TestMain, TestBattery
                 "swift-nio",
             ])
 
+            tests.expect(docs.graph.cultures.count >? 0)
+            tests.expect(docs.graph.decls.nodes.count >? 0)
+
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
 
@@ -149,6 +158,9 @@ enum Main:TestMain, TestBattery
                 "swift-nio",
             ])
 
+            tests.expect(docs.graph.cultures.count >? 0)
+            tests.expect(docs.graph.decls.nodes.count >? 0)
+
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
 
@@ -167,6 +179,9 @@ enum Main:TestMain, TestBattery
         {
             //  the swift-argument-parser dependency should have been linted.
             tests.expect(docs.metadata.dependencies.map(\.package.name) **? [])
+
+            tests.expect(docs.graph.cultures.count >? 0)
+            tests.expect(docs.graph.decls.nodes.count >? 0)
 
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
