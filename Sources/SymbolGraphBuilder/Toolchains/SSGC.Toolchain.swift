@@ -263,7 +263,7 @@ extension SSGC.Toolchain
             arguments.append("\(path)")
         }
 
-        try SystemProcess.init(command: self.swiftCommand, arguments: arguments)()
+        try SystemProcess.init(command: self.swiftCommand, arguments: arguments, echo: true)()
 
         do
         {
