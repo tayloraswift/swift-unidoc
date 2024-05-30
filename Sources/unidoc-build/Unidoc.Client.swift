@@ -196,10 +196,10 @@ extension Unidoc.Client
 
         let workspace:SSGC.Workspace = try .create(at: "unidoc")
 
-        let diagnostics:FilePath = workspace.path / "docs.log"
-        let docs:FilePath = workspace.path / "docs.bson"
-        let output:FilePath = workspace.path / "output"
-        let status:FilePath = workspace.path / "status"
+        let diagnostics:FilePath = workspace.location / "docs.log"
+        let docs:FilePath = workspace.location / "docs.bson"
+        let output:FilePath = workspace.location / "output"
+        let status:FilePath = workspace.location / "status"
 
         try SystemProcess.init(command: "rm", "-f", "\(status)")()
         try SystemProcess.init(command: "mkfifo", "\(status)")()
@@ -220,7 +220,7 @@ extension Unidoc.Client
             "--package-name", "\(labels.package)",
             "--package-repo", labels.repo,
             "--ref", labels.ref,
-            "--workspace", "\(workspace.path)",
+            "--workspace", "\(workspace.location)",
             "--status", "\(status)",
             "--output", "\(docs)",
             "--output-log", "\(diagnostics)"
@@ -298,13 +298,13 @@ extension Unidoc.Client
     func buildAndUpload(local symbol:Symbol.Package, search:FilePath?) async throws
     {
         let workspace:SSGC.Workspace = try .create(at: ".ssgc")
-        let docs:FilePath = workspace.path / "docs.bson"
+        let docs:FilePath = workspace.location / "docs.bson"
 
         var arguments:[String] = [
             "compile",
 
             "--package-name", "\(symbol)",
-            "--workspace", "\(workspace.path)",
+            "--workspace", "\(workspace.location)",
             "--output", "\(docs)",
         ]
         if  self.pretty

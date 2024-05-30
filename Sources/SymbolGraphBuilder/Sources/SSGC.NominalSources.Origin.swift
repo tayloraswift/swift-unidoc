@@ -4,7 +4,7 @@ extension SSGC.NominalSources
 {
     enum Origin
     {
-        case sources(FilePath)
+        case sources(FilePath.Directory)
         case toolchain
     }
 }

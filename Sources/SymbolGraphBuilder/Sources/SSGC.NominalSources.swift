@@ -34,7 +34,13 @@ extension SSGC
 }
 extension SSGC.NominalSources
 {
-    init(include:inout [FilePath],
+    init(toolchain module:consuming SymbolGraph.Module)
+    {
+        self.init(module)
+    }
+
+    init(
+        include:inout [FilePath.Directory],
         exclude:borrowing [String],
         package:borrowing SSGC.PackageRoot,
         module:consuming SymbolGraph.Module,
@@ -45,7 +51,7 @@ extension SSGC.NominalSources
         locations:
         if  let location:String = self.module.location
         {
-            self.origin = .sources(package.path / location)
+            self.origin = .sources(package.location / location)
         }
         else
         {
@@ -57,12 +63,12 @@ extension SSGC.NominalSources
                 break locations
             }
 
-            let sources:FilePath = package.path / directory.name
-            let path:FilePath = sources / self.module.name
+            let sources:FilePath.Directory = package.location / directory.name
+            let nested:FilePath.Directory = sources / self.module.name
 
-            if  path.directory.exists()
+            if  nested.exists()
             {
-                self.origin = .sources(path)
+                self.origin = .sources(nested)
             }
             else if case 1? = count[directory]
             {
@@ -74,48 +80,34 @@ extension SSGC.NominalSources
             {
                 //  Artifically synthesize the error we would have caught if we had tried to
                 //  scan the nonexistent directory.
-                throw FileError.opening(path, .noSuchFileOrDirectory)
+                throw FileError.opening(nested.path, .noSuchFileOrDirectory)
             }
         }
 
-        try self.scan(include: &include, exclude: exclude, package: package)
-    }
-
-    static
-    func toolchain(module name:String, dependencies:Int...) -> Self
-    {
-        .init(.init(name: name,
-                type: .binary,
-                dependencies: .init(modules: dependencies)),
-            origin: .toolchain)
+        include += try self.scan(exclude: exclude, package: package)
     }
 }
 extension SSGC.NominalSources
 {
     private mutating
-    func scan(include:inout [FilePath], exclude:[String], package root:SSGC.PackageRoot) throws
+    func scan(exclude:[String], package root:SSGC.PackageRoot) throws -> [FilePath.Directory]
     {
         guard
         case .sources(let path) = self.origin
         else
         {
-            return
+            return []
         }
 
         let exclude:[FilePath] = exclude.map { path / $0 }
-        var headers:Set<FilePath> = []
+        var headers:Set<FilePath.Directory> = []
 
         defer
         {
             self.markdown.sort { $0.id < $1.id }
-
-            if  self.module.type != .executable
-            {
-                include += headers.sorted { $0.string < $1.string }
-            }
         }
 
-        try path.directory.walk
+        try path.walk
         {
             let file:(path:FilePath, extension:String)
             if  let `extension`:String = $1.extension
@@ -152,7 +144,7 @@ extension SSGC.NominalSources
             }
             //  TODO: might also benefit from a better algorithm.
             var inDocC:Bool = false
-            for component:FilePath.Component in $0.components
+            for component:FilePath.Component in $0.path.components
             {
                 if  case "docc"? = component.extension
                 {
@@ -223,6 +215,11 @@ extension SSGC.NominalSources
                     print("Unknown file type: \(file.path)")
                 }
             }
+        }
+
+        return self.module.type == .executable ? [] : headers.sorted
+        {
+            $0.path.string < $1.path.string
         }
     }
 }

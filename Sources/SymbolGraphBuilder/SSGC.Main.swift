@@ -10,13 +10,13 @@ extension SSGC
     {
         /// A path to the workspace directory. SSGC will **create** this workspace unless
         /// ``workspacePath`` is set.
-        var workspaceName:FilePath
+        var workspaceName:FilePath.Directory
         /// A path to the workspace directory. SSGC will **assume** this workspace exists.
-        var workspacePath:FilePath?
+        var workspacePath:FilePath.Directory?
         /// A path to a FIFO that SSGC will use to communicate its status. If set, SSGC will
         /// block until something opens this FIFO for reading.
         var status:FilePath?
-        var search:FilePath?
+        var search:FilePath.Directory?
 
         var output:FilePath?
         var outputLog:FilePath?
@@ -24,7 +24,7 @@ extension SSGC
         var swiftPath:FilePath?
         var swiftSDK:AppleSDK?
 
-        var swiftCache:FilePath?
+        var swiftCache:FilePath.Directory?
 
         var name:Symbol.Package?
         var repo:String?
@@ -125,7 +125,7 @@ extension SSGC.Main
     func launch() throws
     {
         guard
-        let workspacePath:FilePath = self.workspacePath
+        let workspacePath:FilePath.Directory = self.workspacePath
         else
         {
             //  It would never make sense to write to a FIFO that we created ourselves, because
@@ -210,7 +210,7 @@ extension SSGC.Main
                 status: status)
         }
         else if
-            let search:FilePath = self.search
+            let search:FilePath.Directory = self.search
         {
             let build:SSGC.PackageBuild = .local(package: package, among: search)
 
@@ -218,7 +218,7 @@ extension SSGC.Main
             {
                 if  self.removeBuild
                 {
-                    try? (build.root / toolchain.scratch).directory.remove()
+                    try? (build.root / toolchain.scratch).remove()
                 }
             }
 
@@ -233,16 +233,16 @@ extension SSGC.Main
         {
             defer
             {
-                let repoClone:FilePath = workspace.checkouts / "\(package)"
+                let repoClone:FilePath.Directory = workspace.checkouts / "\(package)"
 
                 if  self.removeClone
                 {
-                    try? repoClone.directory.remove()
+                    try? repoClone.remove()
                 }
                 else if
                     self.removeBuild
                 {
-                    try? (repoClone / toolchain.scratch).directory.remove()
+                    try? (repoClone / toolchain.scratch).remove()
                 }
             }
 
@@ -264,7 +264,7 @@ extension SSGC.Main
             throw CommandLine.ArgumentError.missing("--search-path")
         }
 
-        let output:FilePath = self.output ?? workspace.path / "docs.bson"
+        let output:FilePath = self.output ?? workspace.location / "docs.bson"
         try output.open(.writeOnly,
             permissions: (.rw, .r, .r),
             options: [.create, .truncate])

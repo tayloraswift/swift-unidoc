@@ -16,12 +16,12 @@ extension SSGC
 
         /// Where the package root directory is. There should be a `Package.swift`
         /// manifest at the top level of this directory.
-        var root:FilePath
+        var root:FilePath.Directory
         /// Additional flags to pass to the Swift compiler.
         var flags:Flags
 
         private
-        init(id:ID, root:FilePath, flags:Flags)
+        init(id:ID, root:FilePath.Directory, flags:Flags)
         {
             self.id = id
             self.root = root
@@ -34,7 +34,7 @@ extension SSGC.PackageBuild
     func listExtraManifests() throws -> [MinorVersion]
     {
         var versions:[MinorVersion] = []
-        for file:Result<FilePath.Component, any Error> in self.root.directory
+        for file:Result<FilePath.Component, any Error> in self.root
         {
             let file:FilePath.Component = try file.get()
             let name:String = file.stem
@@ -71,7 +71,7 @@ extension SSGC.PackageBuild
     ///         Additional flags to pass to the Swift compiler.
     public static
     func local(package:Symbol.Package,
-        among packages:FilePath,
+        among packages:FilePath.Directory,
         flags:Flags = .init()) -> Self
     {
         return .init(id: .unversioned(package), root: packages / "\(package)", flags: flags)
@@ -111,15 +111,15 @@ extension SSGC.PackageBuild
         //          ├── Package.swift
         //          └── ...
 
-        let clone:FilePath = workspace.checkouts / "\(package)"
+        let clone:FilePath.Directory = workspace.checkouts / "\(package)"
         if  clean
         {
-            try clone.directory.remove()
+            try clone.remove()
         }
 
         print("Pulling repository from remote: \(repository)")
 
-        if  clone.directory.exists()
+        if  clone.exists()
         {
             try SystemProcess.init(command: "git", "-C", "\(clone)", "fetch")()
         }
@@ -172,7 +172,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     mutating
     func compile(updating status:SSGC.StatusStream?,
-        into artifacts:FilePath,
+        into artifacts:FilePath.Directory,
         with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         switch self.id
@@ -223,7 +223,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let platform:SymbolGraphMetadata.Platform = try swift.platform()
 
         var dependencies:[PackageNode] = []
-        var include:[FilePath] = [scratch.include]
+        var include:[FilePath.Directory] = [scratch.include]
 
         //  Nominal dependencies mean we need to perform two passes.
         var packageContainingProduct:[String: Symbol.Package] = [:]
@@ -232,11 +232,10 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 
         for pin:SPM.DependencyPin in pins
         {
-            let checkout:FilePath = scratch.path / "checkouts" / "\(pin.location.name)"
-
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
 
-            let manifest:SPM.Manifest = try swift.manifest(package: checkout,
+            let manifest:SPM.Manifest = try swift.manifest(
+                package: scratch.location / "checkouts" / "\(pin.location.name)",
                 json: artifacts / "\(pin.identity).package.json",
                 leaf: false)
 
@@ -257,10 +256,10 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
                 on: platform,
                 as: pin.identity)
 
-            let sources:SSGC.PackageSources = try .init(scanning: dependency)
+            let _:SSGC.PackageSources.Layout = try .init(scanning: dependency,
+                include: &include)
 
             dependencies.append(dependency)
-            include += sources.include
         }
 
         //  Now it is time to normalize the leaf manifest.
@@ -319,13 +318,20 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
             root: manifest.root)
 
         //  This step is considered part of documentation building.
+        let sources:SSGC.PackageSources
         do
         {
-            return (metadata, try .init(scanning: flatNode, include: include, scratch: scratch))
+            sources = try .init(scanning: flatNode, scratch: scratch, include: &include)
         }
         catch let error
         {
             throw SSGC.DocumentationBuildError.scanning(error)
         }
+
+        try swift.dump(modules: sources.cultures.lazy.map(\.module),
+            to: artifacts,
+            include: include)
+
+        return (metadata, sources)
     }
 }
