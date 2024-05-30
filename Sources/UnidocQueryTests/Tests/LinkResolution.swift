@@ -22,13 +22,13 @@ struct LinkResolution:UnidocDatabaseTestBattery
                 among: "TestPackages"),
             with: toolchain)
 
-        example.roundtrip(for: tests, in: workspace.path)
+        example.roundtrip(for: tests, in: workspace.location)
 
         let swift:SymbolGraphObject<Void>
         do
         {
             //  Use the cached binary if available.
-            swift = try .load(swift: toolchain.version, in: workspace.path)
+            swift = try .load(swift: toolchain.version, in: workspace.location)
         }
         catch
         {

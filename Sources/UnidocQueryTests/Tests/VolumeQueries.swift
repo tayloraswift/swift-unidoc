@@ -34,7 +34,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
                     swift: swift.version),
                 graph: .init(modules: []))
 
-            empty.roundtrip(for: tests, in: workspace.path)
+            empty.roundtrip(for: tests, in: workspace.location)
 
             let v:Unidoc.Version = .init(rawValue: i)
             tests.expect(try await unidoc.store(linking: empty, with: session).0 ==? .init(

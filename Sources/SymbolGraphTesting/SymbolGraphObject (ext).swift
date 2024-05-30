@@ -9,7 +9,7 @@ extension SymbolGraphObject<Void>
 {
     public static
     func load(swift:SwiftVersion,
-        in directory:FilePath) throws -> Self
+        in directory:FilePath.Directory) throws -> Self
     {
         let filename:String = "swift@\(swift.version).bson"
         return try .init(buffer: try (directory / filename).read())
@@ -18,7 +18,7 @@ extension SymbolGraphObject<Void>
     public static
     func load(package:Symbol.Package,
         at version:AnyVersion? = nil,
-        in directory:FilePath) throws -> Self
+        in directory:FilePath.Directory) throws -> Self
     {
         let filename:String = version.map { "\(package)@\($0).bson" } ?? "\(package).bson"
         return try .init(buffer: try (directory / filename).read())
@@ -26,7 +26,7 @@ extension SymbolGraphObject<Void>
 
     @discardableResult
     public
-    func save(as filename:String? = nil, in directory:FilePath) throws -> FilePath
+    func save(as filename:String? = nil, in directory:FilePath.Directory) throws -> FilePath
     {
         let bson:BSON.Document = .init(encoding: self)
 
@@ -39,7 +39,7 @@ extension SymbolGraphObject<Void>
 extension SymbolGraphObject<Void>
 {
     public
-    func roundtrip(for tests:TestGroup, in directory:FilePath)
+    func roundtrip(for tests:TestGroup, in directory:FilePath.Directory)
     {
         tests.do
         {

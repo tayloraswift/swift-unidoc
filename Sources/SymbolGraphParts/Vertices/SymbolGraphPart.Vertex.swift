@@ -17,7 +17,7 @@ extension SymbolGraphPart
         public
         let usr:Symbol.USR
         public
-        let acl:ACL
+        let acl:Symbol.ACL
         public
         let phylum:Phylum
         public
@@ -40,7 +40,7 @@ extension SymbolGraphPart
         private
         init(
             usr:Symbol.USR,
-            acl:ACL,
+            acl:Symbol.ACL,
             phylum:Phylum,
             final:Bool,
             doccomment:Doccomment?,
@@ -65,7 +65,7 @@ extension SymbolGraphPart.Vertex
 {
     private
     init(usr:Symbol.USR,
-        acl:ACL,
+        acl:Symbol.ACL,
         phylum:Phylum,
         availability:Availability,
         doccomment:Doccomment?,
