@@ -102,8 +102,8 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.2")),
 
-        // .package(url: "https://github.com/apple/indexstore-db",
-        //     branch: "swift-5.10-RELEASE"),
+        .package(url: "https://github.com/apple/indexstore-db",
+            branch: "swift-5.10-RELEASE"),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -305,7 +305,7 @@ let package:Package = .init(
         .target(name: "MarkdownPluginSwift_IndexStoreDB",
             dependencies: [
                 .target(name: "MarkdownPluginSwift"),
-                // .product(name: "IndexStoreDB", package: "indexstore-db"),
+                .product(name: "IndexStoreDB", package: "indexstore-db"),
             ]),
 
         .target(name: "MarkdownSemantics",
