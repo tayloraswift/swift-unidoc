@@ -1,3 +1,17 @@
+#if canImport(Darwin)
+
+import func Darwin.getcwd
+import func Darwin.free
+
+#elseif canImport(Glibc)
+
+import func Glibc.getcwd
+import func Glibc.free
+
+#else
+#error("unsupported platform")
+#endif
+
 extension FilePath
 {
     /// `Directory` provides an interface for creating a ``DirectoryIterator``.
@@ -5,16 +19,35 @@ extension FilePath
     /// requests the first element, and `Directory`  (but not
     /// ``DirectoryIterator``) supports multi-pass iteration.
     @frozen public
-    struct Directory
+    struct Directory:Equatable, Sendable
     {
         public
-        let path:FilePath
+        var path:FilePath
 
         @inlinable public
-        init(_ path:FilePath)
+        init(path:FilePath)
         {
             self.path = path
         }
+    }
+}
+extension FilePath.Directory
+{
+    public static
+    func current() -> Self?
+    {
+        guard
+        let buffer:UnsafeMutablePointer<CChar> = getcwd(nil, 0)
+        else
+        {
+            return nil
+        }
+        defer
+        {
+            free(buffer)
+        }
+
+        return .init(path: FilePath.init(platformString: buffer))
     }
 }
 extension FilePath.Directory
@@ -59,6 +92,60 @@ extension FilePath.Directory
         }
     }
 }
+extension FilePath.Directory
+{
+    @inlinable public static
+    func /= (self:inout Self, next:FilePath.Component)
+    {
+        self.path.append(next)
+    }
+    @inlinable public static
+    func /= (self:inout Self, next:String)
+    {
+        self.path.append(next)
+    }
+
+    @inlinable public static
+    func / (self:consuming Self, next:FilePath.Component) -> Self
+    {
+        self /= next
+        return self
+    }
+    @inlinable public static
+    func / (self:consuming Self, next:String) -> Self
+    {
+        self /= next
+        return self
+    }
+
+    @inlinable public static
+    func / (self:consuming Self, next:FilePath.Component) -> FilePath
+    {
+        self /= next
+        return self.path
+    }
+    @inlinable public static
+    func / (self:consuming Self, next:String) -> FilePath
+    {
+        self /= next
+        return self.path
+    }
+}
+extension FilePath.Directory:CustomStringConvertible
+{
+    @inlinable public
+    var description:String { "\(self.path)" }
+}
+extension FilePath.Directory:LosslessStringConvertible
+{
+    @inlinable public
+    init(_ description:String) { self.init(path: .init(description)) }
+}
+extension FilePath.Directory:ExpressibleByStringInterpolation
+{
+    @inlinable public
+    init(stringLiteral:String) { self.init(stringLiteral) }
+}
 extension FilePath.Directory:Sequence
 {
     @inlinable public
@@ -78,15 +165,15 @@ extension FilePath.Directory
         try self.walk { try body($0 / $1) }
     }
     @inlinable public
-    func walk(with body:(FilePath, FilePath.Component) throws -> ()) throws
+    func walk(with body:(FilePath.Directory, FilePath.Component) throws -> ()) throws
     {
         //  minimize the amount of file descriptors we have open
         var explore:[FilePath] = []
         for next:Result<FilePath.Component, any Error> in self
         {
             let next:FilePath.Component = try next.get()
-            try body(self.path, next)
-            explore.append(self.path / next)
+            try body(self, next)
+            explore.append(self / next)
         }
         for current:FilePath in explore
         {

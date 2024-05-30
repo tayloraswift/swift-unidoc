@@ -16,12 +16,12 @@ extension SSGC
 
         /// Where the package root directory is. There should be a `Package.swift`
         /// manifest at the top level of this directory.
-        var root:FilePath
+        var root:FilePath.Directory
         /// Additional flags to pass to the Swift compiler.
         var flags:Flags
 
         private
-        init(id:ID, root:FilePath, flags:Flags)
+        init(id:ID, root:FilePath.Directory, flags:Flags)
         {
             self.id = id
             self.root = root
@@ -34,7 +34,7 @@ extension SSGC.PackageBuild
     func listExtraManifests() throws -> [MinorVersion]
     {
         var versions:[MinorVersion] = []
-        for file:Result<FilePath.Component, any Error> in self.root.directory
+        for file:Result<FilePath.Component, any Error> in self.root
         {
             let file:FilePath.Component = try file.get()
             let name:String = file.stem
@@ -71,7 +71,7 @@ extension SSGC.PackageBuild
     ///         Additional flags to pass to the Swift compiler.
     public static
     func local(package:Symbol.Package,
-        among packages:FilePath,
+        among packages:FilePath.Directory,
         flags:Flags = .init()) -> Self
     {
         return .init(id: .unversioned(package), root: packages / "\(package)", flags: flags)
@@ -111,15 +111,15 @@ extension SSGC.PackageBuild
         //          ├── Package.swift
         //          └── ...
 
-        let clone:FilePath = workspace.checkouts / "\(package)"
+        let clone:FilePath.Directory = workspace.checkouts / "\(package)"
         if  clean
         {
-            try clone.directory.remove()
+            try clone.remove()
         }
 
         print("Pulling repository from remote: \(repository)")
 
-        if  clone.directory.exists()
+        if  clone.exists()
         {
             try SystemProcess.init(command: "git", "-C", "\(clone)", "fetch")()
         }
@@ -187,7 +187,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 
         let manifestVersions:[MinorVersion] = try self.listExtraManifests()
         var manifest:SPM.Manifest = try swift.manifest(package: self.root,
-            json: artifacts.path / "\(self.id.package).package.json",
+            json: artifacts / "\(self.id.package).package.json",
             leaf: true)
 
         print("""
@@ -233,12 +233,11 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 
         for pin:SPM.DependencyPin in pins
         {
-            let checkout:FilePath = scratch.path / "checkouts" / "\(pin.location.name)"
-
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
 
-            let manifest:SPM.Manifest = try swift.manifest(package: checkout,
-                json: artifacts.path / "\(pin.identity).package.json",
+            let manifest:SPM.Manifest = try swift.manifest(
+                package: scratch.location / "checkouts" / "\(pin.location.name)",
+                json: artifacts / "\(pin.identity).package.json",
                 leaf: false)
 
             for product:SPM.Manifest.Product in manifest.products

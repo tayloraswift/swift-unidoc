@@ -49,7 +49,7 @@ extension SSGC.NominalSources
         locations:
         if  let location:String = self.module.location
         {
-            self.origin = .sources(package.path / location)
+            self.origin = .sources(package.location / location)
         }
         else
         {
@@ -61,12 +61,12 @@ extension SSGC.NominalSources
                 break locations
             }
 
-            let sources:FilePath = package.path / directory.name
-            let path:FilePath = sources / self.module.name
+            let sources:FilePath.Directory = package.location / directory.name
+            let nested:FilePath.Directory = sources / self.module.name
 
-            if  path.directory.exists()
+            if  nested.exists()
             {
-                self.origin = .sources(path)
+                self.origin = .sources(nested)
             }
             else if case 1? = count[directory]
             {
@@ -78,7 +78,7 @@ extension SSGC.NominalSources
             {
                 //  Artifically synthesize the error we would have caught if we had tried to
                 //  scan the nonexistent directory.
-                throw FileError.opening(path, .noSuchFileOrDirectory)
+                throw FileError.opening(nested.path, .noSuchFileOrDirectory)
             }
         }
 
@@ -104,7 +104,7 @@ extension SSGC.NominalSources
             self.markdown.sort { $0.id < $1.id }
         }
 
-        try path.directory.walk
+        try path.walk
         {
             let file:(path:FilePath, extension:String)
             if  let `extension`:String = $1.extension
@@ -141,7 +141,7 @@ extension SSGC.NominalSources
             }
             //  TODO: might also benefit from a better algorithm.
             var inDocC:Bool = false
-            for component:FilePath.Component in $0.components
+            for component:FilePath.Component in $0.path.components
             {
                 if  case "docc"? = component.extension
                 {

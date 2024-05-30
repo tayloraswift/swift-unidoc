@@ -5,39 +5,39 @@ extension SSGC
 {
     struct PackageRoot
     {
-        let path:FilePath
+        let location:FilePath.Directory
 
         private
-        init(normalized path:FilePath)
+        init(normalized location:FilePath.Directory)
         {
-            self.path = path
+            self.location = location
         }
     }
 }
 extension SSGC.PackageRoot
 {
-    init(normalizing path:FilePath)
+    init(normalizing location:FilePath.Directory)
     {
-        self.init(normalized: path.lexicallyNormalized())
+        self.init(normalized: .init(path: location.path.lexicallyNormalized()))
     }
 
     init(normalizing root:Symbol.FileBase)
     {
-        self.init(normalizing: FilePath.init(root.path))
+        self.init(normalizing: FilePath.Directory.init(root.path))
     }
 }
 extension SSGC.PackageRoot
 {
     func rebase(_ path:FilePath) -> Symbol.File
     {
-        guard path.components.starts(with: self.path.components)
+        guard path.components.starts(with: self.location.path.components)
         else
         {
             fatalError("Could not lexically rebase file path '\(path)'")
         }
 
         let relative:FilePath = .init(root: nil,
-            path.components.dropFirst(self.path.components.count))
+            path.components.dropFirst(self.location.path.components.count))
 
         return .init("\(relative)")
     }

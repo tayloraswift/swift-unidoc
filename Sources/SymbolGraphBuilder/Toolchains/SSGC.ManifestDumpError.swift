@@ -9,12 +9,12 @@ extension SSGC
         public
         let underlying:any Error
         public
-        let root:FilePath
+        let root:FilePath.Directory
         public
         let leaf:Bool
 
         public
-        init(underlying:any Error, root:FilePath, leaf:Bool)
+        init(underlying:any Error, root:FilePath.Directory, leaf:Bool)
         {
             self.underlying = underlying
             self.root = root

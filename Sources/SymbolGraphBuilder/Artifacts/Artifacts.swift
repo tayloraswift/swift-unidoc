@@ -8,15 +8,14 @@ import System
 
 struct Artifacts
 {
-    let parts:[SymbolGraphPart.ID]
-    let path:FilePath
+    let location:FilePath.Directory
+    var parts:[SymbolGraphPart.ID]
 
-    init(parts:consuming [SymbolGraphPart.ID], in path:FilePath)
+    init(location:FilePath.Directory, parts:consuming [SymbolGraphPart.ID])
     {
-        parts.sort { $0.basename < $1.basename }
-
+        self.location = location
         self.parts = parts
-        self.path = path
+        self.parts.sort { $0.basename < $1.basename }
     }
 }
 extension Artifacts
@@ -25,7 +24,7 @@ extension Artifacts
     {
         try self.parts.map
         {
-            let path:FilePath = self.path / "\($0)"
+            let path:FilePath = self.location / "\($0)"
 
             print("Loading symbols: \($0)")
 
