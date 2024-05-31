@@ -58,6 +58,8 @@ extension SyntaxClassificationCursor.SpanIterator
             case .protocol:         highlight.kind = .type
             case .struct:           highlight.kind = .type
             case .typealias:        highlight.kind = .type
+            case .func:             highlight.kind = .identifier
+            case .initializer:      highlight.kind = .keyword
             default:                break
             }
         }
