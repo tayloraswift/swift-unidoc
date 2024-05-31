@@ -69,7 +69,6 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
                 case .instanceProperty:     phylum = .var(.instance)
                 case .classProperty:        phylum = .var(.class)
                 case .staticProperty:       phylum = .var(.static)
-                case .constructor:          phylum = .initializer
                 case .destructor:           phylum = .deinitializer
                 case .conversionFunction:   phylum = nil
                 case .parameter:            phylum = nil
