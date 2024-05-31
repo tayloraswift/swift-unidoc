@@ -1,7 +1,13 @@
 #!/bin/bash
 set -e
+
 swift --version
-swift build -c release --explicit-target-dependency-import-check=error
+
+swift build -c release \
+    -explicit-target-dependency-import-check=error \
+    -Xcxx -I/usr/lib/swift \
+    -Xcxx -I/usr/lib/swift/Block
+
 ./generate-test-symbolgraphs
 for f in .build/release/*Tests; do
   $f
