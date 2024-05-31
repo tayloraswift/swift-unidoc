@@ -1,12 +1,16 @@
+import Snippets
+
 enum Enum
 {
     case a(Int)
+    case b(CustomType)
 }
 extension Enum
 {
     init()
     {
         let a = Int.init(1)
+        let b = CustomType.init()
         self = .a(a)
     }
 }
