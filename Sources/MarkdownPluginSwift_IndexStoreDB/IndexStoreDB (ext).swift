@@ -17,7 +17,7 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
             if  byte == 0x0A
             {
                 line += 1
-                lines[line] = i
+                lines[line] = utf8.index(after: i)
             }
         }
 
@@ -70,7 +70,7 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
                 case .commentTag:           phylum = nil
                 }
 
-                markers[base + occurence.location.utf8Column] = .init(symbol: usr,
+                markers[base + occurence.location.utf8Column - 1] = .init(symbol: usr,
                     phylum: phylum)
             }
         }
