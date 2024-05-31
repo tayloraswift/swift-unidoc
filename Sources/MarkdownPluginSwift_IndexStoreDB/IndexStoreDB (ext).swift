@@ -42,6 +42,11 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
 
                 switch symbol.kind
                 {
+                case .constructor:
+                    phylum = occurence.roles.contains(.call)
+                        ? .func(.static)
+                        : .initializer
+
                 case .unknown:              phylum = nil
                 case .module:               phylum = nil
                 case .namespace:            phylum = nil
