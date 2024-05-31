@@ -3,7 +3,9 @@ import SwiftSyntax
 
 struct SyntaxClassificationCursor
 {
+    private(set)
     var spans:SpanIterator
+    private
     var span:SyntaxClassifiedRange?
 
     init(_ spans:consuming SyntaxClassifications,

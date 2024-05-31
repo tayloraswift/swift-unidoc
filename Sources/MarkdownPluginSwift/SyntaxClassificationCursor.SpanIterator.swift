@@ -18,6 +18,22 @@ extension SyntaxClassificationCursor
         }
     }
 }
+extension SyntaxClassificationCursor.SpanIterator:CustomDebugStringConvertible
+{
+    var debugDescription:String
+    {
+        self.links
+            .sorted
+        {
+            $0.key < $1.key
+        }
+            .map
+        {
+            "[\($0.key)]: \($0.value)"
+        }
+            .joined(separator: "\n")
+    }
+}
 extension SyntaxClassificationCursor.SpanIterator
 {
     mutating

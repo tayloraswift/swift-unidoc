@@ -296,6 +296,7 @@ let package:Package = .init(
                 .target(name: "MarkdownABI"),
                 .target(name: "Signatures"),
                 .target(name: "Snippets"),
+                .target(name: "Sources"),
                 .target(name: "Symbols"),
 
                 .product(name: "SwiftIDEUtils", package: "swift-syntax"),
