@@ -1,8 +1,8 @@
-enum E
+enum Enum
 {
     case a(Int)
 }
-extension E
+extension Enum
 {
     init()
     {
@@ -11,8 +11,17 @@ extension E
     }
 }
 
+struct `init`
+{
+    init()
+    {
+    }
+}
+
 func f()
 {
-    let e = E()
-    print(e)
+    let _ = `init`()
+    let _ = Enum()
+    let _:Enum = Enum.init()
+    let _:Enum = .init()
 }

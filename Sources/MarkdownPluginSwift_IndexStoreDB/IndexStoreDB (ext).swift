@@ -2,6 +2,7 @@
 
 import class IndexStoreDB.IndexStoreDB
 import MarkdownPluginSwift
+import Sources
 import Symbols
 
 extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
@@ -28,6 +29,8 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
                 roles: .all)
             {
                 guard
+                let position:SourcePosition = .init(line: occurence.location.line - 1,
+                    column: occurence.location.utf8Column - 1),
                 let base:Int = lines[occurence.location.line],
                 let usr:Symbol.USR = .init(symbol.usr)
                 else
@@ -70,7 +73,8 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
                 case .commentTag:           phylum = nil
                 }
 
-                markers[base + occurence.location.utf8Column - 1] = .init(symbol: usr,
+                markers[base + occurence.location.utf8Column - 1] = .init(position: position,
+                    symbol: usr,
                     phylum: phylum)
             }
         }

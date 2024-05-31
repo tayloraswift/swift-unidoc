@@ -1,4 +1,5 @@
 import Symbols
+import Sources
 
 extension Markdown.SwiftLanguage
 {
@@ -6,13 +7,16 @@ extension Markdown.SwiftLanguage
     struct IndexMarker
     {
         public
+        let position:SourcePosition
+        public
         let symbol:Symbol.USR
         public
         let phylum:Phylum.Decl?
 
         @inlinable public
-        init(symbol:Symbol.USR, phylum:Phylum.Decl?)
+        init(position:SourcePosition, symbol:Symbol.USR, phylum:Phylum.Decl?)
         {
+            self.position = position
             self.symbol = symbol
             self.phylum = phylum
         }
@@ -23,6 +27,6 @@ extension Markdown.SwiftLanguage.IndexMarker:CustomStringConvertible
     public
     var description:String
     {
-        "(\(self.phylum?.name ?? "unknown"): \(self.symbol))"
+        "(\(self.position): \(self.symbol), \(self.phylum?.name ?? "unknown"))"
     }
 }
