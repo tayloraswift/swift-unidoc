@@ -158,3 +158,37 @@ extension Phylum.Decl:RawRepresentable
         }
     }
 }
+extension Phylum.Decl
+{
+    @inlinable public
+    var name:String
+    {
+        switch self
+        {
+        case .actor:                "actor"
+        case .associatedtype:       "associatedtype"
+        case .case:                 "case"
+        case .class:                "class"
+        case .deinitializer:        "deinitializer"
+        case .enum:                 "enum"
+        case .func(nil):            "global func"
+        case .func(.instance):      "func"
+        case .func(.class):         "class func"
+        case .func(.static):        "static func"
+        case .initializer:          "init"
+        case .macro(.attached):     "attached macro"
+        case .macro(.freestanding): "freestanding macro"
+        case .operator:             "operator"
+        case .protocol:             "protocol"
+        case .struct:               "struct"
+        case .subscript(.static):   "static subscript"
+        case .subscript(.class):    "class subscript"
+        case .subscript(.instance): "subscript"
+        case .typealias:            "typealias"
+        case .var(nil):             "global var"
+        case .var(.instance):       "var"
+        case .var(.class):          "class var"
+        case .var(.static):         "static var"
+        }
+    }
+}

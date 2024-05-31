@@ -18,3 +18,11 @@ extension Markdown.SwiftLanguage
         }
     }
 }
+extension Markdown.SwiftLanguage.IndexMarker:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        "(\(self.phylum?.name ?? "unknown"): \(self.symbol))"
+    }
+}
