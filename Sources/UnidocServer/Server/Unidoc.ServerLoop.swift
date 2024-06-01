@@ -63,12 +63,12 @@ extension Unidoc
 extension Unidoc.ServerLoop
 {
     @inlinable public nonisolated
-    var secure:Bool
+    var security:Unidoc.ServerSecurity
     {
         switch self.options.mode
         {
-        case .development: false
-        case .production:  true
+        case .development(_, let options):  options.security
+        case .production:                   .enforced
         }
     }
 

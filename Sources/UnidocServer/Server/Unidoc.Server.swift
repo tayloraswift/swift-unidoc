@@ -24,12 +24,12 @@ extension Unidoc
 extension Unidoc.Server
 {
     @inlinable public
+    var security:Unidoc.ServerSecurity { self.loop.security }
+
+    @inlinable public
     var plugins:[String: any Unidoc.ServerPlugin] { self.loop.plugins }
     @inlinable public
     var context:Unidoc.ServerPluginContext { self.loop.context }
-
-    @inlinable public
-    var secure:Bool { self.loop.secure }
 
     @inlinable public
     var github:GitHub.Integration? { self.loop.github }
@@ -49,7 +49,9 @@ extension Unidoc.Server
         rights:Unidoc.UserRights,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        guard case .human = rights.level, self.secure
+        guard
+        case .enforced = self.security,
+        case .human = rights.level
         else
         {
             //  Only enforce ownership rules for humans.
