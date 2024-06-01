@@ -23,7 +23,7 @@ extension Unidoc.PackageRights
         }
         else if access.contains(owner)
         {
-            return .editor
+            return .owner
         }
         else
         {
