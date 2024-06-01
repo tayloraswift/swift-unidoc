@@ -29,8 +29,15 @@ extension Unidoc.RestrictedOperation
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session
-        if  server.secure
+
+        switch server.security
         {
+        case .ignored:
+            session = try await .init(from: server.db.sessions)
+            //  Yes, we need to call this, even though we ignore the result.
+            let _:Bool = self.admit(user: .init(access: [], level: .administratrix))
+
+        case .enforced:
             let user:Unidoc.UserSession
 
             switch state.authorization
@@ -91,12 +98,6 @@ extension Unidoc.RestrictedOperation
             {
                 return .forbidden("Regrettably, you are not a mighty It Girl.\n")
             }
-        }
-        else
-        {
-            session = try await .init(from: server.db.sessions)
-            //  Yes, we need to call this, even though we ignore the result.
-            let _:Bool = self.admit(user: .init(access: [], level: .administratrix))
         }
 
         return try await self.load(from: server, with: session)

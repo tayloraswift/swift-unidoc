@@ -19,6 +19,10 @@ extension Unidoc.ServerOptions
         public
         var runPolicy:Bool
 
+        /// Whether to enforce account-level permissions.
+        public
+        var security:Unidoc.ServerSecurity
+
         /// The name of the replica set to use for development.
         public
         var replicaSet:String
@@ -40,6 +44,7 @@ extension Unidoc.ServerOptions
             self.runTelescope = false
             self.runMonitor = false
             self.runPolicy = false
+            self.security = .ignored
 
             self.replicaSet = "unidoc-rs"
             self.bucket = nil
