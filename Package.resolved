@@ -1,5 +1,5 @@
 {
-  "originHash" : "11a2c92dc12e2d1090f389f23c98adcb98ad3e0b6ccf1e724d65aeb0152c5554",
+  "originHash" : "93c5267fbbc54cec0eda6b0539261e2510a3f3f590d8c25562b8ab43e635c383",
   "pins" : [
     {
       "identity" : "swift-atomics",
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-hash",
       "state" : {
-        "revision" : "c7ba0cde5eb63042c2196b02b65a770101c1ac11",
-        "version" : "0.5.0"
+        "revision" : "7798c344afd5a96b689fa9904ad52242a85b5068",
+        "version" : "0.6.0"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "525e2c29fc45a4085531d5bc3226736f95a7ce5b",
-        "version" : "0.18.0"
+        "revision" : "84e362d34244fa55525564771415874d195790b6",
+        "version" : "0.18.1"
       }
     },
     {
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-png",
       "state" : {
-        "revision" : "14a720bfcf1b0660dc63979d55d218babc8d651f",
-        "version" : "4.4.2"
+        "revision" : "fee79d9e180480dcc6408041a68c11c43c870b30",
+        "version" : "4.4.3"
       }
     },
     {

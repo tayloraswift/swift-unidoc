@@ -30,7 +30,7 @@ let package:Package = .init(
         .library(name: "IP", targets: ["IP"]),
         .library(name: "ISO", targets: ["ISO"]),
         .library(name: "InlineArray", targets: ["InlineArray"]),
-        .library(name: "InlineBuffer", targets: ["InlineBuffer"]),
+
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
         .library(name: "LinkResolution", targets: ["LinkResolution"]),
         .library(name: "LexicalPaths", targets: ["LexicalPaths"]),
@@ -42,8 +42,6 @@ let package:Package = .init(
         .library(name: "MarkdownSemantics", targets: ["MarkdownSemantics"]),
 
         .library(name: "Media", targets: ["Media"]),
-
-        .library(name: "MD5", targets: ["MD5"]),
 
         .library(name: "Multiparts", targets: ["Multiparts"]),
 
@@ -92,16 +90,16 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
-            from: "0.5.0")),
+            from: "0.6.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.18.0")),
+            from: "0.18.1")),
         // .package(path: "../swift-mongodb"),
 
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "1.1.0")),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-            from: "4.4.2")),
+            from: "4.4.3")),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -189,16 +187,15 @@ let package:Package = .init(
         .target(name: "GitHubAPI",
             dependencies: [
                 .target(name: "UnixTime"),
-                .target(name: "SHA1"),
                 .product(name: "JSON", package: "swift-json"),
+                .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "HTTP",
             dependencies: [
                 .target(name: "ISO"),
                 .target(name: "Media"),
-                .target(name: "MD5"),
-
+                .product(name: "MD5", package: "swift-hash"),
                 .product(name: "NIOCore", package: "swift-nio"),
             ]),
 
@@ -206,7 +203,7 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "HTTP"),
                 .target(name: "Media"),
-                .target(name: "MD5"),
+                .product(name: "MD5", package: "swift-hash"),
                 .product(name: "HTML", package: "swift-dom"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOHTTP2", package: "swift-nio-http2"),
@@ -234,8 +231,6 @@ let package:Package = .init(
         .target(name: "IP"),
 
         .target(name: "InlineArray"),
-
-        .target(name: "InlineBuffer"),
 
         .target(name: "InlineDictionary"),
 
@@ -312,11 +307,6 @@ let package:Package = .init(
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ]),
 
-        .target(name: "MD5",
-            dependencies: [
-                .target(name: "InlineBuffer"),
-            ]),
-
         .target(name: "Media"),
 
         .target(name: "Multiparts",
@@ -352,11 +342,6 @@ let package:Package = .init(
             ]),
 
         .target(name: "SemanticVersions"),
-
-        .target(name: "SHA1",
-            dependencies: [
-                .target(name: "InlineBuffer"),
-            ]),
 
         .target(name: "Signatures",
             dependencies: [
@@ -408,13 +393,13 @@ let package:Package = .init(
                 .target(name: "MarkdownRendering"),
                 .target(name: "MarkdownSemantics"),
                 .target(name: "SemanticVersions"),
-                .target(name: "SHA1"),
                 .target(name: "Snippets"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "Symbols"),
                 .target(name: "SourceDiagnostics"),
                 .target(name: "URI"),
+                .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "SymbolGraphParts",
@@ -436,11 +421,11 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "LexicalPaths"),
                 .target(name: "SemanticVersions"),
-                .target(name: "SHA1"),
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
 
                 .product(name: "BSON", package: "swift-mongodb"),
+                .product(name: "SHA1", package: "swift-hash"),
             ],
             exclude:
             [
@@ -472,11 +457,11 @@ let package:Package = .init(
         .target(name: "UnidocAPI",
             dependencies: [
                 .target(name: "SemanticVersions"),
-                .target(name: "SHA1"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
                 .target(name: "URI"),
                 .product(name: "JSON", package: "swift-json"),
+                .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "UnidocAssets",
@@ -538,9 +523,9 @@ let package:Package = .init(
         .target(name: "UnidocRecords",
             dependencies: [
                 .target(name: "FNV1"),
-                .target(name: "MD5"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocAPI"),
+                .product(name: "MD5", package: "swift-hash"),
             ]),
 
         .target(name: "UnidocRender",
@@ -633,12 +618,6 @@ let package:Package = .init(
         .executableTarget(name: "MarkdownRenderingTests",
             dependencies: [
                 .target(name: "MarkdownRendering"),
-                .product(name: "Testing_", package: "swift-grammar"),
-            ]),
-
-        .executableTarget(name: "MD5Tests",
-            dependencies: [
-                .target(name: "MD5"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
