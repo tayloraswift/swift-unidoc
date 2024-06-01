@@ -1,9 +1,10 @@
 // swift-tools-version:5.10
+import class Foundation.ProcessInfo
 import PackageDescription
 import CompilerPluginSupport
 
 let package:Package = .init(
-    name: "swift-unidoc",
+    name: "Swift Unidoc",
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
@@ -101,9 +102,6 @@ let package:Package = .init(
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.2")),
-
-        .package(url: "https://github.com/apple/indexstore-db",
-            branch: "swift-5.10-RELEASE"),
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
@@ -301,12 +299,6 @@ let package:Package = .init(
 
                 .product(name: "SwiftIDEUtils", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
-            ]),
-
-        .target(name: "MarkdownPluginSwift_IndexStoreDB",
-            dependencies: [
-                .target(name: "MarkdownPluginSwift"),
-                .product(name: "IndexStoreDB", package: "indexstore-db"),
             ]),
 
         .target(name: "MarkdownSemantics",
@@ -756,6 +748,25 @@ let package:Package = .init(
 
         .target(name: "guides", path: "Guides"),
     ])
+
+switch ProcessInfo.processInfo.environment["UNIDOC_ENABLE_INDEXSTORE"]?.lowercased()
+{
+case "1"?, "true"?:
+    package.dependencies.append(.package(url: "https://github.com/apple/indexstore-db",
+        branch: "swift-5.10-RELEASE"))
+
+    package.targets.append(.target(name: "MarkdownPluginSwift_IndexStoreDB",
+        dependencies: [
+            .target(name: "MarkdownPluginSwift"),
+            .product(name: "IndexStoreDB", package: "indexstore-db"),
+        ]))
+
+default:
+    package.targets.append(.target(name: "MarkdownPluginSwift_IndexStoreDB",
+        dependencies: [
+            .target(name: "MarkdownPluginSwift"),
+        ]))
+}
 
 for target:PackageDescription.Target in package.targets
 {
