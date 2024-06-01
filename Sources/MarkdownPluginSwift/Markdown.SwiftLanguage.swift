@@ -34,9 +34,16 @@ extension Markdown.SwiftLanguage
     func parse(snippet utf8:[UInt8],
         from indexID:String? = nil) -> (caption:String, slices:[Markdown.SnippetSlice])
     {
-        if  let indexID:String
+        let links:[Int: IndexMarker]
+
+        if  let indexID:String,
+            let index:any IndexStore = self.index
         {
-            self.index?.load(for: indexID)
+            links = index.load(for: indexID, utf8: utf8)
+        }
+        else
+        {
+            links = [:]
         }
 
         //  It is safe to escape the pointer to ``Parser.parse(source:maximumNestingLevel:)``,
@@ -98,7 +105,7 @@ extension Markdown.SwiftLanguage
         }
 
         let slices:[SnippetParser.Slice] = parser.finish(at: parsed.endPosition, in: utf8)
-        var cursor:SyntaxClassificationCursor = .init(parsed.classifications)
+        var cursor:SyntaxClassificationCursor = .init(parsed.classifications, links: links)
 
         let rendered:[Markdown.SnippetSlice] = slices.map
         {
