@@ -310,19 +310,8 @@ extension Unidoc.VersionsPage
             }
         }
 
-        if  self.view.editor
-        {
-            section[.form]
-            {
-                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
-                $0.method = "post"
-            } = ConfigButton.init(package: self.package.id,
-                update: "refresh",
-                value: "true",
-                label: "Refresh tags")
-        }
-        else if case nil = self.view.global
+
+        if case nil = self.view.global
         {
             section[.form]
             {
@@ -341,6 +330,22 @@ extension Unidoc.VersionsPage
 
                 $0[.button] { $0.class = "area" ; $0.type = "submit" } = "Log in"
             }
+        }
+        else if self.view.editor
+        {
+            section[.form]
+            {
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
+                $0.method = "post"
+            } = ConfigButton.init(package: self.package.id,
+                update: "refresh",
+                value: "true",
+                label: "Refresh tags")
+        }
+        else
+        {
+            section[.form] = Unidoc.DisabledButton.init(label: "Refresh tags", view: self.view)
         }
 
         section[.div]
