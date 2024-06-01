@@ -1,4 +1,5 @@
 import S3
+import UnidocRender
 
 extension Unidoc.ServerOptions
 {

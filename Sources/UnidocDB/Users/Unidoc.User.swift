@@ -54,13 +54,6 @@ extension Unidoc.User
     {
         .init(id: .init(type: .unidoc, user: number), level: .machine)
     }
-
-    @inlinable public consuming
-    func `as`(_ level:Level) -> Self
-    {
-        self.level = level
-        return self
-    }
 }
 extension Unidoc.User
 {
