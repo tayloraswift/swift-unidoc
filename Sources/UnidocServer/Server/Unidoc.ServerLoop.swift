@@ -86,8 +86,8 @@ extension Unidoc.ServerLoop
     @inlinable nonisolated
     func format(locale:HTTP.Locale?) -> Unidoc.RenderFormat
     {
-        .init(
-            assets: self.options.cloudfront ? .cloudfront : .local,
+        .init(assets: self.options.cloudfront ? .cloudfront : .local,
+            security: self.security,
             locale: locale,
             server: self.options.mode.server)
     }

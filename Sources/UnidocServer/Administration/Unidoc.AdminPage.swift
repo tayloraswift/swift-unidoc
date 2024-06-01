@@ -45,7 +45,11 @@ extension Unidoc.AdminPage:Unidoc.AdministrativePage
         main[.p]
         {
             $0 += "This is a "
-            $0[.strong] = format.secure ? "real" : "test"
+            $0[.strong] = switch format.server
+            {
+            case .swiftinit_org:    "real"
+            case .localhost:        "fake"
+            }
             $0 += " deployment."
         }
 

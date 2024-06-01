@@ -58,8 +58,8 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
         }
 
         /// In development mode, everyone is an administratrix!
-        let view:Unidoc.Permissions = .init(package: output.package,
-            user: format.secure ? output.user : output.user?.as(.administratrix))
+        let view:Unidoc.Permissions = format.security.permissions(package: output.package,
+            user: output.user)
 
         switch self.query.filter
         {
