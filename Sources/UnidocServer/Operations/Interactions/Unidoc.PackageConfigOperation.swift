@@ -69,7 +69,7 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         if  let rejection:HTTP.ServerResponse = try await server.authorize(
-                package: self.package,
+                loading: self.package,
                 account: self.account,
                 rights: self.rights,
                 with: session)
