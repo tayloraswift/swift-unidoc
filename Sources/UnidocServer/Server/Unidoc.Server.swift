@@ -43,7 +43,8 @@ extension Unidoc.Server
 }
 extension Unidoc.Server
 {
-    func authorize(package:Unidoc.Package,
+    func authorize(package preloaded:Unidoc.PackageMetadata? = nil,
+        loading id:Unidoc.Package,
         account:Unidoc.Account?,
         rights:Unidoc.UserRights,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
@@ -62,11 +63,18 @@ extension Unidoc.Server
             return .unauthorized("You must be logged in to perform this operation!\n")
         }
 
-        //  Don’t really have a smarter way to check this except loading the entire package
-        //  metadata.
-        guard
-        let package:Unidoc.PackageMetadata = try await self.db.packages.find(id: package,
-            with: session)
+        let package:Unidoc.PackageMetadata
+
+        if  let preloaded:Unidoc.PackageMetadata
+        {
+            package = preloaded
+        }
+        else if
+            let metadata:Unidoc.PackageMetadata = try await self.db.packages.find(id: id,
+                with: session)
+        {
+            package = metadata
+        }
         else
         {
             return .notFound("No such package\n")

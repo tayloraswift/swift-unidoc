@@ -38,24 +38,27 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
     func load(from server:borrowing Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
+        let metadata:Unidoc.PackageMetadata?
         let package:Unidoc.Package
         let request:Unidoc.BuildRequest?
 
         switch self.action
         {
         case .submit(let id, let build):
+            metadata = nil
             package = id
             request = build
 
         case .cancel(let id):
+            metadata = nil
             package = id
             request = nil
 
         case .cancelSymbolic(let symbol):
+            metadata = try await server.db.unidoc.package(named: symbol, with: session)
+
             guard
-            let metadata:Unidoc.PackageMetadata = try await server.db.unidoc.package(
-                named: symbol,
-                with: session)
+            let metadata:Unidoc.PackageMetadata
             else
             {
                 return .notFound("No such package")
@@ -66,22 +69,24 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
 
         case .submitSymbolic(let symbol):
             guard
-            let metadata:Unidoc.EditionOutput = try await server.db.unidoc.edition(
+            let outputs:Unidoc.EditionOutput = try await server.db.unidoc.edition(
                 package: symbol.package,
                 version: .name(symbol.ref),
                 with: session),
-            let edition:Unidoc.Edition = metadata.edition?.id
+            let edition:Unidoc.Edition = outputs.edition?.id
             else
             {
                 return .notFound("No such edition")
             }
 
-            package = metadata.package.id
+            metadata = outputs.package
+            package = outputs.package.id
             request = .id(edition, force: true)
         }
 
         if  let rejection:HTTP.ServerResponse = try await server.authorize(
-                package: package,
+                package: metadata,
+                loading: package,
                 account: self.account,
                 rights: self.rights,
                 with: session)
