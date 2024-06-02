@@ -15,15 +15,19 @@ extension Unidoc.PackageRights
     @inlinable public static
     func of(account:Unidoc.Account,
         access:[Unidoc.Account],
-        owner:Unidoc.Account) -> Unidoc.PackageRights
+        rulers:Unidoc.PackageRulers) -> Unidoc.PackageRights
     {
-        if  account == owner
+        if  case account? = rulers.owner
         {
             return .owner
         }
-        else if access.contains(owner)
+        else if let owner:Unidoc.Account = rulers.owner, access.contains(owner)
         {
             return .owner
+        }
+        else if rulers.editors.contains(account)
+        {
+            return .editor
         }
         else
         {

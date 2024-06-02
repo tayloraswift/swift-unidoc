@@ -9,6 +9,11 @@ extension Unidoc.PackageMetadata:Mongo.MasterCodingModel
 }
 extension Unidoc.PackageMetadata
 {
+    @inlinable public
+    var rulers:Unidoc.PackageRulers { .init(editors: self.editors, owner: self.repo?.account) }
+}
+extension Unidoc.PackageMetadata
+{
     mutating
     func crawled(repo:consuming Unidoc.PackageRepo)
     {
