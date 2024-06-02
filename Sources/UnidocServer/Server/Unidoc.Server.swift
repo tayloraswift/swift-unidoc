@@ -82,16 +82,13 @@ extension Unidoc.Server
             return .notFound("No such package\n")
         }
 
-        if  let owner:Unidoc.Account = package.repo?.account
-        {
-            let rights:Unidoc.PackageRights = .of(account: account,
-                access: rights.access,
-                owner: owner)
+        let rights:Unidoc.PackageRights = .of(account: account,
+            access: rights.access,
+            rulers: package.rulers)
 
-            if  rights >= .editor
-            {
-                return nil
-            }
+        if  rights >= .editor
+        {
+            return nil
         }
 
         return .forbidden("You are not authorized to edit this package!\n")

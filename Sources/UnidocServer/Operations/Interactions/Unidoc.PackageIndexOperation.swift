@@ -164,7 +164,8 @@ extension Unidoc.PackageIndexOperation
         {
             let rights:Unidoc.PackageRights = .of(account: self.account,
                 access: self.rights.access,
-                owner: .init(type: .github, user: repo.owner.id))
+                rulers: .init(editors: [],
+                    owner: .init(type: .github, user: repo.owner.id)))
 
             if  rights < .editor
             {

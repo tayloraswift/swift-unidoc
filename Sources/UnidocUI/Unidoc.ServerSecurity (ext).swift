@@ -7,22 +7,15 @@ extension Unidoc.ServerSecurity
             return .init(global: user.map { _ in .administratrix }, rights: .owner)
         }
 
-        guard
-        let user:Unidoc.User
-        else
-        {
-            return .init(global: nil, rights: .reader)
-        }
-
-        if  let owner:Unidoc.Account = package.repo?.account
+        if  let user:Unidoc.User
         {
             return .init(global: user.level, rights: .of(account: user.id,
                 access: user.access,
-                owner: owner))
+                rulers: package.rulers))
         }
         else
         {
-            return .init(global: user.level, rights: .reader)
+            return .init(global: nil, rights: .reader)
         }
     }
 }
