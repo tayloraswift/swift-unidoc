@@ -5,6 +5,26 @@ import SymbolGraphs
 extension Mongo.PipelineEncoder
 {
     mutating
+    func loadUser(matching id:Unidoc.Account, as output:Mongo.AnyKeyPath)
+    {
+        self[stage: .lookup] = .init
+        {
+            $0[.from] = Unidoc.DB.Users.name
+            $0[.pipeline] = .init
+            {
+                $0[stage: .match] = .init
+                {
+                    $0[Unidoc.User[.id]] = id
+                }
+            }
+            $0[.as] = output
+        }
+
+        //  Unbox single-element array.
+        self[stage: .set] = .init { $0[output] = .expr { $0[.first] = output } }
+    }
+
+    mutating
     func loadEdition(matching predicate:Unidoc.VersionPredicate,
         from package:Mongo.AnyKeyPath,
         into edition:Mongo.AnyKeyPath)

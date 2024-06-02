@@ -15,10 +15,10 @@ extension Unidoc
         public
         let filter:Predicate
         public
-        let user:Unidoc.Account?
+        let user:Account?
 
         @inlinable public
-        init(symbol:Symbol.Package, filter:Predicate, as user:Unidoc.Account? = nil)
+        init(symbol:Symbol.Package, filter:Predicate, as user:Account? = nil)
         {
             self.symbol = symbol
             self.filter = filter
@@ -123,27 +123,10 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             }
         }
 
-        if  let user:Unidoc.Account = self.user
+        if  let id:Unidoc.Account = self.user
         {
             //  Lookup the querying user.
-            pipeline[stage: .lookup] = .init
-            {
-                $0[.from] = Unidoc.DB.Users.name
-                $0[.pipeline] = .init
-                {
-                    $0[stage: .match] = .init
-                    {
-                        $0[Unidoc.User[.id]] = user
-                    }
-                }
-                $0[.as] = Output[.user]
-            }
-
-            //  Unbox single-element array.
-            pipeline[stage: .set] = .init
-            {
-                $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
-            }
+            pipeline.loadUser(matching: id, as: Output[.user])
         }
     }
 }

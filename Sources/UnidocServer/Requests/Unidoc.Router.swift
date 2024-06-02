@@ -233,6 +233,7 @@ extension Unidoc.Router
         case .ref:          return self.ref(form: nil)
         case .render:       return self.render()
         case .robots_txt:   return self.robots()
+        case .rules:        return self.rules()
         case .sitemap_xml:  return self.sitemap()
         case .sitemaps:     return self.sitemaps()
         case .ssgc:         return self.ssgc()
@@ -941,6 +942,23 @@ extension Unidoc.Router
                 id: .robots_txt)),
             parameters: .init(self.query),
             etag: etag)
+    }
+
+    private mutating
+    func rules() -> Unidoc.AnyOperation?
+    {
+        guard let symbol:Symbol.Package = self.descend()
+        else
+        {
+            return nil
+        }
+
+        let parameters:Unidoc.PipelineParameters = .init(self.query)
+
+        return .explainable(Unidoc.RulesEndpoint.init(query: .init(symbol: symbol,
+                as: self.authorization.account)),
+            parameters: parameters,
+            etag: self.etag)
     }
 
     private

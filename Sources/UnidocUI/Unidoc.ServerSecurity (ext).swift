@@ -4,6 +4,7 @@ extension Unidoc.ServerSecurity
     {
         if  case .ignored = self
         {
+            /// In development mode, everyone is an administratrix!
             return .init(global: user.map { _ in .administratrix }, rights: .owner)
         }
 

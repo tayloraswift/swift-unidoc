@@ -57,7 +57,6 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        /// In development mode, everyone is an administratrix!
         let view:Unidoc.Permissions = format.security.permissions(package: output.package,
             user: output.user)
 
