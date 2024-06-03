@@ -64,15 +64,18 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
         }
             content:
         {
-            $0[.li] = owner?.card
+            $0[.li] = owner?.card(tools: .owner)
 
             for user in self.members
             {
-                $0[.li] = user.card
+                $0[.li] = user.card(tools: .member)
             }
+
+            let package:Unidoc.Package? = self.view.owner ? package.id : nil
+
             for user in self.editors
             {
-                $0[.li] = user.card
+                $0[.li] = user.card(tools: .editor(package, user.id))
             }
         }
 
@@ -112,6 +115,18 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
             {
                 $0.class = "area"
                 $0.type = "submit"
+
+                if  case nil = self.view.global
+                {
+                    $0.disabled = true
+                    $0.title = "You are not logged in!"
+                }
+                else if !self.view.owner
+                {
+                    $0.disabled = true
+                    $0.title = "You cannot grant permissions for this package!"
+                }
+
             } = "Grant edit access"
         }
     }
