@@ -68,6 +68,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let tags:URI = Unidoc.TagsEndpoint[self.tags]
+        let now:UnixInstant = .now()
 
         main[.section]
         {
@@ -96,12 +97,15 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 
             $0[.h1] = self.title
 
-            if  let repo:Unidoc.PackageRepo = self.context.repo
+            guard
+            let repo:Unidoc.PackageRepo = self.context.repo
+            else
             {
-                $0 += Unidoc.PackageBanner.init(repo: repo,
-                    tag: self.volume.refname,
-                    now: .now())
+                return
             }
+
+            $0[.p] = repo.origin.about
+            $0[.p] { $0.class = "chyron" } = repo.chyron(now: now, ref: self.volume.refname)
         }
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical

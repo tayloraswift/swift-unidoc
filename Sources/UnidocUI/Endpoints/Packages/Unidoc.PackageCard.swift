@@ -97,8 +97,7 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
             case .github(let origin):   pushed = origin.pushed
             }
 
-            $0[.span] = Unidoc.PackageIndicators.init(
-                pushed: pushed,
+            $0[.span] = Unidoc.PackageChyron.SocialMetrics.init(pushed: pushed,
                 stars: repo.stars,
                 now: self.now)
         }

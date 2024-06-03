@@ -67,10 +67,15 @@ extension Unidoc.VersionsPage:Unidoc.ApplicationPage
         {
             $0[.h1] = "\(self.package.symbol)"
 
-            if  let repo:Unidoc.PackageRepo = self.package.repo
+            guard
+            let repo:Unidoc.PackageRepo = self.package.repo
+            else
             {
-                $0 += Unidoc.PackageBanner.init(repo: repo, now: now)
+                return
             }
+
+            $0[.p] = repo.origin.about
+            $0[.p] { $0.class = "chyron" } = repo.chyron(now: now)
         }
 
         let dormancy:Duration? = self.package.repo?.dormant(by: now)

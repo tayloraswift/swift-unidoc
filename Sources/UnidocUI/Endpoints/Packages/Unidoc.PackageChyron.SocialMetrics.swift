@@ -2,9 +2,9 @@ import BSON
 import HTML
 import UnixTime
 
-extension Unidoc
+extension Unidoc.PackageChyron
 {
-    struct PackageIndicators
+    struct SocialMetrics
     {
         private
         let pushed:BSON.Millisecond
@@ -21,7 +21,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackageIndicators:HTML.OutputStreamable
+extension Unidoc.PackageChyron.SocialMetrics:HTML.OutputStreamable
 {
     static
     func += (span:inout HTML.ContentEncoder, self:Self)
