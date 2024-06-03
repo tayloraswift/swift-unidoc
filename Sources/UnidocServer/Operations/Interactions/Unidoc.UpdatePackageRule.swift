@@ -15,6 +15,12 @@ extension Unidoc.UpdatePackageRule
         {
             self = .insertEditorFromGitHub(login: login)
         }
+        else if
+            let revoke:String = form["revoke"],
+            let id:Unidoc.Account = .init(revoke)
+        {
+            self = .revokeEditor(id)
+        }
         else
         {
             return nil
