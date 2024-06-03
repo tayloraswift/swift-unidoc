@@ -1,0 +1,71 @@
+ul.users
+{
+    padding: 0;
+    margin-bottom: 3rem;
+    list-style-type: none;
+
+}
+ul.users > li:first-child
+{
+    border-top: none;
+}
+ul.users > li
+{
+    border-top: 1px dashed var(--fg-light);
+    padding: 1rem 0;
+
+    > header
+    {
+        display: flex;
+        align-items: left;
+
+        div.icon
+        {
+            border: 2px dashed var(--fg-light);
+            box-sizing: border-box;
+        }
+        div.icon,
+        img.icon
+        {
+            width: 2rem;
+            height: 2rem;
+            margin-right: 0.5rem;
+            border-radius: 50%;
+        }
+
+        div.tools
+        {
+            margin-left: auto;
+            display: flex;
+            align-items: right;
+
+            color: var(--fg-heavy);
+
+            > form
+            {
+                margin-left: 0.5em;
+
+                button[type="submit"]
+                {
+                    margin: 0 0.25em;
+                    font-style: italic;
+                }
+            }
+
+            > form::before,
+            > form::after
+            {
+                color: var(--fg-semi);
+            }
+
+            > form::before
+            {
+                content: '(';
+            }
+            > form::after
+            {
+                content: ')';
+            }
+        }
+    }
+}

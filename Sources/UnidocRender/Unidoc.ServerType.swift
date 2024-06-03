@@ -1,13 +1,15 @@
-extension Unidoc.RenderFormat
+extension Unidoc
 {
     @frozen public
-    enum Server
+    enum ServerType
     {
+        /// The official Swiftinit server.
         case swiftinit_org
+        /// A local preview server.
         case localhost(port:Int)
     }
 }
-extension Unidoc.RenderFormat.Server:CustomStringConvertible
+extension Unidoc.ServerType:CustomStringConvertible
 {
     @inlinable public
     var description:String

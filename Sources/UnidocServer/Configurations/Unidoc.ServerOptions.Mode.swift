@@ -13,7 +13,7 @@ extension Unidoc.ServerOptions
 extension Unidoc.ServerOptions.Mode
 {
     @inlinable
-    var server:Unidoc.RenderFormat.Server
+    var server:Unidoc.ServerType
     {
         switch self
         {

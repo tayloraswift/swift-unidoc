@@ -63,12 +63,12 @@ extension Unidoc
 extension Unidoc.ServerLoop
 {
     @inlinable public nonisolated
-    var secure:Bool
+    var security:Unidoc.ServerSecurity
     {
         switch self.options.mode
         {
-        case .development: false
-        case .production:  true
+        case .development(_, let options):  options.security
+        case .production:                   .enforced
         }
     }
 
@@ -86,8 +86,8 @@ extension Unidoc.ServerLoop
     @inlinable nonisolated
     func format(locale:HTTP.Locale?) -> Unidoc.RenderFormat
     {
-        .init(
-            assets: self.options.cloudfront ? .cloudfront : .local,
+        .init(assets: self.options.cloudfront ? .cloudfront : .local,
+            security: self.security,
             locale: locale,
             server: self.options.mode.server)
     }

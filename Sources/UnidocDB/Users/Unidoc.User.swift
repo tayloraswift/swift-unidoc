@@ -50,16 +50,22 @@ extension Unidoc
 extension Unidoc.User
 {
     @inlinable public static
+    func github(_ user:GitHub.User, initialLimit:Int) -> Self
+    {
+        /// r u taylor swift?
+        let level:Unidoc.User.Level = user.id == 2556986 ? .administratrix : .human
+        let id:Unidoc.Account = .init(type: .github, user: user.id)
+        return .init(id: id,
+            level: level,
+            //  This will only be written to the database if the user is new.
+            apiLimitLeft: initialLimit,
+            github: user.profile)
+    }
+
+    @inlinable public static
     func machine(_ number:UInt32 = 0) -> Self
     {
         .init(id: .init(type: .unidoc, user: number), level: .machine)
-    }
-
-    @inlinable public consuming
-    func `as`(_ level:Level) -> Self
-    {
-        self.level = level
-        return self
     }
 }
 extension Unidoc.User

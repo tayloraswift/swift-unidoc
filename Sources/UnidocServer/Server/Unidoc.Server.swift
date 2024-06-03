@@ -24,12 +24,12 @@ extension Unidoc
 extension Unidoc.Server
 {
     @inlinable public
+    var security:Unidoc.ServerSecurity { self.loop.security }
+
+    @inlinable public
     var plugins:[String: any Unidoc.ServerPlugin] { self.loop.plugins }
     @inlinable public
     var context:Unidoc.ServerPluginContext { self.loop.context }
-
-    @inlinable public
-    var secure:Bool { self.loop.secure }
 
     @inlinable public
     var github:GitHub.Integration? { self.loop.github }
@@ -43,12 +43,16 @@ extension Unidoc.Server
 }
 extension Unidoc.Server
 {
-    func authorize(package:Unidoc.Package,
+    func authorize(package preloaded:Unidoc.PackageMetadata? = nil,
+        loading id:Unidoc.Package,
         account:Unidoc.Account?,
         rights:Unidoc.UserRights,
+        require minimum:Unidoc.PackageRights = .editor,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
-        guard case .human = rights.level, self.secure
+        guard
+        case .enforced = self.security,
+        case .human = rights.level
         else
         {
             //  Only enforce ownership rules for humans.
@@ -62,26 +66,30 @@ extension Unidoc.Server
             return .unauthorized("You must be logged in to perform this operation!\n")
         }
 
-        //  Don’t really have a smarter way to check this except loading the entire package
-        //  metadata.
-        guard
-        let package:Unidoc.PackageMetadata = try await self.db.packages.find(id: package,
-            with: session)
+        let package:Unidoc.PackageMetadata
+
+        if  let preloaded:Unidoc.PackageMetadata
+        {
+            package = preloaded
+        }
+        else if
+            let metadata:Unidoc.PackageMetadata = try await self.db.packages.find(id: id,
+                with: session)
+        {
+            package = metadata
+        }
         else
         {
             return .notFound("No such package\n")
         }
 
-        if  let owner:Unidoc.Account = package.repo?.account
-        {
-            let rights:Unidoc.PackageRights = .of(account: account,
-                access: rights.access,
-                owner: owner)
+        let rights:Unidoc.PackageRights = .of(account: account,
+            access: rights.access,
+            rulers: package.rulers)
 
-            if  rights >= .editor
-            {
-                return nil
-            }
+        if  rights >= minimum
+        {
+            return nil
         }
 
         return .forbidden("You are not authorized to edit this package!\n")

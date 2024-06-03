@@ -140,6 +140,35 @@ extension Unidoc.DB.Packages
 extension Unidoc.DB.Packages
 {
     public
+    func insert(editor:Unidoc.Account,
+        into package:Unidoc.Package,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        try await self.modify(existing: package, with: session)
+        {
+            $0[.addToSet]
+            {
+                $0[Unidoc.PackageMetadata[.editors]] = editor
+            }
+        }
+    }
+    public
+    func revoke(editor:Unidoc.Account,
+        from package:Unidoc.Package,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        try await self.modify(existing: package, with: session)
+        {
+            $0[.pull]
+            {
+                $0[Unidoc.PackageMetadata[.editors]] = editor
+            }
+        }
+    }
+}
+extension Unidoc.DB.Packages
+{
+    public
     func findGitHub(repo id:Int32,
         with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
