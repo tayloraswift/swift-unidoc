@@ -50,12 +50,24 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
 
         main[.section, { $0.class = "introduction" }]
         {
+            $0[.nav, { $0.class = "breadcrumbs" }]
+            {
+                $0[.a]
+                {
+                    $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol])"
+                } = "\(self.package.symbol)"
+            }
+
             $0[.h1] = "Manage collaborators"
 
-            if  let repo:Unidoc.PackageRepo = self.package.repo
+            guard
+            let repo:Unidoc.PackageRepo = self.package.repo
+            else
             {
-                $0 += Unidoc.PackageBanner.init(repo: repo, now: now)
+                return
             }
+
+            $0[.p] { $0.class = "chyron" } = repo.chyron(now: now)
         }
 
         main[.ul]

@@ -58,14 +58,21 @@ extension Unidoc.TagsPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
+        let now:UnixInstant = .now()
+
         main[.section, { $0.class = "introduction" }]
         {
             $0[.h1] = "\(self.package.symbol)"
 
-            if  let repo:Unidoc.PackageRepo = self.package.repo
+            guard
+            let repo:Unidoc.PackageRepo = self.package.repo
+            else
             {
-                $0 += Unidoc.PackageBanner.init(repo: repo, now: .now())
+                return
             }
+
+            $0[.p] = repo.origin.about
+            $0[.p] { $0.class = "chyron" } = repo.chyron(now: now)
         }
 
         main[.section, { $0.class = "details" }]
