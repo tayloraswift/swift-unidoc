@@ -7,6 +7,7 @@ extension Unidoc
         case packageAlign = "package-align"
         case packageConfig = "package-config"
         case packageIndex = "package-index"
+        case packageRules = "package-rules"
 
         case robots_txt = "robots.txt"
 

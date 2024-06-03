@@ -47,6 +47,7 @@ extension Unidoc.Server
         loading id:Unidoc.Package,
         account:Unidoc.Account?,
         rights:Unidoc.UserRights,
+        require minimum:Unidoc.PackageRights = .editor,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         guard
@@ -86,7 +87,7 @@ extension Unidoc.Server
             access: rights.access,
             rulers: package.rulers)
 
-        if  rights >= .editor
+        if  rights >= minimum
         {
             return nil
         }

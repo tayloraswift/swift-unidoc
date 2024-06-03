@@ -1,4 +1,5 @@
 import HTML
+import Media
 import Symbols
 import URI
 import UnixTime
@@ -73,6 +74,45 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
             {
                 $0[.li] = user.card
             }
+        }
+
+        main[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Unidoc.Post[.packageRules])"
+            $0.method = "post"
+
+            $0.class = "config"
+        }
+            content:
+        {
+            $0[.dl]
+            {
+                $0[.dt] = "GitHub username"
+                $0[.dd]
+                {
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "package"
+                        $0.value = "\(self.package.id)"
+                    }
+
+                    $0[.input]
+                    {
+                        $0.type = "text"
+                        $0.name = "login"
+                        $0.pattern = #"^[a-zA-Z0-9_\-\.]+$"#
+                        $0.required = true
+                    }
+                }
+            }
+
+            $0[.button]
+            {
+                $0.class = "area"
+                $0.type = "submit"
+            } = "Grant edit access"
         }
     }
 }

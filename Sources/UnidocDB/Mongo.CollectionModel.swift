@@ -463,6 +463,29 @@ extension Mongo.CollectionModel
 
 extension Mongo.CollectionModel
 {
+    @inlinable package
+    func modify(existing id:Element.ID,
+        returning phase:Mongo.UpdatePhase = .new,
+        with session:Mongo.Session,
+        do encode:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
+        where Element:BSONDecodable, Element.ID:BSONEncodable
+    {
+        let (element, _):(Element?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Element>>.init(Self.name,
+                returning: phase)
+            {
+                $0[.query] { $0["_id"] = id }
+                $0[.update]
+                {
+                    encode(&$0)
+                }
+            },
+            against: self.database)
+        return element
+    }
+}
+extension Mongo.CollectionModel
+{
     func update(
         some elements:some Sequence<some BSONDocumentEncodable & Identifiable<Element.ID>>,
         with session:Mongo.Session) async throws -> Mongo.Updates<Element.ID>
