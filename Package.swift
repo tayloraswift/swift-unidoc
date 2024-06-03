@@ -731,8 +731,8 @@ let package:Package = .init(
 switch ProcessInfo.processInfo.environment["UNIDOC_ENABLE_INDEXSTORE"]?.lowercased()
 {
 case "1"?, "true"?:
-    package.dependencies.append(.package(url: "https://github.com/apple/indexstore-db",
-        branch: "swift-5.10-RELEASE"))
+    package.dependencies.append(.package(url: "https://github.com/tayloraswift/indexstore-db",
+        branch: "occurrences-in-file"))
 
     package.targets.append(.target(name: "MarkdownPluginSwift_IndexStoreDB",
         dependencies: [
