@@ -24,6 +24,15 @@ extension Unidoc.DB.Users
     {
         $0[Unidoc.User[.apiLimitLeft]] = (+)
     }
+    public static
+    let indexAccess:Mongo.CollectionIndex = .init("Access", unique: false)
+    {
+        $0[Unidoc.User[.access]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.User[.access]] { $0[.exists] = true }
+    }
 }
 extension Unidoc.DB.Users:Mongo.CollectionModel
 {
@@ -34,7 +43,13 @@ extension Unidoc.DB.Users:Mongo.CollectionModel
     var name:Mongo.Collection { "Users" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [Self.indexRateLimit] }
+    var indexes:[Mongo.CollectionIndex]
+    {
+        [
+            Self.indexRateLimit,
+            Self.indexAccess
+        ]
+    }
 }
 extension Unidoc.DB.Users
 {

@@ -5,7 +5,6 @@ extension Unidoc
         let global:Unidoc.User.Level?
         let rights:Unidoc.PackageRights
 
-        private
         init(global:Unidoc.User.Level?, rights:Unidoc.PackageRights)
         {
             self.global = global
@@ -28,28 +27,5 @@ extension Unidoc.Permissions
     var owner:Bool
     {
         self.global == .administratrix || self.rights >= .owner
-    }
-}
-extension Unidoc.Permissions
-{
-    init(package:Unidoc.PackageMetadata, user:Unidoc.User?)
-    {
-        guard
-        let user:Unidoc.User
-        else
-        {
-            self.init(global: nil, rights: .reader)
-            return
-        }
-        if  let owner:Unidoc.Account = package.repo?.account
-        {
-            self.init(global: user.level, rights: .of(account: user.id,
-                access: user.access,
-                owner: owner))
-        }
-        else
-        {
-            self.init(global: user.level, rights: .reader)
-        }
     }
 }

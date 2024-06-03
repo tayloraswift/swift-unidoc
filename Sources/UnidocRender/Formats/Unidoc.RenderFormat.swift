@@ -9,31 +9,24 @@ extension Unidoc
         public
         let assets:Assets
         public
+        var security:ServerSecurity
+        public
         var locale:HTTP.Locale?
         public
-        var server:Server
+        var server:ServerType
 
         @inlinable public
         init(
             assets:Assets,
+            security:ServerSecurity,
             locale:HTTP.Locale? = nil,
-            server:Server = .swiftinit_org)
+            server:ServerType = .swiftinit_org)
         {
             self.assets = assets
             self.locale = locale
+            self.security = security
             self.server = server
         }
     }
 }
-extension Unidoc.RenderFormat
-{
-    @inlinable public
-    var secure:Bool
-    {
-        switch self.server
-        {
-        case .swiftinit_org:    true
-        case .localhost:        false
-        }
-    }
-}
+
