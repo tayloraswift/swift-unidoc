@@ -38,6 +38,19 @@ extension Unidoc.Account
     {
         self.type.rawValue << 32 | UInt64.init(self.user)
     }
+
+    @inlinable public
+    var github:UInt32?
+    {
+        guard
+        self.type == .github
+        else
+        {
+            return nil
+        }
+
+        return self.user
+    }
 }
 extension Unidoc.Account:RawRepresentable
 {
