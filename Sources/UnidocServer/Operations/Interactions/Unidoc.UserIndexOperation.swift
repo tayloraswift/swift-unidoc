@@ -57,15 +57,7 @@ extension Unidoc.UserIndexOperation
             let user:Unidoc.User = try await restAPI.connect
             {
                 let user:GitHub.User = try await $0.get(from: "/user", with: .token(self.token))
-
-                /// r u taylor swift?
-                let level:Unidoc.User.Level = user.id == 2556986 ? .administratrix : .human
-                let id:Unidoc.Account = .init(type: .github, user: user.id)
-                return .init(id: id,
-                    level: level,
-                    //  This will only be written to the database if the user is new.
-                    apiLimitLeft: server.db.policy.apiLimitPerReset,
-                    github: user.profile)
+                return .github(user, initialLimit: server.db.policy.apiLimitPerReset)
             }
 
             let session:Mongo.Session = try await .init(from: server.db.sessions)

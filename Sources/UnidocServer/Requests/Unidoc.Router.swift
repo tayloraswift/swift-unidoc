@@ -481,6 +481,18 @@ extension Unidoc.Router
                     subject: subject))
             }
 
+        case .packageRules:
+            if  let account:Unidoc.Account = self.authorization.account,
+                let package:String = form["package"],
+                let package:Unidoc.Package = .init(package),
+                let rule:Unidoc.UpdatePackageRule = .init(from: form)
+            {
+                return .actor(Unidoc.UpdatePackageRuleOperation.init(
+                    account: account,
+                    package: package,
+                    rule: rule))
+            }
+
         case .telescope:
             if  let days:String = form["days"],
                 let days:Int = .init(days)
