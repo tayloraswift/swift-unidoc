@@ -65,7 +65,6 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.StaticPage
 }
 extension Unidoc.StatsEndpoint.ModulePage:Unidoc.ApplicationPage
 {
-    typealias Navigator = HTML.Logo
 }
 extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
 {

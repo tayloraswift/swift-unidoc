@@ -26,7 +26,10 @@ extension Unidoc.AdministrativePage
     {
         body[.header, { $0.class = "app" }]
         {
-            $0[.div, { $0.class = "content" }] { $0[.nav] = HTML.Logo.init() }
+            $0[.div, { $0.class = "content" }]
+            {
+                $0[.nav] { $0.class = "cornice" } = Unidoc.ApplicationCornice.init()
+            }
         }
         body[.div, { $0.class = "app" }]
         {

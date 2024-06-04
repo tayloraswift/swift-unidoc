@@ -23,7 +23,6 @@ extension Unidoc.DocsEndpoint.NotFoundPage:Unidoc.RenderablePage, Unidoc.Dynamic
 }
 extension Unidoc.DocsEndpoint.NotFoundPage:Unidoc.ApplicationPage
 {
-    typealias Navigator = HTML.Logo
 }
 extension Unidoc.DocsEndpoint.NotFoundPage:Unidoc.VertexPage
 {

@@ -46,7 +46,6 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.StaticPage
 }
 extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApplicationPage
 {
-    typealias Navigator = HTML.Logo
 }
 extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 {

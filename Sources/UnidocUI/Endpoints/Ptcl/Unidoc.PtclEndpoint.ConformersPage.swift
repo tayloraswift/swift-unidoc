@@ -65,7 +65,6 @@ extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.StaticPage
 }
 extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.ApplicationPage
 {
-    typealias Navigator = HTML.Logo
 }
 extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.VertexPage
 {

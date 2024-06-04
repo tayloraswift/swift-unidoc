@@ -20,8 +20,6 @@ extension Unidoc.ServerErrorPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 }
 extension Unidoc.ServerErrorPage:Unidoc.ApplicationPage
 {
-    typealias Navigator = HTML.Logo
-
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section]

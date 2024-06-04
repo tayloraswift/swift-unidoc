@@ -64,7 +64,7 @@ extension Unidoc.VertexPage
         {
             $0[.div, { $0.class = "content" }]
             {
-                $0[.nav] = self.navigator
+                $0[.nav] { $0.class = "cornice" } = self.cornice(format: format)
                 $0[.div, { $0.class = "searchbar-container" }]
                 {
                     $0[.div]

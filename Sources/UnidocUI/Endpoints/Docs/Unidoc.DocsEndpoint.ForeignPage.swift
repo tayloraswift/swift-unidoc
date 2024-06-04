@@ -43,7 +43,6 @@ extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.StaticPage
 }
 extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApplicationPage
 {
-    typealias Navigator = HTML.Logo
 }
 extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApicalPage
 {
