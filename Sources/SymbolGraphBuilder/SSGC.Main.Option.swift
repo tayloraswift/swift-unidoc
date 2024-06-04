@@ -50,6 +50,7 @@ extension SSGC.Main.Option
         switch string
         {
         case "--swiftpm-cache":         self = .swiftpm_cache
+        case "--swift-runtime":         self = .swift_runtime
         case "--swift", "-s":           self = .swift
         case "--sdk", "-k":             self = .sdk
         case "--workspace-name", "-w":  self = .workspace_name
