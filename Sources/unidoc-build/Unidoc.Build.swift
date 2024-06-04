@@ -23,6 +23,7 @@ extension Unidoc
 
         var pretty:Bool
         var executablePath:String?
+        var swiftRuntime:String?
         var swiftPath:String?
         var swiftSDK:SSGC.AppleSDK?
         var force:Unidoc.VersionSeries?
@@ -38,6 +39,7 @@ extension Unidoc
 
             self.pretty = false
             self.executablePath = nil
+            self.swiftRuntime = nil
             self.swiftPath = nil
             self.swiftSDK = nil
             self.force = nil
@@ -124,6 +126,9 @@ extension Unidoc.Build
             case "--pretty", "-o":
                 options.pretty = true
 
+            case "--swift-runtime", "-r":
+                options.swiftRuntime = try arguments.next(for: option)
+
             case "--swift", "-s":
                 options.swiftPath = try arguments.next(for: option)
 
@@ -161,6 +166,12 @@ extension Unidoc.Build
 
         //  Guess the SDK if not specified.
         options.swiftSDK = options.swiftSDK ?? .macOS
+        //  Guess the Swift runtime if not specified.
+        options.swiftRuntime = options.swiftRuntime ?? """
+            /Applications/Xcode.app/Contents/Developer/Toolchains\
+            /XcodeDefault.xctoolchain/usr/lib
+            """
+
         #endif
 
         return options

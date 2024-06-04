@@ -18,6 +18,8 @@ extension Unidoc
         let executablePath:String?
 
         private
+        let swiftRuntime:String?
+        private
         let swiftPath:String?
         private
         let swiftSDK:SSGC.AppleSDK?
@@ -31,6 +33,7 @@ extension Unidoc
 
         private
         init(executablePath:String?,
+            swiftRuntime:String?,
             swiftPath:String?,
             swiftSDK:SSGC.AppleSDK?,
             pretty:Bool,
@@ -39,6 +42,7 @@ extension Unidoc
             port:Int)
         {
             self.executablePath = executablePath
+            self.swiftRuntime = swiftRuntime
             self.swiftPath = swiftPath
             self.swiftSDK = swiftSDK
             self.pretty = pretty
@@ -69,6 +73,7 @@ extension Unidoc.Client
 
         self.init(
             executablePath: options.executablePath,
+            swiftRuntime: options.swiftRuntime,
             swiftPath: options.swiftPath,
             swiftSDK: options.swiftSDK,
             pretty: options.pretty,
@@ -229,10 +234,15 @@ extension Unidoc.Client
         {
             arguments.append("--pretty")
         }
-        if  let swift:String = self.swiftPath
+        if  let path:String = self.swiftRuntime
+        {
+            arguments.append("--swift-runtime")
+            arguments.append("\(path)")
+        }
+        if  let path:String = self.swiftPath
         {
             arguments.append("--swift")
-            arguments.append("\(swift)")
+            arguments.append("\(path)")
         }
         if  let sdk:SSGC.AppleSDK = self.swiftSDK
         {
@@ -311,10 +321,15 @@ extension Unidoc.Client
         {
             arguments.append("--pretty")
         }
-        if  let swift:String = self.swiftPath
+        if  let path:String = self.swiftRuntime
+        {
+            arguments.append("--swift-runtime")
+            arguments.append("\(path)")
+        }
+        if  let path:String = self.swiftPath
         {
             arguments.append("--swift")
-            arguments.append("\(swift)")
+            arguments.append("\(path)")
         }
         if  let sdk:SSGC.AppleSDK = self.swiftSDK
         {

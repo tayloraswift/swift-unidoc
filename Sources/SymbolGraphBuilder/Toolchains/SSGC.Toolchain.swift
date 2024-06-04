@@ -19,6 +19,9 @@ extension SSGC
         /// A path to a specific Swift toolchain to use, or just the string `"swift"`.
         private
         let swiftCommand:String
+        /// A path to the Swift runtime directory to load the `libIndexStore.{so, dylib}` from.
+        private
+        let swiftRuntime:FilePath.Directory?
         /// A path to the SwiftPM cache directory to use.
         private
         let swiftCache:FilePath.Directory?
@@ -41,6 +44,7 @@ extension SSGC
 
         private
         init(swiftCommand:String,
+            swiftRuntime:FilePath.Directory?,
             swiftCache:FilePath.Directory?,
             swiftSDK:AppleSDK?,
             scratch:FilePath.Component,
@@ -50,6 +54,7 @@ extension SSGC
             pretty:Bool)
         {
             self.swiftCommand = swiftCommand
+            self.swiftRuntime = swiftRuntime
             self.swiftCache = swiftCache
             self.swiftSDK = swiftSDK
             self.scratch = scratch
@@ -65,6 +70,7 @@ extension SSGC.Toolchain
     public
     init(parsing splash:String,
         swiftCommand:String = "swift",
+        swiftRuntime:FilePath.Directory? = nil,
         swiftCache:FilePath.Directory? = nil,
         swiftSDK:SSGC.AppleSDK? = nil,
         scratch:FilePath.Component = ".build.ssgc",
@@ -136,6 +142,7 @@ extension SSGC.Toolchain
 
         self.init(
             swiftCommand: swiftCommand,
+            swiftRuntime: swiftRuntime,
             swiftCache: swiftCache,
             swiftSDK: swiftSDK,
             scratch: scratch,
@@ -147,6 +154,7 @@ extension SSGC.Toolchain
 
     public static
     func detect(
+        swiftRuntime:FilePath.Directory? = nil,
         swiftCache:FilePath.Directory? = nil,
         swiftPath:FilePath? = nil,
         swiftSDK:SSGC.AppleSDK? = nil,
@@ -165,6 +173,7 @@ extension SSGC.Toolchain
         try SystemProcess.init(command: swift, "--version", stdout: writable)()
         return try .init(parsing: try readable.read(buffering: 1024),
             swiftCommand: swift,
+            swiftRuntime: swiftRuntime,
             swiftCache: swiftCache,
             swiftSDK: swiftSDK,
             pretty: pretty)
@@ -176,8 +185,15 @@ extension SSGC.Toolchain
 
     func libIndexStore() throws -> IndexStoreLibrary
     {
-        /// FIXME: this is almost certain to fail on macOS
-        try .init(dylibPath: "/usr/lib/libIndexStore.so")
+        let libraries:FilePath.Directory = self.swiftRuntime ?? "/usr/lib"
+        let library:FilePath
+        #if os(macOS)
+            library = libraries / "libIndexStore.dylib"
+        #else
+            library = libraries / "libIndexStore.so"
+        #endif
+
+        return try .init(dylibPath: "\(library)")
     }
 
     #endif
