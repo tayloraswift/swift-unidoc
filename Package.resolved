@@ -1,6 +1,15 @@
 {
-  "originHash" : "25b3f1574313c009bdec4c6510f80560fd41cc5ee105aa6ffc53530cca917c10",
+  "originHash" : "b23a17dad08d4e33b2879bd84a52763a741e6f5a369685a16838bafe623621f1",
   "pins" : [
+    {
+      "identity" : "indexstore-db",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tayloraswift/indexstore-db",
+      "state" : {
+        "branch" : "occurrences-in-file",
+        "revision" : "2ef13f914518765f1626eeb5ef2c12271502e331"
+      }
+    },
     {
       "identity" : "swift-atomics",
       "kind" : "remoteSourceControl",

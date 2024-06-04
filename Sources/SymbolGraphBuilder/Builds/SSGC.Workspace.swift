@@ -134,13 +134,27 @@ extension SSGC.Workspace
             }
         }
 
+        let index:(any Markdown.SwiftLanguage.IndexStore)?
+        do
+        {
+            index = try package.indexStore(for: swift)
+        }
+        catch let error
+        {
+            print("""
+                Couldn’t load IndexStoreDB library, advanced syntax highlighting will be \
+                disabled! (\(error))
+                """)
+            index = nil
+        }
+
         let compiled:SymbolGraph = try .compile(artifacts: package.cultures.map
             {
                 .init(location: output, parts: symbols[$0.module.id, default: []])
             },
             package: package,
             logger: logger,
-            index: try package.indexStore(for: swift))
+            index: index)
 
         return .init(metadata: metadata, graph: compiled)
     }
