@@ -26,8 +26,6 @@ extension Unidoc.PolicyErrorPage:Unidoc.RenderablePage, Unidoc.DynamicPage
 }
 extension Unidoc.PolicyErrorPage:Unidoc.ApplicationPage
 {
-    typealias Navigator = HTML.Logo
-
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         main[.section]

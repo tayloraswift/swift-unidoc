@@ -5,18 +5,28 @@ import URI
 extension Unidoc
 {
     public
-    protocol ApplicationPage<Navigator>:RenderablePage
+    protocol ApplicationPage<Cornice>:RenderablePage
     {
-        associatedtype Navigator:HTML.OutputStreamable
-        var navigator:Navigator { get }
+        associatedtype Cornice:HTML.OutputStreamable
 
+        func cornice(format:RenderFormat) -> Cornice
         func main(_:inout HTML.ContentEncoder, format:RenderFormat)
     }
 }
-extension Unidoc.ApplicationPage<HTML.Logo>
+extension Unidoc.ApplicationPage<Unidoc.ApplicationCornice>
 {
-    @inlinable public
-    var navigator:HTML.Logo { .init() }
+    public
+    func cornice(format:Unidoc.RenderFormat) -> Unidoc.ApplicationCornice
+    {
+        if  case .swiftinit_org = format.server
+        {
+            .init(official: true)
+        }
+        else
+        {
+            .init(official: false)
+        }
+    }
 }
 extension Unidoc.ApplicationPage
 {
@@ -33,8 +43,7 @@ extension Unidoc.ApplicationPage
         {
             $0[.div, { $0.class = "content" }]
             {
-                $0[.nav] = self.navigator
-
+                $0[.nav] { $0.class = "cornice" } = self.cornice(format: format)
                 $0[.div, { $0.class = "searchbar-container" }]
                 {
                     $0[.div]

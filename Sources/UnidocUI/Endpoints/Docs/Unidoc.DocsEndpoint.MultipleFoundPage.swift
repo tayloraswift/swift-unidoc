@@ -52,7 +52,6 @@ extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.StaticPage
 }
 extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.ApplicationPage
 {
-    typealias Navigator = HTML.Logo
 }
 extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.VertexPage
 {

@@ -57,7 +57,7 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
     {
         body[.header]
         {
-            $0[.div, { $0.class = "content" }] { $0[.nav] = HTML.Logo.init() }
+            $0[.div, { $0.class = "content" }] { $0[.nav] = Unidoc.ApplicationCornice.init() }
         }
 
         body[.div, { $0.class = "app" }]
