@@ -8,23 +8,19 @@ extension SSGC
 {
     struct Main:Sendable
     {
-        /// A path to the workspace directory. SSGC will **create** this workspace unless
-        /// ``workspacePath`` is set.
         var workspaceName:FilePath.Directory
-        /// A path to the workspace directory. SSGC will **assume** this workspace exists.
         var workspacePath:FilePath.Directory?
-        /// A path to a FIFO that SSGC will use to communicate its status. If set, SSGC will
-        /// block until something opens this FIFO for reading.
+
         var status:FilePath?
         var search:FilePath.Directory?
 
         var output:FilePath?
         var outputLog:FilePath?
 
+        var swiftRuntime:FilePath.Directory?
+        var swiftCache:FilePath.Directory?
         var swiftPath:FilePath?
         var swiftSDK:AppleSDK?
-
-        var swiftCache:FilePath.Directory?
 
         var name:Symbol.Package?
         var repo:String?
@@ -49,6 +45,7 @@ extension SSGC
             self.output = nil
             self.outputLog = nil
 
+            self.swiftRuntime = nil
             self.swiftCache = nil
             self.swiftPath = nil
             self.swiftSDK = nil
@@ -67,57 +64,33 @@ extension SSGC.Main
     mutating
     func parse(arguments:consuming CommandLine.Arguments) throws
     {
-        while let option:String = arguments.next()
+        while let word:String = arguments.next()
         {
+            guard
+            let option:Option = .init(word)
+            else
+            {
+                throw CommandLine.ArgumentError.unknown(word)
+            }
+
             switch option
             {
-            case "--swiftpm-cache":
-                self.swiftCache = .init(try arguments.next(for: option))
-
-            case "--swift", "-s":
-                self.swiftPath = .init(try arguments.next(for: option))
-
-            case "--sdk", "-k":
-                self.swiftSDK = try .init(arguments.next(for: option))
-
-            case "--workspace-name", "-w":
-                self.workspaceName = try .init(arguments.next(for: option))
-
-            case "--workspace", "-W":
-                self.workspacePath = try .init(arguments.next(for: option))
-
-            case "--status", "-P":
-                self.status = try .init(arguments.next(for: option))
-
-            case "--search-path", "-I":
-                self.search = .init(try arguments.next(for: option))
-
-            case "--package-name", "-n":
-                self.name = try .init(arguments.next(for: option))
-
-            case "--package-repo", "-r":
-                self.repo = try arguments.next(for: option)
-
-            case "--ref", "-t":
-                self.ref = try arguments.next(for: option)
-
-            case "--output", "-o":
-                self.output = try .init(arguments.next(for: option))
-
-            case "--output-log", "-l":
-                self.outputLog = try .init(arguments.next(for: option))
-
-            case "--remove-build":
-                self.removeBuild = true
-
-            case "--remove-clone":
-                self.removeClone = true
-
-            case "--pretty", "-p":
-                self.pretty = true
-
-            case let option:
-                throw CommandLine.ArgumentError.unknown(option)
+            case .swiftpm_cache:    self.swiftCache = .init(try arguments.next(for: word))
+            case .swift_runtime:    self.swiftRuntime = .init(try arguments.next(for: word))
+            case .swift:            self.swiftPath = .init(try arguments.next(for: word))
+            case .sdk:              self.swiftSDK = .init(try arguments.next(for: word))
+            case .workspace_name:   self.workspaceName = .init(try arguments.next(for: word))
+            case .workspace:        self.workspacePath = .init(try arguments.next(for: word))
+            case .status:           self.status = .init(try arguments.next(for: word))
+            case .search_path:      self.search = .init(try arguments.next(for: word))
+            case .package_name:     self.name = .init(try arguments.next(for: word))
+            case .package_repo:     self.repo = try arguments.next(for: word)
+            case .ref:              self.ref = try arguments.next(for: word)
+            case .output:           self.output = .init(try  arguments.next(for: word))
+            case .output_log:       self.outputLog = .init(try arguments.next(for: word))
+            case .remove_build:     self.removeBuild = true
+            case .remove_clone:     self.removeClone = true
+            case .pretty:           self.pretty = true
             }
         }
     }
@@ -194,7 +167,8 @@ extension SSGC.Main
             throw CommandLine.ArgumentError.missing("--package-name")
         }
 
-        let toolchain:SSGC.Toolchain = try .detect(swiftCache: self.swiftCache,
+        let toolchain:SSGC.Toolchain = try .detect(swiftRuntime: self.swiftRuntime,
+            swiftCache: self.swiftCache,
             swiftPath: self.swiftPath,
             swiftSDK: self.swiftSDK,
             pretty: self.pretty)
