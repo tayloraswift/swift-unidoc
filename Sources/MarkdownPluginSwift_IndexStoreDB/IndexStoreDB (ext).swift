@@ -74,9 +74,30 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
             case .commentTag:           phylum = nil
             }
 
-            markers[base + occurence.location.utf8Column - 1] = .init(position: position,
-                symbol: usr,
-                phylum: phylum)
+            {
+                let stacked:Markdown.SwiftLanguage.IndexMarker = .init(position: position,
+                    symbol: usr,
+                    phylum: phylum)
+
+                guard
+                let marker:Markdown.SwiftLanguage.IndexMarker = $0
+                else
+                {
+                    $0 = stacked
+                    return
+                }
+
+                switch marker.phylum
+                {
+                case .actor, .associatedtype, .class, .enum, .protocol, .struct, .typealias:
+                    return
+
+                default:
+                    $0 = stacked
+                }
+
+            } (&markers[base + occurence.location.utf8Column - 1])
+
         }
 
         return markers
