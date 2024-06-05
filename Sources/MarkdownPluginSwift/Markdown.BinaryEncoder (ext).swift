@@ -3,7 +3,7 @@ import SwiftIDEUtils
 
 extension Markdown.BinaryEncoder
 {
-    subscript<UTF8>(highlight classification:SyntaxClassification) -> UTF8?
+    subscript<UTF8>(highlight color:Markdown.Bytecode.Context?) -> UTF8?
         where UTF8:Collection<UInt8>
     {
         get { nil }
@@ -16,9 +16,9 @@ extension Markdown.BinaryEncoder
                 return
             }
 
-            if  let context:Markdown.Bytecode.Context = .init(classification: classification)
+            if  let color:Markdown.Bytecode.Context
             {
-                self[context] { $0 += value }
+                self[color] { $0 += value }
             }
             else
             {

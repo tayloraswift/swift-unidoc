@@ -37,7 +37,7 @@ extension Markdown.SwiftLanguage.Highlighter:Markdown.CodeHighlighter
                     start: base + span.offset,
                     count: span.length)
 
-                binary[highlight: span.kind] = text
+                binary[highlight: .init(classification: span.kind)] = text
             }
         }
     }

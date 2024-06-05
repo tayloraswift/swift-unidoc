@@ -37,7 +37,7 @@ extension SyntaxClassificationCursor.SpanIterator:CustomDebugStringConvertible
 extension SyntaxClassificationCursor.SpanIterator
 {
     mutating
-    func next() -> SyntaxClassifiedRange?
+    func next() -> SyntaxClassificationCursor.Span?
     {
         guard
         var highlight:SyntaxClassifiedRange = self.spans.next()
@@ -46,7 +46,9 @@ extension SyntaxClassificationCursor.SpanIterator
             return nil
         }
 
-        if  let marker:Markdown.SwiftLanguage.IndexMarker = self.links[highlight.offset],
+        let marker:Markdown.SwiftLanguage.IndexMarker? = self.links[highlight.offset]
+
+        if  let marker:Markdown.SwiftLanguage.IndexMarker,
             let phylum:Phylum.Decl = marker.phylum
         {
             switch phylum
@@ -64,6 +66,8 @@ extension SyntaxClassificationCursor.SpanIterator
             }
         }
 
-        return highlight
+        return .init(color: .init(classification: highlight.kind),
+            usr: marker?.symbol,
+            end: highlight.endOffset)
     }
 }

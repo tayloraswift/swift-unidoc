@@ -9,12 +9,12 @@ extension Markdown.SwiftLanguage
         public
         let position:SourcePosition
         public
-        let symbol:Symbol.USR
+        let symbol:Symbol.USR?
         public
         let phylum:Phylum.Decl?
 
         @inlinable public
-        init(position:SourcePosition, symbol:Symbol.USR, phylum:Phylum.Decl?)
+        init(position:SourcePosition, symbol:Symbol.USR?, phylum:Phylum.Decl?)
         {
             self.position = position
             self.symbol = symbol
@@ -27,6 +27,9 @@ extension Markdown.SwiftLanguage.IndexMarker:CustomStringConvertible
     public
     var description:String
     {
-        "(\(self.position): \(self.symbol), \(self.phylum?.name ?? "unknown"))"
+        """
+        (\(self.position): \
+        \(self.symbol?.description ?? "local"), \(self.phylum?.name ?? "unknown"))
+        """
     }
 }
