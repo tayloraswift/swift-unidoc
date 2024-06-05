@@ -185,12 +185,22 @@ extension SSGC.Toolchain
 
     func libIndexStore() throws -> IndexStoreLibrary
     {
-        let libraries:FilePath.Directory = self.swiftRuntime ?? "/usr/lib"
+        let libraries:FilePath.Directory
         let library:FilePath
+
         #if os(macOS)
+
+            libraries = self.swiftRuntime ?? """
+            /Applications/Xcode.app/Contents/Developer/Toolchains\
+            /XcodeDefault.xctoolchain/usr/lib
+            """
             library = libraries / "libIndexStore.dylib"
+
         #else
+
+            libraries = self.swiftRuntime ?? "/usr/lib"
             library = libraries / "libIndexStore.so"
+
         #endif
 
         return try .init(dylibPath: "\(library)")
