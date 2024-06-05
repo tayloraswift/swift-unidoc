@@ -10,6 +10,11 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
     public
     func load(for id:String, utf8:[UInt8]) -> [Int: Markdown.SwiftLanguage.IndexMarker]
     {
+        let locallyDeclared:Set<String> = self.symbols(inFilePath: id).reduce(into: [])
+        {
+            $0.insert($1.usr)
+        }
+
         //  Compute line positions
         var lines:[Int: Int] = [1: utf8.startIndex]
         var line:Int = 1
@@ -76,7 +81,7 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
 
             {
                 let stacked:Markdown.SwiftLanguage.IndexMarker = .init(position: position,
-                    symbol: usr,
+                    symbol: locallyDeclared.contains(occurence.symbol.usr) ? nil : usr,
                     phylum: phylum)
 
                 guard

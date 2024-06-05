@@ -6,7 +6,7 @@ struct SyntaxClassificationCursor
     private(set)
     var spans:SpanIterator
     private
-    var span:SyntaxClassifiedRange?
+    var span:Span?
 
     init(_ spans:consuming SyntaxClassifications,
         links:[Int: Markdown.SwiftLanguage.IndexMarker] = [:])
@@ -17,38 +17,38 @@ struct SyntaxClassificationCursor
 
     mutating
     func step(through range:inout Range<Int>,
-        _ yield:(Range<Int>, SyntaxClassification) throws -> ()) rethrows
+        _ yield:(Range<Int>, Span) throws -> ()) rethrows
     {
-        while let highlight:SyntaxClassifiedRange = self.span
+        while let highlight:Span = self.span
         {
-            if  range.upperBound < highlight.endOffset
+            if  range.upperBound < highlight.end
             {
                 //  This range is strictly contained within the current highlight.
-                try yield(range, highlight.kind)
+                try yield(range, highlight)
                 return
             }
 
             self.span = self.spans.next()
 
-            if  range.lowerBound >= highlight.endOffset
+            if  range.lowerBound >= highlight.end
             {
                 //  This range does not overlap with the current highlight at all.
                 continue
             }
 
-            if  range.upperBound == highlight.endOffset
+            if  range.upperBound == highlight.end
             {
                 //  This range ends at the end of the current highlight.
-                try yield(range, highlight.kind)
+                try yield(range, highlight)
                 return
             }
             else
             {
                 //  This range ends after the end of the current highlight.
-                let overlap:Range<Int> = range.lowerBound ..< highlight.endOffset
-                try yield(overlap, highlight.kind)
+                let overlap:Range<Int> = range.lowerBound ..< highlight.end
+                try yield(overlap, highlight)
 
-                range = highlight.endOffset ..< range.upperBound
+                range = highlight.end ..< range.upperBound
             }
         }
     }

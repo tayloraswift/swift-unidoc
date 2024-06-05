@@ -119,7 +119,7 @@ extension Markdown.SwiftLanguage
                 {
                     cursor.step(through: &range)
                     {
-                        output[highlight: $1] = utf8[$0]
+                        output[highlight: $1.color] = utf8[$0]
                     }
                 }
             }
@@ -153,7 +153,7 @@ extension Markdown.SwiftLanguage
                         output in
                         cursor.step(through: &range)
                         {
-                            output[highlight: $1] = utf8[$0]
+                            output[highlight: $1.color] = utf8[$0]
                         }
                     }
                 }
@@ -161,7 +161,7 @@ extension Markdown.SwiftLanguage
                 {
                     cursor.step(through: &range)
                     {
-                        output[highlight: $1] = utf8[$0]
+                        output[highlight: $1.color] = utf8[$0]
                     }
                 }
             }
