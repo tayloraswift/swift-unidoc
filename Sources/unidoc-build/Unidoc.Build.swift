@@ -166,11 +166,6 @@ extension Unidoc.Build
 
         //  Guess the SDK if not specified.
         options.swiftSDK = options.swiftSDK ?? .macOS
-        //  Guess the Swift runtime if not specified.
-        options.swiftRuntime = options.swiftRuntime ?? """
-            /Applications/Xcode.app/Contents/Developer/Toolchains\
-            /XcodeDefault.xctoolchain/usr/lib
-            """
 
         #endif
 
