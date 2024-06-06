@@ -800,68 +800,16 @@ extension SSGC.Linker
                 let module:Symbol.Module = self.tables.graph.namespaces[namespace.index]
                 for i:Int32 in namespace.range
                 {
-                    self.link(decl: i, of: culture, in: module)
+                    let article:SSGC.ArticleCollation? = self.collations.move(i)
+                    self.tables.link(article: article, of: culture, as: i, in: module)
                 }
             }
         }
     }
 
     private mutating
-    func link(decl id:Int32, of culture:Culture, in module:Symbol.Module)
-    {
-        let linked:SymbolGraph.Article?
-        let topics:[[Int32]]
-        let rename:Int32?
-
-        if  let decl:SymbolGraph.Decl = self.tables.graph.decls.nodes[id].decl
-        {
-            let article:SSGC.ArticleCollation? = self.collations.move(id)
-            let renamed:String? = decl.signature.availability.universal?.renamed
-                ?? decl.signature.availability.agnostic[.swift]?.renamed
-                ?? decl.signature.availability.agnostic[.swiftPM]?.renamed
-
-            if  case nil = article,
-                case nil = renamed
-            {
-                return // Nothing to do.
-            }
-
-            ((linked, topics), rename) = self.tables.resolving(with: .init(
-                namespace: module,
-                culture: culture,
-                origin: id,
-                scope: article?.scope ?? decl.phylum.scope(trimming: decl.path)))
-            {
-                (outliner:inout SSGC.Outliner) in
-                (
-                    article.map
-                    {
-                        outliner.link(body: $0.combined, file: $0.file)
-                    } ?? (nil, []),
-                    renamed.map
-                    {
-                        outliner.follow(rename: $0, of: decl.path, at: decl.location)
-                    } ?? nil
-                )
-            }
-        }
-        else
-        {
-            fatalError("Attempting to typeset a declaration that has not been indexed!")
-        }
-
-        {
-            $0?.renamed = rename
-            $0?.article = linked
-        } (&self.tables.graph.decls.nodes[id].decl)
-
-        self.tables.graph.curation += topics
-    }
-
-    private mutating
     func link(extensions:[(Int32, Int)])
     {
-        //  Need to load this before mutating the symbol graph to avoid overlapping access
         let imports:[Symbol.Module] = self.tables.importAll
 
         for (i, j):(Int32, Int) in extensions
@@ -873,23 +821,10 @@ extension SSGC.Linker
                 continue
             }
 
-            let e:SymbolGraph.Extension = self.tables.graph.decls.nodes[i].extensions[j]
-            let scopes:SSGC.OutlineResolutionScopes = .init(
-                namespace: self.tables.graph.namespaces[e.namespace],
-                culture: .init(resources: self.resources[e.culture],
-                    imports: imports,
-                    module: self.tables.graph.namespaces[e.culture]),
-                origin: nil,
-                scope: article.scope)
-
-            let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.tables.resolving(
-                with: scopes)
-            {
-                $0.link(body: article.combined, file: article.file)
-            }
-
-            self.tables.graph.decls.nodes[i].extensions[j].article = linked
-            self.tables.graph.curation += topics
+            self.tables.link(article: article,
+                extension: (i, j),
+                resources: self.resources,
+                imports: imports)
         }
     }
 
@@ -904,23 +839,7 @@ extension SSGC.Linker
 
             for article:SSGC.Article in articles[c]
             {
-                let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.tables.resolving(
-                    with: .init(culture: culture, origin: article.id(in: c)))
-                {
-                    $0.link(body: article.body, file: article.file)
-                }
-
-                self.tables.graph.curation += topics
-
-                switch article.type
-                {
-                case .standalone(id: let id):
-                    self.tables.graph.articles.nodes[id].article = linked
-
-                case .culture:
-                    //  This is the article for the module’s landing page.
-                    self.tables.graph.cultures[c].article = linked
-                }
+                self.tables.link(article: article, of: culture, at: c)
             }
         }
     }

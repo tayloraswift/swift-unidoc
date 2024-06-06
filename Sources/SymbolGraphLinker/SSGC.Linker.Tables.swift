@@ -8,7 +8,7 @@ import UCF
 extension SSGC.Linker
 {
     @_spi(testable) public
-    struct Tables:~Copyable
+    struct Tables//:~Copyable
     {
         var diagnostics:Diagnostics<SSGC.Symbolicator>
 
@@ -17,7 +17,7 @@ extension SSGC.Linker
         @_spi(testable) public
         var doclinks:DoclinkResolver.Table
 
-        private
+        private(set)
         var anchors:SSGC.AnchorResolver
 
         /// Interned module names. This only contains modules that are not included in the
@@ -330,34 +330,122 @@ extension SSGC.Linker.Tables
     func resolving<Success>(with scopes:SSGC.OutlineResolutionScopes,
         do body:(inout SSGC.Outliner) throws -> Success) rethrows -> Success
     {
-        let codelinks:CodelinkResolver<Int32>.Table = self.codelinks
-        let doclinks:DoclinkResolver.Table = self.doclinks
-        let anchors:SSGC.AnchorResolver = self.anchors
-
         var outliner:SSGC.Outliner = .init(resources: scopes.resources,
             resolver: .init(
-                diagnostics: (consume self).diagnostics,
-                codelinks: .init(table: codelinks, scope: scopes.codelink),
-                doclinks: .init(table: doclinks, scope: scopes.doclink),
-                anchors: anchors,
-                origin: scopes.origin))
-
+                codelinks: .init(table: self.codelinks, scope: scopes.codelink),
+                doclinks: .init(table: self.doclinks, scope: scopes.doclink),
+                origin: scopes.origin,
+                tables: consume self))
         do
         {
             let success:Success = try body(&outliner)
-            self = .init(diagnostics: outliner.diagnostics(),
-                codelinks: codelinks,
-                doclinks: doclinks,
-                anchors: anchors)
+            self = outliner.move()
             return success
         }
         catch let error
         {
-            self = .init(diagnostics: outliner.diagnostics(),
-                codelinks: codelinks,
-                doclinks: doclinks,
-                anchors: anchors)
+            self = outliner.move()
             throw error
         }
+    }
+
+    mutating
+    func link(article:SSGC.Article, of culture:SSGC.Linker.Culture, at c:Int)
+    {
+        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(
+            with: .init(culture: culture, origin: article.id(in: c)))
+        {
+            $0.link(body: article.body, file: article.file)
+        }
+
+        self.graph.curation += topics
+
+        switch article.type
+        {
+        case .standalone(id: let id):
+            self.graph.articles.nodes[id].article = linked
+
+        case .culture:
+            //  This is the article for the module’s landing page.
+            self.graph.cultures[c].article = linked
+        }
+    }
+
+    mutating
+    func link(article:SSGC.ArticleCollation?,
+        of culture:SSGC.Linker.Culture,
+        as id:Int32,
+        in namespace:Symbol.Module)
+    {
+        let linked:SymbolGraph.Article?
+        let topics:[[Int32]]
+        let rename:Int32?
+
+        if  let decl:SymbolGraph.Decl = self.graph.decls.nodes[id].decl
+        {
+            let renamed:String? = decl.signature.availability.universal?.renamed
+                ?? decl.signature.availability.agnostic[.swift]?.renamed
+                ?? decl.signature.availability.agnostic[.swiftPM]?.renamed
+
+            if  case nil = article,
+                case nil = renamed
+            {
+                return // Nothing to do.
+            }
+
+            ((linked, topics), rename) = self.resolving(with: .init(
+                namespace: namespace,
+                culture: culture,
+                origin: id,
+                scope: article?.scope ?? decl.phylum.scope(trimming: decl.path)))
+            {
+                (outliner:inout SSGC.Outliner) in
+                (
+                    article.map
+                    {
+                        outliner.link(body: $0.combined, file: $0.file)
+                    } ?? (nil, []),
+                    renamed.map
+                    {
+                        outliner.follow(rename: $0, of: decl.path, at: decl.location)
+                    } ?? nil
+                )
+            }
+        }
+        else
+        {
+            fatalError("Attempting to typeset a declaration that has not been indexed!")
+        }
+
+        {
+            $0?.renamed = rename
+            $0?.article = linked
+        } (&self.graph.decls.nodes[id].decl)
+
+        self.graph.curation += topics
+    }
+
+    mutating
+    func link(article:SSGC.ArticleCollation,
+        extension e:(i:Int32, j:Int),
+        resources:[[String: SSGC.Resource]],
+        imports:[Symbol.Module])
+    {
+        let `extension`:SymbolGraph.Extension = self.graph.decls.nodes[e.i].extensions[e.j]
+        let scopes:SSGC.OutlineResolutionScopes = .init(
+            namespace: self.graph.namespaces[`extension`.namespace],
+            culture: .init(resources: resources[`extension`.culture],
+                imports: imports,
+                module: self.graph.namespaces[`extension`.culture]),
+            origin: nil,
+            scope: article.scope)
+
+        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(with: scopes)
+        {
+            $0.link(body: article.combined, file: article.file)
+        }
+
+        self.graph.decls.nodes[e.i].extensions[e.j].article = linked
+        self.graph.curation += topics
     }
 }
