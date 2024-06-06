@@ -88,31 +88,56 @@ enum Main:TestMain, TestBattery
                 let parser:Markdown.SwiftLanguage = .swift(
                     index: try sources.indexStore(for: toolchain))
 
-                for snippet:SSGC.LazyFile in sources.snippets
+                guard
+                let snippet:SSGC.LazyFile = tests.expect(
+                    value: sources.snippets.first(where: { $0.name == "UnitTests" }))
+                else
                 {
-                    let html:HTML
-
-                    switch snippet.name
-                    {
-                    case "Unit":
-                        html = .init
-                        {
-                            $0[.span] { $0.class = "xk" } = "let"
-                            $0 += " "
-                            $0[.span] { $0.class = "xv" } = "x"
-                            $0 += " = "
-                            $0[.span] { $0.class = "xt" } = "Int"
-                            $0 += "()\n"
-                        }
-                    default:        continue
-                    }
-
-                    let test:SnippetHighlightingTest = .init(parser: parser,
-                        source: snippet,
-                        html: html)
-
-                    try test.run(in: tests)
+                    return
                 }
+
+                let test:SnippetHighlightingTest = .init(parser: parser,
+                    source: snippet,
+                    html: .init
+                    {
+                        $0[.span] { $0.class = "xk" } = "let"
+                        $0 += " _ = "
+                        $0[.span] { $0.class = "xt" } = "Int"
+                        $0 += "()\n"
+                    },
+                    .init
+                    {
+                        $0[.span] { $0.class = "xk" } = "let"
+                        $0 += " _:"
+                        $0[.span] { $0.class = "xt" } = "String"
+                        $0 += " = "
+                        $0[.span] { $0.class = "xs" } = "\""
+                        $0 += "\\("
+                        $0[.span] { $0.class = "xn" } = "1959"
+                        $0 += ")"
+                        $0[.span] { $0.class = "xs" } = "\""
+                        $0 += "\n"
+                    },
+                    .init
+                    {
+                        $0[.span] { $0.class = "xk" } = "let"
+                        $0 += " _ = "
+                        $0[.span] { $0.class = "xv" } = "dictionary"
+                        $0 += "["
+                        $0[.span] { $0.class = "xs" } = "\"key\""
+                        $0 += "]\n"
+                    },
+                    .init
+                    {
+                        $0[.span] { $0.class = "xk" } = "let"
+                        $0 += " _:"
+                        $0[.span] { $0.class = "xt" } = "Key"
+                        $0 += " = "
+                        $0[.span] { $0.class = "xs" } = "\"key\""
+                        $0 += "\n"
+                    })
+
+                try test.run(in: tests)
 
                 let docs:SymbolGraphObject<Void> = try workspace.build(package: package,
                     with: toolchain)

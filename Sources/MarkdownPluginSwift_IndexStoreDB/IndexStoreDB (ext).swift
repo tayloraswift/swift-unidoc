@@ -42,41 +42,48 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
 
             let phylum:Phylum.Decl?
 
-            switch occurence.symbol.kind
+            if  occurence.roles.contains(.implicit)
             {
-            case .constructor:
-                phylum = occurence.roles.contains(.call)
-                    ? .func(.static)
-                    : .initializer
+                phylum = nil
+            }
+            else
+            {
+                switch occurence.symbol.kind
+                {
+                case .constructor:
+                    phylum = occurence.roles.contains(.call)
+                        ? .func(.static)
+                        : .initializer
 
-            case .unknown:              phylum = nil
-            case .module:               phylum = nil
-            case .namespace:            phylum = nil
-            case .namespaceAlias:       phylum = nil
-            case .macro:                phylum = nil
-            case .enum:                 phylum = .enum
-            case .struct:               phylum = .struct
-            case .class:                phylum = .class
-            case .protocol:             phylum = .protocol
-            case .extension:            phylum = .typealias
-            case .union:                phylum = .enum
-            case .typealias:            phylum = .typealias
-            case .function:             phylum = .func(nil)
-            case .variable:             phylum = .var(nil)
-            case .field:                phylum = nil
-            case .enumConstant:         phylum = .case
-            case .instanceMethod:       phylum = .func(.instance)
-            case .classMethod:          phylum = .func(.class)
-            case .staticMethod:         phylum = .func(.static)
-            case .instanceProperty:     phylum = .var(.instance)
-            case .classProperty:        phylum = .var(.class)
-            case .staticProperty:       phylum = .var(.static)
-            case .destructor:           phylum = .deinitializer
-            case .conversionFunction:   phylum = nil
-            case .parameter:            phylum = nil
-            case .using:                phylum = nil
-            case .concept:              phylum = nil
-            case .commentTag:           phylum = nil
+                case .unknown:              phylum = nil
+                case .module:               phylum = nil
+                case .namespace:            phylum = nil
+                case .namespaceAlias:       phylum = nil
+                case .macro:                phylum = nil
+                case .enum:                 phylum = .enum
+                case .struct:               phylum = .struct
+                case .class:                phylum = .class
+                case .protocol:             phylum = .protocol
+                case .extension:            phylum = .typealias
+                case .union:                phylum = .enum
+                case .typealias:            phylum = .typealias
+                case .function:             phylum = .func(nil)
+                case .variable:             phylum = .var(nil)
+                case .field:                phylum = nil
+                case .enumConstant:         phylum = .case
+                case .instanceMethod:       phylum = .func(.instance)
+                case .classMethod:          phylum = .func(.class)
+                case .staticMethod:         phylum = .func(.static)
+                case .instanceProperty:     phylum = .var(.instance)
+                case .classProperty:        phylum = .var(.class)
+                case .staticProperty:       phylum = .var(.static)
+                case .destructor:           phylum = .deinitializer
+                case .conversionFunction:   phylum = nil
+                case .parameter:            phylum = nil
+                case .using:                phylum = nil
+                case .concept:              phylum = nil
+                case .commentTag:           phylum = nil
+                }
             }
 
             {
