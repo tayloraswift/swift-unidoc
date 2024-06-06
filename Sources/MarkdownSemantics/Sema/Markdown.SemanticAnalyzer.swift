@@ -176,7 +176,14 @@ extension Markdown.SemanticAnalyzer
         return compacted
     }
 
-
+    /// Consumes the block if it is “special”, otherwise yields it to the closure argument.
+    ///
+    /// Blocks can be removed from the normal document flow for a variety of reasons, some of
+    /// which are given below.
+    ///
+    /// -   The block might be a ``BlockMetadata`` (`@Metadata`).
+    /// -   The block might be a parameter, or a parameter list.
+    /// -   The block might be a throws or returns section.
     private mutating
     func remove(block:consuming Markdown.BlockElement,
         else yield:(consuming Markdown.BlockElement) -> ())

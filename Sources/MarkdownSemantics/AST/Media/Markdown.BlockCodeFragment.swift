@@ -24,6 +24,10 @@ extension Markdown
     ///     highlighting must be performed ahead of time.
     ///
     /// 1.  `BlockCodeFragment` does not support diffing.
+    ///
+    /// A `BlockCodeFragment` by itself is just a snippet and slice name. It is supposed to be
+    /// broken up into ``BlockCodeLiteral`` elements that contain the actual code via the
+    /// snippet inlining process.
     final
     class BlockCodeFragment:BlockLeaf
     {
