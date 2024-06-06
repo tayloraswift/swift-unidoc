@@ -815,14 +815,12 @@ extension SSGC.Linker
     private mutating
     func link(decl id:Int32, of culture:Culture, in module:Symbol.Module)
     {
-        {
-            guard
-            let decl:SymbolGraph.Decl = $0
-            else
-            {
-                fatalError("Attempting to typeset a declaration that has not been indexed!")
-            }
+        let linked:SymbolGraph.Article?
+        let topics:[[Int32]]
+        let rename:Int32?
 
+        if  let decl:SymbolGraph.Decl = self.symbolizer.graph.decls.nodes[id].decl
+        {
             let article:SSGC.ArticleCollation? = self.collations.move(id)
             let renamed:String? = decl.signature.availability.universal?.renamed
                 ?? decl.signature.availability.agnostic[.swift]?.renamed
@@ -834,10 +832,7 @@ extension SSGC.Linker
                 return // Nothing to do.
             }
 
-            let linked:SymbolGraph.Article?
-            let rename:Int32?
-
-            (linked, rename) = self.tables.resolving(with: .init(
+            ((linked, topics), rename) = self.tables.resolving(with: .init(
                 namespace: module,
                 culture: culture,
                 origin: id,
@@ -847,24 +842,26 @@ extension SSGC.Linker
                 (
                     article.map
                     {
-                        let (article, topics):(SymbolGraph.Article, [[Int32]]) = outliner.link(
-                            body: $0.combined,
-                            file: $0.file)
-
-                        self.symbolizer.graph.curation += topics
-                        return article
-                    },
+                        outliner.link(body: $0.combined, file: $0.file)
+                    } ?? (nil, []),
                     renamed.map
                     {
                         outliner.follow(rename: $0, of: decl.path, at: decl.location)
                     } ?? nil
                 )
             }
+        }
+        else
+        {
+            fatalError("Attempting to typeset a declaration that has not been indexed!")
+        }
 
+        {
             $0?.renamed = rename
             $0?.article = linked
-
         } (&self.symbolizer.graph.decls.nodes[id].decl)
+
+        self.symbolizer.graph.curation += topics
     }
 
     private mutating
@@ -882,25 +879,23 @@ extension SSGC.Linker
                 continue
             }
 
+            let e:SymbolGraph.Extension = self.symbolizer.graph.decls.nodes[i].extensions[j]
+            let scopes:SSGC.OutlineResolutionScopes = .init(
+                namespace: self.symbolizer.graph.namespaces[e.namespace],
+                culture: .init(resources: self.resources[e.culture],
+                    imports: imports,
+                    module: self.symbolizer.graph.namespaces[e.culture]),
+                origin: nil,
+                scope: article.scope)
+
+            let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.tables.resolving(
+                with: scopes)
             {
-                let scopes:SSGC.OutlineResolutionScopes = .init(
-                    namespace: self.symbolizer.graph.namespaces[$0.namespace],
-                    culture: .init(resources: self.resources[$0.culture],
-                        imports: imports,
-                        module: self.symbolizer.graph.namespaces[$0.culture]),
-                    origin: nil,
-                    scope: article.scope)
+                $0.link(body: article.combined, file: article.file)
+            }
 
-                let topics:[[Int32]]
-
-                ($0.article, topics) = self.tables.resolving(with: scopes)
-                {
-                    $0.link(body: article.combined, file: article.file)
-                }
-
-                self.symbolizer.graph.curation += topics
-
-            } (&self.symbolizer.graph.decls.nodes[i].extensions[j])
+            self.symbolizer.graph.decls.nodes[i].extensions[j].article = linked
+            self.symbolizer.graph.curation += topics
         }
     }
 
@@ -915,23 +910,22 @@ extension SSGC.Linker
 
             for article:SSGC.Article in articles[c]
             {
-                self.tables.resolving(with: .init(culture: culture, origin: article.id(in: c)))
+                let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.tables.resolving(
+                    with: .init(culture: culture, origin: article.id(in: c)))
                 {
-                    let (documentation, topics):(SymbolGraph.Article, [[Int32]]) = $0.link(
-                        body: article.body,
-                        file: article.file)
+                    $0.link(body: article.body, file: article.file)
+                }
 
-                    self.symbolizer.graph.curation += topics
+                self.symbolizer.graph.curation += topics
 
-                    switch article.type
-                    {
-                    case .standalone(id: let id):
-                        self.symbolizer.graph.articles.nodes[id].article = documentation
+                switch article.type
+                {
+                case .standalone(id: let id):
+                    self.symbolizer.graph.articles.nodes[id].article = linked
 
-                    case .culture:
-                        //  This is the article for the module’s landing page.
-                        self.symbolizer.graph.cultures[c].article = documentation
-                    }
+                case .culture:
+                    //  This is the article for the module’s landing page.
+                    self.symbolizer.graph.cultures[c].article = linked
                 }
             }
         }
