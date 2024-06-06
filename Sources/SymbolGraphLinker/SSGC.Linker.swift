@@ -32,8 +32,6 @@ extension SSGC
         let root:Symbol.FileBase?
 
         private
-        var symbolizer:Symbolizer
-        private
         var resources:[[String: Resource]]
         private
         var snippets:[String: Markdown.Snippet]
@@ -62,11 +60,10 @@ extension SSGC
             self.nominations = nominations
             self.root = root
 
-            self.symbolizer = .init(modules: modules)
             self.resources = []
             self.snippets = [:]
             self.router = .init()
-            self.tables = .init()
+            self.tables = .init(modules: modules)
 
             self.supplements = [:]
             self.collations = .init()
@@ -79,7 +76,7 @@ extension SSGC.Linker
     private mutating
     func address(of decl:Symbol.Decl?) -> Int32?
     {
-        decl.map { self.symbolizer.intern($0) }
+        decl.map { self.tables.intern($0) }
     }
     /// Returns an array of local scalars for an array of declaration symbols.
     /// The scalar assignments reflect the order of the symbols in the array,
@@ -93,7 +90,7 @@ extension SSGC.Linker
     private mutating
     func addresses(of decls:[Symbol.Decl]) -> [Int32]
     {
-        decls.map { self.symbolizer.intern($0) }
+        decls.map { self.tables.intern($0) }
     }
     /// Returns an array of addresses for an array of vector features,
     /// exposing each vector for codelink resolution in the process.
@@ -121,9 +118,9 @@ extension SSGC.Linker
     {
         features.map
         {
-            let feature:Int32 = self.symbolizer.intern($0)
+            let feature:Int32 = self.tables.intern($0)
             if  let (last, phylum):(String, Phylum.Decl) =
-                self.symbolizer.graph.decls[feature]?.decl.map({ ($0.path.last, $0.phylum) }) ??
+                self.tables.graph.decls[feature]?.decl.map({ ($0.path.last, $0.phylum) }) ??
                 self.nominations[feature: $0]
             {
                 let vector:Symbol.Decl.Vector = .init($0, self: extended)
@@ -153,7 +150,7 @@ extension SSGC.Linker
             $0.map
             {
                 .init(range: self.allocate(decls: $0.decls),
-                    index: self.symbolizer.intern($0.id))
+                    index: self.tables.intern($0.id))
             }
         }
         for ((culture, sources), destinations):
@@ -163,13 +160,13 @@ extension SSGC.Linker
             destinations)
         {
             //  Record scalar ranges
-            self.symbolizer.graph.cultures[culture].namespaces = destinations
+            self.tables.graph.cultures[culture].namespaces = destinations
 
             for (source, destination):(SSGC.Namespace, SymbolGraph.Namespace) in
                 zip(sources, destinations)
             {
                 let qualifier:Symbol.Module =
-                    self.symbolizer.graph.namespaces[destination.index]
+                    self.tables.graph.namespaces[destination.index]
                 for (scalar, decl) in zip(destination.range, source.decls)
                 {
                     let hash:FNV24 = .init(truncating: .decl(decl.id))
@@ -193,7 +190,7 @@ extension SSGC.Linker
         var scalars:(first:Int32, last:Int32)? = nil
         for decl:SSGC.Decl in decls
         {
-            let scalar:Int32 = self.symbolizer.allocate(decl: decl)
+            let scalar:Int32 = self.tables.allocate(decl: decl)
             switch scalars
             {
             case  nil:              scalars = (scalar, scalar)
@@ -228,12 +225,12 @@ extension SSGC.Linker
     {
         let addresses:[Int32] = extensions.map
         {
-            self.symbolizer.allocate(extension: $0)
+            self.tables.allocate(extension: $0)
         }
         return zip(addresses, extensions).map
         {
-            let namespace:Int = self.symbolizer.intern($0.1.signature.extended.namespace)
-            let qualifier:Symbol.Module = self.symbolizer.graph.namespaces[namespace]
+            let namespace:Int = self.tables.intern($0.1.signature.extended.namespace)
+            let qualifier:Symbol.Module = self.tables.graph.namespaces[namespace]
 
             //  Sort *then* address, since we want deterministic addresses too.
             let conformances:[Int32] = self.addresses(
@@ -246,10 +243,10 @@ extension SSGC.Linker
             let nested:[Int32] = self.addresses(
                 of: $0.1.nested.sorted())
 
-            let index:Int = self.symbolizer.graph.decls.nodes[$0.0].push(.init(
+            let index:Int = self.tables.graph.decls.nodes[$0.0].push(.init(
                 conditions: $0.1.conditions.map
                 {
-                    $0.map { self.symbolizer.intern($0) }
+                    $0.map { self.tables.intern($0) }
                 },
                 namespace: namespace,
                 culture: $0.1.signature.culture,
@@ -276,7 +273,7 @@ extension SSGC.Linker
         {
             $0.reduce(into: [:])
             {
-                $0[$1.name] = .init(file: $1, id: self.symbolizer.intern($1.path))
+                $0[$1.name] = .init(file: $1, id: self.tables.intern($1.path))
             }
         }
         self.snippets = try self.attach(snippets: snippets)
@@ -313,7 +310,7 @@ extension SSGC.Linker
                 snippet: try $1.read(as: [UInt8].self),
                 from: indexID)
 
-            $0[$1.name] = .init(id: self.symbolizer.intern($1.path),
+            $0[$1.name] = .init(id: self.tables.intern($1.path),
                 caption: snippet.caption,
                 slices: snippet.slices,
                 using: self.doccommentParser)
@@ -325,7 +322,7 @@ extension SSGC.Linker
     {
         let articles:[[SSGC.Article]] = try markdown.indices.map
         {
-            let namespace:Symbol.Module = self.symbolizer.graph.namespaces[$0]
+            let namespace:Symbol.Module = self.tables.graph.namespaces[$0]
 
             var range:(first:Int32, last:Int32)? = nil
             var articles:[SSGC.Article] = []
@@ -350,7 +347,7 @@ extension SSGC.Linker
                 }
             }
 
-            self.symbolizer.graph.cultures[$0].articles = range.map
+            self.tables.graph.cultures[$0].articles = range.map
             {
                 $0.first ... $0.last
             }
@@ -362,8 +359,8 @@ extension SSGC.Linker
         //  we can link them. But before doing that, we need to register all known namespaces
         //  for codelink resolution.
         for (n, namespace):(Int, Symbol.Module) in zip(
-            self.symbolizer.graph.namespaces.indices,
-            self.symbolizer.graph.namespaces)
+            self.tables.graph.namespaces.indices,
+            self.tables.graph.namespaces)
         {
             self.tables.codelinks[namespace].overload(with: .init(
                 target: .scalar(n * .module),
@@ -396,7 +393,7 @@ extension SSGC.Linker
     {
         //  We always intern the article’s file path, for diagnostics, even if
         //  we end up discarding the article.
-        let file:Int32 = self.symbolizer.intern(supplement.path)
+        let file:Int32 = self.tables.intern(supplement.path)
         let source:Markdown.Source = .init(file: file,
             text: try supplement.read(as: String.self))
 
@@ -483,7 +480,7 @@ extension SSGC.Linker
             id = .tutorial(namespace, name)
         }
 
-        if  let id:Int32 = self.symbolizer.allocate(article: id, title: title)
+        if  let id:Int32 = self.tables.allocate(article: id, title: title)
         {
              //  Make the standalone article visible for doclink resolution.
             self.tables.doclinks[prefix, name] = id
@@ -532,9 +529,7 @@ extension SSGC.Linker
 
         let resolver:CodelinkResolver<Int32> = .init(
             table: self.tables.codelinks,
-            scope: .init(
-                namespace: namespace,
-                imports: self.symbolizer.importAll))
+            scope: .init(namespace: namespace, imports: self.tables.importAll))
 
         switch resolver.resolve(codelink)
         {
@@ -575,8 +570,8 @@ extension SSGC.Linker
     func collate(namespaces sources:[[SSGC.Namespace]],
         at destinations:[[SymbolGraph.Namespace]]) throws
     {
-        precondition(self.symbolizer.graph.cultures.count == destinations.count)
-        precondition(self.symbolizer.graph.cultures.count == sources.count)
+        precondition(self.tables.graph.cultures.count == destinations.count)
+        precondition(self.tables.graph.cultures.count == sources.count)
 
         //  First pass: expose and link unqualified features.
         for (sources, destinations):
@@ -585,8 +580,7 @@ extension SSGC.Linker
             for (source, destination):
                 (SSGC.Namespace, SymbolGraph.Namespace) in zip(sources, destinations)
             {
-                let qualifier:Symbol.Module =
-                    self.symbolizer.graph.namespaces[destination.index]
+                let qualifier:Symbol.Module = self.tables.graph.namespaces[destination.index]
 
                 for (address, decl):(Int32, SSGC.Decl) in zip(
                     destination.range,
@@ -602,14 +596,14 @@ extension SSGC.Linker
                         of: decl.id,
                         at: address)
 
-                    self.symbolizer.graph.decls.nodes[address].decl?.features = features
+                    self.tables.graph.decls.nodes[address].decl?.features = features
                 }
             }
         }
 
         //  Second pass: link everything else.
         for (c, resources):(Int, [String: SSGC.Resource]) in zip(
-            self.symbolizer.graph.cultures.indices,
+            self.tables.graph.cultures.indices,
             self.resources)
         {
             for (source, destination):
@@ -626,7 +620,7 @@ extension SSGC.Linker
     private mutating
     func collate(decl:SSGC.Decl, with resources:[String: SSGC.Resource], at i:Int32) throws
     {
-        let signature:Signature<Int32> = decl.signature.map { self.symbolizer.intern($0) }
+        let signature:Signature<Int32> = decl.signature.map { self.tables.intern($0) }
 
         //  Sort for deterministic addresses.
         let requirements:[Int32] = self.addresses(of: decl.requirements.sorted())
@@ -636,7 +630,7 @@ extension SSGC.Linker
 
         let location:SourceLocation<Int32>? = decl.location?.map
         {
-            self.symbolizer.intern($0)
+            self.tables.intern($0)
         }
 
         let comment:Markdown.Source? = decl.comment.map
@@ -704,7 +698,7 @@ extension SSGC.Linker
             $0?.signature = signature
             $0?.location = location
 
-        } (&self.symbolizer.graph.decls.nodes[i].decl)
+        } (&self.tables.graph.decls.nodes[i].decl)
 
     }
 
@@ -752,7 +746,7 @@ extension SSGC.Linker
             }
 
             //  Only intern the file path for the extension block with the longest comment
-            let file:Int32? = location.map { self.symbolizer.intern($0.file) }
+            let file:Int32? = location.map { self.tables.intern($0.file) }
             let markdown:Markdown.Source = .init(comment: comment, in: file)
 
             let collation:SSGC.ArticleCollation = .init(combined: markdown.parse(
@@ -762,7 +756,7 @@ extension SSGC.Linker
                 scope: [String].init(`extension`.path),
                 file: file)
 
-            let c:Int = self.symbolizer.graph.decls.nodes[i].extensions[j].culture
+            let c:Int = self.tables.graph.decls.nodes[i].extensions[j].culture
 
             try self.tables.inline(resources: self.resources[c],
                 into: collation.combined.details,
@@ -794,16 +788,16 @@ extension SSGC.Linker
     {
         //  Second pass: link everything else.
         for (c, module):(Int, Symbol.Module) in zip(
-            self.symbolizer.graph.cultures.indices,
-            self.symbolizer.graph.namespaces)
+            self.tables.graph.cultures.indices,
+            self.tables.graph.namespaces)
         {
             let culture:Culture = .init(resources: self.resources[c],
-                imports: self.symbolizer.importAll,
+                imports: self.tables.importAll,
                 module: module)
 
             for namespace:SymbolGraph.Namespace in namespaces[c]
             {
-                let module:Symbol.Module = self.symbolizer.graph.namespaces[namespace.index]
+                let module:Symbol.Module = self.tables.graph.namespaces[namespace.index]
                 for i:Int32 in namespace.range
                 {
                     self.link(decl: i, of: culture, in: module)
@@ -819,7 +813,7 @@ extension SSGC.Linker
         let topics:[[Int32]]
         let rename:Int32?
 
-        if  let decl:SymbolGraph.Decl = self.symbolizer.graph.decls.nodes[id].decl
+        if  let decl:SymbolGraph.Decl = self.tables.graph.decls.nodes[id].decl
         {
             let article:SSGC.ArticleCollation? = self.collations.move(id)
             let renamed:String? = decl.signature.availability.universal?.renamed
@@ -859,16 +853,16 @@ extension SSGC.Linker
         {
             $0?.renamed = rename
             $0?.article = linked
-        } (&self.symbolizer.graph.decls.nodes[id].decl)
+        } (&self.tables.graph.decls.nodes[id].decl)
 
-        self.symbolizer.graph.curation += topics
+        self.tables.graph.curation += topics
     }
 
     private mutating
     func link(extensions:[(Int32, Int)])
     {
         //  Need to load this before mutating the symbol graph to avoid overlapping access
-        let imports:[Symbol.Module] = self.symbolizer.importAll
+        let imports:[Symbol.Module] = self.tables.importAll
 
         for (i, j):(Int32, Int) in extensions
         {
@@ -879,12 +873,12 @@ extension SSGC.Linker
                 continue
             }
 
-            let e:SymbolGraph.Extension = self.symbolizer.graph.decls.nodes[i].extensions[j]
+            let e:SymbolGraph.Extension = self.tables.graph.decls.nodes[i].extensions[j]
             let scopes:SSGC.OutlineResolutionScopes = .init(
-                namespace: self.symbolizer.graph.namespaces[e.namespace],
+                namespace: self.tables.graph.namespaces[e.namespace],
                 culture: .init(resources: self.resources[e.culture],
                     imports: imports,
-                    module: self.symbolizer.graph.namespaces[e.culture]),
+                    module: self.tables.graph.namespaces[e.culture]),
                 origin: nil,
                 scope: article.scope)
 
@@ -894,8 +888,8 @@ extension SSGC.Linker
                 $0.link(body: article.combined, file: article.file)
             }
 
-            self.symbolizer.graph.decls.nodes[i].extensions[j].article = linked
-            self.symbolizer.graph.curation += topics
+            self.tables.graph.decls.nodes[i].extensions[j].article = linked
+            self.tables.graph.curation += topics
         }
     }
 
@@ -905,8 +899,8 @@ extension SSGC.Linker
         for c:Int in articles.indices
         {
             let culture:Culture = .init(resources: self.resources[c],
-                imports: self.symbolizer.importAll,
-                module: self.symbolizer.graph.namespaces[c])
+                imports: self.tables.importAll,
+                module: self.tables.graph.namespaces[c])
 
             for article:SSGC.Article in articles[c]
             {
@@ -916,16 +910,16 @@ extension SSGC.Linker
                     $0.link(body: article.body, file: article.file)
                 }
 
-                self.symbolizer.graph.curation += topics
+                self.tables.graph.curation += topics
 
                 switch article.type
                 {
                 case .standalone(id: let id):
-                    self.symbolizer.graph.articles.nodes[id].article = linked
+                    self.tables.graph.articles.nodes[id].article = linked
 
                 case .culture:
                     //  This is the article for the module’s landing page.
-                    self.symbolizer.graph.cultures[c].article = linked
+                    self.tables.graph.cultures[c].article = linked
                 }
             }
         }
@@ -936,17 +930,15 @@ extension SSGC.Linker
     public mutating
     func load() throws -> SymbolGraph
     {
-        self.symbolizer.graph.colorize(routes: self.router.paths,
-            with: &self.tables.diagnostics)
-
-        return self.symbolizer.graph
+        self.tables.graph.colorize(routes: self.router.paths, with: &self.tables.diagnostics)
+        return self.tables.graph
     }
 
     public consuming
     func status() -> DiagnosticMessages
     {
         self.tables.diagnostics.symbolicated(with: .init(
-            graph: self.symbolizer.graph,
+            graph: self.tables.graph,
             root: self.root))
     }
 }
