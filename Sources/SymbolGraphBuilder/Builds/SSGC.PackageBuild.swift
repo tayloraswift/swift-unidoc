@@ -170,7 +170,7 @@ extension SSGC.PackageBuild
 }
 extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
-    mutating
+    @_spi(testable) public mutating
     func compile(updating status:SSGC.StatusStream?,
         into artifacts:FilePath.Directory,
         with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
