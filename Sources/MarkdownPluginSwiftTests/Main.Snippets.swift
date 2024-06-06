@@ -364,11 +364,6 @@ extension Main.Snippets
             {
                 tests.expect("\(slices[i].code.safe)" ==? expected)
             }
-            else
-            {
-                tests.expect(value: nil as Markdown.SnippetSlice?)
-                continue
-            }
         }
     }
 }

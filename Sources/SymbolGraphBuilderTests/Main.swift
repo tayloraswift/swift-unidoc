@@ -1,4 +1,7 @@
 import BSON
+import HTML
+import MarkdownPluginSwift
+@_spi(testable)
 import SymbolGraphBuilder
 import SymbolGraphs
 import SymbolGraphTesting
@@ -65,6 +68,63 @@ enum Main:TestMain, TestBattery
         {
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
+
+        #if canImport(IndexStoreDB)
+
+        if  let tests:TestGroup = tests / "swift-snippets"
+        {
+            tests.do
+            {
+                var package:SSGC.PackageBuild = .local(
+                    package: "swift-snippets",
+                    among: "TestPackages")
+
+                try workspace.artifacts.create()
+
+                let (_, sources):(_, SSGC.PackageSources) = try package.compile(updating: nil,
+                        into: workspace.artifacts,
+                        with: toolchain)
+
+                let parser:Markdown.SwiftLanguage = .swift(
+                    index: try sources.indexStore(for: toolchain))
+
+                for snippet:SSGC.LazyFile in sources.snippets
+                {
+                    let html:HTML
+
+                    switch snippet.name
+                    {
+                    case "Unit":
+                        html = .init
+                        {
+                            $0[.span] { $0.class = "xk" } = "let"
+                            $0 += " "
+                            $0[.span] { $0.class = "xv" } = "x"
+                            $0 += " = "
+                            $0[.span] { $0.class = "xt" } = "Int"
+                            $0 += "()\n"
+                        }
+                    default:        continue
+                    }
+
+                    let test:SnippetHighlightingTest = .init(parser: parser,
+                        source: snippet,
+                        html: html)
+
+                    try test.run(in: tests)
+                }
+
+                let docs:SymbolGraphObject<Void> = try workspace.build(package: package,
+                    with: toolchain)
+
+                tests.expect(docs.graph.cultures.count >? 0)
+                tests.expect(docs.graph.decls.nodes.count >? 0)
+
+                docs.roundtrip(for: tests, in: workspace.artifacts)
+            }
+        }
+
+        #endif
 
         if  let tests:TestGroup = tests / "swift-atomics",
             let docs:SymbolGraphObject<Void> = (tests.do

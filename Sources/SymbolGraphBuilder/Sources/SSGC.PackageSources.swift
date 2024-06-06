@@ -3,11 +3,13 @@
 import class IndexStoreDB.IndexStoreDB
 import class IndexStoreDB.IndexStoreLibrary
 import MarkdownPluginSwift_IndexStoreDB
+import MarkdownPluginSwift
 
 #endif
 
 import MarkdownABI
 import SymbolGraphs
+import SymbolGraphLinker
 import PackageGraphs
 import Symbols
 import System
@@ -15,9 +17,12 @@ import System
 extension SSGC
 {
     /// Stores information about the layout, snippets, and build directory for a package.
+    @_spi(testable) public
     struct PackageSources
     {
         let cultures:[NominalSources]
+
+        @_spi(testable) public internal(set)
         var snippets:[LazyFile]
 
         let scratch:PackageBuildDirectory
@@ -95,6 +100,7 @@ extension SSGC.PackageSources:SSGC.DocumentationSources
 {
     var prefix:Symbol.FileBase? { .init(self.root.location.path.string) }
 
+    @_spi(testable) public
     func indexStore(for swift:SSGC.Toolchain) throws -> (any Markdown.SwiftLanguage.IndexStore)?
     {
         #if canImport(IndexStoreDB)

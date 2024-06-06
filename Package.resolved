@@ -1,5 +1,5 @@
 {
-  "originHash" : "b23a17dad08d4e33b2879bd84a52763a741e6f5a369685a16838bafe623621f1",
+  "originHash" : "edae0dcf80e63f00c4652738cff558120ba2c136347b935504d173e36b600f36",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-dom",
       "state" : {
-        "revision" : "d1490a70331d99a98ecc87813478df7f8ac2dbe4",
-        "version" : "1.0.0"
+        "revision" : "c54da6ef6c10fc54651609fe8233221d5e1f35fe",
+        "version" : "1.0.1"
       }
     },
     {
