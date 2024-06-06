@@ -86,7 +86,7 @@ let package:Package = .init(
     ],
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
-            from: "1.0.0")),
+            from: "1.0.1")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
@@ -118,7 +118,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.3.0")),
         .package(url: "https://github.com/apple/swift-syntax",
-            exact: "510.0.2"),
+            from: "510.0.2"),
     ],
     targets: [
         .macro(name: "UnidocMacros",

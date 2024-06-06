@@ -5,7 +5,7 @@ import URI
 
 extension SSGC
 {
-    final
+    @_spi(testable) public final
     class LazyFile
     {
         /// The amount of time it took to load this file from disk.
@@ -14,8 +14,12 @@ extension SSGC
         private
         var content:[UInt8]?
 
+        /// Absolute path to the file on disk.
+        @_spi(testable) public
         let location:FilePath
+        @_spi(testable) public
         let path:Symbol.File
+        @_spi(testable) public
         let name:String
 
         init(location:FilePath, path:Symbol.File, name:String)
@@ -70,6 +74,7 @@ extension SSGC.LazyFile
 }
 extension SSGC.LazyFile:SSGC.ResourceFile
 {
+    @_spi(testable) public
     func read(as _:[UInt8].Type = [UInt8].self) throws -> [UInt8]
     {
         if  let content:[UInt8] = self.content
@@ -84,6 +89,7 @@ extension SSGC.LazyFile:SSGC.ResourceFile
         }
     }
 
+    @_spi(testable) public
     func read(as _:String.Type = String.self) throws -> String
     {
         //  We’re not using caching here, because we should only be reading strings once per
