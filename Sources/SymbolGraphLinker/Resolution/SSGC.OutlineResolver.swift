@@ -10,35 +10,37 @@ extension SSGC
 {
     struct OutlineResolver:~Copyable
     {
-        var diagnostics:Diagnostics<SSGC.Symbolicator>
-
         private
         let codelinks:CodelinkResolver<Int32>
         private
         let doclinks:DoclinkResolver
         private
-        let anchors:AnchorResolver
-        private
         let origin:Int32?
 
+        var tables:Linker.Tables
+
         init(
-            diagnostics:consuming Diagnostics<SSGC.Symbolicator>,
             codelinks:CodelinkResolver<Int32>,
             doclinks:DoclinkResolver,
-            anchors:AnchorResolver,
-            origin:Int32?)
+            origin:Int32?,
+            tables:consuming Linker.Tables)
         {
-            self.diagnostics = diagnostics
-
             self.codelinks = codelinks
             self.doclinks = doclinks
-            self.anchors = anchors
             self.origin = origin
+
+            self.tables = tables
         }
     }
 }
 extension SSGC.OutlineResolver
 {
+    var diagnostics:Diagnostics<SSGC.Symbolicator>
+    {
+        _read   { yield  self.tables.diagnostics }
+        _modify { yield &self.tables.diagnostics }
+    }
+
     mutating
     func resolve(rename renamed:String,
         of redirect:UnqualifiedPath,
@@ -117,7 +119,7 @@ extension SSGC.OutlineResolver
         let fragment:String?
         if  let spelling:String = doclink.fragment
         {
-            switch self.anchors[page][normalizing: spelling]
+            switch self.tables.anchors[page][normalizing: spelling]
             {
             case .success(let original):
                 fragment = original

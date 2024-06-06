@@ -35,10 +35,7 @@ extension SSGC
 extension SSGC.Outliner
 {
     consuming
-    func diagnostics() -> Diagnostics<SSGC.Symbolicator>
-    {
-        self.resolver.diagnostics
-    }
+    func move() -> SSGC.Linker.Tables { self.resolver.tables }
 }
 extension SSGC.Outliner
 {
