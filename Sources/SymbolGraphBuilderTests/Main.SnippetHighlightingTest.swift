@@ -35,14 +35,14 @@ extension Main.SnippetHighlightingTest
         let (_, slices):(String, [Markdown.SnippetSlice]) = self.parser.parse(snippet: utf8,
             from: "\(self.source.location)")
 
-        if  let tests:TestGroup = tests / "Count"
+        if  let tests:TestGroup = tests / self.source.name / "Count"
         {
             tests.expect(slices.count ==? self.html.count)
         }
         for (i, expected):(Int, HTML) in self.html.enumerated()
         {
             guard
-            let tests:TestGroup = tests / "\(i)"
+            let tests:TestGroup = tests / self.source.name / "\(i)"
             else
             {
                 continue
