@@ -56,18 +56,24 @@ extension Unidoc.InertSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[index]
         {
-        case .file(line: let line, let id):
+        case .external(https: let url, safe: _):
+            html += url
+
+        case .fragment(let text):
+            html[.span] = text
+
+        case .fallback(text: let text):
+            html[.code] = text
+
+        case .bare(line: let line, let id):
             guard
             let file:Unidoc.FileVertex = self.vertices[id]?.vertex.file
             else
             {
-                break
+                return
             }
 
             html[.code] = line.map { "\(file.symbol.last):\($0 + 1)" } ?? file.symbol.last
-
-        case .link(https: let url, safe: _):
-            html += url
 
         case .path(let display, let vector):
             if  let id:Unidoc.Scalar = vector.last,
@@ -79,12 +85,6 @@ extension Unidoc.InertSection:HTML.OutputStreamableMarkdown
             {
                 html[.code] = display
             }
-
-        case .fragment(let text):
-            html[.span] = text
-
-        case .fallback(text: let text):
-            html[.code] = text
         }
     }
 }
@@ -102,7 +102,19 @@ extension Unidoc.InertSection:TextOutputStreamableMarkdown
         }
         switch self.outlines[index]
         {
-        case .file(line: let line, let id):
+        case .external(https: let url, safe: _):
+            utf8 += url.utf8
+
+        case .fragment(let fragment):
+            utf8 += fragment.utf8
+
+        case .fallback(let text?):
+            utf8 += text.utf8
+
+        case .fallback(nil):
+            break
+
+        case .bare(line: let line, let id):
             guard
             let file:Unidoc.FileVertex = self.vertices[id]?.vertex.file
             else
@@ -112,13 +124,14 @@ extension Unidoc.InertSection:TextOutputStreamableMarkdown
 
             utf8 += file.symbol.last.utf8
 
-            if  let line:Int = line
+            guard
+            let line:Int = line
+            else
             {
-                utf8 += ":\(line + 1)".utf8
+                break
             }
 
-        case .link(https: let url, safe: _):
-            utf8 += url.utf8
+            utf8 += ":\(line + 1)".utf8
 
         case .path(let display, let vector):
             if  let id:Unidoc.Scalar = vector.last,
@@ -133,12 +146,6 @@ extension Unidoc.InertSection:TextOutputStreamableMarkdown
                     utf8.append(byte == 0x20 ? 0x2E : byte)
                 }
             }
-
-        case .fragment(let text):
-            utf8 += text.utf8
-
-        case .fallback(text: let text):
-            utf8 += text.utf8
         }
     }
 }
