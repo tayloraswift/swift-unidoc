@@ -362,7 +362,7 @@ extension Main.Snippets
             }
             if  slices.indices.contains(i)
             {
-                tests.expect("\(slices[i].code.safe)" ==? expected)
+                tests.expect("\(slices[i].text)" ==? expected)
             }
         }
     }

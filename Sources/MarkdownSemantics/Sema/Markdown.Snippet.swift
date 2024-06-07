@@ -6,7 +6,7 @@ import OrderedCollections
 extension Markdown
 {
     @frozen public
-    struct Snippet
+    struct Snippet<USR>
     {
         public
         let id:Int32
@@ -14,12 +14,12 @@ extension Markdown
         public
         let caption:[Markdown.BlockElement]
         public
-        let slices:OrderedDictionary<String, SnippetSlice>
+        let slices:OrderedDictionary<String, SnippetSlice<USR>>
 
         private
         init(id:Int32,
             caption:[Markdown.BlockElement],
-            slices:OrderedDictionary<String, SnippetSlice>)
+            slices:OrderedDictionary<String, SnippetSlice<USR>>)
         {
             self.id = id
             self.caption = caption
@@ -32,10 +32,10 @@ extension Markdown.Snippet
     public
     init(id:Int32,
         caption:String,
-        slices:[Markdown.SnippetSlice],
+        slices:[Markdown.SnippetSlice<USR>],
         using parser:borrowing some Markdown.ParsingEngine)
     {
-        let index:OrderedDictionary<String, Markdown.SnippetSlice> = slices.reduce(
+        let index:OrderedDictionary<String, Markdown.SnippetSlice<USR>> = slices.reduce(
             into: [:])
         {
             $0[$1.id] = $1
