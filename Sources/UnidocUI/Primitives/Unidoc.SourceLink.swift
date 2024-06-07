@@ -4,12 +4,12 @@ extension Unidoc
 {
     struct SourceLink:Equatable, Sendable
     {
-        let target:String?
+        let target:String
         let icon:Icon
         let file:Substring
         let line:Int?
 
-        init(target:String?, icon:Icon, file:Substring, line:Int? = nil)
+        init(target:String, icon:Icon, file:Substring, line:Int? = nil)
         {
             self.icon = icon
             self.file = file
@@ -23,9 +23,10 @@ extension Unidoc.SourceLink:HTML.OutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        html[link: self.target]
+        html[.a]
         {
             $0.rel = .google_ugc
+            $0.href = self.target
             $0.target = "_blank"
             $0.class = "source \(self.icon.id)"
         }
