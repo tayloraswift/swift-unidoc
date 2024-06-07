@@ -1,4 +1,5 @@
 import Sources
+import Symbols
 
 extension Markdown
 {
@@ -18,6 +19,7 @@ extension Markdown
         /// A reference to a source location, which has already been resolved. These originate
         /// from the inlining of code snippets.
         case location(SourceLocation<Int32>)
+        case symbolic(Symbol.USR)
         /// A fully-qualified URL.
         case external(url:ExternalURL)
     }

@@ -9,6 +9,7 @@ extension SymbolGraph
     {
         case vector(Int32, self:Int32, text:OutlineText)
         case vertex(Int32, text:OutlineText)
+        case symbol(Int32)
         /// A URL fragment, without the hashtag (`#`) prefix.
         case fragment(String)
         case location(SourceLocation<Int32>)
@@ -59,14 +60,17 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
     {
         switch self
         {
-        case .vertex(let id, text: let text):
-            bson[.vertex_self] = id
-            bson[.text] = text
-
         case .vector(let id, self: let heir, text: let text):
             bson[.vertex_self] = id
             bson[.vector_self] = heir
             bson[.text] = text
+
+        case .vertex(let id, text: let text):
+            bson[.vertex_self] = id
+            bson[.text] = text
+
+        case .symbol(let self):
+            bson[.vertex_self] = self
 
         case .fragment(let self):
             bson[.fragment] = self
@@ -93,15 +97,18 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
     {
         if  let id:Int32 = try bson[.vertex_self]?.decode()
         {
-            let text:SymbolGraph.OutlineText = try bson[.text].decode()
-
             if  let heir:Int32 = try bson[.vector_self]?.decode()
             {
-                self = .vector(id, self: heir, text: text)
+                self = .vector(id, self: heir, text: try bson[.text].decode())
+            }
+            else if
+                let text:SymbolGraph.OutlineText = try bson[.text]?.decode()
+            {
+                self = .vertex(id, text: text)
             }
             else
             {
-                self = .vertex(id, text: text)
+                self = .symbol(id)
             }
 
             return

@@ -176,7 +176,7 @@ extension Unidoc.Linker
         let target:CodelinkResolver<Unidoc.Scalar>.Overload.Target
         else
         {
-            return .fallback(text: codelink.path.visible.joined(separator: "."))
+            return .fallback(codelink.path.visible.joined(separator: "."))
         }
         /// TODO: support fragment in `Codelink`?
         let text:SymbolGraph.OutlineText = .init(vector: codelink.path.visible, fragment: nil)

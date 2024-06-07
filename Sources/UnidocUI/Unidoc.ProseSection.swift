@@ -35,7 +35,7 @@ extension Unidoc.ProseSection
 }
 extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
 {
-    func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
+    func load(_ reference:Int, for type:inout Markdown.Bytecode.Attribute) -> String?
     {
         guard self.outlines.indices.contains(reference)
         else
@@ -45,38 +45,11 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[reference]
         {
-        case .file(line: let line, let id):
-            switch attribute
+        case .external(https: let url, safe: let safe):
+            switch type
             {
             case .href:
-                return self.context.link(source: id, line: line)?.target
-
-            case .src:
-                guard
-                let file:Unidoc.FileVertex = self.context.vertices[id]?.vertex.file
-                else
-                {
-                    return nil
-                }
-
-                return self.context.media?.link(media: file.symbol)
-
-            default:
-                return nil
-            }
-
-        case .link(https: let url, safe: let safe):
-            switch attribute
-            {
-            case .href:
-                if  safe
-                {
-                    attribute = .safelink
-                }
-                else
-                {
-                    attribute = .external
-                }
+                type = safe ? .safelink : .external
                 fallthrough
 
             case .external:
@@ -84,6 +57,21 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
 
             default:
                 return nil
+            }
+
+        case .fragment(let text):
+            return "\(URI.Fragment.init(decoded: text))"
+
+        case .fallback:
+            return nil
+
+        case .bare(line: _, let id):
+            switch type
+            {
+            //  File links are not yet supported.
+            case .href: return self.context.load(id: id, href: &type)
+            case .src:  return self.context.load(id: id, src: &type)
+            default:    return nil
             }
 
         case .path(let display, let scalars):
@@ -95,60 +83,15 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                 return nil
             }
 
-            switch attribute
+            let fragment:Substring? = display.fragment
+
+            switch type
             {
-            case .href:
-                guard
-                let target:Unidoc.LinkTarget = self.context[vertex: target]?.target
-                else
-                {
-                    return nil
-                }
-
-                let fragment:URI.Fragment? = display.fragment.map
-                {
-                    .init(decoded: String.init($0))
-                }
-                if  case .exported = target
-                {
-                    attribute = .safelink
-                }
-
-                switch (target.url, fragment)
-                {
-                case (let url?, nil):
-                    return url
-
-                case (let url?, let fragment?):
-                    return "\(url)\(fragment)"
-
-                case (nil, let fragment?):
-                    return "\(fragment)"
-
-                case (nil, nil):
-                    return "#"
-                }
-
+            case .href: return self.context.load(id: target, fragment: fragment, href: &type)
             //  This needs to be here for backwards compatibility with older symbol graphs.
-            case .src:
-                guard
-                let file:Unidoc.FileVertex = self.context.vertices[target]?.vertex.file
-                else
-                {
-                    return nil
-                }
-
-                return self.context.media?.link(media: file.symbol)
-
-            default:
-                return nil
+            case .src:  return self.context.load(id: target, src: &type)
+            default:    return nil
             }
-
-        case .fragment(let text):
-            return "\(URI.Fragment.init(decoded: text))"
-
-        case .fallback(text: _):
-            return nil
         }
     }
 
@@ -165,10 +108,7 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[index]
         {
-        case .file(line: let line, let id):
-            html ?= self.context.link(source: id, line: line)
-
-        case .link(https: let url, safe: let safe):
+        case .external(https: let url, safe: let safe):
             html[.a]
             {
                 $0.target = "_blank"
@@ -184,6 +124,16 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                 \(HTML.Attribute.Rel.google_ugc)
                 """
             } = url
+
+        case .fragment(let text):
+            html[.a] { $0.href = "\(URI.Fragment.init(decoded: text))" } = text
+
+        case .fallback(let text):
+            html[.code] = text
+
+        case .bare(line: let line, let id):
+            //  Only file links are supported here.
+            html ?= self.context.link(source: id, line: line)
 
         case .path(let display, let vector):
             //  We never started using path outlines for inline file elements, so we don’t need
@@ -274,12 +224,6 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                 //  TODO: support URL fragment?
                 html[.code] = components
             }
-
-        case .fragment(let text):
-            html[.a] { $0.href = "\(URI.Fragment.init(decoded: text))" } = text
-
-        case .fallback(text: let text):
-            html[.code] = text
         }
     }
 }

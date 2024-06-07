@@ -67,13 +67,22 @@ extension Unidoc.Resolver
     {
         switch outline
         {
+        case .fragment(let fragment):
+            return .fragment(fragment)
+
         case .location(let location):
             //  File references never cross packages, so this is basically a no-op.
             let line:Int? = location.position == .zero ? nil : location.position.line
-            return .file(line: line, self.current.id + location.file)
+            return .bare(line: line, self.current.id + location.file)
 
-        case .fragment(let text):
-            return .fragment(text)
+        case .symbol(let id):
+            guard let id:Unidoc.Scalar = self.current.scalars.decls[id]
+            else
+            {
+                return .fallback(nil)
+            }
+
+            return .bare(line: nil, id)
 
         case .vertex(let id, text: let text):
             if  case SymbolGraph.Plane.decl? = .of(id),
@@ -93,7 +102,7 @@ extension Unidoc.Resolver
                 //  Prior to v0.8.21 of the symbol graph compiler, we encoded references to
                 //  files as vertex outlines. Eventually, the renderer will begin expecting
                 //  file references to appear as file outlines, so we need to prepare for that.
-                return .file(line: nil, self.current.id + id)
+                return .bare(line: nil, self.current.id + id)
             }
             else
             {
@@ -128,7 +137,7 @@ extension Unidoc.Resolver
             }
         }
 
-        return .fallback(text: "<unavailable>")
+        return .fallback("<unavailable>")
     }
 }
 extension Unidoc.Resolver
@@ -144,7 +153,7 @@ extension Unidoc.Resolver
             self.diagnostics[location] = .error("""
                 autolink expression '\(link)' could not be parsed
                 """)
-            return .fallback(text: link)
+            return .fallback(link)
         }
 
         let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
@@ -175,7 +184,7 @@ extension Unidoc.Resolver
             self.diagnostics[location] = .error("""
                 doclink expression '\(link)' could not be parsed
                 """)
-            return .fallback(text: link)
+            return .fallback(link)
         }
 
         guard
@@ -186,7 +195,7 @@ extension Unidoc.Resolver
             self.diagnostics[location] = .warning("""
                 dynamic resolution of doclink '\(link)' is not supported yet
                 """)
-            return .fallback(text: link)
+            return .fallback(link)
         }
 
         let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
@@ -243,7 +252,7 @@ extension Unidoc.Resolver
             default:                false
             }
 
-            return .link(https: link, safe: safe)
+            return .external(https: link, safe: safe)
         }
 
         let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
@@ -257,7 +266,7 @@ extension Unidoc.Resolver
             else
             {
                 //  Not an error, this was only speculative.
-                return .link(https: link, safe: false)
+                return .external(https: link, safe: false)
             }
 
             resolution = overload.target

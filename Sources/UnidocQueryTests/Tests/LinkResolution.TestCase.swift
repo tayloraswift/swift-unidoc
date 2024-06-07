@@ -86,8 +86,16 @@ extension LinkResolution.TestCase
         {
             switch outline
             {
-            case .file:
-                continue
+            case .bare(line: _, let id):
+                guard
+                let id:Unidoc.Scalar = tests.expect(value: id),
+                let full:String = tests.expect(value: loadable[id])
+                else
+                {
+                    continue
+                }
+
+                internalLinks[full, default: []].append("")
 
             case .path(let display, let scalars):
                 guard
@@ -100,14 +108,17 @@ extension LinkResolution.TestCase
 
                 internalLinks[full, default: []].append("\(display)")
 
-            case .link(https: let url, let safe):
+            case .external(https: let url, let safe):
                 externalLinks[url] = safe
 
             case .fragment(let display):
                 fragmentLinks.insert(display)
 
-            case .fallback(text: let text):
+            case .fallback(let text?):
                 brokenLinks.insert(text)
+
+            case .fallback(nil):
+                continue
             }
         }
 
