@@ -2,8 +2,9 @@ import HTML
 import LexicalPaths
 import MarkdownABI
 import MarkdownRendering
-import UnidocRender
 import Symbols
+import UnidocRender
+import URI
 
 extension Unidoc.VertexContext
 {
@@ -88,5 +89,50 @@ extension Unidoc.VertexContext
             icon: icon,
             file: vertex.symbol.last,
             line: line)
+    }
+}
+extension Unidoc.VertexContext
+{
+    func load(id:Unidoc.Scalar,
+        fragment:Substring? = nil,
+        href attribute:inout Markdown.Bytecode.Attribute) -> String?
+    {
+        guard
+        let target:Unidoc.LinkTarget = self[vertex: id]?.target
+        else
+        {
+            return nil
+        }
+        if  case .exported = target
+        {
+            attribute = .safelink
+        }
+
+        switch (target.url, fragment.map { URI.Fragment.init(decoded: String.init($0)) })
+        {
+        case (let url?, nil):
+            return url
+
+        case (let url?, let fragment?):
+            return "\(url)\(fragment)"
+
+        case (nil, let fragment?):
+            return "\(fragment)"
+
+        case (nil, nil):
+            return "#"
+        }
+    }
+
+    func load(id:Unidoc.Scalar, src _:inout Markdown.Bytecode.Attribute) -> String?
+    {
+        guard
+        let file:Unidoc.FileVertex = self.vertices[id]?.vertex.file
+        else
+        {
+            return nil
+        }
+
+        return self.media?.link(media: file.symbol)
     }
 }

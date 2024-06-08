@@ -6,56 +6,6 @@ code
     white-space: pre-wrap;
     hyphens: none;
 }
-code
-{
-    span.xv,    // identifier
-    span.xo     // operator
-    {
-        color: var(--fg);
-    }
-    span.xb     // binding
-    {
-        color: var(--fg);
-    }
-    span.xa, a.xa, // attribute
-    span.xr,    // directive
-    span.xk,    // keyword
-    span.xm     // magic
-    {
-        color: var(--fg-swift-keyword);
-    }
-    span.xj,    // interpolation anchor
-    span.xp     // pseudo
-    {
-        color: var(--fg-accent);
-    }
-    span.xn,    // numeric literal
-    span.xs     // string literal
-    {
-        color: var(--fg-swift-literal);
-    }
-    span.xy, a.xy,  // actor
-    span.xz, a.xz,  // class
-    span.xt, a.xt   // type
-    {
-        color: var(--fg-swift-type);
-    }
-    span.extendee, a.extendee
-    {
-        color: inherit;
-    }
-    span.xu     // typealias
-    {
-        color: var(--fg-accent);
-        font-style: italic;
-    }
-    span.xc,    // regular comment
-    span.xd     // documentation comment
-    {
-        color: var(--fg-swift-comment);
-        font-style: italic;
-    }
-}
 code.multiline
 {
     span.xi::before

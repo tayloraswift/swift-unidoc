@@ -1,4 +1,5 @@
 import Sources
+import Symbols
 
 extension Markdown
 {
@@ -114,12 +115,12 @@ extension Markdown.BlockCodeFragment
     /// As long as people are not reusing the same slices in multiple places, this has no
     /// performance drawbacks. No one should be doing that (extensively) anyways, because that
     /// would result in documentation that is hard to browse.
-    func inline(snippets:[String: Markdown.Snippet],
+    func inline(snippets:[String: Markdown.Snippet<Symbol.USR>],
         into yield:(consuming Markdown.BlockElement) -> ()) throws
     {
         guard
         let snippet:String = self.snippet,
-        let snippet:Markdown.Snippet = snippets[snippet]
+        let snippet:Markdown.Snippet<Symbol.USR> = snippets[snippet]
         else
         {
             throw ArgumentError.snippet(self.snippet, available: snippets.keys.sorted())
@@ -136,9 +137,11 @@ extension Markdown.BlockCodeFragment
                 }
             }
 
-            if  let slice:Markdown.SnippetSlice = snippet.slices[slice]
+            if  let slice:Markdown.SnippetSlice<Symbol.USR> = snippet.slices[slice]
             {
-                yield(Markdown.BlockCodeLiteral.init(bytecode: slice.code,
+                yield(Markdown.BlockCodeLiteral.init(
+                    utf8: slice.utf8,
+                    code: slice.code,
                     location: slice.location(in: snippet.id)))
             }
             else
@@ -154,9 +157,11 @@ extension Markdown.BlockCodeFragment
             {
                 yield(block)
             }
-            for slice:Markdown.SnippetSlice in snippet.slices.values
+            for slice:Markdown.SnippetSlice<Symbol.USR> in snippet.slices.values
             {
-                yield(Markdown.BlockCodeLiteral.init(bytecode: slice.code,
+                yield(Markdown.BlockCodeLiteral.init(
+                    utf8: slice.utf8,
+                    code: slice.code,
                     location: slice.location(in: snippet.id)))
             }
         }

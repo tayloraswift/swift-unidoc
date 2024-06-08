@@ -6,6 +6,7 @@ import MarkdownPluginSwift
 import MarkdownRendering
 @_spi(testable)
 import SymbolGraphBuilder
+import Symbols
 import Testing_
 import HTML
 
@@ -15,15 +16,15 @@ extension Main
     {
         let parser:Markdown.SwiftLanguage
         let source:SSGC.LazyFile
-        let html:[HTML]
+        let slices:[[ExpectedFragment]]
 
         init(parser:Markdown.SwiftLanguage,
             source:SSGC.LazyFile,
-            html:HTML...)
+            slices:[ExpectedFragment]...)
         {
             self.parser = parser
             self.source = source
-            self.html = html
+            self.slices = slices
         }
     }
 }
@@ -37,9 +38,9 @@ extension Main.SnippetHighlightingTest
 
         if  let tests:TestGroup = tests / self.source.name / "Count"
         {
-            tests.expect(slices.count ==? self.html.count)
+            tests.expect(slices.count ==? self.slices.count)
         }
-        for (i, expected):(Int, HTML) in self.html.enumerated()
+        for (i, expected):(Int, [ExpectedFragment]) in self.slices.enumerated()
         {
             guard
             let tests:TestGroup = tests / self.source.name / "\(i)"
@@ -49,8 +50,16 @@ extension Main.SnippetHighlightingTest
             }
             if  slices.indices.contains(i)
             {
-                let html:HTML = .init { $0 += slices[i].code.safe }
-                tests.expect("\(html)" ==? "\(expected)")
+                let slice:Markdown.SnippetSlice<Symbol.USR> = slices[i]
+                let fragments:[ExpectedFragment] = slice.code.map
+                {
+                    .init(
+                        token: .init(decoding: slice.utf8[$0.range], as: Unicode.UTF8.self),
+                        color: $0.color,
+                        usr: $0.usr)
+                }
+
+                tests.expect(fragments ..? expected)
             }
         }
     }

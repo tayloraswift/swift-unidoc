@@ -7,13 +7,18 @@ extension Unidoc
     @frozen public
     enum Outline:Equatable, Sendable
     {
-        case file(line:Int?, Unidoc.Scalar)
         /// An external web link. The string does not contain the URL scheme.
-        case link(https:String, safe:Bool)
-        case path(SymbolGraph.OutlineText, [Unidoc.Scalar])
-        case fallback(text:String)
-        /// A URL fragment, without the hashtag (`#`) prefix.
+        case external(https:String, safe:Bool)
+        /// A same-page link, encoded as a URL fragment without the hashtag (`#`) prefix.
         case fragment(String)
+        /// A broken link, with optional fallback text.
+        case fallback(String?)
+        /// A bare scalar link with no accompanying outline text. The `line` parameter
+        /// is only meaningful when the vertex is a file.
+        case bare(line:Int?, Unidoc.Scalar)
+        /// A vector link with accompanying outline text specifying the visual presentation of
+        /// the link, along with an optional URL fragment.
+        case path(SymbolGraph.OutlineText, [Unidoc.Scalar])
     }
 }
 extension Unidoc.Outline
@@ -27,6 +32,7 @@ extension Unidoc.Outline
         case fragment = "F"
         case display = "T"
         case scalars = "s"
+        case scalar = "r"
     }
 }
 extension Unidoc.Outline:BSONDocumentEncodable
@@ -36,23 +42,31 @@ extension Unidoc.Outline:BSONDocumentEncodable
     {
         switch self
         {
-        case .link(https: let url, let safe):
+        case .external(https: let url, safe: let safe):
             bson[.link_safe] = safe ? true : nil
             bson[.link_url] = url
 
-        case .file(line: let number, let file):
-            bson[.file_line] = number
-            bson[.scalars] = [file]
-
-        case .path(let display, let scalars):
-            bson[.scalars] = scalars
-            bson[.display] = display
-
-        case .fallback(text: let text):
-            bson[.display] = text
-
         case .fragment(let display):
             bson[.fragment] = display
+
+        case .fallback(let text):
+            bson[.display] = text
+
+        case .bare(line: let number, let id):
+            bson[.file_line] = number
+            bson[.scalar] = id
+
+        case .path(let display, let vector):
+            if  vector.count == 1
+            {
+                bson[.scalar] = vector[0]
+            }
+            else
+            {
+                bson[.scalars] = vector
+            }
+
+            bson[.display] = display
         }
     }
 }
@@ -63,31 +77,46 @@ extension Unidoc.Outline:BSONDocumentDecodable
     {
         if  let text:String = try bson[.display]?.decode()
         {
-            switch try bson[.scalars]?.decode(to: [Unidoc.Scalar].self)
+            if  let id:Unidoc.Scalar = try bson[.scalar]?.decode()
             {
-            case let scalars?:  self = .path(SymbolGraph.OutlineText.init(text), scalars)
-            case nil:           self = .fallback(text: text)
+                self = .path(SymbolGraph.OutlineText.init(text), [id])
             }
-        }
-        else if
-            let text:String = try bson[.fragment]?.decode()
-        {
-            self = .fragment(text)
-        }
-        else if
-            let url:String = try bson[.link_url]?.decode()
-        {
-            self = .link(https: url, safe: try bson[.link_safe]?.decode() ?? false)
+            else if
+                let path:[Unidoc.Scalar] = try bson[.scalars]?.decode()
+            {
+                self = .path(SymbolGraph.OutlineText.init(text), path)
+            }
+            else
+            {
+                self = .fallback(text)
+            }
         }
         else
         {
-            let id:Unidoc.Scalar = try bson[.scalars].decode
+            /// Note: need to handle legacy array encoding
+            let id:Unidoc.Scalar? = try bson[.scalar]?.decode() ?? bson[.scalars]?.decode
             {
                 try $0.shape.expect(length: 1)
                 return try $0[0].decode()
             }
-
-            self = .file(line: try bson[.file_line]?.decode(), id)
+            if  let id:Unidoc.Scalar
+            {
+                self = .bare(line: try bson[.file_line]?.decode(), id)
+            }
+            else if
+                let text:String = try bson[.fragment]?.decode()
+            {
+                self = .fragment(text)
+            }
+            else if
+                let url:String = try bson[.link_url]?.decode()
+            {
+                self = .external(https: url, safe: try bson[.link_safe]?.decode() ?? false)
+            }
+            else
+            {
+                self = .fallback(nil)
+            }
         }
     }
 }

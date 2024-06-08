@@ -7,13 +7,13 @@ import MarkdownParsing
 import MarkdownSemantics
 import Signatures
 import Snippets
+import SourceDiagnostics
 import Sources
 import SymbolGraphCompiler
 import SymbolGraphs
 import Symbols
 import UCF
 import Unidoc
-import SourceDiagnostics
 
 extension SSGC
 {
@@ -34,7 +34,7 @@ extension SSGC
         private
         var resources:[[String: Resource]]
         private
-        var snippets:[String: Markdown.Snippet]
+        var snippets:[String: Markdown.Snippet<Symbol.USR>]
         private
         var router:Router
         private
@@ -282,7 +282,7 @@ extension SSGC.Linker
 
     private mutating
     func attach(
-        snippets:[any SSGC.ResourceFile]) throws -> [String: Markdown.Snippet]
+        snippets:[any SSGC.ResourceFile]) throws -> [String: Markdown.Snippet<Symbol.USR>]
     {
         guard
         let swift:Markdown.SwiftLanguage = self.swiftParser
