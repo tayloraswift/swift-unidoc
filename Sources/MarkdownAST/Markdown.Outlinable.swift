@@ -7,6 +7,18 @@ extension Markdown
         case inline     (InlineValue)
     }
 }
+extension Markdown.Outlinable
+{
+    @inlinable public
+    var outlined:Int?
+    {
+        switch self
+        {
+        case .outlined(let reference):  reference
+        case .inline:                   nil
+        }
+    }
+}
 extension Markdown.Outlinable:Equatable where InlineValue:Equatable
 {
 }

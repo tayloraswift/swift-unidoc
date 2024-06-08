@@ -1,5 +1,6 @@
 import MarkdownABI
 import Sources
+import Symbols
 
 extension Markdown
 {
@@ -9,20 +10,24 @@ extension Markdown
     class BlockCodeLiteral:BlockElement
     {
         private
-        let bytecode:Markdown.Bytecode
-        private
         let language:String
-
+        private
+        let utf8:[UInt8]
+        private
+        var code:[Markdown.SnippetFragment<Outlinable<Symbol.USR>>]
         private
         var location:Outlinable<SourceLocation<Int32>>?
 
-        init(bytecode:Markdown.Bytecode,
-            language:String = "swift",
-            location:SourceLocation<Int32>?)
+        private
+        init(language:String,
+            utf8:[UInt8],
+            code:[Markdown.SnippetFragment<Outlinable<Symbol.USR>>],
+            location:Outlinable<SourceLocation<Int32>>?)
         {
-            self.bytecode = bytecode
             self.language = language
-            self.location = location.map(Outlinable.inline(_:))
+            self.utf8 = utf8
+            self.code = code
+            self.location = location
         }
 
         override
@@ -30,7 +35,28 @@ extension Markdown
         {
             binary[.snippet, { $0[.language] = self.language }]
             {
-                $0 += self.bytecode
+                for fragment:Markdown.SnippetFragment<Outlinable<Symbol.USR>> in self.code
+                {
+                    if  let color:Markdown.Bytecode.Context = fragment.color
+                    {
+                        $0[color, { $0[.href] = fragment.usr?.outlined }]
+                        {
+                            $0 += self.utf8[fragment.range]
+                        }
+                    }
+                    else if
+                        let reference:Int = fragment.usr?.outlined
+                    {
+                        $0[.a, { $0[.href] = reference }]
+                        {
+                            $0 += self.utf8[fragment.range]
+                        }
+                    }
+                    else
+                    {
+                        $0 += self.utf8[fragment.range]
+                    }
+                }
             }
             if  case .outlined(let reference) = self.location
             {
@@ -47,7 +73,38 @@ extension Markdown
                 self.location = .outlined(reference)
             }
 
+            for i:Int in self.code.indices
+            {
+                try
+                {
+                    if  case .inline(let usr)? = $0.usr,
+                        let reference:Int = try register(.symbolic(usr))
+                    {
+                        $0.usr = .outlined(reference)
+                    }
+                } (&self.code[i])
+            }
+
             try super.outline(by: register)
         }
+    }
+}
+extension Markdown.BlockCodeLiteral
+{
+    convenience
+    init(language:String = "swift",
+        utf8:[UInt8],
+        code:borrowing [Markdown.SnippetFragment<Symbol.USR>],
+        location:SourceLocation<Int32>?)
+    {
+        self.init(language: language,
+            utf8: utf8,
+            code: code.map
+            {
+                .init(range: $0.range,
+                    color: $0.color,
+                    usr: $0.usr.map(Markdown.Outlinable.inline(_:)))
+            },
+            location: location.map(Markdown.Outlinable.inline(_:)))
     }
 }

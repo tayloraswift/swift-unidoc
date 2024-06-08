@@ -1,5 +1,6 @@
 import MarkdownAST
 import SourceDiagnostics
+import Symbols
 
 extension Markdown
 {
@@ -10,7 +11,7 @@ extension Markdown
         var diagnostics:Diagnostics<Symbolicator>
 
         private
-        let snippets:[String: Snippet]
+        let snippets:[String: Snippet<Symbol.USR>]
 
         private
         var metadata:SemanticMetadata
@@ -25,7 +26,8 @@ extension Markdown
         var `throws`:[BlockElement]
 
         public
-        init(_ diagnostics:consuming Diagnostics<Symbolicator>, snippets:[String: Snippet])
+        init(_ diagnostics:consuming Diagnostics<Symbolicator>,
+            snippets:[String: Snippet<Symbol.USR>])
         {
             self.diagnostics = diagnostics
             self.snippets = snippets

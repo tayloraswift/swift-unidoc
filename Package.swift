@@ -103,7 +103,7 @@ let package:Package = .init(
 
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
-        .package(url: "https://github.com/apple/swift-collections.git", .upToNextMinor(
+        .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(
             from: "1.1.0")),
 
         .package(url: "https://github.com/apple/swift-nio",
@@ -262,6 +262,7 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "MarkdownABI"),
                 .target(name: "Sources"),
+                .target(name: "Symbols"),
             ]),
 
         .target(name: "MarkdownDisplay",

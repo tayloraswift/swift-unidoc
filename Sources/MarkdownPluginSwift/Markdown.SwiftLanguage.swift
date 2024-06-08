@@ -32,7 +32,11 @@ extension Markdown.SwiftLanguage
 {
     public
     func parse(snippet utf8:[UInt8],
-        from indexID:String? = nil) -> (caption:String, slices:[Markdown.SnippetSlice])
+        from indexID:String? = nil) ->
+    (
+        caption:String,
+        slices:[Markdown.SnippetSlice<Symbol.USR>]
+    )
     {
         let links:[Int: IndexMarker]
 
@@ -107,24 +111,19 @@ extension Markdown.SwiftLanguage
         let slices:[SnippetParser.Slice] = parser.finish(at: parsed.endPosition, in: utf8)
         var cursor:SyntaxClassificationCursor = .init(parsed.classifications, links: links)
 
-        let rendered:[Markdown.SnippetSlice] = slices.map
+        let rendered:[Markdown.SnippetSlice<Symbol.USR>] = slices.map
         {
-            (slice:SnippetParser.Slice) in
+            var code:[Markdown.SnippetFragment<Symbol.USR>] = []
 
-            let bytecode:Markdown.Bytecode = .init
+            for var range:Range<Int> in $0.ranges
             {
-                (output:inout Markdown.BinaryEncoder) in
-
-                for var range:Range<Int> in slice.ranges
+                cursor.step(through: &range)
                 {
-                    cursor.step(through: &range)
-                    {
-                        output[highlight: $1.color] = utf8[$0]
-                    }
+                    code.append(.init(range: $0, color: $1.color, usr: $1.usr))
                 }
             }
 
-            return .init(id: slice.id, line: slice.line, code: bytecode)
+            return .init(id: $0.id, line: $0.line, utf8: utf8, code: code)
         }
 
         return (caption, rendered)

@@ -8,6 +8,7 @@ import SourceDiagnostics
 import Sources
 import SymbolGraphCompiler
 import SymbolGraphs
+import Symbols
 import UCF
 
 extension SSGC
@@ -132,6 +133,9 @@ extension SSGC.Outliner
                 source: link.source,
                 string: String.init(link.string[link.string.index(after: i)...]))
 
+        case .symbolic(let usr):
+            return self.outline(symbol: usr)
+
         case .location(let location):
             //  This is almost a no-op, except we can optimize away duplicated locations.
             return self.cache.add(outline: .location(location))
@@ -216,6 +220,20 @@ extension SSGC.Outliner
 
             return .unresolved(doc: link.string, location: link.source.start)
         }
+    }
+
+    private mutating
+    func outline(symbol usr:Symbol.USR) -> Int?
+    {
+        let symbol:Symbol.Decl
+        switch usr
+        {
+        case .scalar(let scalar):   symbol = scalar
+        case .vector(let vector):   symbol = vector.feature
+        case .block:                return nil
+        }
+
+        return self.cache.add(outline: .symbol(self.resolver.tables.intern(symbol)))
     }
 }
 extension SSGC.Outliner

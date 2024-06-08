@@ -5,6 +5,7 @@ import MarkdownParsing
 import MarkdownSemantics
 import Testing_
 import SourceDiagnostics
+import Symbols
 
 @_spi(testable)
 import SymbolGraphLinker
@@ -16,7 +17,7 @@ extension MarkdownTestBattery
 {
     static
     func run(tests:TestGroup,
-        snippets:[String: Markdown.Snippet] = [:],
+        snippets:[String: Markdown.Snippet<Symbol.USR>] = [:],
         markdown:Markdown.Source,
         expected:String,
         topics:[Int] = [])

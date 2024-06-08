@@ -98,44 +98,48 @@ enum Main:TestMain, TestBattery
 
                 let test:SnippetHighlightingTest = .init(parser: parser,
                     source: snippet,
-                    html: .init
-                    {
-                        $0[.span] { $0.class = "xk" } = "let"
-                        $0 += " _ = "
-                        $0[.span] { $0.class = "xt" } = "Int"
-                        $0 += "()\n"
-                    },
-                    .init
-                    {
-                        $0[.span] { $0.class = "xk" } = "let"
-                        $0 += " _:"
-                        $0[.span] { $0.class = "xt" } = "String"
-                        $0 += " = "
-                        $0[.span] { $0.class = "xs" } = "\""
-                        $0 += "\\("
-                        $0[.span] { $0.class = "xn" } = "1959"
-                        $0 += ")"
-                        $0[.span] { $0.class = "xs" } = "\""
-                        $0 += "\n"
-                    },
-                    .init
-                    {
-                        $0[.span] { $0.class = "xk" } = "let"
-                        $0 += " _ = "
-                        $0[.span] { $0.class = "xv" } = "dictionary"
-                        $0 += "["
-                        $0[.span] { $0.class = "xs" } = "\"key\""
-                        $0 += "]\n"
-                    },
-                    .init
-                    {
-                        $0[.span] { $0.class = "xk" } = "let"
-                        $0 += " _:"
-                        $0[.span] { $0.class = "xt" } = "Key"
-                        $0 += " = "
-                        $0[.span] { $0.class = "xs" } = "\"key\""
-                        $0 += "\n"
-                    })
+                    slices: [
+                        .init(token: "let", color: .keyword),
+                        .init(token: " _ = "),
+                        .init(token: "Int",
+                            color: .type,
+                            usr: .init("s:Si")),
+                        .init(token: "()\n"),
+                    ],
+                    [
+                        .init(token: "let", color: .keyword),
+                        .init(token: " _:"),
+                        .init(token: "String",
+                            color: .type,
+                            usr: .init("s:SS")),
+                        .init(token: " = "),
+                        .init(token: "\"",
+                            color: .literalString,
+                            usr: .init("s:SS19stringInterpolationSSs013DefaultStringB0V_tcfc")),
+                        .init(token: "\\("),
+                        .init(token: "1959", color: .literalNumber),
+                        .init(token: ")"),
+                        .init(token: "\"", color: .literalString),
+                        .init(token: "\n"),
+                    ],
+                    [
+                        .init(token: "let", color: .keyword),
+                        .init(token: " _ = "),
+                        .init(token: "dictionary", color: .identifier),
+                        .init(token: "[",
+                            color: nil,
+                            usr: .init("s:SDyq_Sgxcip")),
+                        .init(token: "\"key\"", color: .literalString),
+                        .init(token: "]\n"),
+                    ],
+                    [
+                        .init(token: "let", color: .keyword),
+                        .init(token: " _:"),
+                        .init(token: "Key", color: .type),
+                        .init(token: " = "),
+                        .init(token: "\"key\"", color: .literalString),
+                        .init(token: "\n"),
+                    ])
 
                 try test.run(in: tests)
 

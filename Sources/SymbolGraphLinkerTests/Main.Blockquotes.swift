@@ -1,5 +1,6 @@
 import MarkdownABI
 import MarkdownPluginSwift
+import Symbols
 import Testing_
 
 extension Main
@@ -114,12 +115,12 @@ extension Main.Blockquotes:MarkdownTestBattery
             let snippet:(caption:String, slices:[Markdown.SnippetSlice]) = swiftParser.parse(
                 snippet: [UInt8].init(swiftSource.utf8))
 
-            let snippets:[String: Markdown.Snippet] =
+            let snippets:[String: Markdown.Snippet<Symbol.USR>] =
             [
                 "Example": .init(id: 0,
-                caption: snippet.caption,
-                slices: snippet.slices,
-                using: markdownParser)
+                    caption: snippet.caption,
+                    slices: snippet.slices,
+                    using: markdownParser)
             ]
 
             Self.run(tests: tests,
