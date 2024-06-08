@@ -32,6 +32,30 @@ enum Main:TestMain, TestBattery
     static
     func run(tests:TestGroup)
     {
+        if  let tests:TestGroup = tests / "Links" / "External"
+        {
+            self.run(tests: tests,
+                expecting: """
+                <a class='xv' href='https://swiftinit.org/x' \
+                target='_blank' rel='external nofollow noopener ugc'>x</a>
+                """,
+                plain: "x")
+            {
+                $0[.identifier] { $0[.external] = "https://swiftinit.org/x" } = "x"
+            }
+        }
+        if  let tests:TestGroup = tests / "Links" / "Safe"
+        {
+            self.run(tests: tests,
+                expecting: """
+                <a class='xv' href='https://swiftinit.org/x' \
+                target='_blank' rel='external'>x</a>
+                """,
+                plain: "x")
+            {
+                $0[.identifier] { $0[.safelink] = "https://swiftinit.org/x" } = "x"
+            }
+        }
         if  let tests:TestGroup = tests / "Pre" / "Transparency"
         {
             //  The markdown VM cannot parse inline HTML, so this will generate no plain text.
