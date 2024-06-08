@@ -67,12 +67,12 @@ extension Markdown.TreeContext.AttributeList
             \(HTML.Attribute.Rel.noopener) \
             \(HTML.Attribute.Rel.google_ugc)
             """))
-            self.others.append((.href, value))
+            self.href = value
 
         case .safelink:
             self.others.append((.target, "_blank"))
             self.others.append((.rel, "\(HTML.Attribute.Rel.external)"))
-            self.others.append((.href, value))
+            self.href = value
         }
     }
 
