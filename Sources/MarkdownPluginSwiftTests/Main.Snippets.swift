@@ -44,6 +44,65 @@ extension Main.Snippets:TestBattery
 
                 """)
         }
+        if  let tests:TestGroup = tests / "NoCaptionButHidden"
+        {
+            Self.run(tests: tests,
+                snippet:
+                """
+                //  snippet.hide
+                import Barbie
+
+                //  snippet.show
+                print("Hi Barbie!")
+
+                """,
+                caption:
+                """
+                """,
+                slices:
+                """
+                print("Hi Barbie!")
+
+                """)
+        }
+        if  let tests:TestGroup = tests / "NoCaptionButSliced"
+        {
+            Self.run(tests: tests,
+                snippet:
+                """
+                //  snippet.HI_BARBIE
+                print("Hi Barbie!")
+
+                """,
+                caption:
+                """
+                """,
+                slices:
+                """
+                print("Hi Barbie!")
+
+                """)
+        }
+        if  let tests:TestGroup = tests / "NoCaptionButSlicedAndTrimmed"
+        {
+            Self.run(tests: tests,
+                snippet:
+                """
+                //  snippet.HI_BARBIE
+
+                print("Hi Barbie!")
+
+                //  snippet.end
+
+                """,
+                caption:
+                """
+                """,
+                slices:
+                """
+                print("Hi Barbie!")
+                """)
+        }
         if  let tests:TestGroup = tests / "WithCaption"
         {
             Self.run(tests: tests,
@@ -57,6 +116,7 @@ extension Main.Snippets:TestBattery
                 caption:
                 """
                 Here’s how to say ‘hi’ to Barbie.
+
                 """,
                 slices:
                 """
@@ -81,6 +141,7 @@ extension Main.Snippets:TestBattery
                 Here’s how to say ‘hi’ to Barbie.
 
                 This is a multi-line comment.
+
                 """,
                 slices:
                 """
@@ -101,6 +162,7 @@ extension Main.Snippets:TestBattery
                 caption:
                 """
                 Here’s how to say ‘hi’ to Barbie.
+
                 """,
                 slices:
                 """
@@ -130,14 +192,14 @@ extension Main.Snippets:TestBattery
                 """,
                 caption:
                 """
-                Here’s how to say ‘hi’ to Barbie.
+                Here’s how to say ‘hi’ to Barbie and Skipper.
+
                 """,
                 slices: // This should preserve the empty line before `Hi Skipper!`.
                 """
                 // print("Hi Barbie!")
 
                 // print("Hi Skipper!")
-
                 """)
         }
         if  let tests:TestGroup = tests / "Indented"
@@ -162,20 +224,19 @@ extension Main.Snippets:TestBattery
                 caption:
                 """
                 Here’s how to say ‘hi’ to Barbie.
+
                 """,
                 slices:
                 """
                 @main
                 enum Main
                 {
-
                 """,
                 """
                 static func main()
                 {
                     print("Hi Barbie!")
                 }
-
                 """)
         }
         if  let tests:TestGroup = tests / "IndentedNonContiguous"
@@ -206,16 +267,14 @@ extension Main.Snippets:TestBattery
                 caption:
                 """
                 Here’s how to say ‘hi’ to Barbie.
+
                 """,
                 slices:
-                """
-                """,
                 """
                 static func main()
                 {
                     print("Hi Barbie!")
                 }
-
                 """)
         }
         if  let tests:TestGroup = tests / "AnonymousNonContiguous"
@@ -247,6 +306,7 @@ extension Main.Snippets:TestBattery
                 caption:
                 """
                 Here’s how to say ‘hi’ to Barbie.
+
                 """,
                 slices:
                 """
@@ -254,7 +314,41 @@ extension Main.Snippets:TestBattery
                 {
                     print("Hi Barbie!")
                 }
+                """)
+        }
+        if  let tests:TestGroup = tests / "AnonymousExplicitShow"
+        {
+            Self.run(tests: tests,
+                snippet:
+                """
+                //  Here’s how to say ‘hi’ to Barbie.
+                @main
+                enum Main
+                {
+                    // snippet.show
+                    static func main()
+                    {
+                        print("Hi Barbie!")
 
+                        print("Hi Ken!")
+                    }
+                    // snippet.end
+                }
+
+                """,
+                caption:
+                """
+                Here’s how to say ‘hi’ to Barbie.
+
+                """,
+                slices:
+                """
+                static func main()
+                {
+                    print("Hi Barbie!")
+
+                    print("Hi Ken!")
+                }
                 """)
         }
         if  let tests:TestGroup = tests / "AnonymousCollapseWhitespace"
@@ -272,6 +366,7 @@ extension Main.Snippets:TestBattery
                 caption:
                 """
                 Here’s how to say ‘hi’ to Barbie.
+
                 """,
                 slices:
                 """
@@ -295,6 +390,7 @@ extension Main.Snippets:TestBattery
                 caption:
                 """
                 Here’s how to say ‘hi’ to Barbie.
+
                 """,
                 slices:
                 """
@@ -326,10 +422,9 @@ extension Main.Snippets:TestBattery
                 caption:
                 """
                 Here’s how to say ‘hi’ to Barbie.
+
                 """,
                 slices:
-                """
-                """,
                 """
                 """)
         }
@@ -338,7 +433,10 @@ extension Main.Snippets:TestBattery
 extension Main.Snippets
 {
     private static
-    func run(tests:TestGroup, snippet:String, caption:String, slices expected:String...)
+    func run(tests:TestGroup,
+        snippet:String,
+        caption captionExpectation:String,
+        slices sliceExpectations:String...)
     {
         let swift:Markdown.SwiftLanguage = .swift
         let (caption, slices):(String, [Markdown.SnippetSlice]) = swift.parse(
@@ -346,13 +444,13 @@ extension Main.Snippets
 
         if  let tests:TestGroup = tests / "Caption"
         {
-            tests.expect(caption ==? caption)
+            tests.expect(caption ==? captionExpectation)
         }
         if  let tests:TestGroup = tests / "Count"
         {
-            tests.expect(slices.count ==? expected.count)
+            tests.expect(slices.count ==? sliceExpectations.count)
         }
-        for (i, expected):(Int, String) in expected.enumerated()
+        for (i, sliceExpectation):(Int, String) in sliceExpectations.enumerated()
         {
             guard
             let tests:TestGroup = tests / "\(i)"
@@ -362,7 +460,7 @@ extension Main.Snippets
             }
             if  slices.indices.contains(i)
             {
-                tests.expect("\(slices[i].text)" ==? expected)
+                tests.expect("\(slices[i].text)" ==? sliceExpectation)
             }
         }
     }

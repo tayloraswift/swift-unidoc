@@ -104,7 +104,7 @@ enum Main:TestMain, TestBattery
                         .init(token: "Int",
                             color: .type,
                             usr: .init("s:Si")),
-                        .init(token: "()\n"),
+                        .init(token: "()"),
                     ],
                     [
                         .init(token: "let", color: .keyword),
@@ -119,8 +119,7 @@ enum Main:TestMain, TestBattery
                         .init(token: "\\("),
                         .init(token: "1959", color: .literalNumber),
                         .init(token: ")"),
-                        .init(token: "\"", color: .literalString),
-                        .init(token: "\n"),
+                        .init(token: "\"", color: .literalString)
                     ],
                     [
                         .init(token: "let", color: .keyword),
@@ -130,7 +129,7 @@ enum Main:TestMain, TestBattery
                             color: nil,
                             usr: .init("s:SDyq_Sgxcip")),
                         .init(token: "\"key\"", color: .literalString),
-                        .init(token: "]\n"),
+                        .init(token: "]"),
                     ],
                     [
                         .init(token: "let", color: .keyword),
@@ -138,7 +137,6 @@ enum Main:TestMain, TestBattery
                         .init(token: "Key", color: .type),
                         .init(token: " = "),
                         .init(token: "\"key\"", color: .literalString),
-                        .init(token: "\n"),
                     ])
 
                 try test.run(in: tests)

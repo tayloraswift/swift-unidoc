@@ -57,4 +57,20 @@ extension SnippetParser.Slice
             self.ranges.append(next)
         }
     }
+
+    consuming
+    func normalized() -> Self?
+    {
+        self.ranges.removeAll(where: \.isEmpty)
+
+        if  self.id == "",
+            self.ranges.isEmpty
+        {
+            return nil
+        }
+        else
+        {
+            return self
+        }
+    }
 }
