@@ -57,58 +57,17 @@ extension Markdown.SwiftLanguage
             Parser.parse(source: $0)
         }
 
-        var start:AbsolutePosition = parsed.position
-        var caption:String = ""
-        lines:
-        for piece:TriviaPiece in parsed.leadingTrivia
-        {
-            let line:String
-            let skip:Int
-            switch piece
-            {
-            case .lineComment(let text):
-                start += piece.sourceLength
-                line = text
-                skip = 2
-
-            case .docLineComment(let text):
-                start += piece.sourceLength
-                line = text
-                skip = 3
-
-            case .newlines(1), .carriageReturnLineFeeds(1):
-                start += piece.sourceLength
-                continue
-
-            case .newlines, .carriageReturnLineFeeds:
-                start += piece.sourceLength
-                break lines
-
-            default:
-                break lines
-            }
-
-            guard
-            let i:String.Index = line.index(line.startIndex,
-                offsetBy: skip,
-                limitedBy: line.endIndex)
-            else
-            {
-                fatalError("Encountered a line comment with no leading slashes!")
-            }
-
-            caption += line[i...].drop(while: \.isWhitespace)
-            caption.append("\n")
-        }
-
         var parser:SnippetParser = .init(sourcemap: .init(fileName: "", tree: parsed),
-            start: start)
+            start: parsed.position)
         for token:TokenSyntax in parsed.tokens(viewMode: .sourceAccurate)
         {
             parser.visit(token: token)
         }
 
-        let slices:[SnippetParser.Slice] = parser.finish(at: parsed.endPosition, in: utf8)
+        let (caption, slices):(String, [SnippetParser.Slice]) = parser.finish(
+            at: parsed.endPosition,
+            in: utf8)
+
         var cursor:SyntaxClassificationCursor = .init(parsed.classifications, links: links)
 
         let rendered:[Markdown.SnippetSlice<Symbol.USR>] = slices.map
