@@ -1,28 +1,34 @@
 import MarkdownABI
 import MarkdownAST
 import Snippets
+import Symbols
 import OrderedCollections
 
 extension Markdown
 {
     @frozen public
-    struct Snippet<USR>
+    struct Snippet
     {
         public
         let id:Int32
 
+        private
+        let captionParser:any Markdown.ParsingEngine
+        private
+        let captionSource:Markdown.Source?
+
         public
-        let caption:[Markdown.BlockElement]
-        public
-        let slices:OrderedDictionary<String, SnippetSlice<USR>>
+        let slices:OrderedDictionary<String, SnippetSlice<Symbol.USR>>
 
         private
         init(id:Int32,
-            caption:[Markdown.BlockElement],
-            slices:OrderedDictionary<String, SnippetSlice<USR>>)
+            captionParser:any Markdown.ParsingEngine,
+            captionSource:Markdown.Source?,
+            slices:OrderedDictionary<String, SnippetSlice<Symbol.USR>>)
         {
             self.id = id
-            self.caption = caption
+            self.captionParser = captionParser
+            self.captionSource = captionSource
             self.slices = slices
         }
     }
@@ -31,25 +37,31 @@ extension Markdown.Snippet
 {
     public
     init(id:Int32,
+        captionParser:any Markdown.ParsingEngine,
         caption:String,
-        slices:[Markdown.SnippetSlice<USR>],
-        using parser:borrowing some Markdown.ParsingEngine)
+        slices:[Markdown.SnippetSlice<Symbol.USR>])
     {
-        let index:OrderedDictionary<String, Markdown.SnippetSlice<USR>> = slices.reduce(
+        let index:OrderedDictionary<String, Markdown.SnippetSlice<Symbol.USR>> = slices.reduce(
             into: [:])
         {
             $0[$1.id] = $1
         }
 
-        if  caption.allSatisfy(\.isWhitespace)
-        {
-            self.init(id: id, caption: [], slices: index)
-            return
-        }
+        self.init(id: id,
+            captionParser: captionParser,
+            captionSource: caption.allSatisfy(\.isWhitespace) ? nil : .init(file: id,
+                text: caption),
+            slices: index)
+    }
 
+    /// Parses the Snippet’s caption and returns the resulting block elements.
+    ///
+    /// Snippets must be re-parsed every time they are inlined into a document, to account for
+    /// the possibility that the same caption may be embedded multiple times.
+    func caption() -> [Markdown.BlockElement]
+    {
         //  We don’t need to do anything special to the caption, because flavor processing will
         //  be performed after it is inlined into a document.
-        let caption:[Markdown.BlockElement] = parser.parse(.init(file: id, text: caption))
-        self.init(id: id, caption: caption, slices: index)
+        self.captionSource.map(self.captionParser.parse(_:)) ?? []
     }
 }

@@ -17,7 +17,7 @@ extension MarkdownTestBattery
 {
     static
     func run(tests:TestGroup,
-        snippets:[String: Markdown.Snippet<Symbol.USR>] = [:],
+        snippets:[String: Markdown.Snippet] = [:],
         markdown:Markdown.Source,
         expected:String,
         topics:[Int] = [])

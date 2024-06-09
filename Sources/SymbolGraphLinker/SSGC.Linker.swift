@@ -34,7 +34,7 @@ extension SSGC
         private
         var resources:[[String: Resource]]
         private
-        var snippets:[String: Markdown.Snippet<Symbol.USR>]
+        var snippets:[String: Markdown.Snippet]
         private
         var router:Router
         private
@@ -282,7 +282,7 @@ extension SSGC.Linker
 
     private mutating
     func attach(
-        snippets:[any SSGC.ResourceFile]) throws -> [String: Markdown.Snippet<Symbol.USR>]
+        snippets:[any SSGC.ResourceFile]) throws -> [String: Markdown.Snippet]
     {
         guard
         let swift:Markdown.SwiftLanguage = self.swiftParser
@@ -311,9 +311,9 @@ extension SSGC.Linker
                 from: indexID)
 
             $0[$1.name] = .init(id: self.tables.intern($1.path),
+                captionParser: self.doccommentParser,
                 caption: snippet.caption,
-                slices: snippet.slices,
-                using: self.doccommentParser)
+                slices: snippet.slices)
         }
     }
 

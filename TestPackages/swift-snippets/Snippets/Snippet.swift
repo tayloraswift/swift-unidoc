@@ -1,3 +1,6 @@
+/// This is a caption with a codelink reference: ``CustomType``
+///
+/// Here is a reference to an out-of-package type: ``Int``
 import Snippets
 
 enum Enum
