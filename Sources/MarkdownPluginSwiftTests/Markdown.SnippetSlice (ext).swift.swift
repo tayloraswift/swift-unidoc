@@ -1,5 +1,16 @@
 import MarkdownABI
+import Snippets
 
+extension Markdown.SnippetSlice:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        """
+        SnippetSlice(id: '\(self.id)', text: '\(self.text)')
+        """
+    }
+}
 extension Markdown.SnippetSlice
 {
     var text:String

@@ -7,10 +7,11 @@ extension SnippetParser
     struct SliceBounds
     {
         let id:String
-        var marker:(line:Int, indent:Int)
+
+        var marker:(line:Int, indent:Int)?
         var ranges:[Range<AbsolutePosition>]
 
-        init(id:String, marker:(line:Int, indent:Int))
+        init(id:String, marker:(line:Int, indent:Int)?)
         {
             self.id = id
             self.marker = marker
@@ -20,7 +21,7 @@ extension SnippetParser
 }
 extension SnippetParser.SliceBounds
 {
-    func viewbox(in utf8:[UInt8]) -> SnippetParser.Slice
+    func viewbox(in utf8:[UInt8]) -> SnippetParser.Slice?
     {
         //  We need to do two passes over the source ranges, as indentation is computed across
         //  the entire slice, and not just one subslice.
@@ -80,7 +81,7 @@ extension SnippetParser.SliceBounds
         }
 
         //  Compute maximum removable indentation.
-        var indent:Int = self.marker.indent
+        var indent:Int = self.marker?.indent ?? 0
         for range:Range<Int> in ranges
         {
             /// We initialize this to 0 and not nil because we assume the range starts at the
@@ -115,45 +116,48 @@ extension SnippetParser.SliceBounds
             }
         }
 
+        var slice:SnippetParser.Slice
 
-        if  self.marker.indent == 0
+        if  indent == 0
         {
-            return .init(id: self.id, line: self.marker.line, ranges: ranges)
+            slice = .init(id: self.id, line: self.marker?.line ?? 0, ranges: ranges)
         }
-
-        var slice:SnippetParser.Slice = .init(id: self.id, line: self.marker.line, ranges: [])
+        else
+        {
+            slice = .init(id: self.id, line: self.marker?.line ?? 0, ranges: [])
             slice.ranges.reserveCapacity(ranges.count)
 
-        for range:Range<Int> in ranges
-        {
-            slice.ranges.append(range)
-
-            var start:Int? = range.lowerBound
-            for j:Int in range
+            for range:Range<Int> in ranges
             {
-                switch (utf8[j], start)
+                slice.ranges.append(range)
+
+                var start:Int? = range.lowerBound
+                for j:Int in range
                 {
-                //  '\n'
-                case    (0x0A, _):
-                    start = j + 1
+                    switch (utf8[j], start)
+                    {
+                    //  '\n'
+                    case    (0x0A, _):
+                        start = j + 1
 
-                //  '\r'
-                //  '\t', ' '
-                case    (0x0D, _),
-                        (0x09, _),
-                        (0x20, _):
-                    continue
+                    //  '\r'
+                    //  '\t', ' '
+                    case    (0x0D, _),
+                            (0x09, _),
+                            (0x20, _):
+                        continue
 
-                case    (_, let i?):
-                    slice.punch(hole: (i ..< j).prefix(self.marker.indent))
-                    start = nil
+                    case    (_, let i?):
+                        slice.punch(hole: (i ..< j).prefix(indent))
+                        start = nil
 
-                case    (_, nil):
-                    continue
+                    case    (_, nil):
+                        continue
+                    }
                 }
             }
         }
 
-        return slice
+        return slice.normalized()
     }
 }

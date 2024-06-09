@@ -7,12 +7,11 @@ extension SnippetParser
         let statement:Statement
         /// The number of leading spaces before the slice marker.
         let indent:Int
-        /// The UTF-8 offset of the (first) newline before the slice marker, or the beginning
-        /// of the file if the control comment is at the beginning of the file.
-        let before:AbsolutePosition
-        /// The UTF-8 offset of the newline after the slice marker, assuming it exists.
-        let after:AbsolutePosition
         /// The line number (0-indexed) of the slice marker.
         let line:Int
+        /// The range of the newlines before the slice marker, which may be empty if the control
+        /// comment is at the beginning of the file.
+        let gap:Range<AbsolutePosition>
+        let end:AbsolutePosition
     }
 }
