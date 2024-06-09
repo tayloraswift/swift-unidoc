@@ -5,15 +5,33 @@ struct SnippetParser
     private
     let sourcemap:SourceLocationConverter
 
-    var complete:[SliceBounds]
-    var current:SliceFetus?
+    private
+    var captionText:String
+    private
+    var captionLine:Bool
 
-    init(sourcemap:SourceLocationConverter, start position:AbsolutePosition)
+    private
+    var complete:[SliceBounds]
+
+    /// The start of the current subslice. This is nil if the current slice is hidden or
+    /// terminated.
+    private
+    var subslice:AbsolutePosition?
+    private
+    var current:SliceBounds
+    private
+    var currentLine:(indent:Int, gap:Range<AbsolutePosition>)?
+
+    init(sourcemap:SourceLocationConverter, start:AbsolutePosition)
     {
         self.sourcemap = sourcemap
 
+        self.captionText = ""
+        self.captionLine = true
         self.complete = []
-        self.current = .anonymous(start: position)
+        self.subslice = start
+        self.current = .init(id: "", marker: nil)
+        self.currentLine = (indent: 0, gap: start ..< start)
     }
 }
 extension SnippetParser
@@ -22,155 +40,154 @@ extension SnippetParser
     func visit(token:TokenSyntax)
     {
         self.visit(trivia: token.leadingTrivia, at: token.position)
+        self.captionLine = false
+        self.currentLine = nil
         self.visit(trivia: token.trailingTrivia, at: token.endPositionBeforeTrailingTrivia)
     }
 
     private mutating
     func visit(trivia:Trivia, at position:AbsolutePosition)
     {
-        var newline:(indent:Int, end:AbsolutePosition)? = nil
-        var current:AbsolutePosition = position
+        var start:AbsolutePosition = position
         for piece:TriviaPiece in trivia
         {
-            let range:Range<AbsolutePosition> = current ..< current + piece.sourceLength
+            let range:Range<AbsolutePosition> = start ..< start + piece.sourceLength
 
             defer
             {
-                current = range.upperBound
+                start = range.upperBound
             }
 
-            let line:String
+            let token:String
             let skip:Int
 
             switch piece
             {
-            case .newlines:
-                newline = (indent: 0, end: min(current.advanced(by: 1), range.upperBound))
+            case .newlines(let count), .carriageReturnLineFeeds(let count):
+                self.currentLine = (indent: 0, gap: range)
+                self.captionLine = self.captionLine && count == 1
                 continue
 
-            case .carriageReturnLineFeeds:
-                newline = (indent: 0, end: min(current.advanced(by: 2), range.upperBound))
-                continue
-
-            case .spaces(let count):
+            case .spaces(let count), .tabs(let count):
                 //  We only care about leading spaces.
-                if  let indent:Int = newline?.indent
-                {
-                    newline?.indent = indent + count
-                }
+                self.currentLine?.indent += count
                 continue
 
-            case .lineComment(let text):
-                line = text
+            case .lineComment(let content):
+                token = content
                 skip = 2
 
-            case .docLineComment(let text):
-                line = text
+            case .docLineComment(let content):
+                token = content
                 skip = 3
 
             default:
-                newline = nil
+                self.captionLine = false
+                self.currentLine = nil
                 continue
             }
 
             guard
-            let (indent, before):(Int, AbsolutePosition) = newline
+            let currentLine:(indent:Int, gap:Range<AbsolutePosition>) = self.currentLine
             else
             {
                 //  We only care about line comments at the beginning of a line.
                 continue
             }
 
-            if  let statement:SliceMarker.Statement = .init(lineComment: line, skip: skip)
-            {
-                let location:SourceLocation = self.sourcemap.location(for: current)
-                //  We know that line comments always extend to the end of the line.
-                //  Therefore, `range.upperBound` “always” points to a newline, and the start of
-                //  the next line is one after the index after the end of the comment.
-                //
-                //  This math of course is invalid if the source file is missing a final
-                //  newline. So code that uses these indices **must** clamp them to the bounds
-                //  of the source text.
-                self.push(marker: .init(statement: statement,
-                    indent: indent,
-                    before: before,
-                    after: range.upperBound.advanced(by: 1),
-                    line: location.line - 1))
-            }
+            self.currentLine = nil
+
+            guard
+            let i:String.Index = token.index(token.startIndex,
+                offsetBy: skip,
+                limitedBy: token.endIndex)
             else
             {
-                newline = nil
+                fatalError("Encountered a line comment with no leading slashes!")
+            }
+
+            let trimmedLine:Substring = token[i...].drop(while: \.isWhitespace)
+
+            if  let statement:SliceMarker.Statement = .init(trimmedLine: trimmedLine)
+            {
+                let grid:SourceLocation = self.sourcemap.location(
+                    for: range.lowerBound)
+
+                self.push(marker: .init(statement: statement,
+                    indent: currentLine.indent,
+                    line: grid.line - 1,
+                    gap: currentLine.gap,
+                    end: range.upperBound))
+
+                self.captionLine = false
+            }
+            else if self.captionLine
+            {
+                self.captionText += trimmedLine
+                self.captionText.append("\n")
+
+                self.subslice = range.upperBound
             }
         }
     }
 
-    private mutating
+    mutating
     func push(marker:SliceMarker)
     {
         switch marker.statement
         {
-        case .end:
-            if  let current:SliceFetus = self.current
+        case .hide, .end:
+            if  let subslice:AbsolutePosition = self.subslice
             {
-                self.current = nil
-                self.complete.append(current.end(at: marker.before))
-            }
-            else
-            {
-                //  TODO: Emit a warning.
-            }
-
-        case .hide:
-            if  case nil = self.current?.hide(at: marker.before)
-            {
-                //  TODO: Emit a warning.
+                self.current.ranges.append(subslice ..< marker.gap.lowerBound)
+                self.subslice = nil
             }
 
         case .show:
-            if  case nil = self.current?.show(with: marker)
+            if  case nil = self.current.marker
             {
-                //  TODO: Emit a warning.
+                self.current.marker = (line: marker.line, indent: marker.indent)
+                self.subslice = marker.end
+            }
+            else if case nil = self.subslice
+            {
+                self.subslice = marker.end
             }
 
         case .slice(let id):
-            appending:
-            if  let current:SliceFetus = self.current
+            if  let subslice:AbsolutePosition = self.subslice
             {
-                self.current = nil
-                let slice:SliceBounds = current.end(at: marker.before)
-
-                if  slice.id == "",
-                    slice.ranges.isEmpty
-                {
-                    //  We don't want to emit an empty snippet.
-                    break appending
-                }
-
-                self.complete.append(slice)
+                self.current.ranges.append(subslice ..< marker.gap.lowerBound)
             }
 
-            self.current = .named(id: id, marker: marker)
+            defer
+            {
+                self.subslice = marker.end
+                self.current = .init(id: id, marker: (line: marker.line, indent: marker.indent))
+            }
+
+            self.complete.append(self.current)
         }
     }
 }
 extension SnippetParser
 {
     consuming
-    func finish(at position:AbsolutePosition, in utf8:[UInt8]) -> [Slice]
+    func finish(at position:AbsolutePosition, in utf8:[UInt8]) -> (String, [Slice])
     {
-        let bounds:[SnippetParser.SliceBounds] = self.finish(at: position)
-        return bounds.map { $0.viewbox(in: utf8) }
+        let (caption, bounds):(String, [SnippetParser.SliceBounds]) = self.finish(at: position)
+        return (caption, bounds.compactMap { $0.viewbox(in: utf8) })
     }
 
     private consuming
-    func finish(at position:AbsolutePosition) -> [SliceBounds]
+    func finish(at position:AbsolutePosition) -> (String, [SliceBounds])
     {
-        if  let current:SliceFetus = self.current
+        if  let subslice:AbsolutePosition = self.subslice
         {
-            self.current = nil
-            self.complete.append(current.end(at: position))
+            self.current.ranges.append(subslice ..< position)
         }
 
-        return complete
+        self.complete.append(self.current)
+        return (self.captionText, complete)
     }
 }

@@ -13,3 +13,4 @@ struct Key:ExpressibleByStringLiteral
 }
 /// snippet.STRING_LITERAL_EXPRESSIBLE
 let _:Key = "key"
+/// snippet.end

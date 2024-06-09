@@ -11,30 +11,19 @@ extension SnippetParser.SliceMarker
 extension SnippetParser.SliceMarker.Statement
 {
     private
-    init(_ text:Substring)
+    init(word:Substring)
     {
-        switch text
+        switch word
         {
         case "end":     self = .end
         case "hide":    self = .hide
         case "show":    self = .show
-        default:        self = .slice(String.init(text))
+        default:        self = .slice(String.init(word))
         }
     }
 
-    init?(lineComment text:borrowing String, skip:Int)
+    init?(trimmedLine text:borrowing Substring)
     {
-        guard
-        let i:String.Index = text.index(text.startIndex,
-            offsetBy: skip,
-            limitedBy: text.endIndex)
-        else
-        {
-            fatalError("Encountered a line comment with no leading slashes!")
-        }
-
-        let text:Substring = text[i...].drop(while: \.isWhitespace)
-
         guard
         let j:String.Index = text.firstIndex(of: "."),
         case "snippet" = text[..<j]
@@ -52,11 +41,11 @@ extension SnippetParser.SliceMarker.Statement
                 return nil
             }
 
-            self.init(text[k ..< space])
+            self.init(word: text[k ..< space])
         }
         else
         {
-            self.init(text[k...])
+            self.init(word: text[k...])
         }
     }
 }
