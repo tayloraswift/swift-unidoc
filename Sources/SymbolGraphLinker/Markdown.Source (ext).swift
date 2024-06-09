@@ -27,7 +27,7 @@ extension Markdown.Source
     @_spi(testable) public
     func parse(_:Markdown.SemanticDocument.Type = Markdown.SemanticDocument.self,
         markdownParser markdown:Markdown.Parser<Markdown.SwiftComment>,
-        snippetsTable:[String: Markdown.Snippet<Symbol.USR>],
+        snippetsTable:[String: Markdown.Snippet],
         diagnostics:inout Diagnostics<SSGC.Symbolicator>) -> Markdown.SemanticDocument
     {
         let blocks:[Markdown.BlockElement] = markdown.parse(self)
@@ -48,7 +48,7 @@ extension Markdown.Source
     @_spi(testable) public
     func parse(_:SSGC.Supplement.Type = SSGC.Supplement.self,
         markdownParser markdown:Markdown.Parser<Markdown.SwiftFlavor>,
-        snippetsTable:[String: Markdown.Snippet<Symbol.USR>],
+        snippetsTable:[String: Markdown.Snippet],
         diagnostics:inout Diagnostics<SSGC.Symbolicator>) throws -> SSGC.Supplement
     {
         let blocks:[Markdown.BlockElement] = markdown.parse(self)

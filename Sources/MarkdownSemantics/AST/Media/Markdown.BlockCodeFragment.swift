@@ -115,12 +115,12 @@ extension Markdown.BlockCodeFragment
     /// As long as people are not reusing the same slices in multiple places, this has no
     /// performance drawbacks. No one should be doing that (extensively) anyways, because that
     /// would result in documentation that is hard to browse.
-    func inline(snippets:[String: Markdown.Snippet<Symbol.USR>],
+    func inline(snippets:[String: Markdown.Snippet],
         into yield:(consuming Markdown.BlockElement) -> ()) throws
     {
         guard
         let snippet:String = self.snippet,
-        let snippet:Markdown.Snippet<Symbol.USR> = snippets[snippet]
+        let snippet:Markdown.Snippet = snippets[snippet]
         else
         {
             throw ArgumentError.snippet(self.snippet, available: snippets.keys.sorted())
@@ -131,7 +131,7 @@ extension Markdown.BlockCodeFragment
             //  If this is the first slice, we should also inline the caption.
             if  case slice? = snippet.slices.keys.first
             {
-                for block:Markdown.BlockElement in snippet.caption
+                for block:Markdown.BlockElement in snippet.caption()
                 {
                     yield(block)
                 }
@@ -153,7 +153,7 @@ extension Markdown.BlockCodeFragment
         {
             //  Snippet captions cannot contain topics, so we can just add them directly to
             //  the ``blocks`` list.
-            for block:Markdown.BlockElement in snippet.caption
+            for block:Markdown.BlockElement in snippet.caption()
             {
                 yield(block)
             }

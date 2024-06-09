@@ -115,12 +115,12 @@ extension Main.Blockquotes:MarkdownTestBattery
             let snippet:(caption:String, slices:[Markdown.SnippetSlice]) = swiftParser.parse(
                 snippet: [UInt8].init(swiftSource.utf8))
 
-            let snippets:[String: Markdown.Snippet<Symbol.USR>] =
+            let snippets:[String: Markdown.Snippet] =
             [
                 "Example": .init(id: 0,
+                    captionParser: markdownParser,
                     caption: snippet.caption,
-                    slices: snippet.slices,
-                    using: markdownParser)
+                    slices: snippet.slices)
             ]
 
             Self.run(tests: tests,
