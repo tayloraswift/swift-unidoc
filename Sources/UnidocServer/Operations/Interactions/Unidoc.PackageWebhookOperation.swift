@@ -95,13 +95,21 @@ extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
             sha1: nil,
             with: session)
 
-        if  new
-        {
-            return .resource("", status: 201)
-        }
+        guard new
         else
         {
             return .noContent
         }
+
+        if !package.hidden
+        {
+            let activity:Unidoc.DB.RepoFeed.Activity = .init(discovered: .init(format.time),
+                package: package.symbol,
+                refname: event.ref)
+
+            try await server.db.repoFeed.push(activity, with: session)
+        }
+
+        return .resource("", status: 201)
     }
 }
