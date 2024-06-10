@@ -360,6 +360,12 @@ let package:Package = .init(
                 .target(name: "MarkdownABI"),
             ]),
 
+        .target(name: "SourceDiagnostics",
+            dependencies: [
+                .target(name: "Symbols"),
+                .target(name: "Sources"),
+            ]),
+
         .target(name: "Sources"),
 
         .target(name: "Symbols",
@@ -491,12 +497,6 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "UnidocRecords"),
                 .product(name: "LZ77", package: "swift-png"),
-            ]),
-
-        .target(name: "SourceDiagnostics",
-            dependencies: [
-                .target(name: "Symbols"),
-                .target(name: "Sources"),
             ]),
 
         .target(name: "UnidocLinker",

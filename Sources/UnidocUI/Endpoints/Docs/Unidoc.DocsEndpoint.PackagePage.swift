@@ -67,7 +67,6 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let tags:URI = Unidoc.TagsEndpoint[self.tags]
-        let now:UnixInstant = .now()
 
         main[.section]
         {
@@ -104,7 +103,10 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
             }
 
             $0[.p] = repo.origin.about
-            $0[.p] { $0.class = "chyron" } = repo.chyron(now: now, ref: self.volume.refname)
+            $0[.p]
+            {
+                $0.class = "chyron"
+            } = repo.chyron(now: format.time, ref: self.volume.refname)
         }
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical

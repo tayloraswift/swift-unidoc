@@ -55,7 +55,7 @@ extension Unidoc.UserPropertyEndpoint:HTTP.ServerEndpoint
 
         let page:Unidoc.UserPropertyPage = .init(user: output.user,
             name: name,
-            packages: .init(organizing: output.packages, heading: .free),
+            packages: .init(organizing: output.packages, heading: .free, now: format.time),
             id: self.query.account)
 
         return .ok(page.resource(format: format))
