@@ -46,8 +46,6 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        let now:UnixInstant = .now()
-
         main[.section, { $0.class = "introduction" }]
         {
             $0[.nav, { $0.class = "breadcrumbs" }]
@@ -67,7 +65,7 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
                 return
             }
 
-            $0[.p] { $0.class = "chyron" } = repo.chyron(now: now)
+            $0[.p] { $0.class = "chyron" } = repo.chyron(now: format.time)
         }
 
         main[.ul]

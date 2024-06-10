@@ -61,8 +61,6 @@ extension Unidoc.VersionsPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        let now:UnixInstant = .now()
-
         main[.section, { $0.class = "introduction" }]
         {
             $0[.h1] = "\(self.package.symbol)"
@@ -75,10 +73,10 @@ extension Unidoc.VersionsPage:Unidoc.ApplicationPage
             }
 
             $0[.p] = repo.origin.about
-            $0[.p] { $0.class = "chyron" } = repo.chyron(now: now)
+            $0[.p] { $0.class = "chyron" } = repo.chyron(now: format.time)
         }
 
-        let dormancy:Duration? = self.package.repo?.dormant(by: now)
+        let dormancy:Duration? = self.package.repo?.dormant(by: format.time)
         if  let time:Duration = dormancy
         {
             /// Sure, we are ignoring leap years here, but no one will notice.
@@ -105,7 +103,7 @@ extension Unidoc.VersionsPage:Unidoc.ApplicationPage
                 } = Unidoc.PackageMediaSettings.init(package: self.package)
             }
 
-            self.section(tags: &$0, now: now, dormancy: dormancy)
+            self.section(tags: &$0, now: format.time, dormancy: dormancy)
         }
     }
 }

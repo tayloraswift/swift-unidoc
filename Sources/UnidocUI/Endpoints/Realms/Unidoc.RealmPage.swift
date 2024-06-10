@@ -9,7 +9,6 @@ extension Unidoc
         let packages:PackageGroups
         let user:User?
 
-        private
         init(metadata:RealmMetadata,
             packages:PackageGroups,
             user:User?)
@@ -18,20 +17,6 @@ extension Unidoc
             self.packages = packages
             self.user = user
         }
-    }
-}
-extension Unidoc.RealmPage
-{
-    init(from output:consuming Unidoc.RealmQuery.Output)
-    {
-        //  5.9 compiler bug :(
-        let packages:[Unidoc.EditionOutput] = output.packages
-        let metadata:Unidoc.RealmMetadata = output.metadata
-        let user:Unidoc.User? = (consume output).user
-
-        self.init(metadata: metadata,
-            packages: .init(organizing: packages, heading: .realm),
-            user: user)
     }
 }
 extension Unidoc.RealmPage:Unidoc.RenderablePage

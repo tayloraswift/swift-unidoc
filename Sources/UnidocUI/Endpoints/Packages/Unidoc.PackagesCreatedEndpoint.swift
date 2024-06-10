@@ -58,7 +58,7 @@ extension Unidoc.PackagesCreatedEndpoint:HTTP.ServerEndpoint
         //  protocol requirements.
         let date:Timestamp.Date = self.date
         let page:Unidoc.PackagesCreatedPage = .init(
-            groups: .init(organizing: batch),
+            groups: .init(organizing: batch, now: format.time),
             date: date)
 
         return .ok(page.resource(format: format))

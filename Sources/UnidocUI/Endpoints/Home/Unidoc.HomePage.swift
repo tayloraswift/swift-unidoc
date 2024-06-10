@@ -119,8 +119,6 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                     }
                 }
 
-                let now:UnixInstant = .now()
-
                 $0[.div, { $0.class = "feeds" }]
                 {
                     $0[.section, { $0.class = "repo" }]
@@ -133,7 +131,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                                 $0[.li]
                                 {
                                     let dynamicAge:Duration.DynamicFormat = .init(
-                                        truncating: now - .millisecond(item.id.value))
+                                        truncating: format.time - .millisecond(item.id.value))
 
                                     $0[.p, { $0.class = "edition"}]
                                     {
@@ -164,7 +162,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                                 $0[.li]
                                 {
                                     let dynamicAge:Duration.DynamicFormat = .init(
-                                        truncating: now - .millisecond(item.id.value))
+                                        truncating: format.time - .millisecond(item.id.value))
 
                                     $0[.p, { $0.class = "edition"}]
                                     {

@@ -45,7 +45,10 @@ extension Unidoc.RealmEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let page:Unidoc.RealmPage = .init(from: output)
+        let page:Unidoc.RealmPage = .init(metadata: output.metadata,
+            packages: .init(organizing: output.packages, heading: .realm, now: format.time),
+            user: output.user)
+
         return .ok(page.resource(format: format))
     }
 }

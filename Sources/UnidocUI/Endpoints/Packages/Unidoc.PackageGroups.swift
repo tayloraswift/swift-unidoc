@@ -30,10 +30,10 @@ extension Unidoc
 }
 extension Unidoc.PackageGroups
 {
-    init(organizing packages:consuming [Unidoc.EditionOutput], heading:Heading? = nil)
+    init(organizing packages:consuming [Unidoc.EditionOutput],
+        heading:Heading? = nil,
+        now:UnixInstant)
     {
-        let now:UnixInstant = .now()
-
         var packages:
         (
             inactive:[Unidoc.PackageCard],
