@@ -50,7 +50,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
         //  Lookup the package alias documents by symbol.
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[Unidoc.PackageAlias[.id]] { $0[.in] = self.patches.lazy.map(\.package) }
         }
@@ -98,7 +98,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
             }
             $0[.pipeline] = .init
             {
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[.and]
                     {
