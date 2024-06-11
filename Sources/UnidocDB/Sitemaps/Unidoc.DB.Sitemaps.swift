@@ -3,7 +3,6 @@ import MongoDB
 import MongoQL
 import Symbols
 import UnidocRecords
-import UnixTime
 
 extension Unidoc.DB
 {
@@ -49,46 +48,28 @@ extension Unidoc.DB.Sitemaps
         }
     }
 
-    func diff(new:inout Unidoc.Sitemap,
+    func diff(new:Unidoc.Sitemap,
         with session:Mongo.Session) async throws -> Unidoc.SitemapDelta?
     {
-        let old:Unidoc.Sitemap? = try await self.find(id: new.id, with: session)
-
-        let update:Unidoc.SitemapDelta?
-        if  let old:Unidoc.Sitemap
-        {
-            //  Compute sitemap delta.
-            var deletions:Set<Unidoc.Shoot> = .init(old.elements)
-            var additions:Int = 0
-
-            for page:Unidoc.Shoot in new.elements
-            {
-                if  case nil = deletions.remove(page)
-                {
-                    additions += 1
-                }
-            }
-
-            let delta:Unidoc.SitemapDelta = .init(
-                deletions: deletions.sorted(),
-                additions: additions)
-
-            if  case .zero = delta
-            {
-                //  We can skip the update entirely.
-                return delta
-            }
-            else
-            {
-                update = delta
-                new.modified = .now()
-            }
-        }
+        guard
+        let old:Unidoc.Sitemap = try await self.find(id: new.id, with: session)
         else
         {
-            update = nil
+            return nil
         }
 
-        return update
+        //  Compute sitemap delta.
+        var deletions:Set<Unidoc.Shoot> = .init(old.elements)
+        var additions:[Unidoc.Shoot] = []
+
+        for page:Unidoc.Shoot in new.elements
+        {
+            if  case nil = deletions.remove(page)
+            {
+                additions.append(page)
+            }
+        }
+
+        return .init(deletions: deletions.sorted(), additions: additions)
     }
 }
