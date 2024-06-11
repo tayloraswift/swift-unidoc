@@ -29,7 +29,7 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[Aliases.Element[.id]] = self.symbol
         }
