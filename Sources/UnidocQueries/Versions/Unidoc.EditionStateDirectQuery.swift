@@ -26,7 +26,7 @@ extension Unidoc.EditionStateDirectQuery:Mongo.PipelineQuery
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[Unidoc.PackageMetadata[.id]] = self.package
         }
@@ -50,7 +50,7 @@ extension Unidoc.EditionStateDirectQuery:Mongo.PipelineQuery
                 $0[.from] = Unidoc.DB.Editions.name
                 $0[.pipeline] = .init
                 {
-                    $0[stage: .match] = .init
+                    $0[stage: .match]
                     {
                         $0[Unidoc.EditionMetadata[.id]] = id
                     }

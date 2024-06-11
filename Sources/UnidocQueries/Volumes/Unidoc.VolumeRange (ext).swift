@@ -24,7 +24,7 @@ extension Unidoc.VolumeRange:Unidoc.VertexPredicate
             }
             $0[.pipeline] = .init
             {
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[.expr]
                     {

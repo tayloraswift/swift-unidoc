@@ -123,7 +123,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
             }
             $0[.pipeline] = .init
             {
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[.or]
                     {

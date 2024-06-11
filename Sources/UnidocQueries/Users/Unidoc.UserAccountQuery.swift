@@ -35,16 +35,16 @@ extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[Unidoc.User[.id]] = self.session.id
             $0[Unidoc.User[.cookie]] = self.session.cookie
         }
 
-        pipeline[stage: .facet] = .init
+        pipeline[stage: .facet, using: Output.CodingKey.self]
         {
-            $0[Output[.user]] = []
-            $0[Output[.organizations]] = .init
+            $0[.user]
+            $0[.organizations]
             {
                 $0[stage: .unwind] = Unidoc.User[.access]
                 $0[stage: .lookup] = .init

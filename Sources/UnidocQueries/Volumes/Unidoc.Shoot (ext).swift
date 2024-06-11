@@ -24,7 +24,7 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
             }
             $0[.pipeline] = .init
             {
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     //  The stem index is partial, so we need this condition here in order
                     //  for MongoDB to use the index.

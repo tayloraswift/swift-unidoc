@@ -18,7 +18,7 @@ extension Unidoc.VersionPredicate
         switch self
         {
         case .latest(let series):
-            pipeline[stage: .match] = .init
+            pipeline[stage: .match]
             {
                 $0[Unidoc.EditionMetadata[.release]] = series == .release
                 $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
@@ -31,7 +31,7 @@ extension Unidoc.VersionPredicate
             }
 
         case .name(let name):
-            pipeline[stage: .match] = .init
+            pipeline[stage: .match]
             {
                 $0[Unidoc.EditionMetadata[.name]] = name
             }

@@ -46,7 +46,7 @@ extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
     {
         typealias Document = Unidoc.TextResource<CollectionOrigin.Element.ID>
 
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[Document[.id]] = self.id
         }

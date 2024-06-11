@@ -49,7 +49,7 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
                 $0[.from] = Unidoc.DB.Users.name
                 $0[.pipeline] = .init
                 {
-                    $0[stage: .match] = .init
+                    $0[stage: .match]
                     {
                         $0[Unidoc.User[.id]] = user
                     }

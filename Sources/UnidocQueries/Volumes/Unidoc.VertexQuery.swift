@@ -121,9 +121,9 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 
         //  The `$facet` stage in ``pipeline`` should collect all records into a
         //  single document, so this pipeline should return at most 1 element.
-        pipeline[stage: .facet] = .init
+        pipeline[stage: .facet, using: Unidoc.VertexOutput.CodingKey.self]
         {
-            $0[Unidoc.VertexOutput[.principal]] = .init
+            $0[.principal]
             {
                 $0[stage: .project] = .init
                 {
@@ -192,7 +192,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     }
                     $0[.pipeline] = .init
                     {
-                        $0[stage: .match] = .init
+                        $0[stage: .match]
                         {
                             $0[.expr] { $0[.eq] = (Unidoc.TypeTree[.id], tree) }
                         }
@@ -209,7 +209,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 }
             }
 
-            $0[Unidoc.VertexOutput[.canonical]] = .init
+            $0[.canonical]
             {
                 let volume:Mongo.AnyKeyPath = Unidoc.PrincipalOutput[.volumeOfLatest]
                 //  Conveniently, `$unwind` can be used to skip null values even if the field
@@ -253,7 +253,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     }
                     $0[.pipeline] = .init
                     {
-                        $0[stage: .match] = .init
+                        $0[stage: .match]
                         {
                             $0[.expr]
                             {
@@ -288,12 +288,12 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 $0[stage: .replaceWith] = Unidoc.PrincipalOutput[.vertex]
             }
 
-            $0[Unidoc.VertexOutput[.vertices]] = .init
+            $0[.vertices]
             {
                 let results:Mongo.AnyKeyPath = "results"
 
                 $0[stage: .unwind] = edges.scalars
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[edges.scalars] { $0[.ne] = BSON.Null.init() }
                 }
@@ -316,12 +316,12 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 ]
             }
 
-            $0[Unidoc.VertexOutput[.volumes]] = .init
+            $0[.volumes]
             {
                 let results:Mongo.AnyKeyPath = "results"
 
                 $0[stage: .unwind] = edges.volumes
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[.and]
                     {
@@ -353,7 +353,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 
             //  This really does need to be written with two unwinds, a naïve `$in` lookup
             //  causes a collection scan for some reason.
-            $0[Unidoc.VertexOutput[.packages]] = .init
+            $0[.packages]
             {
                 let id:Mongo.AnyKeyPath = "_id"
 

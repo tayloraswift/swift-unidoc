@@ -32,15 +32,15 @@ extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
         let old:Mongo.AnyKeyPath = "old"
         let all:Mongo.AnyKeyPath = "all"
 
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[Unidoc.EditionMetadata[.package]] = package
         }
-        pipeline[stage: .facet] = .init
+        pipeline[stage: .facet]
         {
-            $0[old] = .init
+            $0[old]
             {
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[Unidoc.EditionMetadata[.name]] = refname
                 }
@@ -50,7 +50,7 @@ extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
                     $0[Unidoc.EditionPlacement[.edition]] = Mongo.Pipeline.ROOT
                 }
             }
-            $0[new] = .init
+            $0[new]
             {
                 $0[stage: .sort] = .init
                 {
