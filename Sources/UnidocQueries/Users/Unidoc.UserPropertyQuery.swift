@@ -37,7 +37,7 @@ extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]] = self.account
             $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]]
@@ -46,9 +46,9 @@ extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
             }
         }
 
-        pipeline[stage: .facet] = .init
+        pipeline[stage: .facet, using: Output.CodingKey.self]
         {
-            $0[Output[.packages]] = .init
+            $0[.packages]
             {
                 $0[stage: .replaceWith] = .init
                 {
@@ -72,7 +72,7 @@ extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
             }
             $0[.pipeline] = .init
             {
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[.expr] { $0[.eq] = (Unidoc.User[.id], account) }
                 }

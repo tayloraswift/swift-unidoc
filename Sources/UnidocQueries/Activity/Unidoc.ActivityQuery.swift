@@ -42,9 +42,9 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
 
         pipeline[stage: .limit] = self.limit
 
-        pipeline[stage: .facet] = .init
+        pipeline[stage: .facet, using: Output.CodingKey.self]
         {
-            $0[Output[.docs]] = .init
+            $0[.docs]
             {
                 $0[stage: .lookup] = .init
                 {
@@ -57,7 +57,7 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
                     }
                     $0[.pipeline] = .init
                     {
-                        $0[stage: .match] = .init
+                        $0[stage: .match]
                         {
                             $0[.expr] { $0[.eq] = (Unidoc.VolumeMetadata[.id], id) }
                         }

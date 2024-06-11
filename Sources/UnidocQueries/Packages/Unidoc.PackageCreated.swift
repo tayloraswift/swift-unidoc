@@ -35,7 +35,7 @@ extension Unidoc.PackageCreated:Unidoc.PackagePredicate
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[Unidoc.PackageMetadata[.repo]] { $0[.exists] = true }
 

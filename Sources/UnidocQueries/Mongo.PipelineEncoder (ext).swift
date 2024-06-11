@@ -12,7 +12,7 @@ extension Mongo.PipelineEncoder
             $0[.from] = Unidoc.DB.Users.name
             $0[.pipeline] = .init
             {
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[Unidoc.User[.id]] = id
                 }
@@ -70,7 +70,7 @@ extension Mongo.PipelineEncoder
             $0[.foreignField] = Unidoc.EditionMetadata[.package]
             $0[.pipeline] = .init
             {
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[Unidoc.EditionMetadata[.release]] = false
                     //  This needs to be ``BSON.Null`` and not just `{ $0[.exists] = false }`,

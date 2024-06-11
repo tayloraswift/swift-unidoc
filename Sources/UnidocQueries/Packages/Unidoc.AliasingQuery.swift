@@ -38,7 +38,7 @@ extension Unidoc.AliasingQuery
             self.extend(pipeline: &pipeline)
         }
 
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[CollectionOrigin.Element[.id]] = self.symbol
         }

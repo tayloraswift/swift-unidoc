@@ -33,7 +33,7 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .match] = .init
+        pipeline[stage: .match]
         {
             $0[Unidoc.CrawlingWindow[.id]]
             {
@@ -61,7 +61,7 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
             {
                 /// This improves query performance enormously, as it gets MongoDB to use the
                 /// partial index. But why?? The `localField` is always non-null!
-                $0[stage: .match] = .init
+                $0[stage: .match]
                 {
                     $0[Unidoc.PackageMetadata[.repo]] { $0[.exists] = true }
                 }

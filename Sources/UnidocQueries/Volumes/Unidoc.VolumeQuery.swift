@@ -71,7 +71,7 @@ extension Unidoc.VolumeQuery
             //
             //  This works a lot like ``Database.Names.latest(of:with:)``, except it queries the
             //  package by name instead of id.
-            pipeline[stage: .match] = .init
+            pipeline[stage: .match]
             {
                 $0[Unidoc.VolumeMetadata[.package]] = self.volume.package
                 $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
@@ -103,7 +103,7 @@ extension Unidoc.VolumeQuery
             //  If a version string was provided, use that to filter between
             //  multiple versions of the same package.
             //  This index is unique, so we don’t need a sort or a limit.
-            pipeline[stage: .match] = .init
+            pipeline[stage: .match]
             {
                 $0[Unidoc.VolumeMetadata[.package]] = self.volume.package
                 $0[Unidoc.VolumeMetadata[.version]] = version
@@ -128,7 +128,7 @@ extension Unidoc.VolumeQuery
                 $0[.from] = CollectionOrigin.name
                 $0[.pipeline] = .init
                 {
-                    $0[stage: .match] = .init
+                    $0[stage: .match]
                     {
                         $0[Unidoc.VolumeMetadata[.package]] = self.volume.package
                         $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
