@@ -46,6 +46,8 @@ function textfield(element: Element | null): boolean {
 const tooltips: HTMLElement | null = document.getElementById('ss:tooltips');
 const search: HTMLElement | null = document.getElementById('search');
 const login: HTMLElement | null = document.getElementById('login');
+const intrapageNavigator: HTMLElement | null = document.getElementById('sidebar-intrapage');
+const main: HTMLElement | null = document.querySelector('main');
 
 if (search !== null) {
     const input: HTMLElement | null = document.getElementById('search-input');
@@ -153,7 +155,6 @@ if (tooltips !== null) {
 
     //  Inject the tooltips into every `<a>` element with the same `href` attribute.
     //  This should only be done within the `<main>` element.
-    const main: HTMLElement | null = document.querySelector('main');
     if (main !== null) {
         main.querySelectorAll('a').forEach((
                 anchor: HTMLAnchorElement,
@@ -222,6 +223,75 @@ if (tooltips !== null) {
         frame.className = 'tooltips';
         document.body.appendChild(frame);
     }
+}
+
+if (intrapageNavigator !== null && main !== null) {
+    //  Find every heading (`<h2>` through `<h4>`) that has an `id` attribute, within a `<main>`
+    //  element.
+    let list: HTMLOListElement = document.createElement('ol');
+
+    list.classList.add('table-of-contents');
+
+    let headingElements: HTMLElement[] = [];
+    let listElements: HTMLLIElement[] = [];
+
+    main.querySelectorAll('h2[id], h3[id], h4[id]').forEach((
+            heading: Element,
+            key: number,
+            all: NodeListOf<Element>
+        ) => {
+
+        if (!(heading instanceof HTMLElement)) {
+            return;
+        }
+
+        //  Create a link to the heading.
+        const anchor: HTMLAnchorElement = document.createElement('a');
+        anchor.href = '#' + heading.id;
+        anchor.textContent = heading.textContent;
+
+        //  Create a list item for the link.
+        const item: HTMLLIElement = document.createElement('li');
+        item.appendChild(anchor);
+
+        //  Append the list item to the intrapage navigator.
+        list.appendChild(item);
+
+        headingElements.push(heading);
+        listElements.push(item);
+    });
+
+    intrapageNavigator.appendChild(list);
+
+    //  When the document is scrolled, highlight the anchors associated with the visible
+    //  headings in the intrapage navigator. This is the last heading with a negative viewport
+    //  position, through the last heading with a viewport position less than the height of the
+    //  viewport.
+    document.addEventListener('scroll', (event: Event) => {
+        const viewportMinimum: number = main.offsetTop;
+        const viewportHeight: number = window.innerHeight;
+        let partiallyVisible: boolean = true;
+
+        for (let i = headingElements.length - 1; i >= 0; i--) {
+            const heading: HTMLElement = headingElements[i];
+            const rect: DOMRect = heading.getBoundingClientRect();
+
+            const above: boolean = rect.top < viewportMinimum;
+
+            if (rect.top < viewportHeight && (!above || partiallyVisible)) {
+                listElements[i].classList.add('active');
+            } else {
+                listElements[i].classList.remove('active');
+            }
+
+            if (above) {
+                partiallyVisible = false;
+            }
+        }
+    });
+
+    //  Fire a ceremonial scroll event to initialize the intrapage navigator.
+    document.dispatchEvent(new Event('scroll'));
 }
 
 document.querySelectorAll('form.sort-controls').forEach((
