@@ -326,7 +326,6 @@ extension Unidoc.DB
             hidden: true,
             delta: try await self.fill(volume: consume volume,
                 sitemap: true,
-                clear: uploaded.updated,
                 with: session))
 
         return (uploaded, uplinked)
@@ -436,7 +435,6 @@ extension Unidoc.DB
             hidden: hidden,
             delta: try await self.fill(volume: consume volume,
                 sitemap: !package.hidden,
-                clear: true,
                 with: session))
     }
 
@@ -479,9 +477,10 @@ extension Unidoc.DB
         }
     }
 
+    @discardableResult
     private
     func unlink(volume:Unidoc.VolumeMetadata,
-        with session:Mongo.Session) async throws
+        with session:Mongo.Session) async throws -> Bool
     {
         try await self.editionDependencies.clear(dependent: volume.id, with: session)
         try await self.packageDependencies.clear(dependent: volume.id, with: session)
@@ -493,7 +492,7 @@ extension Unidoc.DB
         try await self.search.delete(id: volume.symbol, with: session)
         //  Delete this last, otherwise if one of the other steps fails, we won’t
         //  have an easy way to clean up the remaining documents.
-        try await self.volumes.delete(id: volume.id, with: session)
+        return try await self.volumes.delete(id: volume.id, with: session)
     }
 }
 extension Unidoc.DB
@@ -519,8 +518,7 @@ extension Unidoc.DB
     private
     func fill(volume:consuming Unidoc.Volume,
         sitemap:Bool,
-        clear:Bool = true,
-        with session:Mongo.Session) async throws -> Unidoc.SitemapDelta?
+        with session:Mongo.Session) async throws -> Unidoc.SurfaceDelta?
     {
         //  We assume compressing the search JSON will take a (relatively) long time, so we do
         //  it before performing any database operations.
@@ -540,10 +538,9 @@ extension Unidoc.DB
         let search:Unidoc.TextResource<Symbol.Volume> = .init(id: volume.id,
             text: .init(compressing: volume.index.utf8))
 
-        if  clear
-        {
-            try await self.unlink(volume: volume.metadata, with: session)
-        }
+        let volumeReplaced:Bool = try await self.unlink(volume: volume.metadata,
+            with: session)
+
         //  If there is a volume generated from a prerelease with the same patch number,
         //  we need to delete that too.
         if  let occupant:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume.id,
@@ -570,25 +567,43 @@ extension Unidoc.DB
 
         try await self.fillEdges(from: volume.metadata, with: session)
 
-        let delta:Unidoc.SitemapDelta?
+        let surfaceDelta:Unidoc.SurfaceDelta?
         if  volume.metadata.latest
         {
             var new:Unidoc.Sitemap = volume.sitemap()
 
-            delta = try await self.sitemaps.diff(new: &new, with: session)
+            if  let sitemapDelta:Unidoc.SitemapDelta = try await self.sitemaps.diff(new: new,
+                    with: session)
+            {
+                if  case .zero = sitemapDelta
+                {
+                    surfaceDelta = volumeReplaced ? .changed(nil) : .updated(nil)
+                }
+                else if sitemap
+                {
+                    surfaceDelta = volumeReplaced
+                        ? .changed(sitemapDelta)
+                        : .updated(sitemapDelta)
 
-            if  sitemap
-            {
-                try await self.sitemaps.upsert(some: new, with: session)
+                    new.modified = .now()
+                    try await self.sitemaps.upsert(some: new, with: session)
+                }
+                else
+                {
+                    surfaceDelta = .ignored
+                    try await self.sitemaps.delete(id: new.id, with: session)
+                }
             }
-            else if case _? = delta
+            else
             {
-                try await self.sitemaps.delete(id: new.id, with: session)
+                //  No pre-existing sitemap.
+                surfaceDelta = .initial
+                try await self.sitemaps.upsert(some: new, with: session)
             }
         }
         else
         {
-            delta = nil
+            surfaceDelta = .ignored
         }
 
         alignment:
@@ -608,7 +623,7 @@ extension Unidoc.DB
                 with: Groups.AlignLatest.init(to: latest, in: realm))
         }
 
-        return delta
+        return surfaceDelta
     }
 
     /// Pins as many of the snapshot’s dependencies as possible. After this function returns,

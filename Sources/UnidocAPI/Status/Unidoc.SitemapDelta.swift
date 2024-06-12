@@ -6,10 +6,10 @@ extension Unidoc
         public
         let deletions:[Shoot]
         public
-        let additions:Int
+        let additions:[Shoot]
 
         @inlinable public
-        init(deletions:[Shoot], additions:Int)
+        init(deletions:[Shoot], additions:[Shoot])
         {
             self.deletions = deletions
             self.additions = additions
@@ -19,5 +19,5 @@ extension Unidoc
 extension Unidoc.SitemapDelta
 {
     @inlinable public static
-    var zero:Self { .init(deletions: [], additions: 0) }
+    var zero:Self { .init(deletions: [], additions: []) }
 }

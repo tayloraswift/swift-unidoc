@@ -36,34 +36,62 @@ extension Unidoc.GraphLinker.Event:HTML.OutputStreamable
                 $0[.dd] = uplinked.hidden ? "yes" : "no"
 
                 guard
-                let delta:Unidoc.SitemapDelta = uplinked.delta
+                let delta:Unidoc.SurfaceDelta = uplinked.delta
                 else
                 {
                     return
                 }
 
-                $0[.dt] = "Additions"
-                $0[.dd] = "\(delta.additions)"
+                $0[.dt] = "Delta"
 
-                if  delta.deletions.isEmpty
+                let api:Unidoc.SitemapDelta?
+
+                switch delta
+                {
+                case .initial:
+                    $0[.dd] = "Initial"
+                    return
+
+                case .ignored:
+                    $0[.dd] = "Ignored"
+                    return
+
+                case .changed(let delta):
+                    $0[.dd] = "Changed"
+                    api = delta
+
+                case .updated(let delta):
+                    $0[.dd] = "Updated"
+                    api = delta
+                }
+
+                guard
+                let api:Unidoc.SitemapDelta
+                else
                 {
                     return
                 }
 
-                $0[.dt] = "Deletions"
-                $0[.dd]
+                for (list, name):([Unidoc.Shoot], String) in [
+                    (api.deletions, "Deletions"),
+                    (api.additions, "Additions")
+                ]   where !list.isEmpty
                 {
-                    $0[.ol]
+                    $0[.dt] = name
+                    $0[.dd]
                     {
-                        for shoot:Unidoc.Shoot in delta.deletions
+                        $0[.ol]
                         {
-                            if  let hash:FNV24 = shoot.hash
+                            for shoot:Unidoc.Shoot in list
                             {
-                                $0[.li] = "\(shoot.stem) [\(hash)]"
-                            }
-                            else
-                            {
-                                $0[.li] = "\(shoot.stem)"
+                                if  let hash:FNV24 = shoot.hash
+                                {
+                                    $0[.li] = "\(shoot.stem) [\(hash)]"
+                                }
+                                else
+                                {
+                                    $0[.li] = "\(shoot.stem)"
+                                }
                             }
                         }
                     }
