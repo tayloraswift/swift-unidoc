@@ -11,6 +11,7 @@
 @import 'div.constraints';
 @import 'div.menu';
 @import 'div.more';
+@import 'div.sidebar';
 @import 'div.tooltips';
 @import 'dl';
 @import 'figure';
@@ -34,13 +35,17 @@
 @import 'section.introduction';
 @import 'section.literature';
 @import 'section.metadata';
-@import 'Sidebar';
 @import 'Tables';
 @import 'table';
 @import 'table.tags';
 @import 'Typefaces';
 @import 'ul.cards';
 @import 'ul.users';
+
+html
+{
+    scroll-behavior: smooth;
+}
 
 body
 {
@@ -52,6 +57,8 @@ body
         position: fixed;
         z-index: 1;
         width: 100%;
+
+        pointer-events: none;
 
         nav
         {
@@ -80,6 +87,11 @@ body
             content: '';
 
             @include backdrop-blur;
+        }
+
+        > div.content
+        {
+            pointer-events: auto;
         }
     }
 
@@ -118,6 +130,10 @@ body
             margin-top: 6rem;
         }
 
+        > header.app > *.sidebar
+        {
+            pointer-events: none;
+        }
         > *.app > *.sidebar
         {
             display: block;
