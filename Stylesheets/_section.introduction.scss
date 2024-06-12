@@ -10,7 +10,7 @@ section.introduction
         font-style: italic;
 
         display: flex;
-        flex-direction: row;
+        flex-flow: row wrap;
 
         .phylum
         {

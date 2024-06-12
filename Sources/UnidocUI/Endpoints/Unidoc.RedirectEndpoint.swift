@@ -68,7 +68,9 @@ extension Unidoc.RedirectEndpoint:HTTP.ServerEndpoint
                 packages: [],
                 vertices: .init(secondary: output.matches))
 
-            let display:Unidoc.DocsEndpoint.NotFoundPage = .init(context, sidebar: nil)
+            let display:Unidoc.DocsEndpoint.NotFoundPage = .init(context, sidebar: .module(
+                volume: context.volume,
+                tree: nil))
             //  We return 410 Gone instead of 404 Not Found so that search engines and
             //  research bots will stop crawling this URL. But the page appears the same
             //  to the user.

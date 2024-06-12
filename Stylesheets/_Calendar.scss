@@ -43,7 +43,7 @@ section.details
 
         grid-gap: 0.25rem;
 
-        @media only screen and (min-width: 50rem)
+        @media only screen and (min-width: 56rem)
         {
             grid-gap: 0.5rem;
         }
@@ -61,7 +61,7 @@ section.details
 
                 background-color: var(--bg-codewell);
 
-                @media only screen and (min-width: 50rem)
+                @media only screen and (min-width: 56rem)
                 {
                     padding: 0.35rem 0.5rem 0.5rem 0.5rem;
                 }
