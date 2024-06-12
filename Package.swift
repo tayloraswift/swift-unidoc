@@ -537,6 +537,7 @@ let package:Package = .init(
                 .target(name: "Media"),
                 .target(name: "UnidocAssets"),
                 .target(name: "UnidocRecords"),
+                .target(name: "UnixTime"),
 
                 .product(name: "HTML", package: "swift-dom"),
             ]),

@@ -12,13 +12,13 @@ extension Unidoc
         public
         let hidden:Bool
         public
-        let delta:SitemapDelta?
+        let delta:SurfaceDelta?
 
         @inlinable public
         init(edition:Edition,
             volume:Symbol.Volume,
             hidden:Bool,
-            delta:SitemapDelta?)
+            delta:SurfaceDelta?)
         {
             self.edition = edition
             self.volume = volume
