@@ -6,7 +6,7 @@ div.more
     > div.charts
     {
         display: flex;
-        flex-direction: row;
+        flex-flow: row wrap;
         justify-content: center;
 
         h2, h3

@@ -66,7 +66,7 @@ extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
                 break
             }
 
-            let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>? = .module(
+            let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint> = .module(
                 volume: context.volume,
                 tree: tree)
 

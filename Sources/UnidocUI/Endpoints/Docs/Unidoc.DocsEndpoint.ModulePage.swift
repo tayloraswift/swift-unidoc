@@ -9,11 +9,11 @@ extension Unidoc.DocsEndpoint
 {
     struct ModulePage
     {
-        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>
         let cone:Unidoc.Cone
         let apex:Unidoc.CultureVertex
 
-        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?,
+        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
             cone:Unidoc.Cone,
             apex:Unidoc.CultureVertex)
         {

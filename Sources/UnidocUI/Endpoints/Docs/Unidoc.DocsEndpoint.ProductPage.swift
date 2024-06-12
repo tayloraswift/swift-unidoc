@@ -38,7 +38,7 @@ extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApplicationPage
 }
 extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
 {
-    var sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>? { .product(volume: self.volume) }
+    var sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint> { .product(volume: self.volume) }
 
     var descriptionFallback:String
     {

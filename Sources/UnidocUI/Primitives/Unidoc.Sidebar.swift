@@ -36,16 +36,9 @@ extension Unidoc.Sidebar
     }
 
     static
-    func module(volume:Unidoc.VolumeMetadata, tree:Unidoc.TypeTree?) -> Self?
+    func module(volume:Unidoc.VolumeMetadata, tree:Unidoc.TypeTree?) -> Self
     {
-        guard
-        let nouns:[Unidoc.Noun] = tree?.rows
-        else
-        {
-            return nil
-        }
-
-        return .init(volume: volume, nouns: nouns)
+        .init(volume: volume, nouns: tree?.rows ?? [])
     }
 }
 extension Unidoc.Sidebar:HTML.OutputStreamable

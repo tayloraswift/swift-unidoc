@@ -9,11 +9,11 @@ extension Unidoc.DocsEndpoint
 {
     struct ArticlePage
     {
-        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>
         let cone:Unidoc.Cone
         let apex:Unidoc.ArticleVertex
 
-        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?,
+        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
             cone:Unidoc.Cone,
             apex:Unidoc.ArticleVertex)
         {

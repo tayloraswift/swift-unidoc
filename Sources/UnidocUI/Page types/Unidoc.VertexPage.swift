@@ -13,7 +13,7 @@ extension Unidoc
         associatedtype Context:VertexContext
         associatedtype Sidebar:HTML.OutputStreamable
 
-        var sidebar:Sidebar? { get }
+        var sidebar:Sidebar { get }
 
         var context:Context { get }
     }
@@ -58,10 +58,9 @@ extension Unidoc.VertexPage
     public
     func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        let sidebar:Sidebar? = self.sidebar
-
         body[.header, { $0.class = "app" }]
         {
+            $0[.div] { $0.class = "sidebar" }
             $0[.div, { $0.class = "content" }]
             {
                 $0[.nav] { $0.class = "cornice" } = self.cornice(format: format)
@@ -116,13 +115,14 @@ extension Unidoc.VertexPage
                     $0[.ol] { $0.id = "search-results" }
                 }
             }
-            $0[.div] { $0.class = "sidebar" } = sidebar.map { _ in "" }
+            $0[.div] { $0.class = "sidebar" }
         }
 
         body[.div, { $0.class = "app" }]
         {
+            $0[.div] { $0.class = "sidebar" ; $0.id = "sidebar-intrapage" }
             $0[.main, { $0.class = "content" }] { self.main(&$0, format: format) }
-            $0[.div] { $0.class = "sidebar" } = sidebar
+            $0[.div] { $0.class = "sidebar" ; $0.id = "sidebar-interpage" } = self.sidebar
         }
 
         body[.div]

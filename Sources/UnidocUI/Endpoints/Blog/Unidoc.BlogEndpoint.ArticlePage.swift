@@ -55,7 +55,7 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
     public
     func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        body[.header]
+        body[.header, { $0.class = "app" }]
         {
             $0[.div, { $0.class = "content" }]
             {
