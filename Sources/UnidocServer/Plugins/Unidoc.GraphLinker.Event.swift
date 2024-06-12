@@ -52,16 +52,20 @@ extension Unidoc.GraphLinker.Event:HTML.OutputStreamable
                     $0[.dd] = "Initial"
                     return
 
-                case .ignored:
-                    $0[.dd] = "Ignored"
+                case .ignoredHistorical:
+                    $0[.dd] = "Ignored historical"
                     return
 
-                case .changed(let delta):
-                    $0[.dd] = "Changed"
+                case .ignoredPrivate:
+                    $0[.dd] = "Ignored private"
+                    return
+
+                case .ignoredRepeated(let delta):
+                    $0[.dd] = "Ignored repeated"
                     api = delta
 
-                case .updated(let delta):
-                    $0[.dd] = "Updated"
+                case .replaced(let delta):
+                    $0[.dd] = "Replaced"
                     api = delta
                 }
 
