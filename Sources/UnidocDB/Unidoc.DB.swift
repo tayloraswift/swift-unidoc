@@ -323,7 +323,7 @@ extension Unidoc.DB
         let uplinked:Unidoc.UplinkStatus = .init(
             edition: uploaded.edition,
             volume: symbol,
-            hidden: true,
+            hiddenByPackage: true,
             delta: try await self.fill(volume: consume volume,
                 sitemap: true,
                 with: session))
@@ -416,7 +416,6 @@ extension Unidoc.DB
         /// volume.
         var snapshot:Unidoc.Snapshot = stored
 
-        let hidden:Bool = package.hidden || snapshot.action != .uplinkInitial
         let volume:Unidoc.Volume = try await self.link(&snapshot,
             symbol: package.symbol,
             loader: loader,
@@ -432,7 +431,7 @@ extension Unidoc.DB
         return .init(
             edition: id,
             volume: symbol,
-            hidden: hidden,
+            hiddenByPackage: package.hidden,
             delta: try await self.fill(volume: consume volume,
                 sitemap: !package.hidden,
                 with: session))
@@ -577,20 +576,20 @@ extension Unidoc.DB
             {
                 if  case .zero = sitemapDelta
                 {
-                    surfaceDelta = volumeReplaced ? .changed(nil) : .updated(nil)
+                    surfaceDelta = volumeReplaced ? .ignoredRepeated(nil) : .replaced(nil)
                 }
                 else if sitemap
                 {
                     surfaceDelta = volumeReplaced
-                        ? .changed(sitemapDelta)
-                        : .updated(sitemapDelta)
+                        ? .ignoredRepeated(sitemapDelta)
+                        : .replaced(sitemapDelta)
 
                     new.modified = .now()
                     try await self.sitemaps.upsert(some: new, with: session)
                 }
                 else
                 {
-                    surfaceDelta = .ignored
+                    surfaceDelta = .ignoredPrivate
                     try await self.sitemaps.delete(id: new.id, with: session)
                 }
             }
@@ -603,7 +602,7 @@ extension Unidoc.DB
         }
         else
         {
-            surfaceDelta = .ignored
+            surfaceDelta = .ignoredHistorical
         }
 
         alignment:
