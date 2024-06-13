@@ -55,7 +55,8 @@ extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.ApplicationPage
 }
 extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.VertexPage
 {
-    var sidebar:Never? { nil }
+    /// TODO: give this type a better sidebar
+    var sidebar:String { "" }
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
