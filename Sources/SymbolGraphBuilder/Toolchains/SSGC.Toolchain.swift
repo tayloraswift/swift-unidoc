@@ -353,15 +353,35 @@ extension SSGC.Toolchain
     {
         for module:SymbolGraph.Module in modules
         {
-            let module:Symbol.Module = module.id
+            let skip:Bool
+            switch module.type
+            {
+            case .binary:       skip = false
+            case .executable:   skip = true
+            case .regular:      skip = false
+            case .macro:        skip = false
+            case .plugin:       skip = true
+            case .snippet:      skip = true
+            case .system:       skip = true
+            case .test:         skip = true
+            }
 
-            print("Dumping symbols for module '\(module)'")
+            let id:Symbol.Module = module.id
+
+            if skip
+            {
+                print("Skipping symbol dump for \(module.type) module '\(id)'")
+            }
+            else
+            {
+                print("Dumping symbols for \(module.type) module '\(id)'")
+            }
 
             var arguments:[String] =
             [
                 "symbolgraph-extract",
 
-                "-module-name",                     "\(module)",
+                "-module-name",                     "\(id)",
                 "-target",                          "\(self.triple)",
                 "-output-dir",                      "\(output.path)",
             ]
@@ -422,7 +442,7 @@ extension SSGC.Toolchain
             catch SystemProcessError.exit(139, _)
             {
                 print("""
-                    Failed to dump symbols for module '\(module)' due to SIGSEGV \
+                    Failed to dump symbols for module '\(id)' due to SIGSEGV \
                     from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
                     compiler; see https://github.com/apple/swift/issues/68767.
                     """)
