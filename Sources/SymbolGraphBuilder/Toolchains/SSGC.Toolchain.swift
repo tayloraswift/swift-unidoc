@@ -368,9 +368,10 @@ extension SSGC.Toolchain
 
             let id:Symbol.Module = module.id
 
-            if skip
+            if  skip
             {
                 print("Skipping symbol dump for \(module.type) module '\(id)'")
+                continue
             }
             else
             {
