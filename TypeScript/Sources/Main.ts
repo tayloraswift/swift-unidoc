@@ -232,6 +232,16 @@ if (intrapageNavigator !== null && main !== null) {
 
     list.classList.add('table-of-contents');
 
+    const title: HTMLLIElement = document.createElement('li');
+    title.classList.add('title');
+
+    const top: HTMLAnchorElement = document.createElement('a');
+    top.href = '#';
+    top.textContent = 'On this page';
+
+    title.appendChild(top);
+    list.appendChild(title);
+
     let headingElements: HTMLElement[] = [];
     let listElements: HTMLLIElement[] = [];
 
@@ -252,6 +262,7 @@ if (intrapageNavigator !== null && main !== null) {
 
         //  Create a list item for the link.
         const item: HTMLLIElement = document.createElement('li');
+        item.classList.add(heading.tagName.toLowerCase());
         item.appendChild(anchor);
 
         //  Append the list item to the intrapage navigator.

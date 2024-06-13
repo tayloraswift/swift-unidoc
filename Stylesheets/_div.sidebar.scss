@@ -13,9 +13,43 @@ div.sidebar
 
         font-size: 0.875rem;
 
+        li.title
+        {
+            font-style: italic;
+            color: var(--fg);
+            padding-bottom: 0.4em;
+            margin-bottom: 0.6em;
+            border-bottom: 1px solid var(--fg-light);
+        }
+
+        li.active::before
+        {
+            position: absolute;
+            content: '•';
+            left: -0.8em;
+            color: var(--fg-heavy);
+        }
+        li.active + li.active::before
+        {
+            content: '';
+        }
+
         li.active
         {
+            position: relative;
             color: var(--fg);
+        }
+        li.h2
+        {
+            margin-left: 0;
+        }
+        li.h3
+        {
+            margin-left: 1rem;
+        }
+        li.h4
+        {
+            margin-left: 2rem;
         }
         li
         {
