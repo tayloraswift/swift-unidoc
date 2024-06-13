@@ -14,14 +14,14 @@ extension Unidoc.DocsEndpoint
 {
     struct DeclPage
     {
-        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>
         let cone:Unidoc.Cone
         let apex:Unidoc.DeclVertex
 
         private
         let stem:Unidoc.StemComponents
 
-        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?,
+        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
             cone:Unidoc.Cone,
             apex:Unidoc.DeclVertex) throws
         {

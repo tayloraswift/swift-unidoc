@@ -49,7 +49,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApplicationPage
 }
 extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 {
-    var sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>? { .package(volume: self.context.volume) }
+    var sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint> { .package(volume: self.context.volume) }
 
     var descriptionFallback:String
     {

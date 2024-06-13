@@ -14,7 +14,7 @@ extension Unidoc.PtclEndpoint
 {
     struct ConformersPage
     {
-        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?
+        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>
 
         private
         let vertex:Unidoc.DeclVertex
@@ -24,7 +24,7 @@ extension Unidoc.PtclEndpoint
         private
         let stem:Unidoc.StemComponents
 
-        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>?,
+        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
             vertex:Unidoc.DeclVertex,
             halo:Unidoc.ConformingTypes) throws
         {

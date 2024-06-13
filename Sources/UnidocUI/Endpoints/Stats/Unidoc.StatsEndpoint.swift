@@ -59,12 +59,12 @@ extension Unidoc.StatsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
         case .product(let vertex):  route = vertex.route
 
         case .culture(let vertex):
-            let sidebar:Unidoc.Sidebar<Self>? = .package(volume: context.volume)
+            let sidebar:Unidoc.Sidebar<Self> = .package(volume: context.volume)
             let page:ModulePage = .init(context, sidebar: sidebar, vertex: vertex)
             return .ok(page.resource(format: format))
 
         case .landing(let vertex):
-            let sidebar:Unidoc.Sidebar<Self>? = .package(volume: context.volume)
+            let sidebar:Unidoc.Sidebar<Self> = .package(volume: context.volume)
             let page:PackagePage = .init(context, sidebar: sidebar, vertex: vertex)
             return .ok(page.resource(format: format))
 

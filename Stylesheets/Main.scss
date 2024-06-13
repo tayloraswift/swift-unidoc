@@ -11,6 +11,7 @@
 @import 'div.constraints';
 @import 'div.menu';
 @import 'div.more';
+@import 'div.sidebar';
 @import 'div.tooltips';
 @import 'dl';
 @import 'figure';
@@ -34,13 +35,17 @@
 @import 'section.introduction';
 @import 'section.literature';
 @import 'section.metadata';
-@import 'Sidebar';
 @import 'Tables';
 @import 'table';
 @import 'table.tags';
 @import 'Typefaces';
 @import 'ul.cards';
 @import 'ul.users';
+
+html
+{
+    scroll-behavior: smooth;
+}
 
 body
 {
@@ -52,6 +57,42 @@ body
         position: fixed;
         z-index: 1;
         width: 100%;
+
+        pointer-events: none;
+
+        nav
+        {
+            width: 100%;
+            height: 1.5rem;
+            position: relative;
+
+            padding: 0.25rem 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            overflow: hidden;
+            overflow-wrap: break-word;
+        }
+
+        > div.content::before
+        {
+            position: fixed;
+            left: 0;
+
+            display: block;
+            height: 2rem;
+            width: 100%;
+
+            content: '';
+
+            @include backdrop-blur;
+        }
+
+        > div.content
+        {
+            pointer-events: auto;
+        }
     }
 
     > *
@@ -65,15 +106,11 @@ body
     {
         //  max-width takes effect when `overflow` becomes `visible`
         flex: 0 1 48rem;
-        max-width: 48rem;
         overflow: hidden;
         overflow-wrap: break-word;
-    }
-    > header.app > div.content
-    {
-        //  48rem + 4 rem + 1 rem = 53rem
-        flex: 0 1 53rem;
-        max-width: 53rem;
+
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
     > *.app > *.sidebar
@@ -81,59 +118,37 @@ body
         display: none;
     }
 
-    > header.app > div.content > *,
-    > div.app > main.content
-    {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-
     main
     {
         margin-top: 8rem;
     }
-}
-@media only screen and (min-width: 50rem)
-{
-    body main
+
+    @media only screen and (min-width: 56rem)
     {
-        margin-top: 6rem;
+        main
+        {
+            margin-top: 6rem;
+        }
+
+        > header.app > *.sidebar
+        {
+            pointer-events: none;
+        }
+        > *.app > *.sidebar
+        {
+            display: block;
+            flex: 0 1 16rem;
+            min-width: 12rem;
+            max-width: 16rem;
+        }
+
+        > *.app > *.content
+        {
+            min-width: 24rem;
+            padding-left: 4rem;
+            overflow: visible;
+        }
     }
-
-    body > *.app > *.sidebar
-    {
-        display: block;
-        flex: 0 0 16rem;
-        width: 16rem;
-    }
-
-    body > *.app > *.content
-    {
-        overflow: visible;
-    }
-
-    body > header.app > div.content > *,
-    body > div.app > main.content
-    {
-        padding-left: 4rem;
-    }
-}
-
-body header nav
-{
-    width: 100%;
-    min-height: 1.5rem;
-    position: relative;
-
-    @include backdrop-blur;
-
-    padding: 0.25rem 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    overflow: hidden;
-    overflow-wrap: break-word;
 }
 
 body main
