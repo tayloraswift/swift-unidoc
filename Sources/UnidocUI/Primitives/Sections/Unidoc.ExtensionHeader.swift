@@ -6,7 +6,7 @@ extension Unidoc
     struct ExtensionHeader:Identifiable
     {
         private
-        let heading:Heading
+        let heading:ExtensionHeading
         private
         let culture:Unidoc.LinkReference<Unidoc.CultureVertex>
         private
@@ -15,7 +15,7 @@ extension Unidoc
         let id:String
 
         init(
-            heading:Heading,
+            heading:ExtensionHeading,
             culture:Unidoc.LinkReference<Unidoc.CultureVertex>,
             where clause:Unidoc.WhereClause?,
             id:String)

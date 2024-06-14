@@ -70,9 +70,9 @@ extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
                 volume: context.volume,
                 tree: tree)
 
-            let conformers:Unidoc.ConformingTypes = try .init(context,
-                groups: groups,
-                bias: vertex.culture)
+            let conformers:Unidoc.ConformingTypes = try .init(groups: groups,
+                bias: vertex.culture,
+                with: context)
 
             let page:ConformersPage = try .init(
                 sidebar: sidebar,
