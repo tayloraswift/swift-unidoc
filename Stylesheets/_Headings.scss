@@ -22,6 +22,7 @@ h6[id], h6[name]
 {
     > a
     {
+        position: relative;
         color: inherit;
     }
 
@@ -32,7 +33,7 @@ h6[id], h6[name]
             content: '$';
 
             position: absolute;
-            margin-left: -1em;
+            margin-left: -1.6rem;
 
             font-weight: 400;
             font-family: $typeface-monospace;
@@ -47,21 +48,6 @@ h6[id], h6[name]
             opacity: 1;
         }
     }
-}
-
-h1[id]:target::before, h1[name]:target::before,
-h2[id]:target::before, h2[name]:target::before,
-h3[id]:target::before, h3[name]:target::before,
-h4[id]:target::before, h4[name]:target::before,
-h5[id]:target::before, h5[name]:target::before,
-h6[id]:target::before, h6[name]:target::before,
-dt[id]:target::before, dt[name]:target::before,
-li[id]:target::before
-{
-    content: '';
-    display: block;
-    height: 100px;
-    margin: -100px 0 0;
 }
 
 h1
