@@ -1,40 +1,38 @@
 import HTML
-import Signatures
 import Unidoc
 
 extension Unidoc
 {
-    struct ConformingTypesHeader
+    struct ConformingTypesHeader:Identifiable
     {
-        let context:Unidoc.PeripheralPageContext
-
         private
         let heading:ConformingTypesHeading
+        private
+        let culture:Unidoc.LinkReference<Unidoc.CultureVertex>
 
-        init(_ context:Unidoc.PeripheralPageContext,
-            heading:ConformingTypesHeading)
+        let id:String
+
+        init(
+            heading:ConformingTypesHeading,
+            culture:Unidoc.LinkReference<Unidoc.CultureVertex>,
+            id:String)
         {
-            self.context = context
             self.heading = heading
+            self.culture = culture
+            self.id = id
         }
     }
 }
-extension Unidoc.ConformingTypesHeader:HTML.OutputStreamable
+extension Unidoc.ConformingTypesHeader:HTML.OutputStreamableAnchor
 {
     static
-    func += (h2:inout HTML.ContentEncoder, self:Self)
+    func += (header:inout HTML.ContentEncoder, self:Self)
     {
-        let module:Unidoc.Scalar
-
-        switch self.heading
+        header[.h2]
         {
-        case .citizens(in: let culture):    module = culture
-        case .available(in: let culture):   module = culture
-        case .extension(in: let culture):   module = culture
+            $0[.a] { $0.href = "#\(self.id)" } = "Conforming types"
+            $0 += " in "
+            $0[.a] { $0.href = self.culture.target?.url } = "\(self.culture.vertex.module.id)"
         }
-
-        h2 += "Conforming types in "
-
-        h2 ?= self.context.link(module: module)
     }
 }

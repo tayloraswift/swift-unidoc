@@ -1,6 +1,6 @@
-extension Unidoc.ExtensionHeader
+extension Unidoc
 {
-    enum Heading:Unidoc.BiasedHeading
+    enum ExtensionHeading:BiasedHeading
     {
         case citizens(in:Unidoc.Scalar)
         case available(in:Unidoc.Scalar)
