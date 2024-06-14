@@ -11,10 +11,14 @@ extension Unidoc
         let count:Int
 
         private
-        init(lists:Lists, count:Int)
+        let name:String?
+
+        private
+        init(lists:Lists, count:Int, name:String?)
         {
             self.lists = lists
             self.count = count
+            self.name = name
         }
     }
 }
@@ -46,8 +50,9 @@ extension Unidoc.SegregatedBody:Unidoc.CollapsibleContent
 }
 extension Unidoc.SegregatedBody
 {
-    init?(_ context:Unidoc.InternalPageContext,
-        group:__shared [Unidoc.Scalar])
+    init?(group:__shared [Unidoc.Scalar],
+        name:String? = nil,
+        with context:borrowing Unidoc.InternalPageContext)
     {
         if  group.isEmpty
         {
@@ -91,7 +96,7 @@ extension Unidoc.SegregatedBody
             }
         }
 
-        self.init(lists: lists, count: group.count)
+        self.init(lists: lists, count: group.count, name: name)
     }
 }
 extension Unidoc.SegregatedBody
@@ -101,26 +106,27 @@ extension Unidoc.SegregatedBody
         dynamicMember keyPath:
         KeyPath<Lists, Unidoc.SegregatedList>) -> Unidoc.SegregatedSection?
     {
-        let items:Unidoc.SegregatedList = self.lists[keyPath: keyPath]
-        if  items.isEmpty
+        let list:Unidoc.SegregatedList = self.lists[keyPath: keyPath]
+        if  list.isEmpty
         {
             return nil
         }
 
-        let heading:String
+        let type:Unidoc.SegregatedType
+
         switch keyPath
         {
-        case \.protocols:               heading = "Protocols"
-        case \.types:                   heading = "Types"
-        case \.typealiases:             heading = "Typealiases"
-        case \.macros:                  heading = "Macros"
-        case \.membersOnType:           heading = "Type members"
-        case \.membersOnInstance:       heading = "Instance members"
-        case \.globals:                 heading = "Globals"
-        default:                        heading = "?"
+        case \.protocols:               type = .protocols
+        case \.types:                   type = .types
+        case \.typealiases:             type = .typealiases
+        case \.macros:                  type = .macros
+        case \.membersOnType:           type = .membersOnType
+        case \.membersOnInstance:       type = .membersOnInstance
+        case \.globals:                 type = .globals
+        default:                        return nil
         }
 
-        return .init(heading: heading, items: items)
+        return .init(list: list, type: type, in: self.name)
     }
 }
 extension Unidoc.SegregatedBody:HTML.OutputStreamable

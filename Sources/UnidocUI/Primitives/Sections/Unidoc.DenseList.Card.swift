@@ -10,25 +10,25 @@ extension Unidoc.DenseList
         let target:Unidoc.LinkTarget
         let decl:Unidoc.DeclVertex
         let path:UnqualifiedPath
-        let constraints:Unidoc.ConstraintsList?
+        let `where`:Unidoc.WhereClause?
 
         private
         init(target:Unidoc.LinkTarget,
             decl:Unidoc.DeclVertex,
             path:UnqualifiedPath,
-            constraints:Unidoc.ConstraintsList?)
+            where clause:Unidoc.WhereClause?)
         {
             self.target = target
             self.decl = decl
             self.path = path
-            self.constraints = constraints
+            self.where = clause
         }
     }
 }
 extension Unidoc.DenseList.Card
 {
     init?(_ type:Unidoc.Scalar,
-        constraints:[GenericConstraint<Unidoc.Scalar?>] = [],
+        requirements:[GenericConstraint<Unidoc.Scalar?>] = [],
         with context:some Unidoc.VertexContext)
     {
         guard
@@ -43,7 +43,7 @@ extension Unidoc.DenseList.Card
         self.init(target: target,
             decl: reference.vertex,
             path: path,
-            constraints: .init(context, constraints: constraints))
+            where: requirements | context)
     }
 }
 extension Unidoc.DenseList.Card:HTML.OutputStreamableAnchor
@@ -57,6 +57,6 @@ extension Unidoc.DenseList.Card:HTML.OutputStreamable
     {
         li[.a] { $0.href = "#\(self.id)" }
         li[.code, { $0.class = "decl" }] { $0[.a] { $0.link = self.target } = self.path }
-        li[.div, .code] { $0.class = "constraints" } = self.constraints
+        li[.div, .code] { $0.class = "constraints" } = self.where
     }
 }
