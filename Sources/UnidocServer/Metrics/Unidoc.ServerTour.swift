@@ -1,5 +1,4 @@
 import HTTP
-import UnidocProfiling
 
 extension Unidoc
 {

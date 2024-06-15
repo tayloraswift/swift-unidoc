@@ -1,4 +1,4 @@
-import UnidocProfiling
+import PieCharts
 import UnidocRecords
 
 extension Unidoc.Stats.Coverage:PieValues

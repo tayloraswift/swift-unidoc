@@ -2,7 +2,7 @@ import GitHubAPI
 import HTTP
 import HTTPServer
 import MongoDB
-import UnidocProfiling
+import PieCharts
 import UnidocRender
 
 extension Unidoc

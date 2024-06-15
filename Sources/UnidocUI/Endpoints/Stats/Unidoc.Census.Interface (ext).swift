@@ -1,5 +1,4 @@
-import BSON
-import UnidocProfiling
+import PieCharts
 import UnidocRecords
 
 extension Unidoc.Census.Interface:PieSectorKey

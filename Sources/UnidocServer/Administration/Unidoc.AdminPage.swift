@@ -1,11 +1,11 @@
 import HTML
 import Durations
 import HTTP
+import PieCharts
 import Media
 import MongoDB
 import UnidocUI
 import UnidocRender
-import UnidocProfiling
 import URI
 
 extension Unidoc

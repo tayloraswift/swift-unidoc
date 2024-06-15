@@ -45,6 +45,7 @@ let package:Package = .init(
 
         .library(name: "Multiparts", targets: ["Multiparts"]),
 
+        .library(name: "PieCharts", targets: ["PieCharts"]),
         .library(name: "PackageGraphs", targets: ["PackageGraphs"]),
         .library(name: "PackageMetadata", targets: ["PackageMetadata"]),
 
@@ -316,6 +317,11 @@ let package:Package = .init(
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
+        .target(name: "PieCharts",
+            dependencies: [
+                .product(name: "HTML", package: "swift-dom"),
+            ]),
+
         .target(name: "PackageGraphs",
             dependencies: [
                 .target(name: "SymbolGraphs"),
@@ -508,11 +514,8 @@ let package:Package = .init(
 
         .target(name: "UnidocProfiling",
             dependencies: [
-                .target(name: "HTTPServer"),
-                .target(name: "MarkdownRendering"),
-                .target(name: "Media"),
-                .target(name: "UA"),
-                .target(name: "URI"),
+                .target(name: "HTTP"),
+                .target(name: "ISO"),
             ]),
 
         .target(name: "UnidocQueries",
@@ -565,9 +568,9 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "DynamicTime"),
                 .target(name: "GitHubAPI"),
+                .target(name: "PieCharts"),
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocAPI"),
-                .target(name: "UnidocProfiling"),
                 .target(name: "UnidocQueries"),
                 .target(name: "URI"),
             ]),
