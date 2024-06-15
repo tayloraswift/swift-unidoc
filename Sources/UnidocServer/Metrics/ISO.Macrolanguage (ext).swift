@@ -1,5 +1,5 @@
 import ISO
-import UnidocProfiling
+import PieCharts
 
 extension ISO.Macrolanguage:Identifiable
 {

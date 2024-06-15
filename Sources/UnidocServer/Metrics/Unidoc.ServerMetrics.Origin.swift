@@ -1,4 +1,4 @@
-import UnidocProfiling
+import PieCharts
 
 extension Unidoc.ServerMetrics
 {

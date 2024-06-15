@@ -4,7 +4,6 @@ import IP
 import NIOHPACK
 import NIOHTTP1
 import UA
-import UnidocProfiling
 import UnidocRecords
 import URI
 

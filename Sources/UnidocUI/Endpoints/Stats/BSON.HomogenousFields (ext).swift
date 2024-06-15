@@ -1,5 +1,5 @@
 import BSON
-import UnidocProfiling
+import PieCharts
 import UnidocRecords
 
 extension BSON.HomogenousFields:PieValues where Key:PieSectorKey, Value == Int

@@ -2,7 +2,6 @@ import GitHubAPI
 import HTTP
 import MongoDB
 import UnidocRender
-import UnidocProfiling
 
 extension Unidoc
 {

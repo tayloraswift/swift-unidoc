@@ -1,13 +1,13 @@
 import GitHubAPI
 import HTML
 import MarkdownRendering
+import PieCharts
 import SemanticVersions
 import SHA1
 import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocDB
-import UnidocProfiling
 import UnidocRecords
 import UnixTime
 import URI

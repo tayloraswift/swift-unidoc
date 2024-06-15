@@ -4,7 +4,6 @@ import Media
 import MongoDB
 import UnidocUI
 import UnidocRender
-import UnidocProfiling
 import URI
 
 extension Unidoc

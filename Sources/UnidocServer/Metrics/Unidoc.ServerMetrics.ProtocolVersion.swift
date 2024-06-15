@@ -1,5 +1,5 @@
 import HTTP
-import UnidocProfiling
+import PieCharts
 
 extension Unidoc.ServerMetrics
 {
