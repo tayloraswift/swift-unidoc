@@ -245,6 +245,8 @@ if (intrapageNavigator !== null && main !== null) {
     let headingElements: HTMLElement[] = [];
     let listElements: HTMLLIElement[] = [];
 
+    let culturesSeen: Set<string> = new Set();
+
     main.querySelectorAll('header, h2[id], h3[id], h4[id]').forEach((
             header: Element,
             key: number,
@@ -275,10 +277,16 @@ if (intrapageNavigator !== null && main !== null) {
                 return;
             }
 
-            const module: HTMLSpanElement = document.createElement('span');
-            module.textContent = culture.textContent;
+            //  If we have already seen this culture, we can skip rendering the module name,
+            //  to save vertical space.
+            if (!culturesSeen.has(culture.href)) {
+                culturesSeen.add(culture.href);
 
-            anchor.appendChild(module);
+                const module: HTMLSpanElement = document.createElement('span');
+                module.textContent = culture.textContent;
+
+                anchor.appendChild(module);
+            }
 
             //  Find the generic where clause, if present.
             const clause: HTMLDivElement | null = header.querySelector('h2 + div');
