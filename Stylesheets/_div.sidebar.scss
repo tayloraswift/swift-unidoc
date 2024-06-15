@@ -7,7 +7,7 @@ div.sidebar
         margin-top: 10rem;
         position: sticky;
         top: 3rem;
-        padding: 0 1rem 1rem 0;
+        padding: 0 1rem 1rem 1rem;
 
         list-style: none;
 
@@ -16,6 +16,7 @@ div.sidebar
         // account for `top` and the bottom `padding`
         max-height: calc(100vh - 3rem - 1rem);
         overflow-y: auto;
+        overflow-x: hidden;
 
         li
         {
@@ -79,6 +80,8 @@ div.sidebar
         li.group
         {
             margin-top: 0.5rem;
+            display: flex;
+            align-content: center;
 
             > a
             {
@@ -98,7 +101,9 @@ div.sidebar
                 {
                     font-style: normal;
                     font-size: 0.75rem;
-                    margin-bottom: 0.2em;
+                    margin: 0.2em 0;
+
+                    overflow-wrap: anywhere;
                 }
             }
         }
