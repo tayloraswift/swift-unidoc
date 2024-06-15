@@ -7,11 +7,15 @@ div.sidebar
         margin-top: 10rem;
         position: sticky;
         top: 3rem;
-        padding: 0 1rem;
+        padding: 0 1rem 1rem 0;
 
         list-style: none;
 
         font-size: 0.875rem;
+
+        // account for `top` and the bottom `padding`
+        max-height: calc(100vh - 3rem - 1rem);
+        overflow-y: auto;
 
         li
         {
