@@ -26,9 +26,9 @@ extension Unidoc
 }
 extension Unidoc.ConformingTypes
 {
-    init(_ context:Unidoc.PeripheralPageContext,
-        groups:[Unidoc.AnyGroup],
-        bias culture:Unidoc.Scalar) throws
+    init(groups:[Unidoc.AnyGroup],
+        bias culture:Unidoc.Scalar,
+        with context:Unidoc.PeripheralPageContext) throws
     {
         self.init(context, culture: culture)
 
@@ -56,10 +56,20 @@ extension Unidoc.ConformingTypes:HTML.OutputStreamable
     {
         for group:Unidoc.ConformerGroup in self.conformers
         {
+            guard
+            let culture:Unidoc.LinkReference<Unidoc.CultureVertex> = self.context[
+                culture: group.culture]
+            else
+            {
+                continue
+            }
+
             html[.section, { $0.class = "group conformer" }]
             {
-                $0[.h2] = Unidoc.ConformingTypesHeader.init(self.context,
-                    heading: .init(culture: group.culture, bias: .culture(self.culture)))
+                $0[.header] = Unidoc.ConformingTypesHeader.init(
+                    heading: .init(culture: group.culture, bias: .culture(self.culture)),
+                    culture: culture,
+                    id: "se:\(culture.vertex.module.id)")
 
                 $0[.ul]
                 {

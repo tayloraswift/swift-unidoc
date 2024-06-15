@@ -245,30 +245,58 @@ if (intrapageNavigator !== null && main !== null) {
     let headingElements: HTMLElement[] = [];
     let listElements: HTMLLIElement[] = [];
 
-    main.querySelectorAll('h2[id], h3[id], h4[id]').forEach((
-            heading: Element,
+    main.querySelectorAll('header, h2[id], h3[id], h4[id]').forEach((
+            header: Element,
             key: number,
             all: NodeListOf<Element>
         ) => {
 
-        if (!(heading instanceof HTMLElement)) {
+        if (!(header instanceof HTMLElement)) {
             return;
         }
 
-        //  Create a link to the heading.
-        const anchor: HTMLAnchorElement = document.createElement('a');
-        anchor.href = '#' + heading.id;
-        anchor.textContent = heading.textContent;
-
         //  Create a list item for the link.
         const item: HTMLLIElement = document.createElement('li');
-        item.classList.add(heading.tagName.toLowerCase());
+
+        //  Create a link to the heading.
+        const anchor: HTMLAnchorElement = document.createElement('a');
+        anchor.href = '#' + header.id;
+
+        if (header instanceof HTMLHeadingElement) {
+            item.classList.add(header.tagName.toLowerCase());
+            anchor.textContent = header.textContent;
+        } else {
+            item.classList.add('group');
+
+            //  Find the module name.
+            const culture: HTMLAnchorElement | null = header.querySelector('h2 a[href^="/"]');
+
+            if (culture === null) {
+                return;
+            }
+
+            const module: HTMLSpanElement = document.createElement('span');
+            module.textContent = culture.textContent;
+
+            anchor.appendChild(module);
+
+            //  Find the generic where clause, if present.
+            const clause: HTMLDivElement | null = header.querySelector('h2 + div');
+
+            if (clause !== null) {
+                const where: HTMLElement = document.createElement('code');
+                where.textContent = clause.textContent;
+
+                anchor.appendChild(where);
+            }
+        }
+
         item.appendChild(anchor);
 
         //  Append the list item to the intrapage navigator.
         list.appendChild(item);
 
-        headingElements.push(heading);
+        headingElements.push(header);
         listElements.push(item);
     });
 

@@ -8,11 +8,14 @@ extension Unidoc
     {
         private
         var lists:Lists
+        private
+        let name:String
 
         private
-        init(lists:Lists)
+        init(lists:Lists, name:String)
         {
             self.lists = lists
+            self.name = name
         }
     }
 }
@@ -37,26 +40,11 @@ extension Unidoc.ExtensionBody
 }
 extension Unidoc.ExtensionBody
 {
-    // var visibleItems:Int
-    // {
-    //     self.lists.conformances.visible.count
-    //     + self.lists.protocols.visible.count
-    //     + self.lists.types.visible.count
-    //     + self.lists.typealiases.visible.count
-    //     + self.lists.membersOnType.visible.count
-    //     + self.lists.membersOnInstance.visible.count
-    //     + self.lists.featuresOnType.visible.count
-    //     + self.lists.featuresOnInstance.visible.count
-    //     + self.lists.subtypes.visible.count
-    //     + self.lists.subclasses.visible.count
-    //     + self.lists.overriddenBy.visible.count
-    //     + self.lists.restatedBy.visible.count
-    //     + self.lists.defaultImplementations.visible.count
-    // }
-
-    init?(_ context:Unidoc.InternalPageContext,
+    init?(
         group:borrowing Unidoc.ExtensionGroup,
-        decl:Phylum.DeclFlags)
+        decl:Phylum.DeclFlags,
+        name:String,
+        with context:borrowing Unidoc.InternalPageContext)
     {
         if  group.isEmpty
         {
@@ -167,7 +155,7 @@ extension Unidoc.ExtensionBody
             }
         }
 
-        self.init(lists: lists)
+        self.init(lists: lists, name: name)
     }
 }
 
@@ -178,32 +166,33 @@ extension Unidoc.ExtensionBody
         dynamicMember keyPath:
         KeyPath<Lists, Unidoc.SegregatedList>) -> Unidoc.SegregatedSection?
     {
-        let items:Unidoc.SegregatedList = self.lists[keyPath: keyPath]
-        if  items.isEmpty
+        let list:Unidoc.SegregatedList = self.lists[keyPath: keyPath]
+        if  list.isEmpty
         {
             return nil
         }
 
-        let heading:String
+        let type:Unidoc.SegregatedType
+
         switch keyPath
         {
-        case \.conformances:            heading = "Conformances"
-        case \.protocols:               heading = "Protocols"
-        case \.types:                   heading = "Types"
-        case \.typealiases:             heading = "Typealiases"
-        case \.membersOnType:           heading = "Type members"
-        case \.membersOnInstance:       heading = "Instance members"
-        case \.featuresOnType:          heading = "Type features"
-        case \.featuresOnInstance:      heading = "Instance features"
-        case \.subtypes:                heading = "Subtypes"
-        case \.subclasses:              heading = "Subclasses"
-        case \.overriddenBy:            heading = "Overridden by"
-        case \.restatedBy:              heading = "Restated by"
-        case \.defaultImplementations:  heading = "Default implementations"
-        default:                        heading = "?"
+        case \.conformances:            type = .conformances
+        case \.protocols:               type = .protocols
+        case \.types:                   type = .types
+        case \.typealiases:             type = .typealiases
+        case \.membersOnType:           type = .membersOnType
+        case \.membersOnInstance:       type = .membersOnInstance
+        case \.featuresOnType:          type = .featuresOnType
+        case \.featuresOnInstance:      type = .featuresOnInstance
+        case \.subtypes:                type = .subtypes
+        case \.subclasses:              type = .subclasses
+        case \.overriddenBy:            type = .overriddenBy
+        case \.restatedBy:              type = .restatedBy
+        case \.defaultImplementations:  type = .defaultImplementations
+        default:                        return nil
         }
 
-        return .init(heading: heading, items: items)
+        return .init(list: list, type: type, in: self.name)
     }
 }
 extension Unidoc.ExtensionBody:HTML.OutputStreamable

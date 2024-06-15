@@ -71,6 +71,33 @@ div.sidebar
         {
             margin-left: 2rem;
         }
+
+        li.group
+        {
+            margin-top: 0.5rem;
+
+            > a
+            {
+                > span
+                {
+                    font-weight: 700;
+                    font-style: italic;
+                }
+
+                > span,
+                > code
+                {
+                    display: block;
+                }
+
+                > code
+                {
+                    font-style: normal;
+                    font-size: 0.75rem;
+                    margin-bottom: 0.2em;
+                }
+            }
+        }
     }
 
     div.nountree

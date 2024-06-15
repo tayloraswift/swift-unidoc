@@ -25,7 +25,7 @@ extension Unidoc.DenseList.Iterator.Cards<Unidoc.ConformingType>
         while   let type:Unidoc.ConformingType = self.base.next()
         {
             if  let next:Unidoc.DenseList.Card = .init(type.id,
-                    constraints: type.constraints,
+                    requirements: type.constraints,
                     with: context)
             {
                 self.next = next

@@ -121,7 +121,7 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
             switch self.apex.module.type
             {
             case .binary, .regular, .macro:
-                $0[.h2] = "Module Information"
+                $0[.h2] = "Module information"
 
                 let decls:Int = self.apex.census.unweighted.decls.total
                 let symbols:Int = self.apex.census.weighted.decls.total

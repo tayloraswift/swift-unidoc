@@ -6,44 +6,76 @@ extension Unidoc
 {
     struct ExtensionSection
     {
-        private
-        let context:Unidoc.InternalPageContext
-        let heading:ExtensionHeading
-        let constraints:[GenericConstraint<Unidoc.Scalar?>]
+        let header:ExtensionHeader
         let body:ExtensionBody
 
         private
-        init(
-            context:Unidoc.InternalPageContext,
-            heading:ExtensionHeading,
-            constraints:[GenericConstraint<Unidoc.Scalar?>],
-            body:ExtensionBody)
+        init(header:ExtensionHeader, body:ExtensionBody)
         {
-            self.context = context
-            self.heading = heading
-            self.constraints = constraints
+            self.header = header
             self.body = body
         }
     }
 }
 extension Unidoc.ExtensionSection
 {
-    init?(_ context:Unidoc.InternalPageContext,
-        group:borrowing Unidoc.ExtensionGroup,
+    //  https://github.com/apple/swift/issues/74438
+    init?(group:borrowing Unidoc.ExtensionGroup,
         decl:Phylum.DeclFlags,
-        bias:Unidoc.Bias)
+        bias:Unidoc.Bias,
+        with context:__shared Unidoc.InternalPageContext)
     {
         guard
-        let body:Unidoc.ExtensionBody = .init(context, group: group, decl: decl)
+        let culture:Unidoc.LinkReference<Unidoc.CultureVertex> = context[culture: group.culture]
         else
         {
             return nil
         }
 
-        self.init(
-            context: context,
-            heading: .init(culture: group.culture, bias: bias),
-            constraints: group.constraints,
+        var name:String = "\(culture.vertex.module.id)"
+        var first:Bool = true
+
+        for requirement:GenericConstraint<Unidoc.Scalar?> in group.constraints
+        {
+            let requirement:Unidoc.WhereClause.Requirement = requirement | context
+
+            if  first
+            {
+                first = false
+                name += " where "
+            }
+            else
+            {
+                name += ", "
+            }
+
+            name += requirement.parameter
+
+            switch requirement.what
+            {
+            case .conformer:    name += ":"
+            case .subclass:     name += ":"
+            case .equal:        name += " == "
+            }
+
+            name += "\(requirement.whom.display)"
+        }
+
+        guard
+        let body:Unidoc.ExtensionBody = .init(group: group,
+            decl: decl,
+            name: name,
+            with: context)
+        else
+        {
+            return nil
+        }
+
+        self.init(header: .init(
+                heading: .init(culture: group.culture, bias: bias),
+                culture: culture,
+                where: group.constraints | context,
+                id: "se:\(name)"),
             body: body)
     }
 }
@@ -52,33 +84,7 @@ extension Unidoc.ExtensionSection:HTML.OutputStreamable
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        section[.h2]
-        {
-            let module:Unidoc.Scalar
-
-            switch self.heading
-            {
-            case .citizens(in: let culture):
-                $0 += "Citizens in "
-                module = culture
-
-            case .available(in: let culture):
-                $0 += "Available in "
-                module = culture
-
-            case .extension(in: let culture):
-                $0 += "Extension in "
-                module = culture
-            }
-
-            $0 ?= self.context.link(module: module)
-        }
-
-        section[.div, .code]
-        {
-            $0.class = "constraints"
-        } = Unidoc.ConstraintsList.init(self.context, constraints: self.constraints)
-
+        section[.header] = self.header
         section += self.body
     }
 }

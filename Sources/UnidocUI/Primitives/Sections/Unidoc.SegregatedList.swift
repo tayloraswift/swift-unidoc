@@ -36,8 +36,7 @@ extension Unidoc.SegregatedList:ExpressibleByArrayLiteral
 }
 extension Unidoc.SegregatedList
 {
-    init?(_ context:borrowing Unidoc.InternalPageContext,
-        group:__shared [Unidoc.Scalar])
+    init?(group:__shared [Unidoc.Scalar], with context:borrowing Unidoc.InternalPageContext)
     {
         if  group.isEmpty
         {
