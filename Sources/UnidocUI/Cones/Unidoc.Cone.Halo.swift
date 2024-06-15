@@ -268,7 +268,9 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
             }
         }
 
-        if  let body:Unidoc.SegregatedBody = .init(self.context, group: self.uncategorized)
+        if  let uncategorized:Unidoc.SegregatedBody = .init(group: self.uncategorized,
+                name: "uncategorized",
+                with: self.context)
         {
             //  This is an uncategorized section, so let’s categorize it.
             html[.section]
@@ -276,10 +278,11 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
                 $0.class = "group segregated"
             } = Unidoc.CollapsibleSection<Unidoc.SegregatedBody>.init(
                 heading: .uncategorized,
-                content: body)
+                content: uncategorized)
         }
 
-        if  let modules:Unidoc.IntegratedList = .init(self.context, items: self.modules)
+        if  let modules:Unidoc.IntegratedList = .init(items: self.modules,
+                with: self.context)
         {
             html[.section]
             {
@@ -288,7 +291,8 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
                 heading: self.bias == .package ? .allModules : .otherModules,
                 content: modules)
         }
-        if  let products:Unidoc.IntegratedList = .init(self.context, items: self.products)
+        if  let products:Unidoc.IntegratedList = .init(items: self.products,
+                with: self.context)
         {
             html[.section]
             {
@@ -299,7 +303,8 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
         }
 
         if  let decl:Phylum.DeclFlags = self.decl,
-            let body:Unidoc.SegregatedList = .init(self.context, group: self.superforms)
+            let body:Unidoc.SegregatedList = .init(group: self.superforms,
+                with: self.context)
         {
             let heading:AutomaticHeading
 
@@ -331,7 +336,8 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
                 heading: heading,
                 content: body)
         }
-        if  let body:Unidoc.SegregatedList = .init(self.context, group: self.inhabitants)
+        if  let body:Unidoc.SegregatedList = .init(group: self.inhabitants,
+                with: self.context)
         {
             html[.section]
             {
@@ -340,7 +346,9 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
                 heading: .allCases,
                 content: body)
         }
-        if  let body:Unidoc.SegregatedBody = .init(self.context, group: self.requirements)
+        if  let body:Unidoc.SegregatedBody = .init(group: self.requirements,
+                name: "requirements",
+                with: self.context)
         {
             html[.section]
             {
@@ -352,7 +360,8 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
 
         let extensionsEmpty:Bool = self.extensions.allSatisfy(\.isEmpty)
 
-        if  let curation:Unidoc.IntegratedList = .init(self.context, items: self.curation)
+        if  let curation:Unidoc.IntegratedList = .init(items: self.curation,
+                with: self.context)
         {
             let last:Bool = self.peerList.isEmpty && extensionsEmpty
 
@@ -387,7 +396,7 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
         }
 
         if  case .case = decl.phylum,
-            let peers:Unidoc.SegregatedList = .init(self.context, group: self.peerList)
+            let peers:Unidoc.SegregatedList = .init(group: self.peerList, with: self.context)
         {
             html[.section]
             {
@@ -398,7 +407,7 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
                 window: extensionsEmpty ? nil : 12 ... 12)
         }
         else if
-            let peers:Unidoc.SegregatedBody = .init(self.context, group: self.peerList)
+            let peers:Unidoc.SegregatedBody = .init(group: self.peerList, with: self.context)
         {
             html[.section]
             {
@@ -416,10 +425,10 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
             html[.section]
             {
                 $0.class = "group segregated extension"
-            } = Unidoc.ExtensionSection.init(self.context,
-                group: group,
+            } = Unidoc.ExtensionSection.init(group: group,
                 decl: decl,
-                bias: self.bias)
+                bias: self.bias,
+                with: self.context)
         }
     }
 }

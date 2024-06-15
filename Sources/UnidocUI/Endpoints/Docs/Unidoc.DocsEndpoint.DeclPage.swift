@@ -240,13 +240,12 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
                 }
             }
 
-            if  let constraints:Unidoc.ConstraintsList = .init(self.context,
-                    constraints: self.cone.halo.peerConstraints)
+            if  let clause:Unidoc.WhereClause = self.cone.halo.peerConstraints | self.context
             {
                 $0[.details, { $0.open = true }]
                 {
                     $0[.summary] = "Constraints"
-                    $0[.div, .code] { $0.class = "constraints" } = constraints
+                    $0[.div, .code] { $0.class = "constraints" } = clause
                 }
             }
         }

@@ -19,8 +19,7 @@ extension Unidoc
 }
 extension Unidoc.IntegratedList
 {
-    init?(_ context:Unidoc.InternalPageContext,
-        items:[Unidoc.Scalar])
+    init?(items:[Unidoc.Scalar], with context:Unidoc.InternalPageContext)
     {
         if  items.isEmpty
         {
