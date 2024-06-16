@@ -18,7 +18,7 @@ extension Unidoc
 extension Unidoc.ClientGuess
 {
     private static
-    func from(acceptLanguage:String?,
+    func from(acceptLanguage:HTTP.AcceptLanguage?,
         userAgent:String?,
         referer:String?) -> Self
     {
@@ -105,9 +105,7 @@ extension Unidoc.ClientGuess
         }
 
         guard
-        let acceptLanguage:String,
-        let acceptLanguage:HTTP.AcceptLanguage = .init(acceptLanguage),
-        let locale:HTTP.Locale = acceptLanguage.dominant
+        let locale:HTTP.Locale = acceptLanguage?.dominant
         else
         {
             //  Didn’t send a locale: definitely a bot.
@@ -187,7 +185,8 @@ extension Unidoc.ClientGuess
     func from(_ headers:HTTPHeaders) -> Self
     {
         .from(
-            acceptLanguage: headers["accept-language"].last,
+            acceptLanguage: headers["accept-language"].last.map(
+                HTTP.AcceptLanguage.init(rawValue:)),
             userAgent: headers["user-agent"].last,
             referer: headers["referer"].last)
     }
@@ -195,7 +194,8 @@ extension Unidoc.ClientGuess
     func from(_ headers:HPACKHeaders) -> Self
     {
         .from(
-            acceptLanguage: headers["accept-language"].last,
+            acceptLanguage: headers["accept-language"].last.map(
+                HTTP.AcceptLanguage.init(rawValue:)),
             userAgent: headers["user-agent"].last,
             referer: headers["referer"].last)
     }
