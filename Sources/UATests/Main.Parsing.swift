@@ -9,9 +9,6 @@ extension Main
     {
     }
 }
-
-import Grammar
-
 extension Main.Parsing:TestBattery
 {
     private static

@@ -701,12 +701,6 @@ let package:Package = .init(
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "UnidocRecordsTests",
-            dependencies: [
-                .target(name: "UnidocRecords"),
-                .product(name: "BSONTesting", package: "swift-mongodb"),
-            ]),
-
         .executableTarget(name: "UnidocDBTests",
             dependencies: [
                 .target(name: "UnidocDB"),
@@ -716,12 +710,24 @@ let package:Package = .init(
                 .product(name: "MongoTesting", package: "swift-mongodb"),
             ]),
 
+        .executableTarget(name: "UnidocProfilingTests",
+            dependencies: [
+                .target(name: "UnidocProfiling"),
+                .product(name: "Testing_", package: "swift-grammar"),
+            ]),
+
         .executableTarget(name: "UnidocQueryTests",
             dependencies: [
                 .target(name: "UnidocQueries"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
+            ]),
+
+        .executableTarget(name: "UnidocRecordsTests",
+            dependencies: [
+                .target(name: "UnidocRecords"),
+                .product(name: "BSONTesting", package: "swift-mongodb"),
             ]),
 
         .executableTarget(name: "URITests",
