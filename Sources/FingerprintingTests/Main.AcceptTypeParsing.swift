@@ -1,6 +1,6 @@
 import HTTP
 import Testing_
-import UnidocProfiling
+import Fingerprinting
 
 extension Main
 {

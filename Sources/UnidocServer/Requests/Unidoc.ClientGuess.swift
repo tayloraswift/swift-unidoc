@@ -3,7 +3,7 @@ import HTTPServer
 import NIOHPACK
 import NIOHTTP1
 import UA
-import UnidocProfiling
+import Fingerprinting
 
 extension Unidoc
 {

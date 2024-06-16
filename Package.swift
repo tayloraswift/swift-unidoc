@@ -175,6 +175,12 @@ let package:Package = .init(
 
         .target(name: "DynamicTime"),
 
+        .target(name: "Fingerprinting",
+            dependencies: [
+                .target(name: "HTTP"),
+                .target(name: "ISO"),
+            ]),
+
         .target(name: "FNV1"),
 
         .target(name: "GitHubClient",
@@ -512,12 +518,6 @@ let package:Package = .init(
                 .target(name: "UnidocRecords"),
             ]),
 
-        .target(name: "UnidocProfiling",
-            dependencies: [
-                .target(name: "HTTP"),
-                .target(name: "ISO"),
-            ]),
-
         .target(name: "UnidocQueries",
             dependencies: [
                 .target(name: "UnidocDB"),
@@ -558,7 +558,7 @@ let package:Package = .init(
                 .target(name: "UnidocAssets_System"),
                 .target(name: "UnidocAPI"),
                 .target(name: "UnidocDB"),
-                .target(name: "UnidocProfiling"),
+                .target(name: "Fingerprinting"),
                 .target(name: "UnidocQueries"),
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocUI"),
@@ -591,6 +591,12 @@ let package:Package = .init(
         .executableTarget(name: "UCFTests",
             dependencies: [
                 .target(name: "UCF"),
+                .product(name: "Testing_", package: "swift-grammar"),
+            ]),
+
+        .executableTarget(name: "FingerprintingTests",
+            dependencies: [
+                .target(name: "Fingerprinting"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
@@ -708,12 +714,6 @@ let package:Package = .init(
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
-            ]),
-
-        .executableTarget(name: "UnidocProfilingTests",
-            dependencies: [
-                .target(name: "UnidocProfiling"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "UnidocQueryTests",
