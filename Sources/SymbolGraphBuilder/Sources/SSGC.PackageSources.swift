@@ -81,7 +81,7 @@ extension SSGC.PackageSources
             else
             {
                 //  directory, or some extensionless file we don’t care about
-                return
+                return true
             }
 
             if  file.extension == "swift"
@@ -92,6 +92,11 @@ extension SSGC.PackageSources
                     name: $1.stem)
 
                 self.snippets.append(snippet)
+                return true
+            }
+            else
+            {
+                return true
             }
         }
     }

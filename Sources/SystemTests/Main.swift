@@ -43,6 +43,7 @@ enum Main:TestMain, TestBattery
                     try path.directory.walk
                     {
                         files.append($0)
+                        return true
                     }
                     return files.compactMap(\.lastComponent)
                 } ?? []
@@ -60,6 +61,7 @@ enum Main:TestMain, TestBattery
                     try path.directory.walk
                     {
                         files.append($0)
+                        return true
                     }
                     return files.compactMap(\.lastComponent)
                 } ?? []

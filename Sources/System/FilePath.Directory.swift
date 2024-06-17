@@ -156,24 +156,29 @@ extension FilePath.Directory:Sequence
 }
 extension FilePath.Directory
 {
-    /// Recursively visits every node (including nested directories)
-    /// within this directory. The yielded file paths begin with the
-    /// same components as ``path``.
+    /// Recursively visits every node (including nested directories) within this directory. The
+    /// yielded file paths begin with the same components as ``path``.
     @inlinable public
-    func walk(with body:(FilePath) throws -> ()) throws
+    func walk(with body:(FilePath) throws -> Bool) throws
     {
         try self.walk { try body($0 / $1) }
     }
+    /// Recursively visits every node (including nested directories) within this directory. The
+    /// yielded directory paths begin with the same components as ``path``.
+    ///
+    /// If the closure returns `false`, descendants will not be visited.
     @inlinable public
-    func walk(with body:(FilePath.Directory, FilePath.Component) throws -> ()) throws
+    func walk(with body:(FilePath.Directory, FilePath.Component) throws -> Bool) throws
     {
         //  minimize the amount of file descriptors we have open
         var explore:[FilePath] = []
         for next:Result<FilePath.Component, any Error> in self
         {
             let next:FilePath.Component = try next.get()
-            try body(self, next)
-            explore.append(self / next)
+            if  try body(self, next)
+            {
+                explore.append(self / next)
+            }
         }
         for current:FilePath in explore
         {
