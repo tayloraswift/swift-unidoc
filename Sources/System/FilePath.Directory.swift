@@ -78,7 +78,7 @@ extension FilePath.Directory
     }
 
     /// Returns true if a directory exists at ``path``, returns false if
-    /// the file does not exist or is not a directory.
+    /// the file does not exist or is not a directory. This method follows symlinks.
     public
     func exists() -> Bool
     {

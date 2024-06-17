@@ -25,6 +25,22 @@ enum Main:TestMain, TestBattery
                     tests.expect(true: path.directory.exists())
                 }
             }
+            if  let tests:TestGroup = tests / "Exists" / "IsSymlink"
+            {
+                tests.do
+                {
+                    let path:FilePath = "Sources/SystemTests/directories/flat-link/a.txt"
+                    tests.expect(false: path.directory.exists())
+                }
+            }
+            if  let tests:TestGroup = tests / "Exists" / "IsSymlinkToDirectory"
+            {
+                tests.do
+                {
+                    let path:FilePath = "Sources/SystemTests/directories/flat-link"
+                    tests.expect(true: path.directory.exists())
+                }
+            }
             if  let tests:TestGroup = tests / "Exists" / "IsNotDirectory"
             {
                 tests.do
