@@ -15,7 +15,7 @@ extension Unidoc.ServerMetrics
         case discoursebot
         case barbiebot
         case barbie
-        case bratz
+        case droid
         case ahrefsbot
         case facebookexternalhit
         case script
@@ -52,7 +52,7 @@ extension Unidoc.ServerMetrics.Origin
         switch guess
         {
         case .barbie:                   return .barbie
-        case .bratz:                    return .bratz
+        case .droid:                    return .droid
         case .robot(let robot):
             switch robot
             {
@@ -85,7 +85,7 @@ extension Unidoc.ServerMetrics.Origin
         {
         case .barbiebot:            return .barbiebot
         case .barbie:               return .barbie
-        case .bratz:                return .bratz
+        case .droid:                return .droid
         case .cloudfront:           return .cloudfront
         case .github:               return .github
         case .githubVerified:       return .github
@@ -116,9 +116,9 @@ extension Unidoc.ServerMetrics.Origin:Identifiable
         case .baiduspider:          return "origin-baiduspider"
         case .bingbot:              return "origin-bingbot"
         case .bingbotVerified:      return "origin-bingbot verified"
-        case .bratz:                return "origin-bratz"
         case .cloudfront:           return "origin-cloudfront"
         case .discoursebot:         return "origin-discoursebot"
+        case .droid:                return "origin-droid"
         case .facebookexternalhit:  return "origin-facebookexternalhit"
         case .github:               return "origin-github"
         case .githubVerified:       return "origin-github verified"
@@ -139,8 +139,8 @@ extension Unidoc.ServerMetrics.Origin:PieSectorKey
         {
         case .barbiebot:            return "Barbiebots"
         case .barbie:               return "Barbies"
-        case .bratz:                return "Bratz"
         case .cloudfront:           return "Cloudfront"
+        case .droid:                return "Droid"
         case .github:               return "GitHub"
         case .githubVerified:       return "GitHub (verified)"
         case .googlebot:            return "Googlebot"

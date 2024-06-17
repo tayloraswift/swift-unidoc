@@ -5,7 +5,7 @@ extension Unidoc.ServerMetrics
     {
         case barbie
         case barbiebot
-        case bratz
+        case droid
         case googlebot
         case bingbot
         case search
@@ -22,7 +22,7 @@ extension Unidoc.ServerMetrics.Crosstab
         {
         case .barbie:       return "Barbies"
         case .barbiebot:    return "Barbiebots"
-        case .bratz:        return "Bratz"
+        case .droid:        return "Droids"
         case .googlebot:    return "Googlebot"
         case .bingbot:      return "Bingbot"
         case .search:       return "Other search engines"
