@@ -99,73 +99,21 @@ extension SSGC.PackageBuild
         flags:Flags = .init(),
         clean:Bool = false) throws -> Self
     {
-        //  The directory layout looks something like:
-        //
-        //  myworkspace/
-        //  ├── artifacts/
-        //  └── checkouts/
-        //      └── swift-example-package/
-        //          ├── .git/
-        //          ├── .build/
-        //          ├── .build.unidoc/
-        //          ├── Package.swift
-        //          └── ...
+        let checkout:SSGC.Checkout = try .checkout(package: package,
+            from: repository,
+            at: reference,
+            in: workspace,
+            clean: clean)
 
-        let clone:FilePath.Directory = workspace.checkouts / "\(package)"
-        if  clean
-        {
-            try clone.remove()
-        }
+        let version:AnyVersion = .init(reference)
+        let pin:SPM.DependencyPin = .init(identity: package,
+            location: .remote(url: repository),
+            revision: checkout.revision,
+            version: version)
 
-        print("Pulling repository from remote: \(repository)")
-
-        if  clone.exists()
-        {
-            try SystemProcess.init(command: "git", "-C", "\(clone)", "fetch")()
-        }
-        else
-        {
-            try SystemProcess.init(command: "git", "-C", "\(workspace.checkouts)",
-                "clone", repository, "\(package)", "--recurse-submodules")()
-        }
-
-        try SystemProcess.init(command: "git", "-C", "\(clone)",
-            "-c", "advice.detachedHead=false",
-            "checkout", "-f", reference,
-            "--recurse-submodules")()
-
-        let (readable, writable):(FileDescriptor, FileDescriptor) =
-            try FileDescriptor.pipe()
-
-        defer
-        {
-            try? writable.close()
-            try? readable.close()
-        }
-
-        try SystemProcess.init(command: "git", "-C", "\(clone)",
-            "rev-list", "-n", "1", reference,
-            stdout: writable)()
-
-        //  Note: output contains trailing newline
-        let stdout:String = try .init(unsafeUninitializedCapacity: 64)
-        {
-            try readable.read(into: .init($0))
-        }
-
-        if  let revision:SHA1 = .init(stdout.prefix(while: \.isHexDigit))
-        {
-            let version:AnyVersion = .init(reference)
-            let pin:SPM.DependencyPin = .init(identity: package,
-                location: .remote(url: repository),
-                revision: revision,
-                version: version)
-            return .init(id: .versioned(pin, reference: reference), root: clone, flags: flags)
-        }
-        else
-        {
-            fatalError("unimplemented")
-        }
+        return .init(id: .versioned(pin, reference: reference),
+            root: checkout.location,
+            flags: flags)
     }
 }
 extension SSGC.PackageBuild:SSGC.DocumentationBuild

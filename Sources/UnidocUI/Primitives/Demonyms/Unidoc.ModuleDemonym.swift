@@ -31,6 +31,7 @@ extension Unidoc.ModuleDemonym
         case (_, .snippet):     "Snippet"
         case (_, .system):      "System Module"
         case (_, .test):        "Test Module"
+        case (_, .book):        "Book"
         }
     }
 
@@ -48,6 +49,7 @@ extension Unidoc.ModuleDemonym
         case (_, .snippet):     "a snippet"
         case (_, .system):      "a system module"
         case (_, .test):        "a test module"
+        case (_, .book):        "a book"
         }
     }
 }

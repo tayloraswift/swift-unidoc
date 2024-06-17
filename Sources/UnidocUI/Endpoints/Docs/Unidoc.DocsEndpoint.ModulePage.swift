@@ -105,7 +105,7 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                 $0[.pre, .code] = Unidoc.ImportSection.init(module: self.apex.module.id)
             }
 
-        case .executable, .plugin, .snippet, .test:
+        case .executable, .plugin, .snippet, .test, .book:
             main[.section, { $0.class = "notice" }]
             {
                 $0[.p] = "This module is \(self.demonym.phrase). It cannot be imported."
