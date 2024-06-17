@@ -64,6 +64,13 @@ extension SSGC.Workspace
 extension SSGC.Workspace
 {
     public
+    func build(book build:SSGC.BookBuild,
+        with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
+    {
+        try self.build(some: build, toolchain: swift, logger: nil, status: nil)
+    }
+
+    public
     func build(package build:SSGC.PackageBuild,
         with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
     {
