@@ -20,9 +20,22 @@ extension Signature.Abridged
         self.init(utf8: [UInt8].init(string.utf8))
     }
 
-    @usableFromInline internal
-    init(utf8:[UInt8])
+    @usableFromInline
+    init(utf8:consuming [UInt8])
     {
+        //  There seems to be a bug in SwiftSyntax that causes misalignment of source ranges
+        //  when trimming leading trivia from syntax nodes. As a temporary workaround, we
+        //  replace all newline characters with space characters before parsing the source.
+        for i:Int in utf8.indices
+        {
+            switch utf8[i]
+            {
+            case 0x0A:  utf8[i] = 0x20
+            case 0x0D:  utf8[i] = 0x20
+            default:    continue
+            }
+        }
+
         let signature:SignatureSyntax = utf8.withUnsafeBufferPointer { .abridged($0) }
         let bytecode:Markdown.Bytecode = .init
         {

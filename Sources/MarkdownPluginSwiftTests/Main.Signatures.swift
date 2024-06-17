@@ -450,5 +450,38 @@ extension Main.Signatures:TestBattery
             <wbr>) rethrows
             """)
         }
+        if  let tests:TestGroup = tests / "Abridged" / "BackDeployed"
+        {
+            let decl:String = """
+            @backDeployed(before: macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0)
+
+            nonisolated func assertIsolated(\
+            _ message: @autoclosure () -> String = String(), \
+            file: StaticString = #fileID, \
+            line: UInt = #line)
+            """
+
+            let abridged:Signature<Never>.Abridged = .init(decl)
+
+            let rendered:HTML = .init { $0 += abridged.bytecode.safe }
+            let expected:HTML = .init
+            {
+                $0 += "nonisolated func "
+                $0[.span] { $0.class = "xv" } = "assertIsolated"
+                $0 += "("
+                $0[.span] { $0.class = "xi" }
+                $0 += "@autoclosure () -> String, "
+                $0[.span] { $0.class = "xi" }
+                $0[.span] { $0.class = "xv" } = "file"
+                $0 += ": StaticString, "
+                $0[.span] { $0.class = "xi" }
+                $0[.span] { $0.class = "xv" } = "line"
+                $0 += ": UInt"
+                $0[.wbr]
+                $0 += ")"
+            }
+
+            tests.expect("\(rendered)" ==? "\(expected)")
+        }
     }
 }
