@@ -294,5 +294,23 @@ enum Main:TestMain, TestBattery
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
         #endif
+
+        if  let tests:TestGroup = tests / "TSPL",
+            let docs:SymbolGraphObject<Void> = (tests.do
+            {
+                try workspace.build(book: try .remote(
+                        package: "swift-book",
+                        from: "https://github.com/apple/swift-book.git",
+                        at: "swift-5.10-fcs",
+                        in: workspace),
+                    with: toolchain)
+            })
+        {
+            tests.expect(docs.graph.cultures.count >? 0)
+            tests.expect(docs.graph.articles.nodes.count >? 0)
+            tests.expect(docs.graph.decls.nodes.count ==? 0)
+
+            docs.roundtrip(for: tests, in: workspace.artifacts)
+        }
     }
 }
