@@ -38,8 +38,6 @@ extension Unidoc.ClientGuess
         }
 
         guard
-        let acceptLanguage:HTTP.AcceptLanguage,
-        let acceptType:HTTP.Accept,
         let userAgent:UA = .init(userAgent)
         else
         {
@@ -173,14 +171,14 @@ extension Unidoc.ClientGuess
 
 
         guard
-        let locale:HTTP.Locale = acceptLanguage.dominant
+        let locale:HTTP.Locale = acceptLanguage?.dominant
         else
         {
             //  Didn’t send a locale: definitely a bot.
             return .droid(.lacksDominantLocale)
         }
 
-        guard acceptType.contains(where: { $0.type == "text/html" })
+        guard case true? = acceptType?.contains(where: { $0.type == "text/html" })
         else
         {
             //  Didn’t explicitly specify `text/html`: probably a bot.
