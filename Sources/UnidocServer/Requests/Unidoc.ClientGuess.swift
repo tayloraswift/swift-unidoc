@@ -11,14 +11,16 @@ extension Unidoc
     enum ClientGuess:Equatable, Hashable, Sendable
     {
         case barbie(HTTP.Locale)
-        case bratz
+        case droid(Droid)
         case robot(Robot)
     }
 }
 extension Unidoc.ClientGuess
 {
     private static
-    func from(acceptLanguage:HTTP.AcceptLanguage?,
+    func from(
+        acceptLanguage:HTTP.AcceptLanguage?,
+        acceptType:HTTP.Accept?,
         userAgent:String?,
         referer:String?) -> Self
     {
@@ -36,6 +38,8 @@ extension Unidoc.ClientGuess
         }
 
         guard
+        let acceptLanguage:HTTP.AcceptLanguage,
+        let acceptType:HTTP.Accept,
         let userAgent:UA = .init(userAgent)
         else
         {
@@ -104,14 +108,6 @@ extension Unidoc.ClientGuess
             }
         }
 
-        guard
-        let locale:HTTP.Locale = acceptLanguage?.dominant
-        else
-        {
-            //  Didn’t send a locale: definitely a bot.
-            return .robot(.other)
-        }
-
         //  Sent a referrer: might be a Barbie.
         if  case _? = referer
         {
@@ -170,12 +166,34 @@ extension Unidoc.ClientGuess
             }
         }
 
-
-        switch suspicion
+        if  suspicion >= 10
         {
-        case Int.min ..<  0:    return .barbie(locale)
-        case 0       ... 10:    return .bratz
-        case _:                 return .robot(.other)
+            return .robot(.other)
+        }
+
+
+        guard
+        let locale:HTTP.Locale = acceptLanguage.dominant
+        else
+        {
+            //  Didn’t send a locale: definitely a bot.
+            return .droid(.lacksDominantLocale)
+        }
+
+        guard acceptType.contains(where: { $0.type == "text/html" })
+        else
+        {
+            //  Didn’t explicitly specify `text/html`: probably a bot.
+            return .droid(.lacksDominantAcceptHTML)
+        }
+
+        if  suspicion < 0
+        {
+            return .barbie(locale)
+        }
+        else
+        {
+            return .droid(._bratz(score: suspicion))
         }
     }
 }
@@ -187,6 +205,8 @@ extension Unidoc.ClientGuess
         .from(
             acceptLanguage: headers["accept-language"].last.map(
                 HTTP.AcceptLanguage.init(rawValue:)),
+            acceptType: headers["accept"].last.map(
+                HTTP.Accept.init(rawValue:)),
             userAgent: headers["user-agent"].last,
             referer: headers["referer"].last)
     }
@@ -196,6 +216,8 @@ extension Unidoc.ClientGuess
         .from(
             acceptLanguage: headers["accept-language"].last.map(
                 HTTP.AcceptLanguage.init(rawValue:)),
+            acceptType: headers["accept"].last.map(
+                HTTP.Accept.init(rawValue:)),
             userAgent: headers["user-agent"].last,
             referer: headers["referer"].last)
     }
@@ -207,7 +229,7 @@ extension Unidoc.ClientGuess
         switch self
         {
         case .barbie(let locale):   locale
-        case .bratz:                nil
+        case .droid:                nil
         case .robot(_):             nil
         }
     }
