@@ -18,7 +18,7 @@ extension SSGC
         private(set)
         var module:SymbolGraph.Module
         /// Absolute path to the module sources directory, if known.
-        private(set)
+        private
         var origin:Origin?
 
         private
@@ -37,6 +37,15 @@ extension SSGC.NominalSources
     init(toolchain module:consuming SymbolGraph.Module)
     {
         self.init(module)
+    }
+
+    init(
+        package:borrowing SSGC.PackageRoot,
+        bundle:borrowing FilePath.Directory,
+        module:consuming SymbolGraph.Module) throws
+    {
+        self.init(module)
+        try self.scan(bundle: bundle, package: package)
     }
 
     init(

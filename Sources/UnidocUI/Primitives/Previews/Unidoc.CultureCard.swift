@@ -42,6 +42,7 @@ extension Unidoc.CultureCard:HTML.OutputStreamable
             case .snippet:      tag = "snippet"
             case .system:       tag = "system"
             case .test:         tag = "test"
+            case .book:         tag = "book"
             }
 
             $0[.span] { $0.class = "parenthetical" } = tag

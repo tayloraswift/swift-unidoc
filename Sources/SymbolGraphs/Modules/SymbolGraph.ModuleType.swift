@@ -17,6 +17,7 @@ extension SymbolGraph
 
         case system
         case test
+        case book
     }
 }
 extension SymbolGraph.ModuleType:CustomStringConvertible
