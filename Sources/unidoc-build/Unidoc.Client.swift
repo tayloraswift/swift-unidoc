@@ -223,7 +223,7 @@ extension Unidoc.Client
             "compile",
 
             "--package-name", "\(labels.package)",
-            "--package-repo", labels.repo,
+            "--project-repo", labels.repo,
             "--ref", labels.ref,
             "--workspace", "\(workspace.location)",
             "--status", "\(status)",

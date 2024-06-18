@@ -75,15 +75,15 @@ enum Main:TestMain, TestBattery
         {
             tests.do
             {
-                var package:SSGC.PackageBuild = .local(
-                    package: "swift-snippets",
+                let package:SSGC.PackageBuild = .local(
+                    project: "swift-snippets",
                     among: "TestPackages")
 
                 try workspace.artifacts.create()
 
-                let (_, sources):(_, SSGC.PackageSources) = try package.compile(updating: nil,
-                        into: workspace.artifacts,
-                        with: toolchain)
+                let (_, sources):(_, SSGC.PackageSources) = try package.compileSwiftPM(
+                    into: workspace.artifacts,
+                    with: toolchain)
 
                 let parser:Markdown.SwiftLanguage = .swift(
                     index: try sources.indexStore(for: toolchain))
@@ -157,7 +157,7 @@ enum Main:TestMain, TestBattery
             let docs:SymbolGraphObject<Void> = (tests.do
             {
                 try workspace.build(package: try .remote(
-                        package: "swift-atomics",
+                        project: "swift-atomics",
                         from: "https://github.com/apple/swift-atomics.git",
                         at: "1.1.0",
                         in: workspace),
@@ -176,7 +176,7 @@ enum Main:TestMain, TestBattery
             let docs:SymbolGraphObject<Void> = (tests.do
             {
                 try workspace.build(package: try .remote(
-                        package: "swift-nio",
+                        project: "swift-nio",
                         from: "https://github.com/apple/swift-nio.git",
                         at: "2.65.0",
                         in: workspace),
@@ -205,7 +205,7 @@ enum Main:TestMain, TestBattery
             let docs:SymbolGraphObject<Void> = (tests.do
             {
                 try workspace.build(package: try .remote(
-                        package: "swift-nio-ssl",
+                        project: "swift-nio-ssl",
                         from: "https://github.com/apple/swift-nio-ssl.git",
                         at: "2.24.0",
                         in: workspace),
@@ -231,7 +231,7 @@ enum Main:TestMain, TestBattery
             let docs:SymbolGraphObject<Void> = (tests.do
             {
                 try workspace.build(package: try .remote(
-                        package: "swift-async-dns-resolver",
+                        project: "swift-async-dns-resolver",
                         from: "https://github.com/apple/swift-async-dns-resolver.git",
                         at: "0.1.2",
                         in: workspace),
@@ -257,7 +257,7 @@ enum Main:TestMain, TestBattery
             let docs:SymbolGraphObject<Void> = (tests.do
             {
                 try workspace.build(package: try .remote(
-                        package: "swift-syntax",
+                        project: "swift-syntax",
                         from: "https://github.com/apple/swift-syntax.git",
                         at: "508.0.0",
                         in: workspace),
@@ -298,10 +298,11 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "TSPL",
             let docs:SymbolGraphObject<Void> = (tests.do
             {
-                try workspace.build(book: try .remote(
-                        package: "swift-book",
+                try workspace.build(package: try .remote(
+                        project: "swift-book",
                         from: "https://github.com/apple/swift-book.git",
                         at: "swift-5.10-fcs",
+                        as: .book,
                         in: workspace),
                     with: toolchain)
             })

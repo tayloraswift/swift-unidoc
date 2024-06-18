@@ -23,7 +23,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         let toolchain:SSGC.Toolchain = try .detect(pretty: true)
 
         let example:SymbolGraphObject<Void> = try workspace.build(package: .local(
-                package: "swift-malibu",
+                project: "swift-malibu",
                 among: "TestPackages"),
             with: toolchain)
 

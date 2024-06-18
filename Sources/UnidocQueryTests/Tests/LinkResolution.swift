@@ -18,7 +18,7 @@ struct LinkResolution:UnidocDatabaseTestBattery
         let toolchain:SSGC.Toolchain = try .detect(pretty: true)
 
         let example:SymbolGraphObject<Void> = try workspace.build(package: .local(
-                package: "swift-test",
+                project: "swift-test",
                 among: "TestPackages"),
             with: toolchain)
 

@@ -1,4 +1,5 @@
 import PackageMetadata
+import SymbolGraphs
 import Symbols
 
 extension SSGC.PackageBuild
@@ -14,6 +15,17 @@ extension SSGC.PackageBuild
 }
 extension SSGC.PackageBuild.ID
 {
+    var commit:SymbolGraphMetadata.Commit?
+    {
+        guard case .versioned(let pin, let ref?) = self
+        else
+        {
+            return nil
+        }
+
+        return .init(name: ref, sha1: pin.revision)
+    }
+
     var package:Symbol.Package
     {
         switch self
