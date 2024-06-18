@@ -85,7 +85,14 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                 }
             }
 
-            $0[.h1] = self.name
+            if  let custom:Markdown.Bytecode = self.apex.headline
+            {
+                $0[.h1] = custom.safe
+            }
+            else
+            {
+                $0[.h1] = self.name
+            }
 
             $0 ?= self.cone.overview
 
