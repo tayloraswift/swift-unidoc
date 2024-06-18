@@ -219,10 +219,13 @@ extension Unidoc.Client
             try? SystemProcess.init(command: "rm", "\(status)")()
         }
 
+        let type:SSGC.ProjectType = labels.book ? .book : .package
+
         var arguments:[String] = [
             "compile",
 
             "--package-name", "\(labels.package)",
+            "--project-type", "\(type)",
             "--project-repo", labels.repo,
             "--ref", labels.ref,
             "--workspace", "\(workspace.location)",
