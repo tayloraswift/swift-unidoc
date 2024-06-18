@@ -25,6 +25,9 @@ extension Symbol.Package
     var swiftPM:Self { .init(identifier: "swift-package-manager") }
 
     @inlinable public static
+    var swiftBook:Self { .init(identifier: "swift-book") }
+
+    @inlinable public static
     var indexstoreDB:Self { .init(identifier: "indexstore-db") }
 }
 extension Symbol.Package:Comparable

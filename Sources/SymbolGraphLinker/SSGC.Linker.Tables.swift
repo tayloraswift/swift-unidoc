@@ -67,21 +67,16 @@ extension SSGC.Linker.Tables
 {
     /// Indexes the given article and appends it to the symbol graph, if an article with the
     /// same mangled name has not already been indexed. (This function checks for duplicates.)
+    ///
+    /// DO NOT REPLACE `__owned` WITH `consuming`! It will miscompile due to
+    /// https://github.com/apple/swift/issues/70133
     mutating
-    func allocate(article:Symbol.Article, title:consuming Markdown.BlockHeading) -> Int32?
+    func allocate(article:Symbol.Article, title:__owned Markdown.Bytecode) -> Int32?
     {
         {
             if  case nil = $0
             {
-                let headline:Markdown.Bytecode = .init
-                {
-                    //  Don’t emit the enclosing `h1` tag!
-                    for element:Markdown.InlineElement in title.elements
-                    {
-                        element.emit(into: &$0)
-                    }
-                }
-                let scalar:Int32 = self.graph.articles.append(.init(headline: headline),
+                let scalar:Int32 = self.graph.articles.append(.init(headline: title),
                     id: article)
                 $0 = scalar
                 return scalar
@@ -365,9 +360,12 @@ extension SSGC.Linker.Tables
         case .standalone(id: let id):
             self.graph.articles.nodes[id].article = linked
 
-        case .culture:
+        case .culture(let custom):
             //  This is the article for the module’s landing page.
-            self.graph.cultures[c].article = linked
+            {
+                $0.headline = custom
+                $0.article = linked
+            } (&self.graph.cultures[c])
         }
     }
 

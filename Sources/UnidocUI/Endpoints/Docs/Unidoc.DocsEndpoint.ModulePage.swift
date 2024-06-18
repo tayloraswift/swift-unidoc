@@ -85,7 +85,14 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                 }
             }
 
-            $0[.h1] = self.name
+            if  let custom:Markdown.Bytecode = self.apex.headline
+            {
+                $0[.h1] = custom.safe
+            }
+            else
+            {
+                $0[.h1] = self.name
+            }
 
             $0 ?= self.cone.overview
 
@@ -105,7 +112,7 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                 $0[.pre, .code] = Unidoc.ImportSection.init(module: self.apex.module.id)
             }
 
-        case .executable, .plugin, .snippet, .test:
+        case .executable, .plugin, .snippet, .test, .book:
             main[.section, { $0.class = "notice" }]
             {
                 $0[.p] = "This module is \(self.demonym.phrase). It cannot be imported."

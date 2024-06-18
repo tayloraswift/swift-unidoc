@@ -25,6 +25,7 @@ extension SSGC.NominalSources.DefaultDirectory
         case .snippet:      self = .snippets
         case .system:       self = .sources
         case .test:         self = .tests
+        case .book:         return nil
         }
     }
 }

@@ -146,6 +146,7 @@ extension Unidoc.DB
         return .init(coordinate: version.edition.id,
             package: package.symbol,
             repo: repo.origin.https,
-            ref: version.edition.name)
+            ref: version.edition.name,
+            book: package.book)
     }
 }

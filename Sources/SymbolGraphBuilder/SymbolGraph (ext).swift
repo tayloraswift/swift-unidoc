@@ -12,16 +12,13 @@ import SourceDiagnostics
 extension SymbolGraph
 {
     static
-    func compile(artifacts:[Artifacts],
-        package:some SSGC.DocumentationSources,
+    func compile(
+        cultures:[(sources:SSGC.NominalSources, artifacts:Artifacts)],
+        snippets:[SSGC.LazyFile],
+        prefix:Symbol.FileBase?,
         logger:SSGC.DocumentationLogger?,
         index:(any Markdown.SwiftLanguage.IndexStore)? = nil) throws -> Self
     {
-        precondition(package.cultures.count == artifacts.count,
-            "Mismatched cultures and artifacts!")
-
-        let prefix:Symbol.FileBase? = package.prefix
-
         let (namespaces, nominations):([[SSGC.Namespace]], SSGC.Nominations)
         let (extensions):[SSGC.Extension]
 
@@ -30,9 +27,7 @@ extension SymbolGraph
         {
             var checker:SSGC.TypeChecker = .init(root: prefix)
 
-            for (culture, artifacts):(SSGC.NominalSources, Artifacts) in zip(
-                package.cultures,
-                artifacts)
+            for (culture, artifacts):(SSGC.NominalSources, Artifacts) in cultures
             {
                 let parts:[SymbolGraphPart] = try profiler.measure(\.loadingSymbols)
                 {
@@ -72,7 +67,7 @@ extension SymbolGraph
         do
         {
             var linker:SSGC.Linker = .init(nominations: nominations,
-                modules: package.cultures.map(\.module),
+                modules: cultures.map(\.sources.module),
                 plugins: [.swift(index: index)],
                 root: prefix)
 
@@ -85,9 +80,9 @@ extension SymbolGraph
                 linker.allocate(extensions: extensions)
             }
 
-            let resources:[[SSGC.LazyFile]] = package.cultures.map(\.resources)
-            let markdown:[[SSGC.LazyFile]] = package.cultures.map(\.markdown)
-            let snippets:[SSGC.LazyFile] = package.snippets
+            let resources:[[SSGC.LazyFile]] = cultures.map(\.sources.resources)
+            let markdown:[[SSGC.LazyFile]] = cultures.map(\.sources.markdown)
+            let snippets:[SSGC.LazyFile] = snippets
 
             let articles:[[SSGC.Article]] = try profiler.measure(\.linking)
             {

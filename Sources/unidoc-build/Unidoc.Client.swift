@@ -219,11 +219,14 @@ extension Unidoc.Client
             try? SystemProcess.init(command: "rm", "\(status)")()
         }
 
+        let type:SSGC.ProjectType = labels.book ? .book : .package
+
         var arguments:[String] = [
             "compile",
 
             "--package-name", "\(labels.package)",
-            "--package-repo", labels.repo,
+            "--project-type", "\(type)",
+            "--project-repo", labels.repo,
             "--ref", labels.ref,
             "--workspace", "\(workspace.location)",
             "--status", "\(status)",
@@ -305,7 +308,9 @@ extension Unidoc.Client
         }
     }
 
-    func buildAndUpload(local symbol:Symbol.Package, search:FilePath?) async throws
+    func buildAndUpload(local symbol:Symbol.Package,
+        search:FilePath?,
+        type:SSGC.ProjectType) async throws
     {
         let workspace:SSGC.Workspace = try .create(at: ".ssgc")
         let docs:FilePath = workspace.location / "docs.bson"
@@ -314,6 +319,7 @@ extension Unidoc.Client
             "compile",
 
             "--package-name", "\(symbol)",
+            "--project-type", "\(type)",
             "--workspace", "\(workspace.location)",
             "--output", "\(docs)",
         ]

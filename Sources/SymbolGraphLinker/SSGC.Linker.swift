@@ -352,6 +352,18 @@ extension SSGC.Linker
                 $0.first ... $0.last
             }
 
+            /// If there are any options with `global` scope, we need to propogate them
+            /// to every other article in the same culture!
+            var global:Markdown.SemanticMetadata.Options = [:]
+            for article:SSGC.Article in articles
+            {
+                global.propogate(from: article.body.metadata.options)
+            }
+            for i:Int in articles.indices
+            {
+                articles[i].body.metadata.options.propogate(from: global)
+            }
+
             return articles
         }
 
@@ -400,7 +412,10 @@ extension SSGC.Linker
         let name:String = supplement.name
 
         let prefix:DoclinkResolver.Prefix
-        let title:Markdown.BlockHeading
+
+        let title:Markdown.Bytecode
+        let titleLocation:SourceReference<Markdown.Source>?
+
         let route:SSGC.Route
         let id:Symbol.Article
 
@@ -424,6 +439,10 @@ extension SSGC.Linker
 
         switch supplement.type
         {
+        case .supplementWithHeading(let custom):
+            //  Right now, the only way we can get one of these is via `@TechnologyRoot`.
+            return .init(type: .culture(title: custom), file: file, body: supplement.body)
+
         case .supplement(let binding):
             let decl:Int32?
             do
@@ -457,25 +476,28 @@ extension SSGC.Linker
             }
             else
             {
-                return .init(type: .culture, file: file, body: supplement.body)
+                return .init(type: .culture(title: nil), file: file, body: supplement.body)
             }
 
-        case .standalone(let heading):
+        case .standalone(let heading, at: let sourceLocation):
             prefix = .documentation(namespace)
             title = heading
+            titleLocation = sourceLocation
             route = .article(namespace, name)
             id = .article(namespace, name)
 
         case .tutorials(let headline):
             prefix = .tutorials(namespace)
-            title = .h(1, text: headline)
+            title = .init { $0 += headline }
+            titleLocation = nil
             route = .article(namespace, "index.tutorial")
             id = .tutorial(namespace, "index")
 
         case .tutorial(let headline):
             //  To DocC, tutorials are an IMAX experience. To us, they are just articles.
             prefix = .tutorials(namespace)
-            title = .h(1, text: headline)
+            title = .init { $0 += headline }
+            titleLocation = nil
             route = .article(namespace, "\(name).tutorial")
             id = .tutorial(namespace, name)
         }
@@ -488,7 +510,7 @@ extension SSGC.Linker
             return .init(type: .standalone(id: id), file: file, body: supplement.body)
         }
         else if
-            let titleLocation:SourceReference<Markdown.Source> = title.source
+            let titleLocation:SourceReference<Markdown.Source>
         {
             self.tables.diagnostics[titleLocation] = SSGC.ArticleError.duplicated(name: name)
             return nil

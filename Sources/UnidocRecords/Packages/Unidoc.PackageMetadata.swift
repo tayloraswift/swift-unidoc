@@ -74,6 +74,16 @@ extension Unidoc
 }
 extension Unidoc.PackageMetadata
 {
+    /// TODO: This is a temporary hack that special-cases `swift-book` only. We need to make
+    /// this generally configurable.
+    @inlinable public
+    var book:Bool
+    {
+        self.symbol == .swiftBook
+    }
+}
+extension Unidoc.PackageMetadata
+{
     @frozen public
     enum CodingKey:String, Sendable
     {

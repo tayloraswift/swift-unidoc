@@ -9,6 +9,7 @@ extension SSGC.PackageSources
         var cultures:[SSGC.NominalSources]
         let root:SSGC.PackageRoot
 
+        private
         init(cultures:[SSGC.NominalSources] = [], root:SSGC.PackageRoot)
         {
             self.cultures = cultures
