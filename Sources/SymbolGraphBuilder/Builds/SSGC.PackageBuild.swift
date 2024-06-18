@@ -14,18 +14,20 @@ extension SSGC
         /// What is being built.
         let id:ID
 
-        /// Where the package root directory is. There should be a `Package.swift`
-        /// manifest at the top level of this directory.
-        var root:FilePath.Directory
         /// Additional flags to pass to the Swift compiler.
         var flags:Flags
 
+        /// Where the package root directory is.
+        let root:FilePath.Directory
+        let type:ProjectType
+
         private
-        init(id:ID, root:FilePath.Directory, flags:Flags)
+        init(id:ID, flags:Flags, root:FilePath.Directory, type:ProjectType)
         {
             self.id = id
-            self.root = root
             self.flags = flags
+            self.root = root
+            self.type = type
         }
     }
 }
@@ -62,64 +64,149 @@ extension SSGC.PackageBuild
     /// same name in the specified location.
     ///
     /// -   Parameters:
-    ///     -   package:
+    ///     -   name:
     ///         The identifier of the package.
-    ///     -   packages:
+    ///     -   projects:
     ///         The location in which this function will search for a directory
-    ///         named `"\(package)"`.
+    ///         named `"\(name)"`.
+    ///     -   type:
+    ///         The type of project to build.
     ///     -   flags:
     ///         Additional flags to pass to the Swift compiler.
     public static
-    func local(package:Symbol.Package,
-        among packages:FilePath.Directory,
+    func local(project name:Symbol.Package,
+        among projects:FilePath.Directory,
+        as type:SSGC.ProjectType = .package,
         flags:Flags = .init()) -> Self
     {
-        return .init(id: .unversioned(package), root: packages / "\(package)", flags: flags)
+        let project:FilePath.Directory = projects / "\(name)"
+        if  project.path.isAbsolute
+        {
+            return .init(id: .unversioned(name),
+                flags: flags,
+                root: project,
+                type: type)
+        }
+        else if
+            let current:FilePath.Directory = .current()
+        {
+            return .init(id: .unversioned(name),
+                flags: flags,
+                root: .init(path: current.path.appending(project.path.components)),
+                type: type)
+        }
+        else
+        {
+            fatalError("Couldn’t determine the current working directory.")
+        }
     }
 
     /// Clones or pulls the specified package from a git repository, checking out
     /// the specified ref.
     ///
     /// -   Parameters:
-    ///     -   package:
+    ///     -   name:
     ///         The identifier of the package to check out. This is *usually* the
     ///         same as the last path component of the remote URL.
-    ///     -   remote:
+    ///     -   repository:
     ///         The URL of the git repository to clone or pull from.
     ///     -   reference:
     ///         The git reference to check out. This string must match exactly, e.g. `v0.1.0`
     ///         is not equivalent to `0.1.0`.
-    ///     -   shared:
+    ///     -   type:
+    ///         The type of project to build.
+    ///     -   workspace:
     ///         The directory in which this function will create folders.
     public static
-    func remote(package:Symbol.Package,
+    func remote(project name:Symbol.Package,
         from repository:String,
         at reference:String,
+        as type:SSGC.ProjectType = .package,
         in workspace:SSGC.Workspace,
         flags:Flags = .init(),
         clean:Bool = false) throws -> Self
     {
-        let checkout:SSGC.Checkout = try .checkout(package: package,
+        let checkout:SSGC.Checkout = try .checkout(project: name,
             from: repository,
             at: reference,
             in: workspace,
             clean: clean)
 
         let version:AnyVersion = .init(reference)
-        let pin:SPM.DependencyPin = .init(identity: package,
+        let pin:SPM.DependencyPin = .init(identity: name,
             location: .remote(url: repository),
             revision: checkout.revision,
             version: version)
 
         return .init(id: .versioned(pin, reference: reference),
+            flags: flags,
             root: checkout.location,
-            flags: flags)
+            type: type)
     }
 }
+
 extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
-    @_spi(testable) public mutating
     func compile(updating status:SSGC.StatusStream?,
+        into artifacts:FilePath.Directory,
+        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata,
+        any SSGC.DocumentationSources)
+    {
+        switch self.type
+        {
+        case .package:  try self.compileSwiftPM(updating: status, into: artifacts, with: swift)
+        case .book:     try self.compileBook(updating: status, into: artifacts, with: swift)
+        }
+    }
+}
+
+extension SSGC.PackageBuild
+{
+    @_spi(testable) public
+    func compileBook(updating status:SSGC.StatusStream? = nil,
+        into artifacts:FilePath.Directory,
+        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.BookSources)
+    {
+        switch self.id
+        {
+        case .unversioned(let package):
+            print("Discovering sources for book '\(package)' (unversioned)")
+
+        case .versioned(let pin, _):
+            print("Discovering sources for book '\(pin.identity)' at \(pin.state)")
+        }
+
+        //  This step is considered part of documentation building.
+        let sources:SSGC.BookSources
+        do
+        {
+            sources = try .init(scanning: self.root)
+        }
+        catch let error
+        {
+            throw SSGC.DocumentationBuildError.scanning(error)
+        }
+
+        let metadata:SymbolGraphMetadata = .init(
+            package: .init(
+                scope: self.id.pin?.location.owner,
+                name: self.id.package),
+            commit: self.id.commit,
+            triple: swift.triple,
+            swift: swift.version,
+            tools: nil,
+            manifests: [],
+            requirements: [],
+            dependencies: [],
+            products: [],
+            display: "\(self.id.package)",
+            root: sources.prefix)
+
+        return (metadata, sources)
+    }
+
+    @_spi(testable) public
+    func compileSwiftPM(updating status:SSGC.StatusStream? = nil,
         into artifacts:FilePath.Directory,
         with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
@@ -141,9 +228,6 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
             Resolving dependencies for '\(self.id.package)' \
             (swift-tools-version: \(manifest.format))
             """)
-
-        /// The manifest root is always an absolute path, so we would rather use that.
-        self.root = .init(manifest.root.path)
 
         let pins:[SPM.DependencyPin]
         do
@@ -221,16 +305,6 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
             as: self.id.package)
         let flatNode:PackageNode = try sinkNode.flattened(dependencies: dependencies)
 
-        let commit:SymbolGraphMetadata.Commit?
-        if  case .versioned(let pin, let ref?) = self.id
-        {
-            commit = .init(name: ref, sha1: pin.revision)
-        }
-        else
-        {
-            commit = nil
-        }
-
         let dependenciesPinned:[SymbolGraphMetadata.Dependency] = try flatNode.pin(to: pins)
         let dependenciesUsed:Set<Symbol.Package> = flatNode.products.reduce(into: [])
         {
@@ -246,24 +320,6 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
             }
         }
 
-        let metadata:SymbolGraphMetadata = .init(
-            package: .init(
-                scope: self.id.pin?.location.owner,
-                name: self.id.package),
-            commit: commit,
-            triple: swift.triple,
-            swift: swift.version,
-            tools: manifest.format,
-            manifests: manifestVersions,
-            requirements: manifest.requirements,
-            dependencies: dependenciesPinned.filter
-            {
-                dependenciesUsed.contains($0.package.name)
-            },
-            products: .init(viewing: flatNode.products),
-            display: manifest.name,
-            root: manifest.root)
-
         //  This step is considered part of documentation building.
         let sources:SSGC.PackageSources
         do
@@ -278,6 +334,24 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         try swift.dump(modules: sources.cultures.lazy.map(\.module),
             to: artifacts,
             include: include)
+
+        let metadata:SymbolGraphMetadata = .init(
+            package: .init(
+                scope: self.id.pin?.location.owner,
+                name: self.id.package),
+            commit: self.id.commit,
+            triple: swift.triple,
+            swift: swift.version,
+            tools: manifest.format,
+            manifests: manifestVersions,
+            requirements: manifest.requirements,
+            dependencies: dependenciesPinned.filter
+            {
+                dependenciesUsed.contains($0.package.name)
+            },
+            products: .init(viewing: flatNode.products),
+            display: manifest.name,
+            root: sources.prefix)
 
         return (metadata, sources)
     }

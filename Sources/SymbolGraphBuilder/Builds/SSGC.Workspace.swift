@@ -64,13 +64,6 @@ extension SSGC.Workspace
 extension SSGC.Workspace
 {
     public
-    func build(book build:SSGC.BookBuild,
-        with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
-    {
-        try self.build(some: build, toolchain: swift, logger: nil, status: nil)
-    }
-
-    public
     func build(package build:SSGC.PackageBuild,
         with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
     {
@@ -93,7 +86,7 @@ extension SSGC.Workspace
         where Build:SSGC.DocumentationBuild
     {
         let metadata:SymbolGraphMetadata
-        let package:Build.Sources
+        let package:any SSGC.DocumentationSources
 
         let output:FilePath.Directory = self.artifacts
         try output.create(clean: true)
@@ -155,11 +148,13 @@ extension SSGC.Workspace
             index = nil
         }
 
-        let compiled:SymbolGraph = try .compile(artifacts: package.cultures.map
+        let compiled:SymbolGraph = try .compile(
+            cultures: package.cultures.map
             {
-                .init(location: output, parts: symbols[$0.module.id, default: []])
+                ($0, .init(location: output, parts: symbols[$0.module.id, default: []]))
             },
-            package: package,
+            snippets: package.snippets,
+            prefix: package.prefix,
             logger: logger,
             index: index)
 

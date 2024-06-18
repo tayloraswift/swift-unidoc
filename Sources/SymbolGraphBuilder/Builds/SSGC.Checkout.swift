@@ -6,6 +6,7 @@ extension SSGC
 {
     struct Checkout
     {
+        /// Absolute path to the checkout directory.
         let location:FilePath.Directory
         let revision:SHA1
 
@@ -20,7 +21,7 @@ extension SSGC
 extension SSGC.Checkout
 {
     static
-    func checkout(package:Symbol.Package,
+    func checkout(project name:Symbol.Package,
         from repository:String,
         at reference:String,
         in workspace:SSGC.Workspace,
@@ -38,7 +39,7 @@ extension SSGC.Checkout
         //          ├── Package.swift
         //          └── ...
 
-        let clone:FilePath.Directory = workspace.checkouts / "\(package)"
+        let clone:FilePath.Directory = workspace.checkouts / "\(name)"
         if  clean
         {
             try clone.remove()
@@ -53,7 +54,7 @@ extension SSGC.Checkout
         else
         {
             try SystemProcess.init(command: "git", "-C", "\(workspace.checkouts)",
-                "clone", repository, "\(package)", "--recurse-submodules")()
+                "clone", repository, "\(name)", "--recurse-submodules")()
         }
 
         try SystemProcess.init(command: "git", "-C", "\(clone)",

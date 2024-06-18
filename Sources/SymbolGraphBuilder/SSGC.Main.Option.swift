@@ -9,8 +9,11 @@ extension SSGC.Main
         /// The symbolic name of the package to build. This is not the name specified in the
         /// `Package.swift` manifest!
         case package_name
+        /// The type of project to build. This should be one of ``SSGC.ProjectType``.
+        case project_type
         /// The URL of the git repository to clone.
-        case package_repo
+        case project_repo
+
         case pretty
         /// The git ref to check out.
         case ref
@@ -58,7 +61,8 @@ extension SSGC.Main.Option
         case "--status", "-P":          self = .status
         case "--search-path", "-I":     self = .search_path
         case "--package-name", "-n":    self = .package_name
-        case "--package-repo", "-r":    self = .package_repo
+        case "--project-type", "-b":    self = .project_type
+        case "--project-repo", "-r":    self = .project_repo
         case "--ref", "-t":             self = .ref
         case "--output", "-o":          self = .output
         case "--output-log", "-l":      self = .output_log
