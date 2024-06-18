@@ -1,4 +1,5 @@
 import FNV1
+import MarkdownABI
 import SymbolGraphs
 import Symbols
 import Unidoc
@@ -20,6 +21,8 @@ extension Unidoc
         var census:Unidoc.Census
 
         public
+        var headline:Markdown.Bytecode?
+        public
         var overview:Unidoc.Passage?
         public
         var details:Unidoc.Passage?
@@ -31,6 +34,7 @@ extension Unidoc
             module:SymbolGraph.Module,
             readme:Unidoc.Scalar? = nil,
             census:Unidoc.Census = .init(),
+            headline:Markdown.Bytecode? = nil,
             overview:Unidoc.Passage? = nil,
             details:Unidoc.Passage? = nil,
             group:Unidoc.Group? = nil)
@@ -41,6 +45,7 @@ extension Unidoc
             self.readme = readme
             self.census = census
 
+            self.headline = headline
             self.overview = overview
             self.details = details
             self.group = group
