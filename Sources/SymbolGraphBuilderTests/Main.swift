@@ -153,6 +153,69 @@ enum Main:TestMain, TestBattery
 
         #endif
 
+        group:
+        if  let tests:TestGroup = tests / "Local",
+            let docs:SymbolGraphObject<Void> = (tests.do
+            {
+                try workspace.build(package: .local(
+                        project: "swift-test",
+                        among: "TestPackages"),
+                    with: toolchain)
+            })
+        {
+            guard
+            let culture:SymbolGraph.Culture = tests.expect(
+                value: docs.graph.cultures.first(where: { $0.module.id == "DocCOptions" })),
+            let range:ClosedRange<Int32> = tests.expect(
+                value: culture.articles)
+            else
+            {
+                break group
+            }
+
+            tests.expect(value: culture.article)
+            /// `AutomaticSeeAlso` should remain enabled, even though it was disabled
+            /// globally, because it is specified locally.
+            tests.expect(culture.article?.footer ==? nil)
+
+            if  let headline:Markdown.Bytecode = tests.expect(value: culture.headline)
+            {
+                tests.expect("\(headline.safe)" ==? """
+                    This is a culture root with a custom title.
+                    """)
+            }
+
+            var a:SymbolGraph.ArticleNode?
+            var b:SymbolGraph.ArticleNode?
+
+            for i:Int32 in range
+            {
+                let node:SymbolGraph.ArticleNode = docs.graph.articles.nodes[i]
+                switch docs.graph.articles.symbols[i]
+                {
+                case .article("DocCOptions", "A"):  a = node
+                case .article("DocCOptions", "B"):  b = node
+                default:                            continue
+                }
+            }
+
+            guard
+            let a:SymbolGraph.ArticleNode = tests.expect(value: a),
+            let b:SymbolGraph.ArticleNode = tests.expect(value: b)
+            else
+            {
+                break group
+            }
+
+            tests.expect("\(a.headline.safe)" ==? "A")
+            tests.expect("\(b.headline.safe)" ==? "B")
+
+            /// `AutomaticSeeAlso` should be disabled.
+            tests.expect(a.article.footer ==? .omit)
+            /// `AutomaticSeeAlso` should be disabled, because it was disabled globally in A.
+            tests.expect(b.article.footer ==? .omit)
+        }
+
         if  let tests:TestGroup = tests / "swift-atomics",
             let docs:SymbolGraphObject<Void> = (tests.do
             {
