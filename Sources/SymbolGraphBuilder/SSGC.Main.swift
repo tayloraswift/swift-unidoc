@@ -23,6 +23,7 @@ extension SSGC
         var swiftSDK:AppleSDK?
 
         var name:Symbol.Package?
+        var type:ProjectType
         var repo:String?
         var ref:String?
 
@@ -51,6 +52,7 @@ extension SSGC
             self.swiftSDK = nil
 
             self.name = nil
+            self.type = .package
             self.repo = nil
             self.ref = nil
             self.removeBuild = false
@@ -84,7 +86,8 @@ extension SSGC.Main
             case .status:           self.status = .init(try arguments.next(for: word))
             case .search_path:      self.search = .init(try arguments.next(for: word))
             case .package_name:     self.name = .init(try arguments.next(for: word))
-            case .package_repo:     self.repo = try arguments.next(for: word)
+            case .project_type:     self.type = try arguments.next(for: word)
+            case .project_repo:     self.repo = try arguments.next(for: word)
             case .ref:              self.ref = try arguments.next(for: word)
             case .output:           self.output = .init(try  arguments.next(for: word))
             case .output_log:       self.outputLog = .init(try arguments.next(for: word))
@@ -186,7 +189,7 @@ extension SSGC.Main
         else if
             let search:FilePath.Directory = self.search
         {
-            let build:SSGC.PackageBuild = .local(package: package, among: search)
+            let build:SSGC.PackageBuild = .local(project: package, among: search, as: self.type)
 
             defer
             {
@@ -220,10 +223,10 @@ extension SSGC.Main
                 }
             }
 
-            let build:SSGC.PackageBuild = try .remote(
-                package: package,
+            let build:SSGC.PackageBuild = try .remote(project: package,
                 from: repo,
                 at: ref,
+                as: self.type,
                 in: workspace)
 
             try status?.send(.didCloneRepository)

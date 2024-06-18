@@ -32,7 +32,7 @@ extension UCF.AnchorMangling
     init(mangling string:String)
     {
         /// TODO: write more efficient implementation
-        let components:[Substring] = string.split
+        var components:[Substring] = string.split
         {
             if  $0.isLetter
             {
@@ -51,7 +51,16 @@ extension UCF.AnchorMangling
             }
         }
 
-        let joined:String = components.joined(separator: "-")
-        self.init(rawValue: joined.lowercased())
+        for i:Int in components.indices
+        {
+            {
+                $0.removeAll  { !($0.isLetter || $0.isNumber) }
+                $0 = $0.lowercased()[...]
+            } (&components[i])
+        }
+
+        components.removeAll(where: \.isEmpty)
+
+        self.init(rawValue: components.joined(separator: "-"))
     }
 }

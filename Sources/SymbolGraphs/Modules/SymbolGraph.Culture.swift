@@ -1,4 +1,5 @@
 import BSON
+import MarkdownABI
 import Symbols
 
 extension SymbolGraph
@@ -16,6 +17,10 @@ extension SymbolGraph
         /// This module’s standalone articles, if it has any.
         public
         var articles:ClosedRange<Int32>?
+
+        /// A custom headline to override the automatically-generated page title.
+        public
+        var headline:Markdown.Bytecode?
         /// This module’s primary article, if it has one.
         public
         var article:Article?
@@ -27,6 +32,7 @@ extension SymbolGraph
 
             self.namespaces = []
             self.articles = nil
+            self.headline = nil
             self.article = nil
         }
     }
@@ -65,6 +71,7 @@ extension SymbolGraph.Culture
         case namespaces = "N"
         case articles_lower = "L"
         case articles_upper = "U"
+        case headline = "H"
         case article = "A"
     }
 }
@@ -78,6 +85,7 @@ extension SymbolGraph.Culture:BSONDocumentEncodable
         bson[.namespaces] = self.namespaces.isEmpty ? nil : self.namespaces
         bson[.articles_lower] = self.articles?.lowerBound
         bson[.articles_upper] = self.articles?.upperBound
+        bson[.headline] = self.headline
         bson[.article] = self.article
     }
 }
@@ -96,6 +104,7 @@ extension SymbolGraph.Culture:BSONDocumentDecodable
 
         //  TODO: validate well-formedness of scalar ranges.
         self.namespaces = try bson[.namespaces]?.decode() ?? []
+        self.headline = try bson[.headline]?.decode()
         self.article = try bson[.article]?.decode()
     }
 }

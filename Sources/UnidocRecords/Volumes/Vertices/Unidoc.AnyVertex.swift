@@ -229,7 +229,7 @@ extension Unidoc.AnyVertex
         /// Only appears in ``Decl``.
         case position = "P"
 
-        /// Only appears in ``Article``.
+        /// Appears in ``Article``, and sometimes in ``Culture`` as well.
         case headline = "T"
         /// Optional, but can appear in any master record.
         /// The field contains a passage, which contains a list of outlines,
@@ -274,8 +274,8 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
 
             bson[.culture] = self.culture
             bson[.readme] = self.readme
-            bson[.headline] = self.headline
 
+            bson[.headline] = self.headline
             bson[.overview] = self.overview
             bson[.details] = self.details
             bson[.group] = self.group
@@ -334,6 +334,7 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
             bson[.readme] = self.readme
             bson[.census] = self.census
 
+            bson[.headline] = self.headline
             bson[.overview] = self.overview
             bson[.details] = self.details
             bson[.group] = self.group
@@ -383,6 +384,7 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
                 readme: try bson[.readme]?.decode() ?? bson[.file]?.decode(),
                 //  Might be decoding with this key deprojected.
                 census: try bson[.census]?.decode() ?? .init(),
+                headline: try bson[.headline]?.decode(),
                 overview: try bson[.overview]?.decode(),
                 details: try bson[.details]?.decode(),
                 group: try bson[.group]?.decode()))

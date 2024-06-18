@@ -1,9 +1,11 @@
+import MarkdownABI
+
 extension SSGC
 {
     @frozen @usableFromInline
     enum ArticleType
     {
         case standalone(id:Int32)
-        case culture
+        case culture(title:Markdown.Bytecode?)
     }
 }

@@ -410,6 +410,8 @@ extension Unidoc.Linker.Tables
 
         if  let article:SymbolGraph.Article = culture.article
         {
+            //  No sense customizing the headline if there is no article.
+            vertex.headline = culture.headline
             vertex.readme = article.file.map { self.current.id + $0 }
 
             (vertex.overview, vertex.details) = self.context.resolving(

@@ -18,7 +18,7 @@ extension SSGC
         private(set)
         var module:SymbolGraph.Module
         /// Absolute path to the module sources directory, if known.
-        private(set)
+        private
         var origin:Origin?
 
         private
@@ -37,6 +37,15 @@ extension SSGC.NominalSources
     init(toolchain module:consuming SymbolGraph.Module)
     {
         self.init(module)
+    }
+
+    init(
+        package:borrowing SSGC.PackageRoot,
+        bundle:borrowing FilePath.Directory,
+        module:consuming SymbolGraph.Module) throws
+    {
+        self.init(module)
+        try self.scan(bundle: bundle, package: package)
     }
 
     init(
@@ -90,16 +99,46 @@ extension SSGC.NominalSources
 extension SSGC.NominalSources
 {
     private mutating
+    func scan(bundle directory:FilePath.Directory, package root:SSGC.PackageRoot) throws
+    {
+        try directory.walk
+        {
+            if $0.directory.exists()
+            {
+                return true
+            }
+
+            switch $0.extension
+            {
+            case "tutorial"?, "md"?:
+                let markdown:SSGC.LazyFile = .init(location: $0, root: root)
+                self.markdown.append(markdown)
+
+                //  Allow articles to embed their own source text.
+                fallthrough
+
+            default:
+                //  Inside a *.docc directory, everything that is not markdown or a tutorial
+                //  is a resource.
+                let resource:SSGC.LazyFile = .init(location: $0, path: root.rebase($0))
+                self.resources.append(resource)
+                return false
+            }
+        }
+    }
+
+    private mutating
     func scan(exclude:[String], package root:SSGC.PackageRoot) throws -> [FilePath.Directory]
     {
         guard
-        case .sources(let path) = self.origin
+        case .sources(let sources) = self.origin
         else
         {
             return []
         }
 
-        let exclude:[FilePath] = exclude.map { path / $0 }
+        let exclude:[FilePath] = exclude.map { sources / $0 }
+        var bundles:[FilePath.Directory] = []
         var headers:Set<FilePath.Directory> = []
 
         defer
@@ -107,31 +146,42 @@ extension SSGC.NominalSources
             self.markdown.sort { $0.id < $1.id }
         }
 
-        try path.walk
+        try sources.walk
         {
             let file:(path:FilePath, extension:String)
-            if  let `extension`:String = $1.extension
-            {
-                file.extension = `extension`
-                file.path = $0 / $1
-            }
-            else
-            {
-                //  This is a directory, or some extensionless file we don’t care about
-                return
-            }
 
-            if  file.extension == "docc"
+            switch $1.extension
             {
-                //  This is a directory.
-                return
-            }
-            if  file.extension == "md"
-            {
+            case "md"?:
                 //  It’s common to list markdown files under exclude paths.
-                let supplement:SSGC.LazyFile = .init(location: file.path, root: root)
-                self.markdown.append(supplement)
-                return
+                file.path = $0 / $1
+
+                if  file.path.directory.exists()
+                {
+                    //  Someone has named a directory with a `.md` extension. Perhaps it
+                    //  contains markdown files?
+                    return true
+                }
+                else
+                {
+                    let supplement:SSGC.LazyFile = .init(location: $0 / $1, root: root)
+                    self.markdown.append(supplement)
+                    return false
+                }
+
+            case "docc"?, "unidoc"?:
+                //  We will visit these later.
+                file.path = $0 / $1
+                bundles.append(file.path.directory)
+                return false
+
+            case let other?:
+                file.path = $0 / $1
+                file.extension = other
+
+            case nil:
+                file.path = $0 / $1
+                return file.path.directory.exists()
             }
 
             //  TODO: might benefit from a better algorithm.
@@ -139,82 +189,59 @@ extension SSGC.NominalSources
             {
                 if  file.path.starts(with: prefix)
                 {
-                    return
+                    return false
                 }
             }
-            //  TODO: might also benefit from a better algorithm.
-            var inDocC:Bool = false
-            for component:FilePath.Component in $0.path.components
+
+            switch file.extension
             {
-                if  case "docc"? = component.extension
+            case "swift":
+                self.module.language |= .swift
+                //  All extant versions of SwiftPM use the `main.swift` file name to
+                //  indicate an executable module.
+                if  $1.stem.lowercased() == "main"
                 {
-                    inDocC = true
-                    break
+                    self.module.type = .executable
                 }
+
+            case "h":
+                //  Header files don’t indicate a C or C++ module on their own.
+                headers.update(with: $0)
+
+            case "modulemap":
+                //  But modulemaps do.
+                headers.update(with: $0)
+                fallthrough
+
+            case "c":
+                self.module.language |= .c
+
+            case "hpp", "hxx":
+                headers.update(with: $0)
+                fallthrough
+
+            case "cc", "cpp", "cxx":
+                self.module.language |= .cpp
+
+            case "txt":
+                //  The most common culprit is a `CMakeLists.txt`.
+                //  It’s not worth warning about these.
+                break
+
+            case "s", "S":
+                //  These sometimes show up in C modules. We ignore them.
+                break
+
+            default:
+                print("Unknown file type: \(file.path)")
             }
 
-            if  inDocC
-            {
-                switch file.extension
-                {
-                case "tutorial":
-                    let tutorial:SSGC.LazyFile = .init(location: file.path, root: root)
-                    self.markdown.append(tutorial)
+            return true
+        }
 
-                default:
-                    //  Inside a *.docc directory, everything that is not markdown or a tutorial
-                    //  is a resource.
-                    let resource:SSGC.LazyFile = .init(location: file.path,
-                        path: root.rebase(file.path))
-
-                    self.resources.append(resource)
-                }
-            }
-            else
-            {
-                switch file.extension
-                {
-                case "swift":
-                    self.module.language |= .swift
-                    //  All extant versions of SwiftPM use the `main.swift` file name to
-                    //  indicate an executable module.
-                    if  $1.stem.lowercased() == "main"
-                    {
-                        self.module.type = .executable
-                    }
-
-                case "h":
-                    //  Header files don’t indicate a C or C++ module on their own.
-                    headers.update(with: $0)
-
-                case "modulemap":
-                    //  But modulemaps do.
-                    headers.update(with: $0)
-                    fallthrough
-
-                case "c":
-                    self.module.language |= .c
-
-                case "hpp", "hxx":
-                    headers.update(with: $0)
-                    fallthrough
-
-                case "cc", "cpp", "cxx":
-                    self.module.language |= .cpp
-
-                case "txt":
-                    //  The most common culprit is a `CMakeLists.txt`.
-                    //  It’s not worth warning about these.
-                    break
-
-                case "s", "S":
-                    //  These sometimes show up in C modules. We ignore them.
-                    break
-
-                default:
-                    print("Unknown file type: \(file.path)")
-                }
-            }
+        for bundle:FilePath.Directory in bundles
+        {
+            try self.scan(bundle: bundle, package: root)
         }
 
         return self.module.type == .executable ? [] : headers.sorted

@@ -11,7 +11,7 @@ extension Symbol.Package
         //  These are the *only* packages that are allowed to use toolchain versions.
         //  SwiftSyntax is not allowed to use them, because it also publishes normal
         //  semver releases.
-        case .swift, .swiftPM, .indexstoreDB:
+        case .swift, .swiftPM, .swiftBook, .indexstoreDB:
             guard
             let i:String.Index = tag.firstIndex(of: "-"),
             let j:String.Index = tag.lastIndex(of: "-"),
@@ -22,10 +22,29 @@ extension Symbol.Package
                 return nil
             }
 
-            if  tag[..<i] == "swift",
-                tag[j...] == "-RELEASE"
+            let k:String.Index = tag.index(after: j)
+
+            let version:PatchVersion = .init(padding: v)
+
+            if  case .swiftBook = self
             {
-                return .release(PatchVersion.init(padding: v))
+                guard tag[..<i] == "swift"
+                else
+                {
+                    return nil
+                }
+                if  tag[k...] == "fcs"
+                {
+                    return .release(version)
+                }
+                else
+                {
+                    return .prerelease(version, .init(tag[k...]))
+                }
+            }
+            else if tag[..<i] == "swift", tag[k...] == "RELEASE"
+            {
+                return .release(version)
             }
             else
             {

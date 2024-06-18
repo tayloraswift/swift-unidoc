@@ -21,7 +21,8 @@ extension SSGC.SpecialBuild:SSGC.DocumentationBuild
 {
     func compile(updating _:SSGC.StatusStream?,
         into artifacts:FilePath.Directory,
-        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.SpecialSources)
+        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata,
+        any SSGC.DocumentationSources)
     {
         //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
         let modules:[SymbolGraph.Module]
@@ -125,7 +126,7 @@ extension SSGC.SpecialBuild:SSGC.DocumentationBuild
             ])
 
         try swift.dump(modules: modules, to: artifacts)
-
-        return (metadata, .init(modules: modules))
+        let sources:SSGC.SpecialSources = .init(modules: modules)
+        return (metadata, sources)
     }
 }

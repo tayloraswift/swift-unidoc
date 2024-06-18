@@ -364,6 +364,7 @@ extension SSGC.Toolchain
             case .snippet:      skip = true
             case .system:       skip = true
             case .test:         skip = true
+            case .book:         skip = true
             }
 
             let id:Symbol.Module = module.id

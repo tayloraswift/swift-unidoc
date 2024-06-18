@@ -30,7 +30,7 @@ extension Main.Anchors:TestBattery
         if  let tests:TestGroup = tests / "Punctuation"
         {
             tests.expect("""
-                swifties-of-america-don’t-forget-to-claim-your-free-hoodie-before-the-deadline
+                swifties-of-america-dont-forget-to-claim-your-free-hoodie-before-the-deadline
                 """ ==? UCF.AnchorMangling.init(
                 mangling: """
                 Swifties of America! Don’t forget to claim your FREE hoodie before the deadline!

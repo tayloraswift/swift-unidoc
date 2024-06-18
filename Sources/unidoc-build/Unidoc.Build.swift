@@ -16,12 +16,16 @@ extension Unidoc
 {
     struct Build:Sendable
     {
-        var package:Symbol.Package?
+        var project:Symbol.Package?
         var cookie:String
         var host:String
         var port:Int
 
         var pretty:Bool
+        /// Use this option to build a local book project. Has no effect on server-tracked
+        /// documentation builds.
+        var book:Bool
+
         var executablePath:String?
         var swiftRuntime:String?
         var swiftPath:String?
@@ -32,12 +36,14 @@ extension Unidoc
         private
         init()
         {
-            self.package = nil
+            self.project = nil
             self.cookie = ""
             self.host = "localhost"
             self.port = 8443
 
             self.pretty = false
+            self.book = false
+
             self.executablePath = nil
             self.swiftRuntime = nil
             self.swiftPath = nil
@@ -126,6 +132,9 @@ extension Unidoc.Build
             case "--pretty", "-o":
                 options.pretty = true
 
+            case "--book", "-b":
+                options.book = true
+
             case "--swift-runtime", "-r":
                 options.swiftRuntime = try arguments.next(for: option)
 
@@ -145,9 +154,9 @@ extension Unidoc.Build
                 options.force = .prerelease
 
             case let option:
-                if  case nil = options.package
+                if  case nil = options.project
                 {
-                    options.package = .init(option)
+                    options.project = .init(option)
                 }
                 else
                 {
@@ -225,14 +234,15 @@ extension Unidoc.Build
         let unidoc:Unidoc.Client = try .init(from: self)
 
         guard
-        let package:Symbol.Package = self.package
+        let project:Symbol.Package = self.project
         else
         {
-            fatalError("No package specified")
+            fatalError("No project specified")
         }
 
-        try await unidoc.buildAndUpload(local: package,
-            search: self.input.map(FilePath.init(_:)))
+        try await unidoc.buildAndUpload(local: project,
+            search: self.input.map(FilePath.init(_:)),
+            type: self.book ? .book : .package)
     }
 
     private
@@ -241,23 +251,23 @@ extension Unidoc.Build
         let unidoc:Unidoc.Client = try .init(from: self)
 
         guard
-        let package:Symbol.Package = self.package
+        let project:Symbol.Package = self.project
         else
         {
-            print("No package specified!")
+            print("No project specified!")
             return
         }
 
         let labels:Unidoc.BuildLabels? = try await unidoc.connect
         {
-            try await $0.labels(of: package, series: self.force ?? .release)
+            try await $0.labels(of: project, series: self.force ?? .release)
         }
 
         guard
         let labels:Unidoc.BuildLabels
         else
         {
-            print("Package '\(package)' is not buildable by labels!")
+            print("Package '\(project)' is not buildable by labels!")
             return
         }
 

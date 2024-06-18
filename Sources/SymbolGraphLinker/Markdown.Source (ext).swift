@@ -88,9 +88,15 @@ extension Markdown.Source
         else if
             case (let heading as Markdown.BlockHeading)? = blocks.first, heading.level == 1
         {
-            let headline:SSGC.Supplement.Headline = .init(heading)
+            var headline:SSGC.Supplement.Headline = .init(heading)
             let document:Markdown.SemanticDocument = analyzer.organize(
                 article: blocks.dropFirst())
+
+            if  document.metadata.root,
+                case .standalone(let title, at: _) = headline
+            {
+                headline = .supplementWithHeading(title)
+            }
 
             return .init(type: headline, body: document)
         }
