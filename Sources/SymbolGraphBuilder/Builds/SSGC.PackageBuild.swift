@@ -125,11 +125,10 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
     {
         switch self.id
         {
-        case    .unversioned(let package):
+        case .unversioned(let package):
             print("Dumping manifest for package '\(package)' (unversioned)")
 
-        case    .versioned(let pin, _),
-                .upstream(let pin):
+        case .versioned(let pin, _):
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
         }
 
@@ -223,7 +222,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         let flatNode:PackageNode = try sinkNode.flattened(dependencies: dependencies)
 
         let commit:SymbolGraphMetadata.Commit?
-        if  case .versioned(let pin, let ref) = self.id
+        if  case .versioned(let pin, let ref?) = self.id
         {
             commit = .init(name: ref, sha1: pin.revision)
         }
