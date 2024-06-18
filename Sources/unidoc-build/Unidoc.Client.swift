@@ -305,7 +305,9 @@ extension Unidoc.Client
         }
     }
 
-    func buildAndUpload(local symbol:Symbol.Package, search:FilePath?) async throws
+    func buildAndUpload(local symbol:Symbol.Package,
+        search:FilePath?,
+        type:SSGC.ProjectType) async throws
     {
         let workspace:SSGC.Workspace = try .create(at: ".ssgc")
         let docs:FilePath = workspace.location / "docs.bson"
@@ -314,6 +316,7 @@ extension Unidoc.Client
             "compile",
 
             "--package-name", "\(symbol)",
+            "--project-type", "\(type)",
             "--workspace", "\(workspace.location)",
             "--output", "\(docs)",
         ]
