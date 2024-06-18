@@ -9,7 +9,7 @@ extension SSGC
     public
     struct BookBuild
     {
-        let id:ID
+        let id:PackageBuild.ID
         /// Always an absolute path.
         let root:FilePath.Directory
     }
@@ -75,7 +75,7 @@ extension SSGC.BookBuild:SSGC.DocumentationBuild
         }
 
         let commit:SymbolGraphMetadata.Commit?
-        if  case .versioned(let pin, let ref) = self.id
+        if  case .versioned(let pin, let ref?) = self.id
         {
             commit = .init(name: ref, sha1: pin.revision)
         }
