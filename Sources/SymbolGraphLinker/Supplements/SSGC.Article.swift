@@ -8,7 +8,7 @@ extension SSGC
     {
         let type:ArticleType
         let file:Int32
-        let body:Markdown.SemanticDocument
+        var body:Markdown.SemanticDocument
 
         init(type:ArticleType, file:Int32, body:Markdown.SemanticDocument)
         {

@@ -276,13 +276,28 @@ extension SSGC.Outliner
             body.details.emit(into: &binary)
         }
 
+        let footer:SymbolGraph.Article.Footer?
+
+        if  body.containsSeeAlso
+        {
+            footer = .omit
+        }
+        else if case false? = body.metadata.options.automaticSeeAlso?.value
+        {
+            footer = .omit
+        }
+        else
+        {
+            footer = nil
+        }
+
         let article:SymbolGraph.Article = .init(
             outlines: self.cache.clear(),
             overview: overview,
             details: details,
             fold: fold,
             file: file,
-            footer: body.containsSeeAlso ? .omit : nil)
+            footer: footer)
 
         var topics:[[Int32]] = []
             topics.reserveCapacity(body.topics.count)

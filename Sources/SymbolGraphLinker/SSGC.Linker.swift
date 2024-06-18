@@ -352,6 +352,18 @@ extension SSGC.Linker
                 $0.first ... $0.last
             }
 
+            /// If there are any options with `global` scope, we need to propogate them
+            /// to every other article in the same culture!
+            var global:Markdown.SemanticMetadata.Options = [:]
+            for article:SSGC.Article in articles
+            {
+                global.propogate(from: article.body.metadata.options)
+            }
+            for i:Int in articles.indices
+            {
+                articles[i].body.metadata.options.propogate(from: global)
+            }
+
             return articles
         }
 

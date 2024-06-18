@@ -182,7 +182,8 @@ extension Markdown.SemanticAnalyzer
     /// Blocks can be removed from the normal document flow for a variety of reasons, some of
     /// which are given below.
     ///
-    /// -   The block might be a ``BlockMetadata`` (`@Metadata`).
+    /// -   The block might be a ``BlockMetadata`` (`@Metadata`) or a ``BlockOptions``
+    ///     (`@Options`).
     /// -   The block might be a parameter, or a parameter list.
     /// -   The block might be a throws or returns section.
     private mutating
@@ -289,6 +290,9 @@ extension Markdown.SemanticAnalyzer
             }
 
         case let block as Markdown.BlockMetadata:
+            self.metadata.update(docc: block)
+
+        case let block as Markdown.BlockOptions:
             self.metadata.update(docc: block)
 
         case let block:

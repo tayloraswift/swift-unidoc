@@ -26,6 +26,8 @@ extension Markdown.SwiftFlavor:Markdown.ParsingFlavor
         switch directive
         {
         case "Article":                 Markdown.TutorialArticle.init()
+        case "AutomaticSeeAlso":        Markdown.BlockOption.init(key: \.automaticSeeAlso)
+        case "AutomaticTitleHeading":   Markdown.BlockOption.init(key: \.automaticTitleHeading)
         case "Chapter":                 Markdown.BlockArticle.Section.init()
         case "Code":                    Markdown.BlockCodeReference.init()
         case "Comment":                 nil as Markdown.BlockDirective?
@@ -44,6 +46,7 @@ extension Markdown.SwiftFlavor:Markdown.ParsingFlavor
         case "Intro":                   Markdown.BlockArticle.Intro.init()
         case "IsRoot":                  Markdown.BlockMetadata.IsRoot.init()
         case "Metadata":                Markdown.BlockMetadata.init()
+        case "Options":                 Markdown.BlockOptions.init()
         case "Resources":               Markdown.TutorialIndex.ExternalResources.init()
         //  See note about @Column.
         case "Row":                     Markdown.BlockColumns.init()
