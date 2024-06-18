@@ -67,8 +67,11 @@ extension SSGC.Linker.Tables
 {
     /// Indexes the given article and appends it to the symbol graph, if an article with the
     /// same mangled name has not already been indexed. (This function checks for duplicates.)
+    ///
+    /// DO NOT REPLACE `__owned` WITH `consuming`! It will miscompile due to
+    /// https://github.com/apple/swift/issues/70133
     mutating
-    func allocate(article:Symbol.Article, title:consuming Markdown.Bytecode) -> Int32?
+    func allocate(article:Symbol.Article, title:__owned Markdown.Bytecode) -> Int32?
     {
         {
             if  case nil = $0
