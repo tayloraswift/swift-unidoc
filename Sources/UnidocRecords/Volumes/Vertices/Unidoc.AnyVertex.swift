@@ -209,11 +209,11 @@ extension Unidoc.AnyVertex
         case signature_spis = "I"
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case superforms = "p"
-        /// Only appears in ``Decl``, and only when different from ``culture``.
-        /// The field contains a scalar.
-        case namespace = "n"
         /// Appears in ``Article`` and ``Decl``. The field contains a scalar.
         case culture = "c"
+        /// Only appears in ``Decl``, and only when different from ``culture``.
+        /// The field contains a scalar.
+        case colony = "n"
         /// Only appears in ``Decl``. The field contains a list of scalars.
         case scope = "x"
 
@@ -309,9 +309,10 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
 
             //  Deprecated.
             bson[.constituents] = self._requirements.isEmpty ? nil : self._requirements
+
             bson[.superforms] = self.superforms.isEmpty ? nil : self.superforms
-            bson[.namespace] = self.culture == self.namespace ? nil : self.namespace
             bson[.culture] = self.culture
+            bson[.colony] = self.colony
             bson[.scope] = self.scope.isEmpty ? nil : self.scope
             bson[.renamed] = self.renamed
             bson[.readme] = self.readme
@@ -409,7 +410,7 @@ extension Unidoc.AnyVertex:BSONDocumentDecodable
                 stem: try bson[.stem].decode(),
                 _requirements: try bson[.constituents]?.decode() ?? [],
                 superforms: try bson[.superforms]?.decode() ?? [],
-                namespace: try bson[.namespace]?.decode() ?? culture,
+                namespace: try bson[.colony]?.decode() ?? culture,
                 culture: culture,
                 scope: try bson[.scope]?.decode() ?? [],
                 renamed: try bson[.renamed]?.decode(),

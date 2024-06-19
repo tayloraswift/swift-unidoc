@@ -19,17 +19,23 @@ extension Unidoc.DocsEndpoint
         let apex:Unidoc.DeclVertex
 
         private
+        let culture:Unidoc.LinkReference<Unidoc.CultureVertex>
+        private
+        let colony:Unidoc.LinkReference<Unidoc.CultureVertex>?
+        private
         let stem:Unidoc.StemComponents
 
         init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
             cone:Unidoc.Cone,
             apex:Unidoc.DeclVertex) throws
         {
+            self.culture = try cone.context[culture: apex.culture]
+            self.colony = try apex.colony.map { try cone.context[culture: $0] }
+            self.stem = try .init(apex.stem)
+
             self.sidebar = sidebar
             self.cone = cone
             self.apex = apex
-
-            self.stem = try .init(self.apex.stem)
         }
     }
 }
@@ -96,9 +102,7 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
                 $0[.span]
                 {
                     $0.class = "domain"
-                } = self.context.subdomain(self.stem.namespace,
-                    namespace: self.apex.namespace,
-                    culture: self.apex.culture)
+                } = self.context.volume | (self.culture, extends: self.colony)
             }
 
             $0[.nav]
