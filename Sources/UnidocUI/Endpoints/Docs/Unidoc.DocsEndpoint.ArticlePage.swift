@@ -13,13 +13,17 @@ extension Unidoc.DocsEndpoint
         let cone:Unidoc.Cone
         let apex:Unidoc.ArticleVertex
 
+        private
+        let culture:Unidoc.LinkReference<Unidoc.CultureVertex>
+
         init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
             cone:Unidoc.Cone,
-            apex:Unidoc.ArticleVertex)
+            apex:Unidoc.ArticleVertex) throws
         {
             self.sidebar = sidebar
             self.apex = apex
             self.cone = cone
+            self.culture = try self.cone.context[culture: self.apex.culture]
         }
     }
 }
@@ -30,7 +34,13 @@ extension Unidoc.DocsEndpoint.ArticlePage
 }
 extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.apex.headline.safe) · \(self.volume.title) documentation" }
+    var title:String
+    {
+        self.culture.vertex.headline.map
+        {
+            "\(self.apex.headline.safe) · \($0.safe)"
+        } ?? "\(self.apex.headline.safe) · \(self.volume.title) documentation"
+    }
 }
 extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.StaticPage
 {
@@ -48,9 +58,7 @@ extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.ApicalPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Article"
-
-                $0[.span, { $0.class = "domain" }] = self.context.subdomain(self.stem.first,
-                    culture: self.apex.culture)
+                $0[.span] { $0.class = "domain" } = self.context.volume | self.culture
             }
 
             $0[.h1] = self.apex.headline.safe

@@ -22,17 +22,23 @@ extension Unidoc.PtclEndpoint
         let halo:Unidoc.ConformingTypes
 
         private
+        let culture:Unidoc.LinkReference<Unidoc.CultureVertex>
+        private
+        let colony:Unidoc.LinkReference<Unidoc.CultureVertex>?
+        private
         let stem:Unidoc.StemComponents
 
         init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
             vertex:Unidoc.DeclVertex,
             halo:Unidoc.ConformingTypes) throws
         {
+            self.culture = try halo.context[culture: vertex.culture]
+            self.colony = try vertex.colony.map { try halo.context[culture: $0] }
+            self.stem = try .init(vertex.stem)
+
             self.sidebar = sidebar
             self.vertex = vertex
             self.halo = halo
-
-            self.stem = try .init(vertex.stem)
         }
     }
 }
@@ -81,9 +87,10 @@ extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.VertexPage
             {
                 $0[.span] { $0.class = "phylum" } = "Conforming types"
 
-                $0[.span, { $0.class = "domain" }] = self.context.subdomain(self.stem.namespace,
-                    namespace: self.vertex.namespace,
-                    culture: self.vertex.culture)
+                $0[.span]
+                {
+                    $0.class = "domain"
+                } = self.context.volume | (self.culture, extends: self.colony)
             }
 
             $0[.nav]

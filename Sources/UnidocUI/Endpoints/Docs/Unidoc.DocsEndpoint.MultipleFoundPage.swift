@@ -65,7 +65,7 @@ extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.VertexPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span, { $0.class = "phylum" }] = "Disambiguation Page"
-                $0[.span, { $0.class = "domain" }] = self.context.domain
+                $0[.span, { $0.class = "domain" }] = self.context.volume | nil
             }
 
             var path:URI.Path = []
