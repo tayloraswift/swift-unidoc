@@ -77,7 +77,10 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Module details"
-                $0[.span] { $0.class = "domain" } = self.context.subdomain(self.vertex.route)
+                $0[.span]
+                {
+                    $0.class = "domain"
+                } = self.context.volume.subdomain(self.vertex.route)
             }
 
             $0[.h1] = "\(self.name) metrics"
