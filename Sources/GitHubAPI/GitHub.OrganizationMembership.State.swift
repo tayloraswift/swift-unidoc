@@ -7,6 +7,7 @@ extension GitHub.OrganizationMembership
     {
         case pending = 0
         case active = 1
+        case inactive = 2
     }
 }
 extension GitHub.OrganizationMembership.State:CustomStringConvertible
@@ -18,6 +19,7 @@ extension GitHub.OrganizationMembership.State:CustomStringConvertible
         {
         case .pending:  "pending"
         case .active:   "active"
+        case .inactive: "inactive"
         }
     }
 }
@@ -28,12 +30,14 @@ extension GitHub.OrganizationMembership.State:LosslessStringConvertible
     {
         switch description
         {
-        case "pending": self = .pending
-        case "active":  self = .active
-        default:        return nil
+        case "pending":     self = .pending
+        case "active":      self = .active
+        case "inactive":    self = .inactive
+        default:            return nil
         }
     }
 }
 extension GitHub.OrganizationMembership.State:JSONStringEncodable, JSONStringDecodable
 {
 }
+zzz
