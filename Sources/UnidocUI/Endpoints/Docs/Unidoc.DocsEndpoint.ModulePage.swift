@@ -41,7 +41,12 @@ extension Unidoc.DocsEndpoint.ModulePage
 }
 extension Unidoc.DocsEndpoint.ModulePage:Unidoc.RenderablePage
 {
-    var title:String { "\(self.name) · \(self.volume.title) documentation" }
+    var title:String
+    {
+        self.apex.headline?.safe.description ?? """
+        \(self.name) · \(self.volume.title) documentation
+        """
+    }
 }
 extension Unidoc.DocsEndpoint.ModulePage:Unidoc.StaticPage
 {
@@ -54,12 +59,22 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
     {
-        if  case .swift = self.volume.symbol.package
+        switch self.volume.symbol.package
         {
+        case .swift:
             "\(self.name) is \(self.demonym.phrase) in the Swift standard library."
-        }
-        else
-        {
+
+        case .swiftBook:
+            //  TSPL doesn’t have a meta description, so we’ve written one for them.
+            //  I don’t know if this is factual, but great national myths don’t need to be.
+            """
+            Swift is a compiled programming language targeting phones, tablets, desktops, \
+            servers, and even embedded platforms. Designed by some of the original architects \
+            of C++ and Objective-C, Swift builds on lessons learned from its predecessors to \
+            create a safe, performant, and modern programming language.
+            """
+
+        default:
             "\(self.name) is \(self.demonym.phrase) in the \(self.volume.title) package."
         }
     }
@@ -112,11 +127,14 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                 $0[.pre, .code] = Unidoc.ImportSection.init(module: self.apex.module.id)
             }
 
-        case .executable, .plugin, .snippet, .test, .book:
+        case .executable, .plugin, .snippet, .test:
             main[.section, { $0.class = "notice" }]
             {
                 $0[.p] = "This module is \(self.demonym.phrase). It cannot be imported."
             }
+
+        case .book:
+            break
         }
 
         main[.section]

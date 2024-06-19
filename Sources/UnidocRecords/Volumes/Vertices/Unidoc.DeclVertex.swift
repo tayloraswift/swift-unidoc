@@ -139,6 +139,13 @@ extension Unidoc.DeclVertex
         }
     }
 
+    /// Returns ``namespace`` if and only if it is different from ``culture``.
+    @inlinable public
+    var colony:Unidoc.Scalar?
+    {
+        self.culture != self.namespace ? self.namespace : nil
+    }
+
     @inlinable public
     var phylum:Phylum.Decl
     {

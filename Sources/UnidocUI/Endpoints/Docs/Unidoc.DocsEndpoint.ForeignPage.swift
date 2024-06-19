@@ -63,7 +63,7 @@ extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApicalPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Extension (\(self.demonym.title))"
-                $0[.span] { $0.class = "domain" } = self.context.domain
+                $0[.span] { $0.class = "domain" } = self.context.volume | nil
             }
 
             $0[.nav]

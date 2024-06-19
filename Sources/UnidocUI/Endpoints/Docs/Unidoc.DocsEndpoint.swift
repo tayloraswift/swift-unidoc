@@ -56,7 +56,7 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
                 volume: context.volume,
                 tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:ArticlePage = .init(sidebar: sidebar, cone: cone, apex: apex)
+            let page:ArticlePage = try .init(sidebar: sidebar, cone: cone, apex: apex)
             resource = page.resource(format: format)
 
         case .culture(let apex):
@@ -64,10 +64,7 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
                 volume: context.volume,
                 tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:ModulePage = .init(
-                sidebar: sidebar,
-                cone: cone,
-                apex: apex)
+            let page:ModulePage = .init(sidebar: sidebar, cone: cone, apex: apex)
             resource = page.resource(format: format)
 
         case .decl(let apex):

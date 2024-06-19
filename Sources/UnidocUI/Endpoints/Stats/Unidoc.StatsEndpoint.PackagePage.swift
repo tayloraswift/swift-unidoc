@@ -59,7 +59,7 @@ extension Unidoc.StatsEndpoint.PackagePage:Unidoc.VertexPage
             $0[.div, { $0.class = "eyebrows" }]
             {
                 $0[.span] { $0.class = "phylum" } = "Package details"
-                $0[.span, { $0.class = "domain" }] = self.context.domain
+                $0[.span] { $0.class = "domain" } = self.context.volume | nil
             }
 
             $0[.h1] = "\(self.volume.title) metrics"
