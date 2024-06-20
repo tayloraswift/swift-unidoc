@@ -105,17 +105,17 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
         .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(
-            from: "1.1.0")),
+            from: "1.1.1")),
 
         .package(url: "https://github.com/apple/swift-nio",
-            from: "2.65.0"),
+            from: "2.67.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl",
-            from: "2.26.0"),
+            from: "2.27.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
-            from: "1.31.0")),
+            from: "1.32.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
-            from: "0.3.0")),
+            from: "0.4.0")),
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.3.0")),
         .package(url: "https://github.com/apple/swift-syntax",
