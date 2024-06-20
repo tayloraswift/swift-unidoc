@@ -6,8 +6,8 @@ extension Unidoc
 {
     enum LoadDashboardOperation
     {
+        case logger
         case cookie(scramble:Bool)
-        case master
         case plugin(String)
         case replicaSet
     }
@@ -19,6 +19,16 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
     {
         switch self
         {
+        case .logger:
+            guard
+            let logger:any Unidoc.ServerLogger = server.logger
+            else
+            {
+                return .notFound("No logging enabled\n")
+            }
+
+            return .ok(await logger.dashboard(from: server))
+
         case .cookie(scramble: let scramble):
             let secrets:Unidoc.UserSecrets
 
@@ -46,14 +56,6 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
             }
 
             let page:Unidoc.CookiePage = .init(secrets: secrets)
-            return .ok(page.resource(format: server.format))
-
-        case .master:
-            let page:Unidoc.AdminPage = .init(
-                servers: await server.db.sessions._servers(),
-                plugins: server.plugins.values.sorted { $0.id < $1.id },
-                tour: server.tour)
-
             return .ok(page.resource(format: server.format))
 
         case .plugin(let id):
