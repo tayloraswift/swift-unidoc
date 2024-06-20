@@ -2,7 +2,7 @@ import HTML
 import UnidocRender
 import URI
 
-extension Unidoc.AdminPage.Recode
+extension Unidoc._RecodePage
 {
     struct Complete
     {
@@ -18,15 +18,15 @@ extension Unidoc.AdminPage.Recode
         }
     }
 }
-extension Unidoc.AdminPage.Recode.Complete:Unidoc.RenderablePage
+extension Unidoc._RecodePage.Complete:Unidoc.RenderablePage
 {
     var title:String { "Migration complete" }
 }
-extension Unidoc.AdminPage.Recode.Complete:Unidoc.StaticPage
+extension Unidoc._RecodePage.Complete:Unidoc.StaticPage
 {
     var location:URI { self.target.location }
 }
-extension Unidoc.AdminPage.Recode.Complete:Unidoc.AdministrativePage
+extension Unidoc._RecodePage.Complete:Unidoc.AdministrativePage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

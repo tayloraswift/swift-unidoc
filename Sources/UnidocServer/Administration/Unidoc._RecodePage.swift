@@ -3,16 +3,16 @@ import Media
 import UnidocRender
 import URI
 
-extension Unidoc.AdminPage
+extension Unidoc
 {
-    struct Recode
+    struct _RecodePage
     {
         init()
         {
         }
     }
 }
-extension Unidoc.AdminPage.Recode
+extension Unidoc._RecodePage
 {
     static
     var name:String { "recode" }
@@ -20,15 +20,15 @@ extension Unidoc.AdminPage.Recode
     static
     var uri:URI { Unidoc.ServerRoot.admin / Self.name }
 }
-extension Unidoc.AdminPage.Recode:Unidoc.RenderablePage
+extension Unidoc._RecodePage:Unidoc.RenderablePage
 {
     var title:String { "Schema · Administrator Tools" }
 }
-extension Unidoc.AdminPage.Recode:Unidoc.StaticPage
+extension Unidoc._RecodePage:Unidoc.StaticPage
 {
     var location:URI { Self.uri }
 }
-extension Unidoc.AdminPage.Recode:Unidoc.AdministrativePage
+extension Unidoc._RecodePage:Unidoc.AdministrativePage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

@@ -5,18 +5,17 @@ import UnidocRender
 
 extension Unidoc
 {
+    /// A noncopyable wrapper around a ``ServerLoop``. Due to
+    /// <https://github.com/apple/swift/issues/74595> this cannot actually be noncopyable.
     @frozen public
-    struct Server:~Copyable
+    struct Server//:~Copyable
     {
         @usableFromInline
         let loop:ServerLoop
-        @usableFromInline
-        let tour:ServerTour
 
-        init(_ loop:ServerLoop, tour:ServerTour)
+        init(wrapping loop:ServerLoop)
         {
             self.loop = loop
-            self.tour = tour
         }
     }
 }
@@ -34,6 +33,9 @@ extension Unidoc.Server
     var github:GitHub.Integration? { self.loop.github }
     @inlinable public
     var bucket:Unidoc.Buckets { self.loop.bucket }
+
+    @inlinable public
+    var logger:(any Unidoc.ServerLogger)? { self.loop.logger }
 
     @inlinable public
     var format:Unidoc.RenderFormat { self.loop.format }

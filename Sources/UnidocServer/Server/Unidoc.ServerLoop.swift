@@ -8,28 +8,27 @@ import UnidocRender
 extension Unidoc
 {
     public final
-    actor ServerLoop
+    class ServerLoop:Sendable
     {
-        public nonisolated
+        public
         let context:ServerPluginContext
-        public nonisolated
+        public
         let plugins:[String: any ServerPlugin]
-        @usableFromInline nonisolated
+        @usableFromInline
         let options:ServerOptions
-        public nonisolated
+        public
         let db:Database
 
-        private nonisolated
+        private
         let updateQueue:AsyncStream<Update>.Continuation,
             updates:AsyncStream<Update>
 
-        private nonisolated
+        private
         let graphState:GraphStateLoop
 
-        nonisolated
         let policy:(any HTTP.ServerPolicy)?
-
-        var tour:ServerTour
+        @usableFromInline
+        let logger:(any ServerLogger)?
 
         public
         init(
@@ -37,9 +36,11 @@ extension Unidoc
             context:ServerPluginContext,
             options:ServerOptions,
             graphState:GraphStateLoop,
+            logger:(any ServerLogger)? = nil,
             db:Database)
         {
             var policy:(any HTTP.ServerPolicy)? = nil
+
             for case let plugin as any HTTP.ServerPolicy in plugins
             {
                 policy = plugin
@@ -51,9 +52,8 @@ extension Unidoc
             self.options = options
             self.graphState = graphState
             self.policy = policy
+            self.logger = logger
             self.db = db
-
-            self.tour = .init()
 
             (self.updates, self.updateQueue) = AsyncStream<Update>.makeStream(
                 bufferingPolicy: .bufferingOldest(16))
@@ -62,7 +62,7 @@ extension Unidoc
 }
 extension Unidoc.ServerLoop
 {
-    @inlinable public nonisolated
+    @inlinable public
     var security:Unidoc.ServerSecurity
     {
         switch self.options.mode
@@ -72,18 +72,18 @@ extension Unidoc.ServerLoop
         }
     }
 
-    @inlinable public nonisolated
+    @inlinable public
     var github:GitHub.Integration? { self.options.github }
-    @inlinable public nonisolated
+    @inlinable public
     var bucket:Unidoc.Buckets { self.options.bucket }
 
-    @inlinable public nonisolated
+    @inlinable public
     var format:Unidoc.RenderFormat
     {
         self.format(locale: nil)
     }
 
-    @inlinable nonisolated
+    @inlinable
     func format(locale:HTTP.Locale?) -> Unidoc.RenderFormat
     {
         .init(assets: self.options.cloudfront ? .cloudfront : .local,
@@ -95,7 +95,6 @@ extension Unidoc.ServerLoop
 extension Unidoc.ServerLoop
 {
     //  TODO: this really should be manually-triggered and should not run every time.
-    nonisolated
     func _setup() async throws
     {
         let session:Mongo.Session = try await .init(from: self.db.sessions)
@@ -106,7 +105,6 @@ extension Unidoc.ServerLoop
             with: session)
     }
 
-    nonisolated
     func update() async throws
     {
         for await update:Update in self.updates
@@ -124,7 +122,7 @@ extension Unidoc.ServerLoop
 }
 extension Unidoc.ServerLoop
 {
-    private nonisolated
+    private
     func clearance(by authorization:Unidoc.Authorization) async throws -> HTTP.ServerResponse?
     {
         guard case .production = self.options.mode
@@ -165,20 +163,20 @@ extension Unidoc.ServerLoop
 
 extension Unidoc.ServerLoop
 {
-    public nonisolated
+    public
     func clearance(for request:Unidoc.StreamedRequest) async throws -> HTTP.ServerResponse?
     {
         try await self.clearance(by: request.authorization)
     }
 
-    public nonisolated
+    public
     func response(for request:Unidoc.StreamedRequest,
         with body:__owned [UInt8]) async -> HTTP.ServerResponse
     {
         await self.submit(update: request.endpoint, with: body)
     }
 
-    public nonisolated
+    public
     func response(for request:Unidoc.IntegralRequest) async throws -> HTTP.ServerResponse
     {
         switch request.assignee
@@ -221,7 +219,7 @@ extension Unidoc.ServerLoop
 }
 extension Unidoc.ServerLoop
 {
-    private nonisolated
+    private
     func submit(update operation:any Unidoc.ProceduralOperation,
         with body:__owned [UInt8] = []) async -> HTTP.ServerResponse
     {
@@ -244,21 +242,29 @@ extension Unidoc.ServerLoop
     func respond(to request:Unidoc.IncomingRequest,
         running operation:any Unidoc.InteractiveOperation) async throws -> HTTP.ServerResponse
     {
-        let response:HTTP.ServerResponse
-        let duration:Duration
-
         do
         {
             try Task.checkCancellation()
 
             let initiated:ContinuousClock.Instant = .now
 
-            response = try await operation.load(
-                from: .init(self, tour: self.tour),
+            let response:HTTP.ServerResponse = try await operation.load(
+                from: .init(wrapping: self),
                 with: .init(authorization: request.authorization, request: request.uri),
                 as: self.format(locale: request.origin.guess?.locale)) ?? .notFound("not found")
 
-            duration = .now - initiated
+            //  Don’t log these operations, as doing so would make it impossible for admins to
+            //  avoid leaving trails.
+            switch operation
+            {
+            case is Unidoc.LoadDashboardOperation:  return response
+            case is Unidoc.LoginOperation:          return response
+            case is Unidoc.AuthOperation:           return response
+            default:                                break
+            }
+
+            self.logger?.log(request: request, with: response, time: .now - initiated)
+            return response
         }
         catch let error as CancellationError
         {
@@ -266,56 +272,10 @@ extension Unidoc.ServerLoop
         }
         catch let error
         {
-            self.tour.errors += 1
-
-            Log[.error] = "\(error)"
-            Log[.error] = "request = \(request.uri)"
+            self.logger?.log(request: request, with: error)
 
             let page:Unidoc.ServerErrorPage = .init(error: error)
             return .error(page.resource(format: self.format))
         }
-
-        //  Don’t count login requests.
-        if  operation is Unidoc.LoadDashboardOperation ||
-            operation is Unidoc.LoginOperation ||
-            operation is Unidoc.AuthOperation ||
-            operation is Unidoc.UserConfigOperation
-        {
-            return response
-        }
-        //  Don’t increment stats from administrators,
-        //  they will really skew the results.
-        if  case .web(_?, _) = request.authorization
-        {
-            return response
-        }
-
-        if  self.tour.slowestQuery?.time ?? .zero < duration
-        {
-            self.tour.slowestQuery = .init(time: duration, uri: request.uri)
-        }
-        if  duration > .seconds(1)
-        {
-            Log[.warning] = """
-            query '\(request.uri)' took \(duration) to complete!
-            """
-        }
-
-        if  case .barbie(let locale)? = request.origin.guess
-        {
-            self.tour.metrics.languages[locale.language] += 1
-        }
-
-        let origin:Unidoc.ServerMetrics.Origin = .of(request)
-        let crosstab:Unidoc.ServerMetrics.Crosstab = origin.crosstab
-
-        self.tour.metrics.transfer[origin] += response.size
-        self.tour.metrics.requests[origin] += 1
-
-        self.tour.metrics.protocols[crosstab, default: [:]][.init(http: request.version)] += 1
-        self.tour.metrics.responses[crosstab, default: [:]][.of(response)] += 1
-        self.tour.last[crosstab] = request.logged
-
-        return response
     }
 }

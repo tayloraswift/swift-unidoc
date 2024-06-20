@@ -350,19 +350,19 @@ extension Unidoc.Router
         guard let next:String = self.descend()
         else
         {
-            return .actor(Unidoc.LoadDashboardOperation.master)
+            return .actor(Unidoc.LoadDashboardOperation.logger)
         }
 
         switch next
         {
-        case Unidoc.AdminPage.Recode.name:
-            if  let target:Unidoc.AdminPage.Recode.Target = self.descend()
+        case Unidoc._RecodePage.name:
+            if  let target:Unidoc._RecodePage.Target = self.descend()
             {
                 return .syncResource(target)
             }
             else
             {
-                return .syncResource(Unidoc.AdminPage.Recode.init())
+                return .syncResource(Unidoc._RecodePage.init())
             }
 
         case Unidoc.ReplicaSetPage.name:
@@ -399,8 +399,8 @@ extension Unidoc.Router
             return nil
         }
 
-        if  action == Unidoc.AdminPage.Recode.name,
-            let target:Unidoc.AdminPage.Recode.Target = self.descend()
+        if  action == Unidoc._RecodePage.name,
+            let target:Unidoc._RecodePage.Target = self.descend()
         {
             return .actor(Unidoc.SiteConfigOperation.recode(target))
         }
