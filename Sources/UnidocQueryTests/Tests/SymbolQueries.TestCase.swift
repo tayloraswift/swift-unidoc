@@ -87,9 +87,6 @@ extension SymbolQueries.TestCase
                             counts[secondaries[id] ?? "", default: 0] += 1
                         }
 
-                    case ._topic:
-                        continue
-
                     case .extension(let e):
                         guard self.filters.contains(.extensions)
                         else

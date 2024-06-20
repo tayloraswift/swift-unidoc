@@ -30,8 +30,6 @@ extension Unidoc.Cone
         var modules:[Unidoc.Scalar]
 
         private
-        var _topics:[Unidoc.TopicGroup]
-        private
         var extensions:[Unidoc.ExtensionGroup]
 
         private(set)
@@ -59,7 +57,6 @@ extension Unidoc.Cone
             self.products = []
             self.modules = []
 
-            self._topics = []
             self.extensions = []
             self.peerConstraints = []
             self.peerList = []
@@ -186,14 +183,6 @@ extension Unidoc.Cone.Halo
                     }
                 }
 
-            case ._topic(let group):
-                for case .scalar(let scalar) in group.members
-                {
-                    curated.insert(scalar)
-                }
-
-                self._topics.append(group)
-
             case let unexpected:
                 throw Unidoc.GroupTypeError.reject(unexpected)
             }
@@ -231,8 +220,6 @@ extension Unidoc.Cone.Halo
         self.products.removeAll(where: curated.contains(_:))
         self.modules.removeAll(where: curated.contains(_:))
         self.peerList.removeAll(where: curated.contains(_:))
-
-        self._topics.sort { $0.id < $1.id }
     }
 }
 extension Unidoc.Cone.Halo:HTML.OutputStreamable
@@ -240,34 +227,6 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
     static
     func += (html:inout HTML.ContentEncoder, self:Self)
     {
-        var other:Unidoc.TopicGroup? = nil
-        for group:Unidoc.TopicGroup in self._topics
-        {
-            if  group.members.contains(.scalar(self.context.id))
-            {
-                guard group.members.count > 1
-                else
-                {
-                    //  This is a topic group that contains this page only.
-                    //  A “See Also” section is not necessary.
-                    continue
-                }
-
-                other = group
-            }
-            else
-            {
-                //  This is a topic group that doesn’t contain this page. It is not a “See Also”
-                //  section, and we should render any caption associated with it.
-                html[.section]
-                {
-                    $0.class = "group topic"
-                } = Unidoc._LegacyTopic.init(self.context,
-                    caption: group.overview,
-                    members: group.members)
-            }
-        }
-
         if  let uncategorized:Unidoc.SegregatedBody = .init(group: self.uncategorized,
                 name: "uncategorized",
                 with: self.context)
@@ -371,19 +330,6 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
             } = Unidoc.CollapsibleSection<Unidoc.IntegratedList>.init(
                 heading: .seeAlso,
                 content: curation,
-                window: last ? nil : 12 ... 12)
-        }
-        else if
-            let other:Unidoc.TopicGroup
-        {
-            let last:Bool = self.peerList.isEmpty && extensionsEmpty
-
-            html[.section]
-            {
-                $0.class = "group topic"
-            } = Unidoc.CollapsibleSection<Unidoc._LegacyTopic>.init(
-                heading: .seeAlso,
-                content: .init(self.context, members: other.members),
                 window: last ? nil : 12 ... 12)
         }
 

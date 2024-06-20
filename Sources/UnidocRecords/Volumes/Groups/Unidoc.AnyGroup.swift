@@ -13,7 +13,6 @@ extension Unidoc
         case `extension`(ExtensionGroup)
         case  intrinsic(IntrinsicGroup)
         case  curator(CuratorGroup)
-        case  _topic(TopicGroup)
     }
 }
 
@@ -104,7 +103,6 @@ extension Unidoc.AnyGroup:Identifiable
         case .extension(let group):     group.id
         case .intrinsic(let group):     group.id
         case .curator(let group):       group.id
-        case ._topic(let group):        group.id
         }
     }
 }
@@ -171,15 +169,6 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
             bson[.items] = self.items
 
             zones.update(with: self.items)
-
-        case ._topic(let self):
-            bson[.culture] = self.culture
-            bson[.scope] = self.scope
-
-            bson[.overview] = self.overview
-            bson[.items] = self.members.isEmpty ? nil : self.members
-
-            zones.update(with: self.culture?.edition)
         }
 
         bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
@@ -218,17 +207,10 @@ extension Unidoc.AnyGroup:BSONDocumentDecodable
                 scope: try bson[.scope].decode(),
                 items: try bson[.items]?.decode() ?? []))
 
-        case .curator?:
+        case .curator?, _:
             self = .curator(.init(id: id,
                 scope: try bson[.scope]?.decode(),
                 items: try bson[.items]?.decode() ?? []))
-
-        case _:
-            self = ._topic(.init(id: id,
-                culture: try bson[.culture]?.decode(),
-                scope: try bson[.scope]?.decode(),
-                overview: try bson[.overview]?.decode(),
-                members: try bson[.items]?.decode() ?? []))
         }
     }
 }

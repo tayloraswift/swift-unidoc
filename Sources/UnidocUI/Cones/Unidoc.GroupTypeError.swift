@@ -6,7 +6,6 @@ extension Unidoc
         case `extension`
         case  intrinsic
         case  curator
-        case  _topic
     }
 }
 extension Unidoc.GroupTypeError
@@ -20,7 +19,6 @@ extension Unidoc.GroupTypeError
         case .extension:    .extension
         case .intrinsic:    .intrinsic
         case .curator:      .curator
-        case ._topic:       ._topic
         }
     }
 }

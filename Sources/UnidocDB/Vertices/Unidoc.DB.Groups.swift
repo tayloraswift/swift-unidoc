@@ -81,9 +81,7 @@ extension Unidoc.DB.Groups
                 //  There should never be a need for intrinsic groups to have realm-level
                 //  visibiity.
                 $0 += groups.intrinsics.lazy.map(Unidoc.AnyGroup.intrinsic(_:))
-
                 $0 += groups.curators.lazy.map(Unidoc.AnyGroup.curator(_:))
-                $0 += groups.topics.lazy.map(Unidoc.AnyGroup._topic(_:))
 
                 guard
                 let realm:Unidoc.Realm

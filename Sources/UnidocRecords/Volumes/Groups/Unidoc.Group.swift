@@ -18,22 +18,6 @@ extension Unidoc
 }
 extension Unidoc.Group
 {
-    @available(*, deprecated, renamed: "Unidoc.ExtensionGroup")
-    public
-    typealias Extension = Unidoc.ExtensionGroup
-
-    @available(*, deprecated, renamed: "Unidoc.PolygonalGroup")
-    public
-    typealias Automatic = Unidoc.PolygonalGroup
-
-    @available(*, deprecated, renamed: "Unidoc.PolygonalGroup")
-    public
-    typealias Polygon = Unidoc.PolygonalGroup
-
-    @available(*, deprecated, renamed: "Unidoc.TopicGroup")
-    public
-    typealias Topic = Unidoc.TopicGroup
-
     @inlinable public
     var edition:Unidoc.Edition { self.rawValue.edition }
     @inlinable public
