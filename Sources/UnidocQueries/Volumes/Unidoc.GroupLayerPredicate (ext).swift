@@ -20,7 +20,7 @@ extension Unidoc.GroupLayerPredicate
                 }
 
                 for key:Unidoc.AnyGroup.CodingKey
-                    in [.conformances, .features, .nested, .subforms]
+                    in [.conformances, .features, .nested, .subforms, .items]
                 {
                     $0.expr
                     {
@@ -40,22 +40,6 @@ extension Unidoc.GroupLayerPredicate
                             in: passage)
 
                         $0[.reduce] = outlines.flatMap(\.scalars)
-                    }
-                }
-
-                $0.expr
-                {
-                    //  TODO: After we phase out all the legacy topics groups, we should no
-                    //  longer need to check the element type.
-                    let items:Mongo.List<Unidoc.TopicMember, Mongo.AnyKeyPath> = .init(
-                        in: group[.items])
-
-                    $0[.filter] = items.filter
-                    {
-                        (link:Mongo.Variable<Unidoc.TopicMember>) in Mongo.Expression.expr
-                        {
-                            $0[.eq] = ("objectId", .expr { $0[.type] = link })
-                        }
                     }
                 }
             }
