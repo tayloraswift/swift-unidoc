@@ -7,12 +7,12 @@ extension Unidoc
     struct CollectionEventsPage<Visitor>:Sendable where Visitor:CollectionVisitor
     {
         @usableFromInline
-        let list:EventList<Visitor.Event>
+        let events:EventBuffer<Visitor.Event>
 
         @inlinable public
-        init(list:EventList<Visitor.Event>)
+        init(events:EventBuffer<Visitor.Event>)
         {
-            self.list = list
+            self.events = events
         }
     }
 }
@@ -30,7 +30,7 @@ extension Unidoc.CollectionEventsPage:Unidoc.AdministrativePage
         main[.section, { $0.class = "events" }]
         {
             $0[.h2] = "Events"
-            $0[.ol] { $0.class = "events" } = self.list
+            $0[.ol] { $0.class = "events" } = self.events.list(now: format.time)
         }
     }
 }
