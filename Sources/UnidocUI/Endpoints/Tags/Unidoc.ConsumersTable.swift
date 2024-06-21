@@ -48,7 +48,7 @@ extension Unidoc.ConsumersTable:HTML.OutputStreamable
             $0[.tr]
             {
                 $0[.th] = "Package"
-                $0[.th] = "Tag"
+                $0[.th] = "Release"
                 $0[.th] = "Docs"
             }
         }
