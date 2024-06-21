@@ -6,6 +6,7 @@ extension Unidoc._RecodePage
 {
     enum Target:String, CaseIterable
     {
+        case packageDependencies = "package-dependencies"
         case packages
         case editions
         case vertices
@@ -18,10 +19,11 @@ extension Unidoc._RecodePage.Target
     {
         switch self
         {
-        case .packages:     "Packages"
-        case .editions:     "Editions"
-        case .volumes:      "Volume Metadata"
-        case .vertices:     "Vertices"
+        case .packageDependencies:  "Package dependencies"
+        case .packages:             "Packages"
+        case .editions:             "Editions"
+        case .volumes:              "Volume metadata"
+        case .vertices:             "Vertices"
         }
     }
 
@@ -30,10 +32,11 @@ extension Unidoc._RecodePage.Target
     {
         switch self
         {
-        case .packages:     "This will recode all package records. Are you sure?"
-        case .editions:     "This will recode all edition records. Are you sure?"
-        case .volumes:      "This will recode all volume metadata. Are you sure?"
-        case .vertices:     "This will recode all volume vertices. Are you sure?"
+        case .packageDependencies:  "This will recode all package dependencies. Are you sure?"
+        case .packages:             "This will recode all package records. Are you sure?"
+        case .editions:             "This will recode all edition records. Are you sure?"
+        case .volumes:              "This will recode all volume metadata. Are you sure?"
+        case .vertices:             "This will recode all volume vertices. Are you sure?"
         }
     }
 }

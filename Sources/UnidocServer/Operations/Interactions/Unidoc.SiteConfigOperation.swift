@@ -27,10 +27,11 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
 
             switch target
             {
-            case .packages:    collection = server.db.packages
-            case .editions:    collection = server.db.editions
-            case .vertices:    collection = server.db.vertices
-            case .volumes:     collection = server.db.volumes
+            case .packageDependencies:  collection = server.db.packageDependencies
+            case .packages:             collection = server.db.packages
+            case .editions:             collection = server.db.editions
+            case .vertices:             collection = server.db.vertices
+            case .volumes:              collection = server.db.volumes
             }
 
             let (modified, selected):(Int, Int) = try await collection.recode(with: session)
