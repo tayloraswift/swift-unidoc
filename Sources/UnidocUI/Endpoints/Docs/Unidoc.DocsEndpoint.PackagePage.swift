@@ -66,7 +66,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        let tags:URI = Unidoc.TagsEndpoint[self.tags]
+        let tags:URI = Unidoc.RefsEndpoint[self.tags]
 
         main[.section]
         {

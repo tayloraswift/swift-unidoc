@@ -55,7 +55,7 @@ extension Unidoc.VersionsPage:Unidoc.RenderablePage
 }
 extension Unidoc.VersionsPage:Unidoc.StaticPage
 {
-    var location:URI { Unidoc.TagsEndpoint[self.package.symbol] }
+    var location:URI { Unidoc.RefsEndpoint[self.package.symbol] }
 }
 extension Unidoc.VersionsPage:Unidoc.ApplicationPage
 {

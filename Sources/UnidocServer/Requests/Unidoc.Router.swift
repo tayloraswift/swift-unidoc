@@ -1050,25 +1050,27 @@ extension Unidoc.Router
         }
 
         let parameters:Unidoc.PipelineParameters = .init(self.query)
-        let filter:Unidoc.VersionsQuery.Predicate
 
         if  let page:Int = parameters.page
         {
-            filter = .tags(limit: 20,
-                page: page,
-                series: parameters.beta ? .prerelease : .release)
+            return .explainable(Unidoc.TagsEndpoint.init(query: .init(
+                    symbol: symbol,
+                    filter: parameters.beta ? .prerelease : .release,
+                    limit: 20,
+                    page: page,
+                    as: self.authorization.account)),
+                parameters: parameters,
+                etag: self.etag)
         }
         else
         {
-            filter = .none(limit: 12)
+            return .explainable(Unidoc.RefsEndpoint.init(query: .init(
+                    symbol: symbol,
+                    tags: 12,
+                    as: self.authorization.account)),
+                parameters: parameters,
+                etag: self.etag)
         }
-
-        return .explainable(Unidoc.TagsEndpoint.init(query: .init(
-                symbol: symbol,
-                filter: filter,
-                as: self.authorization.account)),
-            parameters: parameters,
-            etag: self.etag)
     }
 
     private mutating

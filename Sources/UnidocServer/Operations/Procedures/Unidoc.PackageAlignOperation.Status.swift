@@ -20,7 +20,7 @@ extension Unidoc.PackageAlignOperation.Status:HTTP.ServerEndpoint
         switch self
         {
         case .align(let package, to: _):
-            .redirect(.seeOther("\(Unidoc.TagsEndpoint[package.symbol])"))
+            .redirect(.seeOther("\(Unidoc.RefsEndpoint[package.symbol])"))
 
         case .noSuchPackage:
             .notFound("No such package")

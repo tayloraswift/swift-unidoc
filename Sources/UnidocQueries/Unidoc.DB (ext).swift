@@ -91,22 +91,25 @@ extension Unidoc.DB
             rebuild = force
 
         case .packageNamed(let symbol, series: let series, force: let force):
-            let filter:Unidoc.VersionsQuery.Predicate
+            let filter:Unidoc.VersionSeries
 
             switch series
             {
-            case .release:      filter = .tags(limit: 1, series: .release)
-            case .prerelease:   filter = .tags(limit: 1, series: .prerelease)
+            case .release:      filter = .release
+            case .prerelease:   filter = .prerelease
             }
 
-            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.VersionsQuery> = .init(
-                query: .init(symbol: symbol, filter: filter))
+            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.TagsQuery> = .init(
+                query: .init(symbol: symbol,
+                    filter: filter,
+                    limit: 1,
+                    page: 0))
 
             try await pipeline.pull(from: self.id, with: session)
 
             guard
-            let output:Unidoc.VersionsQuery.Output = pipeline.value,
-            let tag:Unidoc.VersionState = output.versions.first
+            let output:Unidoc.TagsQuery.Output = pipeline.value,
+            let tag:Unidoc.VersionState = output.tags.first
             else
             {
                 return nil

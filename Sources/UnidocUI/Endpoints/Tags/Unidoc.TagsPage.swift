@@ -102,7 +102,7 @@ extension Unidoc.TagsPage:Unidoc.ApplicationPage
             $0[.a]
             {
                 $0.class = "area"
-                $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol])"
+                $0.href = "\(Unidoc.RefsEndpoint[self.package.symbol])"
             } = "Back to repo details"
         }
     }

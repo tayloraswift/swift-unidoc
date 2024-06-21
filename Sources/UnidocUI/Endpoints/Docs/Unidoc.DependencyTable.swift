@@ -65,7 +65,7 @@ extension Unidoc.DependencyTable:HTML.OutputStreamable
                         {
                             $0[.a]
                             {
-                                $0.href = "\(Unidoc.TagsEndpoint[tags])"
+                                $0.href = "\(Unidoc.RefsEndpoint[tags])"
                             } = "\(dependency.exonym)"
                         }
                     }
