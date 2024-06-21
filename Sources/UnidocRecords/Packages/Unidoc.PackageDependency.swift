@@ -42,9 +42,6 @@ extension Unidoc.PackageDependency
     {
         case id = "_id"
         case source = "e"
-
-        /// DEPRECATED
-        case _dependent = "v"
     }
 }
 extension Unidoc.PackageDependency:BSONDocumentEncodable
@@ -61,13 +58,6 @@ extension Unidoc.PackageDependency:BSONDocumentDecodable
     public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        //  legacy path
-        if  let _dependent:Unidoc.Version = try? bson[._dependent].decode()
-        {
-            self.init(id: try bson[.id].decode(), dependent: _dependent)
-            return
-        }
-
         let source:Unidoc.Edition = try bson[.source].decode()
         self.init(id: try bson[.id].decode(), dependent: source.version)
     }
