@@ -14,7 +14,7 @@ extension Unidoc
 extension Unidoc.PublicOperation
 {
     public consuming
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with _:Unidoc.UserSessionState,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {

@@ -2,7 +2,7 @@ import HTTP
 import HTTPServer
 import MongoDB
 
-extension HTTP.ServerLoop where Self:Unidoc.ServerLoop
+extension HTTP.Server where Self:Unidoc.Server
 {
     public
     func run() async throws

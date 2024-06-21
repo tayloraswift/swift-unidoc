@@ -19,7 +19,7 @@ extension Unidoc
 }
 extension Unidoc.LoadExplainedOperation:Unidoc.PublicOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)

@@ -14,7 +14,7 @@ extension Unidoc
 }
 extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         switch self

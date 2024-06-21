@@ -30,7 +30,7 @@ extension Unidoc
 }
 extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         let github:GitHub.Client<GitHub.PersonalAccessToken>

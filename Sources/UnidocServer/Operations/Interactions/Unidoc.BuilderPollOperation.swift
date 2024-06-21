@@ -17,7 +17,7 @@ extension Unidoc
 }
 extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with session:Mongo.Session) async throws -> JSON?
     {
         polling:

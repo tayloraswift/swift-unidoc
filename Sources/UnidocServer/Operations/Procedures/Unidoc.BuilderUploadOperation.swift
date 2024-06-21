@@ -23,7 +23,7 @@ extension Unidoc
 }
 extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
 {
-    func perform(on server:borrowing Unidoc.ServerLoop,
+    func perform(on server:Unidoc.Server,
         payload:__owned [UInt8],
         session:Mongo.Session) async throws -> HTTP.ServerResponse
     {
@@ -118,7 +118,7 @@ extension Unidoc.BuilderUploadOperation
 {
     private
     func export(report:Unidoc.BuildReport,
-        from server:borrowing Unidoc.ServerLoop) async throws -> [Unidoc.BuildLogType]
+        from server:Unidoc.Server) async throws -> [Unidoc.BuildLogType]
     {
         var logs:[Unidoc.BuildLogType] = []
 

@@ -22,7 +22,7 @@ extension Unidoc
 }
 extension Unidoc.LinkerOperation:Unidoc.AdministrativeOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         try await session.update(database: server.db.unidoc.id, with: self.queue)

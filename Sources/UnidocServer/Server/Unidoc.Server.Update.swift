@@ -1,6 +1,6 @@
 import HTTP
 
-extension Unidoc.ServerLoop
+extension Unidoc.Server
 {
     struct Update:Sendable
     {

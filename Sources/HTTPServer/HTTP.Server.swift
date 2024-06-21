@@ -20,7 +20,7 @@ extension NIONegotiatedHTTPVersion:@unchecked Sendable
 extension HTTP
 {
     public
-    protocol ServerLoop:Sendable
+    protocol Server:Sendable
     {
         associatedtype StreamedRequest:HTTP.ServerStreamedRequest
         associatedtype IntegralRequest:HTTP.ServerIntegralRequest
@@ -37,7 +37,7 @@ extension HTTP
     }
 }
 
-extension HTTP.ServerLoop
+extension HTTP.Server
 {
     public
     func serve<Authority>(
@@ -239,7 +239,7 @@ extension HTTP.ServerLoop
         }
     }
 }
-extension HTTP.ServerLoop
+extension HTTP.Server
 {
     /// Handles an HTTP/1.1 connection.
     private
@@ -401,7 +401,7 @@ extension HTTP.ServerLoop
         }
     }
 }
-extension HTTP.ServerLoop
+extension HTTP.Server
 {
     /// Handles an HTTP/2 connection.
     private

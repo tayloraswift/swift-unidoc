@@ -1,7 +1,7 @@
 import HTTP
 import HTTPServer
 
-extension Unidoc.ServerLoop
+extension Unidoc.Server
 {
     @frozen public
     struct Promise:Sendable
@@ -15,7 +15,7 @@ extension Unidoc.ServerLoop
         }
     }
 }
-extension Unidoc.ServerLoop.Promise
+extension Unidoc.Server.Promise
 {
     func resume(returning response:HTTP.ServerResponse)
     {

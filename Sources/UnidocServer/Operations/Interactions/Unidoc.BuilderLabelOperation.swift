@@ -16,7 +16,7 @@ extension Unidoc
 }
 extension Unidoc.BuilderLabelOperation:Unidoc.MachineOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with session:Mongo.Session) async throws -> JSON?
     {
         guard

@@ -55,7 +55,7 @@ extension Unidoc.ExportOperation
 }
 extension Unidoc.ExportOperation:Unidoc.PublicOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session

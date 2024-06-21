@@ -7,7 +7,7 @@ extension Unidoc
     public
     protocol BlockingOperation:ProceduralOperation
     {
-        func perform(on server:borrowing ServerLoop,
+        func perform(on server:Server,
             payload:consuming [UInt8],
             session:Mongo.Session) async throws -> HTTP.ServerResponse
     }
@@ -15,9 +15,9 @@ extension Unidoc
 extension Unidoc.BlockingOperation
 {
     public
-    func perform(on server:borrowing Unidoc.ServerLoop,
+    func perform(on server:Unidoc.Server,
         payload:consuming [UInt8],
-        request:Unidoc.ServerLoop.Promise) async
+        request:Unidoc.Server.Promise) async
     {
         do
         {

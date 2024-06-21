@@ -26,7 +26,7 @@ extension Unidoc
 }
 extension Unidoc.UserIndexOperation:Unidoc.InteractiveOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with _:Unidoc.UserSessionState,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
@@ -35,7 +35,7 @@ extension Unidoc.UserIndexOperation:Unidoc.InteractiveOperation
 }
 extension Unidoc.UserIndexOperation
 {
-    func perform(on server:borrowing Unidoc.Server) async throws -> HTTP.ServerResponse?
+    func perform(on server:Unidoc.Server) async throws -> HTTP.ServerResponse?
     {
         guard
         let integration:GitHub.Integration = server.github
