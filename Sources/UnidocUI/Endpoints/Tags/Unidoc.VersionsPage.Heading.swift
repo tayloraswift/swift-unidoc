@@ -6,6 +6,7 @@ extension Unidoc.VersionsPage
     {
         case tags
         case branches
+        case consumers
         case settings
         case settingsAdmin
         case importRefs
@@ -19,6 +20,7 @@ extension Unidoc.VersionsPage.Heading:Identifiable
         {
         case .tags:             "ss:tags"
         case .branches:         "ss:branches"
+        case .consumers:        "ss:consumers"
         case .settings:         "ss:settings"
         case .settingsAdmin:    "ss:settings-admin"
         case .importRefs:       "ss:import-refs"
@@ -33,7 +35,8 @@ extension Unidoc.VersionsPage.Heading:HTML.OutputStreamableHeading
         {
         case .tags:             "Package tags"
         case .branches:         "Package branches"
-        case .settings:         "Package settings"
+        case .consumers:        "Consumers"
+        case .settings:         "Settings"
         case .settingsAdmin:    "Admin actions"
         case .importRefs:       "Add branches"
         }

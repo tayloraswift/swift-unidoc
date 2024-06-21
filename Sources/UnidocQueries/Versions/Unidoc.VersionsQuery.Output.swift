@@ -11,13 +11,16 @@ extension Unidoc.VersionsQuery
     struct Output:Sendable
     {
         public
+        var package:Unidoc.PackageMetadata
+        public
+        var dependents:[Unidoc.PackageDependent]
+        public
         var versions:[Unidoc.VersionState]
         public
         var branches:[Unidoc.VersionState]
         public
         var aliases:[Symbol.Package]
-        public
-        var package:Unidoc.PackageMetadata
+
         public
         var build:Unidoc.BuildMetadata?
         public
@@ -27,18 +30,20 @@ extension Unidoc.VersionsQuery
 
         @inlinable public
         init(
+            package:Unidoc.PackageMetadata,
+            dependents:[Unidoc.PackageDependent],
             versions:[Unidoc.VersionState],
             branches:[Unidoc.VersionState],
             aliases:[Symbol.Package],
-            package:Unidoc.PackageMetadata,
             build:Unidoc.BuildMetadata?,
             realm:Unidoc.RealmMetadata?,
             user:Unidoc.User?)
         {
+            self.package = package
+            self.dependents = dependents
             self.versions = versions
             self.branches = branches
             self.aliases = aliases
-            self.package = package
             self.build = build
             self.realm = realm
             self.user = user
@@ -51,6 +56,7 @@ extension Unidoc.VersionsQuery.Output:Mongo.MasterCodingModel
     enum CodingKey:String, Sendable
     {
         case versions
+        case dependents
         case branches
         case aliases
         case package
@@ -64,11 +70,11 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(
-            versions: try bson[.versions]?.decode() ?? [],
-            branches: try bson[.branches]?.decode() ?? [],
-            aliases: try bson[.aliases]?.decode() ?? [],
-            package: try bson[.package].decode(),
+        self.init(package: try bson[.package].decode(),
+            dependents: try bson[.dependents].decode(),
+            versions: try bson[.versions].decode(),
+            branches: try bson[.branches].decode(),
+            aliases: try bson[.aliases].decode(),
             build: try bson[.build]?.decode(),
             realm: try bson[.realm]?.decode(),
             user: try bson[.user]?.decode())

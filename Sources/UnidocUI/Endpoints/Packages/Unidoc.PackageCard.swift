@@ -48,7 +48,7 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
             {
                 $0[.a]
                 {
-                    $0.href = "\(Unidoc.TagsEndpoint[self.metadata.package.symbol])"
+                    $0.href = "\(Unidoc.RefsEndpoint[self.metadata.package.symbol])"
                     $0.class = dead ? "dead" : nil
 
                 } = self.name

@@ -325,7 +325,7 @@ extension Unidoc.DB
             volume: symbol,
             hiddenByPackage: true,
             delta: try await self.fill(volume: consume volume,
-                sitemap: true,
+                hidden: false,
                 with: session))
 
         return (uploaded, uplinked)
@@ -433,7 +433,7 @@ extension Unidoc.DB
             volume: symbol,
             hiddenByPackage: package.hidden,
             delta: try await self.fill(volume: consume volume,
-                sitemap: !package.hidden,
+                hidden: package.hidden,
                 with: session))
     }
 
@@ -497,7 +497,9 @@ extension Unidoc.DB
 extension Unidoc.DB
 {
     private
-    func fillEdges(from metadata:Unidoc.VolumeMetadata, with session:Mongo.Session) async throws
+    func fillEdges(from metadata:Unidoc.VolumeMetadata,
+        hidden:Bool,
+        with session:Mongo.Session) async throws
     {
         try await self.editionDependencies.insert(dependencies: metadata.dependencies,
             dependent: metadata.id,
@@ -509,14 +511,21 @@ extension Unidoc.DB
             return
         }
 
-        try await self.packageDependencies.update(dependencies: metadata.dependencies,
-            dependent: metadata.id,
-            with: session)
+        if  hidden
+        {
+            try await self.packageDependencies.clear(dependent: metadata.id, with: session)
+        }
+        else
+        {
+            try await self.packageDependencies.update(dependencies: metadata.dependencies,
+                dependent: metadata.id,
+                with: session)
+        }
     }
 
     private
     func fill(volume:consuming Unidoc.Volume,
-        sitemap:Bool,
+        hidden:Bool,
         with session:Mongo.Session) async throws -> Unidoc.SurfaceDelta?
     {
         //  We assume compressing the search JSON will take a (relatively) long time, so we do
@@ -564,7 +573,7 @@ extension Unidoc.DB
             realm: volume.metadata.latest ? volume.metadata.realm : nil,
             with: session)
 
-        try await self.fillEdges(from: volume.metadata, with: session)
+        try await self.fillEdges(from: volume.metadata, hidden: hidden, with: session)
 
         let surfaceDelta:Unidoc.SurfaceDelta?
         if  volume.metadata.latest
@@ -574,11 +583,16 @@ extension Unidoc.DB
             if  let sitemapDelta:Unidoc.SitemapDelta = try await self.sitemaps.diff(new: new,
                     with: session)
             {
-                if  case .zero = sitemapDelta
+                if  hidden
+                {
+                    surfaceDelta = .ignoredPrivate
+                    try await self.sitemaps.delete(id: new.id, with: session)
+                }
+                else if case .zero = sitemapDelta
                 {
                     surfaceDelta = volumeReplaced ? .ignoredRepeated(nil) : .replaced(nil)
                 }
-                else if sitemap
+                else
                 {
                     surfaceDelta = volumeReplaced
                         ? .ignoredRepeated(sitemapDelta)
@@ -587,11 +601,10 @@ extension Unidoc.DB
                     new.modified = .now()
                     try await self.sitemaps.upsert(some: new, with: session)
                 }
-                else
-                {
-                    surfaceDelta = .ignoredPrivate
-                    try await self.sitemaps.delete(id: new.id, with: session)
-                }
+            }
+            else if hidden
+            {
+                surfaceDelta = .ignoredPrivate
             }
             else
             {

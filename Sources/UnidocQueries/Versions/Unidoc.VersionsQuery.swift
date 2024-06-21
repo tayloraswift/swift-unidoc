@@ -13,15 +13,25 @@ extension Unidoc
         public
         let symbol:Symbol.Package
         public
-        let filter:Predicate
+        let limitTags:Int
+        public
+        let limitBranches:Int
+        public
+        let limitDependents:Int
         public
         let user:Account?
 
         @inlinable public
-        init(symbol:Symbol.Package, filter:Predicate, as user:Account? = nil)
+        init(symbol:Symbol.Package,
+            limitTags:Int,
+            limitBranches:Int = 32,
+            limitDependents:Int = 32,
+            as user:Account? = nil)
         {
             self.symbol = symbol
-            self.filter = filter
+            self.limitTags = limitTags
+            self.limitBranches = limitBranches
+            self.limitDependents = limitDependents
             self.user = user
         }
     }
@@ -44,83 +54,76 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        switch self.filter
+        let prereleases:Mongo.AnyKeyPath = "prereleases"
+        let releases:Mongo.AnyKeyPath = "releases"
+
+        pipeline.loadTags(matching: .latest(.prerelease),
+            limit: self.limitTags,
+            from: Self.target,
+            into: prereleases)
+
+        pipeline.loadTags(matching: .latest(.release),
+            limit: self.limitTags,
+            from: Self.target,
+            into: releases)
+
+        pipeline.loadBranches(limit: self.limitBranches,
+            from: Self.target,
+            into: Output[.branches])
+
+        pipeline.loadDependents(limit: self.limitDependents,
+            from: Self.target,
+            into: Output[.dependents])
+
+        //  Concatenate the two lists.
+        pipeline[stage: .set] = .init
         {
-        case .tags(limit: let limit, page: let page, series: let series):
-            pipeline.loadTags(matching: .latest(series),
-                limit: limit,
-                skip: limit * page,
-                from: Self.target,
-                into: Output[.versions])
-
-        case .none(limit: let limit):
-            let prereleases:Mongo.AnyKeyPath = "prereleases"
-            let releases:Mongo.AnyKeyPath = "releases"
-
-            pipeline.loadTags(matching: .latest(.prerelease),
-                limit: limit,
-                from: Self.target,
-                into: prereleases)
-
-            pipeline.loadTags(matching: .latest(.release),
-                limit: limit,
-                from: Self.target,
-                into: releases)
-
-            pipeline.loadBranches(limit: limit,
-                from: Self.target,
-                into: Output[.branches])
-
-            //  Concatenate the two lists.
-            pipeline[stage: .set] = .init
+            $0[Output[.versions]] = .expr
             {
-                $0[Output[.versions]] = .expr
-                {
-                    $0[.concatArrays] = (prereleases, releases)
-                }
+                $0[.concatArrays] = (prereleases, releases)
             }
-            pipeline[stage: .unset] = [prereleases, releases]
+        }
+        pipeline[stage: .unset] = [prereleases, releases]
 
-            //  Lookup other aliases for this package.
-            let aliases:Mongo.List<Unidoc.PackageAlias, Mongo.AnyKeyPath> = .init(
-                in: Output[.aliases])
+        //  Lookup other aliases for this package.
+        let aliases:Mongo.List<Unidoc.PackageAlias, Mongo.AnyKeyPath> = .init(
+            in: Output[.aliases])
 
-            pipeline[stage: .lookup] = .init
-            {
-                $0[.from] = Unidoc.DB.PackageAliases.name
-                $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
-                $0[.foreignField] = Unidoc.PackageAlias[.coordinate]
-                $0[.as] = aliases.expression
-            }
+        pipeline[stage: .lookup] = .init
+        {
+            $0[.from] = Unidoc.DB.PackageAliases.name
+            $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
+            $0[.foreignField] = Unidoc.PackageAlias[.coordinate]
+            $0[.as] = aliases.expression
+        }
 
-            pipeline[stage: .set] = .init
-            {
-                $0[Output[.aliases]] = .expr { $0[.map] = aliases.map { $0[.id] } }
-            }
+        pipeline[stage: .set] = .init
+        {
+            $0[Output[.aliases]] = .expr { $0[.map] = aliases.map { $0[.id] } }
+        }
 
-            //  Lookup the associated build.
-            pipeline[stage: .lookup] = .init
-            {
-                $0[.from] = Unidoc.DB.PackageBuilds.name
-                $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
-                $0[.foreignField] = Unidoc.BuildMetadata[.id]
-                $0[.as] = Output[.build]
-            }
-            //  Lookup the associated realm.
-            pipeline[stage: .lookup] = .init
-            {
-                $0[.from] = Unidoc.DB.Realms.name
-                $0[.localField] = Self.target / Unidoc.PackageMetadata[.realm]
-                $0[.foreignField] = Unidoc.RealmMetadata[.id]
-                $0[.as] = Output[.realm]
-            }
+        //  Lookup the associated build.
+        pipeline[stage: .lookup] = .init
+        {
+            $0[.from] = Unidoc.DB.PackageBuilds.name
+            $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
+            $0[.foreignField] = Unidoc.BuildMetadata[.id]
+            $0[.as] = Output[.build]
+        }
+        //  Lookup the associated realm.
+        pipeline[stage: .lookup] = .init
+        {
+            $0[.from] = Unidoc.DB.Realms.name
+            $0[.localField] = Self.target / Unidoc.PackageMetadata[.realm]
+            $0[.foreignField] = Unidoc.RealmMetadata[.id]
+            $0[.as] = Output[.realm]
+        }
 
-            //  Unbox single-element arrays.
-            pipeline[stage: .set] = .init
-            {
-                $0[Output[.build]] = .expr { $0[.first] = Output[.build] }
-                $0[Output[.realm]] = .expr { $0[.first] = Output[.realm] }
-            }
+        //  Unbox single-element arrays.
+        pipeline[stage: .set] = .init
+        {
+            $0[Output[.build]] = .expr { $0[.first] = Output[.build] }
+            $0[Output[.realm]] = .expr { $0[.first] = Output[.realm] }
         }
 
         if  let id:Unidoc.Account = self.user

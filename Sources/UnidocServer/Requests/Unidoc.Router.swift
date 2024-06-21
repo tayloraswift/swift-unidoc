@@ -216,6 +216,7 @@ extension Unidoc.Router
         case .asset:        return self.asset()
         case .auth:         return self.auth()
         case .blog:         return self.blog(module: "Articles")
+        case .consumers:    return self.consumers()
         case .docc:         return self.docs()
         case .docs:         return self.docs()
         case .guides:       return self.docsLegacy()
@@ -1050,22 +1051,45 @@ extension Unidoc.Router
         }
 
         let parameters:Unidoc.PipelineParameters = .init(self.query)
-        let filter:Unidoc.VersionsQuery.Predicate
 
         if  let page:Int = parameters.page
         {
-            filter = .tags(limit: 20,
-                page: page,
-                series: parameters.beta ? .prerelease : .release)
+            return .explainable(Unidoc.TagsEndpoint.init(query: .init(
+                    symbol: symbol,
+                    filter: parameters.beta ? .prerelease : .release,
+                    limit: 20,
+                    page: page,
+                    as: self.authorization.account)),
+                parameters: parameters,
+                etag: self.etag)
         }
         else
         {
-            filter = .none(limit: 12)
+            return .explainable(Unidoc.RefsEndpoint.init(query: .init(
+                    symbol: symbol,
+                    limitTags: 12,
+                    limitBranches: 32,
+                    limitDependents: 16,
+                    as: self.authorization.account)),
+                parameters: parameters,
+                etag: self.etag)
+        }
+    }
+
+    private mutating
+    func consumers() -> Unidoc.AnyOperation?
+    {
+        guard let symbol:Symbol.Package = self.descend()
+        else
+        {
+            return nil
         }
 
-        return .explainable(Unidoc.TagsEndpoint.init(query: .init(
+        let parameters:Unidoc.PipelineParameters = .init(self.query)
+        return .explainable(Unidoc.ConsumersEndpoint.init(query: .init(
                 symbol: symbol,
-                filter: filter,
+                limit: 20,
+                page: parameters.page ?? 0,
                 as: self.authorization.account)),
             parameters: parameters,
             etag: self.etag)

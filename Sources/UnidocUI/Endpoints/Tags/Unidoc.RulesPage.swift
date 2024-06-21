@@ -52,7 +52,7 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
             {
                 $0[.a]
                 {
-                    $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol])"
+                    $0.href = "\(Unidoc.RefsEndpoint[self.package.symbol])"
                 } = "\(self.package.symbol)"
             }
 

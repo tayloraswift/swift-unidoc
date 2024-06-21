@@ -1,9 +1,6 @@
 import MongoQL
+import MongoDB
 import UnidocRecords
-
-extension Unidoc.PackageDependency:Mongo.MasterCodingModel
-{
-}
 
 extension Unidoc.DB
 {
@@ -23,11 +20,18 @@ extension Unidoc.DB
 extension Unidoc.DB.PackageDependencies
 {
     public static
-    let indexSource:Mongo.CollectionIndex = .init("Source",
+    let indexSource:Mongo.CollectionIndex = .init("Source/2",
         collation: SimpleCollation.spec)
     {
         $0[Unidoc.PackageDependency[.id] / Unidoc.Edge<Unidoc.Package>[.source]] = (+)
-        $0[Unidoc.PackageDependency[.dependent]] = (+)
+        $0[Unidoc.PackageDependency[.source]] = (+)
+    }
+
+    public static
+    let indexTarget:Mongo.CollectionIndex = .init("Target",
+        collation: SimpleCollation.spec)
+    {
+        $0[Unidoc.PackageDependency[.id] / Unidoc.Edge<Unidoc.Package>[.target]] = (+)
     }
 }
 extension Unidoc.DB.PackageDependencies:Mongo.CollectionModel
@@ -43,7 +47,18 @@ extension Unidoc.DB.PackageDependencies:Mongo.CollectionModel
     {
         [
             Self.indexSource,
+            Self.indexTarget
         ]
+    }
+}
+extension Unidoc.DB.PackageDependencies:Mongo.RecodableModel
+{
+    public
+    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    {
+        try await self.recode(through: Unidoc.PackageDependency.self,
+            with: session,
+            by: .now.advanced(by: .seconds(30)))
     }
 }
 extension Unidoc.DB.PackageDependencies
@@ -93,7 +108,7 @@ extension Unidoc.DB.PackageDependencies
                     $0[.q]
                     {
                         $0[Element[.id] / Unidoc.Edge<Unidoc.Package>[.source]] = source.package
-                        $0[Element[.dependent]] { $0[.ne] = source.version }
+                        $0[Element[.source]] { $0[.ne] = source }
                     }
                 }
             },
@@ -116,7 +131,7 @@ extension Unidoc.DB.PackageDependencies
                     $0[.q]
                     {
                         $0[Element[.id] / Unidoc.Edge<Unidoc.Package>[.source]] = source.package
-                        $0[Element[.dependent]] = source.version
+                        $0[Element[.source]] = source
                     }
                 }
             },
