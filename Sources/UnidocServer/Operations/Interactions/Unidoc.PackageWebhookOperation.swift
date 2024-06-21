@@ -54,7 +54,7 @@ extension Unidoc.PackageWebhookOperation
 extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
 {
     __consuming
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         var event:GitHub.WebhookCreate

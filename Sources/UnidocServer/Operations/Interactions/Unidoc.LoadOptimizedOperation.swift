@@ -31,7 +31,7 @@ extension Unidoc
 extension Unidoc.LoadOptimizedOperation:Unidoc.PublicOperation
 {
     consuming
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session = try await .init(from: server.db.sessions)

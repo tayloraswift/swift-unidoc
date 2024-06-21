@@ -160,7 +160,7 @@ extension Unidoc.Preview
                 try await Unidoc.GraphStateLoop.run(watching: database)
                 {
                     let linker:Unidoc.GraphLinkerPlugin = .init(bucket: nil)
-                    let server:Unidoc.ServerLoop = .init(
+                    let server:Unidoc.Server = .init(
                         plugins: [linker],
                         context: context,
                         options: options,

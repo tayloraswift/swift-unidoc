@@ -5,8 +5,8 @@ extension Unidoc
     public
     protocol ProceduralOperation:Sendable
     {
-        func perform(on server:borrowing ServerLoop,
+        func perform(on server:Server,
             payload:consuming [UInt8],
-            request:ServerLoop.Promise) async
+            request:Server.Promise) async
     }
 }

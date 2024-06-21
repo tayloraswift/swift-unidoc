@@ -10,11 +10,11 @@ extension Unidoc
     {
         associatedtype Status:HTTP.ServerEndpoint<RenderFormat>
 
-        func enqueue(on server:borrowing ServerLoop,
+        func enqueue(on server:Server,
             payload:consuming [UInt8],
             session:Mongo.Session) async throws -> Status
 
-        func perform(on server:borrowing ServerLoop,
+        func perform(on server:Server,
             session:Mongo.Session,
             status:Status) async
     }
@@ -22,9 +22,9 @@ extension Unidoc
 extension Unidoc.NonblockingOperation
 {
     public
-    func perform(on server:borrowing Unidoc.ServerLoop,
+    func perform(on server:Unidoc.Server,
         payload:consuming [UInt8],
-        request:Unidoc.ServerLoop.Promise) async
+        request:Unidoc.Server.Promise) async
     {
         let session:Mongo.Session
         let status:Status

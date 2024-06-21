@@ -22,7 +22,7 @@ extension Unidoc.UserConfigOperation:Unidoc.RestrictedOperation
     /// only modify the currently authenticated user.
     func admit(user:Unidoc.UserRights) -> Bool { true }
 
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         switch self.update

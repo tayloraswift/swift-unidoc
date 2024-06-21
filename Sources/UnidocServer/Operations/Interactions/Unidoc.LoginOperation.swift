@@ -20,7 +20,7 @@ extension Unidoc
 }
 extension Unidoc.LoginOperation:Unidoc.PublicOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         as _:Unidoc.RenderFormat) -> HTTP.ServerResponse?
     {
         guard

@@ -33,7 +33,7 @@ extension Unidoc.MeteredOperation
     ///
     /// This isn’t called automatically, to allow for maximum customization.
     func charge(cost:Int,
-        from server:borrowing Unidoc.Server,
+        from server:Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         //  The cost for administratrices is not *zero*, mainly so that it’s easier for us to

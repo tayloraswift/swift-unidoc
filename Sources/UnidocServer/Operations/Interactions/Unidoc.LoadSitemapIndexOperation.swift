@@ -22,7 +22,7 @@ extension Unidoc
 }
 extension Unidoc.LoadSitemapIndexOperation:Unidoc.PublicOperation
 {
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let db:Unidoc.Database = server.db

@@ -24,7 +24,7 @@ extension Unidoc
 extension Unidoc.RestrictedOperation
 {
     public consuming
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with state:Unidoc.UserSessionState,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {

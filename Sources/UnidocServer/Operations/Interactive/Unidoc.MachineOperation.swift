@@ -28,7 +28,7 @@ extension Unidoc.MachineOperation
     }
 
     public
-    func load(from server:borrowing Unidoc.Server,
+    func load(from server:Unidoc.Server,
         with session:Mongo.Session) async throws -> HTTP.ServerResponse?
     {
         guard
