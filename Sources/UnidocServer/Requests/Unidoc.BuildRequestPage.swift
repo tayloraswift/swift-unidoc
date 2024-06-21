@@ -27,7 +27,7 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
     {
         form[.p]
         {
-            let package:URI = Unidoc.TagsEndpoint[self.selector.package]
+            let package:URI = Unidoc.RefsEndpoint[self.selector.package]
             if  self.cancel
             {
                 $0 += "You can cancel the build for "

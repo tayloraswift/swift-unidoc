@@ -38,7 +38,7 @@ extension Unidoc.RefsTable.Row.Graph.Tool:HTML.OutputStreamable
         {
             $0.type = "hidden"
             $0.name = "from"
-            $0.value = "\(Unidoc.TagsEndpoint[self.package])"
+            $0.value = "\(Unidoc.RefsEndpoint[self.package])"
         }
 
         form[.button] { $0.type = "submit"; $0.class = "text" } = self.label

@@ -66,7 +66,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        let tags:URI = Unidoc.TagsEndpoint[self.tags]
+        let tags:URI = Unidoc.RefsEndpoint[self.tags]
 
         main[.section]
         {
@@ -204,7 +204,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
             }
             if !self.apex.snapshot.requirements.isEmpty
             {
-                $0[.table, { $0.class = "platforms" }]
+                $0[.table, { $0[data: "type"] = "platforms" }]
                 {
                     $0[.thead]
                     {

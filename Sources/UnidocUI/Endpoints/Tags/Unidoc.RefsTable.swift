@@ -1,5 +1,6 @@
 import HTML
 import Symbols
+import URI
 
 extension Unidoc
 {
@@ -15,7 +16,7 @@ extension Unidoc
         init(package:Symbol.Package,
             rows:[VersionState],
             view:Permissions,
-            type:RefsTableType = .tags)
+            type:RefsTableType)
         {
             self.package = package
             self.rows = rows
@@ -24,8 +25,36 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.RefsTable
+{
+    /// The larger sequence this table is related to (but not necessarily part of).
+    private
+    var series:Unidoc.VersionSeries
+    {
+        switch self.type
+        {
+        case .branches:     return .release
+        case .prereleases:  return .prerelease
+        case .releases:     return .release
+        case .versions:     return .release
+        }
+    }
+}
+extension Unidoc.RefsTable:Unidoc.IterableTable
+{
+    func more(page index:Int) -> URI
+    {
+        Unidoc.TagsEndpoint[self.package, self.series, page: index]
+    }
+}
 extension Unidoc.RefsTable:HTML.OutputStreamable
 {
+    static
+    func |= (table:inout HTML.AttributeEncoder, self:Self)
+    {
+        table[data: "type"] = "refs"
+    }
+
     static
     func += (table:inout HTML.ContentEncoder, self:Self)
     {
@@ -35,8 +64,10 @@ extension Unidoc.RefsTable:HTML.OutputStreamable
             {
                 $0[.th] = switch self.type
                 {
-                case .branches: "Branch"
-                case .tags:     "Tag"
+                case .branches:     "Branch"
+                case .prereleases:  "Tag"
+                case .releases:     "Tag"
+                case .versions:     "Tag"
                 }
 
                 $0[.th] = "Commit"

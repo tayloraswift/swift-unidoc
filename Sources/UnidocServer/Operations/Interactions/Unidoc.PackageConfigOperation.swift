@@ -120,7 +120,7 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
 
         if  let updated:Symbol.Package
         {
-            return .redirect(.seeOther("\(Unidoc.TagsEndpoint[updated])"))
+            return .redirect(.seeOther("\(Unidoc.RefsEndpoint[updated])"))
         }
         else if
             let back:String = self.from

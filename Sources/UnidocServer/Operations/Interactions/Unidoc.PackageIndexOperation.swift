@@ -152,7 +152,7 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 with: session)
         }
 
-        return .redirect(.seeOther("\(Unidoc.TagsEndpoint[package.symbol])"))
+        return .redirect(.seeOther("\(Unidoc.RefsEndpoint[package.symbol])"))
     }
 }
 extension Unidoc.PackageIndexOperation

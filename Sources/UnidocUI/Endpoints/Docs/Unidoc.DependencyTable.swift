@@ -19,6 +19,12 @@ extension Unidoc
 extension Unidoc.DependencyTable:HTML.OutputStreamable
 {
     static
+    func |= (table:inout HTML.AttributeEncoder, self:Self)
+    {
+        table[data: "type"] = "dependencies"
+    }
+
+    static
     func += (table:inout HTML.ContentEncoder, self:Self)
     {
         table[.thead]
@@ -65,7 +71,7 @@ extension Unidoc.DependencyTable:HTML.OutputStreamable
                         {
                             $0[.a]
                             {
-                                $0.href = "\(Unidoc.TagsEndpoint[tags])"
+                                $0.href = "\(Unidoc.RefsEndpoint[tags])"
                             } = "\(dependency.exonym)"
                         }
                     }

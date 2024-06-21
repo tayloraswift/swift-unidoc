@@ -1,4 +1,5 @@
 import DequeModule
+import HTML
 import UnixTime
 
 extension Unidoc
@@ -12,7 +13,7 @@ extension Unidoc
         let limit:Int
 
         @inlinable public
-        init(minimumCapacity limit:Int)
+        init(limit:Int)
         {
             self.entries = .init(minimumCapacity: limit)
             self.limit = limit
@@ -21,6 +22,16 @@ extension Unidoc
 }
 extension Unidoc.EventBuffer:Sendable where Event:Sendable
 {
+}
+extension Unidoc.EventBuffer:RandomAccessCollection
+{
+    @inlinable public
+    var startIndex:Int { self.entries.startIndex }
+    @inlinable public
+    var endIndex:Int { self.entries.endIndex }
+
+    @inlinable public
+    subscript(index:Int) -> Event { self.entries[index].event }
 }
 extension Unidoc.EventBuffer
 {
@@ -33,5 +44,13 @@ extension Unidoc.EventBuffer
         }
 
         self.entries.append(.init(pushed: .now(), event: event))
+    }
+}
+extension Unidoc.EventBuffer where Event:HTML.OutputStreamable
+{
+    @inlinable public
+    func list(now:UnixInstant) -> Unidoc.EventList<Event>
+    {
+        .init(entries: self.entries, now: now)
     }
 }

@@ -1,6 +1,5 @@
 import HTTP
 import MongoDB
-import SemanticVersions
 import Symbols
 import UnidocAPI
 import UnidocDB
@@ -14,12 +13,12 @@ extension Unidoc
     struct TagsEndpoint
     {
         public
-        let query:VersionsQuery
+        let query:TagsQuery
         public
-        var value:VersionsQuery.Output?
+        var value:TagsQuery.Output?
 
         @inlinable public
-        init(query:VersionsQuery)
+        init(query:TagsQuery)
         {
             self.query = query
             self.value = nil
@@ -28,6 +27,7 @@ extension Unidoc
 }
 extension Unidoc.TagsEndpoint
 {
+    @available(*, deprecated, renamed: "Unidoc.RefsEndpoint.subscript(_:)")
     @inlinable public static
     subscript(package:Symbol.Package) -> URI { Unidoc.ServerRoot.tags / "\(package)" }
 
@@ -51,7 +51,7 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
     func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         guard
-        let output:Unidoc.VersionsQuery.Output = self.value
+        let output:Unidoc.TagsQuery.Output = self.value
         else
         {
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
@@ -60,47 +60,18 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
         let view:Unidoc.Permissions = format.security.permissions(package: output.package,
             user: output.user)
 
-        switch self.query.filter
-        {
-        case .tags(limit: let limit, page: let index, series: let series):
-            let table:Unidoc.RefsTable = .init(package: output.package.symbol,
-                rows: output.versions,
-                view: view)
+        let table:Unidoc.Paginated<Unidoc.RefsTable> = .init(
+            table: .init(package: output.package.symbol,
+                rows: output.tags,
+                view: view,
+                type: self.query.filter == .release ? .releases : .prereleases),
+            index: self.query.page,
+            truncated: output.tags.count >= self.query.limit)
 
-            let page:Unidoc.TagsPage = .init(package: output.package,
-                series: series,
-                index: index,
-                limit: limit,
-                table: table,
-                more: output.versions.count == limit)
+        let page:Unidoc.TagsPage = .init(package: output.package,
+            series: self.query.filter,
+            table: table)
 
-            return .ok(page.resource(format: format))
-
-        case .none(limit: let limit):
-            let releases:Int = output.versions.reduce(into: 0)
-            {
-                if  $1.edition.release
-                {
-                    $0 += 1
-                }
-            }
-
-            let versions:Unidoc.RefsTable = .init(
-                package: output.package.symbol,
-                //  Reverse order, because we want the latest versions to come first.
-                rows: output.versions.sorted { $0.edition.ordering > $1.edition.ordering },
-                view: view)
-
-            let page:Unidoc.VersionsPage = .init(
-                versions: versions,
-                branches: output.branches,
-                package: output.package,
-                aliases: output.aliases,
-                build: output.build,
-                realm: output.realm,
-                more: releases == limit)
-
-            return .ok(page.resource(format: format))
-        }
+        return .ok(page.resource(format: format))
     }
 }

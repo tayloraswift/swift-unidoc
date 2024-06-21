@@ -123,7 +123,7 @@ extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
 
             $0[.h2] = AutomaticHeading.allProductConstituents
 
-            $0[.table, { $0.class = "constituents" }]
+            $0[.table, { $0[data: "type"] = "constituents" }]
             {
                 $0[.thead]
                 {

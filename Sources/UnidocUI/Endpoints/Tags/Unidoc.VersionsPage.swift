@@ -11,43 +11,43 @@ extension Unidoc
     struct VersionsPage
     {
         private
-        let versions:RefsTable
+        let package:PackageMetadata
+        private
+        let dependents:Paginated<ConsumersTable>
+        private
+        let versions:Paginated<RefsTable>
         private
         let branches:[VersionState]
-        private
-        let package:PackageMetadata
         private
         let aliases:[Symbol.Package]
         private
         let build:BuildMetadata?
         private
         let realm:RealmMetadata?
-        private
-        let more:Bool
 
         init(
-            versions:RefsTable,
-            branches:[VersionState],
             package:PackageMetadata,
+            dependents:Paginated<ConsumersTable>,
+            versions:Paginated<RefsTable>,
+            branches:[VersionState],
             aliases:[Symbol.Package] = [],
             build:BuildMetadata? = nil,
-            realm:RealmMetadata? = nil,
-            more:Bool)
+            realm:RealmMetadata? = nil)
         {
+            self.package = package
+            self.dependents = dependents
             self.versions = versions
             self.branches = branches
-            self.package = package
             self.aliases = aliases
             self.build = build
             self.realm = realm
-            self.more = more
         }
     }
 }
 extension Unidoc.VersionsPage
 {
     private
-    var view:Unidoc.Permissions { self.versions.view }
+    var view:Unidoc.Permissions { self.versions.table.view }
 }
 extension Unidoc.VersionsPage:Unidoc.RenderablePage
 {
@@ -55,7 +55,7 @@ extension Unidoc.VersionsPage:Unidoc.RenderablePage
 }
 extension Unidoc.VersionsPage:Unidoc.StaticPage
 {
-    var location:URI { Unidoc.TagsEndpoint[self.package.symbol] }
+    var location:URI { Unidoc.RefsEndpoint[self.package.symbol] }
 }
 extension Unidoc.VersionsPage:Unidoc.ApplicationPage
 {
@@ -181,28 +181,34 @@ extension Unidoc.VersionsPage
         }
 
         section[.h2] = Heading.tags
-
-        section[.table] { $0.class = "tags" } = self.versions
-
-        if  self.more
+        section[.table] = self.versions.table
+        if  let more:URI = self.versions.next
         {
-            section[.a]
-            {
-                $0.class = "area"
-                $0.href = "\(Unidoc.TagsEndpoint[self.package.symbol, .release, page: 0])"
-            } = "Browse more tags"
+            section[.a] { $0.class = "area" ; $0.href = "\(more)" } = "Browse more tags"
         }
 
         if !self.branches.isEmpty
         {
             section[.h2] = Heading.branches
-            section[.table]
-            {
-                $0.class = "tags"
-            } = Unidoc.RefsTable.init(package: self.package.symbol,
+            section[.table] = Unidoc.RefsTable.init(package: self.package.symbol,
                 rows: self.branches,
                 view: self.view,
                 type: .branches)
+        }
+
+        section[.h2] = Heading.consumers
+
+        if  self.dependents.table.isEmpty
+        {
+            section[.p] { $0.class = "note" } = "This package has no known consumers!"
+        }
+        else
+        {
+            section[.table] = self.dependents.table
+        }
+        if  let more:URI = self.dependents.next
+        {
+            section[.a] { $0.class = "area" ; $0.href = "\(more)" } = "Browse more consumers"
         }
 
         section[.h2] = Heading.settings

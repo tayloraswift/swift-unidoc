@@ -3,6 +3,8 @@ extension Unidoc
     enum RefsTableType
     {
         case branches
-        case tags
+        case prereleases
+        case releases
+        case versions
     }
 }

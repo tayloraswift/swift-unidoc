@@ -41,7 +41,7 @@ extension Unidoc.PackageDependency
     enum CodingKey:String, Sendable
     {
         case id = "_id"
-        case dependent = "v"
+        case source = "e"
     }
 }
 extension Unidoc.PackageDependency:BSONDocumentEncodable
@@ -50,7 +50,7 @@ extension Unidoc.PackageDependency:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.dependent] = self.dependent
+        bson[.source] = self.source
     }
 }
 extension Unidoc.PackageDependency:BSONDocumentDecodable
@@ -58,6 +58,7 @@ extension Unidoc.PackageDependency:BSONDocumentDecodable
     public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(id: try bson[.id].decode(), dependent: try bson[.dependent].decode())
+        let source:Unidoc.Edition = try bson[.source].decode()
+        self.init(id: try bson[.id].decode(), dependent: source.version)
     }
 }

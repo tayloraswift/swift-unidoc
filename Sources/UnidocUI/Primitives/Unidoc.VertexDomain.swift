@@ -63,7 +63,7 @@ extension Unidoc.VertexDomain:HTML.OutputStreamable
             {
                 $0[.a]
                 {
-                    $0.href = "\(Unidoc.TagsEndpoint[self.volume.symbol.package])"
+                    $0.href = "\(Unidoc.RefsEndpoint[self.volume.symbol.package])"
                 } = "all tags"
             }
         }
