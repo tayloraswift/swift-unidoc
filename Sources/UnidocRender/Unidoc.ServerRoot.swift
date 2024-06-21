@@ -11,6 +11,7 @@ extension Unidoc
         case asset
         case auth
         case blog = "articles"
+        case consumers
         case docs
         case docc
         case help

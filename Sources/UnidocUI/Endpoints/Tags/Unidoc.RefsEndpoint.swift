@@ -57,20 +57,27 @@ extension Unidoc.RefsEndpoint:HTTP.ServerEndpoint
             }
         }
 
-        let versions:Unidoc.RefsTable = .init(
-            package: output.package.symbol,
-            //  Reverse order, because we want the latest versions to come first.
-            rows: output.versions.sorted { $0.edition.ordering > $1.edition.ordering },
-            view: view)
+        let dependents:Unidoc.Paginated<Unidoc.ConsumersTable> = .init(
+            table: .init(dependency: output.package.symbol, rows: output.dependents),
+            index: -1,
+            truncated: output.dependents.count >= self.query.limitDependents)
 
-        let page:Unidoc.VersionsPage = .init(
+        let versions:Unidoc.Paginated<Unidoc.RefsTable> = .init(
+            table: .init(package: output.package.symbol,
+                //  Reverse order, because we want the latest versions to come first.
+                rows: output.versions.sorted { $0.edition.ordering > $1.edition.ordering },
+                view: view,
+                type: .versions),
+            index: -1,
+            truncated: releases >= self.query.limitTags)
+
+        let page:Unidoc.VersionsPage = .init(package: output.package,
+            dependents: dependents,
             versions: versions,
             branches: output.branches,
-            package: output.package,
             aliases: output.aliases,
             build: output.build,
-            realm: output.realm,
-            more: releases == self.query.tags)
+            realm: output.realm)
 
         return .ok(page.resource(format: format))
     }

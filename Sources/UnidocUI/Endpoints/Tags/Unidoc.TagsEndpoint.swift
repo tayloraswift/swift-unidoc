@@ -60,16 +60,17 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
         let view:Unidoc.Permissions = format.security.permissions(package: output.package,
             user: output.user)
 
-        let table:Unidoc.RefsTable = .init(package: output.package.symbol,
-            rows: output.tags,
-            view: view)
+        let table:Unidoc.Paginated<Unidoc.RefsTable> = .init(
+            table: .init(package: output.package.symbol,
+                rows: output.tags,
+                view: view,
+                type: self.query.filter == .release ? .releases : .prereleases),
+            index: self.query.page,
+            truncated: output.tags.count >= self.query.limit)
 
         let page:Unidoc.TagsPage = .init(package: output.package,
             series: self.query.filter,
-            index: self.query.page,
-            limit: self.query.limit,
-            table: table,
-            more: output.tags.count == self.query.limit)
+            table: table)
 
         return .ok(page.resource(format: format))
     }

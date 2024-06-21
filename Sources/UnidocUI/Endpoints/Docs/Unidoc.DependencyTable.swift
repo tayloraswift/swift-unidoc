@@ -19,6 +19,12 @@ extension Unidoc
 extension Unidoc.DependencyTable:HTML.OutputStreamable
 {
     static
+    func |= (table:inout HTML.AttributeEncoder, self:Self)
+    {
+        table[data: "type"] = "dependencies"
+    }
+
+    static
     func += (table:inout HTML.ContentEncoder, self:Self)
     {
         table[.thead]

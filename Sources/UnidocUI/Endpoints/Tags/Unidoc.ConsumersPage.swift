@@ -1,46 +1,36 @@
 import HTML
 import Symbols
+import UnixTime
 import URI
 
 extension Unidoc
 {
-    struct TagsPage
+    struct ConsumersPage
     {
         private
         let package:PackageMetadata
-
         private
-        let series:VersionSeries
-        private
-        let page:Paginated<RefsTable>
+        let page:Paginated<ConsumersTable>
 
-        init(package:PackageMetadata,
-            series:VersionSeries,
-            table page:Paginated<RefsTable>)
+        init(package:PackageMetadata, table page:Paginated<ConsumersTable>)
         {
             self.package = package
-            self.series = series
             self.page = page
         }
     }
 }
-extension Unidoc.TagsPage
+extension Unidoc.ConsumersPage:Unidoc.RenderablePage
 {
-    private
-    var view:Unidoc.Permissions { self.page.table.view }
+    var title:String { "Consumers · \(self.package.symbol)" }
 }
-extension Unidoc.TagsPage:Unidoc.RenderablePage
-{
-    var title:String { "Tags · \(self.package.symbol)" }
-}
-extension Unidoc.TagsPage:Unidoc.StaticPage
+extension Unidoc.ConsumersPage:Unidoc.StaticPage
 {
     var location:URI
     {
-        Unidoc.TagsEndpoint[self.package.symbol, self.series, page: self.page.index]
+        Unidoc.ConsumersEndpoint[self.package.symbol, page: self.page.index]
     }
 }
-extension Unidoc.TagsPage:Unidoc.ApplicationPage
+extension Unidoc.ConsumersPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
@@ -61,8 +51,6 @@ extension Unidoc.TagsPage:Unidoc.ApplicationPage
 
         main[.section, { $0.class = "details" }]
         {
-            $0[.h2] = self.heading
-
             $0 += self.page
 
             $0[.a]
@@ -73,15 +61,4 @@ extension Unidoc.TagsPage:Unidoc.ApplicationPage
         }
     }
 }
-extension Unidoc.TagsPage
-{
-    private
-    var heading:Heading
-    {
-        switch self.series
-        {
-        case .release:      .releases
-        case .prerelease:   .prereleases
-        }
-    }
-}
+

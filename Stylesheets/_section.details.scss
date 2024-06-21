@@ -8,31 +8,6 @@ section.details
         @include inline-code;
     }
 
-    table.constituents,
-    table.dependencies,
-    table.platforms
-    {
-        width: 100%;
-    }
-    table.constituents
-    {
-        td
-        {
-            font-style: italic;
-        }
-    }
-    table.dependencies
-    {
-        td:first-child
-        {
-            font-style: italic;
-        }
-        td span.upto
-        {
-            padding: 0 0.5rem;
-        }
-    }
-
     section.parameters
     {
         > h2
