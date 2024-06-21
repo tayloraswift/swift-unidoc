@@ -88,7 +88,7 @@ extension Mongo.PipelineEncoder
                 }
 
                 //  Unbox single- or zero-element array.
-                self[stage: .set] = .init
+                $0[stage: .set] = .init
                 {
                     $0[Unidoc.PackageDependent[.volume]] = .expr
                     {

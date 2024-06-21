@@ -24,3 +24,137 @@ table
         padding-left: 0;
     }
 }
+
+table[data-type]
+{
+    width: 100%;
+}
+
+table[data-type='constituents']
+{
+    td
+    {
+        font-style: italic;
+    }
+}
+table[data-type='dependencies']
+{
+    td:first-child
+    {
+        font-style: italic;
+    }
+    td span.upto
+    {
+        padding: 0 0.5rem;
+    }
+}
+
+table[data-type='consumers']
+{
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    border-collapse: collapse;
+
+    > thead,
+    > thead > tr,
+    > tbody,
+    > tbody > tr
+    {
+        display: contents;
+    }
+
+    td:first-child
+    {
+        font-style: italic;
+    }
+}
+
+table[data-type='consumers'],
+table[data-type='refs']
+{
+    td.ref
+    {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: '...';
+    }
+}
+
+table[data-type='refs']
+{
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 3fr;
+    border-collapse: collapse;
+
+    > thead,
+    > thead > tr,
+    > tbody,
+    > tbody > tr
+    {
+        display: contents;
+    }
+
+    > tbody > tr
+    {
+        > td.graph
+        {
+            display: flex;
+            justify-content: space-between;
+
+            font-weight: normal;
+
+            > div:first-child
+            {
+                color: var(--fg-semi);
+
+                > span.graph:first-child::before
+                {
+                    content: '✓';
+                    color: var(--fg-accent);
+                    margin-right: 0.5rem;
+                }
+                > span.graph.uplinking:first-child::before
+                {
+                    content: '⟳';
+                }
+                > span.graph.unlinking:first-child::before
+                {
+                    content: '▼';
+                }
+                > span.graph.deleting:first-child::before
+                {
+                    content: '✗';
+                }
+                > span:first-child::before
+                {
+                    content: '✗';
+                    color: var(--fg-semi);
+                    margin-right: 0.5rem;
+                }
+                > span:first-child
+                {
+                    font-weight: 700;
+                }
+
+                > span.kb
+                {
+                    font-weight: normal;
+                }
+            }
+
+            > div.menu
+            {
+                > ul
+                {
+                    right: 0;
+                    min-width: 15rem;
+                }
+            }
+        }
+    }
+
+    > tbody > tr.modern
+    {
+        font-weight: 700;
+    }
+}

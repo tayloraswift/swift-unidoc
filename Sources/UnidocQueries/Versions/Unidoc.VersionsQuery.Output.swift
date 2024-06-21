@@ -13,7 +13,7 @@ extension Unidoc.VersionsQuery
         public
         var package:Unidoc.PackageMetadata
         public
-        var dependents:[Unidoc.PackageDependency]
+        var dependents:[Unidoc.PackageDependent]
         public
         var versions:[Unidoc.VersionState]
         public
@@ -31,7 +31,7 @@ extension Unidoc.VersionsQuery
         @inlinable public
         init(
             package:Unidoc.PackageMetadata,
-            dependents:[Unidoc.PackageDependency],
+            dependents:[Unidoc.PackageDependent],
             versions:[Unidoc.VersionState],
             branches:[Unidoc.VersionState],
             aliases:[Symbol.Package],
@@ -71,10 +71,10 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(package: try bson[.package].decode(),
-            dependents: try bson[.dependents]?.decode() ?? [],
-            versions: try bson[.versions]?.decode() ?? [],
-            branches: try bson[.branches]?.decode() ?? [],
-            aliases: try bson[.aliases]?.decode() ?? [],
+            dependents: try bson[.dependents].decode(),
+            versions: try bson[.versions].decode(),
+            branches: try bson[.branches].decode(),
+            aliases: try bson[.aliases].decode(),
             build: try bson[.build]?.decode(),
             realm: try bson[.realm]?.decode(),
             user: try bson[.user]?.decode())

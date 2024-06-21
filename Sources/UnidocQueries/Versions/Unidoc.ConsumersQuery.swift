@@ -7,7 +7,7 @@ import UnidocDB
 extension Unidoc
 {
     @frozen public
-    struct PackageDependenciesQuery:Equatable, Sendable
+    struct ConsumersQuery:Equatable, Sendable
     {
         public
         let symbol:Symbol.Package
@@ -15,14 +15,27 @@ extension Unidoc
         let limit:Int
         public
         let page:Int
+
+        /// We don’t use this yet, but it’s here for future expansion.
+        public
+        let user:Account?
+
+        @inlinable public
+        init(symbol:Symbol.Package, limit:Int, page:Int, as user:Account? = nil)
+        {
+            self.symbol = symbol
+            self.limit = limit
+            self.page = page
+            self.user = user
+        }
     }
 }
-extension Unidoc.PackageDependenciesQuery:Mongo.PipelineQuery
+extension Unidoc.ConsumersQuery:Mongo.PipelineQuery
 {
     public
     typealias Iteration = Mongo.Single<Output>
 }
-extension Unidoc.PackageDependenciesQuery:Unidoc.AliasingQuery
+extension Unidoc.ConsumersQuery:Unidoc.AliasingQuery
 {
     public
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
@@ -30,7 +43,7 @@ extension Unidoc.PackageDependenciesQuery:Unidoc.AliasingQuery
     typealias CollectionTarget = Unidoc.DB.Packages
 
     @inlinable public static
-    var target:Mongo.AnyKeyPath { Unidoc.EditionState[.package] }
+    var target:Mongo.AnyKeyPath { Output[.dependency] }
 
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
@@ -39,5 +52,10 @@ extension Unidoc.PackageDependenciesQuery:Unidoc.AliasingQuery
             skip: self.limit * self.page,
             from: Self.target,
             into: Output[.dependents])
+
+        if  let id:Unidoc.Account = self.user
+        {
+            pipeline.loadUser(matching: id, as: Output[.user])
+        }
     }
 }

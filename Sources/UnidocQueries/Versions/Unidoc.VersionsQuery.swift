@@ -13,15 +13,25 @@ extension Unidoc
         public
         let symbol:Symbol.Package
         public
-        let tags:Int
+        let limitTags:Int
+        public
+        let limitBranches:Int
+        public
+        let limitDependents:Int
         public
         let user:Account?
 
         @inlinable public
-        init(symbol:Symbol.Package, tags:Int, as user:Account? = nil)
+        init(symbol:Symbol.Package,
+            limitTags:Int,
+            limitBranches:Int = 32,
+            limitDependents:Int = 32,
+            as user:Account? = nil)
         {
             self.symbol = symbol
-            self.tags = tags
+            self.limitTags = limitTags
+            self.limitBranches = limitBranches
+            self.limitDependents = limitDependents
             self.user = user
         }
     }
@@ -48,18 +58,22 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         let releases:Mongo.AnyKeyPath = "releases"
 
         pipeline.loadTags(matching: .latest(.prerelease),
-            limit: self.tags,
+            limit: self.limitTags,
             from: Self.target,
             into: prereleases)
 
         pipeline.loadTags(matching: .latest(.release),
-            limit: self.tags,
+            limit: self.limitTags,
             from: Self.target,
             into: releases)
 
-        pipeline.loadBranches(limit: 32,
+        pipeline.loadBranches(limit: self.limitBranches,
             from: Self.target,
             into: Output[.branches])
+
+        pipeline.loadDependents(limit: self.limitDependents,
+            from: Self.target,
+            into: Output[.dependents])
 
         //  Concatenate the two lists.
         pipeline[stage: .set] = .init
