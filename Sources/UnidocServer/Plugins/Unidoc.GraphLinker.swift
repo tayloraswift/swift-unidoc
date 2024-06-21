@@ -19,7 +19,7 @@ extension Unidoc
         {
             self.status = status
             self.graphs = graphs
-            self.buffer = .init(minimumCapacity: 100)
+            self.buffer = .init(limit: 100)
         }
     }
 }
@@ -38,7 +38,7 @@ extension Unidoc.GraphLinker:Unidoc.CollectionVisitor
     public
     func publish()
     {
-        self.status.replace(value: .init(list: .init(from: self.buffer)))
+        self.status.replace(value: .init(events: self.buffer))
     }
 
     public mutating

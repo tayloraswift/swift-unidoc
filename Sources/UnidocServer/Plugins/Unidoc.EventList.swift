@@ -4,41 +4,34 @@ import UnixTime
 
 extension Unidoc
 {
+    /// A formatting abstraction that renders an ``EventBuffer`` as a sequence of `li` elements
+    /// with relative timestamps.
+    ///
+    /// `EventList`’s only purpose is to render HTML. Therefore, it requires `Event` to be
+    /// ``HTML.OutputStreamable``. You should not store `EventList`s for a long period of time,
+    /// because they contain a current time that will become stale if not immediately rendered.
     @frozen public
-    struct EventList<Event>
+    struct EventList<Event> where Event:HTML.OutputStreamable
     {
         @usableFromInline
-        let items:[EventBuffer<Event>.Entry]
+        let entries:Deque<EventBuffer<Event>.Entry>
         @usableFromInline
         let now:UnixInstant
 
         @inlinable
-        init(items:[EventBuffer<Event>.Entry], now:UnixInstant)
+        init(entries:Deque<EventBuffer<Event>.Entry>, now:UnixInstant)
         {
-            self.items = items
+            self.entries = entries
             self.now = now
         }
     }
 }
-extension Unidoc.EventList:Sendable where Event:Sendable
-{
-}
-extension Unidoc.EventList
-{
-    @inlinable public
-    init(from buffer:borrowing Unidoc.EventBuffer<Event>, now:UnixInstant = .now())
-    {
-        //  This will be sent concurrently, so it will almost certainly
-        //  end up being copied anyway.
-        self.init(items: [_].init(buffer.entries.reversed()), now: now)
-    }
-}
-extension Unidoc.EventList:HTML.OutputStreamable where Event:HTML.OutputStreamable
+extension Unidoc.EventList:HTML.OutputStreamable
 {
     @inlinable public static
     func += (ol:inout HTML.ContentEncoder, self:Self)
     {
-        for entry:Unidoc.EventBuffer<Event>.Entry in self.items
+        for entry:Unidoc.EventBuffer<Event>.Entry in self.entries.reversed()
         {
             ol[.li]
             {
