@@ -14,6 +14,7 @@ extension Unidoc
     @frozen public
     struct IncomingRequest:Sendable
     {
+        public
         let headers:HTTP.Headers
 
         public
@@ -47,26 +48,6 @@ extension Unidoc.IncomingRequest
     var path:ArraySlice<String>
     {
         self.uri.path.normalized(lowercase: true)[...]
-    }
-}
-extension Unidoc.IncomingRequest
-{
-    var version:HTTP
-    {
-        switch self.headers
-        {
-        case .http1_1:  .http1_1
-        case .http2:    .http2
-        }
-    }
-
-    var logged:Unidoc.ServerTour.Request
-    {
-        .init(
-            version: self.version,
-            headers: self.headers,
-            origin: self.origin.ip,
-            uri: self.uri)
     }
 }
 extension Unidoc.IncomingRequest

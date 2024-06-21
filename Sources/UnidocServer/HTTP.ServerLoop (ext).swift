@@ -4,7 +4,7 @@ import MongoDB
 
 extension HTTP.ServerLoop where Self:Unidoc.ServerLoop
 {
-    public nonisolated
+    public
     func run() async throws
     {
         try await self._setup()

@@ -2,7 +2,7 @@ import HTML
 import UnidocRender
 import URI
 
-extension Unidoc.AdminPage.Recode
+extension Unidoc._RecodePage
 {
     enum Target:String, CaseIterable
     {
@@ -12,7 +12,7 @@ extension Unidoc.AdminPage.Recode
         case volumes
     }
 }
-extension Unidoc.AdminPage.Recode.Target
+extension Unidoc._RecodePage.Target
 {
     var label:String
     {
@@ -37,15 +37,15 @@ extension Unidoc.AdminPage.Recode.Target
         }
     }
 }
-extension Unidoc.AdminPage.Recode.Target:Unidoc.RenderablePage
+extension Unidoc._RecodePage.Target:Unidoc.RenderablePage
 {
     var title:String { "Recode \(self.label)?" }
 }
-extension Unidoc.AdminPage.Recode.Target:Unidoc.StaticPage
+extension Unidoc._RecodePage.Target:Unidoc.StaticPage
 {
-    var location:URI { Unidoc.AdminPage.Recode.uri.path / self.rawValue }
+    var location:URI { Unidoc._RecodePage.uri.path / self.rawValue }
 }
-extension Unidoc.AdminPage.Recode.Target:Unidoc.AdministrativePage
+extension Unidoc._RecodePage.Target:Unidoc.AdministrativePage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {

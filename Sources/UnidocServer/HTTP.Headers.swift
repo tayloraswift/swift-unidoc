@@ -4,7 +4,7 @@ import NIOHPACK
 
 extension HTTP
 {
-    @frozen @usableFromInline
+    @frozen public
     enum Headers:Equatable, Sendable
     {
         case http1_1(HTTPHeaders)
