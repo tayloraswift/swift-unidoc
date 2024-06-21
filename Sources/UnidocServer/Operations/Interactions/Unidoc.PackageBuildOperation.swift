@@ -110,6 +110,6 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
             return .resource("Cannot cancel a build that has already started", status: 409)
         }
 
-        return .redirect(.seeOther("\(Unidoc.TagsEndpoint[self.redirect])"))
+        return .redirect(.seeOther("\(Unidoc.RefsEndpoint[self.redirect])"))
     }
 }

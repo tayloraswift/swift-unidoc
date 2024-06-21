@@ -53,6 +53,79 @@ extension Mongo.PipelineEncoder
 extension Mongo.PipelineEncoder
 {
     mutating
+    func loadDependents(
+        limit:Int,
+        skip:Int = 0,
+        from package:Mongo.AnyKeyPath,
+        into output:Mongo.AnyKeyPath)
+    {
+        self[stage: .lookup] = Mongo.LookupDocument.init
+        {
+            $0[.from] = Unidoc.DB.PackageDependencies.name
+            $0[.localField] = package / Unidoc.PackageMetadata[.id]
+            $0[.foreignField] = Unidoc.PackageDependency[.id]
+                / Unidoc.Edge<Unidoc.Package>[.target]
+
+            $0[.pipeline] = .init
+            {
+                $0[stage: .skip] = skip == 0 ? nil : skip
+                $0[stage: .limit] = limit
+
+                $0[stage: .replaceWith] = .init
+                {
+                    $0[Unidoc.PackageDependent[.package]] = Unidoc.PackageDependency[.id]
+                        / Unidoc.Edge<Unidoc.Package>[.source]
+                    $0[Unidoc.PackageDependent[.edition]] = Unidoc.PackageDependency[.source]
+                }
+
+                //  Look up volume metadata, if it exists.
+                $0[stage: .lookup] = .init
+                {
+                    $0[.from] = Unidoc.DB.Volumes.name
+                    $0[.localField] = Unidoc.PackageDependent[.edition]
+                    $0[.foreignField] = Unidoc.VolumeMetadata[.id]
+                    $0[.as] = Unidoc.PackageDependent[.volume]
+                }
+
+                //  Unbox single- or zero-element array.
+                self[stage: .set] = .init
+                {
+                    $0[Unidoc.PackageDependent[.volume]] = .expr
+                    {
+                        $0[.first] = Unidoc.PackageDependent[.volume]
+                    }
+                }
+
+                //  Look up edition metadata
+                $0[stage: .lookup] = .init
+                {
+                    $0[.from] = Unidoc.DB.Editions.name
+                    $0[.localField] = Unidoc.PackageDependent[.edition]
+                    $0[.foreignField] = Unidoc.EditionMetadata[.id]
+                    $0[.as] = Unidoc.PackageDependent[.edition]
+                }
+                //  The edition metadata is mandatory.
+                $0[stage: .unwind] = Unidoc.PackageDependent[.edition]
+
+                //  Look up package metadata
+                $0[stage: .lookup] = .init
+                {
+                    $0[.from] = Unidoc.DB.Packages.name
+                    $0[.localField] = Unidoc.PackageDependent[.package]
+                    $0[.foreignField] = Unidoc.PackageMetadata[.id]
+                    $0[.as] = Unidoc.PackageDependent[.package]
+                }
+                //  The package metadata is mandatory.
+                $0[stage: .unwind] = Unidoc.PackageDependent[.package]
+            }
+
+            $0[.as] = output
+        }
+    }
+}
+extension Mongo.PipelineEncoder
+{
+    mutating
     func loadBranches(
         limit:Int,
         skip:Int = 0,
