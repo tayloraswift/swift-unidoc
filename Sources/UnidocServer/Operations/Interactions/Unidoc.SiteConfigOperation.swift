@@ -11,7 +11,7 @@ extension Unidoc
 {
     enum SiteConfigOperation
     {
-        case recode(Unidoc.AdminPage.Recode.Target)
+        case recode(Unidoc._RecodePage.Target)
         case telescope(days:Int)
     }
 }
@@ -34,7 +34,7 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
             }
 
             let (modified, selected):(Int, Int) = try await collection.recode(with: session)
-            let complete:Unidoc.AdminPage.Recode.Complete = .init(
+            let complete:Unidoc._RecodePage.Complete = .init(
                 selected: selected,
                 modified: modified,
                 target: target)
