@@ -123,10 +123,10 @@ extension Unidoc.VolumeQuery
                 break
             }
 
-            pipeline[stage: .lookup] = .init
+            pipeline[stage: .lookup]
             {
                 $0[.from] = CollectionOrigin.name
-                $0[.pipeline] = .init
+                $0[.pipeline]
                 {
                     $0[stage: .match]
                     {
@@ -144,10 +144,7 @@ extension Unidoc.VolumeQuery
             }
 
             //  Unbox the single-element array.
-            pipeline[stage: .set] = .init
-            {
-                $0[volumeOfLatest] = .expr { $0[.first] = volumeOfLatest }
-            }
+            pipeline[stage: .set] { $0[volumeOfLatest] { $0[.first] = volumeOfLatest } }
         }
     }
 }

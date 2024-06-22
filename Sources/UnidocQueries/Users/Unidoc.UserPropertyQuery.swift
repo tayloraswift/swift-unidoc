@@ -63,14 +63,14 @@ extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
 
         let account:Mongo.Variable<Unidoc.Scalar> = "account"
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Users.name
             $0[.let] = .init
             {
                 $0[let: account] = self.account
             }
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .match]
                 {
@@ -81,9 +81,9 @@ extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
         }
 
         //  Unbox zero- or one-element array.
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Output.CodingKey.self]
         {
-            $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
+            $0[.user] { $0[.first] = Output[.user] }
         }
     }
 }

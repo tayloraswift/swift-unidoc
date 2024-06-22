@@ -45,10 +45,10 @@ extension Unidoc.EditionStateDirectQuery:Mongo.PipelineQuery
         case .exact(let id):
             let id:Unidoc.Edition = .init(package: self.package, version: id)
 
-            pipeline[stage: .lookup] = .init
+            pipeline[stage: .lookup]
             {
                 $0[.from] = Unidoc.DB.Editions.name
-                $0[.pipeline] = .init
+                $0[.pipeline]
                 {
                     $0[stage: .match]
                     {

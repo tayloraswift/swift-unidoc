@@ -46,7 +46,7 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
         {
             $0[.docs]
             {
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     let id:Mongo.Variable<Unidoc.Edition> = "id"
 
@@ -55,7 +55,7 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
                     {
                         $0[let: id] = Unidoc.DB.DocsFeed.Activity<Unidoc.Edition>[.volume]
                     }
-                    $0[.pipeline] = .init
+                    $0[.pipeline]
                     {
                         $0[stage: .match]
                         {
@@ -71,10 +71,10 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
             }
         }
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.RepoFeed.name
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .sort] = .init
                 {

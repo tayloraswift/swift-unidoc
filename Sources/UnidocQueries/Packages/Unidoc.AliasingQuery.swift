@@ -45,7 +45,7 @@ extension Unidoc.AliasingQuery
 
         pipeline[stage: .limit] = 1
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = CollectionTarget.name
             $0[.localField] = CollectionOrigin.Element[.coordinate]

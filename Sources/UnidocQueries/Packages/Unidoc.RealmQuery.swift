@@ -44,10 +44,10 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
     {
         if  let user:Unidoc.Account = self.user
         {
-            pipeline[stage: .lookup] = .init
+            pipeline[stage: .lookup]
             {
                 $0[.from] = Unidoc.DB.Users.name
-                $0[.pipeline] = .init
+                $0[.pipeline]
                 {
                     $0[stage: .match]
                     {
@@ -57,20 +57,20 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
                 $0[.as] = Output[.user]
             }
             //  Unbox single-element array.
-            pipeline[stage: .set] = .init
+            pipeline[stage: .set, using: Output.CodingKey.self]
             {
-                $0[Output[.user]] = .expr { $0[.first] = Output[.user] }
+                $0[.user] { $0[.first] = Output[.user] }
             }
         }
 
         //  It’s not clear to me how this is able to use the partial index even without
         // `$exists` guards, but somehow it does.
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Self.target / Unidoc.RealmMetadata[.id]
             $0[.foreignField] = Unidoc.PackageMetadata[.realm]
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .replaceWith] = .init
                 {

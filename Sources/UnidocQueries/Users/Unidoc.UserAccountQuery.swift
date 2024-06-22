@@ -47,7 +47,7 @@ extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
             $0[.organizations]
             {
                 $0[stage: .unwind] = Unidoc.User[.access]
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     $0[.from] = Unidoc.DB.Users.name
                     $0[.localField] = Unidoc.User[.access]

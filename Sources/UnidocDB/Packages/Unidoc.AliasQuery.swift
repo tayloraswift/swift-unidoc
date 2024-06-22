@@ -41,9 +41,9 @@ extension Unidoc.AliasQuery:Mongo.PipelineQuery
         {
             $0[Aliases.Element[.id]] = self.symbol
         }
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Aliases.Element.CodingKey.self]
         {
-            $0[Aliases.Element[.id]] = self.alias
+            $0[.id] = self.alias
         }
         pipeline[stage: .merge] = .init
         {

@@ -13,7 +13,7 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
         output:Mongo.AnyKeyPath,
         unset:[Mongo.AnyKeyPath])
     {
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             let zone:Mongo.Variable<Unidoc.Edition> = "zone"
 
@@ -22,7 +22,7 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
             {
                 $0[let: zone] = volume / Unidoc.VolumeMetadata[.id]
             }
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .match]
                 {

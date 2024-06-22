@@ -38,7 +38,7 @@ extension Unidoc.SitemapQuery:Unidoc.AliasingQuery
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Sitemaps.name
             $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
@@ -48,9 +48,9 @@ extension Unidoc.SitemapQuery:Unidoc.AliasingQuery
 
         pipeline[stage: .unwind] = Output[.sitemap]
 
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Output.CodingKey.self]
         {
-            $0[Output[.package]] = Self.target / Unidoc.PackageMetadata[.symbol]
+            $0[.package] = Self.target / Unidoc.PackageMetadata[.symbol]
         }
     }
 }

@@ -76,12 +76,9 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             into: Output[.dependents])
 
         //  Concatenate the two lists.
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Output.CodingKey.self]
         {
-            $0[Output[.versions]] = .expr
-            {
-                $0[.concatArrays] = (prereleases, releases)
-            }
+            $0[.versions] { $0[.concatArrays] = (prereleases, releases) }
         }
         pipeline[stage: .unset] = [prereleases, releases]
 
@@ -89,7 +86,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         let aliases:Mongo.List<Unidoc.PackageAlias, Mongo.AnyKeyPath> = .init(
             in: Output[.aliases])
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.PackageAliases.name
             $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
@@ -97,13 +94,13 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             $0[.as] = aliases.expression
         }
 
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Output.CodingKey.self]
         {
-            $0[Output[.aliases]] = .expr { $0[.map] = aliases.map { $0[.id] } }
+            $0[.aliases] { $0[.map] = aliases.map { $0[.id] } }
         }
 
         //  Lookup the associated build.
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.PackageBuilds.name
             $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
@@ -111,7 +108,7 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             $0[.as] = Output[.build]
         }
         //  Lookup the associated realm.
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Realms.name
             $0[.localField] = Self.target / Unidoc.PackageMetadata[.realm]
@@ -120,10 +117,10 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         }
 
         //  Unbox single-element arrays.
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Output.CodingKey.self]
         {
-            $0[Output[.build]] = .expr { $0[.first] = Output[.build] }
-            $0[Output[.realm]] = .expr { $0[.first] = Output[.realm] }
+            $0[.build] { $0[.first] = Output[.build] }
+            $0[.realm] { $0[.first] = Output[.realm] }
         }
 
         if  let id:Unidoc.Account = self.user
