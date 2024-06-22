@@ -67,17 +67,17 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
 
         //  Map the coordinates back to the patch versions associated with the original
         //  packages.
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.foreignField] = Symbol.PackageDependency<PatchVersion>[.package]
             $0[.localField] = Symbol.PackageDependency<Unidoc.Edition>[.package]
-            $0[.pipeline] = .init { $0[stage: .documents] = self.patches }
+            $0[.pipeline] { $0[stage: .documents] = self.patches }
             $0[.as] = patch
         }
 
         pipeline[stage: .unwind] = patch
 
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set]
         {
             $0[patch] = patch / Symbol.PackageDependency<PatchVersion>[.version]
         }
@@ -85,7 +85,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
         let edition:Mongo.AnyKeyPath = "_edition"
 
         //  Lookup release editions using the package coordinate and patch version.
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             let p:Mongo.Variable<Int32> = "p"
             let v:Mongo.Variable<PatchVersion> = "v"
@@ -96,7 +96,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
                 $0[let: p] = coordinate
                 $0[let: v] = patch
             }
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .match]
                 {
@@ -122,10 +122,9 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
 
         pipeline[stage: .unwind] = edition
 
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Symbol.PackageDependency<Unidoc.Edition>.CodingKey.self]
         {
-            $0[Symbol.PackageDependency<Unidoc.Edition>[.version]] =
-                edition / Unidoc.EditionMetadata[.id]
+            $0[.version] = edition / Unidoc.EditionMetadata[.id]
         }
 
         //  Lint temporary variables.

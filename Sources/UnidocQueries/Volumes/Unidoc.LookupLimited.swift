@@ -19,7 +19,7 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
         vertex:Mongo.AnyKeyPath,
         output:Mongo.AnyKeyPath)
     {
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set]
         {
             $0[output] = .init { $0.append(volume / Unidoc.VolumeMetadata[.cell]) }
         }
@@ -32,10 +32,7 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
         vertex _:Mongo.AnyKeyPath,
         output:Mongo.AnyKeyPath)
     {
-        pipeline[stage: .set] = .init
-        {
-            $0[output] = [] as [Never]
-        }
+        pipeline[stage: .set] { $0[output] = [] as [Never] }
     }
 
     /// Stores the editions of the current volume’s dependencies in `output.volumes`, and
@@ -47,13 +44,13 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
         groups _:Mongo.AnyKeyPath,
         output:(scalars:Mongo.AnyKeyPath, volumes:Mongo.AnyKeyPath))
     {
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set]
         {
             let dependencies:
                 Mongo.List<Unidoc.VolumeMetadata.Dependency, Mongo.AnyKeyPath> = .init(
                 in: volume / Unidoc.VolumeMetadata[.dependencies])
 
-            $0[output.volumes] = .expr
+            $0[output.volumes]
             {
                 $0[.setUnion] = .init
                 {

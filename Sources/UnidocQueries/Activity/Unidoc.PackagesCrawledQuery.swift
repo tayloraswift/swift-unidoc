@@ -52,12 +52,12 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
 
         let count:Mongo.AnyKeyPath = "_count"
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Date[.window] / Unidoc.CrawlingWindow[.id]
             $0[.foreignField] = Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 /// This improves query performance enormously, as it gets MongoDB to use the
                 /// partial index. But why?? The `localField` is always non-null!
@@ -72,13 +72,13 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
         }
 
         //  Unbox the count.
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Date.CodingKey.self]
         {
-            $0[Date[.repos]] = .expr { $0[.first] = Date[.repos] }
+            $0[.repos] { $0[.first] = Date[.repos] }
         }
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Date.CodingKey.self]
         {
-            $0[Date[.repos]] = Date[.repos] / count
+            $0[.repos] = Date[.repos] / count
         }
     }
 }

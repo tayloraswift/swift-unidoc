@@ -40,7 +40,7 @@ extension Unidoc.EditionStateSymbolicQuery:Unidoc.AliasingQuery
         //  Unbox single-element array.
         pipeline[stage: .unwind] = Unidoc.EditionState[.version]
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.PackageBuilds.name
             $0[.localField] = Unidoc.EditionState[.package] / Unidoc.PackageMetadata[.id]
@@ -48,12 +48,9 @@ extension Unidoc.EditionStateSymbolicQuery:Unidoc.AliasingQuery
             $0[.as] = Unidoc.EditionState[.build]
         }
 
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Unidoc.EditionState.CodingKey.self]
         {
-            $0[Unidoc.EditionState[.build]] = .expr
-            {
-                $0[.first] = Unidoc.EditionState[.build]
-            }
+            $0[.build] { $0[.first] = Unidoc.EditionState[.build] }
         }
     }
 }

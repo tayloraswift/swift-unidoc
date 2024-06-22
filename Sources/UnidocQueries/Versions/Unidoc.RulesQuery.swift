@@ -42,9 +42,9 @@ extension Unidoc.RulesQuery:Unidoc.AliasingQuery
     public
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Unidoc.RulesOutput.CodingKey.self]
         {
-            $0[Unidoc.RulesOutput[.editors]] = .expr
+            $0[.editors]
             {
                 $0[.coalesce] =
                 (
@@ -52,7 +52,7 @@ extension Unidoc.RulesQuery:Unidoc.AliasingQuery
                     [] as [Never]
                 )
             }
-            $0[Unidoc.RulesOutput[.owner]] = .expr
+            $0[.owner]
             {
                 $0[.coalesce] =
                 (
@@ -64,7 +64,7 @@ extension Unidoc.RulesQuery:Unidoc.AliasingQuery
             }
         }
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Users.name
             $0[.localField] = Unidoc.RulesOutput[.editors]
@@ -72,7 +72,7 @@ extension Unidoc.RulesQuery:Unidoc.AliasingQuery
             $0[.as] = Unidoc.RulesOutput[.editors]
         }
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Users.name
             $0[.localField] = Unidoc.RulesOutput[.owner]
@@ -80,7 +80,7 @@ extension Unidoc.RulesQuery:Unidoc.AliasingQuery
             $0[.as] = Unidoc.RulesOutput[.members]
         }
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Users.name
             $0[.localField] = Unidoc.RulesOutput[.owner]
@@ -89,12 +89,9 @@ extension Unidoc.RulesQuery:Unidoc.AliasingQuery
         }
 
         //  Unbox single-element array.
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Unidoc.RulesOutput.CodingKey.self]
         {
-            $0[Unidoc.RulesOutput[.owner]] = .expr
-            {
-                $0[.first] = Unidoc.RulesOutput[.owner]
-            }
+            $0[.owner] { $0[.first] = Unidoc.RulesOutput[.owner] }
         }
 
         guard

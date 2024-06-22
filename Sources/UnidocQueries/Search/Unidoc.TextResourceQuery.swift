@@ -51,10 +51,10 @@ extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
             $0[Document[.id]] = self.id
         }
 
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Unidoc.TextResourceOutput.CodingKey.self]
         {
-            $0[Unidoc.TextResourceOutput[.hash]] = Document[.hash]
-            $0[Unidoc.TextResourceOutput[.text]] = .expr
+            $0[.hash] = Document[.hash]
+            $0[.text]
             {
                 if  let tag:MD5 = self.tag
                 {

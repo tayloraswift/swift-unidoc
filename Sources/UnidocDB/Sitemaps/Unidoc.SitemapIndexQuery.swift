@@ -23,7 +23,7 @@ extension Unidoc.SitemapIndexQuery:Mongo.PipelineQuery
             $0[Unidoc.Sitemap[.id]] = (+)
         }
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Packages.name
             $0[.localField] = Unidoc.Sitemap[.id]

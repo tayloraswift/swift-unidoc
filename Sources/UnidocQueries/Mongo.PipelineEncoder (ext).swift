@@ -7,10 +7,10 @@ extension Mongo.PipelineEncoder
     mutating
     func loadUser(matching id:Unidoc.Account, as output:Mongo.AnyKeyPath)
     {
-        self[stage: .lookup] = .init
+        self[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Users.name
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .match]
                 {
@@ -21,7 +21,7 @@ extension Mongo.PipelineEncoder
         }
 
         //  Unbox single-element array.
-        self[stage: .set] = .init { $0[output] = .expr { $0[.first] = output } }
+        self[stage: .set] { $0[output] { $0[.first] = output } }
     }
 
     mutating
@@ -30,12 +30,12 @@ extension Mongo.PipelineEncoder
         into edition:Mongo.AnyKeyPath)
     {
         //  Lookup the latest release of each package.
-        self[stage: .lookup] = .init
+        self[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Editions.name
             $0[.localField] = package / Unidoc.PackageMetadata[.id]
             $0[.foreignField] = Unidoc.EditionMetadata[.package]
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0 += predicate
                 $0[stage: .limit] = 1
@@ -44,10 +44,7 @@ extension Mongo.PipelineEncoder
         }
 
         //  Unbox single-element array.
-        self[stage: .set] = .init
-        {
-            $0[edition] = .expr { $0[.first] = edition }
-        }
+        self[stage: .set] { $0[edition] { $0[.first] = edition } }
     }
 }
 extension Mongo.PipelineEncoder
@@ -59,14 +56,14 @@ extension Mongo.PipelineEncoder
         from package:Mongo.AnyKeyPath,
         into output:Mongo.AnyKeyPath)
     {
-        self[stage: .lookup] = Mongo.LookupDocument.init
+        self[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.PackageDependencies.name
             $0[.localField] = package / Unidoc.PackageMetadata[.id]
             $0[.foreignField] = Unidoc.PackageDependency[.id]
                 / Unidoc.Edge<Unidoc.Package>[.target]
 
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .skip] = skip == 0 ? nil : skip
                 $0[stage: .limit] = limit
@@ -79,7 +76,7 @@ extension Mongo.PipelineEncoder
                 }
 
                 //  Look up volume metadata, if it exists.
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     $0[.from] = Unidoc.DB.Volumes.name
                     $0[.localField] = Unidoc.PackageDependent[.edition]
@@ -88,16 +85,13 @@ extension Mongo.PipelineEncoder
                 }
 
                 //  Unbox single- or zero-element array.
-                $0[stage: .set] = .init
+                $0[stage: .set, using: Unidoc.PackageDependent.CodingKey.self]
                 {
-                    $0[Unidoc.PackageDependent[.volume]] = .expr
-                    {
-                        $0[.first] = Unidoc.PackageDependent[.volume]
-                    }
+                    $0[.volume] { $0[.first] = Unidoc.PackageDependent[.volume] }
                 }
 
                 //  Look up edition metadata
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     $0[.from] = Unidoc.DB.Editions.name
                     $0[.localField] = Unidoc.PackageDependent[.edition]
@@ -108,7 +102,7 @@ extension Mongo.PipelineEncoder
                 $0[stage: .unwind] = Unidoc.PackageDependent[.edition]
 
                 //  Look up package metadata
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     $0[.from] = Unidoc.DB.Packages.name
                     $0[.localField] = Unidoc.PackageDependent[.package]
@@ -136,12 +130,12 @@ extension Mongo.PipelineEncoder
         let volume:Mongo.AnyKeyPath = Unidoc.VersionState[.volume]
         let graph:Mongo.AnyKeyPath = Unidoc.VersionState[.graph]
 
-        self[stage: .lookup] = Mongo.LookupDocument.init
+        self[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Editions.name
             $0[.localField] = package / Unidoc.PackageMetadata[.id]
             $0[.foreignField] = Unidoc.EditionMetadata[.package]
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .match]
                 {
@@ -185,12 +179,12 @@ extension Mongo.PipelineEncoder
         let volume:Mongo.AnyKeyPath = Unidoc.VersionState[.volume]
         let graph:Mongo.AnyKeyPath = Unidoc.VersionState[.graph]
 
-        self[stage: .lookup] = Mongo.LookupDocument.init
+        self[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Editions.name
             $0[.localField] = package / Unidoc.PackageMetadata[.id]
             $0[.foreignField] = Unidoc.EditionMetadata[.package]
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0 += predicate
 
@@ -219,7 +213,7 @@ extension Mongo.PipelineEncoder
         graph:Mongo.AnyKeyPath)
     {
         //  Check if a volume has been created for this edition.
-        self[stage: .lookup] = .init
+        self[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Volumes.name
             $0[.localField] = id
@@ -228,12 +222,12 @@ extension Mongo.PipelineEncoder
         }
 
         //  Check if a symbol graph has been uploaded for this edition.
-        self[stage: .lookup] = Mongo.LookupDocument.init
+        self[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Snapshots.name
             $0[.localField] = id
             $0[.foreignField] = Unidoc.Snapshot[.id]
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .replaceWith] = .init(Unidoc.VersionState.Graph.CodingKey.self)
                 {
@@ -258,10 +252,10 @@ extension Mongo.PipelineEncoder
         }
 
         //  Unbox single-element arrays.
-        self[stage: .set] = .init
+        self[stage: .set]
         {
-            $0[volume] = .expr { $0[.first] = volume }
-            $0[graph] = .expr { $0[.first] = graph }
+            $0[volume] { $0[.first] = volume }
+            $0[graph] { $0[.first] = graph }
         }
     }
 }

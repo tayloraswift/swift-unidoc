@@ -37,7 +37,7 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
         {
             $0[Iteration.BatchElement[.id]] = Aliases.Element[.coordinate]
         }
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             $0[.from] = Targets.name
             $0[.localField] = Iteration.BatchElement[.id]

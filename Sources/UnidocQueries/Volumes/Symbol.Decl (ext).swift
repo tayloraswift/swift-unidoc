@@ -13,7 +13,7 @@ extension Symbol.Decl:Unidoc.VertexPredicate
         output:Mongo.AnyKeyPath,
         unset:[Mongo.AnyKeyPath])
     {
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             let min:Mongo.Variable<Unidoc.Scalar> = "min"
             let max:Mongo.Variable<Unidoc.Scalar> = "max"
@@ -24,7 +24,7 @@ extension Symbol.Decl:Unidoc.VertexPredicate
                 $0[let: min] = volume / Unidoc.VolumeMetadata[.min]
                 $0[let: max] = volume / Unidoc.VolumeMetadata[.max]
             }
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .match]
                 {

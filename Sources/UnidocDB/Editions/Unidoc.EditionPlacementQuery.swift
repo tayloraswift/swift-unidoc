@@ -69,9 +69,9 @@ extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
             }
         }
 
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set]
         {
-            $0[all] = .expr { $0[.concatArrays] = (old, new) }
+            $0[all] { $0[.concatArrays] = (old, new) }
         }
 
         pipeline[stage: .unwind] = all

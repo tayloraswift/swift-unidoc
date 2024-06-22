@@ -87,9 +87,9 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         //  Populate this field only if exactly one vertex matched.
         //  This allows us to skip looking up secondary/tertiary records if
         //  we are only going to generate a disambiguation page.
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Unidoc.PrincipalOutput.CodingKey.self]
         {
-            $0[Unidoc.PrincipalOutput[.vertex]] = .expr
+            $0[.vertex]
             {
                 $0[.cond] =
                 (
@@ -168,7 +168,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                         }
                     }
                 }
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     let tree:Mongo.Variable<Unidoc.Scalar> = "tree"
 
@@ -190,7 +190,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                             )
                         }
                     }
-                    $0[.pipeline] = .init
+                    $0[.pipeline]
                     {
                         $0[stage: .match]
                         {
@@ -200,12 +200,9 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     $0[.as] = Unidoc.PrincipalOutput[.tree]
                 }
                 //  Unbox single-element array.
-                $0[stage: .set] = .init
+                $0[stage: .set, using: Unidoc.PrincipalOutput.CodingKey.self]
                 {
-                    $0[Unidoc.PrincipalOutput[.tree]] = .expr
-                    {
-                        $0[.first] = Unidoc.PrincipalOutput[.tree]
-                    }
+                    $0[.tree] { $0[.first] = Unidoc.PrincipalOutput[.tree] }
                 }
             }
 
@@ -220,7 +217,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 
                 //  Look up the vertex in the volume of the latest stable release of its home
                 //  package. The lookup correlates verticies by symbol.
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     let symbol:Mongo.Variable<Unidoc.Scalar> = "symbol"
                     let hash:Mongo.Variable<Unidoc.Scalar> = "hash"
@@ -251,7 +248,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                         $0[let: min] = volume / Unidoc.VolumeMetadata[.min]
                         $0[let: max] = volume / Unidoc.VolumeMetadata[.max]
                     }
-                    $0[.pipeline] = .init
+                    $0[.pipeline]
                     {
                         $0[stage: .match]
                         {
@@ -297,7 +294,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 {
                     $0[edges.scalars] { $0[.ne] = BSON.Null.init() }
                 }
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     $0[.from] = Unidoc.DB.Vertices.name
                     $0[.localField] = edges.scalars
@@ -339,7 +336,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                         }
                     }
                 }
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     $0[.from] = Unidoc.DB.Volumes.name
                     $0[.localField] = edges.volumes
@@ -363,7 +360,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     output: id)
 
                 $0[stage: .unwind] = id
-                $0[stage: .lookup] = .init
+                $0[stage: .lookup]
                 {
                     $0[.from] = Unidoc.DB.Packages.name
                     $0[.localField] = id
@@ -376,16 +373,10 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         }
 
         //  Unbox single-element arrays.
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set, using: Unidoc.VertexOutput.CodingKey.self]
         {
-            $0[Unidoc.VertexOutput[.principal]] = .expr
-            {
-                $0[.first] = Unidoc.VertexOutput[.principal]
-            }
-            $0[Unidoc.VertexOutput[.canonical]] = .expr
-            {
-                $0[.first] = Unidoc.VertexOutput[.canonical]
-            }
+            $0[.principal] { $0[.first] = Unidoc.VertexOutput[.principal] }
+            $0[.canonical] { $0[.first] = Unidoc.VertexOutput[.canonical] }
         }
     }
 }

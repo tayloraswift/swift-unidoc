@@ -28,9 +28,9 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
         vertex:Mongo.AnyKeyPath,
         output:Mongo.AnyKeyPath)
     {
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set]
         {
-            $0[output] = .expr
+            $0[output]
             {
                 $0[.concatArrays]
                 {
@@ -52,7 +52,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
     {
         let extendee:Mongo.OptionalKeyPath = .init(in: vertex / Unidoc.AnyVertex[.extendee])
 
-        pipeline[stage: .lookup] = .init
+        pipeline[stage: .lookup]
         {
             let special:SpecialGroups
 
@@ -121,7 +121,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                     $0[.coalesce] = (vertex / Unidoc.AnyVertex[.group], BSON.Max.init())
                 }
             }
-            $0[.pipeline] = .init
+            $0[.pipeline]
             {
                 $0[stage: .match]
                 {
@@ -144,9 +144,9 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
         groups:Mongo.AnyKeyPath,
         output:(scalars:Mongo.AnyKeyPath, volumes:Mongo.AnyKeyPath))
     {
-        pipeline[stage: .set] = .init
+        pipeline[stage: .set]
         {
-            $0[output.volumes] = .expr
+            $0[output.volumes]
             {
                 let adjacent:Volumes = .init(
                     upstream: .init(in: volume / Unidoc.VolumeMetadata[.dependencies]),
@@ -154,7 +154,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
 
                 $0[.setUnion] = .init { $0 += adjacent }
             }
-            $0[output.scalars] = .expr
+            $0[output.scalars]
             {
                 let adjacent:Vertices = .init(layer: self.layer,
                     groups: .init(in: groups),
