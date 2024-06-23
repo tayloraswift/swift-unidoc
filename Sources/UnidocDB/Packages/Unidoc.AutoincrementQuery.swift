@@ -51,9 +51,9 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
             $0[.collection] = Aliases.name
             $0[.pipeline] = .init
             {
-                $0[stage: .sort] = .init
+                $0[stage: .sort, using: Aliases.Element.CodingKey.self]
                 {
-                    $0[Aliases.Element[.coordinate]] = (-)
+                    $0[.coordinate] = (-)
                 }
 
                 $0[stage: .limit] = 1
@@ -68,9 +68,9 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
             }
         }
         //  Prefer existing registrations, if any.
-        pipeline[stage: .sort] = .init
+        pipeline[stage: .sort, using: Iteration.BatchElement.CodingKey.self]
         {
-            $0[Iteration.BatchElement[.id]] = (+)
+            $0[.id] = (+)
         }
 
         pipeline[stage: .limit] = 1

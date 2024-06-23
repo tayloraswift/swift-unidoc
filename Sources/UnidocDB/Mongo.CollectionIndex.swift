@@ -14,7 +14,7 @@ extension Mongo
         @usableFromInline internal
         var unique:Bool
         @usableFromInline internal
-        var fields:SortDocument
+        var fields:SortDocument<Mongo.AnyKeyPath>
         @usableFromInline internal
         var filter:PredicateDocument?
 
@@ -22,7 +22,7 @@ extension Mongo
         init(id:String,
             collation:Collation?,
             unique:Bool,
-            fields:SortDocument,
+            fields:SortDocument<Mongo.AnyKeyPath>,
             filter:PredicateDocument?)
         {
             self.id = id
@@ -39,7 +39,7 @@ extension Mongo.CollectionIndex
     init(_ id:String,
         collation:Mongo.Collation? = nil,
         unique:Bool = false,
-        fields:(inout Mongo.SortEncoder) -> (),
+        fields:(inout Mongo.SortEncoder<Mongo.AnyKeyPath>) -> (),
         where filter:((inout Mongo.PredicateEncoder) -> ())? = nil)
     {
         self.init(id: id,

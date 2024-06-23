@@ -35,9 +35,10 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
         //  Cannot use $natural sort in an aggregation pipeline.
-        pipeline[stage: .sort] = .init
+        pipeline[stage: .sort,
+            using: Unidoc.DB.DocsFeed.Activity<Unidoc.Edition>.CodingKey.self]
         {
-            $0[Unidoc.DB.DocsFeed.Activity<Unidoc.Edition>[.id]] = (-)
+            $0[.id] = (-)
         }
 
         pipeline[stage: .limit] = self.limit
@@ -51,7 +52,7 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
                     let id:Mongo.Variable<Unidoc.Edition> = "id"
 
                     $0[.from] = Unidoc.DB.Volumes.name
-                    $0[.let] = .init
+                    $0[.let]
                     {
                         $0[let: id] = Unidoc.DB.DocsFeed.Activity<Unidoc.Edition>[.volume]
                     }
@@ -62,7 +63,7 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
                             $0[.expr] { $0[.eq] = (Unidoc.VolumeMetadata[.id], id) }
                         }
 
-                        $0[stage: .project] = .init(with: Unidoc.VolumeMetadata.names(_:))
+                        $0[stage: .project] = Unidoc.VolumeMetadata.NameFields.init()
                     }
                     $0[.as] = Unidoc.DB.DocsFeed.Activity<Unidoc.VolumeMetadata>[.volume]
                 }
@@ -76,9 +77,9 @@ extension Unidoc.ActivityQuery:Mongo.PipelineQuery
             $0[.from] = Unidoc.DB.RepoFeed.name
             $0[.pipeline]
             {
-                $0[stage: .sort] = .init
+                $0[stage: .sort, using: Unidoc.DB.RepoFeed.Activity.CodingKey.self]
                 {
-                    $0[Unidoc.DB.RepoFeed.Activity[.id]] = (-)
+                    $0[.id] = (-)
                 }
 
                 $0[stage: .limit] = self.limit

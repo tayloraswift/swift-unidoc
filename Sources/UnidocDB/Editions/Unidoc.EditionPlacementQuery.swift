@@ -52,9 +52,9 @@ extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
             }
             $0[new]
             {
-                $0[stage: .sort] = .init
+                $0[stage: .sort, using: Unidoc.EditionMetadata.CodingKey.self]
                 {
-                    $0[Unidoc.EditionMetadata[.version]] = (-)
+                    $0[.version] = (-)
                 }
 
                 $0[stage: .limit] = 1

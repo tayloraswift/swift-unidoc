@@ -24,10 +24,10 @@ extension Unidoc.VersionPredicate
                 $0[Unidoc.EditionMetadata[.semver]] { $0[.exists] = true }
             }
 
-            pipeline[stage: .sort] = .init
+            pipeline[stage: .sort, using: Unidoc.EditionMetadata.CodingKey.self]
             {
-                $0[Unidoc.EditionMetadata[.semver]] = (-)
-                $0[Unidoc.EditionMetadata[.version]] = (-)
+                $0[.semver] = (-)
+                $0[.version] = (-)
             }
 
         case .name(let name):

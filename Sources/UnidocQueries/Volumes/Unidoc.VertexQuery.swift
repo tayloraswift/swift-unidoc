@@ -125,57 +125,23 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
         {
             $0[.principal]
             {
-                $0[stage: .project] = .init
+                $0[stage: .project, using: Unidoc.PrincipalOutput.CodingKey.self]
                 {
-                    for key:Unidoc.PrincipalOutput.CodingKey in
-                    [
-                        .matches,
-                        .vertex,
-                        .groups,
-                    ]
-                    {
-                        $0[Unidoc.PrincipalOutput[key]] = true
-                    }
-                    for volume:Unidoc.PrincipalOutput.CodingKey in
-                    [
-                        .volume,
-                        .volumeOfLatest,
-                    ]
-                    {
-                        //  Do not return computed fields.
-                        for key:Unidoc.VolumeMetadata.CodingKey in
-                        [
-                            .id,
-                            .dependencies,
-                            .package,
-                            .version,
-                            .display,
-                            .refname,
-                            .patch,
+                    $0[.matches] = true
+                    $0[.vertex] = true
+                    $0[.groups] = true
 
-                            //  TODO: we only need this for top-level queries and
-                            //  foreign vertices!
-                            .products,
-                            .cultures,
-
-                            .latest,
-                            .realm,
-                            .abi
-                        ]
-                        {
-                            $0[Unidoc.PrincipalOutput[volume] / Unidoc.VolumeMetadata[key]] =
-                                true
-                        }
-                    }
+                    $0[.volume] = Unidoc.VolumeMetadata.StoredFields.init()
+                    $0[.volumeOfLatest] = Unidoc.VolumeMetadata.StoredFields.init()
                 }
                 $0[stage: .lookup]
                 {
                     let tree:Mongo.Variable<Unidoc.Scalar> = "tree"
 
                     $0[.from] = Unidoc.DB.Trees.name
-                    $0[.let] = .init
+                    $0[.let]
                     {
-                        $0[let: tree] = .expr
+                        $0[let: tree]
                         {
                             //  ``Unidoc.CultureVertex`` doesn’t have a `culture`
                             //  field, but we still want to get the type tree for
@@ -226,9 +192,9 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                     let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
                     $0[.from] = Unidoc.DB.Vertices.name
-                    $0[.let] = .init
+                    $0[.let]
                     {
-                        $0[let: symbol] = .expr
+                        $0[let: symbol]
                         {
                             $0[.coalesce] =
                             (
@@ -236,7 +202,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                                 BSON.Max.init()
                             )
                         }
-                        $0[let: hash] = .expr
+                        $0[let: hash]
                         {
                             $0[.coalesce] =
                             (
@@ -345,7 +311,7 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
                 }
                 $0[stage: .unwind] = results
                 $0[stage: .replaceWith] = results
-                $0[stage: .project] = .init(with: Unidoc.VolumeMetadata.names(_:))
+                $0[stage: .project] = Unidoc.VolumeMetadata.NameFields.init()
             }
 
             //  This really does need to be written with two unwinds, a naïve `$in` lookup

@@ -71,9 +71,9 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 id: "realm")
 
             $0[.from] = Unidoc.DB.Groups.name
-            $0[.let] = .init
+            $0[.let]
             {
-                $0[let: local.scope] = .expr
+                $0[let: local.scope]
                 {
                     $0[.coalesce] =
                     (
@@ -82,7 +82,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                         BSON.Max.init()
                     )
                 }
-                $0[let: realm.scope] = .expr
+                $0[let: realm.scope]
                 {
                     $0[.cond] =
                     (
@@ -98,7 +98,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 $0[let: local.min] = volume / Unidoc.VolumeMetadata[.min]
                 $0[let: local.max] = volume / Unidoc.VolumeMetadata[.max]
 
-                $0[let: realm.id] = .expr
+                $0[let: realm.id]
                 {
                     $0[.coalesce] = (volume / Unidoc.VolumeMetadata[.realm], BSON.Max.init())
                 }
@@ -110,13 +110,13 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                     return
                 }
 
-                $0[let: special.peers] = .expr
+                $0[let: special.peers]
                 {
                     //  `BSON.max` is a safe choice for a group `_id` that will never
                     //  match anything.
                     $0[.coalesce] = (vertex / Unidoc.AnyVertex[.peers], BSON.Max.init())
                 }
-                $0[let: special.topic] = .expr
+                $0[let: special.topic]
                 {
                     $0[.coalesce] = (vertex / Unidoc.AnyVertex[.group], BSON.Max.init())
                 }

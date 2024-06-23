@@ -17,7 +17,7 @@ extension Unidoc.VolumeRange:Unidoc.VertexPredicate
             let max:Mongo.Variable<Unidoc.Scalar> = "max"
 
             $0[.from] = Unidoc.DB.Vertices.name
-            $0[.let] = .init
+            $0[.let]
             {
                 $0[let: min] = volume / Unidoc.VolumeMetadata[self.min]
                 $0[let: max] = volume / Unidoc.VolumeMetadata[self.max]
