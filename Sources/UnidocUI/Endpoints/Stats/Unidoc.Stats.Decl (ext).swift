@@ -1,13 +1,13 @@
 import PieCharts
 import UnidocRecords
 
-extension Unidoc.Stats.Decl:PieValues
+extension Unidoc.Stats.Decl:Pie.ChartSource
 {
     public
-    typealias SectorKey = CodingKey
+    typealias Key = CodingKey
 
     public
-    var sectors:KeyValuePairs<SectorKey, Int>
+    var sectors:KeyValuePairs<Key, Int>
     {
         [
             .functions:             self.functions,

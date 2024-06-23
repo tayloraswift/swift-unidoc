@@ -2,11 +2,8 @@ import BSON
 import PieCharts
 import UnidocRecords
 
-extension BSON.HomogenousFields:PieValues where Key:PieSectorKey, Value == Int
+extension BSON.HomogenousFields:Pie.ChartSource where Key:Pie.ChartKey, Value == Int
 {
-    public
-    typealias SectorKey = Key
-
     public
     var sectors:[(key:Key, value:Int)] { self.ordered }
 }

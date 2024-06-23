@@ -1,21 +1,21 @@
 import HTML
 
-extension Pie
+extension Pie.Chart
 {
     @frozen public
     struct Legend
     {
-        @usableFromInline internal
-        let shape:Shape
+        @usableFromInline
+        let shape:Pie.Shape<Key>
 
-        @inlinable internal
-        init(shape:Shape)
+        @inlinable
+        init(shape:Pie.Shape<Key>)
         {
             self.shape = shape
         }
     }
 }
-extension Pie.Legend:HTML.OutputStreamable
+extension Pie.Chart.Legend:HTML.OutputStreamable
 {
     @inlinable public static
     func += (html:inout HTML.ContentEncoder, self:Self)
@@ -26,7 +26,7 @@ extension Pie.Legend:HTML.OutputStreamable
             key.legend(&html, share: 1.0)
 
         case .slices(let slices):
-            for slice:Pie<Key>.Slice in slices
+            for slice:Pie.Shape<Key>.Slice in slices
             {
                 slice.key.legend(&html, share: .init(slice.geometry.share))
             }

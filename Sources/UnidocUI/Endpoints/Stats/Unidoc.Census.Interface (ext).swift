@@ -1,7 +1,7 @@
 import PieCharts
 import UnidocRecords
 
-extension Unidoc.Census.Interface:PieSectorKey
+extension Unidoc.Census.Interface:Pie.ChartKey
 {
     public
     var id:String

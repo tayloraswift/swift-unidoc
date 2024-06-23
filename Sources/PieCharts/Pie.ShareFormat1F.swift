@@ -1,17 +1,20 @@
-/// A type that can format a sector share with one decimal place.
-@frozen public
-struct PieShareFormat1F
+extension Pie
 {
-    public
-    let share:Double
-
-    @inlinable public
-    init(_ share:Double)
+    /// A type that can format a sector share with one decimal place.
+    @frozen public
+    struct ShareFormat1F
     {
-        self.share = share
+        public
+        let share:Double
+
+        @inlinable public
+        init(_ share:Double)
+        {
+            self.share = share
+        }
     }
 }
-extension PieShareFormat1F:PieShareFormat
+extension Pie.ShareFormat1F:Pie.ShareFormat
 {
     /// Formats the share as a percentage with one decimal place, without the percent sign.
     /// Returns nil if the share is less than 0.1 percent.

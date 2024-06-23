@@ -26,7 +26,7 @@ extension Unidoc.Stats.Decl.CodingKey:Identifiable
         }
     }
 }
-extension Unidoc.Stats.Decl.CodingKey:PieSectorKey
+extension Unidoc.Stats.Decl.CodingKey:Pie.ChartKey
 {
     public
     var name:String
