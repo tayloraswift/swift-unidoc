@@ -66,7 +66,7 @@ extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
         pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Users.name
-            $0[.let] = .init
+            $0[.let]
             {
                 $0[let: account] = self.account
             }

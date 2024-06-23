@@ -18,9 +18,9 @@ extension Unidoc.SitemapIndexQuery:Mongo.PipelineQuery
 
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .sort] = .init
+        pipeline[stage: .sort, using: Unidoc.Sitemap.CodingKey.self]
         {
-            $0[Unidoc.Sitemap[.id]] = (+)
+            $0[.id] = (+)
         }
 
         pipeline[stage: .lookup]

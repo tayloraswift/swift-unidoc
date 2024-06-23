@@ -80,9 +80,9 @@ extension Unidoc.VolumeQuery
             //  it is closer to the ground-truth, and the latest-flag doesn’t
             //  have a unique (compound) index with the package name, since
             //  it experiences rolling alignments.
-            pipeline[stage: .sort] = .init
+            pipeline[stage: .sort, using: Unidoc.VolumeMetadata.CodingKey.self]
             {
-                $0[Unidoc.VolumeMetadata[.patch]] = (-)
+                $0[.patch] = (-)
             }
 
             pipeline[stage: .limit] = 1
@@ -133,9 +133,9 @@ extension Unidoc.VolumeQuery
                         $0[Unidoc.VolumeMetadata[.package]] = self.volume.package
                         $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
                     }
-                    $0[stage: .sort] = .init
+                    $0[stage: .sort, using: Unidoc.VolumeMetadata.CodingKey.self]
                     {
-                        $0[Unidoc.VolumeMetadata[.patch]] = (-)
+                        $0[.patch] = (-)
                     }
 
                     $0[stage: .limit] = 1

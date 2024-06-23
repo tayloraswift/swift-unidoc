@@ -145,9 +145,9 @@ extension Mongo.PipelineEncoder
                     $0[Unidoc.EditionMetadata[.semver]] = BSON.Null.init()
                 }
 
-                $0[stage: .sort] = .init
+                $0[stage: .sort, using: Unidoc.EditionMetadata.CodingKey.self]
                 {
-                    $0[Unidoc.EditionMetadata[.name]] = (+)
+                    $0[.name] = (+)
                 }
 
                 $0[stage: .skip] = skip == 0 ? nil : skip

@@ -91,7 +91,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
             let v:Mongo.Variable<PatchVersion> = "v"
 
             $0[.from] = Unidoc.DB.Editions.name
-            $0[.let] = .init
+            $0[.let]
             {
                 $0[let: p] = coordinate
                 $0[let: v] = patch

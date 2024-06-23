@@ -86,7 +86,7 @@ extension Mongo.CollectionModel where Capacity == (bytes:Int, count:Int?)
             command: Mongo.Find<Mongo.SingleBatch<Decodable>>.init(Self.name,
                 limit: count)
             {
-                $0[.sort] { $0[.natural] = (-) }
+                $0[.sort, using: Decodable.CodingKey.self] { $0[.natural] = (-) }
             },
             against: self.database)
     }
@@ -284,11 +284,11 @@ extension Mongo.CollectionModel
                         }
                     }
                 }
-                $0[.sort]
+                $0[.sort, using: Mongo.AnyKeyPath.self]
                 {
                     $0["_id"] = (+)
                 }
-                $0[.hint]
+                $0[.hint, using: Mongo.AnyKeyPath.self]
                 {
                     $0["_id"] = (+)
                 }

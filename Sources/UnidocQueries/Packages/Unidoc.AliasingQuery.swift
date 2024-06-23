@@ -53,7 +53,7 @@ extension Unidoc.AliasingQuery
             $0[.as] = Self.target
         }
 
-        pipeline[stage: .project] = .init
+        pipeline[stage: .project]
         {
             $0[Self.target] = true
         }
