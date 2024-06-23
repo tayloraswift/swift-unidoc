@@ -27,7 +27,7 @@ extension Unidoc.Stats
 extension Unidoc.Stats.Coverage:ExpressibleByDictionaryLiteral
 {
     @inlinable public
-    init(dictionaryLiteral elements:(Never, Int)...)
+    init(dictionaryLiteral elements:(CodingKey, Never)...)
     {
         self.init(undocumented: 0, indirect: 0, direct: 0)
     }

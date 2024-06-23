@@ -1,7 +1,7 @@
 extension Pie
 {
     @frozen public
-    struct Accumulator where Key:Hashable
+    struct Accumulator<Key> where Key:Hashable
     {
         @usableFromInline
         var counts:[Key: Int]
@@ -42,11 +42,8 @@ extension Pie.Accumulator
         }
     }
 }
-extension Pie.Accumulator:PieValues where Key:Comparable
+extension Pie.Accumulator:Pie.ChartSource where Key:Comparable, Key:Pie.ChartKey
 {
-    public
-    typealias SectorKey = Key
-
     @inlinable public
     var sectors:[(key:Key, value:Int)]
     {

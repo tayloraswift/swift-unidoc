@@ -14,7 +14,7 @@ extension Unidoc.Stats.Coverage.CodingKey:Identifiable
         }
     }
 }
-extension Unidoc.Stats.Coverage.CodingKey:PieSectorKey
+extension Unidoc.Stats.Coverage.CodingKey:Pie.ChartKey
 {
     public
     var name:String

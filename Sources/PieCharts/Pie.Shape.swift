@@ -2,48 +2,47 @@ import HTML
 
 extension Pie
 {
-    @frozen @usableFromInline internal
-    enum Shape
+    @frozen @usableFromInline
+    enum Shape<Key> where Key:ChartKey
     {
-        case circle(Key, Slice.Title)
+        case circle(Key, String)
         case slices([Slice])
     }
 }
 extension Pie.Shape:HTML.OutputStreamable
 {
-    @inlinable public static
-    func += (html:inout HTML.ContentEncoder, self:Self)
+    @inlinable
+    static func += (html:inout HTML.ContentEncoder, self:Self)
     {
         html[.div, { $0.class = "pie-color" }]
         {
-            $0[.svg] { $0.viewBox = "-1 -1 2 2" } = self
-        }
-
-        html[.div] { $0.class = "pie-geometry" }
-    }
-}
-extension Pie.Shape:SVG.OutputStreamable
-{
-    @inlinable public static
-    func += (svg:inout SVG.ContentEncoder, self:Self)
-    {
-        svg[.g]
-        {
-            switch self
+            $0[.svg, { $0.viewBox = "-1 -1 2 2" }]
             {
-            case .circle(let key, let title):
-                $0[.circle] { $0.r = "1" ; $0.class = key.id } = title
-
-            case .slices(let slices):
-                for slice:Pie<Key>.Slice in slices
+                $0[.g]
                 {
-                    $0[.path]
+                    switch self
                     {
-                        $0.d = slice.geometry.d
-                        $0.class = slice.key.id
-                    } = slice.title
+                    case .circle(let key, let title):
+                        $0[.circle]
+                        {
+                            $0.r = "1"
+                            $0.class = key.id
+                        }
+                            content:
+                        {
+                            $0[.title] = title.isEmpty ? nil : title
+                        }
+
+                    case .slices(let slices):
+                        for slice:Slice in slices
+                        {
+                            $0[.path] = slice
+                        }
+                    }
                 }
             }
         }
+
+        html[.div] { $0.class = "pie-geometry" }
     }
 }

@@ -43,7 +43,7 @@ extension Unidoc.StatsThumbnail:HTML.OutputStreamable
                 $0[.figure]
                 {
                     $0.class = "chart coverage"
-                } = self.census.unweighted.coverage.pie
+                } = self.census.unweighted.coverage.disc
                 {
                     """
                     \($1) percent of the declarations in \(self.domain) are \($0.name)
@@ -62,7 +62,7 @@ extension Unidoc.StatsThumbnail:HTML.OutputStreamable
                 $0[.figure]
                 {
                     $0.class = "chart decl"
-                } = self.census.unweighted.decls.pie
+                } = self.census.unweighted.decls.disc
                 {
                     """
                     \($1) percent of the declarations in \(self.domain) are \($0.name)
@@ -81,7 +81,7 @@ extension Unidoc.StatsThumbnail:HTML.OutputStreamable
                 $0[.figure]
                 {
                     $0.class = "chart spis"
-                } = self.census.interfaces.pie
+                } = self.census.interfaces.disc
                 {
                     """
                     \($1) percent of the declarations in \(self.domain) are \($0.name)

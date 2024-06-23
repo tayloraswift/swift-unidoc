@@ -1,21 +1,21 @@
 import HTML
 
-extension Pie.Slice
+extension Pie
 {
-    @frozen @usableFromInline internal
-    struct Geometry
+    @frozen @usableFromInline
+    struct ArcGeometry
     {
-        @usableFromInline internal
+        @usableFromInline
         let share:Double
-        @usableFromInline internal
+        @usableFromInline
         let startArc:SVG.Point<Double>
-        @usableFromInline internal
+        @usableFromInline
         let endArc:SVG.Point<Double>
         /// The end of the slice, in radians.
-        @usableFromInline internal
+        @usableFromInline
         let end:Double
 
-        @inlinable internal
+        @inlinable
         init(share:Double,
             startArc:SVG.Point<Double>,
             endArc:SVG.Point<Double>,
@@ -28,9 +28,9 @@ extension Pie.Slice
         }
     }
 }
-extension Pie.Slice.Geometry
+extension Pie.ArcGeometry
 {
-    @inlinable internal
+    @inlinable
     init(share:Double, from start:SVG.Point<Double>, to end:Double)
     {
         self.init(share: share,
@@ -39,9 +39,9 @@ extension Pie.Slice.Geometry
             end: end)
     }
 }
-extension Pie.Slice.Geometry
+extension Pie.ArcGeometry
 {
-    @usableFromInline internal
+    @usableFromInline
     var d:String
     {
         var d:String = "M 0,0 L \(self.startArc)"

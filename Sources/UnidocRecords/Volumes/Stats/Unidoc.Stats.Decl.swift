@@ -127,7 +127,7 @@ extension Unidoc.Stats.Decl
 extension Unidoc.Stats.Decl:ExpressibleByDictionaryLiteral
 {
     @inlinable public
-    init(dictionaryLiteral elements:(Never, Int)...)
+    init(dictionaryLiteral elements:(CodingKey, Never)...)
     {
         self.init(
             typealiases: 0,

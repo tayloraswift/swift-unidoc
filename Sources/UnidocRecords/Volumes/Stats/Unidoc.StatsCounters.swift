@@ -3,10 +3,9 @@ import BSON
 extension Unidoc
 {
     public
-    protocol StatsCounters:ExpressibleByDictionaryLiteral where Key == Never
+    protocol StatsCounters:ExpressibleByDictionaryLiteral where Value == Never
     {
         associatedtype CodingKey:RawRepresentable<String>, CaseIterable
-        associatedtype Value
 
         static
         subscript(key:CodingKey) -> WritableKeyPath<Self, Int> { get }
