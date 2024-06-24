@@ -307,7 +307,7 @@ extension Unidoc.Router
     {
         switch root
         {
-        case .admin:    return self.admin(form: form)
+        case .admin:    return nil
         case .api:      return self.api(form: form)
         case .login:    return self.login(form: form)
         case .really:   return self.really(form: form)
@@ -376,9 +376,6 @@ extension Unidoc.Router
         case Unidoc.ReplicaSetPage.name:
             return .actor(Unidoc.LoadDashboardOperation.replicaSet)
 
-        case Unidoc.CookiePage.name:
-            return .actor(Unidoc.LoadDashboardOperation.cookie(scramble: false))
-
         case "robots":
             return .actor(Unidoc.TextEditorOperation.init(id: .robots_txt))
 
@@ -386,18 +383,7 @@ extension Unidoc.Router
             return nil
         }
     }
-    //  These are kind of a mess right now.
-    private mutating
-    func admin(form:URI.Query) -> Unidoc.AnyOperation?
-    {
-        guard case Unidoc.CookiePage.name? = self.descend() as String?
-        else
-        {
-            return nil
-        }
 
-        return .actor(Unidoc.LoadDashboardOperation.cookie(scramble: true))
-    }
     private mutating
     func admin(form:MultipartForm) -> Unidoc.AnyOperation?
     {
