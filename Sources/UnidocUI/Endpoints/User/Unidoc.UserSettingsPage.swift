@@ -12,16 +12,15 @@ extension Unidoc
         private
         let organizations:[User]
 
-        init(user:User, organizations:[User])
+        let location:URI
+
+        init(user:User, organizations:[User], location:URI)
         {
             self.user = user
             self.organizations = organizations
+            self.location = location
         }
     }
-}
-extension Unidoc.UserSettingsPage
-{
-
 }
 extension Unidoc.UserSettingsPage:Unidoc.RenderablePage
 {
@@ -29,7 +28,6 @@ extension Unidoc.UserSettingsPage:Unidoc.RenderablePage
 }
 extension Unidoc.UserSettingsPage:Unidoc.StaticPage
 {
-    var location:URI { Unidoc.ServerRoot.account.uri }
 }
 extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
 {
@@ -217,8 +215,8 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
                 $0[.input]
                 {
                     $0.type = "hidden"
-                    $0.name = "generate"
-                    $0.value = "api-key"
+                    $0.name = "generate-api-key"
+                    $0.value = "\(self.user.id)"
                 }
 
                 $0[.button] { $0.class = "area" ; $0.type = "submit" } = button

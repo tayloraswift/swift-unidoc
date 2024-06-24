@@ -20,12 +20,12 @@ extension Unidoc.Client
     struct Connection
     {
         let http2:HTTP.Client2.Connection
-        let cookie:String
+        let authorization:String?
 
-        init(http2:HTTP.Client2.Connection, cookie:String)
+        init(http2:HTTP.Client2.Connection, authorization:String?)
         {
             self.http2 = http2
-            self.cookie = cookie
+            self.authorization = authorization
         }
     }
 }
@@ -145,6 +145,7 @@ extension Unidoc.Client.Connection
 {
     func headers(_ method:String, _ endpoint:String) -> HPACKHeaders
     {
+        var headers:HPACKHeaders =
         [
             ":method": method,
             ":scheme": "https",
@@ -153,8 +154,14 @@ extension Unidoc.Client.Connection
 
             "user-agent": "UnidocBuild",
             "accept": "application/json",
-            "cookie": "__Host-session=\(self.cookie)",
         ]
+
+        if  let authorization:String = self.authorization
+        {
+            headers.add(name: "authorization", value: "Unidoc \(authorization)")
+        }
+
+        return headers
     }
 }
 extension Unidoc.Client.Connection

@@ -1,8 +1,10 @@
 import HTTP
 import MongoDB
-import UnidocRender
 import UnidocDB
 import UnidocQueries
+import UnidocRecords
+import UnidocRender
+import URI
 
 extension Unidoc
 {
@@ -22,15 +24,36 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.UserSettingsEndpoint
+{
+    @inlinable public
+    static subscript(account:Unidoc.Account?) -> URI
+    {
+        var uri:URI = Unidoc.ServerRoot.account.uri
+        if  let account:Unidoc.Account
+        {
+            uri.path.append("\(account)")
+        }
+        return uri
+    }
+}
 extension Unidoc.UserSettingsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
-    @inlinable public static
-    var replica:Mongo.ReadPreference { .nearest }
+    @inlinable public
+    static var replica:Mongo.ReadPreference { .nearest }
 }
 extension Unidoc.UserSettingsEndpoint:HTTP.ServerEndpoint
 {
-    public consuming
+    public __consuming
     func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
+    {
+        self.response(as: format, admin: false)
+    }
+}
+extension Unidoc.UserSettingsEndpoint
+{
+    public __consuming
+    func response(as format:Unidoc.RenderFormat, admin:Bool) -> HTTP.ServerResponse
     {
         guard
         let output:Unidoc.UserAccountQuery.Output = self.value
@@ -39,8 +62,9 @@ extension Unidoc.UserSettingsEndpoint:HTTP.ServerEndpoint
             return .notFound("No such user")
         }
 
-        let page:Unidoc.UserSettingsPage = .init(user: output.user,
-            organizations: output.organizations)
-        return .ok(page.resource(format: format))
+        let userSettingsPage:Unidoc.UserSettingsPage = .init(user: output.user,
+            organizations: output.organizations,
+            location: Self[admin ? output.user.id : nil])
+        return .ok(userSettingsPage.resource(format: format))
     }
 }
