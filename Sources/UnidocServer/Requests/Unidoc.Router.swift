@@ -328,8 +328,15 @@ extension Unidoc.Router
 }
 extension Unidoc.Router
 {
-    private
+    private mutating
     func account() -> Unidoc.AnyOperation
+    {
+        if  let account:String = self.descend(),
+            let account:Unidoc.Account = .init(account)
+        {
+            return .actor(Unidoc.UserAdminOperation.init(account: account))
+        }
+        else
     {
         guard case .web(let session?, _) = self.authorization
         else
@@ -337,10 +344,10 @@ extension Unidoc.Router
             return .syncRedirect(.temporary("\(Unidoc.ServerRoot.login)"))
         }
 
-        return .explainable(Unidoc.UserSettingsEndpoint.init(
-                query: .init(session: session)),
+            return .explainable(Unidoc.UserSettingsEndpoint.init(query: .current(session)),
             parameters: .init(self.query),
             etag: self.etag)
+        }
     }
 }
 extension Unidoc.Router
