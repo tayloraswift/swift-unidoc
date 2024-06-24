@@ -246,6 +246,12 @@ let package:Package = .init(
         .target(name: "ISO",
             dependencies: [
                 .target(name: "CasesByIntegerEncodingMacro"),
+            ],
+            exclude: [
+                //  "ISO.Country (gen).swift",
+                "ISO.Country.swift",
+                //  "ISO.Macrolanguage (gen).swift",
+                "ISO.Macrolanguage.swift",
             ]),
 
         .target(name: "LexicalPaths"),
