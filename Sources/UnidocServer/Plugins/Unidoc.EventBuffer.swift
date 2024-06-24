@@ -36,14 +36,14 @@ extension Unidoc.EventBuffer:RandomAccessCollection
 extension Unidoc.EventBuffer
 {
     @inlinable public mutating
-    func push(event:Event)
+    func push(event:Event, from now:UnixInstant = .now())
     {
         if  self.entries.count == self.limit
         {
             self.entries.removeFirst()
         }
 
-        self.entries.append(.init(pushed: .now(), event: event))
+        self.entries.append(.init(pushed: now, event: event))
     }
 }
 extension Unidoc.EventBuffer where Event:HTML.OutputStreamable
