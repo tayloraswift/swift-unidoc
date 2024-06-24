@@ -200,7 +200,7 @@ extension Unidoc.Router
         let root:Unidoc.ServerRoot = .init(rawValue: root)
         else
         {
-            return .syncRedirect(.temporary("/"))
+            return nil
         }
 
         if  let redirect:String = self.redirect(root: root)
@@ -337,16 +337,16 @@ extension Unidoc.Router
             return .actor(Unidoc.UserAdminOperation.init(account: account))
         }
         else
-    {
-        guard case .web(let session?, _) = self.authorization
-        else
         {
-            return .syncRedirect(.temporary("\(Unidoc.ServerRoot.login)"))
-        }
+            guard case .web(let session?, _) = self.authorization
+            else
+            {
+                return .syncRedirect(.temporary("\(Unidoc.ServerRoot.login)"))
+            }
 
             return .explainable(Unidoc.UserSettingsEndpoint.init(query: .current(session)),
-            parameters: .init(self.query),
-            etag: self.etag)
+                parameters: .init(self.query),
+                etag: self.etag)
         }
     }
 }
