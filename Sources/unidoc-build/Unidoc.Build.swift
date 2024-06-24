@@ -16,8 +16,8 @@ extension Unidoc
 {
     struct Build:Sendable
     {
+        var authorization:String?
         var project:Symbol.Package?
-        var cookie:String
         var host:String
         var port:Int
 
@@ -36,8 +36,8 @@ extension Unidoc
         private
         init()
         {
+            self.authorization = nil
             self.project = nil
-            self.cookie = ""
             self.host = "localhost"
             self.port = 8443
 
@@ -114,14 +114,14 @@ extension Unidoc.Build
         {
             switch option
             {
+            case "--authorization", "-i":
+                options.authorization = try arguments.next(for: option)
+
             case "--swiftinit", "-S":
                 options.host = "swiftinit.org"
                 options.port = 443
 
-                options.cookie = try arguments.next(for: option)
-
-            case "--cookie", "-i":
-                options.cookie = try arguments.next(for: option)
+                options.authorization = try arguments.next(for: option)
 
             case "--host", "-h":
                 options.host = try arguments.next(for: option)

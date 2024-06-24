@@ -1,21 +1,20 @@
 import BSON
 import MongoDB
 import UnidocDB
+import UnidocRecords
 
 extension Unidoc
 {
-    /// Returns the user account information for the currently-authenticated user.
     @frozen public
-    struct UserAccountQuery:Sendable
+    enum UserAccountQuery:Sendable
     {
-        public
-        let session:UserSession.Web
+        /// Returns the user account information for the currently-authenticated user, checking
+        /// the session cookie.
+        case current(UserSession.Web)
 
-        @inlinable public
-        init(session:UserSession.Web)
-        {
-            self.session = session
-        }
+        /// Returns the user account information for the specified user, performing no
+        /// authentication! **THIS QUERY RETURNS SENSITIVE INFORMATION!!!**
+        case another(Account)
     }
 }
 extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
@@ -37,8 +36,15 @@ extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
     {
         pipeline[stage: .match]
         {
-            $0[Unidoc.User[.id]] = self.session.id
-            $0[Unidoc.User[.cookie]] = self.session.cookie
+            switch self
+            {
+            case .current(let session):
+                $0[Unidoc.User[.id]] = session.id
+                $0[Unidoc.User[.cookie]] = session.cookie
+
+            case .another(let account):
+                $0[Unidoc.User[.id]] = account
+            }
         }
 
         pipeline[stage: .facet, using: Output.CodingKey.self]

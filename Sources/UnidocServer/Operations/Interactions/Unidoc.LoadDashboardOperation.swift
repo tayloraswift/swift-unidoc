@@ -7,7 +7,6 @@ extension Unidoc
     enum LoadDashboardOperation
     {
         case logger
-        case cookie(scramble:Bool)
         case plugin(String)
         case replicaSet
     }
@@ -28,35 +27,6 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
             }
 
             return .ok(await logger.dashboard(from: server))
-
-        case .cookie(scramble: let scramble):
-            let secrets:Unidoc.UserSecrets
-
-            switch scramble
-            {
-            case true:
-                guard
-                let changed:Unidoc.UserSecrets = try await server.db.users.scramble(
-                    secret: .cookie,
-                    user: .init(type: .unidoc, user: 0),
-                    with: session)
-                else
-                {
-                    //  If, for some reason, the account has disappeared, we'll just create
-                    //  a new one.
-                    fallthrough
-                }
-
-                secrets = changed
-
-            case false:
-                secrets = try await server.db.users.update(
-                    user: .machine(0),
-                    with: session)
-            }
-
-            let page:Unidoc.CookiePage = .init(secrets: secrets)
-            return .ok(page.resource(format: server.format))
 
         case .plugin(let id):
             guard

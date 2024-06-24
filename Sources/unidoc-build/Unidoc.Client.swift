@@ -26,7 +26,7 @@ extension Unidoc
         private
         let pretty:Bool
         private
-        let cookie:String
+        let authorization:String?
 
         let http2:HTTP.Client2
         let port:Int
@@ -37,7 +37,7 @@ extension Unidoc
             swiftPath:String?,
             swiftSDK:SSGC.AppleSDK?,
             pretty:Bool,
-            cookie:String,
+            authorization:String?,
             http2:HTTP.Client2,
             port:Int)
         {
@@ -46,7 +46,7 @@ extension Unidoc
             self.swiftPath = swiftPath
             self.swiftSDK = swiftSDK
             self.pretty = pretty
-            self.cookie = cookie
+            self.authorization = authorization
             self.http2 = http2
             self.port = port
         }
@@ -77,7 +77,7 @@ extension Unidoc.Client
             swiftPath: options.swiftPath,
             swiftSDK: options.swiftSDK,
             pretty: options.pretty,
-            cookie: options.cookie,
+            authorization: options.authorization,
             http2: .init(threads: threads,
                 niossl: niossl,
                 remote: options.host),
@@ -90,7 +90,7 @@ extension Unidoc.Client
     {
         try await self.http2.connect(port: self.port)
         {
-            try await body(Connection.init(http2: $0, cookie: self.cookie))
+            try await body(Connection.init(http2: $0, authorization: self.authorization))
         }
     }
 }
