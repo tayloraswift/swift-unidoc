@@ -142,8 +142,17 @@ extension Unidoc.VersionsPage
                     {
                         $0[.a]
                         {
-                            $0.href = "\(Unidoc.RulesEndpoint[self.package.symbol])"
-                        } = origin.owner
+                            $0.href = "https://github.com/\(origin.owner)"
+                            $0.rel = .external
+                        } = "@\(origin.owner)"
+
+                        $0[.span, { $0.class = "parenthetical" }]
+                        {
+                            $0[.a]
+                            {
+                                $0.href = "\(Unidoc.RulesEndpoint[self.package.symbol])"
+                            } = "manage collaborators"
+                        }
                     }
 
                     $0[.dt] = "Watchers"

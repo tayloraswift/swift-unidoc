@@ -29,7 +29,7 @@ extension Unidoc.UserSettingsPage.Heading:HTML.OutputStreamableHeading
     {
         switch self
         {
-        case .profile:          "GitHub Profile"
+        case .profile:          "GitHub profile"
         case .repositories:     "Repositories"
         case .organizations:    "Organizations"
         case .apiKeys:          "API keys"

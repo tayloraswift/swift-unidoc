@@ -1,0 +1,12 @@
+header.visual
+{
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+
+    img.icon
+    {
+        height: 5rem;
+        border-radius: 50%;
+    }
+}
