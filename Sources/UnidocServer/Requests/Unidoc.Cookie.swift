@@ -2,7 +2,7 @@ extension Unidoc
 {
     enum Cookie
     {
-        static var loginSession:Substring { "__Host-login_session" }
-        static var loginState:Substring { "login_state" }
+        static var loginSession:String { "__Host-login_session" }
+        static var loginState:String { "login_state" }
     }
 }

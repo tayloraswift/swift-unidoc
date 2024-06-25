@@ -36,13 +36,3 @@ extension HTTP.Cookie
         }
     }
 }
-extension HTTP.Cookie:LosslessStringConvertible
-{
-    @inlinable public
-    init?(_ string:String) { self.init(string[...]) }
-}
-extension HTTP.Cookie:CustomStringConvertible
-{
-    @inlinable public
-    var description:String { "\(self.name)=\(self.value)" }
-}

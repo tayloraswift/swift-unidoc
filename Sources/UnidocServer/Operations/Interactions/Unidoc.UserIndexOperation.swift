@@ -48,7 +48,7 @@ extension Unidoc.UserIndexOperation
             niossl: server.context.niossl,
             as: integration.agent)
 
-        let cookies:KeyValuePairs<Substring, Substring>
+        let cookies:[(String, HTTP.CookieValue)]
 
         switch self.flow
         {
@@ -72,10 +72,19 @@ extension Unidoc.UserIndexOperation
                     """)
             }
 
-            cookies = [Unidoc.Cookie.loginSession: "\(web)"]
+            let cookie:HTTP.CookieValue = .init("\(web)")
+            {
+                $0.httpOnly = true
+                $0.secure = true
+                $0.maxAge = 90 * 86400
+                $0.path = "/"
+                $0.sameSite = .lax
+            }
+
+            cookies = [(Unidoc.Cookie.loginSession, cookie)]
 
         case .sync:
-            cookies = [:]
+            cookies = []
 
             let memberships:[GitHub.OrganizationMembership] = try await restAPI.connect
             {
