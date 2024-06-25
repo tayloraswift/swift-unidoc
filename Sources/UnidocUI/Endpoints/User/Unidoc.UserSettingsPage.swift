@@ -62,7 +62,15 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
 
             if  let github:GitHub.User.Profile = self.user.github
             {
-                $0[.h2] = Heading.profile
+                $0[.header, { $0.class = "visual" }]
+                {
+                    $0[.h2] = Heading.profile
+                    $0[.img]
+                    {
+                        $0.class = "icon"
+                        $0.src = self.user.icon(size: 128)
+                    }
+                }
                 $0[.dl]
                 {
                     $0[.dt] = "GitHub name"
@@ -151,19 +159,15 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
                 You have verified your membership in \(count) GitHub organizations.
                 """
             }
-            $0[.ul]
+
+            $0[.ul, { $0.class = "users" }]
             {
                 for organization:Unidoc.User in self.organizations
                 {
-                    $0[.li]
-                    {
-                        $0[.a]
-                        {
-                            $0.href = "\(Unidoc.UserPropertyEndpoint[organization.id])"
-                        } = organization.name ?? "\(organization.id)"
-                    }
+                    $0[.li] = organization.card()
                 }
             }
+
             $0[.form]
             {
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
