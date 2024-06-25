@@ -252,10 +252,13 @@ extension Unidoc.Server
                 with: .init(authorization: request.authorization, request: request.uri),
                 as: self.format(locale: request.origin.guess?.locale)) ?? .notFound("not found")
 
-            //  Don’t log these operations, as doing so would make it impossible for admins to
-            //  avoid leaving trails.
             switch operation
             {
+            //  Don’t log traffic from the builders.
+            case is Unidoc.BuilderLabelOperation:   return response
+            case is Unidoc.BuilderPollOperation:    return response
+            //  Don’t log these operations, as doing so would make it impossible for admins to
+            //  avoid leaving trails.
             case is Unidoc.LoadDashboardOperation:  return response
             case is Unidoc.LoginOperation:          return response
             case is Unidoc.AuthOperation:           return response
