@@ -72,11 +72,11 @@ extension Unidoc.DB.Users
                 $0[.hint] { $0[Element[.id]] = (+) }
                 $0[.query] { $0[Element[.id]] = user.id }
                 $0[.update] { $0 += user }
-                $0[.fields]
+                $0[.fields, using: Element.CodingKey.self]
                 {
-                    $0[Element[.id]] = true
-                    $0[Element[.cookie]] = true
-                    $0[Element[.apiKey]] = true
+                    $0[.symbol] = true
+                    $0[.cookie] = true
+                    $0[.apiKey] = true
                 }
             },
             against: self.database)
@@ -145,10 +145,11 @@ extension Unidoc.DB.Users
                         $0[Element[secret]] = Int64.random(in: .min ... .max)
                     }
                 }
-                $0[.fields]
+                $0[.fields, using: Element.CodingKey.self]
                 {
-                    $0[Element[.cookie]] = true
-                    $0[Element[.apiKey]] = true
+                    $0[.symbol] = true
+                    $0[.cookie] = true
+                    $0[.apiKey] = true
                 }
             },
             against: self.database)
@@ -174,9 +175,9 @@ extension Unidoc.DB.Users
                 {
                     $0[Element[.apiLimitLeft]] { $0[.ne] = reset }
                 }
-                $0[.projection]
+                $0[.projection, using: Element.CodingKey.self]
                 {
-                    $0[Element[.id]] = true
+                    $0[.id] = true
                 }
             },
             against: self.database)
@@ -243,10 +244,10 @@ extension Unidoc.DB.Users
                 {
                     $0[.inc] { $0[Element[.apiLimitLeft]] = -cost }
                 }
-                $0[.fields]
+                $0[.fields, using: Element.CodingKey.self]
                 {
-                    $0[Element[.apiLimitLeft]] = true
-                    $0[Element[.apiKey]] = true
+                    $0[.apiLimitLeft] = true
+                    $0[.apiKey] = true
                 }
             },
             against: self.database)
@@ -280,10 +281,10 @@ extension Unidoc.DB.Users
                         $0[Element[.apiKey]] = user.apiKey
                     }
                 }
-                $0[.projection]
+                $0[.projection, using: Element.CodingKey.self]
                 {
-                    $0[Element[.access]] = true
-                    $0[Element[.level]] = true
+                    $0[.access] = true
+                    $0[.level] = true
                 }
             },
             against: self.database)

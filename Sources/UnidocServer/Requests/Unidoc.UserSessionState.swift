@@ -1,4 +1,5 @@
 import URI
+import UnidocRender
 
 extension Unidoc
 {
@@ -9,12 +10,15 @@ extension Unidoc
         let authorization:Authorization
         public
         let request:URI
+        public
+        let format:RenderFormat
 
         @inlinable public
-        init(authorization:Authorization, request:URI)
+        init(authorization:Authorization, request:URI, format:RenderFormat)
         {
             self.authorization = authorization
             self.request = request
+            self.format = format
         }
     }
 }

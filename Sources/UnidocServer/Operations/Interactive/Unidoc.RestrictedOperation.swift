@@ -18,15 +18,15 @@ extension Unidoc
         /// consistent with any authentication that took place before calling this witness.
         consuming
         func load(from server:borrowing Server,
-            with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+            with session:Mongo.Session,
+            as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     }
 }
 extension Unidoc.RestrictedOperation
 {
     public consuming
     func load(from server:Unidoc.Server,
-        with state:Unidoc.UserSessionState,
-        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
+        with state:Unidoc.UserSessionState) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session
 
@@ -58,7 +58,7 @@ extension Unidoc.RestrictedOperation
                 let login:Unidoc.LoginPage = .init(client: oauth.client,
                     flow: .sso,
                     from: state.request)
-                return .ok(login.resource(format: server.format))
+                return .ok(login.resource(format: state.format))
 
             case .web(let session?, _):
                 user = .web(session)
@@ -89,7 +89,7 @@ extension Unidoc.RestrictedOperation
             if  case .guest = rights.level
             {
                 return .forbidden("""
-                    It looks like you are somehow logged in as a non-player entity.\n
+                    It looks like you are somehow logged in as an organization.\n
                     """)
             }
 
@@ -100,6 +100,6 @@ extension Unidoc.RestrictedOperation
             }
         }
 
-        return try await self.load(from: server, with: session)
+        return try await self.load(from: server, with: session, as: state.format)
     }
 }

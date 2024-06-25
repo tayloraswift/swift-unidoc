@@ -7,10 +7,10 @@ extension HTTP.AcceptLanguage
     struct Iterator
     {
         @usableFromInline
-        var parser:HTTP.AcceptStringIterator
+        var parser:HTTP.HeaderWords<HTTP.AcceptStringParameter, HTTP.Comma>
 
         @inlinable
-        init(parser:HTTP.AcceptStringIterator)
+        init(parser:HTTP.HeaderWords<HTTP.AcceptStringParameter, HTTP.Comma>)
         {
             self.parser = parser
         }

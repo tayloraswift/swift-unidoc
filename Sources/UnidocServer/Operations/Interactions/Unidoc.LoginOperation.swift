@@ -20,8 +20,7 @@ extension Unidoc
 }
 extension Unidoc.LoginOperation:Unidoc.PublicOperation
 {
-    func load(from server:Unidoc.Server,
-        as _:Unidoc.RenderFormat) -> HTTP.ServerResponse?
+    func load(from server:Unidoc.Server, as format:Unidoc.RenderFormat) -> HTTP.ServerResponse?
     {
         guard
         let oauth:GitHub.OAuth = server.github?.oauth
@@ -38,6 +37,6 @@ extension Unidoc.LoginOperation:Unidoc.PublicOperation
             flow: self.flow,
             from: self.path)
 
-        return .ok(page.resource(format: server.format))
+        return .ok(page.resource(format: format))
     }
 }

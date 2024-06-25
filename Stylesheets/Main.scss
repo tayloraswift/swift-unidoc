@@ -68,8 +68,9 @@ body
 
             padding: 0.25rem 0;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            flex-direction: row;
+            justify-content: space-between;
+            align-content: center;
 
             overflow: hidden;
             overflow-wrap: break-word;

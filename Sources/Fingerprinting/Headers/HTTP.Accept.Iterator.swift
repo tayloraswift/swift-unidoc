@@ -6,10 +6,10 @@ extension HTTP.Accept
     struct Iterator
     {
         @usableFromInline
-        var parser:HTTP.AcceptStringIterator
+        var parser:HTTP.HeaderWords<HTTP.AcceptStringParameter, HTTP.Comma>
 
         @inlinable
-        init(parser:HTTP.AcceptStringIterator)
+        init(parser:HTTP.HeaderWords<HTTP.AcceptStringParameter, HTTP.Comma>)
         {
             self.parser = parser
         }
@@ -20,9 +20,9 @@ extension HTTP.Accept.Iterator:IteratorProtocol
     @inlinable public mutating
     func next() -> HTTP.Accept.Option?
     {
-        while let string:HTTP.AcceptStringParameter = self.parser.next()
+        while let parameter:HTTP.AcceptStringParameter = self.parser.next()
         {
-            return .init(type: string.key, q: string.q ?? 1.0, v: string.v)
+            return .init(type: parameter.key, q: parameter.q ?? 1.0, v: parameter.v)
         }
 
         return nil

@@ -18,7 +18,8 @@ extension Unidoc
 extension Unidoc.TextUpdateOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session,
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let _:Bool? = try await server.db.metadata.update(with: session)
         {

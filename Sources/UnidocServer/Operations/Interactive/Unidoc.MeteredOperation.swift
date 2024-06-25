@@ -34,7 +34,7 @@ extension Unidoc.MeteredOperation
     /// This isn’t called automatically, to allow for maximum customization.
     func charge(cost:Int,
         from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session) async throws -> Unidoc.PolicyErrorPage?
     {
         //  The cost for administratrices is not *zero*, mainly so that it’s easier for us to
         //  tell if the rate limiting system is working.
@@ -47,10 +47,9 @@ extension Unidoc.MeteredOperation
         }
         else
         {
-            let display:Unidoc.PolicyErrorPage = .init(illustration: .error4xx_jpg,
+            return .init(illustration: .error4xx_jpg,
                 message: "Inactive or nonexistent API key",
                 status: 429)
-            return display.response(format: server.format)
         }
     }
 }

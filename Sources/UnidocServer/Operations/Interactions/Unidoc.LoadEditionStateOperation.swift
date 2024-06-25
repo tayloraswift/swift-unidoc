@@ -26,7 +26,7 @@ extension Unidoc
 extension Unidoc.LoadEditionStateOperation:Unidoc.PublicOperation
 {
     func load(from server:Unidoc.Server,
-        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let session:Mongo.Session
         let remaining:Int?

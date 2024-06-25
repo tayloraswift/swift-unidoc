@@ -77,18 +77,18 @@ extension Unidoc.Server
     @inlinable public
     var bucket:Unidoc.Buckets { self.options.bucket }
 
-    @inlinable public
     var format:Unidoc.RenderFormat
     {
-        self.format(locale: nil)
+        self.format(username: nil, locale: nil)
     }
 
-    @inlinable
-    func format(locale:HTTP.Locale?) -> Unidoc.RenderFormat
+    func format(username:String?, locale:HTTP.Locale?) -> Unidoc.RenderFormat
     {
-        .init(assets: self.options.cloudfront ? .cloudfront : .local,
+        .init(
             security: self.security,
+            username: username,
             locale: locale,
+            assets: self.options.cloudfront ? .cloudfront : .local,
             server: self.options.mode.server)
     }
 }
@@ -247,10 +247,23 @@ extension Unidoc.Server
             try Task.checkCancellation()
 
             let initiated:ContinuousClock.Instant = .now
+            let username:String?
 
-            let response:HTTP.ServerResponse = try await operation.load(from: self,
-                with: .init(authorization: request.authorization, request: request.uri),
-                as: self.format(locale: request.origin.guess?.locale)) ?? .notFound("not found")
+            if  case .web(let session?, _) = request.authorization
+            {
+                username = session.symbol
+            }
+            else
+            {
+                username = nil
+            }
+
+            let state:Unidoc.UserSessionState = .init(authorization: request.authorization,
+                request: request.uri,
+                format: self.format(username: username, locale: request.origin.guess?.locale))
+
+            let response:HTTP.ServerResponse = try await operation.load(from: self, with: state)
+                ?? .notFound("not found\n")
 
             switch operation
             {

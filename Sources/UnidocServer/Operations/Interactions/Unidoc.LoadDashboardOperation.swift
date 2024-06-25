@@ -14,7 +14,8 @@ extension Unidoc
 extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session,
+        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         switch self
         {
@@ -26,7 +27,7 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
                 return .notFound("No logging enabled\n")
             }
 
-            return .ok(await logger.dashboard(from: server))
+            return .ok(await logger.dashboard(from: server, as: format))
 
         case .plugin(let id):
             guard
@@ -42,7 +43,7 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
                 return .notFound("This plugin has not been initialized yet")
             }
 
-            return .ok(page.resource(format: server.format))
+            return .ok(page.resource(format: format))
 
         case .replicaSet:
             let configuration:Mongo.ReplicaSetConfiguration = try await session.run(
@@ -50,7 +51,7 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
                 against: .admin)
 
             let page:Unidoc.ReplicaSetPage = .init(configuration: configuration)
-            return .ok(page.resource(format: server.format))
+            return .ok(page.resource(format: format))
         }
     }
 }

@@ -201,10 +201,8 @@ extension Unidoc.ClientGuess
     func from(_ headers:HTTPHeaders) -> Self
     {
         .from(
-            acceptLanguage: headers["accept-language"].last.map(
-                HTTP.AcceptLanguage.init(rawValue:)),
-            acceptType: headers["accept"].last.map(
-                HTTP.Accept.init(rawValue:)),
+            acceptLanguage: headers["accept-language"].last.map(HTTP.AcceptLanguage.init(_:)),
+            acceptType: headers["accept"].last.map(HTTP.Accept.init(_:)),
             userAgent: headers["user-agent"].last,
             referer: headers["referer"].last)
     }
@@ -212,10 +210,8 @@ extension Unidoc.ClientGuess
     func from(_ headers:HPACKHeaders) -> Self
     {
         .from(
-            acceptLanguage: headers["accept-language"].last.map(
-                HTTP.AcceptLanguage.init(rawValue:)),
-            acceptType: headers["accept"].last.map(
-                HTTP.Accept.init(rawValue:)),
+            acceptLanguage: headers["accept-language"].last.map(HTTP.AcceptLanguage.init(_:)),
+            acceptType: headers["accept"].last.map(HTTP.Accept.init(_:)),
             userAgent: headers["user-agent"].last,
             referer: headers["referer"].last)
     }

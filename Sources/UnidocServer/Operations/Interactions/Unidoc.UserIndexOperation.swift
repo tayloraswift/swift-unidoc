@@ -27,8 +27,7 @@ extension Unidoc
 extension Unidoc.UserIndexOperation:Unidoc.InteractiveOperation
 {
     func load(from server:Unidoc.Server,
-        with _:Unidoc.UserSessionState,
-        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
+        with _:Unidoc.UserSessionState) async throws -> HTTP.ServerResponse?
     {
         try await self.perform(on: server)
     }
@@ -49,7 +48,7 @@ extension Unidoc.UserIndexOperation
             niossl: server.context.niossl,
             as: integration.agent)
 
-        let cookies:KeyValuePairs<String, String>
+        let cookies:KeyValuePairs<Substring, Substring>
 
         switch self.flow
         {
@@ -64,7 +63,16 @@ extension Unidoc.UserIndexOperation
             let secrets:Unidoc.UserSecrets = try await server.db.users.update(user: user,
                 with: session)
 
-            cookies = [Unidoc.Cookie.session: "\(secrets.web)"]
+            guard
+            let web:Unidoc.UserSession.Web = secrets.web
+            else
+            {
+                return .forbidden("""
+                    It looks like you have somehow logged in as an anonymous user.\n
+                    """)
+            }
+
+            cookies = [Unidoc.Cookie.loginSession: "\(web)"]
 
         case .sync:
             cookies = [:]

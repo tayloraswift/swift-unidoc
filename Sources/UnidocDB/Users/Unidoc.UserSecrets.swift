@@ -12,20 +12,28 @@ extension Unidoc
         let cookie:Int64
         public
         let apiKey:Int64?
+        /// This is only used for display purposes.
+        public
+        let symbol:String?
 
         @inlinable
-        init(account:Account, cookie:Int64, apiKey:Int64?)
+        init(account:Account, cookie:Int64, apiKey:Int64?, symbol:String?)
         {
             self.account = account
             self.cookie = cookie
             self.apiKey = apiKey
+            self.symbol = symbol
         }
     }
 }
 extension Unidoc.UserSecrets
 {
     @inlinable public
-    var web:Unidoc.UserSession.Web { .init(id: self.account, cookie: self.cookie) }
+    var web:Unidoc.UserSession.Web?
+    {
+        self.symbol.map { .init(id: self.account, cookie: self.cookie, symbol: $0) }
+    }
+
     @inlinable public
     var api:Unidoc.UserSession.API?
     {
@@ -42,6 +50,7 @@ extension Unidoc.UserSecrets:BSONDocumentDecodable
     {
         self.init(account: try bson[.id].decode(),
             cookie: try bson[.cookie].decode(),
-            apiKey: try bson[.apiKey]?.decode())
+            apiKey: try bson[.apiKey]?.decode(),
+            symbol: try bson[.symbol]?.decode())
     }
 }

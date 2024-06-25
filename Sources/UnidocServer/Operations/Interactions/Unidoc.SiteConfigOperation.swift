@@ -18,7 +18,8 @@ extension Unidoc
 extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session,
+        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         switch self
         {
@@ -40,7 +41,7 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
                 modified: modified,
                 target: target)
 
-            return .ok(complete.resource(format: server.format))
+            return .ok(complete.resource(format: format))
 
         case .telescope(days: let days):
             let updates:Mongo.Updates = try await server.db.crawlingWindows.create(days: days,

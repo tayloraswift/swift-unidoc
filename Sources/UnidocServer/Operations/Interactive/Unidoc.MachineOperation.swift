@@ -2,14 +2,14 @@ import HTTP
 import JSON
 import MongoDB
 import UnidocDB
+import UnidocRender
 
 extension Unidoc
 {
     public
     protocol MachineOperation:RestrictedOperation
     {
-        func load(from server:borrowing Server,
-            with session:Mongo.Session) async throws -> JSON?
+        func load(from server:Server, with session:Mongo.Session) async throws -> JSON?
     }
 }
 extension Unidoc.MachineOperation
@@ -29,7 +29,8 @@ extension Unidoc.MachineOperation
 
     public
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session,
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         guard
         let json:JSON = try await self.load(from: server, with: session)
