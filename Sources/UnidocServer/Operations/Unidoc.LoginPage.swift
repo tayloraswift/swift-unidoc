@@ -47,11 +47,16 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
             {
             case .sso:
                 $0[.p] = """
-                Authenticate with GitHub to access your account. \
-                We will ask you for read-only access to your teams and organizations.
+                Swiftinit uses GitHub SSO to verify your identity and grant you access to your \
+                packages and their documentation.
                 """
+
+                $0[.p] = """
+                Authenticating with your GitHub account won’t add you to any mailing lists.
+                """
+
             case .sync:
-                $0[.p] = "Authenticate with GitHub to verify your organizations."
+                $0[.p] = "Authenticate again with GitHub to verify your organizations."
                 $0[.p, { $0.class = "note" }]
                 {
                     $0 += "Some of your organizations may have policies that "
