@@ -26,8 +26,7 @@ extension Unidoc
 extension Unidoc.AuthOperation:Unidoc.InteractiveOperation
 {
     func load(from server:Unidoc.Server,
-        with state:Unidoc.UserSessionState,
-        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
+        with state:Unidoc.UserSessionState) async throws -> HTTP.ServerResponse?
     {
         guard case .web(_, login: self.state?) = state.authorization
         else

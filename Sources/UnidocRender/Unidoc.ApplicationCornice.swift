@@ -10,8 +10,8 @@ extension Unidoc
         @usableFromInline
         let official:Bool
 
-        @inlinable public
-        init(username:String? = nil, official:Bool = true)
+        @inlinable
+        init(username:String?, official:Bool)
         {
             self.username = username
             self.official = official
@@ -29,7 +29,14 @@ extension Unidoc.ApplicationCornice:HTML.OutputStreamable
         }
         nav[.div]
         {
-            $0[.a] { $0.href = "\(Unidoc.ServerRoot.account)" } = self.username
+            if  let username:String = self.username
+            {
+                $0[.a] { $0.href = "\(Unidoc.ServerRoot.account)" } = username
+            }
+            else
+            {
+                $0[.a] { $0.href = "\(Unidoc.ServerRoot.login)" } = "login"
+            }
         }
     }
 }

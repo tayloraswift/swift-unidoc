@@ -66,7 +66,8 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
     }
 
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session,
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         if  let rejection:HTTP.ServerResponse = try await server.authorize(
                 loading: self.package,

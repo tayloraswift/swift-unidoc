@@ -59,7 +59,7 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
         {
             $0[.div, { $0.class = "content" }]
             {
-                $0[.nav] { $0.class = "cornice" } = Unidoc.ApplicationCornice.init()
+                $0[.nav] { $0.class = "cornice" } = format.cornice
             }
         }
 

@@ -21,7 +21,8 @@ extension Unidoc
 extension Unidoc.PackageAliasOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session,
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         try await server.db.packageAliases.upsert(alias: self.alias,
             of: self.package,

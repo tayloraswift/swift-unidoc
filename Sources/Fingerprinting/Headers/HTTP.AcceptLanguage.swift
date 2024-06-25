@@ -3,22 +3,17 @@ import HTTP
 extension HTTP
 {
     @frozen public
-    struct AcceptLanguage:RawRepresentable, Sendable
+    struct AcceptLanguage:Header, Sendable, ExpressibleByStringLiteral
     {
         public
-        var rawValue:String
+        var rawValue:Substring
 
         @inlinable public
-        init(rawValue:String)
+        init(rawValue:Substring)
         {
             self.rawValue = rawValue
         }
     }
-}
-extension HTTP.AcceptLanguage:ExpressibleByStringLiteral
-{
-    @inlinable public
-    init(stringLiteral:String) { self.init(rawValue: stringLiteral) }
 }
 extension HTTP.AcceptLanguage:Sequence
 {

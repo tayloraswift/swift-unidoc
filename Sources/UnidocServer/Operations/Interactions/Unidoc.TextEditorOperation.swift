@@ -18,7 +18,8 @@ extension Unidoc
 extension Unidoc.TextEditorOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session,
+        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let action:Unidoc.PostAction
         switch self.id
@@ -40,6 +41,6 @@ extension Unidoc.TextEditorOperation:Unidoc.AdministrativeOperation
             } ?? "",
             action: action)
 
-        return .ok(page.resource(format: server.format))
+        return .ok(page.resource(format: format))
     }
 }

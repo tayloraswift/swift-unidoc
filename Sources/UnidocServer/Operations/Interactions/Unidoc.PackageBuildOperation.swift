@@ -36,7 +36,8 @@ extension Unidoc.PackageBuildOperation
 extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session,
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let metadata:Unidoc.PackageMetadata?
         let package:Unidoc.Package

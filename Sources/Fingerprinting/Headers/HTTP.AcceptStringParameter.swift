@@ -21,7 +21,7 @@ extension HTTP
         }
     }
 }
-extension HTTP.AcceptStringParameter
+extension HTTP.AcceptStringParameter:HTTP.HeaderWord
 {
     @inlinable
     init(_ string:Substring)

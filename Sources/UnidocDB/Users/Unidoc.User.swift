@@ -17,13 +17,13 @@ extension Unidoc
         var apiLimitLeft:Int
         public
         var apiKey:Int64?
+        /// A human-readable label for this user, if available.
+        public
+        var symbol:String?
 
         public
         var github:GitHub.User.Profile?
 
-        /// A human-readable label for this user, if available.
-        public
-        var symbol:String?
         /// Additional accounts that this user has access to.
         public
         var access:[Account]
@@ -33,16 +33,16 @@ extension Unidoc
             level:Level,
             apiLimitLeft:Int = 0,
             apiKey:Int64? = nil,
-            github:GitHub.User.Profile? = nil,
             symbol:String? = nil,
+            github:GitHub.User.Profile? = nil,
             access:[Account] = [])
         {
             self.id = id
             self.level = level
             self.apiLimitLeft = apiLimitLeft
             self.apiKey = apiKey
-            self.github = github
             self.symbol = symbol
+            self.github = github
             self.access = access
         }
     }
@@ -59,6 +59,7 @@ extension Unidoc.User
             level: level,
             //  This will only be written to the database if the user is new.
             apiLimitLeft: initialLimit,
+            symbol: user.profile.login,
             github: user.profile)
     }
 
@@ -91,10 +92,10 @@ extension Unidoc.User:Mongo.MasterCodingModel
         /// The session cookie associated with this account, if logged in. This is generated
         /// randomly in ``AccountDatabase.Users.update(account:with:)``.
         case cookie = "B"
+        case symbol = "Y"
 
         case github = "github"
 
-        case symbol = "Y"
         case access = "a"
     }
 }
@@ -108,10 +109,10 @@ extension Unidoc.User:BSONDocumentEncodable
 
         bson[.apiLimitLeft] = self.apiLimitLeft
         bson[.apiKey] = self.apiKey
+        bson[.symbol] = self.symbol
 
         bson[.github] = self.github
 
-        bson[.symbol] = self.symbol
         bson[.access] = self.access.isEmpty ? nil : self.access
     }
 }
@@ -124,8 +125,8 @@ extension Unidoc.User:BSONDocumentDecodable
             level: try bson[.level].decode(),
             apiLimitLeft: try bson[.apiLimitLeft]?.decode() ?? 0,
             apiKey: try bson[.apiKey]?.decode(),
-            github: try bson[.github]?.decode(),
             symbol: try bson[.symbol]?.decode(),
+            github: try bson[.github]?.decode(),
             access: try bson[.access]?.decode() ?? [])
     }
 }
@@ -140,8 +141,8 @@ extension Unidoc.User
         {
             $0[Self[.id]] = self.id
             $0[Self[.level]] = self.level
-            $0[Self[.github]] = self.github
             $0[Self[.symbol]] = self.symbol
+            $0[Self[.github]] = self.github
         }
         u[.setOnInsert]
         {

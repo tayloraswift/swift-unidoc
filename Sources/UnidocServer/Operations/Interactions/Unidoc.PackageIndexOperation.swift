@@ -31,7 +31,8 @@ extension Unidoc
 extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
+        with session:Mongo.Session,
+        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let github:GitHub.Client<GitHub.PersonalAccessToken>
         if  let integration:GitHub.Integration = server.github
@@ -51,11 +52,11 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
         switch self.subject
         {
         case .repo(owner: let owner, name: let repo):
-            if  let error:HTTP.ServerResponse = try await self.charge(cost: 8,
+            if  let error:Unidoc.PolicyErrorPage = try await self.charge(cost: 8,
                     from: server,
                     with: session)
             {
-                return error
+                return error.response(format: format)
             }
 
             let response:GitHub.RepoMonitorResponse = try await github.connect
@@ -70,12 +71,12 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 let display:Unidoc.PolicyErrorPage = .init(illustration: .error404_jpg,
                     message: "No such GitHub repository!",
                     status: 404)
-                return display.response(format: server.format)
+                return display.response(format: format)
             }
 
             if  let failure:Unidoc.PolicyErrorPage = try await self.validate(repo: repo)
             {
-                return failure.response(format: server.format)
+                return failure.response(format: format)
             }
 
             (package, _) = try await server.db.unidoc.index(
@@ -103,11 +104,11 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 return .notFound("Not a GitHub repository")
             }
 
-            if  let error:HTTP.ServerResponse = try await self.charge(cost: 8,
+            if  let error:Unidoc.PolicyErrorPage = try await self.charge(cost: 8,
                     from: server,
                     with: session)
             {
-                return error
+                return error.response(format: format)
             }
 
             let response:GitHub.RefResponse = try await github.connect

@@ -72,7 +72,7 @@ extension HTTP.ServerResponse
 extension HTTP.ServerResponse
 {
     @inlinable public static
-    func redirect(_ redirect:HTTP.Redirect, cookies:KeyValuePairs<String, String>) -> Self
+    func redirect(_ redirect:HTTP.Redirect, cookies:KeyValuePairs<Substring, Substring>) -> Self
     {
         .redirect(redirect, cookies: cookies.map(HTTP.Cookie.init(name:value:)))
     }

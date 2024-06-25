@@ -1,3 +1,4 @@
+import HTTP
 import NIOHPACK
 import NIOHTTP1
 import UnidocDB
@@ -16,36 +17,29 @@ extension Unidoc
 extension Unidoc.Authorization
 {
     private static
-    func web(header lines:[String]) -> Self
+    func web(cookie lines:[String]) -> Self
     {
-        var session:Unidoc.UserSession.Web? = nil
-        var login:String? = nil
+        var loginSession:Unidoc.UserSession.Web? = nil
+        var loginState:String? = nil
 
         for line:String in lines
         {
-            for cookie:Substring in line.split(separator: ";")
+            for cookie:HTTP.Cookie in HTTP.CookieList.init(line)
             {
-                guard
-                let cookie:Unidoc.Cookie = .init(cookie.drop(while: \.isWhitespace))
-                else
-                {
-                    continue
-                }
-
                 switch cookie.name
                 {
-                case Unidoc.Cookie.session: session = .init(cookie.value)
-                case Unidoc.Cookie.login:   login = .init(cookie.value)
-                case _:                     continue
+                case Unidoc.Cookie.loginSession:    loginSession = .init(cookie.value)
+                case Unidoc.Cookie.loginState:      loginState = .init(cookie.value)
+                case _:                             continue
                 }
             }
         }
 
-        return .web(session, login: login)
+        return .web(loginSession, login: loginState)
     }
 
     private static
-    func api(header:String) -> Self
+    func api(authorization header:String) -> Self
     {
         guard
         let space:String.Index = header.firstIndex(of: " ")
@@ -80,11 +74,11 @@ extension Unidoc.Authorization
     {
         if  let authorization:String = headers["authorization"].last
         {
-            .api(header: authorization)
+            .api(authorization: authorization)
         }
         else
         {
-            .web(header: headers["cookie"])
+            .web(cookie: headers["cookie"])
         }
     }
 
@@ -93,11 +87,11 @@ extension Unidoc.Authorization
     {
         if  let authorization:String = headers["authorization"].last
         {
-            .api(header: authorization)
+            .api(authorization: authorization)
         }
         else
         {
-            .web(header: headers["cookie"])
+            .web(cookie: headers["cookie"])
         }
     }
 }

@@ -4,5 +4,9 @@ nav.cornice
 {
     font-family: $typeface-sans;
     font-size: 12pt;
-    font-weight: 700;
+
+    > div:first-child
+    {
+        font-weight: 700;
+    }
 }

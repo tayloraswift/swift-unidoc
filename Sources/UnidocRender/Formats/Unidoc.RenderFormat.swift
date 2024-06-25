@@ -8,11 +8,13 @@ extension Unidoc
     struct RenderFormat
     {
         public
-        let assets:Assets
-        public
         var security:ServerSecurity
         public
+        var username:String?
+        public
         var locale:HTTP.Locale?
+        public
+        let assets:Assets
         public
         var server:ServerType
 
@@ -21,18 +23,34 @@ extension Unidoc
 
         @inlinable public
         init(
-            assets:Assets,
             security:ServerSecurity,
-            locale:HTTP.Locale? = nil,
-            server:ServerType = .swiftinit_org,
+            username:String?,
+            locale:HTTP.Locale?,
+            assets:Assets,
+            server:ServerType,
             time:UnixInstant = .now())
         {
-            self.assets = assets
-            self.locale = locale
             self.security = security
+            self.username = username
+            self.locale = locale
+            self.assets = assets
             self.server = server
             self.time = time
         }
     }
 }
-
+extension Unidoc.RenderFormat
+{
+    @inlinable public
+    var cornice:Unidoc.ApplicationCornice
+    {
+        if  case .swiftinit_org = self.server
+        {
+            .init(username: self.username, official: true)
+        }
+        else
+        {
+            .init(username: self.username, official: false)
+        }
+    }
+}

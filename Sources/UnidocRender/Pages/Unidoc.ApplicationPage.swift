@@ -5,27 +5,9 @@ import URI
 extension Unidoc
 {
     public
-    protocol ApplicationPage<Cornice>:RenderablePage
+    protocol ApplicationPage:RenderablePage
     {
-        associatedtype Cornice:HTML.OutputStreamable
-
-        func cornice(format:RenderFormat) -> Cornice
         func main(_:inout HTML.ContentEncoder, format:RenderFormat)
-    }
-}
-extension Unidoc.ApplicationPage<Unidoc.ApplicationCornice>
-{
-    public
-    func cornice(format:Unidoc.RenderFormat) -> Unidoc.ApplicationCornice
-    {
-        if  case .swiftinit_org = format.server
-        {
-            .init(official: true)
-        }
-        else
-        {
-            .init(official: false)
-        }
     }
 }
 extension Unidoc.ApplicationPage
@@ -43,7 +25,7 @@ extension Unidoc.ApplicationPage
         {
             $0[.div, { $0.class = "content" }]
             {
-                $0[.nav] { $0.class = "cornice" } = self.cornice(format: format)
+                $0[.nav] { $0.class = "cornice" } = format.cornice
                 $0[.div, { $0.class = "searchbar-container" }]
                 {
                     $0[.div]
