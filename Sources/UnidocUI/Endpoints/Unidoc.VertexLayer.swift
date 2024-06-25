@@ -16,9 +16,8 @@ extension Unidoc
         /// *Swift*, but now it’s just part of the plural.
         static
         var docs:ServerRoot { get }
-        /// The detail layer, which is hidden from search engines. The **c** used to stand for
-        /// *C* (and later C++), but today we also use it for underscored declarations and
-        /// low-value documentation in general. It has no relation to DocC.
+        /// The detail layer, which is hidden from search engines. The **c** stands for *C* (and
+        /// later C++). It has no relation to DocC.
         static
         var docc:ServerRoot { get }
         /// The archive layer, which is hidden from search engines. Historical documentation is not
@@ -30,13 +29,13 @@ extension Unidoc
 extension Unidoc.VertexLayer
 {
     private static
-    subscript(volume:Unidoc.VolumeSelector, detail detail:Bool) -> URI
+    subscript(volume:Unidoc.VolumeSelector, cdecl cdecl:Bool) -> URI
     {
         if  case _? = volume.version
         {
             Self.hist / "\(volume)"
         }
-        else if detail
+        else if cdecl
         {
             Self.docc / "\(volume)"
         }
@@ -49,7 +48,7 @@ extension Unidoc.VertexLayer
     static
     subscript(volume:Unidoc.VolumeMetadata, route:Unidoc.Route) -> URI
     {
-        var uri:URI = Self[volume.selector, detail: route.detail]
+        var uri:URI = Self[volume.selector, cdecl: route.cdecl]
 
         uri.path += route.stem
         uri["hash"] = route.hash?.description
@@ -60,6 +59,6 @@ extension Unidoc.VertexLayer
     static
     subscript(volume:Unidoc.VolumeMetadata) -> URI
     {
-        Self[volume.selector, detail: false]
+        Self[volume.selector, cdecl: false]
     }
 }

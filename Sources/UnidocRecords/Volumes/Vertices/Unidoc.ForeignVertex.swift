@@ -47,7 +47,7 @@ extension Unidoc.ForeignVertex:Unidoc.PrincipalVertex
     @inlinable public
     var route:Unidoc.Route
     {
-        .init(shoot: self.shoot, detail: self.flags.detail)
+        .init(shoot: self.shoot, cdecl: self.flags.cdecl)
     }
 
     @inlinable public
