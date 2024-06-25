@@ -9,13 +9,13 @@ extension Unidoc
         public
         let shoot:Shoot
         public
-        let detail:Bool
+        let cdecl:Bool
 
         @inlinable internal
-        init(shoot:Shoot, detail:Bool = false)
+        init(shoot:Shoot, cdecl:Bool = false)
         {
             self.shoot = shoot
-            self.detail = detail
+            self.cdecl = cdecl
         }
     }
 }
@@ -24,7 +24,7 @@ extension Unidoc.Route
     @inlinable public static
     func bare(_ stem:Unidoc.Stem) -> Self
     {
-        .init(shoot: .init(stem: stem, hash: nil), detail: false)
+        .init(shoot: .init(stem: stem, hash: nil), cdecl: false)
     }
 }
 extension Unidoc.Route

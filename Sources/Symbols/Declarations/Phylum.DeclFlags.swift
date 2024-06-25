@@ -42,6 +42,18 @@ extension Phylum.DeclFlags
         case .cpp:      true
         }
     }
+
+    /// Indicates whether the declaration is a C or C++ declaration.
+    @inlinable public
+    var cdecl:Bool
+    {
+        switch self.language
+        {
+        case .swift:    false
+        case .c:        true
+        case .cpp:      true
+        }
+    }
 }
 extension Phylum.DeclFlags:RawRepresentable
 {
