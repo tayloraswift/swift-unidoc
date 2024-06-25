@@ -7,10 +7,10 @@ typealias ServerResponse = HTTP.ServerResponse
 extension HTTP
 {
     @frozen public
-    enum ServerResponse:Equatable, Sendable
+    enum ServerResponse:Sendable
     {
         case resource(Resource, status:UInt)
-        case redirect(Redirect, cookies:[HTTP.Cookie] = [])
+        case redirect(Redirect, cookies:[(name:String, value:HTTP.CookieValue)] = [])
     }
 }
 extension HTTP.ServerResponse
@@ -67,14 +67,6 @@ extension HTTP.ServerResponse
     func error(_ resource:HTTP.Resource) -> Self
     {
         .resource(resource, status: 500)
-    }
-}
-extension HTTP.ServerResponse
-{
-    @inlinable public static
-    func redirect(_ redirect:HTTP.Redirect, cookies:KeyValuePairs<Substring, Substring>) -> Self
-    {
-        .redirect(redirect, cookies: cookies.map(HTTP.Cookie.init(name:value:)))
     }
 }
 extension HTTP.ServerResponse

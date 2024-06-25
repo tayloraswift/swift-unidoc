@@ -55,7 +55,7 @@ extension HTTP.ServerMessage
 extension HTTP.ServerMessage
 {
     private
-    init(redirect:HTTP.Redirect, cookies:[HTTP.Cookie])
+    init(redirect:HTTP.Redirect, cookies:[(name:String, value:HTTP.CookieValue)])
     {
         self.init(redirect.status)
 
@@ -70,10 +70,10 @@ extension HTTP.ServerMessage
             return
         }
 
-        for cookie:HTTP.Cookie in cookies
+        for (name, value):(String, HTTP.CookieValue) in cookies
         {
             self.headers.add(name: "set-cookie",
-                value: "\(cookie); Secure; HttpOnly; SameSite = Lax; Path = /")
+                value: name.isEmpty ? value.string : "\(name)=\(value.string)")
         }
     }
 
