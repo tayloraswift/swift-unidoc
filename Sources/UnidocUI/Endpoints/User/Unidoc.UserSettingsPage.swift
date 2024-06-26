@@ -225,6 +225,17 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
 
                 $0[.button] { $0.class = "area" ; $0.type = "submit" } = button
             }
+
+            if  let apiCredential:Unidoc.UserSession.API = self.user.apiCredential
+            {
+                $0[.pre, .code]
+                {
+                    $0.class = "snippet"
+                } = """
+                curl -H "Authorization: Unidoc \(apiCredential)" \\
+                    https://api.swiftinit.org/render/swift-book/tspl/aboutswift
+                """
+            }
         }
     }
 }
