@@ -41,6 +41,7 @@ extension SystemProcess
         _ arguments:String?...,
         stdout:FileDescriptor? = nil,
         stderr:FileDescriptor? = nil,
+        duping streams:[SystemProcess.Stream] = [],
         echo:Bool = false,
         with environment:consuming SystemProcess.Environment = .inherit) throws
     {
@@ -48,6 +49,7 @@ extension SystemProcess
             arguments: arguments.compactMap { $0 },
             stdout: stdout,
             stderr: stderr,
+            duping: streams,
             echo: echo,
             with: environment)
     }
@@ -57,6 +59,7 @@ extension SystemProcess
         arguments:[String],
         stdout:FileDescriptor? = nil,
         stderr:FileDescriptor? = nil,
+        duping streams:[Stream] = [],
         echo:Bool = false,
         with environment:consuming SystemProcess.Environment = .inherit) throws
     {
@@ -116,6 +119,11 @@ extension SystemProcess
         if  let stderr:FileDescriptor
         {
             posix_spawn_file_actions_adddup2(&actions, stderr.rawValue, 2)
+        }
+
+        for stream:SystemProcess.Stream in streams
+        {
+            posix_spawn_file_actions_adddup2(&actions, stream.parent.rawValue, stream.child)
         }
 
         var process:pid_t = 0

@@ -72,8 +72,7 @@ extension Unidoc.Build
         if  command == "compile"
         {
             setlinebuf(stdout)
-            SSGC.main(arguments: arguments)
-            return
+            SystemProcess.exit(with: SSGC.main(arguments: arguments))
         }
 
         do

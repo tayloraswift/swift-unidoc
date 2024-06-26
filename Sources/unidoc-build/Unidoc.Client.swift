@@ -101,15 +101,6 @@ extension Unidoc.Client
     private
     func stream(from pipe:FilePath, package:Unidoc.Package) async throws -> Unidoc.BuildReport
     {
-        //  The SSGC child process blocks until somebody opens the pipe for reading, which we do
-        //  here. Sometimes, we run into errors inside the following code block, which cause us
-        //  to exit prematurely, which closes the pipe. When this happens, the child process is
-        //  likely to experience a Broken Pipe error.
-        //
-        //  Because we wait on the child process exit before we wait on the result of this
-        //  function, we might observe the Broken Pipe error instead of the actual error that
-        //  caused the premature exit. Therefore, we avoid throwing out of this function when
-        //  possible, e.g. when failing to upload reports.
         try await SSGC.StatusStream.read(from: pipe)
         {
             //  Acknowledge the build request.
@@ -121,6 +112,7 @@ extension Unidoc.Client
             while let update:SSGC.StatusUpdate = try $0.next()
             {
                 var report:Unidoc.BuildReport = .init(package: package)
+
                 switch update
                 {
                 case .didCloneRepository:
@@ -152,12 +144,6 @@ extension Unidoc.Client
 
                 case .failedToLinkSymbolGraph:
                     report.failure = .failedToLinkSymbolGraph
-
-                case .failedForUnknownReason:
-                    report.failure = .failedForUnknownReason
-
-                case .success:
-                    return report
                 }
 
                 if  case nil = report.failure
@@ -171,7 +157,7 @@ extension Unidoc.Client
                 }
             }
 
-            throw SSGC.StatusUpdateError.init()
+            return .init(package: package)
         }
     }
 
@@ -221,72 +207,87 @@ extension Unidoc.Client
 
         let type:SSGC.ProjectType = labels.book ? .book : .package
 
-        var arguments:[String] = [
-            "compile",
+        /// Temporarily open the named pipe for the express purpose of duping it into the child
+        /// process.
+        ///
+        /// Even though it would never make sense to read from this file descriptor - either
+        /// from within this block, or from the child process, we open the pipe for both reading
+        /// and writing so that it is considered active for the lifetime of the child process.
+        /// This allows the child process to write to the pipe without synchronizing with the
+        /// parent process.
+        let childProcess:SystemProcess = try status.open(.readWrite, permissions: (.rw, .r, .r))
+        {
+            (pipe:FileDescriptor) in
 
-            "--package-name", "\(labels.package)",
-            "--project-type", "\(type)",
-            "--project-repo", labels.repo,
-            "--ref", labels.ref,
-            "--workspace", "\(workspace.location)",
-            "--status", "\(status)",
-            "--output", "\(docs)",
-            "--output-log", "\(diagnostics)"
-        ]
-        if  self.pretty
-        {
-            arguments.append("--pretty")
-        }
-        if  let path:String = self.swiftRuntime
-        {
-            arguments.append("--swift-runtime")
-            arguments.append("\(path)")
-        }
-        if  let path:String = self.swiftPath
-        {
-            arguments.append("--swift")
-            arguments.append("\(path)")
-        }
-        if  let sdk:SSGC.AppleSDK = self.swiftSDK
-        {
-            arguments.append("--sdk")
-            arguments.append("\(sdk)")
-        }
-        if  let cache:FilePath
-        {
-            arguments.append("--swiftpm-cache")
-            arguments.append("\(cache)")
-        }
-        if  remove
-        {
-            arguments.append("--remove-build")
-            arguments.append("--remove-clone")
+            try output.open(.writeOnly,
+                permissions: (.rw, .r, .r),
+                options: [.create, .truncate])
+            {
+                var arguments:[String] = [
+                    "compile",
+
+                    "--package-name", "\(labels.package)",
+                    "--project-type", "\(type)",
+                    "--project-repo", labels.repo,
+                    "--ref", labels.ref,
+                    "--workspace", "\(workspace.location)",
+                    "--status", "3",
+                    "--output", "\(docs)",
+                    "--output-log", "\(diagnostics)"
+                ]
+                if  self.pretty
+                {
+                    arguments.append("--pretty")
+                }
+                if  let path:String = self.swiftRuntime
+                {
+                    arguments.append("--swift-runtime")
+                    arguments.append("\(path)")
+                }
+                if  let path:String = self.swiftPath
+                {
+                    arguments.append("--swift")
+                    arguments.append("\(path)")
+                }
+                if  let sdk:SSGC.AppleSDK = self.swiftSDK
+                {
+                    arguments.append("--sdk")
+                    arguments.append("\(sdk)")
+                }
+                if  let cache:FilePath
+                {
+                    arguments.append("--swiftpm-cache")
+                    arguments.append("\(cache)")
+                }
+                if  remove
+                {
+                    arguments.append("--remove-build")
+                    arguments.append("--remove-clone")
+                }
+
+                return try .init(command: self.executablePath,
+                    arguments: arguments,
+                    stdout: $0,
+                    stderr: $0,
+                    duping: [3 <- pipe])
+            }
         }
 
-        let ssgc:SystemProcess = try output.open(.writeOnly,
-            permissions: (.rw, .r, .r),
-            options: [.create, .truncate])
-        {
-            try .init(command: self.executablePath,
-                arguments: arguments,
-                stdout: $0,
-                stderr: $0)
-        }
-
-        async
-        let updates:Unidoc.BuildReport = try self.stream(from: status,
+        var finalReport:Unidoc.BuildReport = try await self.stream(from: status,
             package: labels.coordinate.package)
 
-        try ssgc()
-
-        var report:Unidoc.BuildReport = try await updates
-
-        try report.attach(log: output, as: .ssgc)
-        try report.attach(log: diagnostics, as: .ssgcDiagnostics)
-
-        if  case _? = report.failure
+        //  Check the exit status of the child process.
+        if  case .failure = childProcess.status()
         {
-            try await self.connect { try await $0.upload(report) }
+            finalReport.failure = .failedForUnknownReason
+        }
+
+        try finalReport.attach(log: output, as: .ssgc)
+        try finalReport.attach(log: diagnostics, as: .ssgcDiagnostics)
+
+        if  case _? = finalReport.failure
+        {
+            try await self.connect { try await $0.upload(finalReport) }
             return false
         }
         else
@@ -295,7 +296,7 @@ extension Unidoc.Client
             //  FIXME: For security reasons, the server does not handle batched uploads well.
             //  This is usually only a problem if the uploads are very large or the network is
             //  very slow.
-            try await self.connect { try await $0.upload(report) }
+            try await self.connect { try await $0.upload(finalReport) }
             try await self.connect
             {
                 try await $0.upload(Unidoc.Snapshot.init(id: labels.coordinate,

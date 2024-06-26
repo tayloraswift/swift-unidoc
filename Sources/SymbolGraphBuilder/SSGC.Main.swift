@@ -11,7 +11,7 @@ extension SSGC
         var workspaceName:FilePath.Directory
         var workspacePath:FilePath.Directory?
 
-        var status:FilePath?
+        var status:Int32?
         var search:FilePath.Directory?
 
         var output:FilePath?
@@ -111,8 +111,12 @@ extension SSGC.Main
             return
         }
 
-        guard
-        let status:FilePath = self.status
+        let status:SSGC.StatusStream
+
+        if  let file:Int32 = self.status
+        {
+            status = .init(file: .init(rawValue: file))
+        }
         else
         {
             let workspace:SSGC.Workspace = .existing(at: workspacePath)
@@ -120,42 +124,33 @@ extension SSGC.Main
             return
         }
 
-        try SSGC.StatusStream.write(to: status)
+        let workspace:SSGC.Workspace = .existing(at: workspacePath)
+        do
         {
-            let workspace:SSGC.Workspace = .existing(at: workspacePath)
-            do
+            try self.launch(workspace: workspace, status: status)
+        }
+        catch let error as SSGC.ManifestDumpError
+        {
+            try status.send(error.leaf
+                ? .failedToReadManifest
+                : .failedToReadManifestForDependency)
+        }
+        catch let error as SSGC.PackageBuildError
+        {
+            switch error
             {
-                try self.launch(workspace: workspace, status: $0)
-                return .success
+            case .swift_package_update:         try status.send(.failedToResolveDependencies)
+            case .swift_build:                  try status.send(.failedToBuild)
+            case .swift_symbolgraph_extract:    try status.send(.failedToExtractSymbolGraph)
             }
-            catch let error as SSGC.ManifestDumpError
+        }
+        catch let error as SSGC.DocumentationBuildError
+        {
+            switch error
             {
-                return error.leaf ?
-                    .failedToReadManifest :
-                    .failedToReadManifestForDependency
-            }
-            catch let error as SSGC.PackageBuildError
-            {
-                switch error
-                {
-                case .swift_package_update:         return .failedToResolveDependencies
-                case .swift_build:                  return .failedToBuild
-                case .swift_symbolgraph_extract:    return .failedToExtractSymbolGraph
-                }
-            }
-            catch let error as SSGC.DocumentationBuildError
-            {
-                switch error
-                {
-                case .scanning: return .failedToLoadSymbolGraph
-                case .loading:  return .failedToLoadSymbolGraph
-                case .linking:  return .failedToLinkSymbolGraph
-                }
-            }
-            catch let error
-            {
-                print(error)
-                return .failedForUnknownReason
+            case .scanning: try status.send(.failedToLoadSymbolGraph)
+            case .loading:  try status.send(.failedToLoadSymbolGraph)
+            case .linking:  try status.send(.failedToLinkSymbolGraph)
             }
         }
     }

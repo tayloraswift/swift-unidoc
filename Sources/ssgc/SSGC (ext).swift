@@ -1,4 +1,5 @@
 import SymbolGraphBuilder
+import System
 
 #if canImport(Glibc)
 import Glibc
@@ -14,6 +15,6 @@ extension SSGC
     func main()
     {
         setlinebuf(stdout)
-        self.main(arguments: .init())
+        SystemProcess.exit(with: Self.main(arguments: .init()))
     }
 }

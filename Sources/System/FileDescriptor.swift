@@ -110,3 +110,13 @@ extension FileDescriptor
         }
     }
 }
+
+extension FileDescriptor
+{
+    @inlinable public
+    static func <- (binding:Int32, self:Self) -> SystemProcess.Stream
+    {
+        precondition(binding > 2, "Invalid file descriptor index: \(binding)")
+        return .init(parent: self, child: binding)
+    }
+}
