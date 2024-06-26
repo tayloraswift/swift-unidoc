@@ -6,8 +6,6 @@ extension SSGC
         case didCloneRepository = 0
         case didResolveDependencies
 
-        case success = 128
-
         case failedToCloneRepository
         case failedToReadManifest
         case failedToReadManifestForDependency
@@ -16,7 +14,5 @@ extension SSGC
         case failedToExtractSymbolGraph
         case failedToLoadSymbolGraph
         case failedToLinkSymbolGraph
-
-        case failedForUnknownReason
     }
 }

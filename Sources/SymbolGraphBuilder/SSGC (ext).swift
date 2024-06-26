@@ -1,23 +1,22 @@
 import ArgumentParsing
 import SymbolGraphs
-import System
 
 extension SSGC
 {
     @MainActor public static
-    func main(arguments:consuming CommandLine.Arguments)
+    func main(arguments:consuming CommandLine.Arguments) -> Int32
     {
         do
         {
             var main:Main = .init()
             try main.parse(arguments: arguments)
             try main.launch()
-            return
+            return 0
         }
         catch let error
         {
             print("Error: \(error)")
-            SystemProcess.exit(with: 1)
+            return 1
         }
     }
 }

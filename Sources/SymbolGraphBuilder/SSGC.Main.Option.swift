@@ -25,8 +25,7 @@ extension SSGC.Main
         case search_path
         /// The SDK to pass to the Swift compiler. This should be one of ``SSGC.AppleSDK``.
         case sdk
-        /// A path to a FIFO that SSGC will use to communicate its status. If set, SSGC will
-        /// block until something opens this FIFO for reading.
+        /// A file descriptor index to emit status updates to.
         case status
         /// A path to a specific toolchain to use. This should be the path to a binary named
         /// `swift`, usually in a directory named `bin`.
