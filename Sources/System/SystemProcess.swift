@@ -139,7 +139,7 @@ extension SystemProcess
     }
 
     public
-    func status() throws -> Result<Void, SystemProcessError>
+    func status() -> Result<Void, SystemProcessError>
     {
         var status:Int32 = 0
 
