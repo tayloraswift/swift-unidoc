@@ -72,6 +72,12 @@ extension Unidoc.User
 extension Unidoc.User
 {
     @inlinable public
+    var apiCredential:Unidoc.UserSession.API?
+    {
+        self.apiKey.map { .init(id: self.id, apiKey: $0) }
+    }
+
+    @inlinable public
     var rights:Unidoc.UserRights { .init(access: self.access, level: self.level) }
 
     @inlinable public
