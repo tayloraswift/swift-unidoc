@@ -334,7 +334,7 @@ extension Unidoc.Router
         if  let account:String = self.descend(),
             let account:Unidoc.Account = .init(account)
         {
-            return .actor(Unidoc.UserAdminOperation.init(account: account))
+            return .unordered(Unidoc.UserAdminOperation.init(account: account))
         }
         else
         {
@@ -358,7 +358,7 @@ extension Unidoc.Router
         guard let next:String = self.descend()
         else
         {
-            return .actor(Unidoc.LoadDashboardOperation.logger)
+            return .unordered(Unidoc.LoadDashboardOperation.logger)
         }
 
         switch next
@@ -374,10 +374,10 @@ extension Unidoc.Router
             }
 
         case Unidoc.ReplicaSetPage.name:
-            return .actor(Unidoc.LoadDashboardOperation.replicaSet)
+            return .unordered(Unidoc.LoadDashboardOperation.replicaSet)
 
         case "robots":
-            return .actor(Unidoc.TextEditorOperation.init(id: .robots_txt))
+            return .unordered(Unidoc.TextEditorOperation.init(id: .robots_txt))
 
         default:
             return nil
@@ -396,7 +396,7 @@ extension Unidoc.Router
         if  action == Unidoc._RecodePage.name,
             let target:Unidoc._RecodePage.Target = self.descend()
         {
-            return .actor(Unidoc.SiteConfigOperation.recode(target))
+            return .unordered(Unidoc.SiteConfigOperation.recode(target))
         }
         else
         {
@@ -427,7 +427,7 @@ extension Unidoc.Router
             if  let account:Unidoc.Account = self.authorization.account,
                 let build:Unidoc.PackageBuildOperation.DirectParameters = .init(from: form)
             {
-                return .actor(Unidoc.PackageBuildOperation.init(
+                return .unordered(Unidoc.PackageBuildOperation.init(
                     account: account,
                     build: build))
             }
@@ -437,7 +437,7 @@ extension Unidoc.Router
                 let package:Unidoc.Package = .init(package),
                 let alias:String = form["alias"]
             {
-                return .actor(Unidoc.PackageAliasOperation.init(
+                return .unordered(Unidoc.PackageAliasOperation.init(
                     package: package,
                     alias: .init(alias)))
             }
@@ -463,14 +463,14 @@ extension Unidoc.Router
                     update: update,
                     from: form["from"])
 
-                return .actor(endpoint)
+                return .unordered(endpoint)
             }
 
         case .packageIndex:
             if  let account:Unidoc.Account = self.authorization.account,
                 let subject:Unidoc.PackageIndexOperation.Subject = .init(from: form)
             {
-                return .actor(Unidoc.PackageIndexOperation.init(
+                return .unordered(Unidoc.PackageIndexOperation.init(
                     account: account,
                     subject: subject))
             }
@@ -481,7 +481,7 @@ extension Unidoc.Router
                 let package:Unidoc.Package = .init(package),
                 let rule:Unidoc.UpdatePackageRule = .init(from: form)
             {
-                return .actor(Unidoc.UpdatePackageRuleOperation.init(
+                return .unordered(Unidoc.UpdatePackageRuleOperation.init(
                     account: account,
                     package: package,
                     rule: rule))
@@ -491,11 +491,11 @@ extension Unidoc.Router
             if  let days:String = form["days"],
                 let days:Int = .init(days)
             {
-                return .actor(Unidoc.SiteConfigOperation.telescope(days: days))
+                return .unordered(Unidoc.SiteConfigOperation.telescope(days: days))
             }
 
         case .uplinkAll:
-            return .actor(Unidoc.LinkerOperation.init(queue: .all))
+            return .unordered(Unidoc.LinkerOperation.init(queue: .all))
 
         case .uplink:
             if  let package:String = form["package"],
@@ -503,7 +503,7 @@ extension Unidoc.Router
                 let version:String = form["version"],
                 let version:Unidoc.Version = .init(version)
             {
-                return .actor(Unidoc.LinkerOperation.init(
+                return .unordered(Unidoc.LinkerOperation.init(
                     queue: .one(.init(package: package, version: version),
                         action: .uplinkRefresh),
                     from: form["from"]))
@@ -515,7 +515,7 @@ extension Unidoc.Router
                 let version:String = form["version"],
                 let version:Unidoc.Version = .init(version)
             {
-                return .actor(Unidoc.LinkerOperation.init(
+                return .unordered(Unidoc.LinkerOperation.init(
                     queue: .one(.init(package: package, version: version),
                         action: .unlink),
                     from: form["from"]))
@@ -527,7 +527,7 @@ extension Unidoc.Router
                 let version:String = form["version"],
                 let version:Unidoc.Version = .init(version)
             {
-                return .actor(Unidoc.LinkerOperation.init(
+                return .unordered(Unidoc.LinkerOperation.init(
                     queue: .one(.init(package: package, version: version),
                         action: .delete),
                     from: form["from"]))
@@ -537,13 +537,13 @@ extension Unidoc.Router
             if  let account:Unidoc.Account = self.authorization.account,
                 let update:Unidoc.UserConfigOperation.Update = .init(from: form)
             {
-                return .actor(Unidoc.UserConfigOperation.init(
+                return .unordered(Unidoc.UserConfigOperation.init(
                     account: account,
                     update: update))
             }
 
         case .userSyncPermissions:
-            return .actor(Unidoc.LoginOperation.init(flow: .sync))
+            return .unordered(Unidoc.LoginOperation.init(flow: .sync))
 
         default:
             break
@@ -571,7 +571,7 @@ extension Unidoc.Router
                 return .syncError("Cannot parse form data: missing field 'text'\n")
             }
 
-            return .actor(Unidoc.TextUpdateOperation.init(text: .init(id: .robots_txt,
+            return .unordered(Unidoc.TextUpdateOperation.init(text: .init(id: .robots_txt,
                 text: .utf8(item.value))))
 
         default:
@@ -609,7 +609,7 @@ extension Unidoc.Router
                 let from:String = parameters.from,
                 let flow:Unidoc.LoginFlow = parameters.flow
             {
-                return .actor(Unidoc.AuthOperation.init(state: state,
+                return .unordered(Unidoc.AuthOperation.init(state: state,
                     code: code,
                     flow: flow,
                     from: from))
@@ -618,7 +618,7 @@ extension Unidoc.Router
         case "register"?:
             if  let token:String = parameters.token
             {
-                return .actor(Unidoc.UserIndexOperation.init(token: token, flow: .sso))
+                return .unordered(Unidoc.UserIndexOperation.init(token: token, flow: .sso))
             }
 
         case _:
@@ -689,7 +689,7 @@ extension Unidoc.Router
         case "github"?:
             do
             {
-                return .actor(try Unidoc.PackageWebhookOperation.init(json: json,
+                return .unordered(try Unidoc.PackageWebhookOperation.init(json: json,
                     from: self.origin,
                     with: self.headers))
             }
@@ -708,7 +708,7 @@ extension Unidoc.Router
     private
     func login() -> Unidoc.AnyOperation
     {
-        .actor(Unidoc.LoginOperation.init(flow: .sso))
+        .unordered(Unidoc.LoginOperation.init(flow: .sso))
     }
     private
     func login(form:URI.Query) -> Unidoc.AnyOperation
@@ -716,7 +716,7 @@ extension Unidoc.Router
         if  let path:String = form.parameters.first?.value,
             let path:URI = .init(path)
         {
-            return .actor(Unidoc.LoginOperation.init(flow: .sso, from: path))
+            return .unordered(Unidoc.LoginOperation.init(flow: .sso, from: path))
         }
         else
         {
@@ -767,7 +767,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .actor(Unidoc.LoadDashboardOperation.plugin(next))
+        return .unordered(Unidoc.LoadDashboardOperation.plugin(next))
     }
 
     private mutating
@@ -833,12 +833,12 @@ extension Unidoc.Router
                 return nil
             }
 
-            return .actor(Unidoc.PackageBuildOperation.init(account: account,
+            return .unordered(Unidoc.PackageBuildOperation.init(account: account,
                 action: .submitSymbolic(.init(package: symbol, ref: name)),
                 redirect: symbol))
 
         case "state":
-            return .actor(Unidoc.LoadEditionStateOperation.init(
+            return .unordered(Unidoc.LoadEditionStateOperation.init(
                 authorization: self.authorization,
                 package: symbol,
                 version: .name(name)))
@@ -858,7 +858,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .actor(Unidoc.ExportOperation.init(authorization: self.authorization,
+        return .unordered(Unidoc.ExportOperation.init(authorization: self.authorization,
             request: .init(volume: volume, vertex: .init(path: self.stem)),
             _query: self.query))
     }
@@ -970,7 +970,7 @@ extension Unidoc.Router
     private
     func sitemap() -> Unidoc.AnyOperation
     {
-        .actor(Unidoc.LoadSitemapIndexOperation.init(tag: self.etag))
+        .unordered(Unidoc.LoadSitemapIndexOperation.init(tag: self.etag))
     }
 
     /// Deprecated route.
@@ -1000,7 +1000,7 @@ extension Unidoc.Router
                 return nil
             }
 
-            return .actor(Unidoc.BuilderLabelOperation.init(prompt: build))
+            return .unordered(Unidoc.BuilderLabelOperation.init(prompt: build))
 
         case "poll"?:
             guard let account:Unidoc.Account = self.authorization.account
@@ -1009,7 +1009,7 @@ extension Unidoc.Router
                 return nil
             }
 
-            return .actor(Unidoc.BuilderPollOperation.init(id: account))
+            return .unordered(Unidoc.BuilderPollOperation.init(id: account))
 
         default:
             return nil
