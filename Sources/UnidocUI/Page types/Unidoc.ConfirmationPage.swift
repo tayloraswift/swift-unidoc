@@ -6,7 +6,7 @@ import URI
 extension Unidoc
 {
     public
-    protocol ConfirmationPage:ApplicationPage, DynamicPage
+    protocol ConfirmationPage:StatusBearingPage, ApplicationPage, DynamicPage
     {
         /// The form encoding to use.
         static
@@ -22,6 +22,11 @@ extension Unidoc
         /// Adds additional content to the form.
         func form(_ form:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     }
+}
+extension Unidoc.ConfirmationPage
+{
+    @inlinable public
+    var status:UInt { 200 }
 }
 extension Unidoc.ConfirmationPage
 {
