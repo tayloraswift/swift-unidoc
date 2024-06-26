@@ -181,7 +181,7 @@ extension Unidoc.Server
     {
         switch request.assignee
         {
-        case .actor(let operation):
+        case .unordered(let operation):
             return try await self.respond(to: request.incoming, running: operation)
 
         case .update(let procedural):
