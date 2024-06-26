@@ -20,6 +20,10 @@ extension Unidoc._RecodePage
     static
     var uri:URI { Unidoc.ServerRoot.admin / Self.name }
 }
+extension Unidoc._RecodePage:Unidoc.StatusBearingPage
+{
+    var status:UInt { 200 }
+}
 extension Unidoc._RecodePage:Unidoc.RenderablePage
 {
     var title:String { "Schema · Administrator Tools" }

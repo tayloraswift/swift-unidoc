@@ -193,17 +193,11 @@ extension Unidoc.Server
 
             return await self.submit(update: procedural)
 
-        case .syncError(let message):
-            return .resource(.init(content: .init(
-                    body: .string(message),
-                    type: .text(.plain, charset: .utf8))),
-                status: 400)
+        case .sync(let response):
+            return response
 
-        case .syncResource(let renderable):
-            return .ok(renderable.resource(format: self.format))
-
-        case .syncRedirect(let target):
-            return .redirect(target)
+        case .syncHTML(let renderable):
+            return renderable.response(format: self.format)
 
         case .syncLoad(let request):
             guard case .development(let cache, _) = self.options.mode

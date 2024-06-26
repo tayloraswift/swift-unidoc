@@ -205,7 +205,7 @@ extension Unidoc.Router
 
         if  let redirect:String = self.redirect(root: root)
         {
-            return .syncRedirect(.permanent(external: redirect))
+            return .sync(redirect: .permanent(external: redirect))
         }
 
         switch root
@@ -257,7 +257,7 @@ extension Unidoc.Router
 
         if  let redirect:String = self.redirect(root: root)
         {
-            return .syncRedirect(.permanent(external: redirect))
+            return .sync(redirect: .permanent(external: redirect))
         }
 
         switch self.contentType
@@ -270,7 +270,7 @@ extension Unidoc.Router
             let form:URI.Query = try? .parse(parameters: body)
             else
             {
-                return .syncError("Cannot parse URL-encoded form data\n")
+                return .sync(error: "Cannot parse URL-encoded form data\n")
             }
 
             return self.post(root: root, form: form)
@@ -280,16 +280,16 @@ extension Unidoc.Router
             let form:MultipartForm = try? .init(splitting: body, on: boundary)
             else
             {
-                return .syncError("Cannot parse multipart form data\n")
+                return .sync(error: "Cannot parse multipart form data\n")
             }
 
             return self.post(root: root, form: form)
 
         case let other?:
-            return .syncError("Cannot POST content type '\(other)'\n")
+            return .sync(error: "Cannot POST content type '\(other)'\n")
 
         default:
-            return .syncError("Cannot POST without a content type\n")
+            return .sync(error: "Cannot POST without a content type\n")
         }
     }
 
@@ -341,7 +341,7 @@ extension Unidoc.Router
             guard case .web(let session?, _) = self.authorization
             else
             {
-                return .syncRedirect(.temporary("\(Unidoc.ServerRoot.login)"))
+                return .sync(redirect: .temporary("\(Unidoc.ServerRoot.login)"))
             }
 
             return .explainable(Unidoc.UserSettingsEndpoint.init(query: .current(session)),
@@ -366,11 +366,11 @@ extension Unidoc.Router
         case Unidoc._RecodePage.name:
             if  let target:Unidoc._RecodePage.Target = self.descend()
             {
-                return .syncResource(target)
+                return .syncHTML(target)
             }
             else
             {
-                return .syncResource(Unidoc._RecodePage.init())
+                return .syncHTML(Unidoc._RecodePage.init())
             }
 
         case Unidoc.ReplicaSetPage.name:
@@ -568,7 +568,7 @@ extension Unidoc.Router
             let item:MultipartForm.Item = form.first(where: { $0.header.name == "text" })
             else
             {
-                return .syncError("Cannot parse form data: missing field 'text'\n")
+                return .sync(error: "Cannot parse form data: missing field 'text'\n")
             }
 
             return .unordered(Unidoc.TextUpdateOperation.init(text: .init(id: .robots_txt,
@@ -695,7 +695,7 @@ extension Unidoc.Router
             }
             catch let error
             {
-                return .syncError("Rejected webhook event: \(error)")
+                return .sync(error: "Rejected webhook event: \(error)")
             }
 
         default:
@@ -720,7 +720,7 @@ extension Unidoc.Router
         }
         else
         {
-            return .syncError("Cannot parse login form data: missing return path\n")
+            return .sync(error: "Cannot parse login form data: missing return path\n")
         }
     }
 }
@@ -893,7 +893,7 @@ extension Unidoc.Router
                 return nil
             }
 
-            return .syncResource(Unidoc.BuildRequestPage.init(selector: build.selector,
+            return .syncHTML(Unidoc.BuildRequestPage.init(selector: build.selector,
                 cancel: build.request == nil,
                 action: action))
 
@@ -934,7 +934,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .syncResource(really)
+        return .syncHTML(really)
     }
 }
 extension Unidoc.Router
@@ -983,7 +983,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .syncRedirect(.permanent("""
+        return .sync(redirect: .permanent("""
             \(Unidoc.ServerRoot.docs)/\(next.prefix { $0 != "." })/all-symbols
             """))
     }
@@ -1006,7 +1006,7 @@ extension Unidoc.Router
             guard let account:Unidoc.Account = self.authorization.account
             else
             {
-                return nil
+                return .sync(error: "Missing authorization header\n", status: 401)
             }
 
             return .unordered(Unidoc.BuilderPollOperation.init(id: account))

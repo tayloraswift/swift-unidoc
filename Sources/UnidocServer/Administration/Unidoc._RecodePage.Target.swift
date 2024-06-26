@@ -40,6 +40,10 @@ extension Unidoc._RecodePage.Target
         }
     }
 }
+extension Unidoc._RecodePage.Target:Unidoc.StatusBearingPage
+{
+    var status:UInt { 200 }
+}
 extension Unidoc._RecodePage.Target:Unidoc.RenderablePage
 {
     var title:String { "Recode \(self.label)?" }
