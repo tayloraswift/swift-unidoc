@@ -10,9 +10,9 @@ extension Unidoc
 }
 extension Unidoc.Post
 {
-    @inlinable public static
-    subscript(post:Unidoc.PostAction, really really:Bool = true) -> URI
+    @inlinable public
+    static subscript(post:Unidoc.PostAction, confirm confirm:Bool = false) -> URI
     {
-        (really ? Unidoc.ServerRoot.api : Unidoc.ServerRoot.really) / "\(post)"
+        (confirm ? Unidoc.ServerRoot.really : Unidoc.ServerRoot.form) / "\(post)"
     }
 }

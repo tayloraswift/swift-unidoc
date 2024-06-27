@@ -105,7 +105,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                     $0[.form]
                     {
                         $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Unidoc.Post[.build, really: false])"
+                        $0.action = "\(Unidoc.Post[.build, confirm: true])"
                         $0.method = "post"
                     } = Unidoc.BuildButton.edition(id: self.id,
                         package: self.symbol.package,
@@ -120,10 +120,10 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                     return
                 }
 
-                for (label, action, proceed):(String, Unidoc.PostAction, Bool) in [
-                    ("Uplink", .uplink, true),
-                    ("Unlink", .unlink, false),
-                    ("Delete", .delete, false)
+                for (label, action, confirm):(String, Unidoc.PostAction, Bool) in [
+                    ("Uplink", .uplink, false),
+                    ("Unlink", .unlink, true),
+                    ("Delete", .delete, true)
                 ]
                 {
                     $0[.li]
@@ -131,7 +131,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                         $0[.form]
                         {
                             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                            $0.action = "\(Unidoc.Post[action, really: proceed])"
+                            $0.action = "\(Unidoc.Post[action, confirm: confirm])"
                             $0.method = "post"
                         } = Tool.init(edition: graph.id,
                             package: self.symbol.package,

@@ -96,7 +96,7 @@ extension Unidoc.VersionsPage:Unidoc.ApplicationPage
                 $0[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Unidoc.Post[.packageConfig, really: true])"
+                    $0.action = "\(Unidoc.Post[.packageConfig])"
                     $0.method = "post"
 
                     $0.class = "config"
@@ -274,11 +274,11 @@ extension Unidoc.VersionsPage
                 if  case .administratrix? = self.view.global
                 {
                     //  If package is hidden, we can unhide it without confirmation.
-                    let really:Bool = self.package.hidden
+                    let confirm:Bool = !self.package.hidden
                     $0[.form]
                     {
                         $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Unidoc.Post[.packageConfig, really: really])"
+                        $0.action = "\(Unidoc.Post[.packageConfig, confirm: confirm])"
                         $0.method = "post"
                     } = ConfigButton.init(package: self.package.id,
                         update: "hidden",
@@ -360,7 +360,7 @@ extension Unidoc.VersionsPage
             section[.form]
             {
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
+                $0.action = "\(Unidoc.Post[.packageConfig, confirm: true])"
                 $0.method = "post"
             } = ConfigButton.init(package: self.package.id,
                 update: "refresh",
@@ -544,7 +544,7 @@ extension Unidoc.VersionsPage
                         $0[.form]
                         {
                             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                            $0.action = "\(Unidoc.Post[.packageConfig, really: false])"
+                            $0.action = "\(Unidoc.Post[.packageConfig, confirm: true])"
                             $0.method = "post"
                         } = ConfigButton.init(package: self.package.id,
                             update: "symbol",

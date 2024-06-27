@@ -212,13 +212,14 @@ extension Unidoc.Router
         {
         case .account:      return self.account()
         case .admin:        return self.admin()
-        case .api:          return nil // POST only
         case .asset:        return self.asset()
         case .auth:         return self.auth()
         case .blog:         return self.blog(module: "Articles")
+        case .builder:      return self.builder()
         case .consumers:    return self.consumers()
         case .docc:         return self.docs()
         case .docs:         return self.docs()
+        case .form:         return nil // POST only
         case .guides:       return self.docsLegacy()
         case .help:         return self.blog(module: "Help")
         case .hist:         return self.docs()
@@ -237,7 +238,6 @@ extension Unidoc.Router
         case .rules:        return self.rules()
         case .sitemap_xml:  return self.sitemap()
         case .sitemaps:     return self.sitemaps()
-        case .ssgc:         return self.ssgc()
         case .stats:        return self.stats()
         case .tags:         return self.tags()
         case .telescope:    return self.telescope()
@@ -308,7 +308,7 @@ extension Unidoc.Router
         switch root
         {
         case .admin:    return nil
-        case .api:      return self.api(form: form)
+        case .form:     return self.form(form: form)
         case .login:    return self.login(form: form)
         case .really:   return self.really(form: form)
         case .ref:      return self.ref(form: form)
@@ -321,7 +321,7 @@ extension Unidoc.Router
         switch root
         {
         case .admin:    return self.admin(form: form)
-        case .api:      return self.api(form: form)
+        case .form:     return self.form(form: form)
         default:        return nil
         }
     }
@@ -407,7 +407,35 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func api(form:URI.Query) -> Unidoc.AnyOperation?
+    func builder() -> Unidoc.AnyOperation?
+    {
+        switch self.descend()
+        {
+        case nil:
+            guard let build:Unidoc.BuildLabelsPrompt = .init(query: self.query)
+            else
+            {
+                return nil
+            }
+
+            return .unordered(Unidoc.BuilderLabelOperation.init(prompt: build))
+
+        case "poll"?:
+            guard let account:Unidoc.Account = self.authorization.account
+            else
+            {
+                return .sync(error: "Missing authorization header\n", status: 401)
+            }
+
+            return .unordered(Unidoc.BuilderPollOperation.init(id: account))
+
+        default:
+            return nil
+        }
+    }
+
+    private mutating
+    func form(form:URI.Query) -> Unidoc.AnyOperation?
     {
         guard
         let action:Unidoc.PostAction = self.descend()
@@ -552,7 +580,7 @@ extension Unidoc.Router
         return nil
     }
     private mutating
-    func api(form:MultipartForm) -> Unidoc.AnyOperation?
+    func form(form:MultipartForm) -> Unidoc.AnyOperation?
     {
         guard
         let action:Unidoc.PostAction = self.descend()
@@ -869,13 +897,13 @@ extension Unidoc.Router
     func really(form:URI.Query) -> Unidoc.AnyOperation?
     {
         guard
-        let confirm:Unidoc.PostAction = self.descend()
+        let action:Unidoc.PostAction = self.descend()
         else
         {
             return nil
         }
 
-        let action:URI = .init(path: Unidoc.Post[confirm].path, query: form)
+        let uri:URI = .init(path: Unidoc.Post[action].path, query: form)
         var table:[String: String]
         {
             form.parameters.reduce(into: [:]) { $0[$1.key] = $1.value }
@@ -883,7 +911,7 @@ extension Unidoc.Router
 
         let really:Unidoc.ReallyPage?
 
-        switch confirm
+        switch action
         {
         case .build:
             guard
@@ -895,13 +923,13 @@ extension Unidoc.Router
 
             return .syncHTML(Unidoc.BuildRequestPage.init(selector: build.selector,
                 cancel: build.request == nil,
-                action: action))
+                action: uri))
 
         case .unlink:
-            really = .unlink(action)
+            really = .unlink(uri)
 
         case .delete:
-            really = .delete(action)
+            really = .delete(uri)
 
         case .packageConfig:
             guard
@@ -911,7 +939,7 @@ extension Unidoc.Router
                 return nil
             }
 
-            really = .packageConfig(action, update: update)
+            really = .packageConfig(uri, update: update)
 
         case .userConfig:
             guard
@@ -921,7 +949,7 @@ extension Unidoc.Router
                 return nil
             }
 
-            really =  .userConfig(action, update: update)
+            really =  .userConfig(uri, update: update)
 
         default:
             return nil
@@ -986,34 +1014,6 @@ extension Unidoc.Router
         return .sync(redirect: .permanent("""
             \(Unidoc.ServerRoot.docs)/\(next.prefix { $0 != "." })/all-symbols
             """))
-    }
-
-    private mutating
-    func ssgc() -> Unidoc.AnyOperation?
-    {
-        switch self.descend()
-        {
-        case nil:
-            guard let build:Unidoc.BuildLabelsPrompt = .init(query: self.query)
-            else
-            {
-                return nil
-            }
-
-            return .unordered(Unidoc.BuilderLabelOperation.init(prompt: build))
-
-        case "poll"?:
-            guard let account:Unidoc.Account = self.authorization.account
-            else
-            {
-                return .sync(error: "Missing authorization header\n", status: 401)
-            }
-
-            return .unordered(Unidoc.BuilderPollOperation.init(id: account))
-
-        default:
-            return nil
-        }
     }
 
     private mutating

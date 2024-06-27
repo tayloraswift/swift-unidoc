@@ -7,13 +7,14 @@ extension Unidoc
     {
         case account
         case admin
-        case api
         case asset
         case auth
         case blog = "articles"
+        case builder
         case consumers
         case docs
         case docc
+        case form
         case help
         case hist
         case hook
@@ -29,7 +30,6 @@ extension Unidoc
         case robots_txt = "robots.txt"
         case rules
         case sitemap_xml = "sitemap.xml"
-        case ssgc
         case stats
         case tags
         case telescope

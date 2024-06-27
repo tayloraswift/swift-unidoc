@@ -83,7 +83,7 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                 section[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Unidoc.Post[.build, really: false])"
+                    $0.action = "\(Unidoc.Post[.build, confirm: true])"
                     $0.method = "post"
                 } = Unidoc.BuildButton.latest(of: self.package, cancel: true)
             }
@@ -120,7 +120,7 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                 section[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Unidoc.Post[.build, really: false])"
+                    $0.action = "\(Unidoc.Post[.build, confirm: true])"
                     $0.method = "post"
                 } = Unidoc.BuildButton.latest(of: self.package)
             }
