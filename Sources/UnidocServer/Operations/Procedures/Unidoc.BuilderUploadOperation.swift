@@ -28,56 +28,47 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
         session:Mongo.Session) async throws -> HTTP.ServerResponse
     {
         let bson:BSON.Document = .init(bytes: payload[...])
-        let uploaded:Unidoc.UploadStatus
 
         switch self.route
         {
         case .report:
             let report:Unidoc.BuildReport = try .init(bson: bson)
-
-            if  let stage:Unidoc.BuildStage = report.entered
-            {
-                try await server.db.packageBuilds.updateBuild(
-                    package: report.package,
-                    entered: stage,
-                    with: session)
-            }
-            else
-            {
-                let logs:[Unidoc.BuildLogType] = try await self.export(report: report,
-                    from: server)
-
-                try await server.db.packageBuilds.finishBuild(
-                    package: report.package,
-                    failure: report.failure,
-                    logs: logs,
-                    with: session)
-            }
-
-            return .noContent
+            try await server.db.packageBuilds.updateBuild(
+                package: report.package,
+                entered: report.entered,
+                with: session)
 
         case .labeled:
-            var snapshot:Unidoc.Snapshot = try .init(bson: bson)
+            var artifact:Unidoc.BuildArtifact = try .init(bson: bson)
+            let logs:[Unidoc.BuildLogType] = try await artifact.export(from: server)
 
-            /// A successful (labeled) build also sets the platform preference, since we now
-            /// know that the package can be built on that platform.
-            let _:Unidoc.PackageMetadata? = try await server.db.packages.reset(
-                platformPreference: snapshot.metadata.triple,
-                of: snapshot.id.package,
-                with: session)
-
-            if  let bucket:AWS.S3.Bucket = server.bucket.graphs
+            switch artifact.outcome
             {
-                let s3:AWS.S3.Client = .init(threads: server.context.threads,
-                    niossl: server.context.niossl,
-                    bucket: bucket)
+            case .failure(let reason):
+                try await server.db.packageBuilds.finishBuild(
+                    package: artifact.package,
+                    failure: reason,
+                    logs: logs,
+                    with: session)
 
-                try await snapshot.moveSymbolGraph(to: s3)
+            case .success(let snapshot):
+                /// A successful (labeled) build also sets the platform preference, since we now
+                /// know that the package can be built on that platform.
+                let _:Unidoc.PackageMetadata? = try await server.db.packages.reset(
+                    platformPreference: snapshot.metadata.triple,
+                    of: snapshot.id.package,
+                    with: session)
+
+                try await server.db.packageBuilds.finishBuild(
+                    package: artifact.package,
+                    failure: nil,
+                    logs: logs,
+                    with: session)
+
+                let _:Unidoc.UploadStatus = try await server.db.snapshots.upsert(
+                    snapshot: snapshot,
+                    with: session)
             }
-
-            uploaded = try await server.db.snapshots.upsert(
-                snapshot: snapshot,
-                with: session)
 
         case .labeling:
             let documentation:SymbolGraphObject<Void> = try .init(bson: bson)
@@ -98,66 +89,14 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
                 try await snapshot.moveSymbolGraph(to: s3)
             }
 
-            uploaded = try await server.db.unidoc.snapshots.upsert(
+            try await server.db.packageBuilds.finishBuild(package: snapshot.id.package,
+                with: session)
+
+            let _:Unidoc.UploadStatus = try await server.db.unidoc.snapshots.upsert(
                 snapshot: snapshot,
                 with: session)
         }
 
-        /// The symbol graph upload and the final build report are not necessarily sequentially
-        /// consistent, so we need to avoid accidentally clearing the logs if the build report
-        /// is written before the symbol graph upload.
-        try await server.db.packageBuilds.finishBuild(package: uploaded.package, with: session)
-        let json:JSON = .encode(uploaded)
-
-        return .ok(.init(content: .init(
-            body: .binary(json.utf8),
-            type: .application(.json, charset: .utf8))))
-    }
-}
-extension Unidoc.BuilderUploadOperation
-{
-    private
-    func export(report:Unidoc.BuildReport,
-        from server:Unidoc.Server) async throws -> [Unidoc.BuildLogType]
-    {
-        var logs:[Unidoc.BuildLogType] = []
-
-        let logsToExport:Int = report.logs.count
-        if  logsToExport > 0
-        {
-            guard
-            let bucket:AWS.S3.Bucket = server.bucket.assets
-            else
-            {
-                Log[.warning] = "No destination bucket configured for exporting build logs!"
-                return []
-            }
-
-            logs.reserveCapacity(logsToExport)
-
-            let s3:AWS.S3.Client = .init(threads: server.context.threads,
-                niossl: server.context.niossl,
-                bucket: bucket)
-
-            try await s3.connect
-            {
-                for log:Unidoc.BuildLog in report.logs
-                {
-                    let path:Unidoc.BuildLogPath = .init(package: report.package,
-                        type: log.type)
-
-                    try await $0.put(object: .init(
-                            body: .binary(log.text.bytes),
-                            type: .text(.plain, charset: .utf8),
-                            encoding: .gzip),
-                        using: .standard,
-                        path: "\(path)")
-
-                    logs.append(log.type)
-                }
-            }
-        }
-
-        return logs
+        return .noContent
     }
 }

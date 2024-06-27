@@ -1,7 +1,7 @@
 import System
 import UnidocRecords_LZ77
 
-extension Unidoc.BuildReport
+extension Unidoc.BuildArtifact
 {
     mutating
     func attach(log:FilePath, as type:Unidoc.BuildLogType) throws

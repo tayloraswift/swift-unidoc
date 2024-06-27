@@ -88,24 +88,46 @@ extension Unidoc.Client.Connection
 
         print("Uploading unlabeled symbol graph...")
 
-        let _:Unidoc.UploadStatus = try await self.put(bson: bson,
-            to: "/ssgc/\(Unidoc.BuildRoute.labeling)",
-            timeout: .seconds(60))
-
-        print("Successfully uploaded symbol graph!")
+        do
+        {
+            let _:Never = try await self.put(bson: bson,
+                to: "/ssgc/\(Unidoc.BuildRoute.labeling)",
+                timeout: .seconds(60))
+        }
+        catch is HTTP.NonError
+        {
+            print("Successfully uploaded unlabeled symbol graph!")
+        }
+        catch let error
+        {
+            print("Error: failed to upload unlabeled symbol graph!")
+            print("Error: \(error)")
+            throw error
+        }
     }
 
-    func upload(_ labeled:Unidoc.Snapshot) async throws
+    func upload(_ artifact:Unidoc.BuildArtifact) async throws
     {
-        let bson:BSON.Document = .init(encoding: labeled)
+        let bson:BSON.Document = .init(encoding: artifact)
 
-        print("Uploading labeled symbol graph...")
+        print("Uploading documentation artifact...")
 
-        let _:Unidoc.UploadStatus = try await self.put(bson: bson,
-            to: "/ssgc/\(Unidoc.BuildRoute.labeled)",
-            timeout: .seconds(60))
-
-        print("Successfully uploaded symbol graph!")
+        do
+        {
+            let _:Never = try await self.put(bson: bson,
+                to: "/ssgc/\(Unidoc.BuildRoute.labeled)",
+                timeout: .seconds(60))
+        }
+        catch is HTTP.NonError
+        {
+            print("Successfully uploaded documentation artifact!")
+        }
+        catch let error
+        {
+            print("Error: failed to upload documentation artifact!")
+            print("Error: \(error)")
+            throw error
+        }
     }
 
     func upload(_ report:Unidoc.BuildReport) async throws
@@ -118,23 +140,11 @@ extension Unidoc.Client.Connection
         }
         catch is HTTP.NonError
         {
-            if  let stage:Unidoc.BuildStage = report.entered
-            {
-                print("Reported build entered stage: \(stage)")
-            }
-            else if
-                let failure:Unidoc.BuildFailure = report.failure
-            {
-                print("Reported build failure: \(failure)")
-            }
-            else
-            {
-                print("Uploaded build logs!")
-            }
+            print("Reported build entered stage: \(report.entered)")
         }
         catch let error
         {
-            print("Warning: failed to upload build report!")
+            print("Error: failed to upload build report!")
             print("Error: \(error)")
             throw error
         }

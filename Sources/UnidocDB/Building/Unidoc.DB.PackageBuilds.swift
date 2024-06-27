@@ -256,7 +256,7 @@ extension Unidoc.DB.PackageBuilds
     func finishBuild(
         package:Unidoc.Package,
         failure:Unidoc.BuildFailure? = nil,
-        logs:[Unidoc.BuildLogType]? = nil,
+        logs:[Unidoc.BuildLogType] = [],
         with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
     {
         let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
