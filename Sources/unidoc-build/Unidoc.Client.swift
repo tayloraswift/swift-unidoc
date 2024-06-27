@@ -276,7 +276,8 @@ extension Unidoc.Client
             outcome: .failure(failure ?? .failedForUnknownReason))
 
         //  Check the exit status of the child process.
-        if  case .success = childProcess.status()
+        if  case nil = failure,
+            case .success = childProcess.status()
         {
             let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
 
