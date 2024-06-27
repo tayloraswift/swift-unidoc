@@ -35,7 +35,7 @@ extension Unidoc.StreamedRequest
             return nil
         }
 
-        guard case .ssgc = root,
+        guard case .builder = root,
         let route:String = path.popFirst(),
         let route:Unidoc.BuildRoute = .init(route)
         else

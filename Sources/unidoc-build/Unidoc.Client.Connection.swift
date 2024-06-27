@@ -33,7 +33,7 @@ extension Unidoc.Client.Connection
 {
     func labels(waiting duration:Duration) async throws -> Unidoc.BuildLabels
     {
-        try await self.get(from: "/ssgc/poll", timeout: duration)
+        try await self.get(from: "/builder/poll", timeout: duration)
     }
 
     func labels(id:Unidoc.Edition) async throws -> Unidoc.BuildLabels?
@@ -41,7 +41,7 @@ extension Unidoc.Client.Connection
         do
         {
             let prompt:Unidoc.BuildLabelsPrompt = .edition(id, force: true)
-            return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
+            return try await self.get(from: "/builder\(prompt.query)", timeout: .seconds(10))
         }
         catch let error as HTTP.StatusError
         {
@@ -65,7 +65,7 @@ extension Unidoc.Client.Connection
                 series: series,
                 force: true)
 
-            return try await self.get(from: "/ssgc\(prompt.query)", timeout: .seconds(10))
+            return try await self.get(from: "/builder\(prompt.query)", timeout: .seconds(10))
         }
         catch let error as HTTP.StatusError
         {
@@ -91,7 +91,7 @@ extension Unidoc.Client.Connection
         do
         {
             let _:Never = try await self.put(bson: bson,
-                to: "/ssgc/\(Unidoc.BuildRoute.labeling)",
+                to: "/builder/\(Unidoc.BuildRoute.labeling)",
                 timeout: .seconds(60))
         }
         catch is HTTP.NonError
@@ -115,7 +115,7 @@ extension Unidoc.Client.Connection
         do
         {
             let _:Never = try await self.put(bson: bson,
-                to: "/ssgc/\(Unidoc.BuildRoute.labeled)",
+                to: "/builder/\(Unidoc.BuildRoute.labeled)",
                 timeout: .seconds(60))
         }
         catch is HTTP.NonError
@@ -136,7 +136,7 @@ extension Unidoc.Client.Connection
         do
         {
             let _:Never = try await self.put(bson: bson,
-                to: "/ssgc/\(Unidoc.BuildRoute.report)")
+                to: "/builder/\(Unidoc.BuildRoute.report)")
         }
         catch is HTTP.NonError
         {

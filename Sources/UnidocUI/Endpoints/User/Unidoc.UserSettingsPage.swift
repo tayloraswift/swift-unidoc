@@ -211,7 +211,7 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
             $0[.form]
             {
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Unidoc.Post[.userConfig, really: false])"
+                $0.action = "\(Unidoc.Post[.userConfig, confirm: true])"
                 $0.method = "post"
             }
                 content:
