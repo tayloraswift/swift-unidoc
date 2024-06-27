@@ -99,7 +99,7 @@ extension Unidoc.Client
     /// Listens for SSGC updates over the provided pipe, uploading any intermediate reports to
     /// Unidoc server and returning the final report, without uploading it.
     private
-    func stream(from pipe:FilePath, package:Unidoc.Package) async throws -> Unidoc.BuildReport
+    func stream(from pipe:FilePath, package:Unidoc.Package) async throws -> Unidoc.BuildFailure?
     {
         try await SSGC.StatusStream.read(from: pipe)
         {
@@ -111,53 +111,48 @@ extension Unidoc.Client
 
             while let update:SSGC.StatusUpdate = try $0.next()
             {
-                var report:Unidoc.BuildReport = .init(package: package)
+                let stage:Unidoc.BuildStage
 
                 switch update
                 {
                 case .didCloneRepository:
-                    report.entered = .resolvingDependencies
+                    stage = .resolvingDependencies
 
                 case .didResolveDependencies:
-                    report.entered = .compilingCode
+                    stage = .compilingCode
 
                 case .failedToCloneRepository:
-                    report.failure = .failedToCloneRepository
+                    return .failedToCloneRepository
 
                 case .failedToReadManifest:
-                    report.failure = .failedToReadManifest
+                    return .failedToReadManifest
 
                 case .failedToReadManifestForDependency:
-                    report.failure = .failedToReadManifestForDependency
+                    return .failedToReadManifestForDependency
 
                 case .failedToResolveDependencies:
-                    report.failure = .failedToResolveDependencies
+                    return .failedToResolveDependencies
 
                 case .failedToBuild:
-                    report.failure = .failedToBuild
+                    return .failedToBuild
 
                 case .failedToExtractSymbolGraph:
-                    report.failure = .failedToExtractSymbolGraph
+                    return .failedToExtractSymbolGraph
 
                 case .failedToLoadSymbolGraph:
-                    report.failure = .failedToLoadSymbolGraph
+                    return .failedToLoadSymbolGraph
 
                 case .failedToLinkSymbolGraph:
-                    report.failure = .failedToLinkSymbolGraph
+                    return .failedToLinkSymbolGraph
                 }
 
-                if  case nil = report.failure
+                try await self.connect
                 {
-                    try await self.connect { try await $0.upload(report) }
-                    continue
-                }
-                else
-                {
-                    return report
+                    try await $0.upload(.init(package: package, entered: stage))
                 }
             }
 
-            return .init(package: package)
+            return nil
         }
     }
 
@@ -205,6 +200,7 @@ extension Unidoc.Client
             try? SystemProcess.init(command: "rm", "\(status)")()
         }
 
+        let started:ContinuousClock.Instant = .now
         let type:SSGC.ProjectType = labels.book ? .book : .package
 
         /// Temporarily open the named pipe for the express purpose of duping it into the child
@@ -273,38 +269,40 @@ extension Unidoc.Client
             }
         }
 
-        var finalReport:Unidoc.BuildReport = try await self.stream(from: status,
+        let failure:Unidoc.BuildFailure? = try await self.stream(from: status,
             package: labels.coordinate.package)
 
+        var artifact:Unidoc.BuildArtifact = .init(package: labels.coordinate.package,
+            outcome: .failure(failure ?? .failedForUnknownReason))
+
         //  Check the exit status of the child process.
-        if  case .failure = childProcess.status()
+        if  case .success = childProcess.status()
         {
-            finalReport.failure = .failedForUnknownReason
+            let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
+
+            artifact.outcome = .success(.init(id: labels.coordinate,
+                metadata: object.metadata,
+                inline: object.graph,
+                action: action))
         }
 
-        try finalReport.attach(log: output, as: .ssgc)
-        try finalReport.attach(log: diagnostics, as: .ssgcDiagnostics)
+        /// Attach build logs.
+        try artifact.attach(log: output, as: .ssgc)
+        try artifact.attach(log: diagnostics, as: .ssgcDiagnostics)
 
-        if  case _? = finalReport.failure
+        artifact.seconds = (.now - started).components.seconds
+
+        try await self.connect
         {
-            try await self.connect { try await $0.upload(finalReport) }
+            try await $0.upload(artifact)
+        }
+
+        if  case .failure = artifact.outcome
+        {
             return false
         }
         else
         {
-            let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
-            //  FIXME: For security reasons, the server does not handle batched uploads well.
-            //  This is usually only a problem if the uploads are very large or the network is
-            //  very slow.
-            try await self.connect { try await $0.upload(finalReport) }
-            try await self.connect
-            {
-                try await $0.upload(Unidoc.Snapshot.init(id: labels.coordinate,
-                    metadata: object.metadata,
-                    inline: object.graph,
-                    action: action))
-            }
-
             return true
         }
     }

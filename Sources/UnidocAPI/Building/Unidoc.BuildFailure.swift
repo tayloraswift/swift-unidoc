@@ -3,7 +3,7 @@ import JSON
 extension Unidoc
 {
     @frozen public
-    enum BuildFailure:Int32, Equatable, Sendable
+    enum BuildFailure:Int32, Error, Equatable, Sendable
     {
         case timeout = 0
         case noValidVersion = 1

@@ -8,25 +8,14 @@ extension Unidoc
     {
         public
         let package:Package
-
         public
-        var failure:BuildFailure?
-        public
-        var entered:BuildStage?
-
-        public
-        var logs:[BuildLog]
+        var entered:BuildStage
 
         @inlinable public
-        init(package:Package,
-            failure:BuildFailure? = nil,
-            entered:BuildStage? = nil,
-            logs:[BuildLog] = [])
+        init(package:Package, entered:BuildStage)
         {
             self.package = package
-            self.failure = failure
             self.entered = entered
-            self.logs = logs
         }
     }
 }
@@ -36,9 +25,7 @@ extension Unidoc.BuildReport
     enum CodingKey:String, Sendable
     {
         case package = "P"
-        case failure = "F"
         case entered = "E"
-        case logs = "L"
     }
 }
 extension Unidoc.BuildReport:BSONDocumentEncodable
@@ -47,9 +34,7 @@ extension Unidoc.BuildReport:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.package] = self.package
-        bson[.failure] = self.failure
         bson[.entered] = self.entered
-        bson[.logs] = self.logs.isEmpty ? nil : self.logs
     }
 }
 extension Unidoc.BuildReport:BSONDocumentDecodable
@@ -59,8 +44,6 @@ extension Unidoc.BuildReport:BSONDocumentDecodable
     {
         self.init(
             package: try bson[.package].decode(),
-            failure: try bson[.failure]?.decode(),
-            entered: try bson[.entered]?.decode(),
-            logs: try bson[.logs]?.decode() ?? [])
+            entered: try bson[.entered].decode())
     }
 }
