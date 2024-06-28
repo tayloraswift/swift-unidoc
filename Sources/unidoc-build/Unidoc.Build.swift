@@ -1,7 +1,7 @@
 #if canImport(Glibc)
-import Glibc
+@preconcurrency import Glibc
 #elseif canImport(Darwin)
-import Darwin
+@preconcurrency import Darwin
 #endif
 
 import ArgumentParsing
@@ -60,6 +60,8 @@ extension Unidoc.Build
     static
     func main() async
     {
+        setlinebuf(stdout)
+
         var arguments:CommandLine.Arguments = .init()
         guard
         let command:String = arguments.next()
@@ -71,7 +73,6 @@ extension Unidoc.Build
 
         if  command == "compile"
         {
-            setlinebuf(stdout)
             SystemProcess.exit(with: SSGC.main(arguments: arguments))
         }
 
@@ -188,42 +189,46 @@ extension Unidoc.Build
         let unidoc:Unidoc.Client = try .init(from: self)
         let cache:FilePath = "swiftpm"
 
-        /// TODO: make configurable
-        let pollInterval:Duration = .seconds(60 * 60)
-
         while true
         {
             //  Don’t run too hot if the network is down.
             async
             let cooldown:Void = try await Task.sleep(for: .seconds(5))
+
             do
             {
-                let labels:Unidoc.BuildLabels = try await unidoc.connect
+                let labels:Unidoc.BuildLabels? = try await unidoc.connect
                 {
-                    try await $0.labels(waiting: pollInterval)
+                    try await $0.labels()
                 }
 
-                print("""
-                    Building package '\(labels.package)' at '\(labels.ref)' \
-                    (\(labels.coordinate))
-                    """)
+                if  let labels:Unidoc.BuildLabels
+                {
+                    print("""
+                        Building package '\(labels.package)' at '\(labels.ref)' \
+                        (\(labels.coordinate))
+                        """)
 
-                /// As this runs continuously, we should remove the build artifacts afterwards,
-                /// to avoid filling up the disk. We must also remove the cloned repository,
-                /// as it may experience name conflicts on long timescales.
-                try await unidoc.buildAndUpload(
-                    labels: labels,
-                    action: .uplinkRefresh,
-                    remove: true,
-                    cache: cache)
-
-                try await cooldown
+                    /// As this runs continuously, we should remove the build artifacts
+                    /// afterwards, to avoid filling up the disk. We must also remove the cloned
+                    /// repository, as it may experience name conflicts on long timescales.
+                    try await unidoc.buildAndUpload(
+                        labels: labels,
+                        action: .uplinkRefresh,
+                        remove: true,
+                        cache: cache)
+                }
+                else
+                {
+                    print("Heartbeat received; no packages to build.")
+                }
             }
             catch let error
             {
                 print("Error: \(error)")
-                try await cooldown
             }
+
+            try await cooldown
         }
     }
 

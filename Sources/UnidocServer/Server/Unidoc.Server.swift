@@ -23,8 +23,7 @@ extension Unidoc
         let updateQueue:AsyncStream<Update>.Continuation,
             updates:AsyncStream<Update>
 
-        private
-        let graphState:GraphStateLoop
+        let builds:BuildCoordinator
 
         let policy:(any HTTP.ServerPolicy)?
         @usableFromInline
@@ -35,7 +34,7 @@ extension Unidoc
             plugins:[any ServerPlugin],
             context:ServerPluginContext,
             options:ServerOptions,
-            graphState:GraphStateLoop,
+            builds:BuildCoordinator,
             logger:(any ServerLogger)? = nil,
             db:Database)
         {
@@ -50,7 +49,7 @@ extension Unidoc
             self.plugins = plugins.reduce(into: [:]) { $0[$1.id] = $1 }
             self.context = context
             self.options = options
-            self.graphState = graphState
+            self.builds = builds
             self.policy = policy
             self.logger = logger
             self.db = db

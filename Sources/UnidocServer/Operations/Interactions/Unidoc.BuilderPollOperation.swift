@@ -18,59 +18,42 @@ extension Unidoc
 extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> JSON?
+        with session:Mongo.Session,
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        polling:
-        do
+        let labels:Unidoc.BuildLabels? = try await withThrowingTaskGroup(
+            of: Unidoc.BuildLabels?.self)
         {
-            guard
-            let build:Unidoc.BuildMetadata = try await server.db.packageBuilds.selectBuild(
-                await: true,
-                with: session),
-            let type:Unidoc.BuildRequest = build.request
-            else
+            $0.addTask
             {
+                try await Task.sleep(for: .seconds(30))
                 return nil
             }
-
-            guard try await server.db.packageBuilds.assignBuild(request: type.selector,
-                package: build.id,
-                builder: self.id,
-                with: session)
-            else
+            $0.addTask
             {
-                //  We lost the race.
-                continue polling
+                try await server.builds.match(builder: self.id)
             }
 
-            let prompt:Unidoc.BuildLabelsPrompt
-            switch type
+            for try await labels:Unidoc.BuildLabels? in $0
             {
-            case .latest(let series, force: let force):
-                prompt = .package(build.id, series: series, force: force)
-
-            case .id(let id, force: let force):
-                prompt = .edition(id, force: force)
+                $0.cancelAll()
+                return labels
             }
 
-            if  let labels:Unidoc.BuildLabels = try await server.db.unidoc.answer(
-                    prompt: prompt,
-                    with: session)
-            {
-                return .object(with: labels.encode(to:))
-            }
-            else if
-                let _:Unidoc.BuildMetadata = try await server.db.packageBuilds.finishBuild(
-                    package: build.id,
-                    failure: .noValidVersion,
-                    with: session)
-            {
-                continue polling
-            }
-            else
-            {
-                return nil
-            }
+            return nil
         }
+
+        guard
+        let labels:Unidoc.BuildLabels
+        else
+        {
+            //  Return heartbeat.
+            return .noContent
+        }
+
+        let json:JSON = .object(with: labels.encode(to:))
+        return .ok(.init(content: .init(
+            body: .binary(json.utf8),
+            type: .application(.json, charset: .utf8))))
     }
 }
