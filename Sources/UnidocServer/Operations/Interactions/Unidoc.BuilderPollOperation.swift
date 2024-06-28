@@ -21,12 +21,17 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
         with session:Mongo.Session,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
+        /// If the builder is recovering from a crash, kill any builds that had previously been
+        /// assigned to it.
+        let _:Int = try await server.db.packageBuilds.killBuilds(builder: self.id,
+            with: session)
+
         let labels:Unidoc.BuildLabels? = try await withThrowingTaskGroup(
             of: Unidoc.BuildLabels?.self)
         {
             $0.addTask
             {
-                try await Task.sleep(for: .seconds(30))
+                try await Task.sleep(for: .seconds(30 * 60))
                 return nil
             }
             $0.addTask

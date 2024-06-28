@@ -5,7 +5,8 @@ extension Unidoc
     @frozen public
     enum BuildFailure:Int32, Error, Equatable, Sendable
     {
-        case timeout = 0
+        case killed = 0
+
         case noValidVersion = 1
         case failedToCloneRepository = 2
         case failedToReadManifest = 3

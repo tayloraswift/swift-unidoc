@@ -304,21 +304,39 @@ extension Unidoc.DB.PackageBuilds
     func lintBuilds(startedBefore:BSON.Millisecond,
         with session:Mongo.Session) async throws -> Int
     {
-        let failure:Unidoc.BuildFailure = .timeout
+        try await self.killBuilds(with: session)
+        {
+            $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
+            $0[Unidoc.BuildMetadata[.progress] / Unidoc.BuildProgress[.started]]
+            {
+                $0[.lt] = startedBefore
+            }
+        }
+    }
+
+    public
+    func killBuilds(builder:Unidoc.Account,
+        with session:Mongo.Session) async throws -> Int
+    {
+        try await self.killBuilds(with: session)
+        {
+            $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
+            $0[Unidoc.BuildMetadata[.progress] / Unidoc.BuildProgress[.builder]] = builder
+        }
+    }
+
+    private
+    func killBuilds(with session:Mongo.Session,
+        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
+    {
+        let failure:Unidoc.BuildFailure = .killed
         let response:Mongo.UpdateResponse = try await session.run(
             command: Mongo.Update<Mongo.Many, Unidoc.Package>.init(Self.name)
             {
                 $0
                 {
                     $0[.multi] = true
-                    $0[.q]
-                    {
-                        $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
-                        $0[Unidoc.BuildMetadata[.progress] / Unidoc.BuildProgress[.started]]
-                        {
-                            $0[.lt] = startedBefore
-                        }
-                    }
+                    $0[.q, predicate]
                     $0[.u]
                     {
                         $0[.unset]
