@@ -135,13 +135,13 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
 
             switch self.build?.failure
             {
-            case .timeout?:
+            case .killed?:
                 section[.div]
                 {
                     $0.title = """
-                    We failed to build the package in the allotted time.
+                    The build was killed due to exceeding resource limits.
                     """
-                } = "Failed (timeout)"
+                } = "Failed (killed)"
 
             case .noValidVersion?:
                 section[.div]

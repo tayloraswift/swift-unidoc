@@ -59,7 +59,7 @@ extension Unidoc.EditionStateReport
             case .failedToLoadSymbolGraph:              return .FAILED_COMPILE_DOCS
             case .failedToLinkSymbolGraph:              return .FAILED_COMPILE_DOCS
             case .failedForUnknownReason:               return .FAILED_UNKNOWN
-            case .timeout:                              return .FAILED_UNKNOWN
+            case .killed:                               return .FAILED_UNKNOWN
             }
         }
         else if
