@@ -1,3 +1,4 @@
+import HTTP
 import JSON
 import MongoQL
 import UnidocDB
@@ -17,7 +18,8 @@ extension Unidoc
 extension Unidoc.BuilderLabelOperation:Unidoc.MachineOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> JSON?
+        with session:Mongo.Session,
+        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         guard
         let labels:Unidoc.BuildLabels = try await server.db.unidoc.answer(
@@ -28,6 +30,9 @@ extension Unidoc.BuilderLabelOperation:Unidoc.MachineOperation
             return nil
         }
 
-        return .object(with: labels.encode(to:))
+        let json:JSON = .object(with: labels.encode(to:))
+        return .ok(.init(content: .init(
+            body: .binary(json.utf8),
+            type: .application(.json, charset: .utf8))))
     }
 }
