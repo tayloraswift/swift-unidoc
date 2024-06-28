@@ -31,9 +31,18 @@ extension Unidoc.Client
 }
 extension Unidoc.Client.Connection
 {
-    func labels(waiting duration:Duration) async throws -> Unidoc.BuildLabels
+    func labels() async throws -> Unidoc.BuildLabels?
     {
-        try await self.get(from: "/builder/poll", timeout: duration)
+        do
+        {
+            //  Server should send a heartbeat every 30 minutes, so we wait for up to
+            //  31 minutes.
+            return try await self.get(from: "/builder/poll", timeout: .seconds(31 * 60))
+        }
+        catch is HTTP.NonError
+        {
+            return nil
+        }
     }
 
     func labels(id:Unidoc.Edition) async throws -> Unidoc.BuildLabels?
