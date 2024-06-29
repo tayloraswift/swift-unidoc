@@ -58,12 +58,7 @@ extension GitHub.Client<GitHub.PersonalAccessToken>.Connection
         switch response.status
         {
         case 200?:
-            var json:JSON = .init(utf8: [])
-            for buffer:ByteBuffer in response.buffers
-            {
-                json.utf8 += buffer.readableBytesView
-            }
-
+            let json:JSON = .init(utf8: response.body[...])
             return try json.decode()
 
         case 403?:
@@ -127,12 +122,7 @@ extension GitHub.Client.Connection
             switch response.status
             {
             case 200?:
-                var json:JSON = .init(utf8: [])
-                for buffer:ByteBuffer in response.buffers
-                {
-                    json.utf8 += buffer.readableBytesView
-                }
-
+                let json:JSON = .init(utf8: response.body[...])
                 return try json.decode()
 
             case 301?:
