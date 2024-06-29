@@ -44,7 +44,7 @@ extension AWS.S3.Client
     @inlinable public
     func connect<T>(with body:(AWS.S3.Connection) async throws -> T) async throws -> T
     {
-        try await self.http1.connect
+        try await self.http1.connect(port: 443)
         {
             try await body(AWS.S3.Connection.init(bucket: self.bucket, http1: $0))
         }

@@ -28,11 +28,7 @@ extension HTTP.Client2.Connection
         switch response.status
         {
         case 200?:
-            var json:JSON = .init(utf8: [])
-            for buffer:ByteBuffer in response.buffers
-            {
-                buffer.withUnsafeReadableBytes { json.utf8 += $0 }
-            }
+            let json:JSON = .init(utf8: response.body[...])
             return try json.decode()
 
         case let code:

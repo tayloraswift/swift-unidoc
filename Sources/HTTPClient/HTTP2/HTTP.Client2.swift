@@ -30,12 +30,6 @@ extension HTTP
         }
     }
 }
-extension HTTP.Client2:Identifiable
-{
-    /// Returns the ``remote`` hostname.
-    @inlinable public
-    var id:String { self.remote }
-}
 extension HTTP.Client2
 {
     public
@@ -94,7 +88,7 @@ extension HTTP.Client2
         try await self.connect { try await $0.fetch(request) }
     }
 }
-extension HTTP.Client2
+extension HTTP.Client2:HTTP.Client
 {
     /// Connect to the remote host over HTTPS and perform the given operation.
     @inlinable public

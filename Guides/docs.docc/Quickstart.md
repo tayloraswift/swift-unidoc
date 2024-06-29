@@ -71,13 +71,22 @@ Once you have a `unidoc-mongod-container` running in the background, you can sta
 
 ### Generating certificates
 
+#### Unidoc < 0.17.0
+
 If you are starting the server for the first time, you likely need to populate the `Assets/certificates/` directory with TLS certificates. See <doc:GeneratingCertificates> for instructions on how to do this.
 
+#### Unidoc ≥ 0.17.0
 
-If you did all of these steps correctly, you should be able to navigate to [`localhost:8443/`](https://localhost:8443/) and view a blank homepage.
+You do not need to generate certificates, as Unidoc 0.17.0 can run locally in insecure mode.
 
 
 ## Populating a local documentation server
+
+If you did all of the previous steps correctly, you should be able to navigate to [`localhost:8080/`](http://localhost:8080/) and view a blank homepage.
+
+>   Note:
+>   If you are using HTTPS, you need to replace the scheme with `https://` and the port number with `8443`.
+
 
 A fresh Unidoc database contains no documentation. Let’s build some now.
 
@@ -102,7 +111,7 @@ Uploading symbol graph...
 Successfully uploaded symbol graph!
 ```
 
-Because you built these docs “abnormally” (meaning: not from a GitHub repository), they won’t show up in the homepage, but you can view them by navigating directly to [`localhost:8443/docs/swift`](https://localhost:8443/docs/swift).
+Because you built these docs “abnormally” (meaning: not from a GitHub repository), they won’t show up in the homepage, but you can view them by navigating directly to [`localhost:8080/docs/swift`](http://localhost:8080/docs/swift).
 
 >   Note:
     You may see a lot of compiler errors when building the standard library. This is expected, as the documentation for the standard library contains many errors.
@@ -125,9 +134,12 @@ Next, you can try building `swift-nio` with `unidoc-build`, specifying the path 
 
 @Code(file: load-swift-nio.sh, title: load-swift-nio.sh)
 
-Unidoc will launch a `swift build` process, which could take a few minutes to build the package. When the build completes, it will then compile, upload, and link the documentation. Because the documentation is local, it will have the version number `__max`, and it will not show up on the homepage. You can view it by navigating directly to [`localhost:8443/docs/swift-nio`](https://localhost:8443/docs/swift-nio).
+Unidoc will launch a `swift build` process, which could take a few minutes to build the package. When the build completes, it will then compile, upload, and link the documentation. Because the documentation is local, it will have the version number `__max`, and it will not show up on the homepage. You can view it by navigating directly to [`localhost:8080/docs/swift-nio`](http://localhost:8080/docs/swift-nio).
 
 Congratulations! You have successfully set up a local Unidoc server and previewed some documentation for a local project.
+
+>   Warning: 
+>   At the time of writing, there is a [Swift compiler bug](https://github.com/swiftlang/swift/issues/68767) that prevents `swift symbolgraph-extract` from emitting symbol data for Swift NIO on macOS. 
 
 
 ## Differences between DocC and Unidoc

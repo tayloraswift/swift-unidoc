@@ -327,7 +327,7 @@ extension HTTP.Server
         guard let path:URI = .init(h1.uri)
         else
         {
-            return .resource("Malformed URI", status: 400)
+            return .resource("Malformed URI\n", status: 400)
         }
 
         switch h1.method
@@ -344,8 +344,38 @@ extension HTTP.Server
             }
             else
             {
-                return .resource("Malformed request", status: 400)
+                return .resource("Malformed request\n", status: 400)
             }
+
+        case .PUT:
+            guard
+            let length:String = h1.headers["content-length"].first,
+            let length:Int = .init(length)
+            else
+            {
+                return .resource("Content length required\n", status: 411)
+            }
+
+            guard
+            let request:StreamedRequest = .init(put: path, headers: h1.headers)
+            else
+            {
+                return .resource("Malformed request\n", status: 400)
+            }
+
+            if  let failure:HTTP.ServerResponse = try await self.clearance(for: request)
+            {
+                return failure
+            }
+
+            guard
+            let body:[UInt8] = try await inbound.accumulateBuffers(length: length)
+            else
+            {
+                return .resource("Content length does not match payload\n", status: 413)
+            }
+
+            return try await self.response(for: request, with: body)
 
         case .POST:
             guard
@@ -353,35 +383,19 @@ extension HTTP.Server
             let length:Int = .init(length)
             else
             {
-                return .resource("Content length required", status: 411)
+                return .resource("Content length required\n", status: 411)
             }
 
             if  length > 1_000_000
             {
-                return .resource("Content too large", status: 413)
+                return .resource("Content too large\n", status: 413)
             }
 
-            var body:[UInt8] = []
-            if  length > 0
+            guard
+            let body:[UInt8] = try await inbound.accumulateBuffers(length: length)
+            else
             {
-                body.reserveCapacity(length)
-
-                while case .body(let buffer)? = try await inbound.next()
-                {
-                    if  buffer.readableBytes <= length - body.count
-                    {
-                        buffer.withUnsafeReadableBytes { body += $0 }
-                    }
-                    else
-                    {
-                        return .resource("Content too large", status: 413)
-                    }
-
-                    if  buffer.readableBytes == length
-                    {
-                        break
-                    }
-                }
+                return .resource("Content length does not match payload\n", status: 400)
             }
 
             if  let request:IntegralRequest = .init(post: path,
@@ -393,11 +407,11 @@ extension HTTP.Server
             }
             else
             {
-                return .resource("Malformed request", status: 400)
+                return .resource("Malformed request\n", status: 400)
             }
 
         default:
-            return .resource("Method requires HTTP/2", status: 505)
+            return .resource("Method requires HTTP/2\n", status: 505)
         }
     }
 }
@@ -618,8 +632,7 @@ extension HTTP.Server
             }
 
             guard
-            let request:StreamedRequest = .init(put: path,
-                headers: headers)
+            let request:StreamedRequest = .init(put: path, headers: headers)
             else
             {
                 return .resource("Malformed request", status: 400)
@@ -678,8 +691,15 @@ extension HTTP.Server
 
                 while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
                 {
+                    guard 
+                    let payload:HTTP2Frame.FramePayload 
+                    else 
+                    {
+                        return .resource("Time limit exceeded", status: 408)
+                    }
+
                     guard
-                    case .data(let payload)? = payload,
+                    case .data(let payload) = payload,
                     case .byteBuffer(let buffer) = payload.data
                     else
                     {

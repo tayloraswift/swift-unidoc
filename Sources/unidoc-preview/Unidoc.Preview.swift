@@ -23,9 +23,10 @@ extension Unidoc
         {
             self.certificates = "Assets/certificates"
             self.development = .init()
+            self.development.port = 8080
             self.mirror = false
-            self.https = true
-            self.mongo = "unidoc-mongod"
+            self.https = false
+            self.mongo = "localhost"
         }
     }
 }
@@ -49,9 +50,9 @@ extension Unidoc.Preview
             case "-s", "--replica-set":
                 self.development.replicaSet = try arguments.next(for: "replica-set")
 
-            case "--http":
-                self.https = false
-                self.development.port = 8080
+            case "-e", "--https":
+                self.https = true
+                self.development.port = 8443
 
             case "-m", "--mongo":
                 self.mongo = .init(try arguments.next(for: "mongo"))
