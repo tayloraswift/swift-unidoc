@@ -691,8 +691,15 @@ extension HTTP.Server
 
                 while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
                 {
+                    guard 
+                    let payload:HTTP2Frame.FramePayload 
+                    else 
+                    {
+                        return .resource("Time limit exceeded", status: 408)
+                    }
+
                     guard
-                    case .data(let payload)? = payload,
+                    case .data(let payload) = payload,
                     case .byteBuffer(let buffer) = payload.data
                     else
                     {
