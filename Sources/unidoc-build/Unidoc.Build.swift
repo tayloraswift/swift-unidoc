@@ -39,7 +39,7 @@ extension Unidoc
             self.authorization = nil
             self.project = nil
             self.host = "localhost"
-            self.port = 8443
+            self.port = 8080
 
             self.pretty = false
             self.book = false
@@ -116,6 +116,7 @@ extension Unidoc.Build
             {
             case "--authorization", "-i":
                 options.authorization = try arguments.next(for: option)
+                options.port = 8443
 
             case "--swiftinit", "-S":
                 options.host = "swiftinit.org"
