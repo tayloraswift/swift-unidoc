@@ -28,7 +28,7 @@ jobs:
                 run: |
                     timeout 60s bash -c \
                     'until docker exec -t unidoc-mongod-container \
-                    /bin/mongosh --file /unidoc-rs-init.js; do sleep 1; done'
+                    /bin/mongosh --file /unidoc-rs-init-containerized.js; do sleep 1; done'
 
             -   name: Run pipeline
                 run: |
