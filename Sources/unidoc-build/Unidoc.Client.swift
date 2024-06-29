@@ -12,7 +12,7 @@ import UnidocRecords
 
 extension Unidoc
 {
-    struct Client:Sendable
+    struct Client<Protocol>:Sendable where Protocol:HTTP.Client
     {
         private
         let executablePath:String?
@@ -28,7 +28,7 @@ extension Unidoc
         private
         let authorization:String?
 
-        let http2:HTTP.Client2
+        let http:Protocol
         let port:Int
 
         private
@@ -38,7 +38,7 @@ extension Unidoc
             swiftSDK:SSGC.AppleSDK?,
             pretty:Bool,
             authorization:String?,
-            http2:HTTP.Client2,
+            http:Protocol,
             port:Int)
         {
             self.executablePath = executablePath
@@ -47,12 +47,31 @@ extension Unidoc
             self.swiftSDK = swiftSDK
             self.pretty = pretty
             self.authorization = authorization
-            self.http2 = http2
+            self.http = http
             self.port = port
         }
     }
 }
-extension Unidoc.Client
+extension Unidoc.Client<HTTP.Client1>
+{
+    init(from options:Unidoc.Build) throws
+    {
+        let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
+
+        print("Connecting to \(options.host):\(options.port)...")
+
+        self.init(
+            executablePath: options.executablePath,
+            swiftRuntime: options.swiftRuntime,
+            swiftPath: options.swiftPath,
+            swiftSDK: options.swiftSDK,
+            pretty: options.pretty,
+            authorization: options.authorization,
+            http: .init(threads: threads, niossl: nil, remote: options.host),
+            port: options.port)
+    }
+}
+extension Unidoc.Client<HTTP.Client2>
 {
     init(from options:Unidoc.Build) throws
     {
@@ -78,7 +97,7 @@ extension Unidoc.Client
             swiftSDK: options.swiftSDK,
             pretty: options.pretty,
             authorization: options.authorization,
-            http2: .init(threads: threads,
+            http: .init(threads: threads,
                 niossl: niossl,
                 remote: options.host),
             port: options.port)
@@ -88,13 +107,13 @@ extension Unidoc.Client
 {
     func connect<T>(with body:(Connection) async throws -> T) async throws -> T
     {
-        try await self.http2.connect(port: self.port)
+        try await self.http.connect(port: self.port)
         {
-            try await body(Connection.init(http2: $0, authorization: self.authorization))
+            try await body(.init(http: $0, authorization: self.authorization))
         }
     }
 }
-extension Unidoc.Client
+extension Unidoc.Client<HTTP.Client2>
 {
     /// Listens for SSGC updates over the provided pipe, uploading any intermediate reports to
     /// Unidoc server and returning the final report, without uploading it.
@@ -312,6 +331,33 @@ extension Unidoc.Client
         search:FilePath?,
         type:SSGC.ProjectType) async throws
     {
+        let object:SymbolGraphObject<Void> = try await self.build(local: symbol,
+            search: search,
+            type: type)
+
+        try await self.connect { try await $0.upload(object) }
+    }
+}
+extension Unidoc.Client<HTTP.Client1>
+{
+    func buildAndUpload(local symbol:Symbol.Package,
+        search:FilePath?,
+        type:SSGC.ProjectType) async throws
+    {
+        let object:SymbolGraphObject<Void> = try await self.build(local: symbol,
+            search: search,
+            type: type)
+
+        try await self.connect { try await $0.upload(object) }
+    }
+}
+extension Unidoc.Client
+{
+    private
+    func build(local symbol:Symbol.Package,
+        search:FilePath?,
+        type:SSGC.ProjectType) async throws -> SymbolGraphObject<Void>
+    {
         let workspace:SSGC.Workspace = try .create(at: ".ssgc")
         let docs:FilePath = workspace.location / "docs.bson"
 
@@ -351,8 +397,6 @@ extension Unidoc.Client
         let ssgc:SystemProcess = try .init(command: self.executablePath, arguments: arguments)
         try ssgc()
 
-        let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
-
-        try await self.connect { try await $0.upload(object) }
+        return try .init(buffer: try docs.read())
     }
 }

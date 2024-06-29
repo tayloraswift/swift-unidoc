@@ -29,18 +29,12 @@ extension HTTP.Client2
 extension HTTP.Client2.Connection:Sendable
 {
 }
-extension HTTP.Client2.Connection
+extension HTTP.Client2.Connection:HTTP.ClientConnection
 {
     @inlinable public
     func buffer(string:Substring) -> ByteBuffer
     {
         self.channel.allocator.buffer(substring: string)
-    }
-
-    @inlinable public
-    func buffer(string:String) -> ByteBuffer
-    {
-        self.channel.allocator.buffer(string: string)
     }
 
     @inlinable public
