@@ -59,7 +59,7 @@ Initialize the replica set with:
 docker exec -t unidoc-mongod-container /bin/mongosh --file /unidoc-rs-init.js
 ```
 
-This only needs to be done **once** per deployment lifecycle. (For example, after clearing the `data/` directory.)
+This only needs to be done **once** per deployment lifecycle. (For example, after clearing the `.mongod` data directory.)
 
 
 ### Connecting to the database
