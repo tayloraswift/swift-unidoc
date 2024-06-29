@@ -26,7 +26,7 @@ extension Unidoc
             self.development.port = 8080
             self.mirror = false
             self.https = false
-            self.mongo = "unidoc-mongod"
+            self.mongo = "localhost"
         }
     }
 }
