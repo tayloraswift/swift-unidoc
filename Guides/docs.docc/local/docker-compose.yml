@@ -11,6 +11,7 @@ services:
         volumes:
             # cannot put this in docker-entrypoint-initdb.d, it does not work
             - ./unidoc-rs-init.js:/unidoc-rs-init.js
+            - ./unidoc-rs-init-containerized.js:/unidoc-rs-init-containerized.js
             - ./unidoc-rs.conf:/etc/mongod.conf
             - ../../../.mongod:/data/db
         command: mongod --config /etc/mongod.conf
