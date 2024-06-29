@@ -186,7 +186,7 @@ extension Unidoc.Client.Connection
 extension Unidoc.Client.Connection
 {
     @discardableResult
-    func post(urlencoded:consuming String, to endpoint:String) async throws -> [ByteBuffer]
+    func post(urlencoded:consuming String, to endpoint:String) async throws -> [UInt8]
     {
         try await self.fetch(endpoint, method: "POST",
             body: self.http2.buffer(string: urlencoded),
@@ -196,7 +196,7 @@ extension Unidoc.Client.Connection
     @discardableResult
     func put(bson:consuming BSON.Document,
         to endpoint:String,
-        timeout:Duration = .seconds(15)) async throws -> [ByteBuffer]
+        timeout:Duration = .seconds(15)) async throws -> [UInt8]
     {
         try await self.fetch(endpoint,
             method: "PUT",
@@ -211,12 +211,8 @@ extension Unidoc.Client.Connection
         expecting _:Response.Type = Response.self) async throws -> Response
         where Response:JSONDecodable
     {
-        var json:JSON = .init(utf8: [])
-
-        for buffer:ByteBuffer in try await self.put(bson: bson, to: endpoint, timeout: timeout)
-        {
-            json.utf8 += buffer.readableBytesView
-        }
+        let json:JSON = .init(
+            utf8: try await self.put(bson: bson, to: endpoint, timeout: timeout)[...])
 
         return try json.decode()
     }
@@ -226,12 +222,8 @@ extension Unidoc.Client.Connection
         timeout:Duration) async throws -> Response
         where Response:JSONDecodable
     {
-        var json:JSON = .init(utf8: [])
-
-        for buffer:ByteBuffer in try await self.fetch(endpoint, method: "GET", timeout: timeout)
-        {
-            json.utf8 += buffer.readableBytesView
-        }
+        let json:JSON = .init(
+            utf8: try await self.fetch(endpoint, method: "GET", timeout: timeout)[...])
 
         return try json.decode()
     }
@@ -242,7 +234,7 @@ extension Unidoc.Client.Connection
         method:String,
         body:ByteBuffer? = nil,
         type:MediaType? = nil,
-        timeout:Duration = .seconds(15)) async throws -> [ByteBuffer]
+        timeout:Duration = .seconds(15)) async throws -> [UInt8]
     {
         var endpoint:String = endpoint
         var message:String = ""
@@ -269,7 +261,7 @@ extension Unidoc.Client.Connection
             switch response.status
             {
             case 200?, 201?, 202?, 203?:
-                return response.buffers
+                return response.body
 
             case 204?:
                 throw HTTP.NonError.init()
@@ -281,10 +273,7 @@ extension Unidoc.Client.Connection
                     continue following
                 }
             case _:
-                message = response.buffers.reduce(into: "")
-                {
-                    $0 += String.init(decoding: $1.readableBytesView, as: Unicode.UTF8.self)
-                }
+                message = .init(decoding: response.body, as: Unicode.UTF8.self)
                 break
             }
 

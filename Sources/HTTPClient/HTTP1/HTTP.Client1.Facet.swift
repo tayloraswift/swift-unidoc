@@ -6,7 +6,7 @@ extension HTTP.Client1
     @frozen public
     struct Facet:Sendable
     {
-        public
+        @usableFromInline
         var head:HTTPResponseHead?
         public
         var body:[UInt8]
@@ -17,4 +17,12 @@ extension HTTP.Client1
             self.body = body
         }
     }
+}
+extension HTTP.Client1.Facet
+{
+    @inlinable public
+    var headers:HTTPHeaders? { self.head?.headers }
+
+    @inlinable public
+    var status:UInt? { self.head?.status.code }
 }

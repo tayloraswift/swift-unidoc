@@ -67,13 +67,13 @@ extension AWS.S3.Connection
                 body: body),
             timeout: timeout)
 
-        switch response.head?.status
+        switch response.status
         {
-        case .ok?:
+        case 200?:
             return
 
         case let status:
-            throw AWS.S3.RequestError.put(status?.code ?? 0, String.init(
+            throw AWS.S3.RequestError.put(status ?? 0, String.init(
                 decoding: response.body,
                 as: Unicode.UTF8.self))
         }
@@ -88,13 +88,13 @@ extension AWS.S3.Connection
                 head: ["host": bucket.domain]),
             timeout: timeout)
 
-        switch response.head?.status
+        switch response.status
         {
-        case .ok?:
+        case 200?:
             return response.body
 
         case let status:
-            throw AWS.S3.RequestError.get(status?.code ?? 0, String.init(
+            throw AWS.S3.RequestError.get(status ?? 0, String.init(
                 decoding: response.body,
                 as: Unicode.UTF8.self))
         }
@@ -109,16 +109,16 @@ extension AWS.S3.Connection
                 head: ["host": bucket.domain]),
             timeout: .seconds(15))
 
-        switch response.head?.status
+        switch response.status
         {
-        case .ok?, .noContent?:
+        case 200?, 204?:
             return true
 
-        case .notFound?:
+        case 404?:
             return false
 
         case let status:
-            throw AWS.S3.RequestError.delete(status?.code ?? 0, String.init(
+            throw AWS.S3.RequestError.delete(status ?? 0, String.init(
                 decoding: response.body,
                 as: Unicode.UTF8.self))
         }

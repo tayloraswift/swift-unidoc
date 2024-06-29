@@ -10,12 +10,12 @@ extension HTTP.Client2
         public
         var headers:HPACKHeaders?
         public
-        var buffers:[ByteBuffer]
+        var body:[UInt8]
 
-        init(headers:HPACKHeaders? = nil, buffers:[ByteBuffer] = [])
+        init(headers:HPACKHeaders? = nil, body:[UInt8] = [])
         {
             self.headers = headers
-            self.buffers = buffers
+            self.body = body
         }
     }
 }
@@ -54,7 +54,7 @@ extension HTTP.Client2.Facet
         case .data(let frame):
             if  case .byteBuffer(let buffer) = frame.data
             {
-                self.buffers.append(buffer)
+                buffer.withUnsafeReadableBytes { self.body += $0 }
                 return frame.endStream
             }
 
