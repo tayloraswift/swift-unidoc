@@ -138,6 +138,9 @@ Unidoc will launch a `swift build` process, which could take a few minutes to bu
 
 Congratulations! You have successfully set up a local Unidoc server and previewed some documentation for a local project.
 
+>   Warning: 
+>   At the time of writing, there is a [Swift compiler bug](https://github.com/swiftlang/swift/issues/68767) that prevents `swift symbolgraph-extract` from emitting symbol data for Swift NIO on macOS. 
+
 
 ## Differences between DocC and Unidoc
 
