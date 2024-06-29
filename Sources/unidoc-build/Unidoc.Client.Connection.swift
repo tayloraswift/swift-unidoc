@@ -11,25 +11,21 @@ import UnidocAPI
 import UnidocRecords
 import URI
 
-extension Unidoc.Client.Connection
-{
-
-}
 extension Unidoc.Client
 {
     struct Connection
     {
-        let http2:HTTP.Client2.Connection
+        let http:Protocol.Connection
         let authorization:String?
 
-        init(http2:HTTP.Client2.Connection, authorization:String?)
+        init(http:Protocol.Connection, authorization:String?)
         {
-            self.http2 = http2
+            self.http = http
             self.authorization = authorization
         }
     }
 }
-extension Unidoc.Client.Connection
+extension Unidoc.Client<HTTP.Client2>.Connection
 {
     func labels() async throws -> Unidoc.BuildLabels?
     {
@@ -89,7 +85,47 @@ extension Unidoc.Client.Connection
         }
     }
 }
-extension Unidoc.Client.Connection
+extension Unidoc.Client<HTTP.Client1>.Connection
+{
+    func upload(_ unlabeled:SymbolGraphObject<Void>) async throws
+    {
+        let bson:BSON.Document = .init(encoding: unlabeled)
+
+        print("Uploading local symbol graph...")
+
+        do
+        {
+            let type:MediaType = .application(.bson)
+            let body:ByteBuffer = self.http.buffer(bytes: bson.bytes)
+
+            let request:HTTP.Client1.Request = .init(method: .PUT,
+                path: "/builder/\(Unidoc.BuildRoute.labeling)",
+                head: [
+                    "content-type": "\(type)",
+                    "content-length": "\(body.readableBytes)",
+                ],
+                body: body)
+
+            let response:HTTP.Client1.Facet = try await self.http.fetch(request)
+
+            guard case 204? = response.status
+            else
+            {
+                throw HTTP.StatusError.init(code: response.status,
+                    message: .init(decoding: response.body, as: Unicode.UTF8.self))
+            }
+
+            print("Successfully uploaded local symbol graph!")
+        }
+        catch let error
+        {
+            print("Error: failed to upload local symbol graph!")
+            print("Error: \(error)")
+            throw error
+        }
+    }
+}
+extension Unidoc.Client<HTTP.Client2>.Connection
 {
     func upload(_ unlabeled:SymbolGraphObject<Void>) async throws
     {
@@ -160,15 +196,16 @@ extension Unidoc.Client.Connection
     }
 }
 
-extension Unidoc.Client.Connection
+extension Unidoc.Client<HTTP.Client2>.Connection
 {
+    private
     func headers(_ method:String, _ endpoint:String) -> HPACKHeaders
     {
         var headers:HPACKHeaders =
         [
             ":method": method,
             ":scheme": "https",
-            ":authority": self.http2.remote,
+            ":authority": self.http.remote,
             ":path": endpoint,
 
             "user-agent": "UnidocBuild",
@@ -183,13 +220,13 @@ extension Unidoc.Client.Connection
         return headers
     }
 }
-extension Unidoc.Client.Connection
+extension Unidoc.Client<HTTP.Client2>.Connection
 {
     @discardableResult
     func post(urlencoded:consuming String, to endpoint:String) async throws -> [UInt8]
     {
         try await self.fetch(endpoint, method: "POST",
-            body: self.http2.buffer(string: urlencoded),
+            body: self.http.buffer(string: urlencoded),
             type: .application(.x_www_form_urlencoded))
     }
 
@@ -200,7 +237,7 @@ extension Unidoc.Client.Connection
     {
         try await self.fetch(endpoint,
             method: "PUT",
-            body: self.http2.buffer(bytes: (consume bson).bytes),
+            body: self.http.buffer(bytes: bson.bytes),
             type: .application(.bson),
             timeout: timeout)
     }
@@ -228,7 +265,7 @@ extension Unidoc.Client.Connection
         return try json.decode()
     }
 }
-extension Unidoc.Client.Connection
+extension Unidoc.Client<HTTP.Client2>.Connection
 {
     func fetch(_ endpoint:String,
         method:String,
@@ -253,7 +290,7 @@ extension Unidoc.Client.Connection
                 headers.add(name: "content-length", value: "\(body.readableBytes)")
             }
 
-            let response:HTTP.Client2.Facet = try await self.http2.fetch(.init(
+            let response:HTTP.Client2.Facet = try await self.http.fetch(.init(
                     headers: headers,
                     body: body),
                 timeout: timeout)
@@ -269,7 +306,7 @@ extension Unidoc.Client.Connection
             case 301?:
                 if  let location:String = response.headers?["location"].first
                 {
-                    endpoint = .init(location.trimmingPrefix("https://\(self.http2.remote)"))
+                    endpoint = .init(location.trimmingPrefix("https://\(self.http.remote)"))
                     continue following
                 }
             case _:

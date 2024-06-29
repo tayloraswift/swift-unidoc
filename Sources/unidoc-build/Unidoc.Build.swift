@@ -186,7 +186,7 @@ extension Unidoc.Build
     private
     func requests() async throws
     {
-        let unidoc:Unidoc.Client = try .init(from: self)
+        let unidoc:Unidoc.Client<HTTP.Client2> = try .init(from: self)
         let cache:FilePath = "swiftpm"
 
         while true
@@ -235,8 +235,6 @@ extension Unidoc.Build
     private
     func local() async throws
     {
-        let unidoc:Unidoc.Client = try .init(from: self)
-
         guard
         let project:Symbol.Package = self.project
         else
@@ -244,15 +242,25 @@ extension Unidoc.Build
             fatalError("No project specified")
         }
 
-        try await unidoc.buildAndUpload(local: project,
-            search: self.input.map(FilePath.init(_:)),
-            type: self.book ? .book : .package)
+        let search:FilePath? = self.input.map(FilePath.init(_:))
+        let type:SSGC.ProjectType = self.book ? .book : .package
+
+        if  case nil = self.authorization
+        {
+            let unidoc:Unidoc.Client<HTTP.Client1> = try .init(from: self)
+            try await unidoc.buildAndUpload(local: project, search: search, type: type)
+        }
+        else
+        {
+            let unidoc:Unidoc.Client<HTTP.Client2> = try .init(from: self)
+            try await unidoc.buildAndUpload(local: project, search: search, type: type)
+        }
     }
 
     private
     func latest() async throws
     {
-        let unidoc:Unidoc.Client = try .init(from: self)
+        let unidoc:Unidoc.Client<HTTP.Client2> = try .init(from: self)
 
         guard
         let project:Symbol.Package = self.project
