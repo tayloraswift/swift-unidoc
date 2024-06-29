@@ -371,6 +371,17 @@ extension Unidoc.DB
                 sha1: commit.sha1,
                 with: session)
         }
+        else if 
+            case .swift = documentation.metadata.package.name,
+            case nil = documentation.metadata.swift.nightly
+        {
+            (edition, _) = try await self.index(
+                package: package.id,
+                version: .release(documentation.metadata.swift.version),
+                name: "__Xcode",
+                sha1: nil,
+                with: session)
+        }
         else
         {
             //  Local documentation bypasses edition placement!
@@ -722,7 +733,7 @@ extension Unidoc.DB
         let thisRelease:PatchVersion?
         let version:String
 
-        //  Yes, the standard library always has a commit, although we don’t always have a
+        //  On Linux, the standard library always has a commit, although we don’t always have a
         //  commit hash.
         versioning:
         if  let commit:SymbolGraphMetadata.Commit = snapshot.metadata.commit
@@ -764,6 +775,28 @@ extension Unidoc.DB
             }
 
             version = "\(semver.number)"
+        }
+        else if 
+            case .swift = snapshot.metadata.package.name,
+            case nil = snapshot.metadata.swift.nightly
+        {
+            //  The default Xcode toolchain on macOS has a version, but no associated 
+            //  tags in the `swiftlang/swift` repo, so if we didn’t have this carve-out, 
+            //  we would always consider it local.
+            if  let formerRelease:Volumes.PatchView = try await self.volumes.latestRelease(
+                    of: snapshot.id.package,
+                    with: session),
+                    formerRelease.patch > snapshot.metadata.swift.version
+            {
+                latestRelease = formerRelease.id
+            }
+            else
+            {
+                latestRelease = snapshot.id
+            }
+
+            thisRelease = snapshot.metadata.swift.version
+            version = "\(snapshot.metadata.swift.version)"
         }
         else
         {
