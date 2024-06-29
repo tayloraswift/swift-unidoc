@@ -134,14 +134,9 @@ extension GitHub.Client
             throw AuthenticationError.status(.init(code: status))
         }
 
-        var json:JSON = .init(utf8: [])
-        for buffer:ByteBuffer in response.buffers
-        {
-            json.utf8 += buffer.readableBytesView
-        }
-
         do
         {
+            let json:JSON = .init(utf8: response.body[...])
             return try json.decode()
         }
         catch let error

@@ -6,13 +6,17 @@ extension HTTP.Client1
     @frozen public
     struct Connection
     {
-        @usableFromInline internal
+        @usableFromInline
         let channel:any Channel
+        /// The hostname of the remote peer.
+        public
+        let remote:String
 
-        @inlinable internal
-        init(channel:any Channel)
+        @inlinable
+        init(channel:any Channel, remote:String)
         {
             self.channel = channel
+            self.remote = remote
         }
     }
 }
@@ -22,17 +26,18 @@ extension HTTP.Client1
 extension HTTP.Client1.Connection:Sendable
 {
 }
-extension HTTP.Client1.Connection
+extension HTTP.Client1.Connection:HTTP.ClientConnection
 {
     @inlinable public
-    func buffer(_ body:HTTP.Resource.Content.Body) -> ByteBuffer
+    func buffer(string:Substring) -> ByteBuffer
     {
-        switch body
-        {
-        case .buffer(let buffer):   buffer
-        case .binary(let bytes):    self.channel.allocator.buffer(bytes: bytes)
-        case .string(let string):   self.channel.allocator.buffer(string: string)
-        }
+        self.channel.allocator.buffer(substring: string)
+    }
+
+    @inlinable public
+    func buffer(bytes:ArraySlice<UInt8>) -> ByteBuffer
+    {
+        self.channel.allocator.buffer(bytes: bytes)
     }
 }
 extension HTTP.Client1.Connection
