@@ -31,7 +31,7 @@ extension AsyncThrowingChannel<HTTPPart<HTTPRequestHead, ByteBuffer>, any Error>
                 return nil
             }
 
-            if  buffer.readableBytes == length
+            if  length == body.count
             {
                 return body
             }
