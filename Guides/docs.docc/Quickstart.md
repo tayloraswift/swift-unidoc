@@ -1,162 +1,60 @@
-# Unidoc quickstart
+# Previewing documentation locally
 
-This guide outlines how to set up and run a local Unidoc server you can use to preview your documentation as it would appear on [Swiftinit](https://swiftinit.org).
+This guide walks through how to use the `unidoc-preview` tool to preview documentation locally on macOS 14. This guide won’t make any effort to explain how Unidoc itself works, it is merely intended to demonstrate how to preview multi-package documentation as quickly as possible. For a more-detailed Linux-centric tour, see the <doc:Getting-started> guide.
 
-## Prerequisites
+In this guide, you will:
 
-You need to have a Swift Package Manager project. Unidoc itself has little relation to SPM, but it uses the Swift toolchain to compile your project, and the Swift toolchain uses SPM to build your project.
+1.  Launch and initialize a `mongod` instance in a Docker container,
+2.  Build and run an instance of `unidoc-preview` on the macOS host,
+3.  Build the `unidoc-build` tool,
+4.  Generate documentation for the standard library, and
+5.  Generate documentation for two SwiftPM packages, one of which depends on the other.
 
-You need to have [Docker](https://www.docker.com/) installed on your development machine. If you install it through your default package repository, we strongly recommend you ensure the installed Docker version is reasonably up-to-date (e.g. 24.0.0 or later).
-
-It is theoretically possible to run Unidoc without Docker, but Docker makes it much easier to do so, because you will not need to (directly) manage a local [MongoDB](https://mongodb.com) deployment.
-
-
-## Setting up a local database
-
-A Unidoc server is a server that talks to a second server, a MongoDB server. Therefore, before you can start a Unidoc server, you need to set up and launch a local [MongoDB](https://github.com/tayloraswift/swift-mongodb) deployment.
-
-A MongoDB deployment consists of a [mongod](https://www.mongodb.com/docs/manual/reference/program/mongod/) process connected to a network that the Unidoc server is also connected to.
-
-
-### Starting the database server
-
-We recommend hosting mongod inside a dedicated Docker container. This repository provides a Docker compose file that does this for you.
-
-To bring up the mongod instance (if it is not already online), run the following:
+Before you begin, clone the Unidoc repository and navigate to the root of the repository:
 
 ```bash
-docker compose -f Guides/docs.docc/local/docker-compose.yml up -d
+git clone https://github.com/tayloraswift/swift-unidoc
+cd swift-unidoc
 ```
 
-The `-d` flag tells Docker to run the container in the background, so it does not block your terminal.
+## 1. Install Docker
+
+The easiest way by far to preview documentation locally is to use Docker. You can download Docker Desktop for macOS from the [official website](https://www.docker.com/products/docker-desktop).
 
 
-### About the Docker compose file
+## 2. Launching a `mongod` instance
 
-If you are new to Docker, it is worth taking a moment to understand the Docker compose file.
+Use Docker Compose to launch a `mongod` instance in a container. This container is named `unidoc-mongod-container`. It has persistent state which `mongod` stores in a directory called `.mongod` at the root of the repository.
 
-@Code(file: docker-compose.yml, title: docker-compose.yml)
+```bash
+docker compose -f Guides/docs.docc/local/docker-compose.yml up
+```
 
-This file:
+The container is home to a MongoDB [replica set](https://www.mongodb.com/docs/manual/reference/replica-configuration/) which you need to initialize.
 
-1.  Launches a container from the official [`mongo:latest`](https://hub.docker.com/_/mongo) image.
-2.  Sets the name of this container to `unidoc-mongod-container`.
-3.  Sets the **hostname** of the container to `unidoc-mongod` **within** the `unidoc-test` network.
-4.  Binds the container’s port 27017 to `localhost:27017`. This is the default port for the `mongod` process.
-5.  Mounts the startup scripts and data directory within the container. This allows the documentation data to persist across container restarts.
-6.  Passes a configuration file to the `mongod` process on startup.
-
-The `unidoc-test` network is helpful for testing, but for the purposes of this tutorial, you will mostly be accessing the `mongod` process through `localhost:27017`.
-
-
-## Initializing the database
-
-The mongod instance will create a `.mongod` directory at the root of the cloned repository. This directory contains the state of the deployment, and like all database deployments, it can outlive the mongod process. This means you can kill (or crash) the mongod instance but it will not lose data unless you clear or delete its data directory.
-
-Initialize the replica set with:
+Open a new terminal and run the following command to initialize the replica set:
 
 ```bash
 docker exec -t unidoc-mongod-container /bin/mongosh --file /unidoc-rs-init.js
 ```
 
-This only needs to be done **once** per deployment lifecycle. (For example, after clearing the `.mongod` data directory.)
+
+## 3. Running `unidoc-preview`
+
+The `unidoc-preview` tool is an ordinary SwiftPM executable product. You can build and run it directly from your macOS host like this:
+
+```bash
+swift run -c release unidoc-preview
+```
+
+The `unidoc-preview` tool will start a web server on [http://localhost:8080](http://localhost:8080).
 
 
-### Connecting to the database
+## 4. Generating documentation for the standard library
 
-Once you have a `unidoc-mongod-container` running in the background, you can start a documentation server. There are many ways to run a documentation server, but if you are developing in a Docker container, the easiest way is compile Unidoc and run the server as a normal process.
-
-@Code(file: start-server.sh, title: start-server.sh)
-
-
-### Generating certificates
-
-#### Unidoc < 0.17.0
-
-If you are starting the server for the first time, you likely need to populate the `Assets/certificates/` directory with TLS certificates. See <doc:GeneratingCertificates> for instructions on how to do this.
-
-#### Unidoc ≥ 0.17.0
-
-You do not need to generate certificates, as Unidoc 0.17.0 can run locally in insecure mode.
-
-
-## Populating a local documentation server
-
-If you did all of the previous steps correctly, you should be able to navigate to [`localhost:8080/`](http://localhost:8080/) and view a blank homepage.
-
->   Note:
->   If you are using HTTPS, you need to replace the scheme with `https://` and the port number with `8443`.
-
-
-A fresh Unidoc database contains no documentation. Let’s build some now.
-
-### Building documentation for the standard library
-
-The documentation compiler lives in this repository, and is packaged as a normal SwiftPM executable target.
-
-To invoke the compiler, run the `unidoc-build` tool and pass it the name of the package you want to build documentation for. In our case, the “package” is `swift`, which is a special name identifying the standard library itself.
+Generate local documentation using the `unidoc-build local` subcommand. To start off, generate the documentation for the standard library (`swift`).
 
 @Code(file: load-standard-library.sh, title: load-standard-library.sh)
 
-If you did everything correctly, you should see output that ends with something like this:
 
-```
-...
-
-Linked documentation!
-    time loading sources    : 0.0 seconds
-    time linking            : 1.172033425 seconds
-symbols         : 16501
-Uploading symbol graph...
-Successfully uploaded symbol graph!
-```
-
-Because you built these docs “abnormally” (meaning: not from a GitHub repository), they won’t show up in the homepage, but you can view them by navigating directly to [`localhost:8080/docs/swift`](http://localhost:8080/docs/swift).
-
->   Note:
-    You may see a lot of compiler errors when building the standard library. This is expected, as the documentation for the standard library contains many errors.
-
-
-### Building documentation for a local project
-
-Building documentation for a local project is similar to building documentation for the standard library, except you need to provide a path to a directory containing the project.
-
-Let’s try building documentation for [`swift-nio`](https://github.com/apple/swift-nio). First, we need to clone the repository.
-
-```bash
-cd /swift
-git clone https://github.com/apple/swift-nio
-```
-
-**Where** you clone the repository is important, because you will need to tell Unidoc where to find the project. In this example, we cloned the repository inside a directory called `/swift`, which is a plausible place to store Git repositories in a devcontainer.
-
-Next, you can try building `swift-nio` with `unidoc-build`, specifying the path to the search directory (`/swift`) with the `-I` option.
-
-@Code(file: load-swift-nio.sh, title: load-swift-nio.sh)
-
-Unidoc will launch a `swift build` process, which could take a few minutes to build the package. When the build completes, it will then compile, upload, and link the documentation. Because the documentation is local, it will have the version number `__max`, and it will not show up on the homepage. You can view it by navigating directly to [`localhost:8080/docs/swift-nio`](http://localhost:8080/docs/swift-nio).
-
-Congratulations! You have successfully set up a local Unidoc server and previewed some documentation for a local project.
-
->   Warning: 
->   At the time of writing, there is a [Swift compiler bug](https://github.com/swiftlang/swift/issues/68767) that prevents `swift symbolgraph-extract` from emitting symbol data for Swift NIO on macOS. 
-
-
-## Differences between DocC and Unidoc
-
-There are a few key differences between DocC and Unidoc workflows to keep in mind.
-
-### Shared database
-
-Unlike DocC, Unidoc is specifically designed for multi-project use cases.
-
-Although you *can* have a separate database for each project, it is usually easier to set up a single deployment per machine, with documentation that is added and updated as needed.
-
-### Not a package plugin
-
-DocC is a package plugin, which means you “install” it by adding it as a dependency to your `Package.swift` and invoke it through SPM. Unidoc is a toolchain and you invoke it directly on an SPM project, like `swift build`. Unlike DocC, Unidoc has no project footprint.
-
-### Not Swiftinit
-
-A local Unidoc server is not [Swiftinit](https://swiftinit.org) and it does not have access to Swiftinit’s package database. If you want to have a local Swiftinit-like experience, you need to populate your local Unidoc server with your packages and the packages they depend on.
-
+## 5. Generating documentation for SwiftPM packages
