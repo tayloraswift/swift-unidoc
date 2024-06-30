@@ -336,6 +336,11 @@ extension Unidoc.Client<HTTP.Client2>
             type: type)
 
         try await self.connect { try await $0.upload(object) }
+
+        print("""
+            View the generated documentation at:
+            https://\(self.http.remote):\(self.port)/tags/\(symbol)
+            """)
     }
 }
 extension Unidoc.Client<HTTP.Client1>
@@ -349,6 +354,11 @@ extension Unidoc.Client<HTTP.Client1>
             type: type)
 
         try await self.connect { try await $0.upload(object) }
+
+        print("""
+            View the generated documentation at:
+            http://\(self.http.remote):\(self.port)/tags/\(symbol)
+            """)
     }
 }
 extension Unidoc.Client
