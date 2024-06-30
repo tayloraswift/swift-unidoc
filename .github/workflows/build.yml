@@ -1,0 +1,43 @@
+# This workflow builds the project under the “starter” configuration, namely, what you would get
+# if you ran `swift build` without any arguments. We use this to verify that we can generate the
+# documentation for Unidoc itself.
+
+name: build
+
+on:
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
+
+jobs:
+    linux:
+        runs-on: ubuntu-22.04
+        name: Ubuntu 22.04
+        env:
+            UNIDOC_ENABLE_INDEXSTORE: "0"
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            -   name: Build debug
+                run: |
+                    swift --version
+                    swift build
+
+    macos:
+        runs-on: macos-14
+        name: macOS
+        env:
+            UNIDOC_ENABLE_INDEXSTORE: "0"
+            DEVELOPER_DIR: "/Applications/Xcode_15.3.app/Contents/Developer"
+
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            -   name: Build debug
+                run: |
+                    swift --version
+                    swift build
+
