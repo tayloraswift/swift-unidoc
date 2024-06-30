@@ -5,6 +5,7 @@
 ### Using Unidoc
 
 -   <doc:Quickstart>
+-   <doc:Getting-started>
 -   <doc:GeneratingCertificates>
 
 ### Developing Unidoc
