@@ -52,9 +52,33 @@ The `unidoc-preview` tool will start a web server on [http://localhost:8080](htt
 
 ## 4. Generating documentation for the standard library
 
-Generate local documentation using the `unidoc-build local` subcommand. To start off, generate the documentation for the standard library (`swift`).
+Generate local documentation using the `unidoc-build local` subcommand. To start off, open a third terminal and generate the documentation for the standard library (`swift`).
 
 @Code(file: load-standard-library.sh, title: load-standard-library.sh)
 
+You should be able to view the symbol graph and its documentation at [http://localhost:8080/tags/swift](localhost:8080/tags/swift).
 
 ## 5. Generating documentation for SwiftPM packages
+
+Now, let’s generate documentation for [swift-collections](https://github.com/apple/swift-collections), a popular SwiftPM package. Download the library’s source code to a sibling directory.
+
+```bash
+cd ..
+git clone https://github.com/apple/swift-collections
+cd -
+```
+
+Generating documentation for a package is similar to generating documentation for the standard library, except you need to specify a search path to a directory containing the project. Because you downloaded the `swift-collections` repository to a sibling directory, you can use `..` for the search path.
+
+```bash
+swift run -c release unidoc-build local swift-collections -I ..
+```
+
+Now, let’s generate documentation for a package that depends on `swift-collections`. Download the source code for [swift-async-algorithms](https://github.com/apple/swift-async-algorithms) to another sibling directory.
+
+```bash
+cd ..
+git clone https://github.com/apple/swift-async-algorithms
+cd -
+swift run -c release unidoc-build local swift-async-algorithms -I ..
+```
