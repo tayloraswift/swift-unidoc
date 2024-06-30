@@ -1,6 +1,7 @@
 import BSON
 import HTML
 import MarkdownPluginSwift
+import MarkdownRendering
 @_spi(testable)
 import SymbolGraphBuilder
 import SymbolGraphs
