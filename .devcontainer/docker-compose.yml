@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  unidoc-mongod:
+    image: mongo:latest
+    container_name: unidoc-mongod-container
+    hostname: unidoc-mongod
+    networks:
+      - unidoc-devcontainer
+    ports:
+      - 27017:27017
+    restart: always
+    volumes:
+      # cannot put this in docker-entrypoint-initdb.d, it does not work
+      - ./unidoc-rs-init.js:/unidoc-rs-init.js
+      - ./unidoc-rs.conf:/etc/mongod.conf
+      - ../.mongod:/data/db
+    command: mongod --config /etc/mongod.conf
+  app:
+    image: swift:5.10
+    networks:
+      - unidoc-devcontainer
+    user: vscode
+    volumes:
+      - ..:/workspace
+    depends_on:
+      - unidoc-mongod
+    command: sleep infinity
+
+networks:
+  unidoc-devcontainer:
+    name: unidoc-devcontainer
+    enable_ipv6: true
