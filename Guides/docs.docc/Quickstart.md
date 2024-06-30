@@ -30,6 +30,11 @@ Use Docker Compose to launch a `mongod` instance in a container. This container 
 docker compose -f Guides/docs.docc/local/docker-compose.yml up
 ```
 
+@Image(source: "Docker Desktop.png", alt: "Docker Desktop") {
+>   You should see the `unidoc-mongod-container` running in the Docker Desktop GUI.
+}
+
+
 The container is home to a MongoDB [replica set](https://www.mongodb.com/docs/manual/reference/replica-configuration/) which you need to initialize.
 
 Open a new terminal and run the following command to initialize the replica set:
@@ -47,8 +52,11 @@ The `unidoc-preview` tool is an ordinary SwiftPM executable product. You can bui
 swift run -c release unidoc-preview
 ```
 
-The `unidoc-preview` tool will start a web server on [http://localhost:8080](http://localhost:8080).
+The `unidoc-preview` tool will start a web server on `http://localhost:8080`.
 
+@Image(source: "Start page.png", alt: "Start page") {
+>   The `unidoc-preview` start page.
+}
 
 ## 4. Generating documentation for the standard library
 
@@ -56,7 +64,12 @@ Generate local documentation using the `unidoc-build local` subcommand. To start
 
 @Code(file: load-standard-library.sh, title: load-standard-library.sh)
 
-You should be able to view the symbol graph and its documentation at [http://localhost:8080/tags/swift](localhost:8080/tags/swift).
+You should be able to view the symbol graph and its documentation at `http://localhost:8080/tags/swift`.
+
+@Image(source: "Standard library tags.png", alt: "Standard library") {
+>   The standard library documentation. We generated it using the default Xcode toolchain, so it’s labeled `__Xcode`.
+}
+
 
 ## 5. Generating documentation for SwiftPM packages
 
@@ -74,7 +87,13 @@ Generating documentation for a package is similar to generating documentation fo
 swift run -c release unidoc-build local swift-collections -I ..
 ```
 
-Now, let’s generate documentation for a package that depends on `swift-collections`. Download the source code for [swift-async-algorithms](https://github.com/apple/swift-async-algorithms) to another sibling directory.
+You should be able to view the symbol graph and its documentation at `http://localhost:8080/tags/swift-collections`.
+
+@Image(source: "Swift Collections tags.png", alt: "Swift Collections") {
+>   The `swift-collections` documentation.
+}
+
+Finally, let’s generate documentation for a package that depends on `swift-collections`. Download the source code for [swift-async-algorithms](https://github.com/apple/swift-async-algorithms) to another sibling directory.
 
 ```bash
 cd ..
@@ -82,3 +101,10 @@ git clone https://github.com/apple/swift-async-algorithms
 cd -
 swift run -c release unidoc-build local swift-async-algorithms -I ..
 ```
+
+
+@Image(source: "Swift Async Algorithms tags.png", alt: "Swift Async Algorithms") {
+>   The `swift-async-algorithms` documentation. Observe that it has a linked dependency on the `swift-collections` documentation you generated earlier.
+}
+
+Please note that when you link documentation for a SwiftPM package against another package, it is your responsibility to ensure that the two versions are ABI-compatible. Many SwiftPM packages are not ABI-stable, so you should always check that the root package is being built with the same versions of its dependencies as you generated their documentation from.
