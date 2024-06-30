@@ -9,7 +9,7 @@ extension Unidoc
 {
     struct PinDependenciesQuery:Sendable
     {
-        private
+        private(set)
         var patches:[Symbol.PackageDependency<PatchVersion>]
 
         private
@@ -21,13 +21,22 @@ extension Unidoc
 }
 extension Unidoc.PinDependenciesQuery
 {
-    init?(for snapshot:borrowing Unidoc.Snapshot)
+    init?(for snapshot:borrowing Unidoc.Snapshot, locally local:Bool)
     {
         self.init()
 
+        /// To link against versioned documentation, a snapshot must itself be versioned!
+        let localOverride:PatchVersion? = local ? .max : nil
+
         for case (nil, let dependency) in zip(snapshot.pins, snapshot.metadata.dependencies)
         {
-            if  let version:PatchVersion = dependency.version.release
+            if  let localOverride:PatchVersion
+            {
+                let exonym:Symbol.Package = dependency.package.name
+                self.patches.append(.init(package: exonym, version: localOverride))
+            }
+            else if
+                let version:PatchVersion = dependency.version.release
             {
                 self.patches.append(.init(package: dependency.id, version: version))
             }

@@ -371,7 +371,7 @@ extension Unidoc.DB
                 sha1: commit.sha1,
                 with: session)
         }
-        else if 
+        else if
             case .swift = documentation.metadata.package.name,
             case nil = documentation.metadata.swift.nightly
         {
@@ -665,8 +665,10 @@ extension Unidoc.DB
             snapshot.pins += repeatElement(nil, count: unallocated)
         }
 
+        let local:Bool = snapshot.metadata.commit == nil
+
         guard
-        let query:Unidoc.PinDependenciesQuery = .init(for: snapshot)
+        let query:Unidoc.PinDependenciesQuery = .init(for: snapshot, locally: local)
         else
         {
             return
@@ -687,7 +689,9 @@ extension Unidoc.DB
             snapshot.pins.indices,
             snapshot.metadata.dependencies)
         {
-            if  let pinned:Unidoc.Edition = pins[dependency.id]
+            if  let pinned:Unidoc.Edition = local
+                    ? pins[dependency.package.name]
+                    : pins[dependency.id]
             {
                 snapshot.pins[pin] = pinned
                 all.append(pinned)
@@ -776,12 +780,12 @@ extension Unidoc.DB
 
             version = "\(semver.number)"
         }
-        else if 
+        else if
             case .swift = snapshot.metadata.package.name,
             case nil = snapshot.metadata.swift.nightly
         {
-            //  The default Xcode toolchain on macOS has a version, but no associated 
-            //  tags in the `swiftlang/swift` repo, so if we didn’t have this carve-out, 
+            //  The default Xcode toolchain on macOS has a version, but no associated
+            //  tags in the `swiftlang/swift` repo, so if we didn’t have this carve-out,
             //  we would always consider it local.
             if  let formerRelease:Volumes.PatchView = try await self.volumes.latestRelease(
                     of: snapshot.id.package,
