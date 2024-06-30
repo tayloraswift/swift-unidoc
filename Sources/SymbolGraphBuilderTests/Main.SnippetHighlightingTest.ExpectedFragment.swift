@@ -1,3 +1,5 @@
+#if canImport(IndexStoreDB)
+
 import MarkdownABI
 import Symbols
 
@@ -20,3 +22,5 @@ extension Main.SnippetHighlightingTest
         }
     }
 }
+
+#endif
