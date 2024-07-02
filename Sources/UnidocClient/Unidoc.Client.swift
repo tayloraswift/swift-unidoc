@@ -35,7 +35,7 @@ extension Unidoc
         let port:Int
 
         @inlinable public
-        init(executablePath:String?,
+        init(
             swiftRuntime:String?,
             swiftPath:String?,
             swiftSDK:SSGC.AppleSDK?,
@@ -44,7 +44,18 @@ extension Unidoc
             http:Protocol,
             port:Int)
         {
-            self.executablePath = executablePath
+            //  On macOS, `/proc/self/exe` is not available, so we must fall back to using the
+            //  path supplied by `argv[0]`.
+            //
+            //  FIXME: according to Alastair Houghton, we should be using `_NSGetExecutablePath`
+            //  https://swift-open-source.slack.com/archives/C5FAE2LL9/p1714118940393719?thread_ts=1714079460.781409&cid=C5FAE2LL9
+
+            #if os(macOS)
+            self.executablePath = CommandLine.arguments.first
+            #else
+            self.executablePath = nil
+            #endif
+
             self.swiftRuntime = swiftRuntime
             self.swiftPath = swiftPath
             self.swiftSDK = swiftSDK

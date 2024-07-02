@@ -1,7 +1,9 @@
+import ArgumentParser
+
 extension SSGC
 {
     @frozen public
-    enum AppleSDK:Equatable, Sendable
+    enum AppleSDK:CaseIterable, Equatable, Sendable
     {
         case driverKit
         case iOS
@@ -55,6 +57,9 @@ extension SSGC.AppleSDK:LosslessStringConvertible
         default:                return nil
         }
     }
+}
+extension SSGC.AppleSDK:ExpressibleByArgument
+{
 }
 extension SSGC.AppleSDK
 {
