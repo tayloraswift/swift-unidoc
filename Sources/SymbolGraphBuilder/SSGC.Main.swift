@@ -1,4 +1,4 @@
-import ArgumentParsing
+import ArgumentParser
 import BSON
 import SymbolGraphs
 import Symbols
@@ -6,98 +6,123 @@ import System
 
 extension SSGC
 {
-    struct Main:Sendable
+    public
+    struct Main:Decodable
     {
-        var workspaceName:FilePath.Directory
-        var workspacePath:FilePath.Directory?
+        @Option(
+            name: [.customLong("workspace-name"), .customShort("w")],
+            help: """
+                A path to the workspace directory — \
+                SSGC will create this workspace unless --workspace is set
+                """)
+        var workspaceName:FilePath.Directory = ".ssgc"
 
-        var status:Int32?
-        var search:FilePath.Directory?
+        @Option(
+            name: [.customLong("workspace"), .customShort("W")],
+            help: "A path to the workspace directory — SSGC will assume this workspace exists.",
+            completion: .directory)
+        var workspacePath:FilePath.Directory? = nil
 
-        var output:FilePath?
-        var outputLog:FilePath?
+        @Option(
+            name: [.customLong("status"), .customShort("P")],
+            help: "A file descriptor index to emit status updates to")
+        var status:Int32? = nil
 
-        var swiftRuntime:FilePath.Directory?
+        @Option(
+            name: [.customLong("search-path"), .customShort("I")],
+            help: "Where to look for a SwiftPM package to build, if building locally",
+            completion: .directory)
+        var search:FilePath.Directory? = nil
+
+        @Option(
+            name: [.customLong("output"), .customShort("o")],
+            help: "The path to write the compiled symbol graph to")
+        var output:FilePath? = nil
+
+        @Option(
+            name: [.customLong("output-log"), .customShort("l")],
+            help: "The path to write the log of the build process to")
+        var outputLog:FilePath? = nil
+
+        @Option(
+            name: [.customLong("swift-runtime")],
+            help: "The path to the Swift runtime directory, usually ending in /usr/lib",
+            completion: .directory)
+        var swiftRuntime:FilePath.Directory? = nil
+
+        @Option(
+            name: [.customLong("swiftpm-cache")],
+            help: "The path to the SwiftPM cache directory to use",
+            completion: .directory)
         var swiftCache:FilePath.Directory?
-        var swiftPath:FilePath?
-        var swiftSDK:AppleSDK?
 
-        var name:Symbol.Package?
-        var type:ProjectType
-        var repo:String?
-        var ref:String?
+        @Option(
+            name: [.customLong("swift"), .customShort("s")],
+            help: "The path to the Swift toolchain",
+            completion: .file(extensions: []))
+        var swiftPath:FilePath? = nil
 
-        /// If true, SSGC will remove the Swift build directory (usually `.build.ssgc`) after
-        /// it finishes building documentation.
-        var removeBuild:Bool
-        /// If true, SSGC will remove the cloned git repository after it finishes building
-        /// documentation. This has no effect for local builds, and will also not remove any
-        /// cloned repositories from the SwiftPM cache.
-        var removeClone:Bool
-        var pretty:Bool
+        @Option(
+            name: [.customLong("sdk"), .customShort("k")],
+            help: "The Swift SDK to use")
+        var swiftSDK:AppleSDK? = nil
 
+        @Option(
+            name: [.customLong("package-name"), .customShort("n")],
+            help: """
+                The symbolic name of the project to build — \
+                this is not the name specified in the `Package.swift` manifest!
+                """)
+        var name:Symbol.Package
+
+        @Option(
+            name: [.customLong("project-type"), .customShort("b")],
+            help: "The type of project to build as")
+        var type:ProjectType = .package
+
+        @Option(
+            name: [.customLong("project-repo"), .customShort("r")],
+            help: "The URL of the git repository to clone")
+        var repo:String? = nil
+
+        @Option(
+            name: [.customLong("ref"), .customShort("t")],
+            help: "The git ref to check out")
+        var ref:String? = nil
+
+        @Flag(
+            name: [.customLong("remove-build")],
+            help: """
+                Remove the Swift build directory (usually .build.ssgc) \
+                after building documentation
+                """)
+        var removeBuild:Bool = false
+
+        @Flag(
+            name: [.customLong("remove-clone")],
+            help: """
+                Remove the cloned git repository after building documentation — \
+                this has no effect for local builds, and will also not remove any cloned \
+                repositories from the SwiftPM cache
+                """)
+        var removeClone:Bool = false
+
+        @Flag(
+            name: [.customLong("pretty"), .customShort("p")],
+            help: """
+                Tell lib/SymbolGraphGen to pretty-print the JSON output, if possible
+                """)
+        var pretty:Bool = false
+
+        public
         init()
         {
-            self.workspaceName = ".ssgc"
-            self.workspacePath = nil
-            self.status = nil
-            self.search = nil
-
-            self.output = nil
-            self.outputLog = nil
-
-            self.swiftRuntime = nil
-            self.swiftCache = nil
-            self.swiftPath = nil
-            self.swiftSDK = nil
-
-            self.name = nil
-            self.type = .package
-            self.repo = nil
-            self.ref = nil
-            self.removeBuild = false
-            self.removeClone = false
-            self.pretty = false
         }
     }
 }
 extension SSGC.Main
 {
-    mutating
-    func parse(arguments:consuming CommandLine.Arguments) throws
-    {
-        while let word:String = arguments.next()
-        {
-            guard
-            let option:Option = .init(word)
-            else
-            {
-                throw CommandLine.ArgumentError.unknown(word)
-            }
-
-            switch option
-            {
-            case .swiftpm_cache:    self.swiftCache = .init(try arguments.next(for: word))
-            case .swift_runtime:    self.swiftRuntime = .init(try arguments.next(for: word))
-            case .swift:            self.swiftPath = .init(try arguments.next(for: word))
-            case .sdk:              self.swiftSDK = .init(try arguments.next(for: word))
-            case .workspace_name:   self.workspaceName = .init(try arguments.next(for: word))
-            case .workspace:        self.workspacePath = .init(try arguments.next(for: word))
-            case .status:           self.status = .init(try arguments.next(for: word))
-            case .search_path:      self.search = .init(try arguments.next(for: word))
-            case .package_name:     self.name = .init(try arguments.next(for: word))
-            case .project_type:     self.type = try arguments.next(for: word)
-            case .project_repo:     self.repo = try arguments.next(for: word)
-            case .ref:              self.ref = try arguments.next(for: word)
-            case .output:           self.output = .init(try  arguments.next(for: word))
-            case .output_log:       self.outputLog = .init(try arguments.next(for: word))
-            case .remove_build:     self.removeBuild = true
-            case .remove_clone:     self.removeClone = true
-            case .pretty:           self.pretty = true
-            }
-        }
-    }
-
+    public
     func launch() throws
     {
         guard
@@ -158,13 +183,6 @@ extension SSGC.Main
     private
     func launch(workspace:SSGC.Workspace, status:SSGC.StatusStream?) throws
     {
-        guard
-        let package:Symbol.Package = self.name
-        else
-        {
-            throw CommandLine.ArgumentError.missing("--package-name")
-        }
-
         let toolchain:SSGC.Toolchain = try .detect(swiftRuntime: self.swiftRuntime,
             swiftCache: self.swiftCache,
             swiftPath: self.swiftPath,
@@ -174,7 +192,7 @@ extension SSGC.Main
         let logger:SSGC.DocumentationLogger? = self.outputLog.map(SSGC.DocumentationLogger.init)
         let object:SymbolGraphObject<Void>
 
-        if  package == .swift
+        if  self.name == .swift
         {
             object = try workspace.build(some: SSGC.SpecialBuild.swift,
                 toolchain: toolchain,
@@ -184,7 +202,9 @@ extension SSGC.Main
         else if
             let search:FilePath.Directory = self.search
         {
-            let build:SSGC.PackageBuild = .local(project: package, among: search, as: self.type)
+            let build:SSGC.PackageBuild = .local(project: self.name,
+                among: search,
+                as: self.type)
 
             defer
             {
@@ -205,7 +225,7 @@ extension SSGC.Main
         {
             defer
             {
-                let repoClone:FilePath.Directory = workspace.checkouts / "\(package)"
+                let repoClone:FilePath.Directory = workspace.checkouts / "\(self.name)"
 
                 if  self.removeClone
                 {
@@ -218,7 +238,7 @@ extension SSGC.Main
                 }
             }
 
-            let build:SSGC.PackageBuild = try .remote(project: package,
+            let build:SSGC.PackageBuild = try .remote(project: self.name,
                 from: repo,
                 at: ref,
                 as: self.type,
@@ -233,7 +253,7 @@ extension SSGC.Main
         }
         else
         {
-            throw CommandLine.ArgumentError.missing("--search-path")
+            throw SSGC.SearchPathRequiredError.init()
         }
 
         let output:FilePath = self.output ?? workspace.location / "docs.bson"

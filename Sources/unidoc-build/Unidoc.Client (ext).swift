@@ -4,14 +4,13 @@ import UnidocClient
 
 extension Unidoc.Client<HTTP.Client1>
 {
-    init(from options:Unidoc.Build) throws
+    init(from options:Unidoc.Build.Local) throws
     {
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
 
         print("Connecting to \(options.host):\(options.port)...")
 
         self.init(
-            executablePath: options.executablePath,
             swiftRuntime: options.swiftRuntime,
             swiftPath: options.swiftPath,
             swiftSDK: options.swiftSDK,
