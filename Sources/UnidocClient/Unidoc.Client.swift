@@ -12,26 +12,29 @@ import UnidocRecords
 
 extension Unidoc
 {
+    @frozen public
     struct Client<Protocol>:Sendable where Protocol:HTTP.Client
     {
-        private
+        public
         let executablePath:String?
 
-        private
+        public
         let swiftRuntime:String?
-        private
+        public
         let swiftPath:String?
-        private
+        public
         let swiftSDK:SSGC.AppleSDK?
-        private
+        public
         let pretty:Bool
-        private
+        public
         let authorization:String?
 
+        public
         let http:Protocol
+        public
         let port:Int
 
-        private
+        @inlinable public
         init(executablePath:String?,
             swiftRuntime:String?,
             swiftPath:String?,
@@ -52,59 +55,9 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.Client<HTTP.Client1>
-{
-    init(from options:Unidoc.Build) throws
-    {
-        let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
-
-        print("Connecting to \(options.host):\(options.port)...")
-
-        self.init(
-            executablePath: options.executablePath,
-            swiftRuntime: options.swiftRuntime,
-            swiftPath: options.swiftPath,
-            swiftSDK: options.swiftSDK,
-            pretty: options.pretty,
-            authorization: options.authorization,
-            http: .init(threads: threads, niossl: nil, remote: options.host),
-            port: options.port)
-    }
-}
-extension Unidoc.Client<HTTP.Client2>
-{
-    init(from options:Unidoc.Build) throws
-    {
-        let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
-
-        var configuration:TLSConfiguration = .makeClientConfiguration()
-            configuration.applicationProtocols = ["h2"]
-
-        //  If we are not using the default port, we are probably running locally.
-        if  options.port != 443
-        {
-            configuration.certificateVerification = .none
-        }
-
-        let niossl:NIOSSLContext = try .init(configuration: configuration)
-
-        print("Connecting to \(options.host):\(options.port)...")
-
-        self.init(
-            executablePath: options.executablePath,
-            swiftRuntime: options.swiftRuntime,
-            swiftPath: options.swiftPath,
-            swiftSDK: options.swiftSDK,
-            pretty: options.pretty,
-            authorization: options.authorization,
-            http: .init(threads: threads,
-                niossl: niossl,
-                remote: options.host),
-            port: options.port)
-    }
-}
 extension Unidoc.Client
 {
+    @inlinable public
     func connect<T>(with body:(Connection) async throws -> T) async throws -> T
     {
         try await self.http.connect(port: self.port)
@@ -175,7 +128,7 @@ extension Unidoc.Client<HTTP.Client2>
         }
     }
 
-    @discardableResult
+    @discardableResult public
     func buildAndUpload(
         labels:Unidoc.BuildLabels,
         action:Unidoc.LinkerAction,
@@ -327,6 +280,7 @@ extension Unidoc.Client<HTTP.Client2>
         }
     }
 
+    public
     func buildAndUpload(local symbol:Symbol.Package,
         search:FilePath?,
         type:SSGC.ProjectType) async throws
@@ -345,6 +299,7 @@ extension Unidoc.Client<HTTP.Client2>
 }
 extension Unidoc.Client<HTTP.Client1>
 {
+    public
     func buildAndUpload(local symbol:Symbol.Package,
         search:FilePath?,
         type:SSGC.ProjectType) async throws
