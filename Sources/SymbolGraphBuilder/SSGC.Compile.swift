@@ -7,7 +7,7 @@ import System
 extension SSGC
 {
     public
-    struct Main:Decodable
+    struct Compile:Decodable
     {
         @Option(
             name: [.customLong("workspace-name"), .customShort("w")],
@@ -19,7 +19,7 @@ extension SSGC
 
         @Option(
             name: [.customLong("workspace"), .customShort("W")],
-            help: "A path to the workspace directory — SSGC will assume this workspace exists.",
+            help: "A path to the workspace directory — SSGC will assume this workspace exists",
             completion: .directory)
         var workspacePath:FilePath.Directory? = nil
 
@@ -120,7 +120,7 @@ extension SSGC
         }
     }
 }
-extension SSGC.Main
+extension SSGC.Compile
 {
     public
     func launch() throws
