@@ -10,7 +10,7 @@ extension Unidoc
         public
         let authority:any HTTP.ServerAuthority
         public
-        var github:GitHub.Integration?
+        var github:(any GitHub.Integration)?
         public
         var mirror:Bool
         public
@@ -20,7 +20,7 @@ extension Unidoc
 
         @inlinable public
         init(authority:any HTTP.ServerAuthority,
-            github:GitHub.Integration? = nil,
+            github:(any GitHub.Integration)? = nil,
             mirror:Bool = false,
             bucket:Buckets,
             mode:Mode = .production)

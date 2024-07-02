@@ -1,29 +1,15 @@
 import GitHubAPI
-import System
 
 extension GitHub
 {
-    @frozen public
-    struct Integration:Sendable
+    public
+    protocol Integration:AnyObject, Sendable
     {
-        public
-        let oauth:OAuth
-        public
-        let app:App
-        public
-        let pat:PersonalAccessToken
+        var agent:String { get }
+        var oauth:OAuth { get }
 
-        @inlinable public
-        init(oauth:OAuth, app:App, pat:PersonalAccessToken)
-        {
-            self.oauth = oauth
-            self.app = app
-            self.pat = pat
-        }
+        var pat:PersonalAccessToken { get }
+
+        func iat(id installation:UInt) async throws -> InstallationAccessToken
     }
-}
-extension GitHub.Integration
-{
-    @inlinable public
-    var agent:String { "unidoc (by tayloraswift)" }
 }
