@@ -55,7 +55,7 @@ extension Unidoc.UpdatePackageRuleOperation:Unidoc.RestrictedOperation
         {
         case .insertEditorFromGitHub(login: let login):
             guard
-            let integration:GitHub.Integration = server.github
+            let integration:any GitHub.Integration = server.github
             else
             {
                 return .error("GitHub integration is not available.\n")

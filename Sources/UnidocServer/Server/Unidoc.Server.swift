@@ -72,7 +72,7 @@ extension Unidoc.Server
     }
 
     @inlinable public
-    var github:GitHub.Integration? { self.options.github }
+    var github:(any GitHub.Integration)? { self.options.github }
     @inlinable public
     var bucket:Unidoc.Buckets { self.options.bucket }
 

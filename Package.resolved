@@ -1,5 +1,5 @@
 {
-  "originHash" : "99ef0d4c9db5561696172060b15fe663b4b56d448bd190a6e0b4f464d4359377",
+  "originHash" : "f6af9095b75964aee9fd27e7a2e21c4a0bd2cca32c73d4eda71359fa56065992",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -8,6 +8,15 @@
       "state" : {
         "branch" : "occurrences-in-file",
         "revision" : "da980455bf2bbbffeffe1946dfc3665eb03c3bcd"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "0fbc8848e389af3bb55c182bc19ca9d5dc2f255b",
+        "version" : "1.4.0"
       }
     },
     {
@@ -60,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-hash",
       "state" : {
-        "revision" : "7798c344afd5a96b689fa9904ad52242a85b5068",
-        "version" : "0.6.0"
+        "revision" : "7a3fbb75ec4c88421796faaf0b47f16ffc21b348",
+        "version" : "0.6.2"
       }
     },
     {
@@ -96,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio",
       "state" : {
-        "revision" : "e5a216ba89deba84356bad9d4c2eab99071c745b",
-        "version" : "2.67.0"
+        "revision" : "fc79798d5a150d61361a27ce0c51169b889e23de",
+        "version" : "2.68.0"
       }
     },
     {
@@ -105,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-http2",
       "state" : {
-        "revision" : "8d8eb609929aee75336a0a3d2417280786265868",
-        "version" : "1.32.0"
+        "revision" : "a0224f3d20438635dd59c9fcc593520d80d131d0",
+        "version" : "1.33.0"
       }
     },
     {
