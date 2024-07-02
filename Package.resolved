@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-hash",
       "state" : {
-        "revision" : "7798c344afd5a96b689fa9904ad52242a85b5068",
-        "version" : "0.6.0"
+        "revision" : "7a3fbb75ec4c88421796faaf0b47f16ffc21b348",
+        "version" : "0.6.2"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio",
       "state" : {
-        "revision" : "e5a216ba89deba84356bad9d4c2eab99071c745b",
-        "version" : "2.67.0"
+        "revision" : "fc79798d5a150d61361a27ce0c51169b889e23de",
+        "version" : "2.68.0"
       }
     },
     {

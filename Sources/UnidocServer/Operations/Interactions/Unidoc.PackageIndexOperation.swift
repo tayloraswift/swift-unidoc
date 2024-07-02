@@ -35,7 +35,7 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let github:GitHub.Client<GitHub.PersonalAccessToken>
-        if  let integration:GitHub.Integration = server.github
+        if  let integration:any GitHub.Integration = server.github
         {
             github = .graphql(pat: integration.pat,
                 threads: server.context.threads,

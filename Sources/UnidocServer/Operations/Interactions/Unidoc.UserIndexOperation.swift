@@ -37,7 +37,7 @@ extension Unidoc.UserIndexOperation
     func perform(on server:Unidoc.Server) async throws -> HTTP.ServerResponse?
     {
         guard
-        let integration:GitHub.Integration = server.github
+        let integration:any GitHub.Integration = server.github
         else
         {
             return nil
