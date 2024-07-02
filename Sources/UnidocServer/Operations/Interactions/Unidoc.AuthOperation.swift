@@ -35,7 +35,7 @@ extension Unidoc.AuthOperation:Unidoc.InteractiveOperation
         }
 
         guard
-        let integration:GitHub.Integration = server.github
+        let integration:any GitHub.Integration = server.github
         else
         {
             return nil

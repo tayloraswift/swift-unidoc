@@ -76,6 +76,7 @@ let package:Package = .init(
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
         .library(name: "UnidocAssets_System", targets: ["UnidocAssets_System"]),
+        .library(name: "UnidocClient", targets: ["UnidocClient"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
@@ -104,18 +105,20 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.3")),
 
+        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(
+            from: "1.4.0")),
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
         .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(
             from: "1.1.1")),
 
         .package(url: "https://github.com/apple/swift-nio",
-            from: "2.67.0"),
+            from: "2.68.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl",
             from: "2.27.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
-            from: "1.32.0")),
+            from: "1.33.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
@@ -146,11 +149,8 @@ let package:Package = .init(
 
         .executableTarget(name: "unidoc-build",
             dependencies: [
-                .target(name: "ArgumentParsing"),
-                .target(name: "HTTPClient"),
-                .target(name: "SymbolGraphBuilder"),
-                .target(name: "UnidocRecords_LZ77"),
-                .target(name: "UnidocRecords"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .target(name: "UnidocClient"),
             ]),
 
         .executableTarget(name: "unidoc-preview",
@@ -390,7 +390,7 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphBuilder",
             dependencies: [
-                .target(name: "ArgumentParsing"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "MarkdownPluginSwift_IndexStoreDB"),
                 .target(name: "PackageMetadata"),
@@ -495,6 +495,14 @@ let package:Package = .init(
                 .target(name: "Media"),
                 .target(name: "System"),
                 .target(name: "UnidocAssets"),
+            ]),
+
+        .target(name: "UnidocClient",
+            dependencies: [
+                .target(name: "HTTPClient"),
+                .target(name: "SymbolGraphBuilder"),
+                .target(name: "UnidocRecords_LZ77"),
+                .target(name: "UnidocRecords"),
             ]),
 
         .target(name: "UnidocDB",

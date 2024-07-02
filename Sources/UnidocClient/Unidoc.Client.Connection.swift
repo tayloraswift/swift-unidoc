@@ -13,11 +13,15 @@ import URI
 
 extension Unidoc.Client
 {
+    @frozen public
     struct Connection
     {
+        @usableFromInline
         let http:Protocol.Connection
+        @usableFromInline
         let authorization:String?
 
+        @inlinable
         init(http:Protocol.Connection, authorization:String?)
         {
             self.http = http
@@ -27,6 +31,7 @@ extension Unidoc.Client
 }
 extension Unidoc.Client<HTTP.Client2>.Connection
 {
+    public
     func labels() async throws -> Unidoc.BuildLabels?
     {
         do
@@ -61,6 +66,7 @@ extension Unidoc.Client<HTTP.Client2>.Connection
         }
     }
 
+    public
     func labels(of package:Symbol.Package,
         series:Unidoc.VersionSeries) async throws -> Unidoc.BuildLabels?
     {
