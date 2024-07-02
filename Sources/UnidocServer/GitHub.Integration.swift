@@ -9,7 +9,5 @@ extension GitHub
         var oauth:OAuth { get }
 
         var pat:PersonalAccessToken { get }
-
-        func iat(id installation:UInt) async throws -> InstallationAccessToken
     }
 }
