@@ -76,6 +76,7 @@ let package:Package = .init(
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
         .library(name: "UnidocAssets_System", targets: ["UnidocAssets_System"]),
+        .library(name: "UnidocClient", targets: ["UnidocClient"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
@@ -147,10 +148,7 @@ let package:Package = .init(
         .executableTarget(name: "unidoc-build",
             dependencies: [
                 .target(name: "ArgumentParsing"),
-                .target(name: "HTTPClient"),
-                .target(name: "SymbolGraphBuilder"),
-                .target(name: "UnidocRecords_LZ77"),
-                .target(name: "UnidocRecords"),
+                .target(name: "UnidocClient"),
             ]),
 
         .executableTarget(name: "unidoc-preview",
@@ -495,6 +493,14 @@ let package:Package = .init(
                 .target(name: "Media"),
                 .target(name: "System"),
                 .target(name: "UnidocAssets"),
+            ]),
+
+        .target(name: "UnidocClient",
+            dependencies: [
+                .target(name: "HTTPClient"),
+                .target(name: "SymbolGraphBuilder"),
+                .target(name: "UnidocRecords_LZ77"),
+                .target(name: "UnidocRecords"),
             ]),
 
         .target(name: "UnidocDB",
