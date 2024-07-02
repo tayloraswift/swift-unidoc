@@ -2,7 +2,7 @@ import ArgumentParser
 import SymbolGraphBuilder
 
 @main
-extension SSGC.Main:ParsableCommand
+extension SSGC.Compile:ParsableCommand
 {
     public
     func run() throws

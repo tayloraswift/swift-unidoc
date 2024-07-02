@@ -4,7 +4,7 @@ import UnidocClient
 
 extension Unidoc.Client<HTTP.Client1>
 {
-    init(from options:Unidoc.Build.Local) throws
+    init(from options:Main.Local) throws
     {
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
 

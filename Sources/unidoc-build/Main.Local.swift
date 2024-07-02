@@ -4,7 +4,7 @@ import SymbolGraphCompiler
 import Symbols
 import System
 
-extension Unidoc.Build
+extension Main
 {
     struct Local
     {
@@ -56,7 +56,7 @@ extension Unidoc.Build
         var book:Bool = false
     }
 }
-extension Unidoc.Build.Local:AsyncParsableCommand
+extension Main.Local:AsyncParsableCommand
 {
     static let configuration:CommandConfiguration = .init(commandName: "local")
 
