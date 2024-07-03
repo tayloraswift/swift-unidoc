@@ -19,6 +19,21 @@ extension HTTP.Client2
         }
     }
 }
+extension HTTP.Client2.Facet:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        var string:String = ""
+        for (key, value, _):(String, String, HPACKIndexing) in headers ?? [:]
+        {
+            string += "\(key): \(value)\n"
+        }
+        string.append("\n")
+        string.append(String.init(decoding: body, as: Unicode.UTF8.self))
+        return string
+    }
+}
 extension HTTP.Client2.Facet
 {
     public
