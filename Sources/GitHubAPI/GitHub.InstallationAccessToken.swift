@@ -1,25 +1,30 @@
+import JSON
+
 extension GitHub
 {
     @frozen public
-    struct InstallationAccessToken:Sendable
+    struct InstallationAccessToken:RawRepresentable, Sendable
     {
         public
-        let value:String
+        let rawValue:String
 
         @inlinable public
-        init(value:String)
+        init(rawValue:String)
         {
-            self.value = value
+            self.rawValue = rawValue
         }
     }
 }
 extension GitHub.InstallationAccessToken:ExpressibleByStringLiteral
 {
     @inlinable public
-    init(stringLiteral:String) { self.init(value: stringLiteral) }
+    init(stringLiteral:String) { self.init(rawValue: stringLiteral) }
 }
 extension GitHub.InstallationAccessToken:CustomStringConvertible
 {
     @inlinable public
-    var description:String { self.value }
+    var description:String { self.rawValue }
+}
+extension GitHub.InstallationAccessToken:JSONEncodable, JSONDecodable
+{
 }
