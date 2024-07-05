@@ -139,6 +139,9 @@ extension GitHub.Repo:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
+        //  Note: GitHub often returns explicit `null` values for fields that are missing.
+        //  This means we need to be careful when mapping optional fields, particularly through
+        //  the use `as:`.
         self.init(id: try json[.id].decode(),
             owner: try json[.owner].decode(),
             name: try json[.name].decode(),
@@ -152,10 +155,20 @@ extension GitHub.Repo:JSONObjectDecodable
             archived: try json[.archived].decode(),
             disabled: try json[.disabled].decode(),
             fork: try json[.fork].decode(),
-            homepage: try json[.homepage]?.decode(as: String.self) { $0.isEmpty ? nil : $0 },
-            about: try json[.about]?.decode(as: String.self) { $0.isEmpty ? nil : $0 },
+            homepage: try json[.homepage]?.decode(),
+            about: try json[.about]?.decode(),
             created: try json[.created].decode(),
             updated: try json[.updated].decode(),
             pushed: try json[.pushed].decode())
+
+        //  String field normalization.
+        if  case true? = self.homepage?.isEmpty
+        {
+            self.homepage = nil
+        }
+        if  case true? = self.about?.isEmpty
+        {
+            self.about = nil
+        }
     }
 }
