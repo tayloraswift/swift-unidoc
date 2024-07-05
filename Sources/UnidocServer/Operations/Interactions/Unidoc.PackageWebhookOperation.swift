@@ -83,10 +83,6 @@ extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
         }
 
         //  TODO: see if we can also perform a package metadata update
-        if  case .github(let origin)? = package.repo?.origin
-        {
-            event.repo.watchers = origin.watchers
-        }
 
         let (_, new):(Unidoc.EditionMetadata, new:Bool) = try await server.db.unidoc.index(
             package: package.id,

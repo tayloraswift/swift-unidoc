@@ -155,8 +155,8 @@ extension Unidoc.VersionsPage
                         }
                     }
 
-                    $0[.dt] = "Watchers"
-                    $0[.dd] = "\(origin.watchers)"
+                    $0[.dt] = "Stars"
+                    $0[.dd] = "\(repo.stars)"
 
                     $0[.dt] = "Forks"
                     $0[.dd] = "\(repo.forks)"
