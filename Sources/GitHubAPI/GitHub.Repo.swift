@@ -46,6 +46,13 @@ extension GitHub
         public
         var fork:Bool
 
+        /// The repo’s visibility on GitHub. Some queries return only public repositories and so
+        /// omit this field.
+        public
+        var visibility:Visibility?
+        /// The repo’s dominant language, if GitHub was able to detect one.
+        public
+        var language:String?
         /// The repo’s homepage URL, if set.
         public
         var homepage:String?
@@ -79,6 +86,8 @@ extension GitHub
             archived:Bool,
             disabled:Bool,
             fork:Bool,
+            visibility:Visibility? = nil,
+            language:String? = nil,
             homepage:String? = nil,
             about:String? = nil,
             created:String,
@@ -98,6 +107,8 @@ extension GitHub
             self.archived = archived
             self.disabled = disabled
             self.fork = fork
+            self.visibility = visibility
+            self.language = language
             self.homepage = homepage
             self.about = about
             self.created = created
@@ -125,11 +136,13 @@ extension GitHub.Repo:JSONObjectDecodable
         case watchers = "subscribers_count"
         case forks = "forks_count"
         case stars = "stargazers_count"
-        case size = "size"
-        case archived = "archived"
-        case disabled = "disabled"
-        case fork = "fork"
-        case homepage = "homepage"
+        case size
+        case archived
+        case disabled
+        case fork
+        case visibility
+        case language
+        case homepage
         case about = "description"
         case created = "created_at"
         case updated = "updated_at"
@@ -155,6 +168,8 @@ extension GitHub.Repo:JSONObjectDecodable
             archived: try json[.archived].decode(),
             disabled: try json[.disabled].decode(),
             fork: try json[.fork].decode(),
+            visibility: try json[.visibility]?.decode(),
+            language: try json[.language]?.decode(),
             homepage: try json[.homepage]?.decode(),
             about: try json[.about]?.decode(),
             created: try json[.created].decode(),
