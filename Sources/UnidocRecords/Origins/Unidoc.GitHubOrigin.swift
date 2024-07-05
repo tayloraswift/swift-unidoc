@@ -23,8 +23,6 @@ extension Unidoc
         var about:String?
 
         public
-        var watchers:Int
-        public
         var size:Int
 
         public
@@ -41,7 +39,6 @@ extension Unidoc
             name:String,
             homepage:String?,
             about:String?,
-            watchers:Int,
             size:Int,
             archived:Bool,
             disabled:Bool,
@@ -53,7 +50,6 @@ extension Unidoc
             self.name = name
             self.homepage = homepage
             self.about = about
-            self.watchers = watchers
             self.size = size
             self.archived = archived
             self.disabled = disabled
@@ -82,7 +78,9 @@ extension Unidoc.GitHubOrigin
         case homepage = "H"
         case about = "A"
 
+        @available(*, unavailable)
         case watchers = "W"
+
         case size = "S"
 
         case archived = "X"
@@ -103,7 +101,6 @@ extension Unidoc.GitHubOrigin:BSONDocumentEncodable
         bson[.homepage] = self.homepage
         bson[.about] = self.about
 
-        bson[.watchers] = self.watchers
         bson[.size] = self.size
 
         bson[.archived] = self.archived
@@ -122,7 +119,6 @@ extension Unidoc.GitHubOrigin:BSONDocumentDecodable
             name: try bson[.name].decode(),
             homepage: try bson[.homepage]?.decode(),
             about: try bson[.about]?.decode(),
-            watchers: try bson[.watchers].decode(),
             size: try bson[.size].decode(),
             archived: try bson[.archived].decode(),
             disabled: try bson[.disabled].decode(),
