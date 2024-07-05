@@ -18,6 +18,19 @@ extension HTTP.Resource.Content.Body
         .binary(bytes[...])
     }
 }
+extension HTTP.Resource.Content.Body:CustomStringConvertible
+{
+    @inlinable public
+    var description:String
+    {
+        switch self
+        {
+        case .binary(let self): .init(decoding: self, as: Unicode.UTF8.self)
+        case .buffer(let self): .init(decoding: self.readableBytesView, as: Unicode.UTF8.self)
+        case .string(let self): self
+        }
+    }
+}
 extension HTTP.Resource.Content.Body
 {
     /// The size of the content to be transferred, in bytes. Unlike ``length``, this property

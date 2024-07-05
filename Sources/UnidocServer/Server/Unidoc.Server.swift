@@ -193,10 +193,13 @@ extension Unidoc.Server
             return await self.submit(update: procedural)
 
         case .sync(let response):
+            self.logger?.log(request: request.incoming, with: response, time: .zero)
             return response
 
         case .syncHTML(let renderable):
-            return renderable.response(format: self.format)
+            let response:HTTP.ServerResponse = renderable.response(format: self.format)
+            self.logger?.log(request: request.incoming, with: response, time: .zero)
+            return response
 
         case .syncLoad(let request):
             guard case .development(let cache, _) = self.options.mode

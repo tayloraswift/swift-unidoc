@@ -723,7 +723,9 @@ extension Unidoc.Router
             }
             catch let error
             {
-                return .sync(error: "Rejected webhook event: \(error)")
+                //  This is considered a server error, so we want to flag it as such for the
+                //  logging system to pick up.
+                return .sync(error: "Rejected webhook event: \(error)", status: 500)
             }
 
         default:
