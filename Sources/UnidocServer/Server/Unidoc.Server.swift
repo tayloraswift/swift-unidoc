@@ -87,7 +87,7 @@ extension Unidoc.Server
         .init(
             security: self.security,
             username: username,
-            locale: locale,
+            locale: locale ?? .init(language: .en),
             assets: self.options.cloudfront ? .cloudfront : .local,
             server: self.options.mode.server)
     }

@@ -14,7 +14,7 @@ extension Unidoc
         public
         var username:String?
         public
-        var locale:ISO.Locale?
+        var locale:ISO.Locale
         public
         let assets:Assets
         public
@@ -27,7 +27,7 @@ extension Unidoc
         init(
             security:ServerSecurity,
             username:String?,
-            locale:ISO.Locale?,
+            locale:ISO.Locale,
             assets:Assets,
             server:ServerType,
             time:UnixAttosecond = .now())
