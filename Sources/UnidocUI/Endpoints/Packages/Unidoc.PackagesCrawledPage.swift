@@ -1,6 +1,7 @@
 import BSON
 import HTTP
 import HTML
+import ISO
 import UnidocRender
 import UnidocDB
 import UnidocQueries
@@ -96,19 +97,19 @@ extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
                         {
                             let id:Timestamp.Date = .init(year: year, month: month, day: day)
                             let label:DateLabel
-                            switch (format.locale?.country, format.locale?.language)
+                            switch (format.locale.country, format.locale.language)
                             {
                             case    (.as?, _),
-                                    (.ca?, .en?),
+                                    (.ca?, .en),
                                     (.fm?, _),
                                     (.gu?, _),
-                                    (.ke?, .sw?),
+                                    (.ke?, .sw),
                                     (.mh?, _),
                                     (.mp?, _),
                                     (.pa?, _),
                                     (.ph?, _),
                                     (.pr?, _),
-                                    (.to?, .ee?),
+                                    (.to?, .ee),
                                     (.us?, _),
                                     (.um?, _),
                                     (.vi?, _):
@@ -142,7 +143,7 @@ extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
                                     $0.title = """
                                     \(date.repos) Swift \
                                     \(date.repos == 1 ? "repository" : "repositories") \
-                                    were created on GitHub on \(id.long(.en)).
+                                    were created on GitHub on \(id.long(.init(language: .en))).
                                     """
                                 }
                                     content:

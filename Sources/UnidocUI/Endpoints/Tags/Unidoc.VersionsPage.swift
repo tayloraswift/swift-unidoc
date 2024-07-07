@@ -102,14 +102,16 @@ extension Unidoc.VersionsPage:Unidoc.ApplicationPage
                 } = Unidoc.PackageMediaSettings.init(package: self.package)
             }
 
-            self.section(tags: &$0, now: format.time, dormancy: dormancy)
+            self.section(tags: &$0, format: format, dormancy: dormancy)
         }
     }
 }
 extension Unidoc.VersionsPage
 {
     private
-    func section(tags section:inout HTML.ContentEncoder, now:UnixAttosecond, dormancy:Duration?)
+    func section(tags section:inout HTML.ContentEncoder,
+        format:Unidoc.RenderFormat,
+        dormancy:Duration?)
     {
         if  let repo:Unidoc.PackageRepo = self.package.repo
         {
@@ -173,7 +175,7 @@ extension Unidoc.VersionsPage
                         $0[.a]
                         {
                             $0.href = "\(Unidoc.PackagesCreatedEndpoint[created])"
-                        } = "\(created.month(.en)) \(created.day), \(created.year)"
+                        } = created.long(format.locale)
                     }
                 }
             }
@@ -289,7 +291,7 @@ extension Unidoc.VersionsPage
 
             if  let crawled:UnixMillisecond = self.package.repo?.crawled
             {
-                let age:DurationFormat = .init(now - .init(crawled))
+                let age:DurationFormat = .init(format.time - .init(crawled))
 
                 $0[.dt] = "Repo read"
                 $0[.dd] = "\(age) ago"
@@ -297,7 +299,7 @@ extension Unidoc.VersionsPage
             if  let repo:Unidoc.PackageRepo = self.package.repo,
                 let fetched:UnixMillisecond = repo.fetched
             {
-                let age:DurationFormat = .init(now - .init(fetched))
+                let age:DurationFormat = .init(format.time - .init(fetched))
 
                 $0[.dt] = "Tags read"
                 $0[.dd]
@@ -322,7 +324,7 @@ extension Unidoc.VersionsPage
             if  self.view.editor,
                 let expires:UnixMillisecond = self.package.repo?.expires
             {
-                let dynamicInterval:DurationFormat = .init(.init(expires) - now)
+                let dynamicInterval:DurationFormat = .init(.init(expires) - format.time)
 
                 $0[.dt] = "Tags fetch in"
                 $0[.dd] = "\(dynamicInterval)"

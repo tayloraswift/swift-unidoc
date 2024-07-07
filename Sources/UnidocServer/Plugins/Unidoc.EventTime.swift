@@ -1,6 +1,7 @@
 import HTML
 import UnidocUI
 import UnixCalendar
+import UnixTime
 
 extension Unidoc
 {
