@@ -1,15 +1,16 @@
 import BSON
 import GitHubAPI
+import UnixTime
 
 @available(*, unavailable, message: "Not needed yet.")
 struct GitHubCredentials
 {
-    var refresh:GitHubCredential<BSON.Millisecond>
-    var access:GitHubCredential<BSON.Millisecond>
+    var refresh:GitHubCredential<UnixMillisecond>
+    var access:GitHubCredential<UnixMillisecond>
 
     init(
-        refresh:GitHubCredential<BSON.Millisecond>,
-        access:GitHubCredential<BSON.Millisecond>)
+        refresh:GitHubCredential<UnixMillisecond>,
+        access:GitHubCredential<UnixMillisecond>)
     {
         self.refresh = refresh
         self.access = access

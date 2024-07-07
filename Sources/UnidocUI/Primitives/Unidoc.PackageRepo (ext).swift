@@ -1,11 +1,10 @@
-import BSON
 import UnixTime
 
 extension Unidoc.PackageRepo
 {
-    func chyron(now:UnixInstant, ref:String? = nil) -> Unidoc.PackageChyron
+    func chyron(now:UnixAttosecond, ref:String? = nil) -> Unidoc.PackageChyron
     {
-        let pushed:BSON.Millisecond
+        let pushed:UnixMillisecond
         let icon:Unidoc.SourceLink.Icon
         let name:Substring
         let url:String

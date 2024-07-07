@@ -1,6 +1,7 @@
 import HTML
 import UnidocRender
 import UnidocDB
+import UnixCalendar
 import UnixTime
 import URI
 

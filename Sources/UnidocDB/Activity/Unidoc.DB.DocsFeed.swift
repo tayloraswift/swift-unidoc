@@ -2,6 +2,7 @@ import BSON
 import MongoDB
 import SymbolGraphs
 import UnidocRecords
+import UnixTime
 
 extension Unidoc.DB
 {
@@ -47,10 +48,10 @@ extension Unidoc.DB.DocsFeed
     func push(_ activity:Activity<Unidoc.Edition>,
         with session:Mongo.Session) async throws -> Bool
     {
-        let (_, inserted):(Activity<Unidoc.Edition>, BSON.Millisecond?) = try await session.run(
+        let (_, inserted):(Activity<Unidoc.Edition>, UnixMillisecond?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Upserting<
                     Activity<Unidoc.Edition>,
-                    BSON.Millisecond>>.init(
+                    UnixMillisecond>>.init(
                 Self.name,
                 returning: .new)
             {

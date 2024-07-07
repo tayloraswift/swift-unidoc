@@ -1,13 +1,13 @@
-import Durations
+import UnixTime
 
 extension Milliseconds
 {
     static
-    var minute:Self { .seconds(60) }
+    var minute:Self { .milliseconds(60_000) }
 
     static
-    var hour:Self { .seconds(3_600) }
+    var hour:Self { .milliseconds(3_600_000) }
 
     static
-    var day:Self { .seconds(86_400) }
+    var day:Self { .milliseconds(86_400_000) }
 }

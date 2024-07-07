@@ -1,5 +1,4 @@
 import BSON
-import Durations
 import MongoQL
 import UnidocRecords
 import UnixTime
@@ -22,15 +21,15 @@ extension Unidoc.PackageMetadata
 
         schedule:
         if  let interval:Milliseconds = repo.crawlingIntervalTarget(
-                dormant: repo.dormant(by: .millisecond(repo.crawled.value)),
+                dormant: repo.dormant(by: .init(repo.crawled)),
                 hidden: self.hidden,
                 realm: self.realm)
         {
-            var target:BSON.Millisecond = repo.crawled.advanced(by: interval)
+            var target:UnixMillisecond = repo.crawled.advanced(by: interval)
 
             //  If the repo is already scheduled to have its tags read, we should not keep
             //  postponing that.
-            if  let expires:BSON.Millisecond = self.repo?.expires,
+            if  let expires:UnixMillisecond = self.repo?.expires,
                     expires < target
             {
                 target = expires
@@ -53,7 +52,7 @@ extension Unidoc.PackageMetadata
         repo.fetched = repo.crawled
 
         if  let interval:Milliseconds = repo.crawlingIntervalTarget(
-                dormant: repo.dormant(by: .millisecond(repo.crawled.value)),
+                dormant: repo.dormant(by: .init(repo.crawled)),
                 hidden: self.hidden,
                 realm: self.realm)
         {

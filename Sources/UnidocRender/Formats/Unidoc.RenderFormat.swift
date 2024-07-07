@@ -1,5 +1,6 @@
 import HTTP
 import Media
+import UnixCalendar
 import UnixTime
 
 extension Unidoc
@@ -19,7 +20,7 @@ extension Unidoc
         var server:ServerType
 
         public
-        let time:UnixInstant
+        let time:UnixAttosecond
 
         @inlinable public
         init(
@@ -28,7 +29,7 @@ extension Unidoc
             locale:HTTP.Locale?,
             assets:Assets,
             server:ServerType,
-            time:UnixInstant = .now())
+            time:UnixAttosecond = .now())
         {
             self.security = security
             self.username = username

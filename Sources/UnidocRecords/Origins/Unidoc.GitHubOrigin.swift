@@ -1,4 +1,5 @@
 import BSON
+import UnixTime
 
 extension Unidoc
 {
@@ -11,7 +12,7 @@ extension Unidoc
         /// When the repository content (as opposed to its metadata) was last pushed to.
         /// This is usually different from ``updated``.
         public
-        var pushed:BSON.Millisecond
+        var pushed:UnixMillisecond
         public
         var owner:String
         public
@@ -34,7 +35,7 @@ extension Unidoc
 
         @inlinable public
         init(id:Int32,
-            pushed:BSON.Millisecond,
+            pushed:UnixMillisecond,
             owner:String,
             name:String,
             homepage:String?,

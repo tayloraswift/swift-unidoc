@@ -45,16 +45,16 @@ extension Unidoc.DB.CrawlingWindows
     /// Creates crawling windows, starting from today and going back up to `days` number of
     /// days. If some of the windows already exist, they are not reinitialized.
     public
-    func create(days:Int,
-        with session:Mongo.Session) async throws -> Mongo.Updates<BSON.Millisecond>
+    func create(previous days:Days,
+        with session:Mongo.Session) async throws -> Mongo.Updates<UnixMillisecond>
     {
-        let response:Mongo.UpdateResponse<BSON.Millisecond> = try await session.run(
+        let response:Mongo.UpdateResponse<UnixMillisecond> = try await session.run(
             command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
             {
-                let today:UnixDate = .midnight(before: .now())
-                for day:UnixDate in today.advanced(by: -days) ... today
+                let today:UnixDate = .today()
+                for day:UnixDate in today.regressed(by: days) ... today
                 {
-                    let id:BSON.Millisecond = .init(day)
+                    let id:UnixMillisecond = .init(day)
 
                     $0
                     {
@@ -68,7 +68,7 @@ extension Unidoc.DB.CrawlingWindows
                             }
                             $0[.setOnInsert]
                             {
-                                $0[Unidoc.CrawlingWindow[.expires]] = 0 as BSON.Millisecond
+                                $0[Unidoc.CrawlingWindow[.expires]] = UnixMillisecond.zero
                             }
                         }
                     }

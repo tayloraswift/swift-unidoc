@@ -1,4 +1,5 @@
 import BSON
+import UnixTime
 
 extension Unidoc
 {
@@ -8,11 +9,11 @@ extension Unidoc
         /// When the package’s repo information was last read. This is always non-nil because
         /// crawling is how we obtain this structure in the first place.
         public
-        var crawled:BSON.Millisecond
+        var crawled:UnixMillisecond
         /// When the package’s tags were last fetched. Nil if the package’s tags have not been
         /// read yet.
         public
-        var fetched:BSON.Millisecond?
+        var fetched:UnixMillisecond?
         /// When we should fetch the package’s tags again. This is nil in some cases where we
         /// do not want to crawl the package at all, such as when the package is archived or
         /// unfree.
@@ -23,7 +24,7 @@ extension Unidoc
         /// Even if this becomes nil, it is expected that a small number of packages may again
         /// be rediscovered later and ruled eligible for crawling.
         public
-        var expires:BSON.Millisecond?
+        var expires:UnixMillisecond?
 
         /// The account that owns the repo, and could be reasonably allowed to update its
         /// package settings.
@@ -35,14 +36,14 @@ extension Unidoc
         /// For query convenience, the instant always encodes an integral date.
         /// This field is used as a quasi shard key for administative purposes.
         public
-        var created:BSON.Millisecond
+        var created:UnixMillisecond
         /// When the repo was last updated. Both GitHub and GitLab define this field.
         ///
         /// The instant represents the time the repo metadata was last updated, not the time
         /// the repo content was last updated. The instant may contain a fractional time
         /// component.
         public
-        var updated:BSON.Millisecond
+        var updated:UnixMillisecond
 
         /// The repo’s license. All software repos have the concept of a license.
         public
@@ -66,12 +67,12 @@ extension Unidoc
 
         @inlinable public
         init(
-            crawled:BSON.Millisecond,
-            fetched:BSON.Millisecond?,
-            expires:BSON.Millisecond?,
+            crawled:UnixMillisecond,
+            fetched:UnixMillisecond?,
+            expires:UnixMillisecond?,
             account:Account?,
-            created:BSON.Millisecond,
-            updated:BSON.Millisecond,
+            created:UnixMillisecond,
+            updated:UnixMillisecond,
             license:PackageLicense?,
             topics:[String],
             master:String?,
@@ -151,7 +152,7 @@ extension Unidoc.PackageRepo:BSONDocumentDecodable
         let origin:Unidoc.PackageOrigin = .github(try bson[.github].decode())
 
         self.init( // TODO: deoptionalize
-            crawled: try bson[.crawled]?.decode() ?? 0,
+            crawled: try bson[.crawled]?.decode() ?? .zero,
             fetched: try bson[.fetched]?.decode(),
             expires: try bson[.expires]?.decode(),
             account: try bson[.account]?.decode(),

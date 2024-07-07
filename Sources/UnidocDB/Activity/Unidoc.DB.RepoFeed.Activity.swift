@@ -3,6 +3,7 @@ import MongoQL
 import SymbolGraphs
 import Symbols
 import UnidocRecords
+import UnixTime
 
 extension Unidoc.DB.RepoFeed
 {
@@ -10,7 +11,7 @@ extension Unidoc.DB.RepoFeed
     struct Activity:Identifiable, Equatable, Sendable
     {
         public
-        let id:BSON.Millisecond
+        let id:UnixMillisecond
 
         public
         let package:Symbol.Package
@@ -18,7 +19,7 @@ extension Unidoc.DB.RepoFeed
         let refname:String
 
         @inlinable public
-        init(discovered id:BSON.Millisecond,
+        init(discovered id:UnixMillisecond,
             package:Symbol.Package,
             refname:String)
         {

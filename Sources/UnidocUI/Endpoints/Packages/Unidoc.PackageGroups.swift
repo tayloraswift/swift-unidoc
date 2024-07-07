@@ -32,7 +32,7 @@ extension Unidoc.PackageGroups
 {
     init(organizing packages:consuming [Unidoc.EditionOutput],
         heading:Heading? = nil,
-        now:UnixInstant)
+        now:UnixAttosecond)
     {
         var packages:
         (

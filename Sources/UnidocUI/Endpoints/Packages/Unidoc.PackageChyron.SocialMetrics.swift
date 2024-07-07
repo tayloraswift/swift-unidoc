@@ -1,4 +1,3 @@
-import BSON
 import HTML
 import UnixTime
 
@@ -7,13 +6,13 @@ extension Unidoc.PackageChyron
     struct SocialMetrics
     {
         private
-        let pushed:BSON.Millisecond
+        let pushed:UnixMillisecond
         private
         let stars:Int
         private
-        let now:UnixInstant
+        let now:UnixAttosecond
 
-        init(pushed:BSON.Millisecond, stars:Int, now:UnixInstant)
+        init(pushed:UnixMillisecond, stars:Int, now:UnixAttosecond)
         {
             self.pushed = pushed
             self.stars = stars
@@ -27,7 +26,7 @@ extension Unidoc.PackageChyron.SocialMetrics:HTML.OutputStreamable
     func += (span:inout HTML.ContentEncoder, self:Self)
     {
         let dynamicInterval:Duration.DynamicFormat = .init(
-            truncating: self.now - .millisecond(self.pushed.value))
+            truncating: self.now - .init(self.pushed))
 
         span[.span]
         {

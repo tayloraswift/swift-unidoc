@@ -4,6 +4,7 @@ import MongoDB
 import SymbolGraphs
 import Symbols
 import UnidocRecords
+import UnixTime
 
 extension Unidoc.DB
 {
@@ -217,7 +218,7 @@ extension Unidoc.DB.Packages
 
     public
     func update(package:Unidoc.Package,
-        expires time:BSON.Millisecond,
+        expires time:UnixMillisecond,
         with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
         let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(

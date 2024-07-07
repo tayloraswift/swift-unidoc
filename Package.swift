@@ -89,15 +89,14 @@ let package:Package = .init(
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
             from: "1.1.0")),
-        // .package(path: "../swift-dom"),
-
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.6.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.22.0")),
-        // .package(path: "../swift-mongodb"),
+            from: "0.23.0")),
+        .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
+            from: "0.1.0")),
 
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "1.1.0")),
@@ -195,7 +194,7 @@ let package:Package = .init(
 
         .target(name: "GitHubAPI",
             dependencies: [
-                .target(name: "UnixTime"),
+                .product(name: "UnixTime", package: "swift-unixtime"),
                 .product(name: "JSON", package: "swift-json"),
                 .product(name: "SHA1", package: "swift-hash"),
             ]),
@@ -350,7 +349,7 @@ let package:Package = .init(
                 .target(name: "HTTPClient"),
                 .target(name: "Media"),
                 .target(name: "S3"),
-                .target(name: "UnixTime"),
+                .product(name: "UnixCalendar", package: "swift-unixtime"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "SHA2", package: "swift-hash"),
@@ -511,7 +510,7 @@ let package:Package = .init(
                 .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
-                .target(name: "UnixTime"),
+                .product(name: "UnixCalendar", package: "swift-unixtime"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
@@ -550,8 +549,7 @@ let package:Package = .init(
                 .target(name: "Media"),
                 .target(name: "UnidocAssets"),
                 .target(name: "UnidocRecords"),
-                .target(name: "UnixTime"),
-
+                .product(name: "UnixCalendar", package: "swift-unixtime"),
                 .product(name: "HTML", package: "swift-dom"),
             ]),
 
@@ -584,8 +582,6 @@ let package:Package = .init(
                 .target(name: "UnidocQueries"),
                 .target(name: "URI"),
             ]),
-
-        .target(name: "UnixTime"),
 
         .target(name: "URI",
             dependencies: [
