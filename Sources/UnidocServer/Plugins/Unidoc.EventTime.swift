@@ -1,4 +1,3 @@
-import DynamicTime
 import HTML
 import UnidocUI
 import UnixCalendar
@@ -11,10 +10,10 @@ extension Unidoc
         @usableFromInline
         let components:Timestamp.Components
         @usableFromInline
-        let dynamicAge:Duration.DynamicFormat
+        let dynamicAge:DurationFormat
 
         @inlinable
-        init(components:Timestamp.Components, dynamicAge:Duration.DynamicFormat)
+        init(components:Timestamp.Components, dynamicAge:DurationFormat)
         {
             self.components = components
             self.dynamicAge = dynamicAge

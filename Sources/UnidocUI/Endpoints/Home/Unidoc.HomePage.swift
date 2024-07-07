@@ -1,5 +1,4 @@
 import BSON
-import DynamicTime
 import HTML
 import UnidocDB
 import UnidocRecords
@@ -130,8 +129,8 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                             {
                                 $0[.li]
                                 {
-                                    let dynamicAge:Duration.DynamicFormat = .init(
-                                        truncating: format.time - .init(item.id))
+                                    let age:Duration = format.time - .init(item.id)
+                                    let ageFormat:DurationFormat = .init(age)
 
                                     $0[.p, { $0.class = "edition"}]
                                     {
@@ -143,8 +142,8 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                                         $0[.span] = item.refname
                                     }
 
-                                    $0[.p] { $0.class = "age" } = dynamicAge.unit != .seconds
-                                        ? "\(dynamicAge) ago"
+                                    $0[.p] { $0.class = "age" } = ageFormat.unit != .seconds
+                                        ? "\(ageFormat) ago"
                                         : "just now"
                                 }
                             }
@@ -161,8 +160,8 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                             {
                                 $0[.li]
                                 {
-                                    let dynamicAge:Duration.DynamicFormat = .init(
-                                        truncating: format.time - .init(item.id))
+                                    let age:Duration = format.time - .init(item.id)
+                                    let ageFormat:DurationFormat = .init(age)
 
                                     $0[.p, { $0.class = "edition"}]
                                     {
@@ -173,8 +172,8 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                                         } = item.volume.symbol.version
                                     }
 
-                                    $0[.p] { $0.class = "age" } = dynamicAge.unit != .seconds
-                                        ? "\(dynamicAge) ago"
+                                    $0[.p] { $0.class = "age" } = ageFormat.unit != .seconds
+                                        ? "\(ageFormat) ago"
                                         : "just now"
                                 }
                             }

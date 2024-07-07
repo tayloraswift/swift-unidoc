@@ -15,7 +15,7 @@ extension Unidoc.PackageRepo
     {
         guard
         let created:Timestamp.Components = .init(iso8601: repo.created),
-        let created:UnixAttosecond = .init(utc: created)
+        let created:UnixMillisecond = .init(utc: created)
         else
         {
             throw Unidoc.GitHubRepoMetadataError.created(repo.created)
@@ -23,7 +23,7 @@ extension Unidoc.PackageRepo
 
         guard
         let updated:Timestamp.Components = .init(iso8601: repo.updated),
-        let updated:UnixAttosecond = .init(utc: updated)
+        let updated:UnixMillisecond = .init(utc: updated)
         else
         {
             throw Unidoc.GitHubRepoMetadataError.updated(repo.updated)
@@ -31,7 +31,7 @@ extension Unidoc.PackageRepo
 
         guard
         let pushed:Timestamp.Components = .init(iso8601: repo.pushed),
-        let pushed:UnixAttosecond = .init(utc: pushed)
+        let pushed:UnixMillisecond = .init(utc: pushed)
         else
         {
             throw Unidoc.GitHubRepoMetadataError.pushed(repo.pushed)
@@ -41,14 +41,14 @@ extension Unidoc.PackageRepo
             fetched: nil,
             expires: nil,
             account: .init(type: .github, user: repo.owner.id),
-            created: .init(truncating: created),
-            updated: .init(truncating: updated),
+            created: created,
+            updated: updated,
             license: repo.license.map { .init(spdx: $0.id, name: $0.name) },
             topics: repo.topics,
             master: repo.master,
             origin: .github(.init(
                 id: repo.id,
-                pushed: .init(truncating: pushed),
+                pushed: pushed,
                 owner: repo.owner.login,
                 name: repo.name,
                 homepage: repo.homepage,

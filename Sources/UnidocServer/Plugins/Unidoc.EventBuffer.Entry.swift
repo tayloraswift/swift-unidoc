@@ -1,4 +1,3 @@
-import DynamicTime
 import UnixCalendar
 import UnixTime
 
@@ -30,7 +29,7 @@ extension Unidoc.EventBuffer.Entry
     {
         self.pushed.timestamp.map
         {
-            .init(components: $0.components, dynamicAge: .init(truncating: now - self.pushed))
+            .init(components: $0.components, dynamicAge: .init(now - self.pushed))
         }
     }
 }
