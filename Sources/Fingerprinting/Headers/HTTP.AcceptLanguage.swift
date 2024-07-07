@@ -1,4 +1,5 @@
 import HTTP
+import ISO
 
 extension HTTP
 {
@@ -27,7 +28,7 @@ extension HTTP.AcceptLanguage
 {
     /// Returns the locale with the highest quality factor.
     @inlinable public
-    var dominant:HTTP.Locale?
+    var dominant:ISO.Locale?
     {
         self.max { $0.q < $1.q }?.locale
     }

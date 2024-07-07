@@ -13,8 +13,6 @@ let package:Package = .init(
 
         .library(name: "guides", targets: ["guides"]),
 
-        .library(name: "CasesByIntegerEncodingMacro", targets: ["CasesByIntegerEncodingMacro"]),
-
         .library(name: "ArgumentParsing", targets: ["ArgumentParsing"]),
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
@@ -28,7 +26,6 @@ let package:Package = .init(
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
         .library(name: "IP", targets: ["IP"]),
-        .library(name: "ISO", targets: ["ISO"]),
         .library(name: "InlineArray", targets: ["InlineArray"]),
 
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
@@ -126,20 +123,6 @@ let package:Package = .init(
             from: "510.0.2"),
     ],
     targets: [
-        .macro(name: "UnidocMacros",
-            dependencies: [
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-            ],
-            path: "Macros/UnidocMacros"),
-
-        .target(name: "CasesByIntegerEncodingMacro",
-            dependencies: [
-                .target(name: "UnidocMacros"),
-            ],
-            path: "Macros/CasesByIntegerEncodingMacro"),
-
-
         .executableTarget(name: "ssgc",
             dependencies: [
                 .target(name: "ArgumentParsing"),
@@ -174,12 +157,10 @@ let package:Package = .init(
                 .target(name: "SemanticVersions"),
             ]),
 
-        .target(name: "DynamicTime"),
-
         .target(name: "Fingerprinting",
             dependencies: [
                 .target(name: "HTTP"),
-                .target(name: "ISO"),
+                .product(name: "ISO", package: "swift-unixtime"),
             ]),
 
         .target(name: "FNV1"),
@@ -201,8 +182,8 @@ let package:Package = .init(
 
         .target(name: "HTTP",
             dependencies: [
-                .target(name: "ISO"),
                 .target(name: "Media"),
+                .product(name: "ISO", package: "swift-unixtime"),
                 .product(name: "MD5", package: "swift-hash"),
                 .product(name: "NIOCore", package: "swift-nio"),
             ]),
@@ -241,17 +222,6 @@ let package:Package = .init(
         .target(name: "InlineArray"),
 
         .target(name: "InlineDictionary"),
-
-        .target(name: "ISO",
-            dependencies: [
-                .target(name: "CasesByIntegerEncodingMacro"),
-            ],
-            exclude: [
-                //  "ISO.Country (gen).swift",
-                "ISO.Country.swift",
-                //  "ISO.Macrolanguage (gen).swift",
-                "ISO.Macrolanguage.swift",
-            ]),
 
         .target(name: "LexicalPaths"),
 
@@ -574,13 +544,13 @@ let package:Package = .init(
 
         .target(name: "UnidocUI",
             dependencies: [
-                .target(name: "DynamicTime"),
                 .target(name: "GitHubAPI"),
                 .target(name: "PieCharts"),
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocAPI"),
                 .target(name: "UnidocQueries"),
                 .target(name: "URI"),
+                .product(name: "UnixTime", package: "swift-unixtime"),
             ]),
 
         .target(name: "URI",

@@ -1,6 +1,7 @@
 import GitHubAPI
 import HTTP
 import HTTPServer
+import ISO
 import MongoDB
 import PieCharts
 import UnidocRender
@@ -81,7 +82,7 @@ extension Unidoc.Server
         self.format(username: nil, locale: nil)
     }
 
-    func format(username:String?, locale:HTTP.Locale?) -> Unidoc.RenderFormat
+    func format(username:String?, locale:ISO.Locale?) -> Unidoc.RenderFormat
     {
         .init(
             security: self.security,

@@ -25,16 +25,15 @@ extension Unidoc.PackageChyron.SocialMetrics:HTML.OutputStreamable
     static
     func += (span:inout HTML.ContentEncoder, self:Self)
     {
-        let dynamicInterval:Duration.DynamicFormat = .init(
-            truncating: self.now - .init(self.pushed))
+        let age:DurationFormat = .init(self.now - .init(self.pushed))
 
         span[.span]
         {
             $0.class = "pushed"
             $0.title = """
-            This package’s repository was last pushed to \(dynamicInterval) ago.
+            This package’s repository was last pushed to \(age) ago.
             """
-        } = "\(dynamicInterval.short)"
+        } = "\(age.short)"
 
         span[.span]
         {

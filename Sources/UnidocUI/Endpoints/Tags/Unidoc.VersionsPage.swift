@@ -289,22 +289,20 @@ extension Unidoc.VersionsPage
 
             if  let crawled:UnixMillisecond = self.package.repo?.crawled
             {
-                let dynamicAge:Duration.DynamicFormat = .init(
-                    truncating: now - .init(crawled))
+                let age:DurationFormat = .init(now - .init(crawled))
 
                 $0[.dt] = "Repo read"
-                $0[.dd] = "\(dynamicAge) ago"
+                $0[.dd] = "\(age) ago"
             }
             if  let repo:Unidoc.PackageRepo = self.package.repo,
                 let fetched:UnixMillisecond = repo.fetched
             {
-                let dynamicAge:Duration.DynamicFormat = .init(
-                    truncating: now - .init(fetched))
+                let age:DurationFormat = .init(now - .init(fetched))
 
                 $0[.dt] = "Tags read"
                 $0[.dd]
                 {
-                    $0 += "\(dynamicAge) ago"
+                    $0 += "\(age) ago"
 
                     let crawlingInterval:Milliseconds? = repo.crawlingIntervalTarget(
                         dormant: dormancy,
@@ -316,8 +314,7 @@ extension Unidoc.VersionsPage
                         $0.class = "parenthetical"
                     } = crawlingInterval.map
                     {
-                        let dynamicInterval:Duration.DynamicFormat = .init(
-                            truncating: Duration.init($0))
+                        let dynamicInterval:DurationFormat = .init($0)
                         return "target: \(dynamicInterval)"
                     }
                 }
@@ -325,8 +322,7 @@ extension Unidoc.VersionsPage
             if  self.view.editor,
                 let expires:UnixMillisecond = self.package.repo?.expires
             {
-                let dynamicInterval:Duration.DynamicFormat = .init(
-                    truncating: .init(expires) - now)
+                let dynamicInterval:DurationFormat = .init(.init(expires) - now)
 
                 $0[.dt] = "Tags fetch in"
                 $0[.dd] = "\(dynamicInterval)"

@@ -39,7 +39,7 @@ extension HTTP.AcceptLanguage.Iterator:IteratorProtocol
                 country = nil
             }
 
-            let locale:HTTP.Locale?
+            let locale:ISO.Locale?
 
             if  let language:ISO.Macrolanguage = .init(language)
             {

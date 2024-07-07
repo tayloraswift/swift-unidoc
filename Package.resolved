@@ -1,5 +1,5 @@
 {
-  "originHash" : "f3d942af43ce7dae62b17206f299863d6d671cac66ddc915b23dfbd3b3db91b5",
+  "originHash" : "e8c323b7882d9fdf230db3ee0274b713966382c78d5582155a258a141bec28e5",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-png",
       "state" : {
-        "revision" : "fee79d9e180480dcc6408041a68c11c43c870b30",
-        "version" : "4.4.3"
+        "revision" : "99c1279148c0843328263b39158bf10ea7ea469e",
+        "version" : "4.4.4"
       }
     },
     {
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-unixtime",
       "state" : {
-        "revision" : "04956919d5d1f7aad9def5f50e9b6c9938e8089e",
-        "version" : "0.1.0"
+        "revision" : "c35e9289702c01d11e3026630bdee9dfdfb3e34f",
+        "version" : "0.1.3"
       }
     }
   ],
