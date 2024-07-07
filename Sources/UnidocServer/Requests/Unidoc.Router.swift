@@ -7,7 +7,7 @@ import Media
 import Multiparts
 import Symbols
 import URI
-import UnixTime
+import UnixCalendar
 
 extension Unidoc
 {
@@ -517,9 +517,9 @@ extension Unidoc.Router
 
         case .telescope:
             if  let days:String = form["days"],
-                let days:Int = .init(days)
+                let days:Int64 = .init(days)
             {
-                return .unordered(Unidoc.SiteConfigOperation.telescope(days: days))
+                return .unordered(Unidoc.SiteConfigOperation.telescope(last: .days(days)))
             }
 
         case .uplinkAll:

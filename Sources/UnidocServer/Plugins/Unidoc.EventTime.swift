@@ -1,7 +1,7 @@
 import DynamicTime
 import HTML
 import UnidocUI
-import UnixTime
+import UnixCalendar
 
 extension Unidoc
 {

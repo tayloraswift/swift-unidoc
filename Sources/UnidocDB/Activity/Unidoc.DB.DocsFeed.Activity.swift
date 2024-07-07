@@ -2,6 +2,7 @@ import BSON
 import MongoQL
 import Unidoc
 import UnidocRecords
+import UnixTime
 
 extension Unidoc.DB.DocsFeed
 {
@@ -13,13 +14,13 @@ extension Unidoc.DB.DocsFeed
     {
         /// In retrospect, this was a truly awful choice of `_id` key.
         public
-        let id:BSON.Millisecond
+        let id:UnixMillisecond
 
         public
         let volume:Volume
 
         @inlinable public
-        init(discovered id:BSON.Millisecond, volume:Volume)
+        init(discovered id:UnixMillisecond, volume:Volume)
         {
             self.id = id
             self.volume = volume

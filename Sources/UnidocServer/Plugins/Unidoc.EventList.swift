@@ -16,10 +16,10 @@ extension Unidoc
         @usableFromInline
         let entries:Deque<EventBuffer<Event>.Entry>
         @usableFromInline
-        let now:UnixInstant
+        let now:UnixAttosecond
 
         @inlinable
-        init(entries:Deque<EventBuffer<Event>.Entry>, now:UnixInstant)
+        init(entries:Deque<EventBuffer<Event>.Entry>, now:UnixAttosecond)
         {
             self.entries = entries
             self.now = now

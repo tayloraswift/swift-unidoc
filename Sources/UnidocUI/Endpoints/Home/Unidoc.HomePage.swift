@@ -131,7 +131,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                                 $0[.li]
                                 {
                                     let dynamicAge:Duration.DynamicFormat = .init(
-                                        truncating: format.time - .millisecond(item.id.value))
+                                        truncating: format.time - .init(item.id))
 
                                     $0[.p, { $0.class = "edition"}]
                                     {
@@ -162,7 +162,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                                 $0[.li]
                                 {
                                     let dynamicAge:Duration.DynamicFormat = .init(
-                                        truncating: format.time - .millisecond(item.id.value))
+                                        truncating: format.time - .init(item.id))
 
                                     $0[.p, { $0.class = "edition"}]
                                     {

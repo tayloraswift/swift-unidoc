@@ -4,6 +4,7 @@ import HTML
 import UnidocRender
 import UnidocDB
 import UnidocQueries
+import UnixCalendar
 import UnixTime
 import URI
 
@@ -30,11 +31,11 @@ extension Unidoc.PackagesCrawledPage
     {
         let dates:[Timestamp.Date: Date] = dates.reduce(into: [:])
         {
-            let id:UnixInstant = .millisecond($1.window.id.value)
+            let id:UnixAttosecond = .init($1.window.id)
             if  let timestamp:Timestamp = id.timestamp
             {
                 $0[timestamp.date] = .init(
-                    crawled: $1.window.crawled.map { .millisecond($0.value) },
+                    crawled: $1.window.crawled.map(UnixAttosecond.init(_:)),
                     repos: $1.repos)
             }
         }

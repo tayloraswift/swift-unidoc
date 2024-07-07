@@ -37,11 +37,11 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
         {
             $0[Unidoc.CrawlingWindow[.id]]
             {
-                $0[.gte] = BSON.Millisecond.init(UnixInstant.date(self.range.lowerBound))
+                $0[.gte] = UnixMillisecond.init(self.range.lowerBound)
             }
             $0[Unidoc.CrawlingWindow[.id]]
             {
-                $0[.lt] = BSON.Millisecond.init(UnixInstant.date(self.range.upperBound))
+                $0[.lt] = UnixMillisecond.init(self.range.upperBound)
             }
         }
 

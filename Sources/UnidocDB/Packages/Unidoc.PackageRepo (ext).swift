@@ -1,8 +1,8 @@
 import BSON
-import Durations
 import GitHubAPI
 import MongoQL
 import UnidocRecords
+import UnixCalendar
 import UnixTime
 
 extension Unidoc.PackageRepo:Mongo.MasterCodingModel
@@ -11,11 +11,11 @@ extension Unidoc.PackageRepo:Mongo.MasterCodingModel
 extension Unidoc.PackageRepo
 {
     @inlinable public static
-    func github(_ repo:GitHub.Repo, crawled:BSON.Millisecond) throws -> Self
+    func github(_ repo:GitHub.Repo, crawled:UnixMillisecond) throws -> Self
     {
         guard
         let created:Timestamp.Components = .init(iso8601: repo.created),
-        let created:UnixInstant = .init(utc: .date(created))
+        let created:UnixAttosecond = .init(utc: created)
         else
         {
             throw Unidoc.GitHubRepoMetadataError.created(repo.created)
@@ -23,7 +23,7 @@ extension Unidoc.PackageRepo
 
         guard
         let updated:Timestamp.Components = .init(iso8601: repo.updated),
-        let updated:UnixInstant = .init(utc: updated)
+        let updated:UnixAttosecond = .init(utc: updated)
         else
         {
             throw Unidoc.GitHubRepoMetadataError.updated(repo.updated)
@@ -31,7 +31,7 @@ extension Unidoc.PackageRepo
 
         guard
         let pushed:Timestamp.Components = .init(iso8601: repo.pushed),
-        let pushed:UnixInstant = .init(utc: pushed)
+        let pushed:UnixAttosecond = .init(utc: pushed)
         else
         {
             throw Unidoc.GitHubRepoMetadataError.pushed(repo.pushed)
@@ -41,14 +41,14 @@ extension Unidoc.PackageRepo
             fetched: nil,
             expires: nil,
             account: .init(type: .github, user: repo.owner.id),
-            created: .init(created),
-            updated: .init(updated),
+            created: .init(truncating: created),
+            updated: .init(truncating: updated),
             license: repo.license.map { .init(spdx: $0.id, name: $0.name) },
             topics: repo.topics,
             master: repo.master,
             origin: .github(.init(
                 id: repo.id,
-                pushed: .init(pushed),
+                pushed: .init(truncating: pushed),
                 owner: repo.owner.login,
                 name: repo.name,
                 homepage: repo.homepage,
@@ -65,16 +65,16 @@ extension Unidoc.PackageRepo
 extension Unidoc.PackageRepo
 {
     public
-    func dormant(by now:UnixInstant) -> Duration?
+    func dormant(by now:UnixAttosecond) -> Duration?
     {
-        let pushed:BSON.Millisecond
+        let pushed:UnixMillisecond
 
         switch self.origin
         {
         case .github(let origin):   pushed = origin.pushed
         }
 
-        let dormancy:Duration = now - .millisecond(pushed.value)
+        let dormancy:Duration = now - .init(pushed)
         //  If the repo has been dormant for two years, we consider it abandoned.
         if  dormancy > .seconds(60 * 60 * 24 * 365 * 2)
         {
@@ -99,7 +99,7 @@ extension Unidoc.PackageRepo
             return nil
         }
 
-        var interval:Milliseconds = 0
+        var interval:Milliseconds = .zero
 
         switch self.license?.free
         {

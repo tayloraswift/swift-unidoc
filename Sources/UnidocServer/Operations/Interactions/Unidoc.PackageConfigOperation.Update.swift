@@ -1,5 +1,5 @@
-import BSON
 import Symbols
+import UnixTime
 
 extension Unidoc.PackageConfigOperation
 {
@@ -7,7 +7,7 @@ extension Unidoc.PackageConfigOperation
     {
         case hidden(Bool)
         case symbol(Symbol.Package)
-        case expires(BSON.Millisecond)
+        case expires(UnixMillisecond)
         case reset(Field)
     }
 }
@@ -28,8 +28,7 @@ extension Unidoc.PackageConfigOperation.Update
         else if
             case "true"? = form["refresh"]
         {
-            let already:BSON.Millisecond = .init(0)
-            self = .expires(already)
+            self = .expires(.zero)
         }
         else if
             let field:Field = .init(from: form)
