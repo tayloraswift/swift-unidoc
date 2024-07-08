@@ -115,12 +115,21 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             $0[.foreignField] = Unidoc.RealmMetadata[.id]
             $0[.as] = Output[.realm]
         }
+        //  Lookup the associated crawling ticket.
+        pipeline[stage: .lookup]
+        {
+            $0[.from] = Unidoc.DB.CrawlingTickets.name
+            $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
+            $0[.foreignField] = Unidoc.CrawlingTicket<Unidoc.Package>[.id]
+            $0[.as] = Output[.ticket]
+        }
 
         //  Unbox single-element arrays.
         pipeline[stage: .set, using: Output.CodingKey.self]
         {
             $0[.build] { $0[.first] = Output[.build] }
             $0[.realm] { $0[.first] = Output[.realm] }
+            $0[.ticket] { $0[.first] = Output[.ticket] }
         }
 
         if  let id:Unidoc.Account = self.user

@@ -38,8 +38,6 @@ extension Unidoc.PackageRepo
         }
 
         return .init(crawled: crawled,
-            fetched: nil,
-            expires: nil,
             account: .init(type: .github, user: repo.owner.id),
             created: created,
             updated: updated,
@@ -48,9 +46,10 @@ extension Unidoc.PackageRepo
             master: repo.master,
             origin: .github(.init(
                 id: repo.id,
-                pushed: pushed,
                 owner: repo.owner.login,
                 name: repo.name,
+                node: repo.node,
+                pushed: pushed,
                 homepage: repo.homepage,
                 about: repo.about,
                 size: repo.size,

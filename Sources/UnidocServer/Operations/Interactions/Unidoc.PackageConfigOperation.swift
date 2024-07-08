@@ -91,11 +91,14 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
             rebuildPackageList = updated != nil
 
         case .expires(let when):
-            let package:Unidoc.PackageMetadata? = try await server.db.packages.update(
-                package: self.package,
-                expires: when,
+            /// TODO: we should diagnose when we try to request a tags fetch for a package that
+            /// uses webhooks, as this will fail silently.
+            let _:Bool? = try await server.db.crawlingTickets.move(
+                ticket: self.package,
+                time: when,
                 with: session)
-            updated = package?.symbol
+
+            updated = nil
             rebuildPackageList = false
 
         case .symbol(let symbol):

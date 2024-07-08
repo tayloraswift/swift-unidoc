@@ -207,40 +207,22 @@ extension Unidoc.DB.Packages
         try await self.update(field: .symbol, of: package, to: symbol, with: session)
     }
 
-    @discardableResult
     public
     func update(package:Unidoc.Package,
         repo:Unidoc.PackageRepo?,
-        with session:Mongo.Session) async throws -> Bool?
-    {
-        try await self.update(field: .repo, of: package, to: repo, with: session)
-    }
-
-    public
-    func update(package:Unidoc.Package,
-        expires time:UnixMillisecond,
         with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
-        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(
-                Self.name,
-                returning: .new)
+        try await self.modify(existing: package, with: session)
+        {
+            if  let repo:Unidoc.PackageRepo
             {
-                $0[.query]
-                {
-                    $0[Unidoc.PackageMetadata[.id]] = package
-                    $0[Unidoc.PackageMetadata[.repo]] { $0[.exists] = true }
-                }
-                $0[.update]
-                {
-                    $0[.set]
-                    {
-                        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = time
-                    }
-                }
-            },
-            against: self.database)
-        return package
+                $0[.set] { $0[Element[.repo]] = repo }
+            }
+            else
+            {
+                $0[.unset] { $0[Element[.repo]] = () }
+            }
+        }
     }
 
     public
@@ -248,59 +230,23 @@ extension Unidoc.DB.Packages
         hidden:Bool,
         with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
     {
-        let (package, _):(Unidoc.PackageMetadata?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Unidoc.PackageMetadata>>.init(
-                Self.name,
-                returning: .new)
-            {
-                $0[.query]
-                {
-                    $0[Unidoc.PackageMetadata[.id]] = package
-                }
-                $0[.update]
-                {
-                    if  hidden
-                    {
-                        $0[.set]
-                        {
-                            $0[Unidoc.PackageMetadata[.hidden]] = true
-                        }
-                    }
-                    else
-                    {
-                        $0[.unset]
-                        {
-                            $0[Unidoc.PackageMetadata[.hidden]] = ()
-                        }
-                    }
-                }
-            },
-            against: self.database)
-        return package
-    }
-
-    public
-    func stalest(_ limit:Int,
-        with session:Mongo.Session) async throws -> [Unidoc.PackageMetadata]
-    {
-        let command:Mongo.Find<Mongo.SingleBatch<Unidoc.PackageMetadata>> = .init(Self.name,
-            limit: limit)
+        try await self.modify(existing: package, with: session)
         {
-            $0[.filter]
+            if  hidden
             {
-                $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]]
+                $0[.set]
                 {
-                    $0[.exists] = true
+                    $0[Unidoc.PackageMetadata[.hidden]] = true
                 }
             }
-            $0[.sort]
+            else
             {
-                $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = (+)
+                $0[.unset]
+                {
+                    $0[Unidoc.PackageMetadata[.hidden]] = ()
+                }
             }
-            $0[.hint] = Self.indexExpiration.id
         }
-
-        return try await session.run(command: command, against: self.database)
     }
 }
 extension Unidoc.DB.Packages

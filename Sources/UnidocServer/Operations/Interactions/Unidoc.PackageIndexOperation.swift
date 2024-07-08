@@ -61,7 +61,7 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
 
             let response:GitHub.RepoMonitorResponse = try await github.connect
             {
-                try await $0.crawl(owner: owner, repo: repo, tags: 0)
+                try await $0.inspectRepo(owner: owner, name: repo, tags: 0)
             }
 
             guard
