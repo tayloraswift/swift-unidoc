@@ -41,11 +41,11 @@ extension Unidoc.PackageCreated:Unidoc.PackagePredicate
 
             $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]]
             {
-                $0[.gte] = BSON.Millisecond.init(UnixInstant.date(self.timeframe.lowerBound))
+                $0[.gte] = UnixMillisecond.init(self.timeframe.lowerBound)
             }
             $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]]
             {
-                $0[.lt] = BSON.Millisecond.init(UnixInstant.date(self.timeframe.upperBound))
+                $0[.lt] = UnixMillisecond.init(self.timeframe.upperBound)
             }
         }
 

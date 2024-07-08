@@ -2,6 +2,7 @@ import BSON
 import MongoQL
 import UnidocAPI
 import UnidocRecords
+import UnixTime
 
 extension Unidoc
 {
@@ -9,7 +10,7 @@ extension Unidoc
     struct BuildProgress:Equatable, Sendable
     {
         public
-        var started:BSON.Millisecond
+        var started:UnixMillisecond
         public
         var builder:Account
         public
@@ -18,7 +19,7 @@ extension Unidoc
         var stage:BuildStage
 
         @inlinable public
-        init(started:BSON.Millisecond, builder:Account, request:BuildSelector, stage:BuildStage)
+        init(started:UnixMillisecond, builder:Account, request:BuildSelector, stage:BuildStage)
         {
             self.started = started
             self.builder = builder

@@ -1,5 +1,6 @@
 import HTTP
 import HTTPServer
+import ISO
 import NIOHPACK
 import NIOHTTP1
 import UA
@@ -10,7 +11,7 @@ extension Unidoc
     @frozen public
     enum ClientGuess:Equatable, Hashable, Sendable
     {
-        case barbie(HTTP.Locale)
+        case barbie(ISO.Locale)
         case droid(Droid)
         case robot(Robot)
     }
@@ -171,7 +172,7 @@ extension Unidoc.ClientGuess
 
 
         guard
-        let locale:HTTP.Locale = acceptLanguage?.dominant
+        let locale:ISO.Locale = acceptLanguage?.dominant
         else
         {
             //  Didn’t send a locale: definitely a bot.
@@ -218,7 +219,7 @@ extension Unidoc.ClientGuess
 }
 extension Unidoc.ClientGuess
 {
-    var locale:HTTP.Locale?
+    var locale:ISO.Locale?
     {
         switch self
         {

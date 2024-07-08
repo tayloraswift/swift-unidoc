@@ -1,6 +1,6 @@
 import BSON
-import Durations
 import MongoDB
+import UnixTime
 
 extension Mongo.Session
 {
@@ -25,7 +25,7 @@ extension Mongo.Session
 {
     @inlinable public
     func observe<Source, Delta>(collection:Source,
-        every interval:Milliseconds = 30_000,
+        every interval:Milliseconds = .milliseconds(30_000),
         since start:inout BSON.Timestamp?,
         yield:(Mongo.ChangeEvent<Delta>) async throws -> ()) async throws where
         Source:Mongo.CollectionModel<Delta.Model>,

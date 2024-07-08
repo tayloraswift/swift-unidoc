@@ -3,6 +3,7 @@ import MongoQL
 import SymbolGraphs
 import Symbols
 import UnidocRecords
+import UnixTime
 
 extension Unidoc
 {
@@ -12,12 +13,12 @@ extension Unidoc
     struct SitemapIndexEntry:Equatable, Sendable
     {
         public
-        let modified:BSON.Millisecond?
+        let modified:UnixMillisecond?
         public
         let symbol:Symbol.Package
 
         @inlinable internal
-        init(modified:BSON.Millisecond?, symbol:Symbol.Package)
+        init(modified:UnixMillisecond?, symbol:Symbol.Package)
         {
             self.modified = modified
             self.symbol = symbol

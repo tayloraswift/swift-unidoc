@@ -140,8 +140,8 @@ extension Unidoc.Preview
             $0.executors = .shared(threads)
             $0.appname = "Unidoc Preview"
 
-            $0.connectionTimeout = .seconds(5)
-            $0.monitorInterval = .seconds(3)
+            $0.connectionTimeout = .milliseconds(5_000)
+            $0.monitorInterval = .milliseconds(3_000)
 
             $0.topology = .replicated(set: options.replicaSet)
         }
@@ -154,7 +154,7 @@ extension Unidoc.Preview
                 let database:Unidoc.Database = .init(sessions: pool,
                     unidoc: await .setup(as: "unidoc", in: pool))
                 {
-                    $0.apiLimitInterval = .seconds(60)
+                    $0.apiLimitInterval = .milliseconds(60_000)
                     $0.apiLimitPerReset = 10000
                 }
 

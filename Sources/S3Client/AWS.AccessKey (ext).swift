@@ -1,6 +1,7 @@
 import NIOCore
 import NIOHTTP1
 import SHA2
+import UnixCalendar
 import UnixTime
 
 extension AWS.AccessKey
@@ -10,7 +11,7 @@ extension AWS.AccessKey
         bucket:AWS.S3.Bucket,
         path:String) -> HTTPHeaders
     {
-        let now:UnixInstant = .now()
+        let now:UnixAttosecond = .now()
 
         guard
         let timestamp:Timestamp = now.timestamp

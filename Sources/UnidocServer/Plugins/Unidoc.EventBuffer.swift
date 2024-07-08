@@ -1,5 +1,6 @@
 import DequeModule
 import HTML
+import UnixCalendar
 import UnixTime
 
 extension Unidoc
@@ -36,7 +37,7 @@ extension Unidoc.EventBuffer:RandomAccessCollection
 extension Unidoc.EventBuffer
 {
     @inlinable public mutating
-    func push(event:Event, from now:UnixInstant = .now())
+    func push(event:Event, from now:UnixAttosecond = .now())
     {
         if  self.entries.count == self.limit
         {
@@ -49,7 +50,7 @@ extension Unidoc.EventBuffer
 extension Unidoc.EventBuffer where Event:HTML.OutputStreamable
 {
     @inlinable public
-    func list(now:UnixInstant) -> Unidoc.EventList<Event>
+    func list(now:UnixAttosecond) -> Unidoc.EventList<Event>
     {
         .init(entries: self.entries, now: now)
     }

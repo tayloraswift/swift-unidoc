@@ -1,6 +1,7 @@
 import HTML
 import UnidocRender
 import UnidocDB
+import UnixCalendar
 import UnixTime
 import URI
 
@@ -43,7 +44,7 @@ extension Unidoc.PackagesCreatedPage:Unidoc.ApplicationPage
                     $0.href = "\(Unidoc.PackagesCreatedEndpoint[before])"
                 } = "◀"
 
-                $0[.h1] = self.date.long(.en)
+                $0[.h1] = self.date.long(format.locale)
 
                 $0[.a]
                 {
@@ -56,7 +57,9 @@ extension Unidoc.PackagesCreatedPage:Unidoc.ApplicationPage
         {
             if  self.groups.isEmpty
             {
-                $0[.p] = "No Swift repositories were created on \(self.date.long(.en))."
+                $0[.p] = """
+                No Swift repositories were created on \(self.date.long(.init(language: .en))).
+                """
             }
             else
             {

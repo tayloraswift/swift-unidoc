@@ -1,4 +1,4 @@
-import DynamicTime
+import UnixCalendar
 import UnixTime
 
 extension Unidoc.EventBuffer
@@ -7,12 +7,12 @@ extension Unidoc.EventBuffer
     struct Entry
     {
         @usableFromInline
-        let pushed:UnixInstant
+        let pushed:UnixAttosecond
         @usableFromInline
         let event:Event
 
         @inlinable
-        init(pushed:UnixInstant, event:Event)
+        init(pushed:UnixAttosecond, event:Event)
         {
             self.pushed = pushed
             self.event = event
@@ -25,11 +25,11 @@ extension Unidoc.EventBuffer.Entry:Sendable where Event:Sendable
 extension Unidoc.EventBuffer.Entry
 {
     @inlinable
-    func time(now:UnixInstant) -> Unidoc.EventTime?
+    func time(now:UnixAttosecond) -> Unidoc.EventTime?
     {
         self.pushed.timestamp.map
         {
-            .init(components: $0.components, dynamicAge: .init(truncating: now - self.pushed))
+            .init(components: $0.components, dynamicAge: .init(now - self.pushed))
         }
     }
 }

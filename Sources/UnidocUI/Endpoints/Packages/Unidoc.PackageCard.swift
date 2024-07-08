@@ -1,4 +1,3 @@
-import BSON
 import HTML
 import SemanticVersions
 import UnixTime
@@ -10,12 +9,12 @@ extension Unidoc
         private
         let metadata:Unidoc.EditionOutput
         private
-        let now:UnixInstant
+        let now:UnixAttosecond
 
         /// Cached for sort performance.
         let order:String
 
-        init(_ metadata:Unidoc.EditionOutput, now:UnixInstant)
+        init(_ metadata:Unidoc.EditionOutput, now:UnixAttosecond)
         {
             self.metadata = metadata
             self.now = now
@@ -91,7 +90,7 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
                 return
             }
 
-            let pushed:BSON.Millisecond
+            let pushed:UnixMillisecond
             switch repo.origin
             {
             case .github(let origin):   pushed = origin.pushed

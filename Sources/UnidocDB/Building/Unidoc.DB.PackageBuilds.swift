@@ -2,6 +2,7 @@ import BSON
 import MongoDB
 import UnidocAPI
 import UnidocRecords
+import UnixTime
 
 extension Unidoc.DB
 {
@@ -90,7 +91,7 @@ extension Unidoc.DB.PackageBuilds
         return try await session.run(
             command: Mongo.Aggregate<Mongo.Cursor<Mongo.ChangeEvent<
                 Unidoc.BuildMetadataDelta>>>.init(Self.name,
-                tailing: .init(timeout: 30_000, awaits: true))
+                tailing: .init(timeout: .milliseconds(30_000), awaits: true))
             {
                 $0[stage: .changeStream]
                 {
@@ -301,7 +302,7 @@ extension Unidoc.DB.PackageBuilds
     }
 
     public
-    func lintBuilds(startedBefore:BSON.Millisecond,
+    func lintBuilds(startedBefore:UnixMillisecond,
         with session:Mongo.Session) async throws -> Int
     {
         try await self.killBuilds(with: session)

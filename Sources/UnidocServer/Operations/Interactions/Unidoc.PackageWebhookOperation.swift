@@ -99,7 +99,8 @@ extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
 
         if !package.hidden
         {
-            let activity:Unidoc.DB.RepoFeed.Activity = .init(discovered: .init(format.time),
+            let activity:Unidoc.DB.RepoFeed.Activity = .init(
+                discovered: .init(truncating: format.time),
                 package: package.symbol,
                 refname: event.ref)
 
