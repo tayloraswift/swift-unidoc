@@ -1,5 +1,4 @@
 import BSON
-import GitHubAPI
 import JSONEncoding
 import MongoDB
 import SemanticVersions

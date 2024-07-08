@@ -23,6 +23,8 @@ extension Unidoc
         let build:BuildMetadata?
         private
         let realm:RealmMetadata?
+        private
+        let ticket:CrawlingTicket<Package>?
 
         init(
             package:PackageMetadata,
@@ -31,7 +33,8 @@ extension Unidoc
             branches:[VersionState],
             aliases:[Symbol.Package] = [],
             build:BuildMetadata? = nil,
-            realm:RealmMetadata? = nil)
+            realm:RealmMetadata? = nil,
+            ticket:CrawlingTicket<Package>? = nil)
         {
             self.package = package
             self.dependents = dependents
@@ -40,6 +43,7 @@ extension Unidoc
             self.aliases = aliases
             self.build = build
             self.realm = realm
+            self.ticket = ticket
         }
     }
 }
@@ -289,22 +293,34 @@ extension Unidoc.VersionsPage
                 }
             }
 
-            if  let crawled:UnixMillisecond = self.package.repo?.crawled
+            guard
+            let repo:Unidoc.PackageRepo = self.package.repo
+            else
             {
-                let age:DurationFormat = .init(format.time - .init(crawled))
-
-                $0[.dt] = "Repo read"
-                $0[.dd] = "\(age) ago"
+                return
             }
-            if  let repo:Unidoc.PackageRepo = self.package.repo,
-                let fetched:UnixMillisecond = repo.fetched
-            {
-                let age:DurationFormat = .init(format.time - .init(fetched))
 
+            let timeSinceRead:DurationFormat = .init(format.time - .init(repo.crawled))
+
+            $0[.dt] = "Repo read"
+            $0[.dd] = "\(timeSinceRead) ago"
+
+            tagging:
+            if  let ticket:Unidoc.CrawlingTicket<Unidoc.Package> = self.ticket
+            {
                 $0[.dt] = "Tags read"
                 $0[.dd]
                 {
-                    $0 += "\(age) ago"
+                    if  let last:UnixMillisecond = ticket.last
+                    {
+                        let timeSinceRead:DurationFormat = .init(format.time - .init(last))
+
+                        $0 += "\(timeSinceRead) ago"
+                    }
+                    else
+                    {
+                        $0[.span] { $0.class = "placeholder" } = "never"
+                    }
 
                     let crawlingInterval:Milliseconds? = repo.crawlingIntervalTarget(
                         dormant: dormancy,
@@ -320,14 +336,23 @@ extension Unidoc.VersionsPage
                         return "target: \(dynamicInterval)"
                     }
                 }
-            }
-            if  self.view.editor,
-                let expires:UnixMillisecond = self.package.repo?.expires
-            {
-                let dynamicInterval:DurationFormat = .init(.init(expires) - format.time)
+
+                guard self.view.editor
+                else
+                {
+                    break tagging
+                }
+
+                let timeRemaining:DurationFormat = .init(.init(ticket.time) - format.time)
 
                 $0[.dt] = "Tags fetch in"
-                $0[.dd] = "\(dynamicInterval)"
+                $0[.dd] = "\(timeRemaining)"
+            }
+            else if
+                let _:Unidoc.PackageRepo = self.package.repo
+            {
+                $0[.dt] = "Tagging mechanism"
+                $0[.dd] = "Webhook"
             }
         }
 
@@ -362,7 +387,8 @@ extension Unidoc.VersionsPage
             } = ConfigButton.init(package: self.package.id,
                 update: "refresh",
                 value: "true",
-                label: "Refresh tags")
+                label: "Refresh tags",
+                back: self.location)
         }
         else
         {
