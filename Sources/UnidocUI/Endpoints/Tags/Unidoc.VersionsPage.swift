@@ -1,8 +1,7 @@
-import Durations
-import BSON
 import HTML
 import Media
 import Symbols
+import UnixCalendar
 import UnixTime
 import URI
 
@@ -103,14 +102,16 @@ extension Unidoc.VersionsPage:Unidoc.ApplicationPage
                 } = Unidoc.PackageMediaSettings.init(package: self.package)
             }
 
-            self.section(tags: &$0, now: format.time, dormancy: dormancy)
+            self.section(tags: &$0, format: format, dormancy: dormancy)
         }
     }
 }
 extension Unidoc.VersionsPage
 {
     private
-    func section(tags section:inout HTML.ContentEncoder, now:UnixInstant, dormancy:Duration?)
+    func section(tags section:inout HTML.ContentEncoder,
+        format:Unidoc.RenderFormat,
+        dormancy:Duration?)
     {
         if  let repo:Unidoc.PackageRepo = self.package.repo
         {
@@ -118,7 +119,7 @@ extension Unidoc.VersionsPage
 
             section[.dl]
             {
-                let created:UnixInstant
+                let created:UnixAttosecond
 
                 switch repo.origin
                 {
@@ -164,7 +165,7 @@ extension Unidoc.VersionsPage
                     $0[.dt] = "Archived?"
                     $0[.dd] = origin.archived ? "yes" : "no"
 
-                    created = .millisecond(repo.created.value)
+                    created = .init(repo.created)
                 }
                 if  let created:Timestamp.Date = created.timestamp?.date
                 {
@@ -174,7 +175,7 @@ extension Unidoc.VersionsPage
                         $0[.a]
                         {
                             $0.href = "\(Unidoc.PackagesCreatedEndpoint[created])"
-                        } = "\(created.month(.en)) \(created.day), \(created.year)"
+                        } = created.long(format.locale)
                     }
                 }
             }
@@ -288,24 +289,22 @@ extension Unidoc.VersionsPage
                 }
             }
 
-            if  let crawled:BSON.Millisecond = self.package.repo?.crawled
+            if  let crawled:UnixMillisecond = self.package.repo?.crawled
             {
-                let dynamicAge:Duration.DynamicFormat = .init(
-                    truncating: now - .millisecond(crawled.value))
+                let age:DurationFormat = .init(format.time - .init(crawled))
 
                 $0[.dt] = "Repo read"
-                $0[.dd] = "\(dynamicAge) ago"
+                $0[.dd] = "\(age) ago"
             }
             if  let repo:Unidoc.PackageRepo = self.package.repo,
-                let fetched:BSON.Millisecond = repo.fetched
+                let fetched:UnixMillisecond = repo.fetched
             {
-                let dynamicAge:Duration.DynamicFormat = .init(
-                    truncating: now - .millisecond(fetched.value))
+                let age:DurationFormat = .init(format.time - .init(fetched))
 
                 $0[.dt] = "Tags read"
                 $0[.dd]
                 {
-                    $0 += "\(dynamicAge) ago"
+                    $0 += "\(age) ago"
 
                     let crawlingInterval:Milliseconds? = repo.crawlingIntervalTarget(
                         dormant: dormancy,
@@ -317,17 +316,15 @@ extension Unidoc.VersionsPage
                         $0.class = "parenthetical"
                     } = crawlingInterval.map
                     {
-                        let dynamicInterval:Duration.DynamicFormat = .init(
-                            truncating: .milliseconds($0))
+                        let dynamicInterval:DurationFormat = .init($0)
                         return "target: \(dynamicInterval)"
                     }
                 }
             }
             if  self.view.editor,
-                let expires:BSON.Millisecond = self.package.repo?.expires
+                let expires:UnixMillisecond = self.package.repo?.expires
             {
-                let dynamicInterval:Duration.DynamicFormat = .init(
-                    truncating: .millisecond(expires.value) - now)
+                let dynamicInterval:DurationFormat = .init(.init(expires) - format.time)
 
                 $0[.dt] = "Tags fetch in"
                 $0[.dd] = "\(dynamicInterval)"

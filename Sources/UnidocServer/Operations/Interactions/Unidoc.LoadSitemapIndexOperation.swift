@@ -44,13 +44,13 @@ extension Unidoc.LoadSitemapIndexOperation:Unidoc.PublicOperation
                         """
 
                         guard
-                        let millisecond:BSON.Millisecond = sitemap.modified
+                        let millisecond:UnixMillisecond = sitemap.modified
                         else
                         {
                             return
                         }
 
-                        let modified:UnixInstant = .millisecond(millisecond.value)
+                        let modified:UnixAttosecond = .init(millisecond)
 
                         $0[.lastmod] = modified.timestamp.map
                         {

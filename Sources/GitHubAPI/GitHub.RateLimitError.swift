@@ -6,6 +6,6 @@ extension GitHub
     protocol RateLimitError:Error, Equatable, Sendable
     {
         /// The UTC epoch second when the rate limit will reset.
-        var until:UnixInstant { get }
+        var until:UnixAttosecond { get }
     }
 }

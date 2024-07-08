@@ -1,5 +1,7 @@
 import HTTP
+import ISO
 import Media
+import UnixCalendar
 import UnixTime
 
 extension Unidoc
@@ -12,23 +14,23 @@ extension Unidoc
         public
         var username:String?
         public
-        var locale:HTTP.Locale?
+        var locale:ISO.Locale
         public
         let assets:Assets
         public
         var server:ServerType
 
         public
-        let time:UnixInstant
+        let time:UnixAttosecond
 
         @inlinable public
         init(
             security:ServerSecurity,
             username:String?,
-            locale:HTTP.Locale?,
+            locale:ISO.Locale,
             assets:Assets,
             server:ServerType,
-            time:UnixInstant = .now())
+            time:UnixAttosecond = .now())
         {
             self.security = security
             self.username = username

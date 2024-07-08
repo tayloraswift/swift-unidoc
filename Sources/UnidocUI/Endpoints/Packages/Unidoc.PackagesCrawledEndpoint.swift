@@ -3,6 +3,7 @@ import MongoDB
 import UnidocRender
 import UnidocDB
 import UnidocQueries
+import UnixCalendar
 import UnixTime
 import URI
 

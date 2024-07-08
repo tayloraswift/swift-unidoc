@@ -1,5 +1,6 @@
 import BSON
 import MongoQL
+import UnixTime
 
 extension Unidoc
 {
@@ -7,16 +8,16 @@ extension Unidoc
     struct CrawlingWindow:Identifiable
     {
         public
-        let id:BSON.Millisecond
+        let id:UnixMillisecond
         public
-        var crawled:BSON.Millisecond?
+        var crawled:UnixMillisecond?
         public
-        var expires:BSON.Millisecond
+        var expires:UnixMillisecond
 
         @inlinable public
-        init(id:BSON.Millisecond,
-            crawled:BSON.Millisecond? = nil,
-            expires:BSON.Millisecond = 0)
+        init(id:UnixMillisecond,
+            crawled:UnixMillisecond? = nil,
+            expires:UnixMillisecond = .zero)
         {
             self.id = id
             self.crawled = crawled
@@ -51,6 +52,6 @@ extension Unidoc.CrawlingWindow:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             crawled: try bson[.crawled]?.decode(),
-            expires: try bson[.expires]?.decode() ?? 0)
+            expires: try bson[.expires]?.decode() ?? .zero)
     }
 }

@@ -3,6 +3,7 @@ import MD5
 import SymbolGraphs
 import Symbols
 import Unidoc
+import UnixTime
 
 extension Unidoc
 {
@@ -24,14 +25,14 @@ extension Unidoc
 
         /// See ``CodingKey.modified``.
         public
-        var modified:BSON.Millisecond?
+        var modified:UnixMillisecond?
         public
         let hash:MD5
 
         @inlinable internal
         init(id:Unidoc.Package,
             elements:Elements,
-            modified:BSON.Millisecond?,
+            modified:UnixMillisecond?,
             hash:MD5)
         {
             self.id = id

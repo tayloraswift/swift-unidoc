@@ -3,16 +3,17 @@ import GitHubClient
 import HTTP
 import MongoDB
 import Multiparts
-import UnidocUI
 import SymbolGraphs
 import UnidocDB
+import UnidocUI
+import UnixTime
 
 extension Unidoc
 {
     enum SiteConfigOperation
     {
         case recode(Unidoc._RecodePage.Target)
-        case telescope(days:Int)
+        case telescope(last:Days)
     }
 }
 extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
@@ -43,8 +44,9 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
 
             return .ok(complete.resource(format: format))
 
-        case .telescope(days: let days):
-            let updates:Mongo.Updates = try await server.db.crawlingWindows.create(days: days,
+        case .telescope(last: let days):
+            let updates:Mongo.Updates = try await server.db.crawlingWindows.create(
+                previous: days,
                 with: session)
 
             return .ok("Updated \(updates.modified) of \(updates.selected) crawling windows.")

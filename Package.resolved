@@ -1,5 +1,5 @@
 {
-  "originHash" : "f6af9095b75964aee9fd27e7a2e21c4a0bd2cca32c73d4eda71359fa56065992",
+  "originHash" : "e8c323b7882d9fdf230db3ee0274b713966382c78d5582155a258a141bec28e5",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "4ef0d5da0bef7100ae0c83947028e9552d34fcfd",
-        "version" : "0.22.0"
+        "revision" : "054ccde704e7d74f216b74692133851b2821d0a0",
+        "version" : "0.23.0"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-png",
       "state" : {
-        "revision" : "fee79d9e180480dcc6408041a68c11c43c870b30",
-        "version" : "4.4.3"
+        "revision" : "99c1279148c0843328263b39158bf10ea7ea469e",
+        "version" : "4.4.4"
       }
     },
     {
@@ -152,6 +152,15 @@
       "state" : {
         "revision" : "6a9e38e7bd22a3b8ba80bddf395623cf68f57807",
         "version" : "1.3.1"
+      }
+    },
+    {
+      "identity" : "swift-unixtime",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tayloraswift/swift-unixtime",
+      "state" : {
+        "revision" : "c35e9289702c01d11e3026630bdee9dfdfb3e34f",
+        "version" : "0.1.3"
       }
     }
   ],

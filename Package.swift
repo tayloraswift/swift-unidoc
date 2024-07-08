@@ -13,8 +13,6 @@ let package:Package = .init(
 
         .library(name: "guides", targets: ["guides"]),
 
-        .library(name: "CasesByIntegerEncodingMacro", targets: ["CasesByIntegerEncodingMacro"]),
-
         .library(name: "ArgumentParsing", targets: ["ArgumentParsing"]),
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
@@ -28,7 +26,6 @@ let package:Package = .init(
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
         .library(name: "IP", targets: ["IP"]),
-        .library(name: "ISO", targets: ["ISO"]),
         .library(name: "InlineArray", targets: ["InlineArray"]),
 
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
@@ -89,15 +86,14 @@ let package:Package = .init(
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
             from: "1.1.0")),
-        // .package(path: "../swift-dom"),
-
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.6.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.22.0")),
-        // .package(path: "../swift-mongodb"),
+            from: "0.23.0")),
+        .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
+            from: "0.1.0")),
 
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "1.1.0")),
@@ -127,20 +123,6 @@ let package:Package = .init(
             from: "510.0.2"),
     ],
     targets: [
-        .macro(name: "UnidocMacros",
-            dependencies: [
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-            ],
-            path: "Macros/UnidocMacros"),
-
-        .target(name: "CasesByIntegerEncodingMacro",
-            dependencies: [
-                .target(name: "UnidocMacros"),
-            ],
-            path: "Macros/CasesByIntegerEncodingMacro"),
-
-
         .executableTarget(name: "ssgc",
             dependencies: [
                 .target(name: "ArgumentParsing"),
@@ -175,12 +157,10 @@ let package:Package = .init(
                 .target(name: "SemanticVersions"),
             ]),
 
-        .target(name: "DynamicTime"),
-
         .target(name: "Fingerprinting",
             dependencies: [
                 .target(name: "HTTP"),
-                .target(name: "ISO"),
+                .product(name: "ISO", package: "swift-unixtime"),
             ]),
 
         .target(name: "FNV1"),
@@ -195,15 +175,15 @@ let package:Package = .init(
 
         .target(name: "GitHubAPI",
             dependencies: [
-                .target(name: "UnixTime"),
+                .product(name: "UnixTime", package: "swift-unixtime"),
                 .product(name: "JSON", package: "swift-json"),
                 .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "HTTP",
             dependencies: [
-                .target(name: "ISO"),
                 .target(name: "Media"),
+                .product(name: "ISO", package: "swift-unixtime"),
                 .product(name: "MD5", package: "swift-hash"),
                 .product(name: "NIOCore", package: "swift-nio"),
             ]),
@@ -242,17 +222,6 @@ let package:Package = .init(
         .target(name: "InlineArray"),
 
         .target(name: "InlineDictionary"),
-
-        .target(name: "ISO",
-            dependencies: [
-                .target(name: "CasesByIntegerEncodingMacro"),
-            ],
-            exclude: [
-                //  "ISO.Country (gen).swift",
-                "ISO.Country.swift",
-                //  "ISO.Macrolanguage (gen).swift",
-                "ISO.Macrolanguage.swift",
-            ]),
 
         .target(name: "LexicalPaths"),
 
@@ -350,7 +319,7 @@ let package:Package = .init(
                 .target(name: "HTTPClient"),
                 .target(name: "Media"),
                 .target(name: "S3"),
-                .target(name: "UnixTime"),
+                .product(name: "UnixCalendar", package: "swift-unixtime"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "SHA2", package: "swift-hash"),
@@ -511,7 +480,7 @@ let package:Package = .init(
                 .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
-                .target(name: "UnixTime"),
+                .product(name: "UnixCalendar", package: "swift-unixtime"),
                 .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
@@ -550,8 +519,7 @@ let package:Package = .init(
                 .target(name: "Media"),
                 .target(name: "UnidocAssets"),
                 .target(name: "UnidocRecords"),
-                .target(name: "UnixTime"),
-
+                .product(name: "UnixCalendar", package: "swift-unixtime"),
                 .product(name: "HTML", package: "swift-dom"),
             ]),
 
@@ -576,16 +544,14 @@ let package:Package = .init(
 
         .target(name: "UnidocUI",
             dependencies: [
-                .target(name: "DynamicTime"),
                 .target(name: "GitHubAPI"),
                 .target(name: "PieCharts"),
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocAPI"),
                 .target(name: "UnidocQueries"),
                 .target(name: "URI"),
+                .product(name: "UnixTime", package: "swift-unixtime"),
             ]),
-
-        .target(name: "UnixTime"),
 
         .target(name: "URI",
             dependencies: [
