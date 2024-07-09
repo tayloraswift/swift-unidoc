@@ -10,21 +10,6 @@ extension Unidoc
         /// crawling is how we obtain this structure in the first place.
         public
         var crawled:UnixMillisecond
-        /// When the package’s tags were last fetched. Nil if the package’s tags have not been
-        /// read yet.
-        public
-        var _fetched:UnixMillisecond?
-        /// When we should fetch the package’s tags again. This is nil in some cases where we
-        /// do not want to crawl the package at all, such as when the package is archived or
-        /// unfree.
-        ///
-        /// Packages that we want to crawl frequently will expire instantly – that is, they
-        /// have an expiration equal to ``fetched``.
-        ///
-        /// Even if this becomes nil, it is expected that a small number of packages may again
-        /// be rediscovered later and ruled eligible for crawling.
-        public
-        var _expires:UnixMillisecond?
 
         /// The account that owns the repo, and could be reasonably allowed to update its
         /// package settings.
@@ -68,8 +53,6 @@ extension Unidoc
         @inlinable public
         init(
             crawled:UnixMillisecond,
-            _fetched:UnixMillisecond? = nil,
-            _expires:UnixMillisecond? = nil,
             account:Account?,
             created:UnixMillisecond,
             updated:UnixMillisecond,
@@ -81,8 +64,6 @@ extension Unidoc
             stars:Int = 0)
         {
             self.crawled = crawled
-            self._fetched = _fetched
-            self._expires = _expires
             self.account = account
 
             self.created = created
@@ -102,8 +83,12 @@ extension Unidoc.PackageRepo
     enum CodingKey:String, Sendable
     {
         case crawled = "I"
+
+        @available(*, unavailable)
         case fetched = "G"
+        @available(*, unavailable)
         case expires = "E"
+
         case account = "A"
 
         case created = "C"
@@ -125,8 +110,6 @@ extension Unidoc.PackageRepo:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.crawled] = self.crawled
-        bson[.fetched] = self._fetched
-        bson[.expires] = self._expires
         bson[.account] = self.account
         bson[.created] = self.created
         bson[.updated] = self.updated
@@ -151,10 +134,8 @@ extension Unidoc.PackageRepo:BSONDocumentDecodable
     {
         let origin:Unidoc.PackageOrigin = .github(try bson[.github].decode())
 
-        self.init( // TODO: deoptionalize
-            crawled: try bson[.crawled]?.decode() ?? .zero,
-            _fetched: try bson[.fetched]?.decode(),
-            _expires: try bson[.expires]?.decode(),
+        self.init(
+            crawled: try bson[.crawled].decode(),
             account: try bson[.account]?.decode(),
             created: try bson[.created].decode(),
             updated: try bson[.updated].decode(),

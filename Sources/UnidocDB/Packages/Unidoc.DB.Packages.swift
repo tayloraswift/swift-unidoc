@@ -37,19 +37,6 @@ extension Unidoc.DB.Packages
     }
 
     public static
-    let indexExpiration:Mongo.CollectionIndex = .init("RepoExpires", unique: false)
-    {
-        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]] = (+)
-    }
-        where:
-    {
-        $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.expires]]
-        {
-            $0[.exists] = true
-        }
-    }
-
-    public static
     let indexRepoCreated:Mongo.CollectionIndex = .init("RepoCreated", unique: false)
     {
         $0[Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.created]] = (+)
@@ -97,7 +84,6 @@ extension Unidoc.DB.Packages:Mongo.CollectionModel
     {
         [
             Self.indexAccount,
-            Self.indexExpiration,
             Self.indexRepoCreated,
             Self.indexRepoGitHub,
             Self.indexRealm,
