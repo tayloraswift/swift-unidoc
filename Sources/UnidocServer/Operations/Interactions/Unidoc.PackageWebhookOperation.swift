@@ -5,12 +5,13 @@ import JSON
 import MongoDB
 import SemanticVersions
 import UnidocRender
+import UnixTime
 
 extension Unidoc
 {
     enum PackageWebhookOperation:Sendable
     {
-        case create(GitHub.WebhookCreate)
+        case create(UInt, GitHub.WebhookCreate)
         case ignore(String)
     }
 }
@@ -29,26 +30,47 @@ extension Unidoc.PackageWebhookOperation
         default:        throw Unidoc.PackageWebhookError.unverifiedOrigin
         }
 
+        let hook:String?
         let type:String?
 
         switch headers
         {
-        case .http1_1(let headers): type = headers["X-GitHub-Event"].first
-        case .http2(let headers):   type = headers["X-GitHub-Event"].first
+        case .http1_1(let headers):
+            hook = headers["X-GitHub-Hook-ID"].first
+            type = headers["X-GitHub-Event"].first
+
+        case .http2(let headers):
+            hook = headers["X-GitHub-Hook-ID"].first
+            type = headers["X-GitHub-Event"].first
+        }
+
+        guard
+        let type:String
+        else
+        {
+            throw Unidoc.PackageWebhookError.missingEventType
+        }
+        guard
+        let hook:String
+        else
+        {
+            throw Unidoc.PackageWebhookError.missingHookID
+        }
+        guard
+        let hook:UInt = .init(hook)
+        else
+        {
+            throw Unidoc.PackageWebhookError.invalidHookID
         }
 
         switch type
         {
-        case "create"?:
-            self = .create(try json.decode())
+        case "create":
+            self = .create(hook, try json.decode())
 
-        case let type?:
+        case let type:
             self = .ignore(type)
-
-        case nil:
-            throw Unidoc.PackageWebhookError.missingEventType
         }
-
     }
 }
 extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
@@ -57,19 +79,87 @@ extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
     func load(from server:Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        var event:GitHub.WebhookCreate
         switch self
         {
-        case .create(let value):    event = value
-        case .ignore(let type):     return .ok("Ignored event type '\(type)'\n")
+        case .create(let webhook, let create):
+            return try await self.create(event: create,
+                from: webhook,
+                in: server.db,
+                at: .init(truncating: format.time))
+
+        case .ignore(let type):
+            return .ok("Ignored event type '\(type)'\n")
+        }
+    }
+}
+extension Unidoc.PackageWebhookOperation
+{
+    private __consuming
+    func create(event:GitHub.WebhookCreate,
+        from hook:UInt,
+        in db:Unidoc.Database,
+        at time:UnixMillisecond) async throws -> HTTP.ServerResponse
+    {
+        let repo:Unidoc.PackageRepo = try .github(event.repo,
+            crawled: time,
+            installation: event.repo.visibility == .private ? event.installation : nil)
+
+        let indexEligible:Bool
+        let repoWebhook:String
+
+        if  let id:Int32 = event.installation
+        {
+            if  case .private = event.repo.visibility
+            {
+                //  This is our only chance to index a private repository.
+                indexEligible = true
+            }
+            else if
+                case "Swift"? = event.repo.language,
+                repo.origin.alive,
+                repo.stars > 1
+            {
+                //  If the repo is public, has more than one star, and contains enough Swift
+                //  code for GitHub to recognize it as a Swift project, we will also take this
+                //  opportunity to index it.
+                indexEligible = true
+            }
+            else
+            {
+                indexEligible = false
+            }
+
+            repoWebhook = "github.com/settings/installations/\(id)"
+        }
+        else
+        {
+            /// This webhook was installed directly on a repository. We can be reasonably
+            /// confident that the owner intended to index this package.
+            indexEligible = true
+            repoWebhook = """
+            github.com/\(event.repo.owner.login)/\(event.repo.name)/settings/hooks/\(hook)
+            """
         }
 
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
+        let session:Mongo.Session = try await .init(from: db.sessions)
+        let package:Unidoc.PackageMetadata
 
-        guard
-        let package:Unidoc.PackageMetadata = try await server.db.packages.findGitHub(
-            repo: event.repo.id,
-            with: session)
+        if  let known:Unidoc.PackageMetadata = try await db.packages.updateWebhook(
+                configurationURL: repoWebhook,
+                repo: repo,
+                with: session)
+        {
+            package = known
+        }
+        else if indexEligible
+        {
+            (package, _) = try await db.unidoc.index(
+                package: "\(event.repo.owner.login).\(event.repo.name)",
+                repo: repo,
+                repoWebhook: repoWebhook,
+                mode: .automatic,
+                with: session)
+        }
         else
         {
             return .notFound("No such package\n")
@@ -82,14 +172,15 @@ extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
             return .ok("Ignored ref '\(event.ref)' because it is not a semantic version\n")
         }
 
-        //  TODO: see if we can also perform a package metadata update
-
-        let (_, new):(Unidoc.EditionMetadata, new:Bool) = try await server.db.unidoc.index(
+        let (_, new):(Unidoc.EditionMetadata, new:Bool) = try await db.unidoc.index(
             package: package.id,
             version: version,
             name: event.ref,
             sha1: nil,
             with: session)
+
+        //  If we got this far, we should destroy any crawling tickets this package has.
+        _ = try? await db.crawlingTickets.delete(id: package.id, with: session)
 
         guard new
         else
@@ -100,11 +191,11 @@ extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
         if !package.hidden
         {
             let activity:Unidoc.DB.RepoFeed.Activity = .init(
-                discovered: .init(truncating: format.time),
+                discovered: time,
                 package: package.symbol,
                 refname: event.ref)
 
-            try await server.db.repoFeed.push(activity, with: session)
+            try await db.repoFeed.push(activity, with: session)
         }
 
         return .resource("", status: 201)

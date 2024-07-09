@@ -163,42 +163,49 @@ extension Unidoc.DB
     public
     func index(package:Symbol.Package,
         repo:Unidoc.PackageRepo? = nil,
+        repoWebhook:String? = nil,
         mode:Unidoc.PackageIndexMode = .manual,
         with session:Mongo.Session) async throws -> (package:Unidoc.PackageMetadata, new:Bool)
     {
-        if  let repo:Unidoc.PackageRepo = repo,
-            case .github(let origin) = repo.origin,
-            let existing:Unidoc.PackageMetadata = try await self.packages.findGitHub(
-                repo: origin.id,
-                with: session)
+        existingGitHub:
+        if  let repo:Unidoc.PackageRepo,
+            case .github(let origin) = repo.origin
         {
-            //  According to GitHub, this package is already known to us by a different name.
-            aliasing:
-            do
-            {
-                if  existing.symbol == package
-                {
-                    break aliasing
-                }
-
-                try await self.packageAliases.insert(alias: package,
-                    of: existing.id,
-                    with: session)
-            }
-            catch is Mongo.WriteError
-            {
-                //  Alias already exists.
-            }
-
-            /// FIXME: Small but non-zero chance that the package could have been deleted in
-            /// between these critical sections, which will cause us to return the deleted
-            /// metadata instead.
-            let modified:Unidoc.PackageMetadata? = try await self.packages.update(
-                package: existing.id,
-                repo: repo,
+            let predicate:Unidoc.PackageByGitHubID = .init(id: origin.id)
+            let modified:Unidoc.PackageMetadata? = try await self.packages.modify(
+                existing: predicate,
                 with: session)
+            {
+                $0[.set]
+                {
+                    $0[Unidoc.PackageMetadata[.repo]] = repo
+                    $0[Unidoc.PackageMetadata[.repoWebhook]] = repoWebhook
+                }
+            }
 
-            return (modified ?? existing, false)
+            guard
+            let modified:Unidoc.PackageMetadata
+            else
+            {
+                break existingGitHub
+            }
+
+            if  modified.symbol != package
+            {
+                //  According to GitHub, this package is already known to us by another name.
+                do
+                {
+                    try await self.packageAliases.insert(alias: package,
+                        of: modified.id,
+                        with: session)
+                }
+                catch is Mongo.WriteError
+                {
+                    //  Alias already exists.
+                }
+            }
+
+            return (modified, false)
         }
 
         //  Placement involves autoincrement, which is why this cannot be done in an update.
@@ -213,33 +220,31 @@ extension Unidoc.DB
             try await self.packageAliases.insert(alias: package, of: id, with: session)
             fallthrough
 
-        case .old(let id, nil):
-            let package:Unidoc.PackageMetadata = .init(id: id,
-                symbol: package,
-                hidden: mode == .automatic,
-                realm: nil,
-                repo: repo)
+        case .old(let id, _):
+            /// In very rare circumstances, the placement may be old but the package metadata
+            /// may be new, if a previous indexing operation failed midway through.
+            let (package, new):(Unidoc.PackageMetadata, Bool) = try await self.packages.modify(
+                upserting: id,
+                with: session)
+            {
+                $0[.setOnInsert]
+                {
+                    $0[Unidoc.PackageMetadata[.hidden]] = mode == .automatic ? true : nil
+                }
+                $0[.set]
+                {
+                    $0[Unidoc.PackageMetadata[.symbol]] = package
+                    $0[Unidoc.PackageMetadata[.repo]] = repo
+                    $0[Unidoc.PackageMetadata[.repoWebhook]] = repoWebhook
+                }
+            }
 
-            try await self.packages.insert(some: package, with: session)
-
-            if !package.hidden
+            if !package.hidden, new
             {
                 try await self.rebuildPackageList(with: session)
             }
 
-            return (package, true)
-
-        case .old(_, var package?):
-            if  let repo:Unidoc.PackageRepo,
-                let modified:Unidoc.PackageMetadata = try await self.packages.update(
-                    package: package.id,
-                    repo: repo,
-                    with: session)
-            {
-                package = modified
-            }
-
-            return (package, false)
+            return (package, new)
         }
     }
 

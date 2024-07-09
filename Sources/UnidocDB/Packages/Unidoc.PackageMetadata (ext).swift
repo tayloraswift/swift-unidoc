@@ -16,6 +16,11 @@ extension Unidoc.PackageMetadata
     public
     func nextTagsFetch() -> UnixMillisecond?
     {
+        if  case _? = self.repoWebhook
+        {
+            return nil
+        }
+
         guard
         let repo:Unidoc.PackageRepo = self.repo,
         let interval:Milliseconds = repo.crawlingIntervalTarget(

@@ -11,7 +11,9 @@ extension Unidoc.PackageRepo:Mongo.MasterCodingModel
 extension Unidoc.PackageRepo
 {
     @inlinable public static
-    func github(_ repo:GitHub.Repo, crawled:UnixMillisecond) throws -> Self
+    func github(_ repo:GitHub.Repo,
+        crawled:UnixMillisecond,
+        installation:Int32? = nil) throws -> Self
     {
         /// We clip this to Midnights because we use this as a shard key, and also because
         /// Midnights are Swifty.
@@ -57,7 +59,8 @@ extension Unidoc.PackageRepo
                 size: repo.size,
                 archived: repo.archived,
                 disabled: repo.disabled,
-                fork: repo.fork)),
+                fork: repo.fork,
+                installation: installation)),
             forks: repo.forks,
             stars: repo.stars)
     }
