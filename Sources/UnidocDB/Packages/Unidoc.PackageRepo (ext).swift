@@ -13,9 +13,11 @@ extension Unidoc.PackageRepo
     @inlinable public static
     func github(_ repo:GitHub.Repo, crawled:UnixMillisecond) throws -> Self
     {
+        /// We clip this to Midnights because we use this as a shard key, and also because
+        /// Midnights are Swifty.
         guard
         let created:Timestamp.Components = .init(iso8601: repo.created),
-        let created:UnixMillisecond = .init(utc: created)
+        let created:UnixDate = .init(utc: created.date)
         else
         {
             throw Unidoc.GitHubRepoMetadataError.created(repo.created)
@@ -39,7 +41,7 @@ extension Unidoc.PackageRepo
 
         return .init(crawled: crawled,
             account: .init(type: .github, user: repo.owner.id),
-            created: created,
+            created: .init(created),
             updated: updated,
             license: repo.license.map { .init(spdx: $0.id, name: $0.name) },
             topics: repo.topics,
