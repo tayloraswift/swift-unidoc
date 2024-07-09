@@ -77,7 +77,8 @@ extension Unidoc.RefsEndpoint:HTTP.ServerEndpoint
             branches: output.branches,
             aliases: output.aliases,
             build: output.build,
-            realm: output.realm)
+            realm: output.realm,
+            ticket: output.ticket)
 
         return .ok(page.resource(format: format))
     }

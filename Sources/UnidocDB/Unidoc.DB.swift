@@ -1,6 +1,5 @@
 import BSON
 import FNV1
-import GitHubAPI
 import MongoDB
 import SemanticVersions
 import SHA1
@@ -36,6 +35,8 @@ extension Unidoc
 }
 extension Unidoc.DB
 {
+    @inlinable public
+    var crawlingTickets:CrawlingTickets { .init(database: self.id) }
     @inlinable public
     var crawlingWindows:CrawlingWindows { .init(database: self.id) }
     @inlinable public
@@ -82,6 +83,7 @@ extension Unidoc.DB:Mongo.DatabaseModel
     public
     func setup(with session:Mongo.Session) async throws
     {
+        try await self.crawlingTickets.setup(with: session)
         try await self.crawlingWindows.setup(with: session)
         try await self.repoFeed.setup(with: session)
         try await self.docsFeed.setup(with: session)
@@ -166,7 +168,7 @@ extension Unidoc.DB
     {
         if  let repo:Unidoc.PackageRepo = repo,
             case .github(let origin) = repo.origin,
-            var existing:Unidoc.PackageMetadata = try await self.packages.findGitHub(
+            let existing:Unidoc.PackageMetadata = try await self.packages.findGitHub(
                 repo: origin.id,
                 with: session)
         {
@@ -188,13 +190,15 @@ extension Unidoc.DB
                 //  Alias already exists.
             }
 
-            existing.crawled(repo: consume repo)
-
-            try await self.packages.update(package: existing.id,
-                repo: existing.repo,
+            /// FIXME: Small but non-zero chance that the package could have been deleted in
+            /// between these critical sections, which will cause us to return the deleted
+            /// metadata instead.
+            let modified:Unidoc.PackageMetadata? = try await self.packages.update(
+                package: existing.id,
+                repo: repo,
                 with: session)
 
-            return (existing, false)
+            return (modified ?? existing, false)
         }
 
         //  Placement involves autoincrement, which is why this cannot be done in an update.
@@ -210,15 +214,11 @@ extension Unidoc.DB
             fallthrough
 
         case .old(let id, nil):
-            var package:Unidoc.PackageMetadata = .init(id: id,
+            let package:Unidoc.PackageMetadata = .init(id: id,
                 symbol: package,
                 hidden: mode == .automatic,
-                realm: nil)
-
-            if  let repo:Unidoc.PackageRepo = repo
-            {
-                package.crawled(repo: consume repo)
-            }
+                realm: nil,
+                repo: repo)
 
             try await self.packages.insert(some: package, with: session)
 
@@ -230,13 +230,13 @@ extension Unidoc.DB
             return (package, true)
 
         case .old(_, var package?):
-            if  let repo:Unidoc.PackageRepo
-            {
-                package.crawled(repo: consume repo)
-
-                try await self.packages.update(package: package.id,
-                    repo: package.repo,
+            if  let repo:Unidoc.PackageRepo,
+                let modified:Unidoc.PackageMetadata = try await self.packages.update(
+                    package: package.id,
+                    repo: repo,
                     with: session)
+            {
+                package = modified
             }
 
             return (package, false)

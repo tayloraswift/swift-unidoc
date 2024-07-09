@@ -476,7 +476,6 @@ let package:Package = .init(
 
         .target(name: "UnidocDB",
             dependencies: [
-                .target(name: "GitHubAPI"),
                 .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
@@ -506,6 +505,7 @@ let package:Package = .init(
         .target(name: "UnidocRecords",
             dependencies: [
                 .target(name: "FNV1"),
+                .target(name: "GitHubAPI"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocAPI"),
                 .product(name: "MD5", package: "swift-hash"),

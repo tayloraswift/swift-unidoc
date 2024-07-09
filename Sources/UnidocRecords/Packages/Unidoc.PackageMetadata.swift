@@ -1,6 +1,7 @@
 import BSON
 import SymbolGraphs
 import Symbols
+import UnixTime
 
 extension Unidoc
 {

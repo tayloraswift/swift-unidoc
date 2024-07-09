@@ -24,6 +24,7 @@ extension GitHub.RepoNode:JSONObjectDecodable
         case id
         case owner
         case name
+        case node
 
         case license
         enum License:String, Sendable
@@ -87,6 +88,7 @@ extension GitHub.RepoNode:JSONObjectDecodable
         self.init(repo: .init(id: try json[.id].decode(),
             owner: try json[.owner].decode(),
             name: try json[.name].decode(),
+            node: try json[.node].decode(),
             license: try json[.license].decode(as: JSON.ObjectDecoder<CodingKey.License>?.self)
             {
                 guard

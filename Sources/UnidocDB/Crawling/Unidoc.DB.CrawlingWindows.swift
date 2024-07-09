@@ -1,7 +1,5 @@
 import BSON
 import MongoDB
-import SymbolGraphs
-import Symbols
 import UnidocRecords
 import UnixTime
 
