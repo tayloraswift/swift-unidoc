@@ -9,21 +9,21 @@ extension Unidoc.VersionsPage
         let update:String
         let value:String
         let label:String
-        let from:URI?
+        let back:URI?
         let area:Bool
 
         init(package:Unidoc.Package,
             update:String,
             value:String,
             label:String,
-            from:URI? = nil,
+            back:URI? = nil,
             area:Bool = true)
         {
             self.package = package
             self.update = update
             self.value = value
             self.label = label
-            self.from = from
+            self.back = back
             self.area = area
         }
     }
@@ -33,13 +33,13 @@ extension Unidoc.VersionsPage.ConfigButton:HTML.OutputStreamable
     static
     func += (form:inout HTML.ContentEncoder, self:Self)
     {
-        if  let from:URI = self.from
+        if  let back:URI = self.back
         {
             form[.input]
             {
                 $0.type = "hidden"
                 $0.name = "from"
-                $0.value = "\(from)"
+                $0.value = "\(back)"
             }
         }
 

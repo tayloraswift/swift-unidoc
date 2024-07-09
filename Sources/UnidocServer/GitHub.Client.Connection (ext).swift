@@ -37,15 +37,35 @@ extension GitHub.Client<GitHub.PersonalAccessToken>.Connection
     }
 
     public
-    func crawl(owner:String, repo:String, tags:Int) async throws -> GitHub.RepoMonitorResponse
+    func inspectRepo(node:GitHub.Node, tags:Int) async throws -> GitHub.RepoMonitorResponse
+    {
+        try await self.inspectRepo(
+            matching: "node(id: \"\(node)\")",
+            tags: tags)
+    }
+
+    public
+    func inspectRepo(owner:String,
+        name:String,
+        tags:Int) async throws -> GitHub.RepoMonitorResponse
+    {
+        try await self.inspectRepo(
+            matching: "repository(owner: \"\(owner)\", name: \"\(name)\")",
+            tags: tags)
+    }
+
+    private
+    func inspectRepo(matching predicate:String,
+        tags:Int) async throws -> GitHub.RepoMonitorResponse
     {
         let query:JSON = .object
         {
             $0["query"] = """
             query
             {
-                repository(owner: "\(owner)", name: "\(repo)")
+                repository: \(predicate)
                 {
+                    ... on Repository {
                     id: databaseId
                     owner
                     {
@@ -54,6 +74,7 @@ extension GitHub.Client<GitHub.PersonalAccessToken>.Connection
                         ... on Organization { id: databaseId }
                     }
                     name
+                    node: id
 
                     license: licenseInfo { id: spdxId, name }
                     topics: repositoryTopics(first: 16)
@@ -83,6 +104,7 @@ extension GitHub.Client<GitHub.PersonalAccessToken>.Connection
                         orderBy: {field: TAG_COMMIT_DATE, direction: ASC})
                     {
                         nodes { name, commit: target { sha: oid } }
+                    }
                     }
                 }
             }

@@ -20,11 +20,13 @@ extension Unidoc.VersionsQuery
         var branches:[Unidoc.VersionState]
         public
         var aliases:[Symbol.Package]
-
         public
         var build:Unidoc.BuildMetadata?
         public
         var realm:Unidoc.RealmMetadata?
+
+        public
+        var ticket:Unidoc.CrawlingTicket<Unidoc.Package>?
         public
         var user:Unidoc.User?
 
@@ -37,6 +39,7 @@ extension Unidoc.VersionsQuery
             aliases:[Symbol.Package],
             build:Unidoc.BuildMetadata?,
             realm:Unidoc.RealmMetadata?,
+            ticket:Unidoc.CrawlingTicket<Unidoc.Package>?,
             user:Unidoc.User?)
         {
             self.package = package
@@ -44,6 +47,7 @@ extension Unidoc.VersionsQuery
             self.versions = versions
             self.branches = branches
             self.aliases = aliases
+            self.ticket = ticket
             self.build = build
             self.realm = realm
             self.user = user
@@ -62,6 +66,7 @@ extension Unidoc.VersionsQuery.Output:Mongo.MasterCodingModel
         case package
         case build
         case realm
+        case ticket
         case user
     }
 }
@@ -77,6 +82,7 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
             aliases: try bson[.aliases].decode(),
             build: try bson[.build]?.decode(),
             realm: try bson[.realm]?.decode(),
+            ticket: try bson[.ticket]?.decode(),
             user: try bson[.user]?.decode())
     }
 }

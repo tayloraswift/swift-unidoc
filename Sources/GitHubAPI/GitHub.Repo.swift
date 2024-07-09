@@ -7,10 +7,13 @@ extension GitHub
     {
         public
         let id:Int32
+
         public
-        var owner:Owner
+        let owner:Owner
         public
-        var name:String
+        let name:String
+        public
+        let node:Node
 
         /// The repo’s license, if GitHub was able to detect it.
         public
@@ -76,6 +79,7 @@ extension GitHub
         init(id:Int32,
             owner:Owner,
             name:String,
+            node:Node,
             license:License? = nil,
             topics:[String] = [],
             master:String?,
@@ -97,6 +101,7 @@ extension GitHub
             self.id = id
             self.owner = owner
             self.name = name
+            self.node = node
             self.license = license
             self.topics = topics
             self.master = master
@@ -123,19 +128,17 @@ extension GitHub.Repo:JSONObjectDecodable
     enum CodingKey:String, Sendable
     {
         case id
+        case node_id
+
         case owner
         case name
-
-        @available(*, unavailable)
-        case node = "node_id"
-
         case license
         case topics
-        case master = "default_branch"
+        case default_branch
         // not `watchers_count`, which is just stargazers
-        case watchers = "subscribers_count"
-        case forks = "forks_count"
-        case stars = "stargazers_count"
+        case subscribers_count
+        case forks_count
+        case stargazers_count
         case size
         case archived
         case disabled
@@ -143,10 +146,10 @@ extension GitHub.Repo:JSONObjectDecodable
         case visibility
         case language
         case homepage
-        case about = "description"
-        case created = "created_at"
-        case updated = "updated_at"
-        case pushed = "pushed_at"
+        case description
+        case created_at
+        case updated_at
+        case pushed_at
     }
 
     public
@@ -158,12 +161,13 @@ extension GitHub.Repo:JSONObjectDecodable
         self.init(id: try json[.id].decode(),
             owner: try json[.owner].decode(),
             name: try json[.name].decode(),
+            node: try json[.node_id].decode(),
             license: try json[.license]?.decode(),
             topics: try json[.topics]?.decode() ?? [],
-            master: try json[.master]?.decode(),
-            watchers: try json[.watchers]?.decode(),
-            forks: try json[.forks].decode(),
-            stars: try json[.stars].decode(),
+            master: try json[.default_branch]?.decode(),
+            watchers: try json[.subscribers_count]?.decode(),
+            forks: try json[.forks_count].decode(),
+            stars: try json[.stargazers_count].decode(),
             size: try json[.size].decode(),
             archived: try json[.archived].decode(),
             disabled: try json[.disabled].decode(),
@@ -171,10 +175,10 @@ extension GitHub.Repo:JSONObjectDecodable
             visibility: try json[.visibility]?.decode(),
             language: try json[.language]?.decode(),
             homepage: try json[.homepage]?.decode(),
-            about: try json[.about]?.decode(),
-            created: try json[.created].decode(),
-            updated: try json[.updated].decode(),
-            pushed: try json[.pushed].decode())
+            about: try json[.description]?.decode(),
+            created: try json[.created_at].decode(),
+            updated: try json[.updated_at].decode(),
+            pushed: try json[.pushed_at].decode())
 
         //  String field normalization.
         if  case true? = self.homepage?.isEmpty

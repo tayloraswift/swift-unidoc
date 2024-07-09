@@ -1,4 +1,5 @@
 import BSON
+import GitHubAPI
 import UnixTime
 
 extension Unidoc
@@ -9,14 +10,18 @@ extension Unidoc
     {
         public
         let id:Int32
+        public
+        let owner:String
+        public
+        let name:String
+        /// TODO: deoptionalize
+        public
+        let node:GitHub.Node?
+
         /// When the repository content (as opposed to its metadata) was last pushed to.
         /// This is usually different from ``updated``.
         public
         var pushed:UnixMillisecond
-        public
-        var owner:String
-        public
-        var name:String
 
         public
         var homepage:String?
@@ -35,9 +40,10 @@ extension Unidoc
 
         @inlinable public
         init(id:Int32,
-            pushed:UnixMillisecond,
             owner:String,
             name:String,
+            node:GitHub.Node?,
+            pushed:UnixMillisecond,
             homepage:String?,
             about:String?,
             size:Int,
@@ -49,6 +55,7 @@ extension Unidoc
             self.pushed = pushed
             self.owner = owner
             self.name = name
+            self.node = node
             self.homepage = homepage
             self.about = about
             self.size = size
@@ -75,6 +82,7 @@ extension Unidoc.GitHubOrigin
         case pushed = "P"
         case owner = "O"
         case name = "N"
+        case node = "Q"
 
         case homepage = "H"
         case about = "A"
@@ -98,6 +106,7 @@ extension Unidoc.GitHubOrigin:BSONDocumentEncodable
         bson[.pushed] = self.pushed
         bson[.owner] = self.owner
         bson[.name] = self.name
+        bson[.node] = self.node
 
         bson[.homepage] = self.homepage
         bson[.about] = self.about
@@ -115,9 +124,10 @@ extension Unidoc.GitHubOrigin:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
-            pushed: try bson[.pushed].decode(),
             owner: try bson[.owner].decode(),
             name: try bson[.name].decode(),
+            node: try bson[.node]?.decode(),
+            pushed: try bson[.pushed].decode(),
             homepage: try bson[.homepage]?.decode(),
             about: try bson[.about]?.decode(),
             size: try bson[.size].decode(),
