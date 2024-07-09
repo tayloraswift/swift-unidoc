@@ -156,29 +156,6 @@ extension Unidoc.DB.Packages
 extension Unidoc.DB.Packages
 {
     public
-    func findGitHub(repo id:Int32,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
-    {
-        let command:Mongo.Find<Mongo.Single<Unidoc.PackageMetadata>> = .init(Self.name,
-            limit: 1)
-        {
-            $0[.filter]
-            {
-                //  We need this to use the partial index, for some reason.
-                $0[ Unidoc.PackageMetadata[.repo] /
-                    Unidoc.PackageRepo[.github]] { $0[.exists] = true }
-
-                $0[ Unidoc.PackageMetadata[.repo] /
-                    Unidoc.PackageRepo[.github] /
-                    Unidoc.GitHubOrigin[.id]] = id
-            }
-            $0[.hint] = Self.indexRepoGitHub.id
-        }
-
-        return try await session.run(command: command, against: self.database)
-    }
-
-    public
     func update(metadata:Unidoc.PackageMetadata,
         with session:Mongo.Session) async throws -> Bool?
     {
@@ -231,6 +208,41 @@ extension Unidoc.DB.Packages
                 {
                     $0[Unidoc.PackageMetadata[.hidden]] = ()
                 }
+            }
+        }
+    }
+
+    public
+    func updateWebhook(configurationURL:String,
+        repo:Unidoc.PackageRepo,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        let package:Unidoc.PackageByGitHubID
+
+        switch repo.origin
+        {
+        case .github(let origin):   package = .init(id: origin.id)
+        }
+
+        return try await self.modify(existing: package, with: session)
+        {
+            $0[.set]
+            {
+                $0[Element[.repo]] = repo
+                $0[Element[.repoWebhook]] = configurationURL
+            }
+        }
+    }
+
+    public
+    func detachWebhook(package:Unidoc.Package,
+        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    {
+        try await self.modify(existing: package, with: session)
+        {
+            $0[.unset]
+            {
+                $0[Unidoc.PackageMetadata[.repoWebhook]] = ()
             }
         }
     }

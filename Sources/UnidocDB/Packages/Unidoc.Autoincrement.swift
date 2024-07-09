@@ -4,6 +4,7 @@ import UnidocRecords
 
 extension Unidoc
 {
+    //  TODO: refactor use sites to stop using document postimages
     enum Autoincrement<Document>:Sendable
         where   Document:Identifiable,
                 Document:BSONDecodable,

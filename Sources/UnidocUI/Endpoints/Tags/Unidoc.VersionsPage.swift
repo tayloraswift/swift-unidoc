@@ -306,7 +306,25 @@ extension Unidoc.VersionsPage
             $0[.dd] = "\(timeSinceRead) ago"
 
             tagging:
-            if  let ticket:Unidoc.CrawlingTicket<Unidoc.Package> = self.ticket
+            if  let configurationURL:String = self.package.repoWebhook
+            {
+                $0[.dt] = "Webhook"
+                $0[.dd]
+                {
+                    $0 += "active"
+                    $0[.span, { $0.class = "parenthetical" }]
+                    {
+                        $0[.a]
+                        {
+                            $0.target = "_blank"
+                            $0.href = "https://\(configurationURL)"
+                            $0.rel = .external
+                        } = "configure"
+                    }
+                }
+            }
+            else if
+                let ticket:Unidoc.CrawlingTicket<Unidoc.Package> = self.ticket
             {
                 $0[.dt] = "Tags read"
                 $0[.dd]
@@ -347,12 +365,6 @@ extension Unidoc.VersionsPage
 
                 $0[.dt] = "Tags fetch in"
                 $0[.dd] = "\(timeRemaining)"
-            }
-            else if
-                let _:Unidoc.PackageRepo = self.package.repo
-            {
-                $0[.dt] = "Tagging mechanism"
-                $0[.dd] = "Webhook"
             }
         }
 

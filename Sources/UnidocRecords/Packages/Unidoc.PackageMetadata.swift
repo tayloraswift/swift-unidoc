@@ -49,6 +49,10 @@ extension Unidoc
         /// Currently only GitHub repos are supported.
         public
         var repo:PackageRepo?
+        /// Present if the package has a webhook configured. The payload is a URL (without the
+        /// scheme) that a human can use to configure the webhook.
+        public
+        var repoWebhook:String?
 
         @inlinable public
         init(id:Unidoc.Package,
@@ -59,7 +63,8 @@ extension Unidoc
             realmAligning:Bool = false,
             platformPreference:Triple? = nil,
             editors:[Account] = [],
-            repo:PackageRepo? = nil)
+            repo:PackageRepo? = nil,
+            repoWebhook:String? = nil)
         {
             self.id = id
             self.symbol = symbol
@@ -70,6 +75,7 @@ extension Unidoc
             self.platformPreference = platformPreference
             self.editors = editors
             self.repo = repo
+            self.repoWebhook = repoWebhook
         }
     }
 }
@@ -97,6 +103,7 @@ extension Unidoc.PackageMetadata
         case platformPreference = "O"
         case editors = "u"
         case repo = "G"
+        case repoWebhook = "W"
 
         @available(*, unavailable)
         case repoLegacy = "R"
@@ -121,6 +128,7 @@ extension Unidoc.PackageMetadata:BSONDocumentEncodable
         bson[.platformPreference] = self.platformPreference
         bson[.editors] = self.editors.isEmpty ? nil : self.editors
         bson[.repo] = self.repo
+        bson[.repoWebhook] = self.repoWebhook
     }
 }
 extension Unidoc.PackageMetadata:BSONDocumentDecodable
@@ -136,6 +144,7 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
             realmAligning: try bson[.realmAligning]?.decode() ?? false,
             platformPreference: try bson[.platformPreference]?.decode(),
             editors: try bson[.editors]?.decode() ?? [],
-            repo: try bson[.repo]?.decode())
+            repo: try bson[.repo]?.decode(),
+            repoWebhook: try bson[.repoWebhook]?.decode())
     }
 }

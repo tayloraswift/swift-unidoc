@@ -15,10 +15,10 @@ extension GitHub
         let refType:RefType
 
         public
-        let installation:UInt?
+        let installation:Int32?
 
         @inlinable public
-        init(repo:Repo, ref:String, refType:RefType, installation:UInt?)
+        init(repo:Repo, ref:String, refType:RefType, installation:Int32?)
         {
             self.repo = repo
             self.ref = ref
@@ -37,10 +37,6 @@ extension GitHub.WebhookCreate:JSONObjectDecodable
         case ref_type
 
         case installation
-        enum Installation:String, Sendable
-        {
-            case id
-        }
     }
 
     public
@@ -50,7 +46,8 @@ extension GitHub.WebhookCreate:JSONObjectDecodable
             repo: try json[.repository].decode(),
             ref: try json[.ref].decode(),
             refType: try json[.ref_type].decode(),
-            installation: try json[.installation]?.decode(using: CodingKey.Installation.self)
+            installation: try json[.installation]?.decode(
+                using: GitHub.Installation.CodingKey.self)
             {
                 try $0[.id].decode()
             })

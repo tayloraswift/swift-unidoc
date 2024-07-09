@@ -38,6 +38,10 @@ extension Unidoc
         public
         var fork:Bool
 
+        /// A GitHub App installation, currently only set for private repositories.
+        public
+        var installation:Int32?
+
         @inlinable public
         init(id:Int32,
             owner:String,
@@ -49,7 +53,8 @@ extension Unidoc
             size:Int,
             archived:Bool,
             disabled:Bool,
-            fork:Bool)
+            fork:Bool,
+            installation:Int32?)
         {
             self.id = id
             self.pushed = pushed
@@ -62,6 +67,7 @@ extension Unidoc
             self.archived = archived
             self.disabled = disabled
             self.fork = fork
+            self.installation = installation
         }
     }
 }
@@ -95,6 +101,7 @@ extension Unidoc.GitHubOrigin
         case archived = "X"
         case disabled = "D"
         case fork = "K"
+        case installation = "L"
     }
 }
 extension Unidoc.GitHubOrigin:BSONDocumentEncodable
@@ -116,6 +123,7 @@ extension Unidoc.GitHubOrigin:BSONDocumentEncodable
         bson[.archived] = self.archived
         bson[.disabled] = self.disabled
         bson[.fork] = self.fork
+        bson[.installation] = self.installation
     }
 }
 extension Unidoc.GitHubOrigin:BSONDocumentDecodable
@@ -133,6 +141,7 @@ extension Unidoc.GitHubOrigin:BSONDocumentDecodable
             size: try bson[.size].decode(),
             archived: try bson[.archived].decode(),
             disabled: try bson[.disabled].decode(),
-            fork: try bson[.fork].decode())
+            fork: try bson[.fork].decode(),
+            installation: try bson[.installation]?.decode())
     }
 }

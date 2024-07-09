@@ -464,6 +464,24 @@ extension Mongo.CollectionModel
 extension Mongo.CollectionModel
 {
     @inlinable package
+    func modify(upserting id:Element.ID,
+        returning phase:Mongo.UpdatePhase = .new,
+        with session:Mongo.Session,
+        do encode:(inout Mongo.UpdateEncoder) -> ()) async throws -> (state:Element, new:Bool)
+        where Element:BSONDecodable, Element.ID:BSONEncodable
+    {
+        let (element, upserted):(Element, Element.ID?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Upserting<Element, Element.ID>>.init(Self.name,
+                returning: phase)
+            {
+                $0[.query] { $0["_id"] = id }
+                $0[.update] { encode(&$0) }
+            },
+            against: self.database)
+        return (element, upserted != nil)
+    }
+
+    @inlinable package
     func modify(existing id:Element.ID,
         returning phase:Mongo.UpdatePhase = .new,
         with session:Mongo.Session,
@@ -475,6 +493,27 @@ extension Mongo.CollectionModel
                 returning: phase)
             {
                 $0[.query] { $0["_id"] = id }
+                $0[.update]
+                {
+                    encode(&$0)
+                }
+            },
+            against: self.database)
+        return element
+    }
+
+    @inlinable package
+    func modify(existing predicate:some Mongo.PredicateEncodable,
+        returning phase:Mongo.UpdatePhase = .new,
+        with session:Mongo.Session,
+        do encode:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
+        where Element:BSONDecodable, Element.ID:BSONEncodable
+    {
+        let (element, _):(Element?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Existing<Element>>.init(Self.name,
+                returning: phase)
+            {
+                $0[.query] { predicate.encode(to: &$0) }
                 $0[.update]
                 {
                     encode(&$0)
