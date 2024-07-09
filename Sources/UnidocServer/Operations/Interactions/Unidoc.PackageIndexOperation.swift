@@ -80,11 +80,16 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
             }
 
             (package, _) = try await server.db.unidoc.index(
-                package: .init("\(repo.owner.login).\(repo.name)"),
+                package: "\(repo.owner.login).\(repo.name)",
                 repo: .github(repo, crawled: .now()),
                 mode: .automatic,
                 with: session)
 
+            //  If we are (re)indexing a package this way, we should create a crawling ticket
+            //  for the repo, for lack of a proper interface for requesting this.
+            _ = try await server.db.crawlingTickets.create(
+                tickets: [.init(id: package.id, node: repo.node, time: .zero)],
+                with: session)
 
         case .ref(let id, ref: let ref):
             if  let metadata:Unidoc.PackageMetadata = try await server.db.packages.find(id: id,
