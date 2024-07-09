@@ -1,4 +1,5 @@
 import HTTP
+import GitHubAPI
 import MongoDB
 import UnidocUI
 import Symbols
@@ -91,14 +92,33 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
             rebuildPackageList = updated != nil
 
         case .expires(let when):
-            /// TODO: we should diagnose when we try to request a tags fetch for a package that
-            /// uses webhooks, as this will fail silently.
-            let _:Bool? = try await server.db.crawlingTickets.move(
+            if  case _? = try await server.db.crawlingTickets.move(
                 ticket: self.package,
                 time: when,
                 with: session)
+            {
+                updated = nil
+            }
+            else if
+                let package:Unidoc.PackageMetadata = try await server.db.packages.detachWebhook(
+                    package: self.package,
+                    with: session),
+                case .github(let origin)? = package.repo?.origin,
+                let node:GitHub.Node = origin.node
+            {
+                let ticket:Unidoc.CrawlingTicket<Unidoc.Package> = .init(id: self.package,
+                    node: node,
+                    time: when)
+                _ = try await server.db.crawlingTickets.create(tickets: [ticket],
+                    with: session)
 
-            updated = nil
+                updated = package.symbol
+            }
+            else
+            {
+                return .notFound("Package does not exist, or is missing GitHub node metadata\n")
+            }
+
             rebuildPackageList = false
 
         case .symbol(let symbol):
