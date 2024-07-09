@@ -34,14 +34,8 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
         with session:Mongo.Session,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let github:GitHub.Client<GitHub.PersonalAccessToken>
-        if  let integration:any GitHub.Integration = server.github
-        {
-            github = .graphql(pat: integration.pat,
-                threads: server.context.threads,
-                niossl: server.context.niossl,
-                as: integration.agent)
-        }
+        guard
+        let github:any Unidoc.Registrar = server.github
         else
         {
             return nil
@@ -59,13 +53,13 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 return error.response(format: format)
             }
 
-            let response:GitHub.RepoMonitorResponse = try await github.connect
+            let repo:GitHub.Repo? = try await github.connect(with: server.context)
             {
-                try await $0.inspectRepo(owner: owner, name: repo, tags: 0)
+                try await $0.lookup(owner: owner, repo: repo)
             }
 
             guard
-            let repo:GitHub.Repo = response.repo
+            let repo:GitHub.Repo
             else
             {
                 let display:Unidoc.PolicyErrorPage = .init(illustration: .error404_jpg,
@@ -116,13 +110,13 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 return error.response(format: format)
             }
 
-            let response:GitHub.RefResponse = try await github.connect
+            let ref:GitHub.Ref? = try await github.connect(with: server.context)
             {
-                try await $0.inspect(ref: ref, owner: origin.owner, repo: origin.name)
+                try await $0.lookup(owner: origin.owner, repo: origin.name, ref: ref)
             }
 
             guard
-            let ref:GitHub.Ref = response.ref
+            let ref:GitHub.Ref
             else
             {
                 return .notFound("No such ref")
