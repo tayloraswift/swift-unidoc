@@ -233,7 +233,6 @@ extension Unidoc.DB
                 }
                 $0[.set]
                 {
-                    $0[Unidoc.PackageMetadata[.symbol]] = package
                     $0[Unidoc.PackageMetadata[.repo]] = repo
                     $0[Unidoc.PackageMetadata[.repoWebhook]] = repoWebhook
                 }
