@@ -230,6 +230,7 @@ extension Unidoc.DB
                 $0[.setOnInsert]
                 {
                     $0[Unidoc.PackageMetadata[.hidden]] = mode == .automatic ? true : nil
+                    $0[Unidoc.PackageMetadata[.symbol]] = package
                 }
                 $0[.set]
                 {
