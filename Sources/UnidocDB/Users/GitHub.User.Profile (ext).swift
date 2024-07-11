@@ -1,5 +1,6 @@
 import BSON
 import GitHubAPI
+import UnidocRecords
 
 extension GitHub.User.Profile
 {
@@ -8,7 +9,8 @@ extension GitHub.User.Profile
     {
         case login = "U"
         case icon = "P"
-        case node = "Z"
+        case node = "Q"
+        case nodeLegacy = "Z"
         case location = "L"
         case hireable = "H"
         case company = "O"
@@ -57,7 +59,8 @@ extension GitHub.User.Profile:BSONDocumentDecodable, BSONDecodable
         self.init(
             login: try bson[.login].decode(),
             icon: try bson[.icon].decode(),
-            node: try bson[.node].decode(),
+            //  Note: type of this field changed from String to Binary Array
+            node: try bson[.node]?.decode() ?? .init(bson[.nodeLegacy].decode()),
             location: try bson[.location]?.decode(),
             hireable: try bson[.hireable]?.decode(),
             company: try bson[.company]?.decode(),

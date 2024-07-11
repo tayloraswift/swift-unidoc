@@ -11,7 +11,7 @@ extension GitHub.User
         var icon:String
         /// The user’s node id. This is GitHub’s analogue of a Unidoc scalar.
         public
-        var node:String
+        var node:GitHub.Node
 
         /// The user’s location, if set.
         public
@@ -55,7 +55,7 @@ extension GitHub.User
         init(
             login:String,
             icon:String,
-            node:String,
+            node:GitHub.Node,
             location:String?,
             hireable:Bool?,
             company:String?,

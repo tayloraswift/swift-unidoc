@@ -7,11 +7,17 @@ extension GitHub
     {
         public
         let id:Int32
+        public
+        let app:Int32
+        public
+        let account:UserInvite
 
         @inlinable public
-        init(id:Int32)
+        init(id:Int32, app:Int32, account:UserInvite)
         {
             self.id = id
+            self.app = app
+            self.account = account
         }
     }
 }
@@ -22,6 +28,8 @@ extension GitHub.Installation
     enum CodingKey:String, Sendable
     {
         case id
+        case app_id
+        case account
     }
 }
 extension GitHub.Installation:JSONObjectDecodable
@@ -29,6 +37,8 @@ extension GitHub.Installation:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        self.init(id: try json[.id].decode())
+        self.init(id: try json[.id].decode(),
+            app: try json[.app_id].decode(),
+            account: try json[.account].decode())
     }
 }

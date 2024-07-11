@@ -24,23 +24,23 @@ extension GitHub.User
     enum CodingKey:String, Sendable
     {
         case id
-        case profile_login = "login"
-        case profile_icon = "avatar_url"
-        case profile_node = "node_id"
-        case profile_location = "location"
-        case profile_hireable = "hireable"
-        case profile_company = "company"
-        case profile_email = "email"
-        case profile_name = "name"
-        case profile_blog = "blog"
-        case profile_bio = "bio"
-        case profile_x = "twitter_username"
-        case profile_publicRepos = "public_repos"
-        case profile_publicGists = "public_gists"
-        case profile_followers = "followers"
-        case profile_following = "following"
-        case profile_created = "created_at"
-        case profile_updated = "updated_at"
+        case login
+        case avatar_url
+        case node_id
+        case location
+        case hireable
+        case company
+        case email
+        case name
+        case blog
+        case bio
+        case twitter_username
+        case public_repos
+        case public_gists
+        case followers
+        case following
+        case created_at
+        case updated_at
     }
 }
 extension GitHub.User:JSONObjectDecodable, JSONDecodable
@@ -49,22 +49,22 @@ extension GitHub.User:JSONObjectDecodable, JSONDecodable
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
         self.init(id: try json[.id].decode(), profile: .init(
-            login: try json[.profile_login].decode(),
-            icon: try json[.profile_icon].decode(),
-            node: try json[.profile_node].decode(),
-            location: try json[.profile_location]?.decode(),
-            hireable: try json[.profile_hireable]?.decode(),
-            company: try json[.profile_company]?.decode(),
-            email: try json[.profile_email]?.decode(),
-            name: try json[.profile_name]?.decode(),
-            blog: try json[.profile_blog]?.decode(),
-            bio: try json[.profile_bio]?.decode(),
-            x: try json[.profile_x]?.decode(),
-            publicRepos: try json[.profile_publicRepos].decode(),
-            publicGists: try json[.profile_publicGists].decode(),
-            followers: try json[.profile_followers].decode(),
-            following: try json[.profile_following].decode(),
-            created: try json[.profile_created].decode(),
-            updated: try json[.profile_updated].decode()))
+            login: try json[.login].decode(),
+            icon: try json[.avatar_url].decode(),
+            node: try json[.node_id].decode(),
+            location: try json[.location]?.decode(),
+            hireable: try json[.hireable]?.decode(),
+            company: try json[.company]?.decode(),
+            email: try json[.email]?.decode(),
+            name: try json[.name]?.decode(),
+            blog: try json[.blog]?.decode(),
+            bio: try json[.bio]?.decode(),
+            x: try json[.twitter_username]?.decode(),
+            publicRepos: try json[.public_repos].decode(),
+            publicGists: try json[.public_gists].decode(),
+            followers: try json[.followers].decode(),
+            following: try json[.following].decode(),
+            created: try json[.created_at].decode(),
+            updated: try json[.updated_at].decode()))
     }
 }

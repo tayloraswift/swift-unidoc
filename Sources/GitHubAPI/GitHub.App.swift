@@ -6,7 +6,7 @@ extension GitHub
     {
         /// The app id number. This is different from the client id.
         public
-        let id:Int?
+        let id:Int32?
 
         public
         let client:String
@@ -14,7 +14,7 @@ extension GitHub
         let secret:String
 
         @inlinable public
-        init(_ id:Int?, client:String, secret:String)
+        init(_ id:Int32?, client:String, secret:String)
         {
             self.id = id
             self.client = client
