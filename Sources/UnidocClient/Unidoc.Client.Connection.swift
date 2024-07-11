@@ -50,33 +50,9 @@ extension Unidoc.Client<HTTP.Client2>.Connection
     {
         do
         {
-            let prompt:Unidoc.BuildLabelsPrompt = .edition(id, force: true)
-            return try await self.get(from: "/builder\(prompt.query)", timeout: .seconds(10))
-        }
-        catch let error as HTTP.StatusError
-        {
-            guard
-            case 404? = error.code
-            else
-            {
-                throw error
-            }
-
-            return nil
-        }
-    }
-
-    public
-    func labels(of package:Symbol.Package,
-        series:Unidoc.VersionSeries) async throws -> Unidoc.BuildLabels?
-    {
-        do
-        {
-            let prompt:Unidoc.BuildLabelsPrompt = .packageNamed(package,
-                series: series,
-                force: true)
-
-            return try await self.get(from: "/builder\(prompt.query)", timeout: .seconds(10))
+            let request:Unidoc.BuildRequest<Unidoc.Package> = .init(version: .id(id),
+                rebuild: true)
+            return try await self.get(from: "/builder\(request.query)", timeout: .seconds(10))
         }
         catch let error as HTTP.StatusError
         {

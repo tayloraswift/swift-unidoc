@@ -1,3 +1,6 @@
+import UnidocAPI
+import UnidocQueries
+
 extension Unidoc
 {
     public
@@ -5,7 +8,8 @@ extension Unidoc
     {
         associatedtype Session:RegistrarSession
 
-        func connect<T>(with context:ServerPluginContext,
-            _ body:(Session) async throws -> T) async throws -> T
+        func connect<T>(_ body:(Session) async throws -> T) async throws -> T
+
+        func resolve(_ edition:EditionState, rebuild:Bool) async throws -> BuildLabels?
     }
 }

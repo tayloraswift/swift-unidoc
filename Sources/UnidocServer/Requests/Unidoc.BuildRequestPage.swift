@@ -1,18 +1,19 @@
 import HTML
 import Media
+import Symbols
 import URI
 
 extension Unidoc
 {
     struct BuildRequestPage
     {
-        let selector:Unidoc.EditionSelector
+        let symbols:Symbol.PackageAtRef
         let cancel:Bool
         let action:URI
 
-        init(selector:Unidoc.EditionSelector, cancel:Bool, action:URI)
+        init(symbols:Symbol.PackageAtRef, cancel:Bool, action:URI)
         {
-            self.selector = selector
+            self.symbols = symbols
             self.cancel = cancel
             self.action = action
         }
@@ -27,18 +28,18 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
     {
         form[.p]
         {
-            let package:URI = Unidoc.RefsEndpoint[self.selector.package]
+            let package:URI = Unidoc.RefsEndpoint[self.symbols.package]
             if  self.cancel
             {
                 $0 += "You can cancel the build for "
-                $0[.a] { $0.href = "\(package)" } = "\(self.selector.package)"
+                $0[.a] { $0.href = "\(package)" } = "\(self.symbols.package)"
                 $0 += " if it has not started yet."
             }
             else if
-                let ref:Substring = self.selector.ref
+                let ref:Substring = self.symbols.ref
             {
                 $0 += "A builder will build the package "
-                $0[.a] { $0.href = "\(package)" } = "\(self.selector.package)"
+                $0[.a] { $0.href = "\(package)" } = "\(self.symbols.package)"
                 $0 += " at "
                 $0[.code] = "\(ref)"
                 $0 += """
@@ -49,7 +50,7 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
             else
             {
                 $0 += "A builder will select a recent version of the package "
-                $0[.a] { $0.href = "\(package)" } = "\(self.selector.package)"
+                $0[.a] { $0.href = "\(package)" } = "\(self.symbols.package)"
                 $0 += """
                  once one becomes available. If you tag a new release in the meantime, \
                 it might build that instead.
@@ -81,7 +82,7 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
         {
             return
         }
-        if  case _? = self.selector.ref
+        if  case _? = self.symbols.ref
         {
             return
         }

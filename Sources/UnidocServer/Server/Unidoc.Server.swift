@@ -24,7 +24,7 @@ extension Unidoc
         let updateQueue:AsyncStream<Update>.Continuation,
             updates:AsyncStream<Update>
 
-        let builds:BuildCoordinator
+        let builds:BuildCoordinator?
 
         let policy:(any HTTP.ServerPolicy)?
         @usableFromInline
@@ -35,7 +35,7 @@ extension Unidoc
             plugins:[any ServerPlugin],
             context:ServerPluginContext,
             options:ServerOptions,
-            builds:BuildCoordinator,
+            builds:BuildCoordinator?,
             logger:(any ServerLogger)? = nil,
             db:Database)
         {

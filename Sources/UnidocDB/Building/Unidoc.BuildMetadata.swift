@@ -14,7 +14,7 @@ extension Unidoc
         public
         var progress:BuildProgress?
         public
-        var request:BuildRequest?
+        var request:BuildRequest<Void>?
         public
         var failure:BuildFailure?
         public
@@ -23,7 +23,7 @@ extension Unidoc
         @inlinable public
         init(id:Unidoc.Package,
             progress:Unidoc.BuildProgress? = nil,
-            request:Unidoc.BuildRequest? = nil,
+            request:Unidoc.BuildRequest<Void>? = nil,
             failure:Unidoc.BuildFailure? = nil,
             logs:[BuildLogType] = [])
         {
@@ -42,14 +42,14 @@ extension Unidoc.BuildMetadata:Mongo.MasterCodingModel
     {
         case id = "_id"
         case progress = "P"
-        case selector = "Q"
+        case behavior = "Q"
         case edition = "e"
         case failure = "F"
         case logs = "L"
 
         @available(*, deprecated, renamed: "selector")
         @inlinable public static
-        var request:Self { .selector }
+        var request:Self { .behavior }
     }
 }
 extension Unidoc.BuildMetadata:BSONDocumentEncodable
@@ -59,8 +59,8 @@ extension Unidoc.BuildMetadata:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.progress] = self.progress
-        bson[.selector] = self.request?.selector
-        bson[.edition] = self.request?.edition
+        bson[.behavior] = self.request?.behavior
+        bson[.edition] = self.request?.version.exact
         bson[.failure] = self.failure
         bson[.logs] = self.logs.isEmpty ? nil : self.logs
     }
@@ -70,16 +70,16 @@ extension Unidoc.BuildMetadata:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        let request:Unidoc.BuildRequest?
-        if  let selector:Unidoc.BuildSelector = try bson[.selector]?.decode()
+        let request:Unidoc.BuildRequest<Void>?
+        if  let behavior:Unidoc.BuildBehavior = try bson[.behavior]?.decode()
         {
-            switch selector
+            switch behavior
             {
             case .latest(let series, force: let force):
-                request = .latest(series, force: force)
+                request = .init(version: .latest(series), rebuild: force)
 
             case .id(force: let force):
-                request = .id(try bson[.edition].decode(), force: force)
+                request = .init(version: .id(try bson[.edition].decode()), rebuild: force)
             }
         }
         else

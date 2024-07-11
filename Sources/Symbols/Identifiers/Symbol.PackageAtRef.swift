@@ -1,24 +1,22 @@
-import Symbols
-
-extension Unidoc
+extension Symbol
 {
     @frozen public
-    struct EditionSelector:Equatable, Hashable, Sendable
+    struct PackageAtRef:Equatable, Hashable, Sendable
     {
         public
-        var package:Symbol.Package
+        var package:Package
         public
         var ref:Substring?
 
         @inlinable public
-        init(package:Symbol.Package, ref:Substring?)
+        init(package:Package, ref:Substring?)
         {
             self.package = package
             self.ref = ref
         }
     }
 }
-extension Unidoc.EditionSelector:CustomStringConvertible
+extension Symbol.PackageAtRef:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -26,7 +24,7 @@ extension Unidoc.EditionSelector:CustomStringConvertible
         self.ref.map { "\(self.package)/\($0)" } ?? "\(self.package)"
     }
 }
-extension Unidoc.EditionSelector:LosslessStringConvertible
+extension Symbol.PackageAtRef:LosslessStringConvertible
 {
     public
     init(_ trunk:String)

@@ -412,13 +412,13 @@ extension Unidoc.Router
         switch self.descend()
         {
         case nil:
-            guard let build:Unidoc.BuildLabelsPrompt = .init(query: self.query)
+            guard let request:Unidoc.BuildRequest<Unidoc.Package> = .init(query: self.query)
             else
             {
                 return nil
             }
 
-            return .unordered(Unidoc.BuilderLabelOperation.init(prompt: build))
+            return .unordered(Unidoc.BuilderLabelOperation.init(request: request))
 
         case "poll"?:
             guard let account:Unidoc.Account = self.authorization.account
@@ -717,7 +717,7 @@ extension Unidoc.Router
         case "github"?:
             do
             {
-                return .unordered(try Unidoc.PackageWebhookOperation.init(json: json,
+                return .unordered(try Unidoc.WebhookOperation.init(json: json,
                     from: self.origin,
                     with: self.headers))
             }
@@ -923,7 +923,7 @@ extension Unidoc.Router
                 return nil
             }
 
-            return .syncHTML(Unidoc.BuildRequestPage.init(selector: build.selector,
+            return .syncHTML(Unidoc.BuildRequestPage.init(symbols: build.symbols,
                 cancel: build.request == nil,
                 action: uri))
 
