@@ -78,8 +78,9 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
                     {
                         $0[.a]
                         {
-                            $0.href = "https://github.com/\(github.login)"
                             $0.target = "_blank"
+                            $0.href = "https://github.com/\(github.login)"
+                            $0.rel = .external
                         } = "@\(github.login)"
 
                         guard
@@ -150,6 +151,25 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
                         }
                     }
 
+                    // $0[.p]
+                    // {
+                    //     $0[.label]
+                    //     {
+                    //         $0.class = "checkbox"
+                    //     }
+                    //         content:
+                    //     {
+                    //         $0[.input]
+                    //         {
+                    //             $0.type = "checkbox"
+                    //             $0.name = "private"
+                    //             $0.value = "true"
+                    //         }
+
+                    //         $0[.span] = "This is a private repository"
+                    //     }
+                    // }
+
                     $0[.button]
                     {
                         $0.class = "area"
@@ -182,6 +202,7 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
                 for organization:Unidoc.User in self.organizations
                 {
                     $0[.li] = organization.card(some: Installation.init(
+                        organization: organization.symbol,
                         id: organization.githubInstallation))
                 }
             }
