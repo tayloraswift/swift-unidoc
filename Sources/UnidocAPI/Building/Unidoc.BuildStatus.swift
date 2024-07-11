@@ -6,14 +6,14 @@ extension Unidoc
     struct BuildStatus
     {
         public
-        let request:Unidoc.BuildRequest?
+        let request:Unidoc.BuildRequest<Void>?
         public
         let stage:Unidoc.BuildStage?
         public
         let failure:Unidoc.BuildFailure?
 
         @inlinable public
-        init(request:Unidoc.BuildRequest?,
+        init(request:Unidoc.BuildRequest<Void>?,
             stage:Unidoc.BuildStage?,
             failure:Unidoc.BuildFailure?)
         {
@@ -40,18 +40,18 @@ extension Unidoc.BuildStatus:JSONObjectEncodable
     public
     func encode(to json:inout JSON.ObjectEncoder<CodingKey>)
     {
-        switch self.request
+        if  let request:Unidoc.BuildRequest<Void> = self.request
         {
-        case nil:
-            break
+            switch request.version
+            {
+            case .latest(let series, of: ()):
+                json[.series] = series
 
-        case .latest(let series, force: let force):
-            json[.series] = series
-            json[.force] = force
+            case .id(let id):
+                json[.version] = id
+            }
 
-        case .id(let id, force: let force):
-            json[.version] = id
-            json[.force] = force
+            json[.force] = request.rebuild
         }
 
         json[.stage] = self.stage
@@ -63,15 +63,15 @@ extension Unidoc.BuildStatus:JSONObjectDecodable
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        let request:Unidoc.BuildRequest?
+        let request:Unidoc.BuildRequest<Void>?
         if  let series:Unidoc.VersionSeries = try json[.series]?.decode()
         {
-            request = .latest(series, force: try json[.force].decode())
+            request = .init(version: .latest(series), rebuild: try json[.force].decode())
         }
         else if
             let id:Unidoc.Edition = try json[.version]?.decode()
         {
-            request = .id(id, force: try json[.force].decode())
+            request = .init(version: .id(id), rebuild: try json[.force].decode())
         }
         else
         {

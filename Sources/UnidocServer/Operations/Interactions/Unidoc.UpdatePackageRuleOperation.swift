@@ -77,7 +77,7 @@ extension Unidoc.UpdatePackageRuleOperation:Unidoc.RestrictedOperation
             }
 
             let registered:Unidoc.UserSecrets = try await server.db.users.update(
-                user: .github(user, initialLimit: server.db.policy.apiLimitPerReset),
+                user: .init(github: user, initialLimit: server.db.policy.apiLimitPerReset),
                 with: session)
 
             package = try await server.db.packages.insert(editor: registered.account,

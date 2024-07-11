@@ -3,22 +3,12 @@ import UnidocAPI
 extension Unidoc.BuildRequest
 {
     @inlinable public
-    var edition:Unidoc.Edition?
+    var behavior:Unidoc.BuildBehavior
     {
-        switch self
+        switch self.version
         {
-        case .latest(_, force: _):  nil
-        case .id(let edition, _):   edition
-        }
-    }
-
-    @inlinable public
-    var selector:Unidoc.BuildSelector
-    {
-        switch self
-        {
-        case .latest(let series, force: let force): .latest(series, force: force)
-        case .id(_, force: let force):              .id(force: force)
+        case .latest(let series, of: _):    .latest(series, force: self.rebuild)
+        case .id:                           .id(force: self.rebuild)
         }
     }
 }

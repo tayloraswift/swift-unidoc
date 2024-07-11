@@ -23,6 +23,8 @@ extension Unidoc
 
         public
         var github:GitHub.User.Profile?
+        public
+        var githubInstallation:Int32?
 
         /// Additional accounts that this user has access to.
         public
@@ -35,6 +37,7 @@ extension Unidoc
             apiKey:Int64? = nil,
             symbol:String? = nil,
             github:GitHub.User.Profile? = nil,
+            githubInstallation:Int32? = nil,
             access:[Account] = [])
         {
             self.id = id
@@ -43,30 +46,42 @@ extension Unidoc
             self.apiKey = apiKey
             self.symbol = symbol
             self.github = github
+            self.githubInstallation = githubInstallation
             self.access = access
         }
     }
 }
 extension Unidoc.User
 {
-    @inlinable public static
-    func github(_ user:GitHub.User, initialLimit:Int) -> Self
+    @inlinable public
+    init(githubInstallation appInstallation:GitHub.Installation, initialLimit:Int)
     {
-        /// r u taylor swift?
-        let level:Unidoc.User.Level = user.id == 2556986 ? .administratrix : .human
-        let id:Unidoc.Account = .init(type: .github, user: user.id)
-        return .init(id: id,
-            level: level,
-            //  This will only be written to the database if the user is new.
-            apiLimitLeft: initialLimit,
-            symbol: user.profile.login,
-            github: user.profile)
+        self.init(github: appInstallation.account.id, symbol: appInstallation.account.login)
+        self.apiLimitLeft = initialLimit
+        self.githubInstallation = appInstallation.id
     }
 
-    @inlinable public static
-    func machine(_ number:UInt32 = 0) -> Self
+    @inlinable public
+    init(github user:GitHub.User, initialLimit:Int)
     {
-        .init(id: .init(type: .unidoc, user: number), level: .machine)
+        self.init(github: user.id, symbol: user.profile.login)
+        self.apiLimitLeft = initialLimit
+        self.github = user.profile
+    }
+
+    @inlinable
+    init(github id:UInt32, symbol:String)
+    {
+        /// r u taylor swift?
+        let level:Unidoc.User.Level = id == 2556986 ? .administratrix : .human
+        let id:Unidoc.Account = .init(type: .github, user: id)
+        self.init(id: id, level: level, symbol: symbol)
+    }
+
+    @inlinable public
+    init(machine:UInt32)
+    {
+        self.init(id: .init(type: .unidoc, user: machine), level: .machine)
     }
 }
 extension Unidoc.User
@@ -101,6 +116,7 @@ extension Unidoc.User:Mongo.MasterCodingModel
         case symbol = "Y"
 
         case github = "github"
+        case githubInstallation = "github_I"
 
         case access = "a"
     }
@@ -118,6 +134,7 @@ extension Unidoc.User:BSONDocumentEncodable
         bson[.symbol] = self.symbol
 
         bson[.github] = self.github
+        bson[.githubInstallation] = self.githubInstallation
 
         bson[.access] = self.access.isEmpty ? nil : self.access
     }
@@ -133,6 +150,7 @@ extension Unidoc.User:BSONDocumentDecodable
             apiKey: try bson[.apiKey]?.decode(),
             symbol: try bson[.symbol]?.decode(),
             github: try bson[.github]?.decode(),
+            githubInstallation: try bson[.githubInstallation]?.decode(),
             access: try bson[.access]?.decode() ?? [])
     }
 }
@@ -149,6 +167,7 @@ extension Unidoc.User
             $0[Self[.level]] = self.level
             $0[Self[.symbol]] = self.symbol
             $0[Self[.github]] = self.github
+            $0[Self[.githubInstallation]] = self.githubInstallation
         }
         u[.setOnInsert]
         {

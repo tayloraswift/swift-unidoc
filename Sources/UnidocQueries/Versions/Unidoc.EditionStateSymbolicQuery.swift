@@ -40,6 +40,10 @@ extension Unidoc.EditionStateSymbolicQuery:Unidoc.AliasingQuery
         //  Unbox single-element array.
         pipeline[stage: .unwind] = Unidoc.EditionState[.version]
 
+        pipeline.loadUser(
+            owning: Unidoc.EditionState[.package],
+            as: Unidoc.EditionState[.owner])
+
         pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.PackageBuilds.name

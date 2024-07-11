@@ -1,17 +1,19 @@
+import Symbols
+
 extension Unidoc.PackageBuildOperation
 {
     struct DirectParameters
     {
-        let selector:Unidoc.EditionSelector
+        let symbols:Symbol.PackageAtRef
         let package:Unidoc.Package
-        let request:Unidoc.BuildRequest?
+        let request:Unidoc.BuildRequest<Void>?
 
         private
-        init(selector:Unidoc.EditionSelector,
+        init(symbols:Symbol.PackageAtRef,
             package:Unidoc.Package,
-            request:Unidoc.BuildRequest?)
+            request:Unidoc.BuildRequest<Void>?)
         {
-            self.selector = selector
+            self.symbols = symbols
             self.package = package
             self.request = request
         }
@@ -22,7 +24,7 @@ extension Unidoc.PackageBuildOperation.DirectParameters
     init?(from form:borrowing [String: String])
     {
         guard
-        let selector:String = form["selector"],
+        let symbols:String = form["selector"],
         let package:String = form["package"],
         let package:Unidoc.Package = .init(package)
         else
@@ -30,31 +32,29 @@ extension Unidoc.PackageBuildOperation.DirectParameters
             return nil
         }
 
-        let request:Unidoc.BuildRequest?
+        let request:Unidoc.BuildRequest<Void>?
 
         switch form["build"]
         {
         case "request"?:
-            let force:Bool = form["force"] == "true"
+            let selector:Unidoc.BuildSelector<Void>
 
             if  let version:String = form["version"],
                 let version:Unidoc.Version = .init(version)
             {
-                request = .id(.init(package: package, version: version), force: force)
-                break
+                selector = .id(.init(package: package, version: version))
             }
-
-            let series:Unidoc.VersionSeries
-            if  case "prerelease"? = form["series"]
+            else if
+                case "prerelease"? = form["series"]
             {
-                series = .prerelease
+                selector = .latest(.prerelease)
             }
             else
             {
-                series = .release
+                selector = .latest(.release)
             }
 
-            request = .latest(series, force: force)
+            request = .init(version: selector, rebuild: form["force"] == "true")
 
         case "cancel"?:
             request = nil
@@ -63,6 +63,6 @@ extension Unidoc.PackageBuildOperation.DirectParameters
             return nil
         }
 
-        self.init(selector: .init(selector), package: package, request: request)
+        self.init(symbols: .init(symbols), package: package, request: request)
     }
 }

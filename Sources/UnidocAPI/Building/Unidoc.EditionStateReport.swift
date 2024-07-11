@@ -75,12 +75,12 @@ extension Unidoc.EditionStateReport
         }
         else
         {
-            switch build.request
+            switch build.request?.version
             {
             case .latest?:
                 return .QUEUED_FLOATING_VERSION
 
-            case .id(self.id, force: _)?:
+            case .id(self.id)?:
                 return .QUEUED
 
             case .id?:

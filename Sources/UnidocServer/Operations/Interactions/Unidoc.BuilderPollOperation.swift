@@ -21,6 +21,13 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
         with session:Mongo.Session,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
+        guard
+        let coordinator:Unidoc.BuildCoordinator = server.builds
+        else
+        {
+            return .notFound("Server does not support builder polling\n")
+        }
+
         /// If the builder is recovering from a crash, kill any builds that had previously been
         /// assigned to it.
         let _:Int = try await server.db.packageBuilds.killBuilds(builder: self.id,
@@ -36,7 +43,7 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
             }
             $0.addTask
             {
-                try await server.builds.match(builder: self.id)
+                try await coordinator.match(builder: self.id)
             }
 
             for try await labels:Unidoc.BuildLabels? in $0

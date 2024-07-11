@@ -74,6 +74,12 @@ extension Unidoc
 extension Unidoc.GitHubOrigin
 {
     @inlinable public
+    func https(token:GitHub.InstallationAccessToken) -> String
+    {
+        "https://x-access-token:\(token)@github.com/\(self.owner)/\(self.name)"
+    }
+
+    @inlinable public
     var https:String
     {
         "https://github.com/\(self.owner)/\(self.name)"

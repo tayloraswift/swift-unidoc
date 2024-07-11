@@ -158,18 +158,15 @@ extension Unidoc.Preview
                     $0.apiLimitPerReset = 10000
                 }
 
-                try await Unidoc.BuildCoordinator.run(watching: database)
-                {
-                    let linker:Unidoc.GraphLinkerPlugin = .init(bucket: nil)
-                    let server:Unidoc.Server = .init(
-                        plugins: [linker],
-                        context: context,
-                        options: options,
-                        builds: $0,
-                        db: database)
+                let linker:Unidoc.GraphLinkerPlugin = .init(bucket: nil)
+                let server:Unidoc.Server = .init(
+                    plugins: [linker],
+                    context: context,
+                    options: options,
+                    builds: nil,
+                    db: database)
 
-                    try await server.run()
-                }
+                try await server.run()
             }
             catch let error
             {

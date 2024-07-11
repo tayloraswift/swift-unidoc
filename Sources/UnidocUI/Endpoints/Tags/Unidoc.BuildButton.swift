@@ -6,20 +6,20 @@ extension Unidoc
 {
     struct BuildButton
     {
-        let selector:EditionSelector
+        let symbols:Symbol.PackageAtRef
         let package:Package
         let version:Version?
         let cancel:Bool
         let area:Bool
 
         private
-        init(selector:EditionSelector,
+        init(symbols:Symbol.PackageAtRef,
             package:Package,
             version:Version?,
             cancel:Bool,
             area:Bool)
         {
-            self.selector = selector
+            self.symbols = symbols
             self.package = package
             self.version = version
             self.cancel = cancel
@@ -32,7 +32,7 @@ extension Unidoc.BuildButton
     static
     func edition(id:Unidoc.Edition, package:Symbol.Package, ref:String) -> Self
     {
-        return .init(selector: .init(package: package, ref: ref[...]),
+        return .init(symbols: .init(package: package, ref: ref[...]),
             package: id.package,
             version: id.version,
             cancel: false,
@@ -42,7 +42,7 @@ extension Unidoc.BuildButton
     static
     func latest(of package:Unidoc.PackageMetadata, cancel:Bool = false) -> Self
     {
-        return .init(selector: .init(package: package.symbol, ref: nil),
+        return .init(symbols: .init(package: package.symbol, ref: nil),
             package: package.id,
             version: nil,
             cancel: cancel,
@@ -58,7 +58,7 @@ extension Unidoc.BuildButton:HTML.OutputStreamable
         {
             $0.type = "hidden"
             $0.name = "selector"
-            $0.value = "\(self.selector)"
+            $0.value = "\(self.symbols)"
         }
 
         form[.input]

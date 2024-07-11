@@ -9,13 +9,22 @@ import UnixTime
 
 extension Unidoc
 {
-    enum PackageWebhookOperation:Sendable
+    struct WebhookOperation:Sendable
     {
-        case create(UInt, GitHub.WebhookCreate)
-        case ignore(String)
+        private
+        let event:Event
+        private
+        let hook:UInt
+
+        private
+        init(event:Event, hook:UInt)
+        {
+            self.event = event
+            self.hook = hook
+        }
     }
 }
-extension Unidoc.PackageWebhookOperation
+extension Unidoc.WebhookOperation
 {
     init(json:JSON, from origin:IP.Origin, with headers:__shared HTTP.Headers) throws
     {
@@ -27,7 +36,7 @@ extension Unidoc.PackageWebhookOperation
         {
         case .github:   break
         case .unknown:  break
-        default:        throw Unidoc.PackageWebhookError.unverifiedOrigin
+        default:        throw Unidoc.WebhookError.unverifiedOrigin
         }
 
         let hook:String?
@@ -48,42 +57,48 @@ extension Unidoc.PackageWebhookOperation
         let type:String
         else
         {
-            throw Unidoc.PackageWebhookError.missingEventType
+            throw Unidoc.WebhookError.missingEventType
         }
         guard
         let hook:String
         else
         {
-            throw Unidoc.PackageWebhookError.missingHookID
+            throw Unidoc.WebhookError.missingHookID
         }
         guard
         let hook:UInt = .init(hook)
         else
         {
-            throw Unidoc.PackageWebhookError.invalidHookID
+            throw Unidoc.WebhookError.invalidHookID
         }
+
+        let event:Event
 
         switch type
         {
-        case "create":
-            self = .create(hook, try json.decode())
-
-        case let type:
-            self = .ignore(type)
+        case "installation":    event = .installation(try json.decode())
+        case "create":          event = .create(try json.decode())
+        case let type:          event = .ignore(type)
         }
+
+        self.init(event: event, hook: hook)
     }
 }
-extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
+extension Unidoc.WebhookOperation:Unidoc.PublicOperation
 {
     __consuming
     func load(from server:Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        switch self
+        switch self.event
         {
-        case .create(let webhook, let create):
-            return try await self.create(event: create,
-                from: webhook,
+        case .installation(let event):
+            return try await self.handle(installation: event,
+                in: server.db,
+                at: .init(truncating: format.time))
+
+        case .create(let event):
+            return try await self.handle(create: event,
                 in: server.db,
                 at: .init(truncating: format.time))
 
@@ -92,11 +107,28 @@ extension Unidoc.PackageWebhookOperation:Unidoc.PublicOperation
         }
     }
 }
-extension Unidoc.PackageWebhookOperation
+extension Unidoc.WebhookOperation
 {
     private __consuming
-    func create(event:GitHub.WebhookCreate,
-        from hook:UInt,
+    func handle(installation event:GitHub.WebhookInstallation,
+        in db:Unidoc.Database,
+        at time:UnixMillisecond) async throws -> HTTP.ServerResponse
+    {
+        guard case .created = event.action
+        else
+        {
+            return .ok("")
+        }
+
+        let user:Unidoc.User = .init(githubInstallation: event.installation,
+            initialLimit: db.policy.apiLimitPerReset)
+        let session:Mongo.Session = try await .init(from: db.sessions)
+        let _:Unidoc.UserSecrets = try await db.users.update(user: user, with: session)
+        return .created("")
+    }
+
+    private __consuming
+    func handle(create event:GitHub.WebhookCreate,
         in db:Unidoc.Database,
         at time:UnixMillisecond) async throws -> HTTP.ServerResponse
     {
@@ -137,7 +169,7 @@ extension Unidoc.PackageWebhookOperation
             /// confident that the owner intended to index this package.
             indexEligible = true
             repoWebhook = """
-            github.com/\(event.repo.owner.login)/\(event.repo.name)/settings/hooks/\(hook)
+            github.com/\(event.repo.owner.login)/\(event.repo.name)/settings/hooks/\(self.hook)
             """
         }
 
@@ -198,6 +230,6 @@ extension Unidoc.PackageWebhookOperation
             try await db.repoFeed.push(activity, with: session)
         }
 
-        return .resource("", status: 201)
+        return .created("")
     }
 }
