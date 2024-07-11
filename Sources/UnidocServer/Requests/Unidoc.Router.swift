@@ -668,7 +668,7 @@ extension Unidoc.Router
         }
 
         return .explainable(Unidoc.BlogEndpoint.init(query: .init(
-                volume: .init(package: "__swiftinit", version: "__max"),
+                volume: .init(package: "__swiftinit", version: nil),
                 vertex: .init(path: [module, article], hash: nil))),
             parameters: .init(self.query),
             etag: self.etag)
