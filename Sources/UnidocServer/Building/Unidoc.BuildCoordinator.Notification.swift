@@ -12,7 +12,7 @@ extension Unidoc.BuildCoordinator
         private
         let package:Unidoc.Package
         private
-        let request:Unidoc.BuildRequest
+        let request:Unidoc.BuildRequest<Void>
 
         private
         let producer:CheckedContinuation<Void, any Error>
@@ -21,7 +21,7 @@ extension Unidoc.BuildCoordinator
 
         init(appeared:BSON.Timestamp,
             package:Unidoc.Package,
-            request:Unidoc.BuildRequest,
+            request:Unidoc.BuildRequest<Void>,
             producer:CheckedContinuation<Void, any Error>)
         {
             self.appeared = appeared
@@ -62,12 +62,15 @@ extension Unidoc.BuildCoordinator
 extension Unidoc.BuildCoordinator.Notification
 {
     func match(with subscription:__owned Unidoc.BuildCoordinator.Subscription,
-        in db:Unidoc.Database) async -> Unidoc.BuildCoordinator.Subscription?
+        in db:Unidoc.Database,
+        registrar:any Unidoc.Registrar) async -> Unidoc.BuildCoordinator.Subscription?
     {
         let labels:Unidoc.BuildLabels?
         do
         {
-            labels = try await self.match(with: subscription.assignee, in: db)
+            labels = try await self.match(with: subscription.assignee,
+                in: db,
+                registrar: registrar)
         }
         catch let error
         {
@@ -97,7 +100,8 @@ extension Unidoc.BuildCoordinator.Notification
 
     private
     func match(with assignee:Unidoc.Account,
-        in db:Unidoc.Database) async throws -> Unidoc.BuildLabels?
+        in db:Unidoc.Database,
+        registrar:any Unidoc.Registrar) async throws -> Unidoc.BuildLabels?
     {
         let session:Mongo.Session = try await .init(from: db.sessions)
 
@@ -106,7 +110,7 @@ extension Unidoc.BuildCoordinator.Notification
         session.synchronize(to: self.appeared)
 
         guard try await db.packageBuilds.assignBuild(
-            request: self.request.selector,
+            request: self.request.behavior,
             package: self.package,
             builder: assignee,
             with: session)
@@ -118,20 +122,18 @@ extension Unidoc.BuildCoordinator.Notification
             return nil
         }
 
-        let prompt:Unidoc.BuildLabelsPrompt
+        let version:Unidoc.BuildSelector<Unidoc.Package>
 
-        switch self.request
+        switch self.request.version
         {
-        case .latest(let series, force: let force):
-            prompt = .package(self.package, series: series, force: force)
-
-        case .id(let id, force: let force):
-            prompt = .edition(id, force: force)
+        case .latest(let series, of: ()):   version = .latest(series, of: self.package)
+        case .id(let id):                   version = .id(id)
         }
 
-        if  let labels:Unidoc.BuildLabels = try await db.unidoc.answer(
-                prompt: prompt,
-                with: session)
+        if  let edition:Unidoc.EditionState = try await db.unidoc.editionState(of: version,
+                with: session),
+            let labels:Unidoc.BuildLabels = try await registrar.resolve(edition,
+                rebuild: self.request.rebuild)
         {
             return labels
         }

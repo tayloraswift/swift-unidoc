@@ -9,8 +9,9 @@ extension Unidoc
     {
         private nonisolated
         let eventQueue:AsyncStream<Event>.Continuation
+
         private
-        var counter:UInt
+        var subscriptionCounter:UInt
         private
         var subscriptions:[UInt: Subscription]
         private
@@ -20,8 +21,7 @@ extension Unidoc
         init(eventQueue:AsyncStream<Event>.Continuation)
         {
             self.eventQueue = eventQueue
-            self.counter = 0
-
+            self.subscriptionCounter = 0
             self.subscriptions = [:]
             self.notifications = nil
         }
@@ -31,6 +31,7 @@ extension Unidoc.BuildCoordinator
 {
     public static
     func run<T>(watching db:Unidoc.Database,
+        registrar:any Unidoc.Registrar,
         with body:(Unidoc.BuildCoordinator) async throws -> T) async rethrows -> T
     {
         let events:AsyncStream<Event>
@@ -41,7 +42,7 @@ extension Unidoc.BuildCoordinator
         let coordinator:Self = .init(eventQueue: eventQueue)
 
         async
-        let _:Void = coordinator.matchNotifications(from: db, to: events)
+        let _:Void = coordinator.matchNotifications(from: db, to: events, registrar: registrar)
         async
         let _:Void = coordinator.pullNotifications(from: db)
 
@@ -90,7 +91,7 @@ extension Unidoc.BuildCoordinator
         let metadata:Unidoc.BuildMetadata = try await db.packageBuilds.selectBuild(
             await: true,
             with: session),
-        let request:Unidoc.BuildRequest = metadata.request
+        let request:Unidoc.BuildRequest<Void> = metadata.request
         else
         {
             throw Unidoc.BuildCoordinatorAssertionError.invalidChangeStreamElement
@@ -117,7 +118,9 @@ extension Unidoc.BuildCoordinator
 extension Unidoc.BuildCoordinator
 {
     private
-    func matchNotifications(from db:Unidoc.Database, to events:AsyncStream<Event>) async
+    func matchNotifications(from db:Unidoc.Database,
+        to events:AsyncStream<Event>,
+        registrar:any Unidoc.Registrar) async
     {
         for await event:Event in events
         {
@@ -127,7 +130,9 @@ extension Unidoc.BuildCoordinator
                 if  let buffered:Notification = self.notifications
                 {
                     self.notifications = nil
-                    self.subscriptions[id] = await buffered.match(with: subscription, in: db)
+                    self.subscriptions[id] = await buffered.match(with: subscription,
+                        in: db,
+                        registrar: registrar)
                 }
                 else
                 {
@@ -137,7 +142,9 @@ extension Unidoc.BuildCoordinator
             case .notify(let notification):
                 if  let (id, buffered):(UInt, Subscription) = self.subscriptions.first
                 {
-                    self.subscriptions[id] = await notification.match(with: buffered, in: db)
+                    self.subscriptions[id] = await notification.match(with: buffered,
+                        in: db,
+                        registrar: registrar)
                 }
                 else
                 {
@@ -157,8 +164,8 @@ extension Unidoc.BuildCoordinator
 {
     func match(builder:Unidoc.Account) async throws -> Unidoc.BuildLabels
     {
-        let id:UInt = self.counter
-        self.counter += 1
+        let id:UInt = self.subscriptionCounter
+        self.subscriptionCounter += 1
 
         return try await withTaskCancellationHandler
         {

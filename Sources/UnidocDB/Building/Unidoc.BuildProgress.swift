@@ -14,12 +14,12 @@ extension Unidoc
         public
         var builder:Account
         public
-        var request:BuildSelector
+        var request:BuildBehavior
         public
         var stage:BuildStage
 
         @inlinable public
-        init(started:UnixMillisecond, builder:Account, request:BuildSelector, stage:BuildStage)
+        init(started:UnixMillisecond, builder:Account, request:BuildBehavior, stage:BuildStage)
         {
             self.started = started
             self.builder = builder

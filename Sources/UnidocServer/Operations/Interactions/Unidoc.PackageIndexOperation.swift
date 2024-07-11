@@ -45,7 +45,7 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
 
         switch self.subject
         {
-        case .repo(owner: let owner, name: let repo):
+        case .repo(owner: let owner, name: let repo, private: let `private`):
             if  let error:Unidoc.PolicyErrorPage = try await self.charge(cost: 8,
                     from: server,
                     with: session)
@@ -53,9 +53,9 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 return error.response(format: format)
             }
 
-            let repo:GitHub.Repo? = try await github.connect(with: server.context)
+            let repo:GitHub.Repo? = try await github.connect
             {
-                try await $0.lookup(owner: owner, repo: repo)
+                try await $0.lookup(owner: owner, repo: repo, private: `private`)
             }
 
             guard
@@ -110,7 +110,7 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 return error.response(format: format)
             }
 
-            let ref:GitHub.Ref? = try await github.connect(with: server.context)
+            let ref:GitHub.Ref? = try await github.connect
             {
                 try await $0.lookup(owner: origin.owner, repo: origin.name, ref: ref)
             }

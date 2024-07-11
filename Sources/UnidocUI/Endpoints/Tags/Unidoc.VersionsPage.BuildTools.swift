@@ -76,7 +76,7 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
             }
         }
         else if
-            let request:Unidoc.BuildRequest = self.build?.request
+            let request:Unidoc.BuildRequest<Void> = self.build?.request
         {
             if  self.view.editor
             {
@@ -94,9 +94,9 @@ extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
                     view: self.view)
             }
 
-            switch request
+            switch request.version
             {
-            case .latest(let series, force: _):
+            case .latest(let series, of: ()):
                 section[.div]
                 {
                     $0.class = "phase"

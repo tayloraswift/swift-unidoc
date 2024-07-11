@@ -7,11 +7,11 @@ extension Unidoc
 {
     struct BuilderLabelOperation:Sendable
     {
-        let prompt:Unidoc.BuildLabelsPrompt
+        let request:Unidoc.BuildRequest<Unidoc.Package>
 
-        init(prompt:Unidoc.BuildLabelsPrompt)
+        init(request:Unidoc.BuildRequest<Unidoc.Package>)
         {
-            self.prompt = prompt
+            self.request = request
         }
     }
 }
@@ -22,9 +22,11 @@ extension Unidoc.BuilderLabelOperation:Unidoc.MachineOperation
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         guard
-        let labels:Unidoc.BuildLabels = try await server.db.unidoc.answer(
-            prompt: self.prompt,
-            with: session)
+        let edition:Unidoc.EditionState = try await server.db.unidoc.editionState(
+            of: self.request.version,
+            with: session),
+        let labels:Unidoc.BuildLabels = try await server.github?.resolve(edition,
+            rebuild: self.request.rebuild)
         else
         {
             return nil
