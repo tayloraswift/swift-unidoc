@@ -5,12 +5,13 @@ import S3Client
 extension Unidoc.BuildArtifact
 {
     mutating
-    func export(from server:Unidoc.Server) async throws -> [Unidoc.BuildLogType]
+    func export(from server:Unidoc.Server,
+        _logsIncluded:Bool = true) async throws -> [Unidoc.BuildLogType]
     {
         var logs:[Unidoc.BuildLogType] = []
 
         let logsToExport:Int = self.logs.count
-        if  logsToExport > 0
+        if  logsToExport > 0 && _logsIncluded
         {
             if  let bucket:AWS.S3.Bucket = server.bucket.assets
             {
