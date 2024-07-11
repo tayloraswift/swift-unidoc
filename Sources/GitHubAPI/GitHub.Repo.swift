@@ -52,7 +52,7 @@ extension GitHub
         /// The repo’s visibility on GitHub. Some queries return only public repositories and so
         /// omit this field.
         public
-        var visibility:Visibility?
+        var visibility:RepoVisibility?
         /// The repo’s dominant language, if GitHub was able to detect one.
         public
         var language:String?
@@ -90,7 +90,7 @@ extension GitHub
             archived:Bool,
             disabled:Bool,
             fork:Bool,
-            visibility:Visibility? = nil,
+            visibility:RepoVisibility? = nil,
             language:String? = nil,
             homepage:String? = nil,
             about:String? = nil,

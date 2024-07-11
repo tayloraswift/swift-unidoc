@@ -18,6 +18,14 @@ extension GitHub.Repo
         }
     }
 }
+extension GitHub.Repo.Owner:CustomStringConvertible
+{
+    /// This conformance witnessed to idiot-proof string interpolation mistakes, as this type
+    /// sometimes appears in an `owner` field that is otherwise a ``String``. Prefer
+    /// interpolating ``login`` directly!
+    @inlinable public
+    var description:String { self.login }
+}
 extension GitHub.Repo.Owner:JSONObjectDecodable
 {
     public
