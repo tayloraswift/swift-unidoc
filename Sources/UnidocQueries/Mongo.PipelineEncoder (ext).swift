@@ -25,6 +25,24 @@ extension Mongo.PipelineEncoder
     }
 
     mutating
+    func loadUser(owning package:Mongo.AnyKeyPath, as output:Mongo.AnyKeyPath)
+    {
+        self[stage: .set]
+        {
+            $0[output] = package / Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.account]
+        }
+        self[stage: .lookup]
+        {
+            $0[.from] = Unidoc.DB.Users.name
+            $0[.localField] = output
+            $0[.foreignField] = Unidoc.User[.id]
+            $0[.as] = output
+        }
+        //  Unbox single-element array.
+        self[stage: .set] { $0[output] { $0[.first] = output } }
+    }
+
+    mutating
     func loadEdition(matching predicate:Unidoc.VersionPredicate,
         from package:Mongo.AnyKeyPath,
         into edition:Mongo.AnyKeyPath)

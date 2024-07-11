@@ -81,6 +81,23 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
                             $0.href = "https://github.com/\(github.login)"
                             $0.target = "_blank"
                         } = "@\(github.login)"
+
+                        guard
+                        let id:Int32 = self.user.githubInstallation
+                        else
+                        {
+                            return
+                        }
+
+                        $0[.span, { $0.class = "parenthetical" }]
+                        {
+                            $0[.a]
+                            {
+                                $0.target = "_blank"
+                                $0.href = "https://github.com/settings/installations/\(id)"
+                                $0.rel = .external
+                            } = "app settings"
+                        }
                     }
 
                     $0[.dt] = "Display name"
@@ -164,7 +181,8 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
             {
                 for organization:Unidoc.User in self.organizations
                 {
-                    $0[.li] = organization.card()
+                    $0[.li] = organization.card(some: Installation.init(
+                        id: organization.githubInstallation))
                 }
             }
 
