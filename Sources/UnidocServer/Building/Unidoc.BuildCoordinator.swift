@@ -30,8 +30,8 @@ extension Unidoc
 extension Unidoc.BuildCoordinator
 {
     public static
-    func run<T>(watching db:Unidoc.Database,
-        registrar:any Unidoc.Registrar,
+    func run<T>(registrar:any Unidoc.Registrar,
+        watching db:Unidoc.Database,
         with body:(Unidoc.BuildCoordinator) async throws -> T) async rethrows -> T
     {
         let events:AsyncStream<Event>
