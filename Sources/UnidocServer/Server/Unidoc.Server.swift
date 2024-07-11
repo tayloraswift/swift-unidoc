@@ -24,7 +24,7 @@ extension Unidoc
         let updateQueue:AsyncStream<Update>.Continuation,
             updates:AsyncStream<Update>
 
-        let builds:BuildCoordinator
+        let builds:BuildCoordinator?
 
         let policy:(any HTTP.ServerPolicy)?
         @usableFromInline
@@ -35,7 +35,7 @@ extension Unidoc
             plugins:[any ServerPlugin],
             context:ServerPluginContext,
             options:ServerOptions,
-            builds:BuildCoordinator,
+            builds:BuildCoordinator?,
             logger:(any ServerLogger)? = nil,
             db:Database)
         {
@@ -101,7 +101,7 @@ extension Unidoc.Server
 
         //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
         //  want to be able to change it without restarting the server.
-        let _:Unidoc.UserSecrets = try await self.db.users.update(user: .machine(0),
+        let _:Unidoc.UserSecrets = try await self.db.users.update(user: .init(machine: 0),
             with: session)
     }
 

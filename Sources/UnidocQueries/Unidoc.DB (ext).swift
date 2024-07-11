@@ -43,113 +43,28 @@ extension Unidoc.DB
         try await session.query(database: self.id,
             with: Unidoc.EditionStateSymbolicQuery.init(package: package, version: version))
     }
-}
-extension Unidoc.DB
-{
-    public
-    func answer(prompt:Unidoc.BuildLabelsPrompt,
-        with session:Mongo.Session) async throws -> Unidoc.BuildLabels?
-    {
-        let package:Unidoc.PackageMetadata
-        let version:Unidoc.VersionState
-        let rebuild:Bool
 
-        switch prompt
+    public
+    func editionState(of selector:Unidoc.BuildSelector<Unidoc.Package>,
+        with session:Mongo.Session) async throws -> Unidoc.EditionState?
+    {
+        switch selector
         {
-        case .edition(let id, force: let force):
+        case .id(let id):
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateDirectQuery> = .init(
                 query: .init(package: id.package, version: .exact(id.version)))
 
             try await pipeline.pull(from: self.id, with: session)
 
-            guard
-            let output:Unidoc.EditionState = pipeline.value
-            else
-            {
-                return nil
-            }
+            return pipeline.value
 
-            package = output.package
-            version = output.version
-            rebuild = force
-
-        case .package(let id, series: let series, force: let force):
+        case .latest(let series, of: let package):
             var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateDirectQuery> = .init(
-                query: .init(package: id, version: .match(.latest(series))))
+                query: .init(package: package, version: .match(.latest(series))))
 
             try await pipeline.pull(from: self.id, with: session)
 
-            guard
-            let output:Unidoc.EditionState = pipeline.value
-            else
-            {
-                return nil
-            }
-
-            package = output.package
-            version = output.version
-            rebuild = force
-
-        case .packageNamed(let symbol, series: let series, force: let force):
-            let filter:Unidoc.VersionSeries
-
-            switch series
-            {
-            case .release:      filter = .release
-            case .prerelease:   filter = .prerelease
-            }
-
-            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.TagsQuery> = .init(
-                query: .init(symbol: symbol,
-                    filter: filter,
-                    limit: 1,
-                    page: 0))
-
-            try await pipeline.pull(from: self.id, with: session)
-
-            guard
-            let output:Unidoc.TagsQuery.Output = pipeline.value,
-            let tag:Unidoc.VersionState = output.tags.first
-            else
-            {
-                return nil
-            }
-
-            package = output.package
-            version = tag
-            rebuild = force
+            return pipeline.value
         }
-
-        guard
-        let repo:Unidoc.PackageRepo = package.repo
-        else
-        {
-            return nil
-        }
-
-        skipping:
-        if  let graph:Unidoc.VersionState.Graph = version.graph
-        {
-            if  rebuild
-            {
-                break skipping
-            }
-            if  let built:SHA1 = graph.commit,
-                let commit:SHA1 = version.edition.sha1,
-                    commit != built
-            {
-                break skipping
-            }
-            else
-            {
-                return nil
-            }
-        }
-
-        return .init(coordinate: version.edition.id,
-            package: package.symbol,
-            repo: repo.origin.https,
-            ref: version.edition.name,
-            book: package.book)
     }
 }

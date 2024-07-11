@@ -4,13 +4,13 @@ import UnidocAPI
 extension Unidoc
 {
     @frozen public
-    enum BuildSelector:Equatable, Sendable
+    enum BuildBehavior:Equatable, Sendable
     {
         case latest(VersionSeries, force:Bool)
         case id(force:Bool)
     }
 }
-extension Unidoc.BuildSelector:RawRepresentable
+extension Unidoc.BuildBehavior:RawRepresentable
 {
     @inlinable public
     init?(rawValue:Int32)
@@ -41,6 +41,6 @@ extension Unidoc.BuildSelector:RawRepresentable
         }
     }
 }
-extension Unidoc.BuildSelector:BSONDecodable, BSONEncodable
+extension Unidoc.BuildBehavior:BSONDecodable, BSONEncodable
 {
 }

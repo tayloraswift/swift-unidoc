@@ -30,7 +30,7 @@ extension Unidoc.PackageBuildOperation
     {
         self.init(account: account,
             action: build.request.map { .submit(build.package, $0) } ?? .cancel(build.package),
-            redirect: build.selector.package)
+            redirect: build.symbols.package)
     }
 }
 extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
@@ -41,7 +41,7 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
     {
         let metadata:Unidoc.PackageMetadata?
         let package:Unidoc.Package
-        let request:Unidoc.BuildRequest?
+        let request:Unidoc.BuildRequest<Void>?
 
         switch self.action
         {
@@ -82,7 +82,7 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
 
             metadata = outputs.package
             package = outputs.package.id
-            request = .id(edition, force: true)
+            request = .init(version: .id(edition), rebuild: true)
         }
 
         if  let rejection:HTTP.ServerResponse = try await server.authorize(
@@ -95,7 +95,7 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
             return rejection
         }
 
-        if  let request:Unidoc.BuildRequest
+        if  let request:Unidoc.BuildRequest<Void>
         {
             _ = try await server.db.packageBuilds.submitBuild(request: request,
                 package: package,

@@ -1,6 +1,6 @@
 extension Unidoc
 {
-    enum PackageWebhookError:Error
+    enum WebhookError:Error
     {
         case missingEventType
         case missingHookID
@@ -8,7 +8,7 @@ extension Unidoc
         case unverifiedOrigin
     }
 }
-extension Unidoc.PackageWebhookError:CustomStringConvertible
+extension Unidoc.WebhookError:CustomStringConvertible
 {
     var description:String
     {

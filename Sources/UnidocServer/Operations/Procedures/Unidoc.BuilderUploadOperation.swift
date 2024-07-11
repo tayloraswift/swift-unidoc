@@ -40,11 +40,12 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
 
         case .labeled:
             var artifact:Unidoc.BuildArtifact = try .init(bson: bson)
-            let logs:[Unidoc.BuildLogType] = try await artifact.export(from: server)
+            let logs:[Unidoc.BuildLogType]
 
             switch artifact.outcome
             {
             case .failure(let reason):
+                logs = try await artifact.export(from: server)
                 try await server.db.packageBuilds.finishBuild(
                     package: artifact.package,
                     failure: reason,
@@ -54,10 +55,26 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
             case .success(let snapshot):
                 /// A successful (labeled) build also sets the platform preference, since we now
                 /// know that the package can be built on that platform.
-                let _:Unidoc.PackageMetadata? = try await server.db.packages.reset(
+                let _metadata:Unidoc.PackageMetadata? = try await server.db.packages.reset(
                     platformPreference: snapshot.metadata.triple,
                     of: snapshot.id.package,
                     with: session)
+
+                /// Right now, exporting build logs for private repositories is a security
+                /// hazard, because the logs contain secrets, and the log URLs are easily
+                /// predicted. For now, we just discard the logs for private repositories.
+                let _logsIncluded:Bool
+                if  case .github(let origin)? = _metadata?.repo?.origin,
+                    case _? = origin.installation
+                {
+                    _logsIncluded = false
+                }
+                else
+                {
+                    _logsIncluded = true
+                }
+
+                logs = try await artifact.export(from: server, _logsIncluded: _logsIncluded)
 
                 try await server.db.packageBuilds.finishBuild(
                     package: artifact.package,

@@ -9,18 +9,12 @@ extension Unidoc.User
         self.id.github.map { "https://avatars.githubusercontent.com/u/\($0)?s=\(size)" }
     }
 
-    func card() -> Unidoc.UserCard<Never>
-    {
-        self.card(some: nil)
-    }
-
     func card(
         tools:Unidoc.RulesPage.EditorTools) -> Unidoc.UserCard<Unidoc.RulesPage.EditorTools>
     {
         self.card(some: tools)
     }
 
-    private
     func card<Tools>(some tools:Tools?) -> Unidoc.UserCard<Tools>
     {
         .init(id: self.id,
