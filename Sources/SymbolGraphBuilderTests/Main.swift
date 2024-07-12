@@ -336,6 +336,9 @@ enum Main:TestMain, TestBattery
 
         //  The swift-snapshot-testing package at 1.17.0 has a dependency on SwiftSyntax with
         //  prerelease bounds on both sides, so we should be able to handle that.
+
+        //  This test is disabled on macOS because `swift symbolgraph-extract` crashes there.
+        #if os(Linux)
         if  let tests:TestGroup = tests / "swift-snapshot-testing",
             let docs:SymbolGraphObject<Void> = (tests.do
             {
@@ -356,6 +359,7 @@ enum Main:TestMain, TestBattery
 
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
+        #endif
 
         //  IndexstoreDB links the LLVM Blocks runtime, so this tests that we handle that.
         //  Since it involves specifying the location of the Swift runtime, we can only expect
