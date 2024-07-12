@@ -214,7 +214,7 @@ extension Main.PackageSwift:TestBattery
                             location: .remote(
                                 url: "https://github.com/tayloraswift/swift-grammar"),
                             requirement: .stable(.range(.release(.v(0, 3, 1)),
-                                to: .v(0, 4, 0))))),
+                                to: .release(.v(0, 4, 0)))))),
 
                         .resolvable(.init(
                             identity: "swift-hash",
@@ -228,7 +228,7 @@ extension Main.PackageSwift:TestBattery
                             location: .local(
                                 root: "/swift/swift-mongodb"),
                             requirement: .stable(.range(.release(.v(0, 4, 5)),
-                                to: .v(0, 5, 0))))),
+                                to: .release(.v(0, 5, 0)))))),
 
                         .resolvable(.init(
                             identity: "swift-system",

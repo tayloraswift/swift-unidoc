@@ -6,31 +6,40 @@ extension SymbolGraphMetadata
     enum DependencyRequirement:Equatable, Hashable, Sendable
     {
         case exact(SemanticVersion)
-        case range(SemanticVersion, to:PatchVersion)
+        case range(SemanticVersion, to:SemanticVersion)
     }
 }
 extension SymbolGraphMetadata.DependencyRequirement
 {
     @inlinable public
-    init?(suffix:SemanticVersion.Suffix?, lower:PatchVersion?, upper:PatchVersion?)
+    init?(
+        lowerNumber:PatchVersion?,
+        lowerSuffix:SemanticVersion.Suffix?,
+        upperNumber:PatchVersion?,
+        upperSuffix:SemanticVersion.Suffix?)
     {
         guard
-        let version:PatchVersion = lower
+        let lowerNumber:PatchVersion
         else
         {
             return nil
         }
 
-        let suffix:SemanticVersion.Suffix =  suffix ?? .release()
+        let lower:SemanticVersion = .init(
+            number: lowerNumber,
+            suffix: lowerSuffix ?? .release())
 
-        if  let upper:PatchVersion,
-                upper >= version
+        if  let upperNumber:PatchVersion,
+                upperNumber >= lowerNumber
         {
-            self = .range(.init(number: version, suffix: suffix), to: upper)
+            let upper:SemanticVersion = .init(number: upperNumber,
+                suffix: upperSuffix ?? .release())
+
+            self = .range(lower, to: upper)
         }
         else
         {
-            self = .exact(.init(number: version, suffix: suffix))
+            self = .exact(lower)
         }
     }
 }

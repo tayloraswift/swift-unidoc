@@ -248,8 +248,7 @@ enum Main:TestMain, TestBattery
             })
         {
             //  the swift-docc-plugin dependency should have been linted.
-            tests.expect(docs.metadata.dependencies.map(\.package.name) **?
-            [
+            tests.expect(docs.metadata.dependencies.map(\.package.name) **? [
                 "swift-atomics",
                 "swift-collections",
                 //  swift-nio grew a dependency on swift-system in 2.63.0
@@ -276,8 +275,7 @@ enum Main:TestMain, TestBattery
                     with: toolchain)
             })
         {
-            tests.expect(docs.metadata.dependencies.map(\.package.name) **?
-            [
+            tests.expect(docs.metadata.dependencies.map(\.package.name) **? [
                 "swift-collections",
                 "swift-atomics",
                 "swift-nio",
@@ -302,8 +300,7 @@ enum Main:TestMain, TestBattery
                     with: toolchain)
             })
         {
-            tests.expect(docs.metadata.dependencies.map(\.package.name) **?
-            [
+            tests.expect(docs.metadata.dependencies.map(\.package.name) **? [
                 "swift-collections",
                 "swift-atomics",
                 "swift-nio",
@@ -336,6 +333,33 @@ enum Main:TestMain, TestBattery
 
             docs.roundtrip(for: tests, in: workspace.artifacts)
         }
+
+        //  The swift-snapshot-testing package at 1.17.0 has a dependency on SwiftSyntax with
+        //  prerelease bounds on both sides, so we should be able to handle that.
+
+        //  This test is disabled on macOS because `swift symbolgraph-extract` crashes there.
+        #if os(Linux)
+        if  let tests:TestGroup = tests / "swift-snapshot-testing",
+            let docs:SymbolGraphObject<Void> = (tests.do
+            {
+                try workspace.build(package: try .remote(
+                        project: "swift-snapshot-testing",
+                        from: "https://github.com/pointfreeco/swift-snapshot-testing.git",
+                        at: "1.17.0",
+                        in: workspace),
+                    with: toolchain)
+            })
+        {
+            tests.expect(docs.metadata.dependencies.map(\.package.name) **? [
+                "swift-syntax",
+            ])
+
+            tests.expect(docs.graph.cultures.count >? 0)
+            tests.expect(docs.graph.decls.nodes.count >? 0)
+
+            docs.roundtrip(for: tests, in: workspace.artifacts)
+        }
+        #endif
 
         //  IndexstoreDB links the LLVM Blocks runtime, so this tests that we handle that.
         //  Since it involves specifying the location of the Swift runtime, we can only expect
