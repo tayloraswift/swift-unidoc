@@ -84,7 +84,7 @@ extension SPM.Manifest.Dependency.Resolvable:JSONObjectDecodable
                     with: \.value.value)))
 
             case .range:
-                let (lower, upper):(SemanticVersion, PatchVersion) = try json.decode(
+                let (lower, upper):(SemanticVersion, SemanticVersion) = try json.decode(
                     as: JSON.SingleElementRepresentation<
                         JSON.ObjectDecoder<CodingKey.Requirement.Range>>.self)
                 {
@@ -93,7 +93,7 @@ extension SPM.Manifest.Dependency.Resolvable:JSONObjectDecodable
                             as: JSON.StringRepresentation<SemanticVersion>.self,
                             with: \.value),
                         try $0.value[.upperBound].decode(
-                            as: JSON.StringRepresentation<PatchVersion>.self,
+                            as: JSON.StringRepresentation<SemanticVersion>.self,
                             with: \.value)
                     )
                 }

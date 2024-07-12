@@ -44,9 +44,10 @@ extension SymbolGraphMetadata.Dependency
     {
         case package_name = "P"
         case package_scope = "S"
-        case requirement_suffix = "B"
-        case requirement_lower = "L"
-        case requirement_upper = "U"
+        case requirement_lowerNumber = "L"
+        case requirement_lowerSuffix = "B"
+        case requirement_upperNumber = "U"
+        case requirement_upperSuffix = "C"
         case revision = "H"
         case version = "V"
     }
@@ -65,13 +66,16 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentEncodable
             break
 
         case .range(let version, to: let upper)?:
-            bson[.requirement_upper] = upper
+            let suffix:String = "\(upper.suffix)"
+            bson[.requirement_upperNumber] = upper.number
+            bson[.requirement_upperSuffix] = suffix.isEmpty ? nil : suffix
+
             fallthrough
 
         case .exact(let version)?:
             let suffix:String = "\(version.suffix)"
-            bson[.requirement_lower] = version.number
-            bson[.requirement_suffix] = suffix.isEmpty ? nil : suffix
+            bson[.requirement_lowerNumber] = version.number
+            bson[.requirement_lowerSuffix] = suffix.isEmpty ? nil : suffix
         }
 
         bson[.revision] = self.revision
@@ -84,9 +88,10 @@ extension SymbolGraphMetadata.Dependency:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let requirement:SymbolGraphMetadata.DependencyRequirement? = .init(
-            suffix: try bson[.requirement_suffix]?.decode(),
-            lower: try bson[.requirement_lower]?.decode(),
-            upper: try bson[.requirement_upper]?.decode())
+            lowerNumber: try bson[.requirement_lowerNumber]?.decode(),
+            lowerSuffix: try bson[.requirement_lowerSuffix]?.decode(),
+            upperNumber: try bson[.requirement_upperNumber]?.decode(),
+            upperSuffix: try bson[.requirement_upperSuffix]?.decode())
 
         self.init(package: .init(
                 scope: try bson[.package_scope]?.decode(),
