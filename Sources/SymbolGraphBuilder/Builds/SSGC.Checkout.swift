@@ -45,7 +45,14 @@ extension SSGC.Checkout
             try clone.remove()
         }
 
-        print("Pulling repository from remote: \(repository)")
+        if  repository.starts(with: "https://x-access-token:")
+        {
+            print("WARNING: redacted repository URL because it contains an access token.")
+        }
+        else
+        {
+            print("Pulling repository from remote: \(repository)")
+        }
 
         if  clone.exists()
         {
