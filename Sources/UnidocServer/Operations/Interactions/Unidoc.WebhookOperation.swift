@@ -114,17 +114,26 @@ extension Unidoc.WebhookOperation
         in db:Unidoc.Database,
         at time:UnixMillisecond) async throws -> HTTP.ServerResponse
     {
-        guard case .created = event.action
-        else
-        {
-            return .ok("")
-        }
-
+        let session:Mongo.Session = try await .init(from: db.sessions)
         let user:Unidoc.User = .init(githubInstallation: event.installation,
             initialLimit: db.policy.apiLimitPerReset)
-        let session:Mongo.Session = try await .init(from: db.sessions)
-        let _:Unidoc.UserSecrets = try await db.users.update(user: user, with: session)
-        return .created("")
+
+        switch event.action
+        {
+        case .created:
+            let _:Unidoc.UserSecrets = try await db.users.update(user: user, with: session)
+            return .created("")
+
+        case .deleted:
+            let modified:Unidoc.User? = try await db.users.modify(existing: user.id,
+                with: session)
+            {
+                $0[.unset] { $0[Unidoc.User[.githubInstallation]] = () }
+            }
+            return modified == nil
+                ? .notFound("No such user\n")
+                : .ok("Removed user installation\n")
+        }
     }
 
     private __consuming
