@@ -119,7 +119,17 @@ extension Unidoc.VersionsPage
     {
         if  let repo:Unidoc.PackageRepo = self.package.repo
         {
-            section[.h2] = "Package repository"
+            section[.header, { $0.class = "visual" }]
+            {
+                $0[.h2] = Heading.repo
+                $0[.div]
+                {
+                    $0.class = "visibility"
+                    $0.title = repo.private
+                        ? "This repository is private"
+                        : "This repository is public"
+                } = repo.private ?  "🗝️" : "🌐"
+            }
 
             section[.dl]
             {
@@ -128,7 +138,7 @@ extension Unidoc.VersionsPage
                 switch repo.origin
                 {
                 case .github(let origin):
-                    $0[.dt] = "Provider"
+                    $0[.dt] = "Registrar"
                     $0[.dd] = "GitHub"
 
                     if  let license:Unidoc.PackageLicense = repo.license
