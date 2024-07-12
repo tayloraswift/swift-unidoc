@@ -64,8 +64,7 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
                 /// hazard, because the logs contain secrets, and the log URLs are easily
                 /// predicted. For now, we just discard the logs for private repositories.
                 let _logsIncluded:Bool
-                if  case .github(let origin)? = _metadata?.repo?.origin,
-                    case _? = origin.installation
+                if  case true? = _metadata?.repo?.private
                 {
                     _logsIncluded = false
                 }

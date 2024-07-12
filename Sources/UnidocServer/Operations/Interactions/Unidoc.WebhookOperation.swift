@@ -132,9 +132,7 @@ extension Unidoc.WebhookOperation
         in db:Unidoc.Database,
         at time:UnixMillisecond) async throws -> HTTP.ServerResponse
     {
-        let repo:Unidoc.PackageRepo = try .github(event.repo,
-            crawled: time,
-            installation: event.repo.visibility == .private ? event.installation : nil)
+        let repo:Unidoc.PackageRepo = try .github(event.repo, crawled: time)
 
         let indexEligible:Bool
         let repoWebhook:String
