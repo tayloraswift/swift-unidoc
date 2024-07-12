@@ -4,6 +4,7 @@ extension Unidoc.VersionsPage
 {
     enum Heading
     {
+        case repo
         case tags
         case branches
         case consumers
@@ -18,6 +19,7 @@ extension Unidoc.VersionsPage.Heading:Identifiable
     {
         switch self
         {
+        case .repo:             "ss:repo"
         case .tags:             "ss:tags"
         case .branches:         "ss:branches"
         case .consumers:        "ss:consumers"
@@ -33,6 +35,7 @@ extension Unidoc.VersionsPage.Heading:HTML.OutputStreamableHeading
     {
         switch self
         {
+        case .repo:             "Package repository"
         case .tags:             "Package tags"
         case .branches:         "Package branches"
         case .consumers:        "Consumers"
