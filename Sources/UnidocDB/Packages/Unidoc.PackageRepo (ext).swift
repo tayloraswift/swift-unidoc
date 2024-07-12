@@ -12,8 +12,7 @@ extension Unidoc.PackageRepo
 {
     @inlinable public static
     func github(_ repo:GitHub.Repo,
-        crawled:UnixMillisecond,
-        installation:Int32? = nil) throws -> Self
+        crawled:UnixMillisecond) throws -> Self
     {
         /// We clip this to Midnights because we use this as a shard key, and also because
         /// Midnights are Swifty.
@@ -46,6 +45,7 @@ extension Unidoc.PackageRepo
             created: .init(created),
             updated: updated,
             license: repo.license.map { .init(spdx: $0.id, name: $0.name) },
+            private: repo.visibility == .private,
             topics: repo.topics,
             master: repo.master,
             origin: .github(.init(
@@ -59,8 +59,7 @@ extension Unidoc.PackageRepo
                 size: repo.size,
                 archived: repo.archived,
                 disabled: repo.disabled,
-                fork: repo.fork,
-                installation: installation)),
+                fork: repo.fork)),
             forks: repo.forks,
             stars: repo.stars)
     }

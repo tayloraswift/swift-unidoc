@@ -33,6 +33,12 @@ extension Unidoc
         /// The repo’s license. All software repos have the concept of a license.
         public
         var license:PackageLicense?
+
+        /// Indicates if the repo is private, and therefore cannot be cloned without
+        /// authentication.
+        public
+        var `private`:Bool
+
         /// The repo’s topic memberships. Both GitHub and GitLab have topics.
         public
         var topics:[String]
@@ -57,6 +63,7 @@ extension Unidoc
             created:UnixMillisecond,
             updated:UnixMillisecond,
             license:PackageLicense?,
+            private:Bool,
             topics:[String],
             master:String?,
             origin:PackageOrigin,
@@ -69,6 +76,7 @@ extension Unidoc
             self.created = created
             self.updated = updated
             self.license = license
+            self.private = `private`
             self.topics = topics
             self.master = master
             self.origin = origin
@@ -95,6 +103,7 @@ extension Unidoc.PackageRepo
         case updated = "U"
 
         case license = "L"
+        case `private` = "X"
         case topics = "T"
         case master = "M"
 
@@ -115,6 +124,7 @@ extension Unidoc.PackageRepo:BSONDocumentEncodable
         bson[.updated] = self.updated
 
         bson[.license] = self.license
+        bson[.private] = self.private
         bson[.topics] = self.topics.isEmpty ? nil : self.topics
         bson[.master] = self.master
 
@@ -140,6 +150,8 @@ extension Unidoc.PackageRepo:BSONDocumentDecodable
             created: try bson[.created].decode(),
             updated: try bson[.updated].decode(),
             license: try bson[.license]?.decode(),
+            //  TODO: deoptionalize
+            private: try bson[.private]?.decode() ?? false,
             topics: try bson[.topics]?.decode() ?? [],
             master: try bson[.master]?.decode(),
             origin: origin,
