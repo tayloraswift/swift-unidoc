@@ -45,7 +45,7 @@ extension Unidoc.PackageRepo
             created: .init(created),
             updated: updated,
             license: repo.license.map { .init(spdx: $0.id, name: $0.name) },
-            private: repo.visibility == .private,
+            private: repo.visibility < .public,
             topics: repo.topics,
             master: repo.master,
             origin: .github(.init(

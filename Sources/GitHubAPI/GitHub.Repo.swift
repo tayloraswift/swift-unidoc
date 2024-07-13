@@ -49,10 +49,9 @@ extension GitHub
         public
         var fork:Bool
 
-        /// The repo’s visibility on GitHub. Some queries return only public repositories and so
-        /// omit this field.
+        /// The repo’s visibility on GitHub.
         public
-        var visibility:RepoVisibility?
+        var visibility:RepoVisibility
         /// The repo’s dominant language, if GitHub was able to detect one.
         public
         var language:String?
@@ -90,7 +89,7 @@ extension GitHub
             archived:Bool,
             disabled:Bool,
             fork:Bool,
-            visibility:RepoVisibility? = nil,
+            visibility:RepoVisibility,
             language:String? = nil,
             homepage:String? = nil,
             about:String? = nil,
@@ -172,7 +171,7 @@ extension GitHub.Repo:JSONObjectDecodable
             archived: try json[.archived].decode(),
             disabled: try json[.disabled].decode(),
             fork: try json[.fork].decode(),
-            visibility: try json[.visibility]?.decode(),
+            visibility: try json[.visibility].decode(),
             language: try json[.language]?.decode(),
             homepage: try json[.homepage]?.decode(),
             about: try json[.description]?.decode(),

@@ -26,16 +26,17 @@ extension GitHub.Client
         }
     }
 }
-extension GitHub.Client<GitHub.PersonalAccessToken>.Connection
+extension GitHub.Client<Void>.Connection
 {
     /// Run a GraphQL API request.
     ///
     /// The request will be charged to the user associated with the stored token. It is not
     /// possible to run a GraphQL API request without a token.
     @inlinable public
-    func post<Response>(query:String,
-        for _:Response.Type = Response.self) async throws -> GraphQL.Response<Response>
-        where Response:JSONDecodable
+    func post<T>(query:String,
+        expecting _:T.Type = T.self,
+        with authorization:GitHub.ClientAuthorization) async throws -> GraphQL.Response<T>
+        where T:JSONDecodable
     {
         let request:HTTP.Client2.Request = .init(headers:
             [
@@ -44,7 +45,7 @@ extension GitHub.Client<GitHub.PersonalAccessToken>.Connection
                 ":authority": self.http2.remote,
                 ":path": "/graphql",
 
-                "authorization": "Bearer \(self.app)",
+                "authorization": authorization.header,
 
                 //  GitHub will reject the API request if the user-agent is not set.
                 "user-agent": self.agent,
@@ -65,8 +66,7 @@ extension GitHub.Client<GitHub.PersonalAccessToken>.Connection
             if  let second:String = response.headers?["x-ratelimit-reset"].first,
                 let second:Int64 = .init(second)
             {
-                throw GitHub.Client<GitHub.PersonalAccessToken>.RateLimitError.init(
-                    until: .second(second))
+                throw GitHub.Client<Application>.RateLimitError.init(until: .second(second))
             }
             else
             {

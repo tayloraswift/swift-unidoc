@@ -149,26 +149,41 @@ extension Unidoc.UserSettingsPage:Unidoc.ApplicationPage
                                 $0.pattern = #"^[a-zA-Z0-9_\-\.]+$"#
                             }
                         }
+
+                        $0[.dt] = "Authorize as"
+                        $0[.dd]
+                        {
+                            $0[.select]
+                            {
+                                $0.name = "installation"
+                            }
+                                content:
+                            {
+                                $0[.option]
+                                {
+                                    $0.selected = true
+                                    $0.value = ""
+                                } = "Nobody (public)"
+
+                                if  let id:Int32 = self.user.githubInstallation
+                                {
+                                    $0[.option] { $0.value = "\(id)" } = "Yourself"
+                                }
+
+                                for organization:Unidoc.User in self.organizations
+                                {
+                                    guard
+                                    let id:Int32 = organization.githubInstallation
+                                    else
+                                    {
+                                        continue
+                                    }
+
+                                    $0[.option] { $0.value = "\(id)" } = organization.symbol
+                                }
+                            }
+                        }
                     }
-
-                    // $0[.p]
-                    // {
-                    //     $0[.label]
-                    //     {
-                    //         $0.class = "checkbox"
-                    //     }
-                    //         content:
-                    //     {
-                    //         $0[.input]
-                    //         {
-                    //             $0.type = "checkbox"
-                    //             $0.name = "private"
-                    //             $0.value = "true"
-                    //         }
-
-                    //         $0[.span] = "This is a private repository"
-                    //     }
-                    // }
 
                     $0[.button]
                     {
