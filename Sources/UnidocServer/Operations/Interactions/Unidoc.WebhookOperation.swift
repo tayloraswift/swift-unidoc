@@ -148,26 +148,10 @@ extension Unidoc.WebhookOperation
 
         if  let id:Int32 = event.installation
         {
-            if  case .private = event.repo.visibility
-            {
-                //  This is our only chance to index a private repository.
-                indexEligible = true
-            }
-            else if
-                case "Swift"? = event.repo.language,
-                repo.origin.alive,
-                repo.stars > 1
-            {
-                //  If the repo is public, has more than one star, and contains enough Swift
-                //  code for GitHub to recognize it as a Swift project, we will also take this
-                //  opportunity to index it.
-                indexEligible = true
-            }
-            else
-            {
-                indexEligible = false
-            }
-
+            /// This webhook came from an app installation. There’s a decent chance the user
+            /// selected “all repositories” when installing the app, so we don’t want to
+            /// automatically index this package if it’s not already in the database.
+            indexEligible = false
             repoWebhook = "github.com/settings/installations/\(id)"
         }
         else
