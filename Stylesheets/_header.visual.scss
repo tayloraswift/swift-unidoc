@@ -4,7 +4,19 @@ header.visual
     justify-content: space-between;
     align-content: center;
 
-    img.icon
+    > h2, h3
+    {
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+
+    > div.visibility
+    {
+        margin: 1rem 0;
+        filter: grayscale(100%);
+    }
+
+    > img.icon
     {
         height: 5rem;
         border-radius: 50%;

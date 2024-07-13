@@ -35,7 +35,7 @@ extension Unidoc.RestrictedOperation
         case .ignored:
             session = try await .init(from: server.db.sessions)
             //  Yes, we need to call this, even though we ignore the result.
-            let _:Bool = self.admit(user: .init(access: [], level: .administratrix))
+            let _:Bool = self.admit(user: .init(level: .administratrix))
 
         case .enforced:
             let user:Unidoc.UserSession
