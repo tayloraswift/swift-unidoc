@@ -40,6 +40,7 @@ form.config
         box-sizing: border-box;
     }
 
+    select,
     input[type="text"],
     input[type="url"]
     {
@@ -56,6 +57,14 @@ form.config
         font-style: italic;
         font-size: inherit;
     }
+
+    select
+    {
+        padding-bottom: 0.2em;
+    }
+
+    select[disabled],
+    select[readonly],
     input[type="text"][disabled],
     input[type="text"][readonly],
     input[type="url"][disabled],
@@ -64,6 +73,8 @@ form.config
         background: none;
         color: var(--fg-semi);
     }
+    select:not([disabled]):not([readonly]):hover,
+    select:not([disabled]):not([readonly]):focus,
     input[type="text"]:not([disabled]):not([readonly]):hover,
     input[type="text"]:not([disabled]):not([readonly]):focus,
     input[type="url"]:not([disabled]):not([readonly]):hover,
