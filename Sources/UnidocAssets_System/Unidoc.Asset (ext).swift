@@ -14,6 +14,7 @@ extension Unidoc.Asset
         case .error500_jpg:     ["icons", "error500.jpg"]
         case .favicon_ico:      ["icons", "favicon.ico"]
         case .favicon_png:      ["icons", "favicon.png"]
+        case .github_jpg:       ["icons", "github.jpg"]
         case .literata45_woff2: ["woff2", "Literata_24pt-Regular.woff2"]
         case .literata47_woff2: ["woff2", "Literata_24pt-Italic.woff2"]
         case .literata75_woff2: ["woff2", "Literata_24pt-Bold.woff2"]
@@ -37,6 +38,7 @@ extension Unidoc.Asset
         case .error500_jpg:     .image(.jpeg)
         case .favicon_ico:      .image(.x_icon)
         case .favicon_png:      .image(.png)
+        case .github_jpg:       .image(.jpeg)
         case .literata45_woff2: .font(.woff2)
         case .literata47_woff2: .font(.woff2)
         case .literata75_woff2: .font(.woff2)

@@ -48,7 +48,10 @@ extension Unidoc.MeteredOperation
         else
         {
             return .init(illustration: .error4xx_jpg,
-                message: "Inactive or nonexistent API key",
+                heading: "Inactive or nonexistent API key",
+                message: """
+                The key may have been changed, or it may have exceeded its hourly rate limit.
+                """,
                 status: 429)
         }
     }
