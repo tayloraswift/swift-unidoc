@@ -82,6 +82,24 @@ extension Unidoc.Server
         self.format(username: nil, locale: nil)
     }
 
+    private
+    func format(for request:Unidoc.IncomingRequest) -> Unidoc.RenderFormat
+    {
+        let username:String?
+
+        if  case .web(let session?, _) = request.authorization
+        {
+            username = session.symbol
+        }
+        else
+        {
+            username = nil
+        }
+
+        return self.format(username: username, locale: request.origin.guess?.locale)
+    }
+
+    private
     func format(username:String?, locale:ISO.Locale?) -> Unidoc.RenderFormat
     {
         .init(
@@ -198,7 +216,9 @@ extension Unidoc.Server
             return response
 
         case .syncHTML(let renderable):
-            let response:HTTP.ServerResponse = renderable.response(format: self.format)
+            let response:HTTP.ServerResponse = renderable.response(
+                format: self.format(for: request.incoming))
+
             self.logger?.log(request: request.incoming, with: response, time: .zero)
             return response
 
@@ -239,25 +259,15 @@ extension Unidoc.Server
     func respond(to request:Unidoc.IncomingRequest,
         running operation:any Unidoc.InteractiveOperation) async throws -> HTTP.ServerResponse
     {
+        try Task.checkCancellation()
+
         do
         {
-            try Task.checkCancellation()
-
             let initiated:ContinuousClock.Instant = .now
-            let username:String?
-
-            if  case .web(let session?, _) = request.authorization
-            {
-                username = session.symbol
-            }
-            else
-            {
-                username = nil
-            }
-
+            let format:Unidoc.RenderFormat = self.format(for: request)
             let state:Unidoc.UserSessionState = .init(authorization: request.authorization,
                 request: request.uri,
-                format: self.format(username: username, locale: request.origin.guess?.locale))
+                format: format)
 
             let response:HTTP.ServerResponse = try await operation.load(from: self, with: state)
                 ?? .notFound("not found\n")
@@ -287,7 +297,7 @@ extension Unidoc.Server
             self.logger?.log(request: request, with: error)
 
             let page:Unidoc.ServerErrorPage = .init(error: error)
-            return .error(page.resource(format: self.format))
+            return .error(page.resource(format: self.format(for: request)))
         }
     }
 }
