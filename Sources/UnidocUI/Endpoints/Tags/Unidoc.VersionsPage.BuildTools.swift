@@ -2,7 +2,7 @@ import HTML
 import Media
 import URI
 
-extension Unidoc.VersionsPage
+extension Unidoc.RefsPage
 {
     struct BuildTools
     {
@@ -23,7 +23,7 @@ extension Unidoc.VersionsPage
         }
     }
 }
-extension Unidoc.VersionsPage.BuildTools:HTML.OutputStreamable
+extension Unidoc.RefsPage.BuildTools:HTML.OutputStreamable
 {
     static
     func += (section:inout HTML.ContentEncoder, self:Self)

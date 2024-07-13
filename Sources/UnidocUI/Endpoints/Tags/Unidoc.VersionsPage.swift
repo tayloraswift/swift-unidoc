@@ -7,7 +7,7 @@ import URI
 
 extension Unidoc
 {
-    struct VersionsPage
+    struct RefsPage
     {
         private
         let package:PackageMetadata
@@ -47,20 +47,20 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.VersionsPage
+extension Unidoc.RefsPage
 {
     private
     var view:Unidoc.Permissions { self.versions.table.view }
 }
-extension Unidoc.VersionsPage:Unidoc.RenderablePage
+extension Unidoc.RefsPage:Unidoc.RenderablePage
 {
     var title:String { "Tags · \(self.package.symbol)" }
 }
-extension Unidoc.VersionsPage:Unidoc.StaticPage
+extension Unidoc.RefsPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.RefsEndpoint[self.package.symbol] }
 }
-extension Unidoc.VersionsPage:Unidoc.ApplicationPage
+extension Unidoc.RefsPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
@@ -110,7 +110,7 @@ extension Unidoc.VersionsPage:Unidoc.ApplicationPage
         }
     }
 }
-extension Unidoc.VersionsPage
+extension Unidoc.RefsPage
 {
     private
     func section(tags section:inout HTML.ContentEncoder,

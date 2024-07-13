@@ -71,7 +71,7 @@ extension Unidoc.RefsEndpoint:HTTP.ServerEndpoint
             index: -1,
             truncated: releases >= self.query.limitTags)
 
-        let page:Unidoc.VersionsPage = .init(package: output.package,
+        let page:Unidoc.RefsPage = .init(package: output.package,
             dependents: dependents,
             versions: versions,
             branches: output.branches,
