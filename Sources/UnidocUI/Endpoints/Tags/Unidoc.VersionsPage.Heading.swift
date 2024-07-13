@@ -1,6 +1,6 @@
 import HTML
 
-extension Unidoc.VersionsPage
+extension Unidoc.RefsPage
 {
     enum Heading
     {
@@ -13,7 +13,7 @@ extension Unidoc.VersionsPage
         case importRefs
     }
 }
-extension Unidoc.VersionsPage.Heading:Identifiable
+extension Unidoc.RefsPage.Heading:Identifiable
 {
     var id:String
     {
@@ -29,7 +29,7 @@ extension Unidoc.VersionsPage.Heading:Identifiable
         }
     }
 }
-extension Unidoc.VersionsPage.Heading:HTML.OutputStreamableHeading
+extension Unidoc.RefsPage.Heading:HTML.OutputStreamableHeading
 {
     var display:String
     {
