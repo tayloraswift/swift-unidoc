@@ -44,7 +44,7 @@ extension Unidoc.SitemapEndpoint:HTTP.ServerEndpoint
         let output:Unidoc.SitemapQuery.Output = self.value
         else
         {
-            return .error("Query for endpoint '\(Self.self)' returned no outputs!")
+            return .notFound("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
         let prefix:String = "https://swiftinit.org\(Unidoc.ServerRoot.docs)/\(output.package)"
