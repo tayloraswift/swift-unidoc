@@ -27,17 +27,17 @@ extension GitHub
         }
     }
 }
-extension GitHub.Client<GitHub.PersonalAccessToken>
+extension GitHub.Client<Void>
 {
     public static
-    func graphql(pat:consuming GitHub.PersonalAccessToken,
+    func graphql(
         threads:consuming MultiThreadedEventLoopGroup,
         niossl:consuming NIOSSLContext,
-        as agent:String) -> GitHub.Client<GitHub.PersonalAccessToken>
+        as agent:String) -> GitHub.Client<Void>
     {
         .init(http2: .init(threads: threads, niossl: niossl, remote: "api.github.com"),
             agent: agent,
-            app: pat)
+            app: ())
     }
 }
 extension GitHub.Client where Application:GitHubApplication

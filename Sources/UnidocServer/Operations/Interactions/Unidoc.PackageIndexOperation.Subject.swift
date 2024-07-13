@@ -2,7 +2,7 @@ extension Unidoc.PackageIndexOperation
 {
     enum Subject
     {
-        case repo(owner:String, name:String, private:Bool)
+        case repo(owner:String, name:String, githubInstallation:Int32?)
         case ref(Unidoc.Package, ref:String)
     }
 }
@@ -19,7 +19,9 @@ extension Unidoc.PackageIndexOperation.Subject
                 return nil
             }
 
-            self = .repo(owner: owner, name: repo, private: form["private"] == "true")
+            let githubInstallation:Int32? = form["installation"].flatMap(Int32.init(_:))
+
+            self = .repo(owner: owner, name: repo, githubInstallation: githubInstallation)
         }
         else if
             let package:String = form["package"],

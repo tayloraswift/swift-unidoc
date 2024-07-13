@@ -114,17 +114,26 @@ extension Unidoc.WebhookOperation
         in db:Unidoc.Database,
         at time:UnixMillisecond) async throws -> HTTP.ServerResponse
     {
-        guard case .created = event.action
-        else
-        {
-            return .ok("")
-        }
-
+        let session:Mongo.Session = try await .init(from: db.sessions)
         let user:Unidoc.User = .init(githubInstallation: event.installation,
             initialLimit: db.policy.apiLimitPerReset)
-        let session:Mongo.Session = try await .init(from: db.sessions)
-        let _:Unidoc.UserSecrets = try await db.users.update(user: user, with: session)
-        return .created("")
+
+        switch event.action
+        {
+        case .created:
+            let _:Unidoc.UserSecrets = try await db.users.update(user: user, with: session)
+            return .created("")
+
+        case .deleted:
+            let modified:Unidoc.User? = try await db.users.modify(existing: user.id,
+                with: session)
+            {
+                $0[.unset] { $0[Unidoc.User[.githubInstallation]] = () }
+            }
+            return modified == nil
+                ? .notFound("No such user\n")
+                : .ok("Removed user installation\n")
+        }
     }
 
     private __consuming
@@ -132,35 +141,17 @@ extension Unidoc.WebhookOperation
         in db:Unidoc.Database,
         at time:UnixMillisecond) async throws -> HTTP.ServerResponse
     {
-        let repo:Unidoc.PackageRepo = try .github(event.repo,
-            crawled: time,
-            installation: event.repo.visibility == .private ? event.installation : nil)
+        let repo:Unidoc.PackageRepo = try .github(event.repo, crawled: time)
 
         let indexEligible:Bool
         let repoWebhook:String
 
         if  let id:Int32 = event.installation
         {
-            if  case .private = event.repo.visibility
-            {
-                //  This is our only chance to index a private repository.
-                indexEligible = true
-            }
-            else if
-                case "Swift"? = event.repo.language,
-                repo.origin.alive,
-                repo.stars > 1
-            {
-                //  If the repo is public, has more than one star, and contains enough Swift
-                //  code for GitHub to recognize it as a Swift project, we will also take this
-                //  opportunity to index it.
-                indexEligible = true
-            }
-            else
-            {
-                indexEligible = false
-            }
-
+            /// This webhook came from an app installation. There’s a decent chance the user
+            /// selected “all repositories” when installing the app, so we don’t want to
+            /// automatically index this package if it’s not already in the database.
+            indexEligible = false
             repoWebhook = "github.com/settings/installations/\(id)"
         }
         else
