@@ -82,9 +82,12 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
 
             //  If we are (re)indexing a package this way, we should create a crawling ticket
             //  for the repo, for lack of a proper interface for requesting this.
-            _ = try await server.db.crawlingTickets.create(
-                tickets: [.init(id: package.id, node: repo.node, time: .zero)],
-                with: session)
+            if  case .public = repo.visibility
+            {
+                _ = try await server.db.crawlingTickets.create(
+                    tickets: [.init(id: package.id, node: repo.node, time: .zero)],
+                    with: session)
+            }
 
         case .ref(let id, ref: let ref):
             if  let metadata:Unidoc.PackageMetadata = try await server.db.packages.find(id: id,
