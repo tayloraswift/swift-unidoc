@@ -10,6 +10,8 @@ extension Unidoc
         case favicon_ico        = "favicon.ico"
         case favicon_png        = "favicon.png"
 
+        case github_jpg         = "github.jpg"
+
         //  We let Google Fonts serve most of the fonts, but we host Literata ourselves
         //  because the front-end CSS uses opentype features such as old-style numerals,
         //  and Google Fonts strips those out.
@@ -62,6 +64,7 @@ extension Unidoc.Asset
         case .error500_jpg:     false
         case .favicon_ico:      false
         case .favicon_png:      false
+        case .github_jpg:       false
         case .literata45_woff2: false
         case .literata47_woff2: false
         case .literata75_woff2: false

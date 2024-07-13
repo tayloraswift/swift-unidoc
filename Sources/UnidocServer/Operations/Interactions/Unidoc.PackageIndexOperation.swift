@@ -45,7 +45,7 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
 
         switch self.subject
         {
-        case .repo(owner: let owner, name: let repo, githubInstallation: let appInstallation):
+        case .repo(owner: let owner, name: let name, githubInstallation: let appInstallation):
             if  let error:Unidoc.PolicyErrorPage = try await self.charge(cost: 8,
                     from: server,
                     with: session)
@@ -56,15 +56,19 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
             let repo:GitHub.Repo? = try await github.connect(
                 with: .init(githubInstallation: appInstallation))
             {
-                try await $0.lookup(owner: owner, repo: repo)
+                try await $0.lookup(owner: owner, repo: name)
             }
 
             guard
             let repo:GitHub.Repo
             else
             {
-                let display:Unidoc.PolicyErrorPage = .init(illustration: .error404_jpg,
-                    message: "No such GitHub repository!",
+                let display:Unidoc.PolicyErrorPage = .init(illustration: .github_jpg,
+                    heading: "No such GitHub repository!",
+                    message: """
+                    The role you selected does not have access to a GitHub repository with the \
+                    name '\(owner)/\(name)'.
+                    """,
                     status: 404)
                 return display.response(format: format)
             }
@@ -89,7 +93,7 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                     with: session)
             }
 
-        case .ref(let id, ref: let ref):
+        case .ref(let id, ref: let name):
             if  let metadata:Unidoc.PackageMetadata = try await server.db.packages.find(id: id,
                     with: session)
             {
@@ -116,14 +120,21 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
 
             let ref:GitHub.Ref? = try await github.connect(with: .init())
             {
-                try await $0.lookup(owner: origin.owner, repo: origin.name, ref: ref)
+                try await $0.lookup(owner: origin.owner, repo: origin.name, ref: name)
             }
 
             guard
             let ref:GitHub.Ref
             else
             {
-                return .notFound("No such ref")
+                let display:Unidoc.PolicyErrorPage = .init(illustration: .github_jpg,
+                    heading: "No such ref!",
+                    message: """
+                    Could not find the ref '\(name)' in the GitHub repository \
+                    '\(origin.owner)/\(origin.name)'.
+                    """,
+                    status: 404)
+                return display.response(format: format)
             }
 
             let version:SemanticVersion? = package.symbol.version(tag: ref.name)
@@ -174,6 +185,7 @@ extension Unidoc.PackageIndexOperation
             if  rights < .editor
             {
                 return .init(illustration: .error4xx_jpg,
+                    heading: "Insufficient permissions",
                     message: "You are not authorized to index this repository!",
                     status: 403)
             }
@@ -186,6 +198,7 @@ extension Unidoc.PackageIndexOperation
         else
         {
             return .init(illustration: .error4xx_jpg,
+                heading: "Server policy error",
                 message: "Cannot index a repository with a dot in the owner’s name!",
                 status: 400)
         }
