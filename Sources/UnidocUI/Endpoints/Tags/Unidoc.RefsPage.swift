@@ -155,18 +155,26 @@ extension Unidoc.RefsPage
                     $0[.dt] = "Owner"
                     $0[.dd]
                     {
-                        $0[.a]
+                        if  let account:Unidoc.Account = self.package.repo?.account
                         {
-                            $0.href = "https://github.com/\(origin.owner)"
-                            $0.rel = .external
-                        } = "@\(origin.owner)"
+                            $0[.a]
+                            {
+                                $0.href = "\(Unidoc.UserPropertyEndpoint[account])"
+                            } = origin.owner
+                        }
+                        else
+                        {
+                            $0[.span] = origin.owner
+                        }
 
                         $0[.span, { $0.class = "parenthetical" }]
                         {
                             $0[.a]
                             {
-                                $0.href = "\(Unidoc.RulesEndpoint[self.package.symbol])"
-                            } = "manage collaborators"
+                                $0.target = "_blank"
+                                $0.href = "https://github.com/\(origin.owner)"
+                                $0.rel = .external
+                            } = "view profile"
                         }
                     }
 
@@ -195,14 +203,11 @@ extension Unidoc.RefsPage
             }
         }
 
-        if  let account:Unidoc.Account = self.package.repo?.account
+        section[.a]
         {
-            section[.a]
-            {
-                $0.class = "area"
-                $0.href = "\(Unidoc.UserPropertyEndpoint[account])"
-            } = "More packages by this author"
-        }
+            $0.class = "area"
+            $0.href = "\(Unidoc.RulesEndpoint[self.package.symbol])"
+        } = "Manage contributors"
 
         section[.h2] = Heading.tags
         section[.table] = self.versions.table

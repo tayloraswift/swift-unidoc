@@ -122,7 +122,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                     switch repo.origin
                     {
                     case .github(let origin):
-                        $0[.dt] = "Provider"
+                        $0[.dt] = "Registrar"
                         $0[.dd] = "GitHub"
 
                         if  let license:Unidoc.PackageLicense = repo.license
