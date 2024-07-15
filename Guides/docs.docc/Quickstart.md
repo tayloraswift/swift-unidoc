@@ -52,7 +52,7 @@ The `unidoc-preview` tool is an ordinary SwiftPM executable product. You can bui
 swift run -c release unidoc-preview
 ```
 
-The `unidoc-preview` tool will start a web server on `http://localhost:8080`.
+The `unidoc-preview` tool will start a web server on [`http://localhost:8080`](http://localhost:8080).
 
 @Image(source: "Start page.png", alt: "Start page") {
 >   The `unidoc-preview` start page.
@@ -64,7 +64,7 @@ Generate local documentation using the `unidoc-build local` subcommand. To start
 
 @Code(file: load-standard-library.sh, title: load-standard-library.sh)
 
-You should be able to view the symbol graph and its documentation at `http://localhost:8080/tags/swift`.
+You should be able to view the symbol graph and its documentation at [`http://localhost:8080/tags/swift`](http://localhost:8080/tags/swift).
 
 @Image(source: "Standard library tags.png", alt: "Standard library") {
 >   The standard library documentation. We generated it using the default Xcode toolchain, so it’s labeled `__Xcode`.
@@ -87,7 +87,7 @@ Generating documentation for a package is similar to generating documentation fo
 swift run -c release unidoc-build local swift-collections -I ..
 ```
 
-You should be able to view the symbol graph and its documentation at `http://localhost:8080/tags/swift-collections`.
+You should be able to view the symbol graph and its documentation at [`http://localhost:8080/tags/swift-collections`](http://localhost:8080/tags/swift-collections).
 
 @Image(source: "Swift Collections tags.png", alt: "Swift Collections") {
 >   The `swift-collections` documentation.
