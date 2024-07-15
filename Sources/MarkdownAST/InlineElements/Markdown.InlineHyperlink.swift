@@ -67,12 +67,28 @@ extension Markdown.InlineHyperlink:Markdown.TreeElement
         {
             switch target
             {
-            //  These will almost certainly be invalid, so there is no point in encoding them.
-            case .absolute:                 break
-            case .relative:                 break
-            case .external(let url):        $0[.external] = "\(url)"
-            case .fragment(let fragment):   $0[.href] = "#\(fragment.string)"
-            case .outlined(let reference):  $0[.href] = reference
+            case .outlined(let reference):
+                $0[.href] = reference
+
+            case .urlFragment(let target):
+                $0[.href] = "#\(target)"
+
+            case .url(let url):
+                guard
+                let scheme:String = url.scheme
+                else
+                {
+                    //  This will almost certainly be invalid, so there is no point encoding it.
+                    break
+                }
+
+                if  scheme == "doc"
+                {
+                    //  This will never work, so there is no point encoding it.
+                    break
+                }
+
+                $0[.external] = "\(url)"
             }
         }
             content:
@@ -107,12 +123,10 @@ extension Markdown.InlineHyperlink:Markdown.TextElement
         let reference:Markdown.AnyReference
         switch self.target
         {
-        case .none:                     return
-        case .outlined?:                return
-        case .fragment?:                return
-        case .relative(let link)?:      reference = .link(link)
-        case .absolute(let link)?:      reference = .link(link)
-        case .external(url: let url)?:  reference = .external(url: url)
+        case .none:             return
+        case .outlined?:        return
+        case .urlFragment?:     return
+        case .url(let url)?:    reference = .link(url: url)
         }
 
         if  let reference:Int = try register(reference)

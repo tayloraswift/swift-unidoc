@@ -25,9 +25,7 @@ extension Markdown
                 try
                 {
                     if  case .inline(let expression) = $0,
-                        case let reference? = try register(.external(url: .init(
-                            scheme: "doc",
-                            suffix: expression)))
+                        case let reference? = try register(.link(url: expression))
                     {
                         $0 = .outlined(reference)
                     }

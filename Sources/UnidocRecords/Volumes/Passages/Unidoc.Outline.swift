@@ -7,18 +7,18 @@ extension Unidoc
     @frozen public
     enum Outline:Equatable, Sendable
     {
-        /// An external web link. The string does not contain the URL scheme.
-        case external(https:String, safe:Bool)
-        /// A same-page link, encoded as a URL fragment without the hashtag (`#`) prefix.
-        case fragment(String)
         /// A broken link, with optional fallback text.
         case fallback(String?)
+        /// A same-page link, encoded as a URL fragment without the hashtag (`#`) prefix.
+        case fragment(String)
         /// A bare scalar link with no accompanying outline text. The `line` parameter
         /// is only meaningful when the vertex is a file.
         case bare(line:Int?, Unidoc.Scalar)
         /// A vector link with accompanying outline text specifying the visual presentation of
         /// the link, along with an optional URL fragment.
         case path(SymbolGraph.OutlineText, [Unidoc.Scalar])
+        /// An external web link.
+        case url(String, safe:Bool)
     }
 }
 extension Unidoc.Outline
@@ -28,7 +28,11 @@ extension Unidoc.Outline
     {
         case file_line = "L"
         case link_safe = "H"
-        case link_url = "U"
+        case link_url = "V"
+
+        //  DEPRECATED, use ``link_url`` instead.
+        case link_https = "U"
+
         case fragment = "F"
         case display = "T"
         case scalars = "s"
@@ -42,15 +46,11 @@ extension Unidoc.Outline:BSONDocumentEncodable
     {
         switch self
         {
-        case .external(https: let url, safe: let safe):
-            bson[.link_safe] = safe ? true : nil
-            bson[.link_url] = url
+        case .fallback(let text):
+            bson[.display] = text
 
         case .fragment(let display):
             bson[.fragment] = display
-
-        case .fallback(let text):
-            bson[.display] = text
 
         case .bare(line: let number, let id):
             bson[.file_line] = number
@@ -67,6 +67,10 @@ extension Unidoc.Outline:BSONDocumentEncodable
             }
 
             bson[.display] = display
+
+        case .url(let url, safe: let safe):
+            bson[.link_safe] = safe ? true : nil
+            bson[.link_url] = url
         }
     }
 }
@@ -111,7 +115,12 @@ extension Unidoc.Outline:BSONDocumentDecodable
             else if
                 let url:String = try bson[.link_url]?.decode()
             {
-                self = .external(https: url, safe: try bson[.link_safe]?.decode() ?? false)
+                self = .url(url, safe: try bson[.link_safe]?.decode() ?? false)
+            }
+            else if
+                let suffix:String = try bson[.link_https]?.decode()
+            {
+                self = .url("https://\(suffix)", safe: try bson[.link_safe]?.decode() ?? false)
             }
             else
             {
