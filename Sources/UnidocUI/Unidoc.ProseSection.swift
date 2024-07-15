@@ -45,25 +45,11 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[reference]
         {
-        case .external(https: let url, safe: let safe):
-            switch type
-            {
-            case .href:
-                type = safe ? .safelink : .external
-                fallthrough
-
-            case .external:
-                return "https://\(url)"
-
-            default:
-                return nil
-            }
+        case .fallback:
+            return nil
 
         case .fragment(let text):
             return "\(URI.Fragment.init(decoded: text))"
-
-        case .fallback:
-            return nil
 
         case .bare(line: _, let id):
             switch type
@@ -92,6 +78,20 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
             case .src:  return self.context.load(id: target, src: &type)
             default:    return nil
             }
+
+        case .url(let url, safe: let safe):
+            switch type
+            {
+            case .href, .safelink:
+                type = safe ? .safelink : .external
+                return url
+
+            case .external:
+                return url
+
+            default:
+                return nil
+            }
         }
     }
 
@@ -108,28 +108,11 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[index]
         {
-        case .external(https: let url, safe: let safe):
-            html[.a]
-            {
-                $0.target = "_blank"
-                $0.href = "https://\(url)"
-
-                $0[name: .rel] = safe ? """
-                \(HTML.Attribute.Rel.external)
-                """ :
-                """
-                \(HTML.Attribute.Rel.external) \
-                \(HTML.Attribute.Rel.nofollow) \
-                \(HTML.Attribute.Rel.noopener) \
-                \(HTML.Attribute.Rel.google_ugc)
-                """
-            } = url
+        case .fallback(let text):
+            html[.code] = text
 
         case .fragment(let text):
             html[.a] { $0.href = "\(URI.Fragment.init(decoded: text))" } = text
-
-        case .fallback(let text):
-            html[.code] = text
 
         case .bare(line: let line, let id):
             //  Only file links are supported here.
@@ -224,6 +207,23 @@ extension Unidoc.ProseSection:HTML.OutputStreamableMarkdown
                 //  TODO: support URL fragment?
                 html[.code] = components
             }
+
+        case .url(let url, safe: let safe):
+            html[.a]
+            {
+                $0.target = "_blank"
+                $0.href = url
+
+                $0[name: .rel] = safe ? """
+                \(HTML.Attribute.Rel.external)
+                """ :
+                """
+                \(HTML.Attribute.Rel.external) \
+                \(HTML.Attribute.Rel.nofollow) \
+                \(HTML.Attribute.Rel.noopener) \
+                \(HTML.Attribute.Rel.google_ugc)
+                """
+            } = url
         }
     }
 }

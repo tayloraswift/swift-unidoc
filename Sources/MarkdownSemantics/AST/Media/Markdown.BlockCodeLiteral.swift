@@ -78,7 +78,7 @@ extension Markdown
                 try
                 {
                     if  case .inline(let usr)? = $0.usr,
-                        let reference:Int = try register(.symbolic(usr))
+                        let reference:Int = try register(.symbolic(usr: usr))
                     {
                         $0.usr = .outlined(reference)
                     }

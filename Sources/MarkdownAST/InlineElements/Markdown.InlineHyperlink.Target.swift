@@ -7,16 +7,11 @@ extension Markdown.InlineHyperlink
     {
         /// The link target has already been outlined.
         case outlined(Int)
+
         /// The link target is a fragment within the current document. The string does not
         /// include a leading `#`.
-        case fragment(Markdown.SourceString)
-        /// The link target is an absolute path. The string includes a leading `/`.
-        case absolute(Markdown.SourceString)
-        /// The link target is a relative path. The string does not include a leading `./`.
-        case relative(Markdown.SourceString)
-        /// The link target is an external URL. The string does not include the scheme, nor the
-        /// delimiting colon.
-        case external(Markdown.ExternalURL)
+        case urlFragment(Markdown.SourceString)
+        case url(Markdown.SourceURL)
     }
 }
 extension Markdown.InlineHyperlink.Target
@@ -26,12 +21,12 @@ extension Markdown.InlineHyperlink.Target
     {
         switch target[target.startIndex]
         {
-        case "/":
-            self = .absolute(.init(source: source, string: target))
-
         case "#":
             let i:String.Index = target.index(after: target.startIndex)
-            self = .fragment(.init(source: source, string: String.init(target[i...])))
+            self = .urlFragment(.init(source: source, string: String.init(target[i...])))
+
+        case "/":
+            self = .url(.init(scheme: nil, suffix: .init(source: source, string: target)))
 
         case ".":
             let trimmed:Markdown.SourceString
@@ -51,18 +46,10 @@ extension Markdown.InlineHyperlink.Target
                 trimmed = .init(source: source, string: target)
             }
 
-            self = .relative(trimmed)
+            self = .url(.init(scheme: nil, suffix: trimmed))
 
         default:
-            let link:Markdown.SourceString = .init(source: source, string: target)
-            if  let url:Markdown.ExternalURL = .init(from: link)
-            {
-                self = .external(url)
-            }
-            else
-            {
-                self = .relative(link)
-            }
+            self = .url(.init(from: .init(source: source, string: target)))
         }
     }
 }

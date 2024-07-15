@@ -3,31 +3,33 @@ import Sources
 extension Markdown
 {
     @frozen public
-    struct ExternalURL
+    struct SourceURL
     {
         public
-        var scheme:String
+        var scheme:String?
         public
         var suffix:SourceString
 
         @inlinable public
-        init(scheme:String, suffix:SourceString)
+        init(scheme:String?, suffix:SourceString)
         {
             self.scheme = scheme
             self.suffix = suffix
         }
     }
 }
-extension Markdown.ExternalURL:CustomStringConvertible
+extension Markdown.SourceURL:CustomStringConvertible
 {
     @inlinable public
-    var description:String { "\(self.scheme):\(self.suffix)" }
+    var description:String { self.scheme.map { "\($0):\(self.suffix)" } ?? "\(self.suffix)" }
 }
-extension Markdown.ExternalURL
+extension Markdown.SourceURL
 {
     @usableFromInline
-    init?(from url:Markdown.SourceString)
+    init(from url:Markdown.SourceString)
     {
+        self.init(scheme: nil, suffix: url)
+
         //  URL parsing is incredibly tough.
         //
         //  This problem is complicated significantly by the fact that Apple uses a
@@ -37,14 +39,14 @@ extension Markdown.ExternalURL
         //  We need to do this in order to avoid emitting unresolved relative URLs, as such
         //  URLs would never work properly for the user.
         guard
-        let colon:String.Index = url.string.firstIndex(of: ":")
+        let colon:String.Index = self.suffix.string.firstIndex(of: ":")
         else
         {
-            return nil
+            return
         }
 
         scheme:
-        for codepoint:Unicode.Scalar in url.string.unicodeScalars[..<colon]
+        for codepoint:Unicode.Scalar in self.suffix.string.unicodeScalars[..<colon]
         {
             switch codepoint
             {
@@ -55,14 +57,11 @@ extension Markdown.ExternalURL
             case "A" ... "Z":   continue
             case "a" ... "z":   continue
             //  This isn’t a scheme at all!
-            default:            return nil
+            default:            return
             }
         }
 
-        let scheme:String = .init(url.string[..<colon])
-        var suffix:Markdown.SourceString = consume url
-            suffix.string.removeSubrange(...colon)
-
-        self.init(scheme: scheme, suffix: suffix)
+        self.scheme = .init(url.string[..<colon])
+        self.suffix.string.removeSubrange(...colon)
     }
 }

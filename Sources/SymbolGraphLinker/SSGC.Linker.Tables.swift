@@ -217,9 +217,12 @@ extension SSGC.Linker.Tables
 
             switch target
             {
-            case .external(let url)?:
+            case .urlFragment(let anchor)?:
+                spelling = anchor
+
+            case .url(url: let url)?:
                 guard
-                case "doc" = url.scheme,
+                case "doc"? = url.scheme,
                 case "#"? = url.suffix.string.first
                 else
                 {
@@ -229,9 +232,6 @@ extension SSGC.Linker.Tables
                 spelling = url.suffix
                 spelling.string.removeFirst()
 
-            case .fragment(let link)?:
-                spelling = link
-
             default:
                 return
             }
@@ -240,7 +240,7 @@ extension SSGC.Linker.Tables
             {
             case .success(let fragment):
                 spelling.string = fragment
-                target = .fragment(spelling)
+                target = .urlFragment(spelling)
 
             case .failure(let error):
                 self.diagnostics[spelling.source] = error
