@@ -223,7 +223,7 @@ extension Unidoc.Resolver
 
         //  Skip the two slashes.
         guard let start:String.Index = url.index(colon, offsetBy: 3, limitedBy: url.endIndex),
-        case "//" = url[colon ..< start]
+        case "//" = url[url.index(after: colon) ..< start]
         else
         {
             return .url(url, safe: false)
