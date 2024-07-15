@@ -56,14 +56,11 @@ extension Unidoc.InertSection:HTML.OutputStreamableMarkdown
 
         switch self.outlines[index]
         {
-        case .external(https: let url, safe: _):
-            html += url
+        case .fallback(text: let text):
+            html[.code] = text
 
         case .fragment(let text):
             html[.span] = text
-
-        case .fallback(text: let text):
-            html[.code] = text
 
         case .bare(line: let line, let id):
             guard
@@ -85,6 +82,9 @@ extension Unidoc.InertSection:HTML.OutputStreamableMarkdown
             {
                 html[.code] = display
             }
+
+        case .url(let url, safe: _):
+            html += url
         }
     }
 }
@@ -102,17 +102,14 @@ extension Unidoc.InertSection:TextOutputStreamableMarkdown
         }
         switch self.outlines[index]
         {
-        case .external(https: let url, safe: _):
-            utf8 += url.utf8
-
-        case .fragment(let fragment):
-            utf8 += fragment.utf8
-
         case .fallback(let text?):
             utf8 += text.utf8
 
         case .fallback(nil):
             break
+
+        case .fragment(let fragment):
+            utf8 += fragment.utf8
 
         case .bare(line: let line, let id):
             guard
@@ -146,6 +143,9 @@ extension Unidoc.InertSection:TextOutputStreamableMarkdown
                     utf8.append(byte == 0x20 ? 0x2E : byte)
                 }
             }
+
+        case .url(let url, safe: _):
+            utf8 += url.utf8
         }
     }
 }

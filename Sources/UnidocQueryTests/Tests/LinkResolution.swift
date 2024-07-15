@@ -101,8 +101,8 @@ struct LinkResolution:UnidocDatabaseTestBattery
                     ],
                 ],
                 externalLinks: [
-                    "en.wikipedia.org/wiki/Main_Page": true,
-                    "liberationnews.org": false,
+                    "https://en.wikipedia.org/wiki/Main_Page": true,
+                    "https://liberationnews.org": false,
                 ],
                 //  Note: the duplicate outline was not optimized away because external
                 //  links are resolved dynamically, and this means their representation
