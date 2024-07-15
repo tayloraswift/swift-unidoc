@@ -48,11 +48,11 @@ extension Main.LinkResolution:TestBattery
                     origin: nil,
                     scope: []))
                 {
-                    tests.expect(value: $0.outline(reference: .code(_string("A.b"))))
-                    tests.expect(value: $0.outline(reference: .code(_string("A.c"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.c"))))
 
-                    tests.expect(value: $0.outline(reference: .code(_string("A.b"))))
-                    tests.expect(value: $0.outline(reference: .code(_string("A.c"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.c"))))
 
                     tests.expect($0.outlines() ..? [
                         .vertex(0, text: "A b"),
@@ -71,11 +71,11 @@ extension Main.LinkResolution:TestBattery
                     origin: nil,
                     scope: ["A"]))
                 {
-                    tests.expect(value: $0.outline(reference: .code(_string("A.b"))))
-                    tests.expect(value: $0.outline(reference: .code(_string("A.c"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.c"))))
 
-                    tests.expect(value: $0.outline(reference: .code(_string("b"))))
-                    tests.expect(value: $0.outline(reference: .code(_string("c"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("b"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("c"))))
 
                     tests.expect($0.outlines() ..? [
                         .vertex(0, text: "A b"),
@@ -112,8 +112,8 @@ extension Main.LinkResolution:TestBattery
                     origin: nil,
                     scope: []))
                 {
-                    tests.expect(value: $0.outline(reference: .code(_string("A.b"))))
-                    tests.expect(value: $0.outline(reference: .code(_string("A.c"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.c"))))
 
                     tests.expect($0.outlines() ..? [
                         .vertex(0, text: "A b"),
@@ -133,8 +133,8 @@ extension Main.LinkResolution:TestBattery
                     origin: nil,
                     scope: []))
                 {
-                    tests.expect(value: $0.outline(reference: .code(_string("A.b"))))
-                    tests.expect(value: $0.outline(reference: .code(_string("A.c"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
+                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.c"))))
 
                     tests.expect($0.outlines() ..? [
                         .unresolved(ucf: "A.b", location: nil),
@@ -163,13 +163,13 @@ extension Main.LinkResolution:TestBattery
             {
 
                 tests.expect(value: $0.outline(
-                    reference: .link(_string("OtherTutorial"))))
+                    reference: .link(url: _string("OtherTutorial"))))
                 tests.expect(value: $0.outline(
-                    reference: .link(_string("/tutorials/OtherTutorial"))))
+                    reference: .link(url: _string("/tutorials/OtherTutorial"))))
                 tests.expect(value: $0.outline(
-                    reference: .link(_string("/tutorials/GettingStarted"))))
+                    reference: .link(url: _string("/tutorials/GettingStarted"))))
                 tests.expect(value: $0.outline(
-                    reference: .link(_string("GettingStarted"))))
+                    reference: .link(url: _string("GettingStarted"))))
 
 
                 tests.expect($0.outlines() ..? [
@@ -198,12 +198,12 @@ extension Main.LinkResolution:TestBattery
                 scope: []))
             {
 
-                tests.expect(value: $0.outline(reference: .link(_string(
-                    "//OtherModule/tutorials/OtherModule/OtherTutorial"))))
-                tests.expect(value: $0.outline(reference: .link(_string(
-                    "//OtherModule/tutorials/OtherModule/GettingStarted"))))
-                tests.expect(value: $0.outline(reference: .link(_string(
-                    "//OtherModule/documentation/OtherModule/GettingStarted"))))
+                tests.expect(value: $0.outline(reference: .link(
+                    url: _string("//OtherModule/tutorials/OtherModule/OtherTutorial"))))
+                tests.expect(value: $0.outline(reference: .link(
+                    url: _string("//OtherModule/tutorials/OtherModule/GettingStarted"))))
+                tests.expect(value: $0.outline(reference: .link(
+                    url: _string("//OtherModule/documentation/OtherModule/GettingStarted"))))
 
 
                 tests.expect($0.outlines() ..? [

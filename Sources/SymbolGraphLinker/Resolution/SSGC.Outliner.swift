@@ -97,24 +97,22 @@ extension SSGC.Outliner
 
         switch reference
         {
-        case .code(let link):
-            return self.outline(ucf: link)
+        case .symbolic(usr: let usr):
+            return self.outline(symbol: usr)
 
-        case .link(let link):
-            return self.outline(doc: link)
+        case .lexical(ucf: let expression):
+            return self.outline(ucf: expression)
 
-        case .external(url: let url):
+        case .link(url: let url):
             switch url.scheme
             {
-            case "doc":     return self.outline(doc: url.suffix)
-            case "http":    return self.outline(web: url.suffix)
-            case "https":   return self.outline(web: url.suffix)
-            default:        break
-            }
+            case nil, "doc"?:
+                return self.outline(doc: url.suffix)
 
-            self.resolver.diagnostics[url.suffix.source] =
-                SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(url.suffix)
-            return nil
+            case let scheme?:
+                return self.cache.add(outline: .url("\(scheme):\(url.suffix)",
+                    location: url.suffix.source.start))
+            }
 
         case .file(let link):
             name = link
@@ -133,9 +131,6 @@ extension SSGC.Outliner
                 source: link.source,
                 string: String.init(link.string[link.string.index(after: i)...]))
 
-        case .symbolic(let usr):
-            return self.outline(symbol: usr)
-
         case .location(let location):
             //  This is almost a no-op, except we can optimize away duplicated locations.
             return self.cache.add(outline: .location(location))
@@ -150,16 +145,6 @@ extension SSGC.Outliner
 
         self.resolver.diagnostics[name.source] = SSGC.ResourceError.fileNotFound(name.string)
         return nil
-    }
-
-    private mutating
-    func outline(web link:__owned Markdown.SourceString) -> Int?
-    {
-        //  Remove leading slashes
-        var link:Markdown.SourceString = consume link
-        link.string.removeFirst(2)
-        return self.cache.add(outline: .unresolved(web: link.string,
-            location: link.source.start))
     }
 
     private mutating

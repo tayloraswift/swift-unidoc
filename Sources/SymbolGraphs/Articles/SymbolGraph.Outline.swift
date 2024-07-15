@@ -16,7 +16,6 @@ extension SymbolGraph
         case unresolved(Unresolved)
     }
 }
-//  These are only here to make it obvious these links do not contain a scheme.
 extension SymbolGraph.Outline
 {
     @inlinable public static
@@ -26,15 +25,16 @@ extension SymbolGraph.Outline
     }
 
     @inlinable public static
-    func unresolved(web link:String, location:SourceLocation<Int32>?) -> Self
-    {
-        .unresolved(.init(link: link, type: .web, location: location))
-    }
-
-    @inlinable public static
     func unresolved(ucf link:String, location:SourceLocation<Int32>?) -> Self
     {
         .unresolved(.init(link: link, type: .ucf, location: location))
+    }
+
+    /// Creates a URL outline from a string, including the scheme.
+    @inlinable public static
+    func url(_ url:String, location:SourceLocation<Int32>?) -> Self
+    {
+        .unresolved(.init(link: url, type: .url, location: location))
     }
 }
 extension SymbolGraph.Outline
@@ -43,8 +43,11 @@ extension SymbolGraph.Outline
     enum CodingKey:String, Sendable
     {
         case unresolved_doc = "D"
-        case unresolved_web = "W"
         case unresolved_ucf = "U"
+        case unresolved_url = "H"
+
+        //  Obsoleted in 0.9.8.
+        case unresolved_urlWithoutScheme = "W"
 
         case fragment = "F"
         case location = "L"
@@ -83,9 +86,9 @@ extension SymbolGraph.Outline:BSONDocumentEncodable
 
             switch self.type
             {
-            case .doc:      bson[.unresolved_doc] = self.link
-            case .web:      bson[.unresolved_web] = self.link
-            case .ucf:      bson[.unresolved_ucf] = self.link
+            case .doc:  bson[.unresolved_doc] = self.link
+            case .ucf:  bson[.unresolved_ucf] = self.link
+            case .url:  bson[.unresolved_url] = self.link
             }
         }
     }
@@ -136,10 +139,16 @@ extension SymbolGraph.Outline:BSONDocumentDecodable
             link = text
         }
         else if
-            let text:String = try bson[.unresolved_web]?.decode()
+            let text:String = try bson[.unresolved_url]?.decode()
         {
-            type = .web
+            type = .url
             link = text
+        }
+        else if
+            let text:String = try bson[.unresolved_urlWithoutScheme]?.decode()
+        {
+            type = .url
+            link = "https://\(text)"
         }
         else
         {

@@ -6,10 +6,13 @@ extension Markdown
     @frozen public
     enum AnyReference
     {
-        /// A reference to a code object. These originate from inline code spans.
-        case code(SourceString)
-        /// An absolute (begins with slash) or relative URL. Never contains domain or scheme.
-        case link(SourceString)
+        /// A symbolic (ABI) reference to a code object.
+        case symbolic(usr:Symbol.USR)
+        /// A lexical (API) path reference to a code object. These originate from inline code
+        /// spans.
+        case lexical(ucf:SourceString)
+        /// A URL reference, which may be external or internal.
+        case link(url:SourceURL)
         /// A reference to a file, by its file name. These originate from block directive
         /// arguments, such as those in an `@Image`.
         case file(SourceString)
@@ -19,28 +22,18 @@ extension Markdown
         /// A reference to a source location, which has already been resolved. These originate
         /// from the inlining of code snippets.
         case location(SourceLocation<Int32>)
-        case symbolic(Symbol.USR)
-        /// A fully-qualified URL.
-        case external(url:ExternalURL)
     }
+}
+extension Markdown.AnyReference
+{
+    @inlinable public
+    static func link(url:__owned Markdown.SourceString) -> Self { .link(url: .init(from: url)) }
 }
 extension Markdown.AnyReference
 {
     @inlinable public
     init(_ autolink:Markdown.InlineAutolink)
     {
-        if  autolink.code
-        {
-            self = .code(autolink.text)
-        }
-        else if
-            let url:Markdown.ExternalURL = .init(from: autolink.text)
-        {
-            self = .external(url: url)
-        }
-        else
-        {
-            self = .link(autolink.text)
-        }
+        self = autolink.code ? .lexical(ucf: autolink.text) : .link(url: autolink.text)
     }
 }

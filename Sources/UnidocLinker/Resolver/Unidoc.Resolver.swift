@@ -126,14 +126,9 @@ extension Unidoc.Resolver
 
             switch unresolved.type
             {
-            case .web:
-                return self.resolve(web: unresolved.link, at: location)
-
-            case .doc:
-                return self.resolve(doc: unresolved.link, at: location)
-
-            case .ucf:
-                return self.resolve(ucf: unresolved.link, at: location)
+            case .doc:  return self.resolve(doc: unresolved.link, at: location)
+            case .ucf:  return self.resolve(ucf: unresolved.link, at: location)
+            case .url:  return self.resolve(url: unresolved.link, at: location)
             }
         }
 
@@ -217,16 +212,60 @@ extension Unidoc.Resolver
     }
 
     private mutating
-    func resolve(web link:String, at _:SourceLocation<Unidoc.Scalar>?) -> Unidoc.Outline
+    func resolve(url:String, at _:SourceLocation<Unidoc.Scalar>?) -> Unidoc.Outline
     {
-        let domain:Substring = link.prefix { $0 != "/" }
+        guard let colon:String.Index = url.firstIndex(of: ":"),
+        case "https" = url[..<colon]
+        else
+        {
+            return .url(url, safe: false)
+        }
+
+        //  Skip the two slashes.
+        guard let start:String.Index = url.index(colon, offsetBy: 3, limitedBy: url.endIndex),
+        case "//" = url[colon ..< start]
+        else
+        {
+            return .url(url, safe: false)
+        }
+
+        let slash:String.Index? = url[start...].firstIndex(of: "/")
 
         //  FIXME: codelink is probably not the right model type here. All of these paths will
         //  be slash (`/`) separated.
-        guard
-        let codelink:Codelink = .init(translating: link, to: domain)
+        if  let slash:String.Index,
+            let codelink:Codelink = .translate(
+                domain: url[start ..< slash],
+                path: url[slash...])
+        {
+            let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
+
+            //  Translation always lowercases the URL, so we need to use the collated table.
+            switch self.caseless.resolve(codelink)
+            {
+            case .some(let overloads):
+                guard
+                let overload:CodelinkResolver<Unidoc.Scalar>.Overload = overloads.first
+                else
+                {
+                    //  Not an error, this was only speculative.
+                    return .url(url, safe: false)
+                }
+
+                resolution = overload.target
+
+            case .one(let overload):
+                resolution = overload.target
+            }
+
+            print("DEBUG: successful translation of '\(url)'")
+
+            return self.context.format(codelink: codelink, to: resolution)
+        }
         else
         {
+            let domain:Substring = slash.map { url[start ..< $0] } ?? url[start...]
+
             let root:Substring
             if  let j:String.Index = domain.lastIndex(of: "."),
                 let i:String.Index = domain[..<j].lastIndex(of: ".")
@@ -252,31 +291,7 @@ extension Unidoc.Resolver
             default:                false
             }
 
-            return .external(https: link, safe: safe)
+            return .url(url, safe: safe)
         }
-
-        let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
-
-        //  Translation always lowercases the URL, so we need to use the collated table.
-        switch self.caseless.resolve(codelink)
-        {
-        case .some(let overloads):
-            guard
-            let overload:CodelinkResolver<Unidoc.Scalar>.Overload = overloads.first
-            else
-            {
-                //  Not an error, this was only speculative.
-                return .external(https: link, safe: false)
-            }
-
-            resolution = overload.target
-
-        case .one(let overload):
-            resolution = overload.target
-        }
-
-        print("DEBUG: successful translation of '\(link)'")
-
-        return self.context.format(codelink: codelink, to: resolution)
     }
 }
