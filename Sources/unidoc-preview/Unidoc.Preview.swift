@@ -1,9 +1,9 @@
-import ArgumentParsing
-import GitHubAPI
+import ArgumentParser
 import HTTPServer
 import MongoDB
 import NIOPosix
 import NIOSSL
+import System_ArgumentParser
 import System
 import UnidocServer
 
@@ -11,86 +11,55 @@ extension Unidoc
 {
     struct Preview
     {
-        var certificates:String
+        @Option(
+            name: [.customLong("certificates"), .customShort("c")],
+            help: "A path to the certificates directory",
+            completion: .directory)
+        var certificates:FilePath.Directory = "Assets/certificates"
 
-        var development:Unidoc.ServerOptions.Development
-        var mirror:Bool
-        var https:Bool
-        var mongo:Mongo.Host
+        @Option(
+            name: [.customLong("mongo"), .customShort("m")],
+            help: "The name of a host running mongod to connect to, and optionally, the port")
+        var mongod:Mongo.Host = "localhost"
 
-        private
-        init() throws
+        @Option(
+            name: [.customLong("replica-set"), .customShort("s")],
+            help: "The name of a replica set to connect to")
+        var replicaSet:String = "unidoc-rs"
+
+        @Option(
+            name: [.customLong("port"), .customShort("p")],
+            help: "The number of a port to bind the documentation server to")
+        var port:Int?
+
+        @Flag(
+            name: [.customLong("mirror"), .customShort("q")],
+            help: "Run in mirror mode, disabling the documentation linker process")
+        var mirror:Bool = false
+
+        @Flag(
+            name: [.customLong("https"), .customShort("e")],
+            help: "Use https instead of http")
+        var https:Bool = false
+
+        init()
         {
-            self.certificates = "Assets/certificates"
-            self.development = .init()
-            self.development.port = 8080
-            self.mirror = false
-            self.https = false
-            self.mongo = "localhost"
         }
     }
 }
 extension Unidoc.Preview
 {
-    private mutating
-    func parse() throws
+    private
+    var serverSSL:NIOSSLContext
     {
-        var arguments:CommandLine.Arguments = .init()
-
-        while let argument:String = arguments.next()
+        get throws
         {
-            switch argument
-            {
-            case "-c", "--certificates":
-                self.certificates = try arguments.next(for: "certificates")
+            let privateKeyPath:FilePath = self.certificates / "privkey.pem"
+            let privateKey:NIOSSLPrivateKey = try .init(file: "\(privateKeyPath)", format: .pem)
 
-            case "-q", "--mirror":
-                self.mirror = true
-
-            case "-s", "--replica-set":
-                self.development.replicaSet = try arguments.next(for: "replica-set")
-
-            case "-e", "--https":
-                self.https = true
-                self.development.port = 8443
-
-            case "-m", "--mongo":
-                self.mongo = .init(try arguments.next(for: "mongo"))
-
-            case "-p", "--port":
-                self.https = true
-                self.development.port = try arguments.next(for: "port")
-
-            case let option:
-                throw CommandLine.ArgumentError.unknown(option)
-            }
-        }
-    }
-}
-
-@main
-extension Unidoc.Preview
-{
-    static
-    func main() async throws
-    {
-        var main:Self = try .init()
-        try main.parse()
-        try await main.launch()
-    }
-}
-extension Unidoc.Preview
-{
-    private consuming
-    func options() throws -> Unidoc.ServerOptions
-    {
-        let authority:any HTTP.ServerAuthority
-        if  self.https
-        {
-            let privateKey:NIOSSLPrivateKey =
-                try .init(file: "\(self.certificates)/privkey.pem", format: .pem)
-            let fullChain:[NIOSSLCertificate] =
-                try NIOSSLCertificate.fromPEMFile("\(self.certificates)/fullchain.pem")
+            let fullChainPath:FilePath = self.certificates / "fullchain.pem"
+            let fullChain:[NIOSSLCertificate] = try NIOSSLCertificate.fromPEMFile(
+                "\(fullChainPath)")
 
             var configuration:TLSConfiguration = .makeServerConfiguration(
                 certificateChain: fullChain.map(NIOSSLCertificateSource.certificate(_:)),
@@ -99,25 +68,26 @@ extension Unidoc.Preview
                 // configuration.applicationProtocols = ["h2", "http/1.1"]
                 configuration.applicationProtocols = ["h2"]
 
-            authority = HTTP.LocalhostSecure.init(
-                context: try .init(configuration: configuration))
+            return try .init(configuration: configuration)
         }
-        else
-        {
-            authority = HTTP.Localhost.init()
-        }
-
-        return .init(authority: authority,
-            github: nil,
-            mirror: self.mirror,
-            bucket: .init(
-                assets: self.development.bucket,
-                graphs: self.development.bucket),
-            mode: .development(.init(source: "Assets"), self.development))
     }
 
-    private consuming
-    func launch() async throws
+    private
+    var clientSSL:NIOSSLContext
+    {
+        get throws
+        {
+            var configuration:TLSConfiguration = .makeClientConfiguration()
+                configuration.applicationProtocols = ["h2"]
+            return try .init(configuration: configuration)
+        }
+    }
+}
+
+@main
+extension Unidoc.Preview:AsyncParsableCommand
+{
+    func run() async throws
     {
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
 
@@ -126,16 +96,32 @@ extension Unidoc.Preview
             try? threads.syncShutdownGracefully()
         }
 
-        let mongod:Mongo.Host = self.mongo
+        var development:Unidoc.ServerOptions.Development = .init(replicaSet: self.replicaSet)
+        let authority:any HTTP.ServerAuthority
 
-        var configuration:TLSConfiguration = .makeClientConfiguration()
-            configuration.applicationProtocols = ["h2"]
+        if  self.https
+        {
+            authority = HTTP.LocalhostSecure.init(context: try self.serverSSL)
+            development.port = self.port ?? 8443
+        }
+        else
+        {
+            authority = HTTP.Localhost.init()
+            development.port = self.port ?? 8080
+        }
+
+        let options:Unidoc.ServerOptions = .init(authority: authority,
+            github: nil,
+            mirror: self.mirror,
+            bucket: .init(
+                assets: development.bucket,
+                graphs: development.bucket),
+            mode: .development(.init(source: "Assets"), development))
 
         let context:Unidoc.ServerPluginContext = .init(threads: threads,
-            niossl: try .init(configuration: configuration))
-        let options:Unidoc.ServerOptions = try self.options()
+            niossl: try self.clientSSL)
 
-        let mongodb:Mongo.DriverBootstrap = MongoDB / [mongod] /?
+        let mongodb:Mongo.DriverBootstrap = MongoDB / [self.mongod] /?
         {
             $0.executors = .shared(threads)
             $0.appname = "Unidoc Preview"

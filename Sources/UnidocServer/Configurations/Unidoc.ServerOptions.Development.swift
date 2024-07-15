@@ -38,7 +38,7 @@ extension Unidoc.ServerOptions
         var port:Int
 
         @inlinable public
-        init()
+        init(replicaSet:String = "unidoc-rs")
         {
             self.cloudfront = false
 
@@ -47,7 +47,7 @@ extension Unidoc.ServerOptions
             self.runPolicy = false
             self.security = .ignored
 
-            self.replicaSet = "unidoc-rs"
+            self.replicaSet = replicaSet
             self.bucket = nil
             self.port = 8443
         }
