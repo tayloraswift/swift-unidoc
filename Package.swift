@@ -137,7 +137,7 @@ let package:Package = .init(
 
         .executableTarget(name: "unidoc-preview",
             dependencies: [
-                .target(name: "ArgumentParsing"),
+                .target(name: "System_ArgumentParser"),
                 .target(name: "UnidocServer"),
             ]),
 
@@ -359,12 +359,12 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphBuilder",
             dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "MarkdownPluginSwift_IndexStoreDB"),
                 .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphLinker"),
+                .target(name: "System_ArgumentParser"),
                 .target(name: "System"),
             ]),
 
@@ -562,6 +562,12 @@ let package:Package = .init(
             dependencies: [
                 .product(name: "SystemPackage", package: "swift-system"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
+            ]),
+
+        .target(name: "System_ArgumentParser",
+            dependencies: [
+                .target(name: "System"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]),
 
         .executableTarget(name: "UCFTests",
