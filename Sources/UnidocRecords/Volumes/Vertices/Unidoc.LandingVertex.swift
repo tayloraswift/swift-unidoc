@@ -4,10 +4,6 @@ import UnidocAPI
 
 extension Unidoc
 {
-    @available(*, deprecated, renamed: "LandingVertex")
-    public
-    typealias GlobalVertex = LandingVertex
-
     @frozen public
     struct LandingVertex:Identifiable, Equatable, Sendable
     {

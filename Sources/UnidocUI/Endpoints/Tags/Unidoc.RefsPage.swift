@@ -131,76 +131,8 @@ extension Unidoc.RefsPage
                 } = repo.private ?  "🗝️" : "🌐"
             }
 
-            section[.dl]
-            {
-                let created:UnixAttosecond
-
-                switch repo.origin
-                {
-                case .github(let origin):
-                    $0[.dt] = "Registrar"
-                    $0[.dd] = "GitHub"
-
-                    if  let license:Unidoc.PackageLicense = repo.license
-                    {
-                        $0[.dt] = "License"
-                        $0[.dd] = license.name
-                    }
-                    if !repo.topics.isEmpty
-                    {
-                        $0[.dt] = "Keywords"
-                        $0[.dd] = repo.topics.joined(separator: ", ")
-                    }
-
-                    $0[.dt] = "Owner"
-                    $0[.dd]
-                    {
-                        if  let account:Unidoc.Account = self.package.repo?.account
-                        {
-                            $0[.a]
-                            {
-                                $0.href = "\(Unidoc.UserPropertyEndpoint[account])"
-                            } = origin.owner
-                        }
-                        else
-                        {
-                            $0[.span] = origin.owner
-                        }
-
-                        $0[.span, { $0.class = "parenthetical" }]
-                        {
-                            $0[.a]
-                            {
-                                $0.target = "_blank"
-                                $0.href = "https://github.com/\(origin.owner)"
-                                $0.rel = .external
-                            } = "view profile"
-                        }
-                    }
-
-                    $0[.dt] = "Stars"
-                    $0[.dd] = "\(repo.stars)"
-
-                    $0[.dt] = "Forks"
-                    $0[.dd] = "\(repo.forks)"
-
-                    $0[.dt] = "Archived?"
-                    $0[.dd] = origin.archived ? "yes" : "no"
-
-                    created = .init(repo.created)
-                }
-                if  let created:Timestamp.Date = created.timestamp?.date
-                {
-                    $0[.dt] = "Created"
-                    $0[.dd]
-                    {
-                        $0[.a]
-                        {
-                            $0.href = "\(Unidoc.PackagesCreatedEndpoint[created])"
-                        } = created.long(format.locale)
-                    }
-                }
-            }
+            section[.dl] = Unidoc.PackageRepoDescriptionList.init(repo: repo,
+                mode: .expanded(format.locale))
         }
 
         section[.a]
