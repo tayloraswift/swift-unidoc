@@ -116,45 +116,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
             if  let repo:Unidoc.PackageRepo = self.context.repo
             {
                 $0[.h2] = Heading.repository
-
-                $0[.dl]
-                {
-                    switch repo.origin
-                    {
-                    case .github(let origin):
-                        $0[.dt] = "Registrar"
-                        $0[.dd] = "GitHub"
-
-                        if  let license:Unidoc.PackageLicense = repo.license
-                        {
-                            $0[.dt] = "License"
-                            $0[.dd] = license.name
-                        }
-
-                        if !repo.topics.isEmpty
-                        {
-                            $0[.dt] = "Keywords"
-                            $0[.dd] = repo.topics.joined(separator: ", ")
-                        }
-
-                        $0[.dt] = "Owner"
-
-                        if  let account:Unidoc.Account = repo.account
-                        {
-                            $0[.dd]
-                            {
-                                $0[.a]
-                                {
-                                    $0.href = "\(Unidoc.UserPropertyEndpoint[account])"
-                                } = origin.owner
-                            }
-                        }
-                        else
-                        {
-                            $0[.dd] = origin.owner
-                        }
-                    }
-                }
+                $0[.dl] = Unidoc.PackageRepoDescriptionList.init(repo: repo, mode: .abridged)
 
                 $0[.a]
                 {
@@ -234,16 +196,37 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                 """
             }
 
-            $0[.h2] = Heading.snapshot
+            $0[.h2] = Heading.linkage
 
             $0[.dl]
             {
-                $0[.dt] = "Symbol Graph ABI"
+                $0[.dt] = "Symbol graph ABI"
                 $0[.dd] = "\(self.apex.snapshot.abi)"
+
+                if  let symbolsLinkable:Int = self.apex.snapshot.symbolsLinkable,
+                    let symbolsLinked:Int = self.apex.snapshot.symbolsLinked
+                {
+                    $0[.dt] = "Symbols linked"
+                    $0[.dd]
+                    {
+                        let percentage:Int = symbolsLinkable != 0
+                            ? symbolsLinked * 100 / symbolsLinkable
+                            : 100
+
+                        $0[.span] = "\(symbolsLinked) / \(symbolsLinkable)"
+                        $0 += " "
+                        $0[.span]
+                        {
+                            $0.class = percentage < 100
+                                ? "parenthetical warn"
+                                : "parenthetical"
+                        } = "\(percentage)%"
+                    }
+                }
 
                 if  let commit:SHA1 = self.apex.snapshot.commit
                 {
-                    $0[.dt] = "Git Revision"
+                    $0[.dt] = "Git revision"
                     $0[.dd]
                     {
                         let url:String?

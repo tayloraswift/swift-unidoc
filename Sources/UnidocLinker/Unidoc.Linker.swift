@@ -8,20 +8,11 @@ import Unidoc
 import SourceDiagnostics
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Unidoc.Linker")
-public
-typealias DynamicContext = Unidoc.Linker
-
-@available(*, deprecated, renamed: "Unidoc.Linker")
-public
-typealias DynamicLinker = Unidoc.Linker
-
-
 extension Unidoc
 {
-    //  https://github.com/apple/swift/issues/72136
+    /// A dynamic symbol graph linker.
     @frozen public
-    struct Linker//:~Copyable
+    struct Linker//:~Copyable https://github.com/apple/swift/issues/72136
     {
         var diagnostics:Diagnostics<Unidoc.Symbolicator>
 
@@ -60,9 +51,6 @@ extension Unidoc.Linker
         linking primary:consuming SymbolGraphObject<Unidoc.Edition>,
         against others:borrowing [SymbolGraphObject<Unidoc.Edition>])
     {
-        //  Build a combined lookup table mapping upstream symbols to scalars.
-        //  Because module names are unique within a build tree, there should
-        //  be no collisions among mangled symbols.
         var upstream:UpstreamScalars = .init()
 
         for other:SymbolGraphObject<Unidoc.Edition> in copy others
@@ -112,8 +100,36 @@ extension Unidoc.Linker
 extension Unidoc.Linker
 {
     public mutating
-    func link(around landing:consuming Unidoc.LandingVertex) -> Mesh
+    func link(primary metadata:SymbolGraphMetadata, pins:[Unidoc.Edition?]) -> Mesh
     {
+        let current:Unidoc.Edition = self.current.id
+        let symbols:(linkable:Int, linked:Int) = self.current.scalars.decls.reduce(into: (0, 0))
+        {
+            guard
+            let id:Unidoc.Scalar = $1
+            else
+            {
+                $0.linkable += 1
+                return
+            }
+
+            if  id.edition != current
+            {
+                $0.linkable += 1
+                $0.linked += 1
+            }
+        }
+
+        let landingVertex:Unidoc.LandingVertex = .init(id: current.global,
+            snapshot: .init(abi: metadata.abi,
+                latestManifest: metadata.tools,
+                extraManifests: metadata.manifests,
+                requirements: metadata.requirements,
+                commit: metadata.commit?.sha1,
+                symbolsLinkable: symbols.linkable,
+                symbolsLinked: symbols.linked),
+            packages: pins.compactMap(\.?.package))
+
         var tables:Tables = .init(context: consume self)
 
         let conformances:Table<Unidoc.Conformers> = tables.linkConformingTypes()
@@ -127,7 +143,7 @@ extension Unidoc.Linker
 
         self = (consume tables).context
 
-        return .init(around: landing,
+        return .init(around: landingVertex,
             conformances: conformances,
             extensions: extensions,
             products: products,

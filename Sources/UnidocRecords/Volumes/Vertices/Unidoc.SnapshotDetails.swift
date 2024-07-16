@@ -25,6 +25,12 @@ extension Unidoc
         public
         var commit:SHA1?
 
+        //  TODO: deoptionalize
+        public
+        var symbolsLinkable:Int?
+        public
+        var symbolsLinked:Int?
+
         /// Top-level linker statistics.
         public
         var census:Unidoc.Census
@@ -37,6 +43,8 @@ extension Unidoc
             extraManifests:[MinorVersion],
             requirements:[SymbolGraphMetadata.PlatformRequirement],
             commit:SHA1?,
+            symbolsLinkable:Int? = nil,
+            symbolsLinked:Int? = nil,
             census:Unidoc.Census = .init())
         {
             self.abi = abi
@@ -44,6 +52,8 @@ extension Unidoc
             self.extraManifests = extraManifests
             self.requirements = requirements
             self.commit = commit
+            self.symbolsLinkable = symbolsLinkable
+            self.symbolsLinked = symbolsLinked
             self.census = census
         }
     }
@@ -58,6 +68,8 @@ extension Unidoc.SnapshotDetails
         case extraManifests = "E"
         case requirements = "O"
         case commit = "H"
+        case symbolsLinkable = "T"
+        case symbolsLinked = "L"
         case census = "C"
     }
 }
@@ -71,6 +83,8 @@ extension Unidoc.SnapshotDetails:BSONDocumentEncodable
         bson[.extraManifests] = self.extraManifests.isEmpty ? nil : self.extraManifests
         bson[.requirements] = self.requirements.isEmpty ? nil : self.requirements
         bson[.commit] = self.commit
+        bson[.symbolsLinkable] = self.symbolsLinkable
+        bson[.symbolsLinked] = self.symbolsLinked
         bson[.census] = self.census
     }
 }
@@ -84,7 +98,8 @@ extension Unidoc.SnapshotDetails:BSONDocumentDecodable
             extraManifests: try bson[.extraManifests]?.decode() ?? [],
             requirements: try bson[.requirements]?.decode() ?? [],
             commit: try bson[.commit]?.decode(),
-            //  Deprojected when serving a redirect.
-            census: try bson[.census]?.decode() ?? .init())
+            symbolsLinkable: try bson[.symbolsLinkable]?.decode(),
+            symbolsLinked: try bson[.symbolsLinked]?.decode(),
+            census: try bson[.census].decode())
     }
 }
