@@ -10,11 +10,11 @@ extension Unidoc
     struct WhereClause
     {
         private
-        let requirements:[GenericConstraint<Unidoc.Scalar?>]
+        let requirements:[GenericConstraint<Unidoc.Scalar>]
         private
         let context:any VertexContext
 
-        init(requirements:[GenericConstraint<Unidoc.Scalar?>], context:any VertexContext)
+        init(requirements:[GenericConstraint<Unidoc.Scalar>], context:any VertexContext)
         {
             self.requirements = requirements
             self.context = context

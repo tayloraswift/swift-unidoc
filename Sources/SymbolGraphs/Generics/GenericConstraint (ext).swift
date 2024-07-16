@@ -8,22 +8,27 @@ extension GenericConstraint
     ///
     /// The BSON coding schema looks roughly like one of
     ///
-    /// `{ G: "0GenericParameterName.AssociatedType", N: 0x1234_5678 }`
+    /// `{ G: "0GenericParameterName.AssociatedType", C: "Int", N: 0x1234_5678 }`
     ///
     /// or
     ///
     /// `{ G: "0GenericParameterName.AssociatedType", C: "Array<Int>" }` .
     ///
-    /// The nominal (`N`) field is usually integer-typed, but its BSON
+    /// The ``nominal`` (`N`) field is usually integer-typed, but its BSON
     /// representation is up to the generic ``Scalar`` parameter.
     ///
-    /// The complex (`C`) field is always a string.
+    /// The ``spelling`` (`C`) field is always a string.
+    ///
+    /// Prior to 0.9.9, the ``spelling`` was optional.
     @frozen public
     enum CodingKey:String, Sendable
     {
         case generic = "G"
         case nominal = "N"
-        case complex = "C"
+        case spelling = "C"
+
+        @available(*, deprecated, renamed: "spelling")
+        static var complex:Self { .spelling }
     }
 }
 extension GenericConstraint:BSONDocumentEncodable, BSONEncodable
@@ -41,12 +46,9 @@ extension GenericConstraint:BSONDocumentEncodable, BSONEncodable
         }
 
         bson[.generic] = "\(sigil)\(self.noun)"
-
-        switch self.whom
-        {
-        case .nominal(let type):        bson[.nominal] = type
-        case .complex(let description): bson[.complex] = description
-        }
+        bson[.nominal] = self.whom.nominal
+        //  For roundtripping pre-0.9.9 BSON. After 1.0, we should encode it unconditionally.
+        bson[.spelling] = self.whom.spelling.isEmpty ? nil : self.whom.spelling
     }
 }
 extension GenericConstraint:BSONDocumentDecodable, BSONDecodable
@@ -72,19 +74,10 @@ extension GenericConstraint:BSONDocumentDecodable, BSONDecodable
             return (sigil, .init(decoding: $0.bytes.dropFirst(), as: Unicode.UTF8.self))
         }
 
-        let type:GenericType<Scalar>
-        //  If there is a null value (which is allowed if `Scalar` is an ``Optional`` type),
-        //  we don’t want to attempt to decode from ``CodingKey.complex``. If we do not
-        //  specify the decoded type (`Scalar.self`), the compiler will infer it to be
-        //  `Scalar?`, which will cause us to fall through to the else block!
-        if  let scalar:Scalar = try bson[.nominal]?.decode(to: Scalar.self)
-        {
-            type = .nominal(scalar)
-        }
-        else
-        {
-            type = .complex(try bson[.complex].decode())
-        }
+        let type:GenericType<Scalar> = .init(
+            //  TODO: deoptionalize this after 1.0.
+            spelling: try bson[.spelling]?.decode() ?? "",
+            nominal: try bson[.nominal]?.decode())
 
         switch sigil
         {

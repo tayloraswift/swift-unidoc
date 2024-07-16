@@ -37,8 +37,8 @@ extension Main.Generics:TestBattery
         {
             for (name, whom):(String, GenericType<Int32>) in
             [
-                ("nominal", .nominal(13)),
-                ("complex", .complex("Dictionary<Int, String>.Index"))
+                ("nominal", .init(spelling: "", nominal: 13)),
+                ("complex", .init(spelling: "Dictionary<Int, String>.Index", nominal: nil))
             ]
             {
                 guard let tests:TestGroup = tests / name

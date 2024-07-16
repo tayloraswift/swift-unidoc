@@ -5,14 +5,14 @@ import UnidocRecords
 
 extension Mongo.Variable<Unidoc.AnyGroup>
 {
-    var constraints:Mongo.List<GenericConstraint<Unidoc.Scalar?>, Mongo.AnyKeyPath>
+    var constraints:Mongo.List<GenericConstraint<Unidoc.Scalar>, Mongo.AnyKeyPath>
     {
         .init(in: self[.constraints])
     }
 }
 extension Mongo.Variable<Unidoc.ConformingType>
 {
-    var constraints:Mongo.List<GenericConstraint<Unidoc.Scalar?>, Mongo.AnyKeyPath>
+    var constraints:Mongo.List<GenericConstraint<Unidoc.Scalar>, Mongo.AnyKeyPath>
     {
         .init(in: self[.constraints])
     }

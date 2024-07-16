@@ -127,7 +127,7 @@ extension Unidoc.Linker.Table<Unidoc.Extension>
             return [:]
         }
 
-        let universal:Set<GenericConstraint<Unidoc.Scalar?>> =
+        let universal:Set<GenericConstraint<Unidoc.Scalar>> =
             extendedDecl.signature.generics.constraints.reduce(into: [])
         {
             $0.insert($1.map { extendedSnapshot.scalars.decls[$0] })
@@ -139,7 +139,7 @@ extension Unidoc.Linker.Table<Unidoc.Extension>
             .init(
                 constraints: $0.conditions.compactMap
                 {
-                    let constraint:GenericConstraint<Unidoc.Scalar?> = $0.map
+                    let constraint:GenericConstraint<Unidoc.Scalar> = $0.map
                     {
                         context.current.scalars.decls[$0]
                     }
@@ -174,7 +174,15 @@ extension Unidoc.Linker.Table<Unidoc.Extension>
                 /// ``RawRepresentable`` in the standard library.
                 conditions.constraints.removeAll
                 {
-                    $0 == .where("Self", is: .conformer, to: .nominal(s))
+                    if  case .where("Self", is: .conformer, to: let type) = $0,
+                        case s? = type.nominal
+                    {
+                        true
+                    }
+                    else
+                    {
+                        false
+                    }
                 }
             }
             //  It’s possible for two locally-disjoint extensions to coalesce

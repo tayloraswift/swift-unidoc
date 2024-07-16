@@ -24,7 +24,7 @@ extension Unidoc.Conformers
 {
     mutating
     func append(conformer type:Unidoc.Scalar,
-        where constraints:[GenericConstraint<Unidoc.Scalar?>])
+        where constraints:[GenericConstraint<Unidoc.Scalar>])
     {
         constraints.isEmpty
             ? self.unconditional.append(type)

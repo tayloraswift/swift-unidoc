@@ -10,10 +10,10 @@ extension Unidoc
         public
         let id:Unidoc.Scalar
         public
-        let constraints:[GenericConstraint<Unidoc.Scalar?>]
+        let constraints:[GenericConstraint<Unidoc.Scalar>]
 
         @inlinable public
-        init(id:Unidoc.Scalar, where constraints:[GenericConstraint<Unidoc.Scalar?>] = [])
+        init(id:Unidoc.Scalar, where constraints:[GenericConstraint<Unidoc.Scalar>] = [])
         {
             self.id = id
             self.constraints = constraints

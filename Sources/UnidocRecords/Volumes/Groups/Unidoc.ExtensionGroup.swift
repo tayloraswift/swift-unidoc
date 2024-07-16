@@ -16,7 +16,7 @@ extension Unidoc
         let id:Unidoc.Group
 
         public
-        let constraints:[GenericConstraint<Unidoc.Scalar?>]
+        let constraints:[GenericConstraint<Unidoc.Scalar>]
         public
         let culture:Unidoc.Scalar
         public
@@ -38,7 +38,7 @@ extension Unidoc
 
         @inlinable public
         init(id:Unidoc.Group,
-            constraints:[GenericConstraint<Unidoc.Scalar?>],
+            constraints:[GenericConstraint<Unidoc.Scalar>],
             culture:Unidoc.Scalar,
             scope:Unidoc.Scalar,
             conformances:[Unidoc.Scalar] = [],

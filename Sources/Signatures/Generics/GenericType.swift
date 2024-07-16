@@ -1,8 +1,17 @@
 @frozen public
-enum GenericType<Scalar>
+struct GenericType<Scalar>
 {
-    case nominal(Scalar)
-    case complex(String)
+    public
+    let spelling:String
+    public
+    let nominal:Scalar?
+
+    @inlinable public
+    init(spelling:String, nominal:Scalar? = nil)
+    {
+        self.spelling = spelling
+        self.nominal = nominal
+    }
 }
 extension GenericType:Equatable where Scalar:Equatable
 {
@@ -15,34 +24,23 @@ extension GenericType:Sendable where Scalar:Sendable
 }
 extension GenericType:Comparable where Scalar:Comparable
 {
+    @inlinable public
+    static func < (a:Self, b:Self) -> Bool
+    {
+        switch (a.nominal, b.nominal)
+        {
+        case (let i?, let j?):  (i, a.spelling) < (j, b.spelling)
+        case (_?, nil):         true
+        case (nil, _?):         false
+        case (nil, nil):        a.spelling < b.spelling
+        }
+    }
 }
 extension GenericType
 {
     @inlinable public
-    var nominal:Scalar?
+    func map<T>(_ transform:(Scalar) throws -> T?) rethrows -> GenericType<T>
     {
-        switch self
-        {
-        case .nominal(let type):    type
-        case .complex:              nil
-        }
-    }
-    @inlinable public
-    func map<T>(_ transform:(Scalar) throws -> T) rethrows -> GenericType<T>
-    {
-        switch self
-        {
-        case .nominal(let type):    .nominal(try transform(type))
-        case .complex(let type):    .complex(type)
-        }
-    }
-    @inlinable public
-    func flatMap<T>(_ transform:(Scalar) throws -> T?) rethrows -> GenericType<T>?
-    {
-        switch self
-        {
-        case .nominal(let type):    try transform(type).map { .nominal($0) }
-        case .complex(let type):    .complex(type)
-        }
+        .init(spelling: self.spelling, nominal: try self.nominal.map(transform) ?? nil)
     }
 }
