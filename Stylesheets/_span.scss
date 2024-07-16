@@ -1,9 +1,7 @@
-td.placeholder,
 span.placeholder,
 span.parenthetical
 {
-    color: var(--fg-semi);
-    font-style: italic;
+    @include note;
 }
 
 span.parenthetical::before
@@ -16,4 +14,9 @@ span.parenthetical::after
 {
     content: ')';
     font-style: normal;
+}
+
+span.warn
+{
+    color: var(--fg-warn);
 }

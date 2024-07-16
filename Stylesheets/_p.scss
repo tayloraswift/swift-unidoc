@@ -1,5 +1,6 @@
 @import 'Mixins/InlineCode';
 @import 'Mixins/InlineImage';
+@import 'Mixins/Note';
 
 p
 {
@@ -18,11 +19,5 @@ p
 
 p.note
 {
-    color: var(--fg-semi);
-    font-style: italic;
-
-    em
-    {
-        font-style: normal;
-    }
+    @include note;
 }
