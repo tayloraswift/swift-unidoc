@@ -33,7 +33,7 @@ extension Unidoc.Cone
         var extensions:[Unidoc.ExtensionGroup]
 
         private(set)
-        var peerConstraints:[GenericConstraint<Unidoc.Scalar?>]
+        var peerConstraints:[GenericConstraint<Unidoc.Scalar>]
         private(set)
         var peerList:[Unidoc.Scalar]
 
