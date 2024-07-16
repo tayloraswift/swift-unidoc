@@ -49,8 +49,6 @@ Here’s a comparison for the (in)famous [SwiftSyntax](https://github.com/apple/
 
 You can regenerate Unidoc documentation from symbol graph archives without recompiling documentation from package sources, which historically was a [major bottleneck](https://forums.swift.org/t/navigating-html-docs-vs-generated-interfaces/67115/7) in the DocC workflow. In many situations, this means you can easily upgrade Unidoc documentation to take advantage of new features even if the underlying symbol graph was compiled by an older version of Unidoc.
 
-You can re-link Unidoc documentation against newer versions of their package (and standard library) dependencies as they are released, without recompiling the symbol graph from source.
-
 Unidoc databases use a cellular architecture which allows you to stagger documentation upgrades across a package index without taking the server offline.
 
 
