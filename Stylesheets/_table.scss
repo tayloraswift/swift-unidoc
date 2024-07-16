@@ -23,6 +23,11 @@ table
     {
         padding-left: 0;
     }
+
+    td.placeholder
+    {
+        @include note;
+    }
 }
 
 table[data-type]

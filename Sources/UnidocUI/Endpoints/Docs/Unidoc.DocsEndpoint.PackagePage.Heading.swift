@@ -7,7 +7,7 @@ extension Unidoc.DocsEndpoint.PackagePage
         case repository
         case dependencies
         case platforms
-        case snapshot
+        case linkage
     }
 }
 extension Unidoc.DocsEndpoint.PackagePage.Heading:Identifiable
@@ -19,7 +19,7 @@ extension Unidoc.DocsEndpoint.PackagePage.Heading:Identifiable
         case .repository:   "ss:package-repository"
         case .dependencies: "ss:package-dependencies"
         case .platforms:    "ss:platform-requirements"
-        case .snapshot:     "ss:snapshot-information"
+        case .linkage:      "ss:snapshot-information"
         }
     }
 }
@@ -32,7 +32,7 @@ extension Unidoc.DocsEndpoint.PackagePage.Heading:HTML.OutputStreamableHeading
         case .repository:   "Package repository"
         case .dependencies: "Package dependencies"
         case .platforms:    "Platform requirements"
-        case .snapshot:     "Snapshot information"
+        case .linkage:      "Linkage information"
         }
     }
 }
