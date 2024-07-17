@@ -1,8 +1,10 @@
 import ArgumentParser
 import HTTP
+import NIOPosix
 import SymbolGraphCompiler
 import Symbols
 import System
+import UnidocClient
 
 extension Main
 {
@@ -22,27 +24,21 @@ extension Main
         var port:Int  = 8080
 
         @Option(
-            name: [.customLong("swift-runtime"), .customShort("r")],
-            help: "The path to the Swift runtime directory, usually ending in /usr/lib",
+            name: [.customLong("swift-toolchain"), .customShort("u")],
+            help: "The path to a Swift toolchain directory, usually ending in 'usr'",
             completion: .directory)
-        var swiftRuntime:String?
-
-        @Option(
-            name: [.customLong("swift"), .customShort("s")],
-            help: "The path to the Swift toolchain",
-            completion: .file(extensions: []))
-        var swiftPath:String?
+        var toolchain:FilePath.Directory?
 
         @Option(
             name: [.customLong("swift-sdk"), .customShort("k")],
             help: "The Swift SDK to use")
-        var swiftSDK:SSGC.AppleSDK?
+        var sdk:SSGC.AppleSDK?
 
         @Option(
             name: [.customLong("input"), .customShort("I")],
             help: "The path to a directory containing the project to build",
             completion: .directory)
-        var input:String?
+        var input:FilePath.Directory?
 
 
         @Flag(
@@ -63,16 +59,29 @@ extension Main.Local:AsyncParsableCommand
     mutating
     func run() async throws
     {
+        let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
+
         #if os(macOS)
 
         //  Guess the SDK if not specified.
-        self.swiftSDK = self.swiftSDK ?? .macOS
+        self.sdk = self.sdk ?? .macOS
 
         #endif
 
-        let search:FilePath? = self.input.map(FilePath.init(_:))
-        let type:SSGC.ProjectType = self.book ? .book : .package
-        let unidoc:Unidoc.Client<HTTP.Client1> = try .init(from: self)
-        try await unidoc.buildAndUpload(local: self.project, search: search, type: type)
+        let toolchain:Unidoc.Toolchain = .init(
+            usr: self.toolchain,
+            sdk: self.sdk)
+
+        let unidoc:Unidoc.Client<HTTP.Client1> = .init(authorization: nil,
+            pretty: self.pretty,
+            http: .init(threads: threads, niossl: nil, remote: self.host),
+            port: self.port)
+
+        print("Connecting to \(self.host):\(self.port)...")
+
+        try await unidoc.buildAndUpload(local: self.project,
+            search: self.input,
+            type: self.book ? .book : .package,
+            with: toolchain)
     }
 }
