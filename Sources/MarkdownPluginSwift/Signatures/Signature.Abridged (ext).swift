@@ -21,11 +21,13 @@ extension Signature.Abridged
     }
 
     @usableFromInline
-    init(utf8:consuming [UInt8])
+    init(utf8:__owned [UInt8])
     {
-        //  There seems to be a bug in SwiftSyntax that causes misalignment of source ranges
-        //  when trimming leading trivia from syntax nodes. As a temporary workaround, we
-        //  replace all newline characters with space characters before parsing the source.
+        /// https://github.com/swiftlang/swift/issues/75312
+        var utf8:[UInt8] = consume utf8
+
+        //  TODO: we should replace this workaround with the pattern suggested in
+        //  https://github.com/swiftlang/swift-syntax/issues/2687
         for i:Int in utf8.indices
         {
             switch utf8[i]
