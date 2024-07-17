@@ -35,7 +35,7 @@ extension Unidoc.ExtensionSection
         var name:String = "\(culture.vertex.module.id)"
         var first:Bool = true
 
-        for requirement:GenericConstraint<Unidoc.Scalar?> in group.constraints
+        for requirement:GenericConstraint<Unidoc.Scalar> in group.constraints
         {
             let requirement:Unidoc.WhereClause.Requirement = requirement | context
 

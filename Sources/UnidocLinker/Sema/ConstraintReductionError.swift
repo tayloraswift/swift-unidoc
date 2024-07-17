@@ -4,13 +4,13 @@ import SourceDiagnostics
 
 struct ConstraintReductionError:Error, Equatable, Sendable
 {
-    let constraints:[[GenericConstraint<Unidoc.Scalar?>]]
-    let minimal:[GenericConstraint<Unidoc.Scalar?>]
+    let constraints:[[GenericConstraint<Unidoc.Scalar>]]
+    let minimal:[GenericConstraint<Unidoc.Scalar>]
     let subject:Unidoc.Scalar
     let `protocol`:Unidoc.Scalar
 
-    init(invalid constraints:[[GenericConstraint<Unidoc.Scalar?>]],
-        minimal:[GenericConstraint<Unidoc.Scalar?>],
+    init(invalid constraints:[[GenericConstraint<Unidoc.Scalar>]],
+        minimal:[GenericConstraint<Unidoc.Scalar>],
         subject:Unidoc.Scalar,
         `protocol`:Unidoc.Scalar)
     {

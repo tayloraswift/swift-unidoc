@@ -35,13 +35,8 @@ extension GenericConstraint:Sendable where Scalar:Sendable
 extension GenericConstraint
 {
     @inlinable public
-    func map<T>(_ transform:(Scalar) throws -> T) rethrows -> GenericConstraint<T>
+    func map<T>(_ transform:(Scalar) throws -> T?) rethrows -> GenericConstraint<T>
     {
         .where(self.noun, is: self.what, to: try self.whom.map(transform))
-    }
-    @inlinable public
-    func flatMap<T>(_ transform:(Scalar) throws -> T?) rethrows -> GenericConstraint<T>?
-    {
-        try self.whom.flatMap(transform).map { .where(self.noun, is: self.what, to: $0) }
     }
 }

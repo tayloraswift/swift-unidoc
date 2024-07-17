@@ -63,11 +63,11 @@ extension Unidoc.EditionSet
         }
     }
     mutating
-    func update(with constraints:[GenericConstraint<Unidoc.Scalar?>])
+    func update(with constraints:[GenericConstraint<Unidoc.Scalar>])
     {
-        for constraint:GenericConstraint<Unidoc.Scalar?> in constraints
+        for constraint:GenericConstraint<Unidoc.Scalar> in constraints
         {
-            self.update(with: constraint.whom.nominal??.edition)
+            self.update(with: constraint.whom.nominal?.edition)
         }
     }
     mutating
