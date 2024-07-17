@@ -381,14 +381,20 @@ enum Main:TestMain, TestBattery
                 (
                     ["Struct", "internal(_:)"],
                     [
-                        .where("T", is: .conformer, to: .nominal(.init("s:SQ")!)),
-                        .where("T", is: .conformer, to: .nominal(.init("s:ST")!)),
+                        .where("T", is: .conformer, to: .init(
+                            spelling: "Equatable",
+                            nominal: "sSQ")),
+                        .where("T", is: .conformer, to: .init(
+                            spelling: "Sequence",
+                            nominal: "sST")),
                     ]
                 ),
                 (
                     ["Protocol", "internal(_:)"],
                     [
-                        .where("Self.T", is: .conformer, to: .nominal(.init("s:SQ")!)),
+                        .where("Self.T", is: .conformer, to: .init(
+                            spelling: "Equatable",
+                            nominal: "sSQ")),
                     ]
                 ),
             ]
@@ -411,27 +417,39 @@ enum Main:TestMain, TestBattery
                 (
                     ["Struct"],
                     [
-                        .where("T", is: .conformer, to: .nominal(.init("s:SQ")!)),
-                        .where("T", is: .conformer, to: .nominal(.init("s:ST")!)),
+                        .where("T", is: .conformer, to: .init(
+                            spelling: "Equatable",
+                            nominal: "sSQ")),
+                        .where("T", is: .conformer, to: .init(
+                            spelling: "Sequence",
+                            nominal: "sST")),
                     ]
                 ),
                 (
                     ["Struct", "external(_:)"],
                     [
-                        .where("T", is: .conformer, to: .nominal(.init("s:SQ")!)),
-                        .where("T", is: .conformer, to: .nominal(.init("s:ST")!)),
+                        .where("T", is: .conformer, to: .init(
+                            spelling: "Equatable",
+                            nominal: "sSQ")),
+                        .where("T", is: .conformer, to: .init(
+                            spelling: "Sequence",
+                            nominal: "sST")),
                     ]
                 ),
                 (
                     ["Protocol"],
                     [
-                        .where("Self.T", is: .conformer, to: .nominal(.init("s:SQ")!)),
+                        .where("Self.T", is: .conformer, to: .init(
+                            spelling: "Equatable",
+                            nominal: "sSQ")),
                     ]
                 ),
                 (
                     ["Protocol", "external(_:)"],
                     [
-                        .where("Self.T", is: .conformer, to: .nominal(.init("s:SQ")!)),
+                        .where("Self.T", is: .conformer, to: .init(
+                            spelling: "Equatable",
+                            nominal: "sSQ")),
                     ]
                 ),
             ]
