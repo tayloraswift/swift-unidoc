@@ -64,6 +64,7 @@ let package:Package = .init(
         .library(name: "Symbols", targets: ["Symbols"]),
 
         .library(name: "System", targets: ["System"]),
+        .library(name: "System_ArgumentParser", targets: ["System_ArgumentParser"]),
 
         .library(name: "UA", targets: ["UA"]),
 
