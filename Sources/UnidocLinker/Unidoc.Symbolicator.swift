@@ -53,32 +53,39 @@ extension Unidoc.Symbolicator:DiagnosticSymbolicator
 }
 extension Unidoc.Symbolicator
 {
-    func constraints(_ constraints:[GenericConstraint<Address?>]) -> String
+    private
+    func spell(_ type:GenericType<Address>) -> String
+    {
+        guard type.spelling.isEmpty
+        else
+        {
+            return type.spelling
+        }
+
+        if  let id:Address = type.nominal
+        {
+            return self[id]
+        }
+        else
+        {
+            return "<unavailable>"
+        }
+    }
+
+    func constraints(_ constraints:[GenericConstraint<Address>]) -> String
     {
         constraints.map
         {
             switch $0
             {
-            case    .where(let parameter, is: .equal, to: .nominal(let type?)):
-                "\(parameter) == \(self[type])"
+            case .where(let parameter, is: .equal, to: let type):
+                return "\(parameter) == \(self.spell(type))"
 
-            case    .where(let parameter, is: .equal, to: .nominal(nil)):
-                "\(parameter) == <unavailable>"
+            case .where(let parameter, is: .subclass, to: let type):
+                fallthrough
 
-            case    .where(let parameter, is: .equal, to: .complex(let text)):
-                "\(parameter) == \(text)"
-
-            case    .where(let parameter, is: .subclass, to: .nominal(let type?)),
-                    .where(let parameter, is: .conformer, to: .nominal(let type?)):
-                "\(parameter):\(self[type])"
-
-            case    .where(let parameter, is: .subclass, to: .nominal(nil)),
-                    .where(let parameter, is: .conformer, to: .nominal(nil)):
-                "\(parameter):<unavailable>"
-
-            case    .where(let parameter, is: .subclass, to: .complex(let text)),
-                    .where(let parameter, is: .conformer, to: .complex(let text)):
-                "\(parameter):\(text)"
+            case .where(let parameter, is: .conformer, to: let type):
+                return "\(parameter):\(self.spell(type))"
             }
         }.joined(separator: ", ")
     }

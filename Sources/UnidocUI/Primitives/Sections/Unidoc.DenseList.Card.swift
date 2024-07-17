@@ -28,7 +28,7 @@ extension Unidoc.DenseList
 extension Unidoc.DenseList.Card
 {
     init?(_ type:Unidoc.Scalar,
-        requirements:[GenericConstraint<Unidoc.Scalar?>] = [],
+        requirements:[GenericConstraint<Unidoc.Scalar>] = [],
         with context:some Unidoc.VertexContext)
     {
         guard

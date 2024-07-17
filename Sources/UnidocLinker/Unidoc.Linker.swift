@@ -375,7 +375,7 @@ extension Unidoc.Linker
         let extancy:Set<Int> = conformances.reduce(into: []) { $0.insert($1.culture) }
 
         //  Group conformances to this protocol by culture.
-        let segregated:[Int: [[GenericConstraint<Unidoc.Scalar?>]]] = conformances.reduce(
+        let segregated:[Int: [[GenericConstraint<Unidoc.Scalar>]]] = conformances.reduce(
             into: [:])
         {
             let module:SymbolGraph.Module = self.current.cultures[$1.culture].module
@@ -397,14 +397,14 @@ extension Unidoc.Linker
         //  `T:Equatable`, but it also conforms to `Equatable` where
         //  `T:Hashable`, because if `T` is ``Hashable`` then it is also
         //  ``Equatable``. So that conformance is redundant.
-        let reduced:[Int: [GenericConstraint<Unidoc.Scalar?>]] = segregated.mapValues
+        let reduced:[Int: [GenericConstraint<Unidoc.Scalar>]] = segregated.mapValues
         {
             //  Swift does not have conditional disjunctions for protocol
             //  conformances. So the most general constraint list must be
             //  (one of) the shortest.
-            var shortest:[[GenericConstraint<Unidoc.Scalar?>]] = []
+            var shortest:[[GenericConstraint<Unidoc.Scalar>]] = []
             var length:Int = .max
-            for constraints:[GenericConstraint<Unidoc.Scalar?>] in $0
+            for constraints:[GenericConstraint<Unidoc.Scalar>] in $0
             {
                 if      constraints.count <  length
                 {
@@ -424,18 +424,18 @@ extension Unidoc.Linker
                 return shortest[0]
             }
 
-            let constraints:Set<GenericConstraint<Unidoc.Scalar?>> = .init(
+            let constraints:Set<GenericConstraint<Unidoc.Scalar>> = .init(
                 shortest.joined())
-            let reduced:Set<GenericConstraint<Unidoc.Scalar?>> = constraints.filter
+            let reduced:Set<GenericConstraint<Unidoc.Scalar>> = constraints.filter
             {
                 switch $0
                 {
-                case .where(_,             is: .equal,   to: _):
+                case .where(_, is: .equal, to: _):
                     //  Same-type constraints are never redundant.
                     return true
 
                 case .where(let parameter, is: let what, to: let type):
-                    if  case .nominal(let type?) = type,
+                    if  let type:Unidoc.Scalar = type.nominal,
                         let snapshot:Graph = self[type.package],
                         let local:[Int32] = snapshot.decls[type.citizen]?.decl?.superforms
                     {
@@ -446,9 +446,18 @@ extension Unidoc.Linker
                             //  constraint is redundant.
                             if  let supertype:Unidoc.Scalar = snapshot.scalars.decls[local],
                                     supertype != type,
-                                    constraints.contains(.where(parameter,
-                                        is: what,
-                                        to: .nominal(supertype)))
+                                    constraints.contains(where:
+                                    {
+                                        if  case .where(parameter, is: what, to: let t) = $0,
+                                            case supertype? = t.nominal
+                                        {
+                                            true
+                                        }
+                                        else
+                                        {
+                                            false
+                                        }
+                                    })
                             {
                                 return false
                             }
@@ -466,7 +475,7 @@ extension Unidoc.Linker
             //  contain exactly the same constraints as the reduced set. We don’t
             //  return the set itself, because this implementation does not know
             //  anything about canonical constraint ordering.
-            let ordered:[[GenericConstraint<Unidoc.Scalar?>]] = shortest.filter
+            let ordered:[[GenericConstraint<Unidoc.Scalar>]] = shortest.filter
             {
                 $0.allSatisfy(reduced.contains(_:))
             }
