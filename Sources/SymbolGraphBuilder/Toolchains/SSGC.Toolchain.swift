@@ -449,6 +449,14 @@ extension SSGC.Toolchain
                     compiler; see https://github.com/apple/swift/issues/68767.
                     """)
             }
+            catch SystemProcessError.exit(134, _)
+            {
+                print("""
+                    Failed to dump symbols for module '\(id)' due to SIGABRT \
+                    from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
+                    compiler; see https://github.com/swiftlang/swift/issues/75318.
+                    """)
+            }
             catch SystemProcessError.exit(let code, let invocation)
             {
                 throw SSGC.PackageBuildError.swift_symbolgraph_extract(code, invocation)

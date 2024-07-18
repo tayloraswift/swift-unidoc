@@ -19,15 +19,9 @@ extension Unidoc
         let executablePath:String?
 
         public
-        let swiftRuntime:String?
-        public
-        let swiftPath:String?
-        public
-        let swiftSDK:SSGC.AppleSDK?
+        let authorization:String?
         public
         let pretty:Bool
-        public
-        let authorization:String?
 
         public
         let http:Protocol
@@ -36,11 +30,8 @@ extension Unidoc
 
         @inlinable public
         init(
-            swiftRuntime:String?,
-            swiftPath:String?,
-            swiftSDK:SSGC.AppleSDK?,
-            pretty:Bool,
             authorization:String?,
+            pretty:Bool,
             http:Protocol,
             port:Int)
         {
@@ -56,11 +47,8 @@ extension Unidoc
             self.executablePath = nil
             #endif
 
-            self.swiftRuntime = swiftRuntime
-            self.swiftPath = swiftPath
-            self.swiftSDK = swiftSDK
-            self.pretty = pretty
             self.authorization = authorization
+            self.pretty = pretty
             self.http = http
             self.port = port
         }
@@ -144,6 +132,7 @@ extension Unidoc.Client<HTTP.Client2>
         labels:Unidoc.BuildLabels,
         action:Unidoc.LinkerAction,
         remove:Bool = false,
+        with toolchain:Unidoc.Toolchain,
         cache:FilePath? = nil) async throws -> Bool
     {
         if  let cache:FilePath, remove
@@ -218,17 +207,19 @@ extension Unidoc.Client<HTTP.Client2>
                 {
                     arguments.append("--pretty")
                 }
-                if  let path:String = self.swiftRuntime
+                if  let usr:FilePath.Directory = toolchain.usr
                 {
+                    let lib:FilePath.Directory = usr / "lib"
+
                     arguments.append("--swift-runtime")
-                    arguments.append("\(path)")
-                }
-                if  let path:String = self.swiftPath
-                {
+                    arguments.append("\(lib)")
+
+                    let swift:FilePath.Directory = usr / "bin" / "swift"
+
                     arguments.append("--swift")
-                    arguments.append("\(path)")
+                    arguments.append("\(swift)")
                 }
-                if  let sdk:SSGC.AppleSDK = self.swiftSDK
+                if  let sdk:SSGC.AppleSDK = toolchain.sdk
                 {
                     arguments.append("--sdk")
                     arguments.append("\(sdk)")
@@ -293,12 +284,14 @@ extension Unidoc.Client<HTTP.Client2>
 
     public
     func buildAndUpload(local symbol:Symbol.Package,
-        search:FilePath?,
-        type:SSGC.ProjectType) async throws
+        search:FilePath.Directory?,
+        type:SSGC.ProjectType,
+        with toolchain:Unidoc.Toolchain) async throws
     {
         let object:SymbolGraphObject<Void> = try await self.build(local: symbol,
             search: search,
-            type: type)
+            type: type,
+            with: toolchain)
 
         try await self.connect { try await $0.upload(object) }
 
@@ -312,12 +305,14 @@ extension Unidoc.Client<HTTP.Client1>
 {
     public
     func buildAndUpload(local symbol:Symbol.Package,
-        search:FilePath?,
-        type:SSGC.ProjectType) async throws
+        search:FilePath.Directory?,
+        type:SSGC.ProjectType,
+        with toolchain:Unidoc.Toolchain) async throws
     {
         let object:SymbolGraphObject<Void> = try await self.build(local: symbol,
             search: search,
-            type: type)
+            type: type,
+            with: toolchain)
 
         try await self.connect { try await $0.upload(object) }
 
@@ -331,8 +326,9 @@ extension Unidoc.Client
 {
     private
     func build(local symbol:Symbol.Package,
-        search:FilePath?,
-        type:SSGC.ProjectType) async throws -> SymbolGraphObject<Void>
+        search:FilePath.Directory?,
+        type:SSGC.ProjectType,
+        with toolchain:Unidoc.Toolchain) async throws -> SymbolGraphObject<Void>
     {
         let workspace:SSGC.Workspace = try .create(at: ".ssgc")
         let docs:FilePath = workspace.location / "docs.bson"
@@ -349,22 +345,24 @@ extension Unidoc.Client
         {
             arguments.append("--pretty")
         }
-        if  let path:String = self.swiftRuntime
+        if  let usr:FilePath.Directory = toolchain.usr
         {
+            let lib:FilePath.Directory = usr / "lib"
+
             arguments.append("--swift-runtime")
-            arguments.append("\(path)")
-        }
-        if  let path:String = self.swiftPath
-        {
+            arguments.append("\(lib)")
+
+            let swift:FilePath.Directory = usr / "bin" / "swift"
+
             arguments.append("--swift")
-            arguments.append("\(path)")
+            arguments.append("\(swift)")
         }
-        if  let sdk:SSGC.AppleSDK = self.swiftSDK
+        if  let sdk:SSGC.AppleSDK = toolchain.sdk
         {
             arguments.append("--sdk")
             arguments.append("\(sdk)")
         }
-        if  let search:FilePath = search
+        if  let search:FilePath.Directory
         {
             arguments.append("--search-path")
             arguments.append("\(search)")
