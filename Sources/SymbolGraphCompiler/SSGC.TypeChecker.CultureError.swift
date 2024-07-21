@@ -1,7 +1,7 @@
 import Symbols
 import TraceableErrors
 
-extension SSGC.TypeChecker
+extension SSGC.SymbolDump
 {
     public
     struct CultureError:Error, Sendable
@@ -19,7 +19,7 @@ extension SSGC.TypeChecker
         }
     }
 }
-extension SSGC.TypeChecker.CultureError:Equatable
+extension SSGC.SymbolDump.CultureError:Equatable
 {
     public static
     func == (lhs:Self, rhs:Self) -> Bool
@@ -27,7 +27,7 @@ extension SSGC.TypeChecker.CultureError:Equatable
         lhs.culture == rhs.culture && lhs.underlying == rhs.underlying
     }
 }
-extension SSGC.TypeChecker.CultureError:TraceableError
+extension SSGC.SymbolDump.CultureError:TraceableError
 {
     public
     var notes:[String]

@@ -45,22 +45,22 @@ extension SSGC
 extension SSGC.PackageSources
 {
     private
-    init(layout:Layout, scratch:consuming SSGC.PackageBuildDirectory)
+    init(layout:consuming Layout, scratch:SSGC.PackageBuildDirectory)
     {
         self.init(cultures: layout.cultures, scratch: scratch, root: layout.root)
     }
 
-    init(scanning package:borrowing PackageNode,
-        scratch:consuming SSGC.PackageBuildDirectory,
+    init(scanning tree:SSGC.PackageTree,
+        scratch:SSGC.PackageBuildDirectory,
         include:inout [FilePath.Directory]) throws
     {
-        self.init(layout: try .init(scanning: package, include: &include), scratch: scratch)
+        self.init(layout: try .init(scanning: tree, include: &include), scratch: scratch)
 
         guard
-        let snippetsDirectory:FilePath.Component = .init(package.snippets)
+        let snippetsDirectory:FilePath.Component = .init(tree.sink.snippets)
         else
         {
-            throw SSGC.SnippetDirectoryError.invalid(package.snippets)
+            throw SSGC.SnippetDirectoryError.invalid(tree.sink.snippets)
         }
 
         let snippets:FilePath.Directory = self.root.location / snippetsDirectory

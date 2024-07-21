@@ -13,8 +13,11 @@ extension SSGC
     class DeclObject
     {
         let conditions:[GenericConstraint<Symbol.Decl>]
-        let namespace:Namespace.ID
-        let culture:Int
+        let namespace:Symbol.Module
+        let culture:Symbol.Module
+        let access:Symbol.ACL
+
+        var conformances:[Symbol.Decl: [GenericConstraint<Symbol.Decl>]]
 
         /// The type of the superforms tracked by ``\.value.superforms``.
         var superforms:(any SuperformRelationship.Type)?
@@ -30,14 +33,17 @@ extension SSGC
         var value:Decl
 
         init(conditions:[GenericConstraint<Symbol.Decl>],
-            namespace:Namespace.ID,
-            culture:Int,
+            namespace:Symbol.Module,
+            culture:Symbol.Module,
+            access:Symbol.ACL,
             value:Decl)
         {
             self.conditions = conditions
             self.namespace = namespace
             self.culture = culture
+            self.access = access
 
+            self.conformances = [:]
             self.superforms = nil
             self.scopes = []
 
@@ -102,9 +108,9 @@ extension SSGC.DeclObject
     /// Adds a superform to this scalar object.
     ///
     /// Each scalar can only accept a single type of superform. For example, if
-    /// a scalar is the source of a ``SymbolRelationship DefaultImplementation``
+    /// a scalar is the source of an ``IntrinsicWitnessRelationship``
     /// relationship, it can receive additional superforms of that type, but it
-    /// cannot receive a ``SymbolRelationship Override``, because a scalar cannot
+    /// cannot receive a ``OverrideRelationship``, because a scalar cannot
     /// be a default implementation and a protocol requirement at the same time.
     func add<Superform>(superform relationship:Superform) throws
         where Superform:SuperformRelationship
@@ -158,8 +164,8 @@ extension SSGC.DeclObject
     ///
     /// If you know the feature’s extension constraints, add it
     /// to an appropriate ``ExtensionObject`` instead.
-    func add(feature:Symbol.Decl, where unknown:Never?)
-    {
-        self.value.features.insert(feature)
-    }
+    // func add(feature:Symbol.Decl, where unknown:Never?)
+    // {
+    //     self.value.features.insert(feature)
+    // }
 }

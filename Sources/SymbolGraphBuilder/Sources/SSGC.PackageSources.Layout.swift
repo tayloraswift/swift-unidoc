@@ -1,4 +1,6 @@
 import PackageGraphs
+import SymbolGraphs
+import Symbols
 import System
 
 extension SSGC.PackageSources
@@ -19,11 +21,11 @@ extension SSGC.PackageSources
 }
 extension SSGC.PackageSources.Layout
 {
-    init(scanning package:borrowing PackageNode, include:inout [FilePath.Directory]) throws
+    init(scanning tree:borrowing SSGC.PackageTree, include:inout [FilePath.Directory]) throws
     {
-        self.init(root: .init(normalizing: package.root))
+        self.init(root: .init(normalizing: tree.sink.root))
 
-        let count:[SSGC.NominalSources.DefaultDirectory: Int] = package.modules.reduce(
+        let count:[SSGC.NominalSources.DefaultDirectory: Int] = tree.sink.modules.reduce(
             into: [:])
         {
             if  case nil = $1.location,
@@ -32,13 +34,25 @@ extension SSGC.PackageSources.Layout
                 $0[directory, default: 0] += 1
             }
         }
-        for i:Int in package.modules.indices
+        for i:Int in tree.sink.modules.indices
         {
+            let module:SymbolGraph.Module = tree.sink.modules[i]
+
+            var dependencies:[SymbolGraph.Module] = module.dependencies.modules.map
+            {
+                tree.sink.modules[$0]
+            }
+            for product:Symbol.Product in module.dependencies.products
+            {
+                dependencies += tree.productPartitions[product] ?? []
+            }
+
             self.cultures.append(try .init(
                 include: &include,
-                exclude: package.exclude[i],
+                exclude: tree.sink.exclude[i],
                 package: self.root,
-                module: package.modules[i],
+                dependencies: dependencies,
+                module: module,
                 count: count))
         }
     }

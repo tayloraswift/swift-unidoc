@@ -6,14 +6,14 @@ extension Symbol
     struct MemberRelationship:SymbolRelationship, Equatable, Hashable, Sendable
     {
         public
-        let source:Symbol.USR
+        let source:Symbol.Decl
         public
         let target:Symbol.USR
         public
         let origin:Symbol.Decl?
 
         @inlinable public
-        init(_ source:Symbol.USR, in target:Symbol.USR, origin:Symbol.Decl? = nil)
+        init(_ source:Symbol.Decl, in target:Symbol.USR, origin:Symbol.Decl? = nil)
         {
             self.source = source
             self.target = target

@@ -8,7 +8,6 @@ import Symbols
 extension SSGC
 {
     /// A scalar is the smallest “unit” a symbol can be broken down into.
-    @_eagerMove
     @frozen public
     struct Decl:Identifiable, Sendable
     {
@@ -20,8 +19,6 @@ extension SSGC
         public
         let location:SourceLocation<Symbol.File>?
 
-        public
-        let language:Phylum.Language
         public
         let phylum:Phylum.Decl
         public
@@ -51,8 +48,9 @@ extension SSGC
         /// add them to an appropriate ``ExtensionObject`` instead.
         ///
         /// This field only exists because of an upstream bug in SymbolGraphGen.
-        public internal(set)
-        var features:Set<Symbol.Decl>
+        // public internal(set)
+        // var features:Set<Symbol.Decl>
+
         /// A scalar that has documentation that is relevant, but less specific
         /// to this scalar.
         public internal(set)
@@ -60,82 +58,32 @@ extension SSGC
         public internal(set)
         var kinks:Phylum.Decl.Kinks
 
-        public private(set)
-        var comment:DocumentationComment?
+        public
+        var comment:SSGC.DocumentationComment?
 
 
-        private
-        init(_ id:Symbol.Decl,
+        init(id:Symbol.Decl,
             signature:Signature<Symbol.Decl>,
             location:SourceLocation<Symbol.File>?,
-            language:Phylum.Language,
             phylum:Phylum.Decl,
-            path:UnqualifiedPath)
+            path:UnqualifiedPath,
+            kinks:Phylum.Decl.Kinks,
+            comment:SSGC.DocumentationComment?)
         {
             self.id = id
 
             self.signature = signature
             self.location = location
-            self.language = language
             self.phylum = phylum
             self.path = path
 
             self.requirements = []
             self.inhabitants = []
             self.superforms = []
-            self.features = []
             self.origin = nil
-            self.kinks = []
 
-            self.comment = nil
-        }
-    }
-}
-extension SSGC.Decl
-{
-    init(from vertex:__shared /* borrowing */ SymbolGraphPart.Vertex,
-        as symbol:/* consuming */ Symbol.Decl,
-        in culture:__shared /* borrowing */ SSGC.TypeChecker.Culture) throws
-    {
-        guard case .decl(let phylum) = vertex.phylum
-        else
-        {
-            throw SSGC.UnexpectedSymbolError.scalar(symbol)
-        }
-
-        let language:Phylum.Language
-        if  case .swift = culture.language,
-            case .c = symbol.language
-        {
-            language = .c
-        }
-        else
-        {
-            language = culture.language
-        }
-
-        self.init(symbol,
-            signature: vertex.signature,
-            location: try vertex.location?.map(culture.resolve(uri:)),
-            language: language,
-            phylum: phylum,
-            path: vertex.path)
-
-        //  It’s not like we should ever see a vertex that is both `final` and `open`, but who
-        //  knows what bugs exist in lib/SymbolGraphGen.
-        if  vertex.final
-        {
-            self.kinks[is: .final] = true
-        }
-        else if
-            case .open = vertex.acl
-        {
-            self.kinks[is: .open] = true
-        }
-
-        if  let doccomment:SymbolGraphPart.Vertex.Doccomment = vertex.doccomment
-        {
-            self.comment = culture.filter(doccomment: doccomment)
+            self.kinks = kinks
+            self.comment = comment
         }
     }
 }

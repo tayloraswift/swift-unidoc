@@ -2,9 +2,9 @@
 struct SourceLocation<File>
 {
     public
-    let position:SourcePosition
+    var position:SourcePosition
     public
-    let file:File
+    var file:File
 
     @inlinable public
     init(position:SourcePosition, file:File)

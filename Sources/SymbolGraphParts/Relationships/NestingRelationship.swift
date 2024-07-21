@@ -1,7 +1,7 @@
 import Symbols
 
 public
-protocol NestingRelationship:SymbolRelationship
+protocol NestingRelationship:SymbolRelationship where Source == Symbol.Decl
 {
     var scope:Symbol.USR { get }
 

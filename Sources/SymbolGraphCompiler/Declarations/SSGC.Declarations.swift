@@ -7,18 +7,18 @@ extension SSGC
     struct Declarations
     {
         private
-        let root:Symbol.FileBase?
+        let threshold:Symbol.ACL
 
         private
-        var cultures:[Symbol.Module: Int]
+        var table:[Symbol.Decl: DeclObject]
         private
-        var entries:[Symbol.Decl: Entry]
+        var holes:[Symbol.Decl: Int]
 
-        init(root:Symbol.FileBase?)
+        init(threshold:Symbol.ACL)
         {
-            self.cultures = [:]
-            self.entries = [:]
-            self.root = root
+            self.threshold = threshold
+            self.table = [:]
+            self.holes = [:]
         }
     }
 }
@@ -34,137 +34,151 @@ extension SSGC.Declarations
     ///
     /// The `external` tuple component contains information about foreign symbols
     /// mentioned by the compiled scalars.
-    public
-    func load() -> (namespaces:[[SSGC.Namespace]], external:SSGC.Nominations)
-    {
-        var included:[[SSGC.Namespace.ID: [SSGC.Decl]]] = .init(repeating: [:],
-            count: self.cultures.count)
+    // public
+    // func load() -> (namespaces:[[SSGC.Namespace]], external:SSGC.Nominations)
+    // {
+    //     var included:[[SSGC.Namespace.ID: [SSGC.Decl]]] = .init(repeating: [:],
+    //         count: self.cultures.count)
 
-        let external:[Symbol.Decl: SSGC.Nomination] =
-            self.entries.compactMapValues
-        {
-            switch $0
-            {
-            case .included(let reference):
-                included[reference.culture][reference.namespace, default: []].append(
-                    reference.value)
-                return nil
+    //     let external:[Symbol.Decl: SSGC.Nomination] = self.entries.compactMapValues
+    //     {
+    //         switch $0
+    //         {
+    //         case .included(let reference):
+    //             included[reference.culture][reference.namespace, default: []].append(
+    //                 reference.value)
+    //             return nil
 
-            case .excluded:
-                return nil
+    //         case .excluded:
+    //             return nil
 
-            case .nominated(let nomination):
-                return nomination
-            }
-        }
-        let namespaces:[[SSGC.Namespace]] = included.map
-        {
-            //  sort scalars by mangled name, and namespaces by id.
-            //  do not re-order the cultures themselves; their ordering is significant.
-            $0.sorted
-            {
-                $0.key < $1.key
-            }
-            .map
-            {
-                .init(decls: $0.value.sorted { $0.id < $1.id }, id: $0.key)
-            }
-        }
-        return (namespaces, .init(external))
-    }
+    //         case .nominated(let nomination):
+    //             return nomination
+    //         }
+    //     }
+    //     let namespaces:[[SSGC.Namespace]] = included.map
+    //     {
+    //         //  sort scalars by mangled name, and namespaces by id.
+    //         //  do not re-order the cultures themselves; their ordering is significant.
+    //         $0.sorted
+    //         {
+    //             $0.key < $1.key
+    //         }
+    //         .map
+    //         {
+    //             .init(decls: $0.value.sorted { $0.id < $1.id }, id: $0.key)
+    //         }
+    //     }
+    //     return (namespaces, .init(external))
+    // }
 }
 extension SSGC.Declarations
 {
     mutating
-    func include(language:Phylum.Language, culture:Symbol.Module) throws -> SSGC.TypeChecker.Culture
+    func include(_ vertex:SymbolGraphPart.Vertex,
+        namespace:Symbol.Module,
+        culture:Symbol.Module) -> SSGC.DeclObject
     {
-        let next:Int = self.cultures.count
-
-        try
+        guard
+        case .scalar(let symbol) = vertex.usr,
+        case .decl(let phylum) = vertex.phylum
+        else
         {
-            if case nil = $0
+            fatalError("vertex is not a decl!")
+        }
+
+        let decl:SSGC.DeclObject =
+        {
+            if  let decl:SSGC.DeclObject = $0
             {
-                $0 = next
+                return decl
+            }
+
+            var kinks:Phylum.Decl.Kinks = []
+            //  It’s not like we should ever see a vertex that is both `final` and `open`, but
+            //  who knows what bugs exist in lib/SymbolGraphGen.
+            if  vertex.final
+            {
+                kinks[is: .final] = true
+            }
+            else if case .open = vertex.acl
+            {
+                kinks[is: .open] = true
+            }
+
+            let decl:SSGC.DeclObject = .init(
+                conditions: vertex.extension.conditions,
+                namespace: namespace,
+                culture: culture,
+                access: vertex.acl,
+                value: .init(id: symbol,
+                    signature: vertex.signature,
+                    location: vertex.location,
+                    phylum: phylum,
+                    path: vertex.path,
+                    kinks: kinks,
+                    comment: vertex.doccomment.map { .init($0.text, at: $0.start) } ?? nil))
+
+            $0 = decl
+            return decl
+
+        } (&self.table[symbol])
+
+        return decl
+    }
+}
+extension SSGC.Declarations
+{
+    /// Loads the declaration object for the specified symbol, throwing an error if the
+    /// declaration does not exist.
+    subscript(id:Symbol.Decl) -> SSGC.DeclObject
+    {
+        get throws
+        {
+            if  let decl:SSGC.DeclObject = self.table[id]
+            {
+                return decl
             }
             else
             {
-                throw SSGC.DuplicateModuleError.culture(culture)
+                throw SSGC.UndefinedSymbolError.scalar(id)
             }
-        }(&self.cultures[culture])
-
-        return .init(id: culture, language: language, index: next, root: self.root)
-    }
-}
-extension SSGC.Declarations
-{
-    mutating
-    func include(scalar symbol:Symbol.Decl,
-        namespace:consuming SSGC.Namespace.ID,
-        with vertex:SymbolGraphPart.Vertex,
-        in culture:SSGC.TypeChecker.Culture) throws -> SSGC.DeclObject
-    {
-        let decl:SSGC.DeclObject = .init(
-            conditions: vertex.extension.conditions,
-            namespace: namespace,
-            culture: culture.index,
-            value: try .init(from: vertex,
-                as: symbol,
-                in: culture))
-        try self.update(symbol, with: .included(decl))
-        return decl
-    }
-    mutating
-    func include(vector symbol:Symbol.Decl.Vector,
-        with vertex:SymbolGraphPart.Vertex) throws
-    {
-        if  case .decl(let phylum) = vertex.phylum
-        {
-            { _ in }(&self.entries[symbol.feature,
-                default: .nominated(.init(vertex.path.last, phylum: phylum))])
-        }
-        else
-        {
-            throw SSGC.UnexpectedSymbolError.vector(symbol)
         }
     }
-    mutating
-    func exclude(scalar symbol:Symbol.Decl) throws
-    {
-        try self.update(symbol, with: .excluded)
-    }
 
-    private mutating
-    func update(_ resolution:Symbol.Decl, with entry:Entry) throws
+    /// Loads the declaration object for the specified symbol, returning `nil` if the
+    /// declaration does not exist, or if the declaration does not have visibility of at least
+    /// ``threshold``. If the declaration does not exist, the missing symbol is logged within
+    /// this structure.
+    ///
+    /// It is expected that a small number of symbols will be missing, even with pre-validation,
+    /// due to certain quirks of lib/SymbolGraphGen.
+    subscript(visible id:Symbol.Decl) -> SSGC.DeclObject?
     {
-        try
+        mutating get
         {
-            switch $0
+            guard
+            let decl:SSGC.DeclObject = self.table[id]
+            else
             {
-            case       nil, .nominated?:
-                $0 = entry
-
-            case .included?, .excluded?:
-                //  if both symbols are C symbols, they are allowed to duplicate
-                if  resolution.language == .c ||
-                    resolution.suffix.starts(with: "So")
-                {
-                    return
-                }
-                else
-                {
-                    throw SSGC.DuplicateSymbolError.scalar(resolution)
-                }
+                self.holes[id, default: 0] += 1
+                return nil
             }
-        } (&self.entries[resolution])
+
+            if  decl.access < self.threshold
+            {
+                return nil
+            }
+            else
+            {
+                return decl
+            }
+        }
     }
 }
+/*
 extension SSGC.Declarations
 {
-    subscript(namespace namespace:Symbol.Module) -> SSGC.Namespace.ID
-    {
-        self.cultures[namespace].map(SSGC.Namespace.ID.index(_:)) ?? .nominated(namespace)
-    }
-
     subscript(resolution:Symbol.Decl) -> Symbol.Decl?
     {
         switch self.entries[resolution]
@@ -201,3 +215,4 @@ extension SSGC.Declarations
         }
     }
 }
+*/

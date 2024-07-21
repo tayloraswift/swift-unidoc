@@ -244,7 +244,9 @@ extension SSGC.PackageBuild
         let scratch:SSGC.PackageBuildDirectory
         do
         {
-            scratch = try swift.build(package: self.root, flags: self.flags)
+            scratch = try swift.build(package: self.root, flags: self.flags.dumping(
+                symbols: .default,
+                to: artifacts))
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
@@ -256,7 +258,8 @@ extension SSGC.PackageBuild
         var dependencies:[PackageNode] = []
         var include:[FilePath.Directory] = [scratch.include]
 
-        //  Nominal dependencies mean we need to perform two passes.
+        //  Nominal dependencies mean we need to build the package-to-product mapping before
+        //  we can actually create the (partitioned) dependency nodes.
         var packageContainingProduct:[String: Symbol.Package] = [:]
         var manifests:[SPM.Manifest] = []
             manifests.reserveCapacity(pins.count)
@@ -278,19 +281,27 @@ extension SSGC.PackageBuild
             manifests.append(manifest)
         }
 
+        //  This second pass must not make any assumptions about the ordering of the pins.
         for (manifest, pin):(Int, SPM.DependencyPin) in zip(manifests.indices, pins)
         {
             try manifests[manifest].normalizeUnqualifiedDependencies(
                 with: packageContainingProduct)
 
-            let dependency:PackageNode = try .all(flattening: manifests[manifest],
+            /// This node is partially flattened, but it is still considered partitioned, as
+            /// we have not yet flattened the product dependencies.
+            dependencies.append(try .all(flattening: manifests[manifest],
                 on: platform,
-                as: pin.identity)
+                as: pin.identity))
+        }
 
-            let _:SSGC.PackageSources.Layout = try .init(scanning: dependency,
-                include: &include)
+        //  This third pass currently has no purpose besides aggregating include paths, but it
+        //  will eventually be used to perform multi-package documentation builds.
+        for dependency:PackageNode in dependencies
+        {
+            let subtree:SSGC.PackageTree = try .init(dependencies: dependencies,
+                sink: dependency)
 
-            dependencies.append(dependency)
+            let _:SSGC.PackageSources.Layout = try .init(scanning: subtree, include: &include)
         }
 
         //  Now it is time to normalize the leaf manifest.
@@ -300,40 +311,23 @@ extension SSGC.PackageBuild
         }
         try manifest.normalizeUnqualifiedDependencies(with: packageContainingProduct)
 
-        let sinkNode:PackageNode = try .all(flattening: manifest,
-            on: platform,
-            as: self.id.package)
-        let flatNode:PackageNode = try sinkNode.flattened(dependencies: dependencies)
-
-        let dependenciesPinned:[SymbolGraphMetadata.Dependency] = try flatNode.pin(to: pins)
-        let dependenciesUsed:Set<Symbol.Package> = flatNode.products.reduce(into: [])
-        {
-            guard
-            case .library = $1.type
-            else
-            {
-                return
-            }
-            for dependency:Symbol.Product in $1.dependencies
-            {
-                $0.insert(dependency.package)
-            }
-        }
+        let tree:SSGC.PackageTree = try .init(dependencies: dependencies,
+            sink: try .all(flattening: manifest, on: platform, as: self.id.package))
 
         //  This step is considered part of documentation building.
         let sources:SSGC.PackageSources
         do
         {
-            sources = try .init(scanning: flatNode, scratch: scratch, include: &include)
+            sources = try .init(scanning: tree, scratch: scratch, include: &include)
         }
         catch let error
         {
             throw SSGC.DocumentationBuildError.scanning(error)
         }
 
-        try swift.dump(modules: sources.cultures.lazy.map(\.module),
-            to: artifacts,
-            include: include)
+        //  try swift.dump(modules: sources.cultures.lazy.map(\.module),
+        //      to: artifacts,
+        //      include: include)
 
         let metadata:SymbolGraphMetadata = .init(
             package: .init(
@@ -345,11 +339,8 @@ extension SSGC.PackageBuild
             tools: manifest.format,
             manifests: manifestVersions,
             requirements: manifest.requirements,
-            dependencies: dependenciesPinned.filter
-            {
-                dependenciesUsed.contains($0.package.name)
-            },
-            products: .init(viewing: flatNode.products),
+            dependencies: try tree.dependenciesUsed(pins: pins),
+            products: .init(viewing: tree.sink.products),
             display: manifest.name,
             root: sources.prefix)
 

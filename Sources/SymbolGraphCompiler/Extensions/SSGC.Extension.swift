@@ -4,7 +4,6 @@ import Symbols
 
 extension SSGC
 {
-    @_eagerMove
     @frozen public
     struct Extension
     {

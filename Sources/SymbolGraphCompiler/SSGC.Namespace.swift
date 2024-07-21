@@ -18,5 +18,5 @@ extension SSGC
 extension SSGC.Namespace
 {
     /// The index of the namespace module, if it is an included culture.
-    var index:Int? { self.id.index }
+    // var index:Int? { self.id.index }
 }

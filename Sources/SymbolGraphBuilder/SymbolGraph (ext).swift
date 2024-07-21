@@ -13,8 +13,9 @@ extension SymbolGraph
 {
     static
     func compile(
-        cultures:[(sources:SSGC.NominalSources, artifacts:Artifacts)],
+        cultures:[SSGC.NominalSources],
         snippets:[SSGC.LazyFile],
+        symbols:SSGC.SymbolDumps,
         prefix:Symbol.FileBase?,
         logger:SSGC.DocumentationLogger?,
         index:(any Markdown.SwiftLanguage.IndexStore)? = nil) throws -> Self
@@ -25,26 +26,46 @@ extension SymbolGraph
         var profiler:BuildProfiler = .init()
         do
         {
-            var checker:SSGC.TypeChecker = .init(root: prefix)
+            var symbolCache:SSGC.SymbolCache = .init(symbols: symbols)
 
-            for (culture, artifacts):(SSGC.NominalSources, Artifacts) in cultures
+            for culture:SSGC.NominalSources in cultures
             {
-                let parts:[SymbolGraphPart] = try profiler.measure(\.loadingSymbols)
+                let symbols:
+                (
+                    missing:[SymbolGraph.Module],
+                    loaded:[SSGC.SymbolDump]
+                ) = try profiler.measure(\.loadingSymbols)
                 {
-                    try artifacts.load()
+                    try culture.dependencies.reduce(into: ([], []))
+                    {
+                        if  let dump:SSGC.SymbolDump = try symbolCache.load(module: $1.id,
+                                base: prefix,
+                                as: culture.module.language ?? .swift)
+                        {
+                            $0.loaded.append(dump)
+                        }
+                        else
+                        {
+                            $0.missing.append($1)
+                        }
+                    }
                 }
+
+                var graphChecker:SSGC.GraphChecker = .init(root: prefix)
+
+                print(symbols)
 
                 try profiler.measure(\.compiling)
                 {
-                    try checker.compile(
+                    try graphChecker.compile(
                         language: culture.module.language ?? .swift,
                         culture: culture.module.id,
-                        parts: parts)
+                        parts: [])
                 }
             }
 
-            (namespaces, nominations) = checker.declarations.load()
-            (extensions) = checker.extensions.load()
+            (namespaces, nominations) = graphChecker.declarations.load()
+            (extensions) = graphChecker.extensions.load()
 
             print("""
                 Compiled documentation!
@@ -67,7 +88,7 @@ extension SymbolGraph
         do
         {
             var linker:SSGC.Linker = .init(nominations: nominations,
-                modules: cultures.map(\.sources.module),
+                modules: cultures.map(\.module),
                 plugins: [.swift(index: index)],
                 root: prefix)
 
@@ -80,8 +101,8 @@ extension SymbolGraph
                 linker.allocate(extensions: extensions)
             }
 
-            let resources:[[SSGC.LazyFile]] = cultures.map(\.sources.resources)
-            let markdown:[[SSGC.LazyFile]] = cultures.map(\.sources.markdown)
+            let resources:[[SSGC.LazyFile]] = cultures.map(\.resources)
+            let markdown:[[SSGC.LazyFile]] = cultures.map(\.markdown)
             let snippets:[SSGC.LazyFile] = snippets
 
             let articles:[[SSGC.Article]] = try profiler.measure(\.linking)

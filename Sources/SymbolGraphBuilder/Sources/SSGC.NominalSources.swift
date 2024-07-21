@@ -16,17 +16,23 @@ extension SSGC
         var markdown:[LazyFile]
 
         private(set)
+        var dependencies:[SymbolGraph.Module]
+
+        private(set)
         var module:SymbolGraph.Module
+
         /// Absolute path to the module sources directory, if known.
         private
         var origin:Origin?
 
+
         private
-        init(_ module:SymbolGraph.Module, origin:Origin? = nil)
+        init(dependencies:[SymbolGraph.Module], module:SymbolGraph.Module, origin:Origin? = nil)
         {
             self.resources = []
             self.markdown = []
 
+            self.dependencies = dependencies
             self.module = module
             self.origin = origin
         }
@@ -34,17 +40,17 @@ extension SSGC
 }
 extension SSGC.NominalSources
 {
-    init(toolchain module:consuming SymbolGraph.Module)
+    init(toolchain module:SymbolGraph.Module)
     {
-        self.init(module)
+        self.init(dependencies: [], module: module)
     }
 
     init(
         package:borrowing SSGC.PackageRoot,
         bundle:borrowing FilePath.Directory,
-        module:consuming SymbolGraph.Module) throws
+        module:SymbolGraph.Module) throws
     {
-        self.init(module)
+        self.init(dependencies: [], module: module)
         try self.scan(bundle: bundle, package: package)
     }
 
@@ -52,10 +58,11 @@ extension SSGC.NominalSources
         include:inout [FilePath.Directory],
         exclude:borrowing [String],
         package:borrowing SSGC.PackageRoot,
-        module:consuming SymbolGraph.Module,
+        dependencies:[SymbolGraph.Module],
+        module:SymbolGraph.Module,
         count:[DefaultDirectory: Int]) throws
     {
-        self.init(module)
+        self.init(dependencies: dependencies, module: module)
 
         locations:
         if  let location:String = self.module.location
