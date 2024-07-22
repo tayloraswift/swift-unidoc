@@ -27,8 +27,6 @@ extension SSGC
         private
         let swiftParser:Markdown.SwiftLanguage?
         private
-        let nominations:SSGC.Nominations
-        private
         let root:Symbol.FileBase?
 
         private
@@ -46,9 +44,9 @@ extension SSGC
         var collations:ArticleCollations
 
         public
-        init(nominations:SSGC.Nominations,
-            modules:[SymbolGraph.Module],
+        init(
             plugins:[any Markdown.CodeLanguageType] = [],
+            modules:[SymbolGraph.Module],
             root:Symbol.FileBase? = nil)
         {
             let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
@@ -57,7 +55,6 @@ extension SSGC
             self.doccommentParser = .init(plugins: plugins, default: swift)
             self.markdownParser = .init(plugins: plugins)
             self.swiftParser = swift as? Markdown.SwiftLanguage
-            self.nominations = nominations
             self.root = root
 
             self.resources = []
@@ -92,105 +89,62 @@ extension SSGC.Linker
     {
         decls.map { self.tables.intern($0) }
     }
-    /// Returns an array of addresses for an array of vector features,
-    /// exposing each vector for codelink resolution in the process.
-    ///
-    /// -   Parameters:
-    ///     -   features:
-    ///         An array of declaration symbols, assumed to be the feature
-    ///         components of a collection of vector symbols with the
-    ///         same heir.
-    ///     -   prefix:
-    ///         The lexical path of the shared heir.
-    ///     -   extended:
-    ///         The shared heir.
-    ///     -   scalar:
-    ///         The scalar for the shared heir.
-    ///
-    /// Unlike ``addresses(of:)``, this function adds overloads to the
-    /// codelink resolver, because it’s more efficient to combine these
-    /// two passes.
-    private mutating
-    func addresses(exposing features:[Symbol.Decl],
-        prefixed prefix:(Symbol.Module, UnqualifiedPath),
-        of extended:Symbol.Decl,
-        at scalar:Int32) -> [Int32]
-    {
-        features.map
-        {
-            let feature:Int32 = self.tables.intern($0)
-            if  let (last, phylum):(String, Phylum.Decl) =
-                self.tables.graph.decls[feature]?.decl.map({ ($0.path.last, $0.phylum) }) ??
-                self.nominations[feature: $0]
-            {
-                let vector:Symbol.Decl.Vector = .init($0, self: extended)
-                self.tables.codelinks[prefix.0, prefix.1, last].overload(with: .init(
-                    target: .vector(feature, self: scalar),
-                    phylum: phylum,
-                    hash: .init(hashing: "\(vector)")))
-            }
-            return feature
-        }
-    }
 }
 extension SSGC.Linker
 {
-    /// Allocates and binds addresses for the declarations stored in the given array
-    /// of compiled namespaces. Binding consists of populating the full name and
-    /// phylum of a declaration. This function also exposes each of the declarations
-    /// for codelink resolution.
+    /// Allocates and binds addresses for the given declarations. Binding consists of populating
+    /// the full name and phylum of a declaration. This function also exposes each of the
+    /// declarations for codelink resolution.
     ///
     /// For best results (smallest/most-orderly linked symbolgraph), you should
     /// call this method first, before calling any others.
     public mutating
-    func allocate(namespaces:[[SSGC.Namespace]]) -> [[SymbolGraph.Namespace]]
+    func allocate(declarations:SSGC.Declarations)
     {
-        let destinations:[[SymbolGraph.Namespace]] = namespaces.map
+        guard
+        let i:Int = self.tables.modules[declarations.culture]
+        else
         {
-            $0.map
-            {
-                .init(range: self.allocate(decls: $0.decls),
-                    index: self.tables.intern($0.id))
-            }
+            fatalError("No such module '\(declarations.culture)'")
         }
-        for ((culture, sources), destinations):
-            ((Int, [SSGC.Namespace]), [SymbolGraph.Namespace]) in zip(zip(
-                namespaces.indices,
-                namespaces),
+
+        let destinations:[SymbolGraph.Namespace] = declarations.namespaces.map
+        {
+            .init(
+                range: self.allocate(decls: $0.decls, language: declarations.language),
+                index: self.tables.intern($0.id))
+        }
+
+        for (namespace, destination):
+            ((id:Symbol.Module, decls:[SSGC.Decl]), SymbolGraph.Namespace) in zip(
+            declarations.namespaces,
             destinations)
         {
-            //  Record scalar ranges
-            self.tables.graph.cultures[culture].namespaces = destinations
-
-            for (source, destination):(SSGC.Namespace, SymbolGraph.Namespace) in
-                zip(sources, destinations)
+            for (scalar, decl) in zip(destination.range, namespace.decls)
             {
-                let qualifier:Symbol.Module =
-                    self.tables.graph.namespaces[destination.index]
-                for (scalar, decl) in zip(destination.range, source.decls)
-                {
-                    let hash:FNV24 = .init(truncating: .decl(decl.id))
-                    //  Make the decl visible to codelink resolution.
-                    self.tables.codelinks[qualifier, decl.path].overload(with: .init(
-                        target: .scalar(scalar),
-                        phylum: decl.phylum,
-                        hash: hash))
-                    //  Assign the decl a URI, and record the decl’s hash
-                    //  so we will know if it has a hash collision.
-                    self.router[qualifier, decl.path, decl.phylum][hash, default: []]
-                        .append(scalar)
-                }
+                let hash:FNV24 = .init(truncating: .decl(decl.id))
+                //  Make the decl visible to codelink resolution.
+                self.tables.codelinks[namespace.id, decl.path].overload(with: .init(
+                    target: .scalar(scalar),
+                    phylum: decl.phylum,
+                    hash: hash))
+                //  Assign the decl a URI, and record the decl’s hash
+                //  so we will know if it has a hash collision.
+                self.router[namespace.id, decl.path, decl.phylum][hash, default: []]
+                    .append(scalar)
             }
         }
-        return destinations
+
+        self.tables.graph.cultures[i].namespaces = destinations
     }
+
     private mutating
-    func allocate(decls:[SSGC.Decl]) -> ClosedRange<Int32>
+    func allocate(decls:[SSGC.Decl], language:Phylum.Language) -> ClosedRange<Int32>
     {
         var scalars:(first:Int32, last:Int32)? = nil
         for decl:SSGC.Decl in decls
         {
-            let scalar:Int32 = self.tables.allocate(decl: decl)
+            let scalar:Int32 = self.tables.allocate(decl: decl, language: language)
             switch scalars
             {
             case  nil:              scalars = (scalar, scalar)
@@ -221,39 +175,54 @@ extension SSGC.Linker
     /// For best results (smallest/most-orderly linked symbolgraph), you should
     /// call this method second, after calling ``allocate(decls:)``.
     public mutating
-    func allocate(extensions:[SSGC.Extension]) -> [(Int32, Int)]
+    func allocate(extensions:SSGC.Extensions) -> [(Int32, Int)]
     {
-        let addresses:[Int32] = extensions.map
+        guard
+        let culture:Int = self.tables.modules[extensions.culture]
+        else
         {
-            self.tables.allocate(extension: $0)
+            fatalError("No such module '\(extensions.culture)'")
         }
-        return zip(addresses, extensions).map
+
+        return extensions.compiled.map
         {
-            let namespace:Int = self.tables.intern($0.1.signature.extended.namespace)
+            let namespace:Int = self.tables.intern($0.signature.extended.namespace)
             let qualifier:Symbol.Module = self.tables.graph.namespaces[namespace]
 
-            //  Sort *then* address, since we want deterministic addresses too.
-            let conformances:[Int32] = self.addresses(
-                of: $0.1.conformances.sorted())
-            let features:[Int32] = self.addresses(
-                exposing: $0.1.features.sorted(),
-                prefixed: (qualifier, $0.1.path),
-                of: $0.1.extended.type,
-                at: $0.0)
-            let nested:[Int32] = self.addresses(
-                of: $0.1.nested.sorted())
+            let extendee:Int32 = self.tables.allocate(extension: $0)
 
-            let index:Int = self.tables.graph.decls.nodes[$0.0].push(.init(
-                conditions: $0.1.conditions.map
+            let conformances:[Int32] = self.addresses(of: $0.conformances)
+            let features:[Int32] = self.addresses(of: $0.features)
+            let nested:[Int32] = self.addresses(of: $0.nested)
+
+            //  Expose features for codelink resolution.
+            for (f, id):(Int32, Symbol.Decl) in zip(features, $0.features)
+            {
+                guard
+                let feature:SSGC.Extensions.Feature = extensions.features[id]
+                else
                 {
-                    $0.map { self.tables.intern($0) }
-                },
+                    continue
+                }
+
+                let hash:FNV24 = .init(
+                    hashing: "\(Symbol.Decl.Vector.init(id, self: $0.extended.type))")
+
+                self.tables.codelinks[qualifier, $0.path, feature.lastName].overload(
+                    with: .init(target: .vector(f, self: extendee),
+                        phylum: feature.phylum,
+                        hash: hash))
+            }
+
+            let index:Int = self.tables.graph.decls.nodes[extendee].push(.init(
+                conditions: $0.conditions.map { $0.map { self.tables.intern($0) } },
                 namespace: namespace,
-                culture: $0.1.signature.culture,
+                culture: culture,
                 conformances: conformances,
                 features: features,
                 nested: nested))
-            return ($0.0, index)
+
+            return (extendee, index)
         }
     }
 }
@@ -589,52 +558,25 @@ extension SSGC.Linker
     /// This throws an error if and only if a file system error occurs. This is fatal because
     /// there is already logic in the linker to handle the case where files are missing.
     public mutating
-    func collate(namespaces sources:[[SSGC.Namespace]],
-        at destinations:[[SymbolGraph.Namespace]]) throws
+    func collate(declarations:SSGC.Declarations) throws
     {
-        precondition(self.tables.graph.cultures.count == destinations.count)
-        precondition(self.tables.graph.cultures.count == sources.count)
-
-        //  First pass: expose and link unqualified features.
-        for (sources, destinations):
-            ([SSGC.Namespace], [SymbolGraph.Namespace]) in zip(sources, destinations)
+        guard
+        let c:Int = self.tables.modules[declarations.culture]
+        else
         {
-            for (source, destination):
-                (SSGC.Namespace, SymbolGraph.Namespace) in zip(sources, destinations)
-            {
-                let qualifier:Symbol.Module = self.tables.graph.namespaces[destination.index]
-
-                for (address, decl):(Int32, SSGC.Decl) in zip(
-                    destination.range,
-                    source.decls)
-                {
-                    if  decl.features.isEmpty
-                    {
-                        continue
-                    }
-
-                    let features:[Int32] = self.addresses(exposing: decl.features.sorted(),
-                        prefixed: (qualifier, decl.path),
-                        of: decl.id,
-                        at: address)
-
-                    self.tables.graph.decls.nodes[address].decl?.features = features
-                }
-            }
+            fatalError("No such module '\(declarations.culture)'")
         }
 
-        //  Second pass: link everything else.
-        for (c, resources):(Int, [String: SSGC.Resource]) in zip(
-            self.tables.graph.cultures.indices,
-            self.resources)
+        let destinations:[SymbolGraph.Namespace] = self.tables.graph.cultures[c].namespaces
+        let resources:[String: SSGC.Resource] = self.resources[c]
+
+        for ((_, decls), destination):((_, [SSGC.Decl]), SymbolGraph.Namespace) in zip(
+            declarations.namespaces,
+            destinations)
         {
-            for (source, destination):
-                (SSGC.Namespace, SymbolGraph.Namespace) in zip(sources[c], destinations[c])
+            for (i, decl):(Int32, SSGC.Decl) in zip(destination.range, decls)
             {
-                for (i, decl):(Int32, SSGC.Decl) in zip(destination.range, source.decls)
-                {
-                    try self.collate(decl: decl, with: resources, at: i)
-                }
+                try self.collate(decl: decl, with: resources, at: i)
             }
         }
     }
@@ -729,9 +671,9 @@ extension SSGC.Linker
     /// This throws an error if and only if a file system error occurs. This is fatal because
     /// there is already logic in the linker to handle the case where files are missing.
     public mutating
-    func collate(extensions:[SSGC.Extension], at addresses:[(Int32, Int)]) throws
+    func collate(extensions:[SSGC.Extension], at positions:[(Int32, Int)]) throws
     {
-        for ((i, j), `extension`):((Int32, Int), SSGC.Extension) in zip(addresses, extensions)
+        for ((i, j), `extension`):((Int32, Int), SSGC.Extension) in zip(positions, extensions)
         {
             //  Extensions can have many constituent extension blocks, each potentially
             //  with its own doccomment. It’s not clear to me how to combine them,
@@ -796,28 +738,17 @@ extension SSGC.Linker
 extension SSGC.Linker
 {
     public mutating
-    func link(namespaces:[[SymbolGraph.Namespace]],
-        extensions:[(Int32, Int)],
-        articles:[[SSGC.Article]])
+    func link(extensions:[[(Int32, Int)]], articles:[[SSGC.Article]]) throws -> SymbolGraph
     {
-        self.link(namespaces: namespaces)
-        self.link(extensions: extensions)
-        self.link(articles: articles)
-    }
+        let imports:[Symbol.Module] = self.tables.importAll
 
-    private mutating
-    func link(namespaces:[[SymbolGraph.Namespace]])
-    {
-        //  Second pass: link everything else.
-        for (c, module):(Int, Symbol.Module) in zip(
-            self.tables.graph.cultures.indices,
-            self.tables.graph.namespaces)
+        for c:Int in self.tables.graph.cultures.indices
         {
             let culture:Culture = .init(resources: self.resources[c],
-                imports: self.tables.importAll,
-                module: module)
+                imports: imports,
+                id: self.tables.graph.namespaces[c])
 
-            for namespace:SymbolGraph.Namespace in namespaces[c]
+            for namespace:SymbolGraph.Namespace in self.tables.graph.cultures[c].namespaces
             {
                 let module:Symbol.Module = self.tables.graph.namespaces[namespace.index]
                 for i:Int32 in namespace.range
@@ -826,15 +757,14 @@ extension SSGC.Linker
                     self.tables.link(article: article, of: culture, as: i, in: module)
                 }
             }
+
+            for article:SSGC.Article in articles[c]
+            {
+                self.tables.link(article: article, of: culture, at: c)
+            }
         }
-    }
 
-    private mutating
-    func link(extensions:[(Int32, Int)])
-    {
-        let imports:[Symbol.Module] = self.tables.importAll
-
-        for (i, j):(Int32, Int) in extensions
+        for (i, j):(Int32, Int) in extensions.joined()
         {
             guard
             let article:SSGC.ArticleCollation = self.collations.move(i, j)
@@ -848,29 +778,7 @@ extension SSGC.Linker
                 resources: self.resources,
                 imports: imports)
         }
-    }
 
-    private mutating
-    func link(articles:[[SSGC.Article]])
-    {
-        for c:Int in articles.indices
-        {
-            let culture:Culture = .init(resources: self.resources[c],
-                imports: self.tables.importAll,
-                module: self.tables.graph.namespaces[c])
-
-            for article:SSGC.Article in articles[c]
-            {
-                self.tables.link(article: article, of: culture, at: c)
-            }
-        }
-    }
-}
-extension SSGC.Linker
-{
-    public mutating
-    func load() throws -> SymbolGraph
-    {
         self.tables.graph.colorize(routes: self.router.paths, with: &self.tables.diagnostics)
         return self.tables.graph
     }

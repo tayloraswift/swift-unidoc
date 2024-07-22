@@ -642,8 +642,7 @@ let package:Package = .init(
 
         .executableTarget(name: "SymbolGraphCompilerTests",
             dependencies: [
-                .target(name: "SymbolGraphCompiler"),
-                .target(name: "System"),
+                .target(name: "SymbolGraphBuilder"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 

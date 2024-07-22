@@ -37,6 +37,6 @@ extension SSGC.SymbolDump
             parts = []
         }
 
-        self.init(language: language, parts: parts, base: base)
+        try self.init(language: language, parts: parts, base: base)
     }
 }

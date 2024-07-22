@@ -20,8 +20,8 @@ extension SymbolGraph
         logger:SSGC.DocumentationLogger?,
         index:(any Markdown.SwiftLanguage.IndexStore)? = nil) throws -> Self
     {
-        let (namespaces, nominations):([[SSGC.Namespace]], SSGC.Nominations)
-        let (extensions):[SSGC.Extension]
+        var declarationsCompiled:[SSGC.Declarations] = []
+        var extensionsCompiled:[SSGC.Extensions] = []
 
         var profiler:BuildProfiler = .init()
         do
@@ -30,6 +30,7 @@ extension SymbolGraph
 
             for culture:SSGC.NominalSources in cultures
             {
+                let id:Symbol.Module = culture.module.id
                 let symbols:
                 (
                     missing:[SymbolGraph.Module],
@@ -40,7 +41,7 @@ extension SymbolGraph
                     {
                         if  let dump:SSGC.SymbolDump = try symbolCache.load(module: $1.id,
                                 base: prefix,
-                                as: culture.module.language ?? .swift)
+                                as: $1.language ?? .swift)
                         {
                             $0.loaded.append(dump)
                         }
@@ -51,33 +52,32 @@ extension SymbolGraph
                     }
                 }
 
-                var graphChecker:SSGC.GraphChecker = .init(root: prefix)
+                print("missing modules:", symbols.missing)
 
-                print(symbols)
-
-                try profiler.measure(\.compiling)
+                let graphChecker:SSGC.TypeChecker = try profiler.measure(\.compiling)
                 {
-                    try graphChecker.compile(
-                        language: culture.module.language ?? .swift,
-                        culture: culture.module.id,
-                        parts: [])
+                    try symbols.loaded.reduce(into: .init())
+                    {
+                        try $0.add(symbols: $1)
+                    }
                 }
-            }
 
-            (namespaces, nominations) = graphChecker.declarations.load()
-            (extensions) = graphChecker.extensions.load()
+                declarationsCompiled.append(graphChecker.declarations(in: id,
+                    language: culture.module.language ?? .swift))
+                extensionsCompiled.append(try graphChecker.extensions(in: id))
+            }
 
             print("""
                 Compiled documentation!
                     time loading symbols    : \(profiler.loadingSymbols)
                     time compiling          : \(profiler.compiling)
-                cultures        : \(namespaces.count)
-                namespaces      : \(namespaces.reduce(0) { $0 + $1.count })
-                declarations    : \(namespaces.reduce(0)
+                cultures        : \(cultures.count)
+                namespaces      : \(declarationsCompiled.reduce(0) { $0 + $1.namespaces.count })
+                declarations    : \(declarationsCompiled.reduce(0)
                 {
-                    $0 + $1.reduce(0) { $0 + $1.decls.count }
+                    $0 + $1.namespaces.reduce(0) { $0 + $1.decls.count }
                 })
-                extensions      : \(extensions.count)
+                extensions      : \(extensionsCompiled.reduce(0) { $0 + $1.compiled.count })
                 """)
         }
         catch let error
@@ -87,18 +87,22 @@ extension SymbolGraph
 
         do
         {
-            var linker:SSGC.Linker = .init(nominations: nominations,
-                modules: cultures.map(\.module),
+            var linker:SSGC.Linker = .init(
                 plugins: [.swift(index: index)],
+                modules: cultures.map(\.module),
                 root: prefix)
 
-            let namespacePositions:[[SymbolGraph.Namespace]] = profiler.measure(\.linking)
+            profiler.measure(\.linking)
             {
-                linker.allocate(namespaces: namespaces)
+                for declarations:SSGC.Declarations in declarationsCompiled
+                {
+                    linker.allocate(declarations: declarations)
+                }
             }
-            let extensionPositions:[(Int32, Int)] = profiler.measure(\.linking)
+
+            let extensionPositions:[[(Int32, Int)]] = profiler.measure(\.linking)
             {
-                linker.allocate(extensions: extensions)
+                extensionsCompiled.map{ linker.allocate(extensions: $0) }
             }
 
             let resources:[[SSGC.LazyFile]] = cultures.map(\.resources)
@@ -131,15 +135,18 @@ extension SymbolGraph
 
             let graph:SymbolGraph = try profiler.measure(\.linking)
             {
-                try linker.collate(namespaces: namespaces, at: namespacePositions)
-                try linker.collate(extensions: extensions, at: extensionPositions)
+                for declarations:SSGC.Declarations in declarationsCompiled
+                {
+                    try linker.collate(declarations: declarations)
+                }
+                for (extensions, extensionPositions):(SSGC.Extensions, [(Int32, Int)]) in zip(
+                    extensionsCompiled,
+                    extensionPositions)
+                {
+                    try linker.collate(extensions: extensions.compiled, at: extensionPositions)
+                }
 
-                linker.link(
-                    namespaces: namespacePositions,
-                    extensions: extensionPositions,
-                    articles: articles)
-
-                return try linker.load()
+                return try linker.link(extensions: extensionPositions, articles: articles)
             }
 
             if  let logger:SSGC.DocumentationLogger

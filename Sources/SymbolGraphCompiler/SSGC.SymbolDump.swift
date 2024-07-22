@@ -133,17 +133,3 @@ extension SSGC.SymbolDump
         self.init(language: language, parts: parts.map(Part.init(from:)))
     }
 }
-extension SSGC.SymbolDump
-{
-    func assert(matches culture:Symbol.Module) throws
-    {
-        for part:Part in self.parts where part.culture != culture
-        {
-            throw CultureError.init(
-                underlying: SSGC.UnexpectedModuleError.culture(part.culture, in: .init(
-                    culture: part.culture,
-                    colony: part.colony)),
-                culture: culture)
-        }
-    }
-}

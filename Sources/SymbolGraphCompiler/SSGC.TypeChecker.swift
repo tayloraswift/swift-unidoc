@@ -3,27 +3,15 @@ import Signatures
 import SymbolGraphParts
 import Symbols
 
-extension SSGC.TypeChecker
-{
-    struct AssertionError:Error
-    {
-        let message:String
-
-        init(message:String)
-        {
-            self.message = message
-        }
-    }
-}
 extension SSGC
 {
     public
     struct TypeChecker
     {
-        public private(set)
-        var declarations:Declarations
-        public private(set)
-        var extensions:Extensions
+        private
+        var declarations:DeclarationTable
+        private
+        var extensions:ExtensionTable
 
         public
         init(threshold:Symbol.ACL = .public)
@@ -36,9 +24,39 @@ extension SSGC
 extension SSGC.TypeChecker
 {
     public mutating
-    func add(dependency dump:SSGC.SymbolDump, as culture:Symbol.Module) throws
+    func add(symbols dump:SSGC.SymbolDump) throws
     {
-        try dump.assert(matches: culture)
+        var culture:Symbol.Module? = nil
+        for part:SSGC.SymbolDump.Part in dump.parts
+        {
+            guard
+            let culture:Symbol.Module
+            else
+            {
+                culture = part.culture
+                continue
+            }
+
+            guard culture == part.culture
+            else
+            {
+                throw CultureError.init(
+                    underlying: SSGC.UnexpectedModuleError.culture(part.culture, in: .init(
+                        culture: part.culture,
+                        colony: part.colony)),
+                    culture: culture)
+            }
+        }
+
+        if  let culture:Symbol.Module
+        {
+            try self.add(symbols: dump, as: culture)
+        }
+    }
+
+    private mutating
+    func add(symbols dump:SSGC.SymbolDump, as culture:Symbol.Module) throws
+    {
         /// We use this to look up protocols by name instead of symbol. This is needed in order
         /// to work around some bizarre lib/SymbolGraphGen bugs.
         var protocolsByName:[UnqualifiedPath: Symbol.Decl] = [:]
@@ -110,7 +128,7 @@ extension SSGC.TypeChecker
             }
             for nesting:Symbol.MemberRelationship in part.memberships
             {
-                try self.assign(nesting, by: part.culture)
+                try self.assign(nesting, by: culture)
             }
         }
         //  SymbolGraphGen fails to emit a `memberOf` edge if the member is a default
@@ -141,39 +159,17 @@ extension SSGC.TypeChecker
         {
             for relationship:Symbol.FeatureRelationship in part.featurings
             {
-                try self.insert(relationship, by: part.culture)
+                try self.insert(relationship, by: culture)
             }
-            /*
-            for relationship:Symbol.AnyRelationship in part.relationships
+            for relationship:Symbol.IntrinsicWitnessRelationship in part.witnessings
             {
-                do
-                {
-                    switch relationship
-                    {
-                    case .extension, .requirement, .member:
-                        continue // Already handled these.
-
-                    case .conformance(let conformance):
-                        try self.insert(conformance, by: culture.index)
-
-                    case .inheritance(let relationship):
-                        try self.insert(relationship)
-
-                    case .override(let relationship):
-                        try self.insert(relationship)
-
-                    case .intrinsicWitness(let relationship):
-                        try self.insert(relationship)
-                    }
-                }
-                catch let error
-                {
-                    throw SSGC.EdgeError.init(underlying: error, in: relationship)
-                }
+                try self.insert(relationship, by: culture)
             }
-            */
+            for relationship:Symbol.OverrideRelationship in part.overrides
+            {
+                try self.insert(relationship, by: culture)
+            }
         }
-
     }
 }
 extension SSGC.TypeChecker
@@ -455,5 +451,34 @@ extension SSGC.TypeChecker
                     """)
             }
         }
+    }
+}
+extension SSGC.TypeChecker
+{
+    public
+    func declarations(in culture:Symbol.Module, language:Phylum.Language) -> SSGC.Declarations
+    {
+        .init(namespaces: self.declarations.load(culture: culture),
+            language: language,
+            culture: culture)
+    }
+
+    public
+    func extensions(in culture:Symbol.Module) throws -> SSGC.Extensions
+    {
+        let extensions:[SSGC.Extension] = self.extensions.load(culture: culture)
+
+        let features:[Symbol.Decl: SSGC.Extensions.Feature] = try extensions.reduce(into: [:])
+        {
+            for feature:Symbol.Decl in $1.features
+            {
+                try
+                {
+                    $0 = try $0 ?? .init(from: try self.declarations[feature].value)
+                } (&$0[feature])
+            }
+        }
+
+        return .init(compiled: extensions, features: features, culture: culture)
     }
 }
