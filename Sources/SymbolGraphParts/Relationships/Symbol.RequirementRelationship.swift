@@ -34,12 +34,6 @@ extension Symbol.RequirementRelationship:NestingRelationship
         self.optional ? [.requiredOptionally] : [.required]
     }
 
-    @inlinable public
-    var scope:Symbol.USR
-    {
-        .scalar(self.target)
-    }
-
     public
     func validate(source phylum:Phylum.Decl) -> Bool
     {

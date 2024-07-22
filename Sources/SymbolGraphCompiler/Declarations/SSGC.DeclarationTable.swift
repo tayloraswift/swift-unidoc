@@ -91,7 +91,7 @@ extension SSGC.DeclarationTable
             }
             else
             {
-                throw SSGC.UndefinedSymbolError.scalar(id)
+                throw SSGC.UndefinedSymbolError.declaration(id)
             }
         }
     }

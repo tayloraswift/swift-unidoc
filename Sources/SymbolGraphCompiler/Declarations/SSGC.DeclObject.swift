@@ -21,13 +21,14 @@ extension SSGC
 
         /// The type of the superforms tracked by ``\.value.superforms``.
         var superforms:(any SuperformRelationship.Type)?
-        /// The symbols this scalar is lexically-nested in. This may include an extension block
-        /// symbol.
+
+        /// The symbols this scalar is lexically-nested in.
         ///
         /// Remarkably, it is possible for certain (Objective C) declarations to have more than
         /// one lexical parent. For example, base class methods can be shared by multiple
         /// subclasses in addition to the base class.
-        var scopes:Set<Symbol.USR>
+        private(set)
+        var scopes:Set<Symbol.Decl>
 
         private(set)
         var value:Decl
@@ -79,7 +80,7 @@ extension SSGC.DeclObject
         }
     }
     /// Assigns a lexical scope to this scalar object.
-    func assign(scope relationship:some NestingRelationship) throws
+    func assign(scope:Symbol.Decl, by relationship:some NestingRelationship) throws
     {
         guard relationship.validate(source: self.value.phylum)
         else
@@ -88,17 +89,26 @@ extension SSGC.DeclObject
         }
 
         //  Only (Objective) C declarations can have multiple lexical scopes.
-        if  case .s = self.id.language,
-            let scope:Symbol.USR = self.scopes.first,
-                scope != relationship.scope
+        switch self.scopes.first
         {
-            throw SSGC.SemanticError.already(has: .scope(scope))
+        case scope?:
+            break
+
+        case let existing?:
+            if  case .s = self.id.language
+            {
+                throw SSGC.SemanticError.already(has: .scope(existing))
+            }
+            else
+            {
+                fallthrough
+            }
+
+        case nil:
+            self.scopes.insert(scope)
         }
-        else
-        {
-            self.scopes.insert(relationship.scope)
-            self.kinks += relationship.kinks
-        }
+
+        self.kinks += relationship.kinks
 
         if  let origin:Symbol.Decl = relationship.origin
         {

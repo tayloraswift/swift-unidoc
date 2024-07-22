@@ -69,7 +69,7 @@ extension SSGC.ExtensionTable
             }
             else
             {
-                throw SSGC.UndefinedSymbolError.block(block)
+                throw SSGC.UndefinedSymbolError.extension(block)
             }
         }
     }

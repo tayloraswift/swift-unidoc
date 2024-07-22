@@ -26,9 +26,6 @@ extension Symbol.MemberRelationship:NestingRelationship
     @inlinable public
     var kinks:Phylum.Decl.Kinks { [] }
 
-    @inlinable public
-    var scope:Symbol.USR { self.target }
-
     public
     func validate(source phylum:Phylum.Decl) -> Bool
     {

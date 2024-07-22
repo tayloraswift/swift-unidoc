@@ -181,7 +181,7 @@ extension SSGC.TypeChecker
     {
         let target:SSGC.DeclObject = try self.declarations[relationship.target]
         let source:SSGC.DeclObject = try self.declarations[relationship.source]
-        try source.assign(scope: relationship)
+        try source.assign(scope: target.id, by: relationship)
         try target.add(requirement: source.id)
     }
 
@@ -228,8 +228,6 @@ extension SSGC.TypeChecker
                     """)
             }
 
-            try member.assign(scope: relationship)
-
             //  Enum cases are considered intrinsic members of their parent enum.
             if  case .case = member.value.phylum
             {
@@ -244,9 +242,9 @@ extension SSGC.TypeChecker
                     by: culture)
             }
 
-        case .block(let block):
-            try member.assign(scope: relationship)
+            try member.assign(scope: scope.id, by: relationship)
 
+        case .block(let block):
             let group:SSGC.ExtensionObject = try self.extensions[named: block]
             if  group.conditions == member.conditions
             {
@@ -259,6 +257,8 @@ extension SSGC.TypeChecker
                 throw SSGC.ExtensionSignatureError.init(expected: group.signature,
                     declared: member.conditions)
             }
+
+            try member.assign(scope: group.extended.type, by: relationship)
         }
     }
 }
@@ -409,8 +409,7 @@ extension SSGC.TypeChecker
                     """)
             }
             guard
-            case .scalar(let conformance) = feature.scopes.first,
-            case 1 = feature.scopes.count
+            let conformance:Symbol.Decl = feature.scopes.first, feature.scopes.count == 1
             else
             {
                 throw AssertionError.init(message: """
