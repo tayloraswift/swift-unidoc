@@ -4,6 +4,7 @@ import System
 
 extension SSGC
 {
+    @_spi(testable) public
     struct SymbolDumps
     {
         let location:FilePath.Directory
@@ -19,8 +20,8 @@ extension SSGC
 }
 extension SSGC.SymbolDumps
 {
-    static
-    func collect(from location:FilePath.Directory) throws -> Self
+    @_spi(testable) public
+    static func collect(from location:FilePath.Directory) throws -> Self
     {
         let symbols:[Symbol.Module: [SymbolGraphPart.ID]] = try location.reduce(
             into: [:])

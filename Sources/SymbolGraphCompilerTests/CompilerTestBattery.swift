@@ -1,4 +1,5 @@
 import Sources
+@_spi(testable) import SymbolGraphBuilder
 import SymbolGraphCompiler
 import SymbolGraphParts
 import Symbols
@@ -8,80 +9,63 @@ import Testing_
 protocol CompilerTestBattery:TestBattery
 {
     static
-    var inputs:[String] { get }
+    var inputs:[Symbol.Module] { get }
 
     static
-    func run(tests:TestGroup,
-        nominations:SSGC.Nominations,
-        namespaces:[[SSGC.Namespace]],
-        extensions:[SSGC.Extension])
+    func run(tests:TestGroup, declarations:SSGC.Declarations, extensions:SSGC.Extensions)
 }
 extension CompilerTestBattery
 {
     static
-    func run(tests:TestGroup)
+    func run(tests:TestGroup) throws
     {
-        let directory:FilePath.Directory = "TestModules/SymbolGraphs"
-        var checker:SSGC.TypeChecker = .init(root: "/swift/swift-unidoc/TestModules")
+        let symbols:SSGC.SymbolDumps = try .collect(from: "TestModules/SymbolGraphs")
 
-        let parts:[SymbolGraphPart] = Self.inputs.compactMap
+        let compiled:[(SSGC.Declarations, SSGC.Extensions)]? = (tests ! "Compilation").do
         {
-            let tests:TestGroup = (tests ! "LoadJSON") ! $0
+            let base:Symbol.FileBase = "/swift/swift-unidoc/TestModules"
 
-            let path:FilePath = directory / "\($0).symbols.json"
-
-            guard
-            let id:FilePath.Component = tests.expect(value: path.lastComponent),
-            let id:SymbolGraphPart.ID = .init(id.string)
-            else
+            return try Self.inputs.map
             {
-                return nil
+                var typeChecker:SSGC.TypeChecker = .init()
+                let symbols:SSGC.SymbolDump = try .init(loading: $0,
+                    from: symbols,
+                    base: base,
+                    as: .swift)
+                try typeChecker.add(symbols: symbols)
+                return (
+                    typeChecker.declarations(in: $0, language: .swift),
+                    try typeChecker.extensions(in: $0)
+                )
             }
-            return tests.do
-            {
-                let part:SymbolGraphPart = try .init(
-                    json: .init(utf8: try path.read([UInt8].self)[...]),
-                    id: id)
-
-                tests.expect(part.metadata.version ==? .v(0, 6, 0))
-
-                return part
-            }
-        }
-
-        let compiled:(([[SSGC.Namespace]], SSGC.Nominations), [SSGC.Extension])? =
-            (tests ! "Compilation").do
-        {
-            try checker.compile(language: .swift, culture: parts[0].culture, parts: parts)
-
-            return (checker.declarations.load(), checker.extensions.load())
         }
 
         guard
-        case let ((namespaces, nominations), extensions)? = compiled
+        let compiled:[(SSGC.Declarations, SSGC.Extensions)]
         else
         {
             return
         }
 
-        if  let tests:TestGroup = tests / "SourceLocations"
+        for (declarations, extensions):(SSGC.Declarations, SSGC.Extensions) in compiled
         {
-            for namespace:SSGC.Namespace in namespaces.joined()
+            Self.run(tests: tests, declarations: declarations, extensions: extensions)
+
+            if  let tests:TestGroup = tests / "SourceLocations"
             {
-                for decl:SSGC.Decl in namespace.decls
+
+                for (_, decls):(_, [SSGC.Decl]) in declarations.namespaces
                 {
-                    if  let location:SourceLocation<Symbol.File> = tests.expect(
-                            value: decl.location)
+                    for decl:SSGC.Decl in decls
                     {
-                        tests.expect(true: location.file.path.starts(with: "Snippets/"))
+                        if  let location:SourceLocation<Symbol.File> = tests.expect(
+                                value: decl.location)
+                        {
+                            tests.expect(true: location.file.path.starts(with: "Snippets/"))
+                        }
                     }
                 }
             }
         }
-
-        Self.run(tests: tests,
-            nominations: nominations,
-            namespaces: namespaces,
-            extensions: extensions)
     }
 }

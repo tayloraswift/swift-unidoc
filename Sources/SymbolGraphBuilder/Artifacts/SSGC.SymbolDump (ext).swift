@@ -5,6 +5,7 @@ import System
 
 extension SSGC.SymbolDump
 {
+    @_spi(testable) public
     init(loading module:__shared Symbol.Module,
         from dumps:borrowing SSGC.SymbolDumps,
         base:borrowing Symbol.FileBase?,
