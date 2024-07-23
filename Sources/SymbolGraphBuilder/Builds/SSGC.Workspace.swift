@@ -65,16 +65,18 @@ extension SSGC.Workspace
 {
     public
     func build(package build:SSGC.PackageBuild,
-        with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
+        with swift:SSGC.Toolchain,
+        clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, logger: nil, status: nil)
+        try self.build(some: build, toolchain: swift, logger: nil, status: nil, clean: clean)
     }
 
     public
     func build(special build:SSGC.SpecialBuild,
-        with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
+        with swift:SSGC.Toolchain,
+        clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, logger: nil, status: nil)
+        try self.build(some: build, toolchain: swift, logger: nil, status: nil, clean: clean)
     }
 }
 extension SSGC.Workspace
@@ -82,20 +84,21 @@ extension SSGC.Workspace
     func build<Build>(some build:consuming Build,
         toolchain swift:SSGC.Toolchain,
         logger:SSGC.DocumentationLogger?,
-        status:SSGC.StatusStream?) throws -> SymbolGraphObject<Void>
+        status:SSGC.StatusStream?,
+        clean:Bool) throws -> SymbolGraphObject<Void>
         where Build:SSGC.DocumentationBuild
     {
         let metadata:SymbolGraphMetadata
         let package:any SSGC.DocumentationSources
 
-        let output:FilePath.Directory = self.artifacts
-        try output.create(clean: true)
+        let artifacts:FilePath.Directory = self.artifacts
+        try artifacts.create(clean: clean)
 
         (metadata, package) = try build.compile(updating: status,
-            into: output,
+            into: artifacts,
             with: swift)
 
-        let symbols:SSGC.SymbolDumps = try .collect(from: output)
+        let symbols:SSGC.SymbolDumps = try .collect(from: artifacts)
         let index:(any Markdown.SwiftLanguage.IndexStore)?
         do
         {

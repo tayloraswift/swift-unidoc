@@ -72,5 +72,17 @@ extension SSGC.SymbolDump.Part
             case .extension(let edge):          self.extensions.append(edge)
             }
         }
+
+        //  Sort vertices and edges for determinism, since lib/SymbolGraphGen does not.
+        self.vertices.sort { $0.usr < $1.usr }
+
+        self.conformances.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.inheritances.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.requirements.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.memberships.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.witnessings.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.featurings.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.overrides.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.extensions.sort { ($0.source, $0.target) < ($1.source, $1.target) }
     }
 }

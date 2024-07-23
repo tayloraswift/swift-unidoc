@@ -15,6 +15,11 @@ extension Symbol
         }
     }
 }
+extension Symbol.Block:Comparable
+{
+    @inlinable public
+    static func < (a:Self, b:Self) -> Bool { a.name < b.name }
+}
 extension Symbol.Block:CustomStringConvertible
 {
     @inlinable public

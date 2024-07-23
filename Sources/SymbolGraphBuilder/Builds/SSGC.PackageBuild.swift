@@ -253,16 +253,12 @@ extension SSGC.PackageBuild
             throw SSGC.PackageBuildError.swift_build(code, invocation)
         }
 
-        let platform:SymbolGraphMetadata.Platform = try swift.platform()
+        var packages:SSGC.PackageGraph = .init(platform: try swift.platform())
 
-        var dependencies:[PackageNode] = []
-        var include:[FilePath.Directory] = [scratch.include]
-
-        //  Nominal dependencies mean we need to build the package-to-product mapping before
-        //  we can actually create the (partitioned) dependency nodes.
-        var packageContainingProduct:[String: Symbol.Package] = [:]
-        var manifests:[SPM.Manifest] = []
-            manifests.reserveCapacity(pins.count)
+        //  Dump the standard library’s symbols
+        let standardLibrary:SSGC.StandardLibrary = .init(platform: try swift.platform())
+        try swift.dump(modules: standardLibrary.modules,
+            to: artifacts)
 
         for pin:SPM.DependencyPin in pins
         {
@@ -273,52 +269,18 @@ extension SSGC.PackageBuild
                 json: artifacts / "\(pin.identity).package.json",
                 leaf: false)
 
-            for product:SPM.Manifest.Product in manifest.products
-            {
-                packageContainingProduct[product.name] = pin.identity
-            }
-
-            manifests.append(manifest)
+            packages.attach(manifest, as: pin.identity)
         }
 
-        //  This second pass must not make any assumptions about the ordering of the pins.
-        for (manifest, pin):(Int, SPM.DependencyPin) in zip(manifests.indices, pins)
-        {
-            try manifests[manifest].normalizeUnqualifiedDependencies(
-                with: packageContainingProduct)
-
-            /// This node is partially flattened, but it is still considered partitioned, as
-            /// we have not yet flattened the product dependencies.
-            dependencies.append(try .all(flattening: manifests[manifest],
-                on: platform,
-                as: pin.identity))
-        }
-
-        //  This third pass currently has no purpose besides aggregating include paths, but it
-        //  will eventually be used to perform multi-package documentation builds.
-        for dependency:PackageNode in dependencies
-        {
-            let subtree:SSGC.PackageTree = try .init(dependencies: dependencies,
-                sink: dependency)
-
-            let _:SSGC.PackageSources.Layout = try .init(scanning: subtree, include: &include)
-        }
-
-        //  Now it is time to normalize the leaf manifest.
-        for product:SPM.Manifest.Product in manifest.products
-        {
-            packageContainingProduct[product.name] = self.id.package
-        }
-        try manifest.normalizeUnqualifiedDependencies(with: packageContainingProduct)
-
-        let tree:SSGC.PackageTree = try .init(dependencies: dependencies,
-            sink: try .all(flattening: manifest, on: platform, as: self.id.package))
+        let modules:SSGC.ModuleGraph = try packages.join(dependencies: pins,
+            with: &manifest,
+            as: self.id.package)
 
         //  This step is considered part of documentation building.
         let sources:SSGC.PackageSources
         do
         {
-            sources = try .init(scanning: tree, scratch: scratch, include: &include)
+            sources = try .init(scanning: modules, scratch: scratch)
         }
         catch let error
         {
@@ -339,8 +301,8 @@ extension SSGC.PackageBuild
             tools: manifest.format,
             manifests: manifestVersions,
             requirements: manifest.requirements,
-            dependencies: try tree.dependenciesUsed(pins: pins),
-            products: .init(viewing: tree.sink.products),
+            dependencies: try modules.dependenciesUsed(pins: pins),
+            products: .init(viewing: modules.package.products),
             display: manifest.name,
             root: sources.prefix)
 

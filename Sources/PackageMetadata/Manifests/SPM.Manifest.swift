@@ -1,12 +1,9 @@
 import JSON
+import OrderedCollections
 import PackageGraphs
 import SemanticVersions
 import SymbolGraphs
 import Symbols
-
-@available(*, deprecated, renamed: "SPM.Manifest")
-public
-typealias PackageManifest = SPM.Manifest
 
 extension SPM
 {
@@ -26,20 +23,20 @@ extension SPM
         public
         var dependencies:[Dependency]
         public
-        var products:[Product]
+        var products:OrderedDictionary<String, Product>
         public
-        var targets:[TargetNode]
+        var targets:OrderedDictionary<String, TargetNode>
         /// The `swift-tools-version` format of this manifest.
         public
         var format:PatchVersion
 
-        @inlinable public
+        @inlinable
         init(name:String,
             root:Symbol.FileBase,
             requirements:[SymbolGraphMetadata.PlatformRequirement] = [],
             dependencies:[Dependency] = [],
-            products:[Product] = [],
-            targets:[TargetNode] = [],
+            products:OrderedDictionary<String, Product>,
+            targets:OrderedDictionary<String, TargetNode>,
             format:PatchVersion)
         {
             self.name = name
@@ -54,6 +51,26 @@ extension SPM
 }
 extension SPM.Manifest
 {
+    @inlinable public
+    init(name:String,
+        root:Symbol.FileBase,
+        requirements:[SymbolGraphMetadata.PlatformRequirement] = [],
+        dependencies:[Dependency] = [],
+        products:[Product] = [],
+        targets:[TargetNode] = [],
+        format:PatchVersion)
+    {
+        self.name = name
+        self.root = root
+        self.requirements = requirements
+        self.dependencies = dependencies
+        self.products = products.reduce(into: [:]) { $0[$1.name] = $1 }
+        self.targets = targets.reduce(into: [:]) { $0[$1.name] = $1 }
+        self.format = format
+    }
+}
+extension SPM.Manifest
+{
     /// The name of the snippets directory. This is supposed to be configurable, but due to
     /// sheer incompetence, it is currently always the string `Snippets`.
     @inlinable public
@@ -63,9 +80,8 @@ extension SPM.Manifest
     func normalizeUnqualifiedDependencies(
         with packageContainingProduct:[String: Symbol.Package]) throws
     {
-        let targets:Set<String> = self.targets.reduce(into: []) { $0.insert($1.name) }
-
-        for i:Int in self.targets.indices
+        let targets:OrderedSet<String> = self.targets.keys
+        for i:Int in self.targets.values.indices
         {
             try
             {
@@ -89,7 +105,7 @@ extension SPM.Manifest
 
                 $0.nominal = []
 
-            } (&self.targets[i].dependencies)
+            } (&self.targets.values[i].dependencies)
         }
     }
 }

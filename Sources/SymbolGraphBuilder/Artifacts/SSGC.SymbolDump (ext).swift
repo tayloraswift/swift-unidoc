@@ -6,7 +6,7 @@ import System
 extension SSGC.SymbolDump
 {
     @_spi(testable) public
-    init(loading module:__shared Symbol.Module,
+    init?(loading module:__shared Symbol.Module,
         from dumps:borrowing SSGC.SymbolDumps,
         base:borrowing Symbol.FileBase?,
         as language:Phylum.Language) throws
@@ -35,7 +35,7 @@ extension SSGC.SymbolDump
         }
         else
         {
-            parts = []
+            return nil
         }
 
         try self.init(language: language, parts: parts, base: base)

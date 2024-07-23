@@ -45,8 +45,8 @@ extension DigraphExplorer.Nodes
 }
 extension DigraphExplorer<TargetNode>.Nodes
 {
-    public
-    init(indexing nodes:[TargetNode]) throws
+    @inlinable public
+    init(indexing nodes:some Sequence<TargetNode>) throws
     {
         self.init()
         for node:TargetNode in nodes

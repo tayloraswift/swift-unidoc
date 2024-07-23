@@ -1,5 +1,6 @@
 import PackageGraphs
 import SymbolGraphs
+import TopologicalSorting
 
 extension DigraphExplorer<TargetNode>.Nodes
 {
@@ -39,25 +40,24 @@ extension DigraphExplorer<TargetNode>.Nodes
             }
         }
         /// The list of targets that *directly* depend on each (explored) target.
-        var consumers:[String: [TargetNode]] = [:]
+        // var consumers:[String: [TargetNode]] = [:]
+        var directedEdges:[(String, String)] = []
         let included:[String: TargetNode] = try explorer.conquer
         {
             // need to sort dependency set to make topological sort deterministic
             for name:String in $1.dependencies.targets(on: platform).sorted()
             {
-                consumers[name, default: []].append($1)
+                directedEdges.append((name, $1.name))
                 try $0.explore(node: name)
             }
         }
-        if  let targets:[TargetNode] = TargetNode.order(
-                topologically: included,
-                consumers: &consumers)
-        {
-            return targets
-        }
+        guard
+        let targets:[TargetNode] = included.orderingValuesTopologically(by: directedEdges)
         else
         {
             throw DigraphCycleError<TargetNode>.init()
         }
+
+        return targets
     }
 }

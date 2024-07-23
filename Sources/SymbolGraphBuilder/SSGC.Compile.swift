@@ -91,6 +91,19 @@ extension SSGC
             help: "The git ref to check out")
         var ref:String? = nil
 
+        //  swift-argument-parser experiences an inexplicable segfault if this flag is defined,
+        //  for some reason...
+
+        @Flag(
+            name: [.customLong("clean-artifacts")],
+            help: """
+                Clear the artifacts directory before building documentation — this should be \
+                turned off if performing incremental builds, otherwise symbols will be missing \
+                from generated documentation
+                """)
+        var cleanArtifacts:Bool = false
+
+
         @Flag(
             name: [.customLong("remove-build")],
             help: """
@@ -198,7 +211,8 @@ extension SSGC.Compile
             object = try workspace.build(some: SSGC.SpecialBuild.swift,
                 toolchain: toolchain,
                 logger: logger,
-                status: status)
+                status: status,
+                clean: self.cleanArtifacts)
         }
         else if
             let search:FilePath.Directory = self.search
@@ -218,7 +232,8 @@ extension SSGC.Compile
             object = try workspace.build(some: build,
                 toolchain: toolchain,
                 logger: logger,
-                status: status)
+                status: status,
+                clean: self.cleanArtifacts)
         }
         else if
             let repo:String = self.repo,
@@ -250,7 +265,8 @@ extension SSGC.Compile
             object = try workspace.build(some: build,
                 toolchain: toolchain,
                 logger: logger,
-                status: status)
+                status: status,
+                clean: self.cleanArtifacts)
         }
         else
         {

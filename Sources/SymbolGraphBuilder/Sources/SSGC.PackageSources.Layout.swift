@@ -21,11 +21,11 @@ extension SSGC.PackageSources
 }
 extension SSGC.PackageSources.Layout
 {
-    init(scanning tree:borrowing SSGC.PackageTree, include:inout [FilePath.Directory]) throws
+    init(scanning graph:borrowing SSGC.ModuleGraph) throws
     {
-        self.init(root: .init(normalizing: tree.sink.root))
+        self.init(root: .init(normalizing: graph.package.root))
 
-        let count:[SSGC.NominalSources.DefaultDirectory: Int] = tree.sink.modules.reduce(
+        let count:[SSGC.NominalSources.DefaultDirectory: Int] = graph.package.modules.reduce(
             into: [:])
         {
             if  case nil = $1.location,
@@ -34,22 +34,17 @@ extension SSGC.PackageSources.Layout
                 $0[directory, default: 0] += 1
             }
         }
-        for i:Int in tree.sink.modules.indices
-        {
-            let module:SymbolGraph.Module = tree.sink.modules[i]
 
-            var dependencies:[SymbolGraph.Module] = module.dependencies.modules.map
-            {
-                tree.sink.modules[$0]
-            }
-            for product:Symbol.Product in module.dependencies.products
-            {
-                dependencies += tree.productPartitions[product] ?? []
-            }
+        var _ignore:[FilePath.Directory] = []
+
+        for i:Int in graph.package.modules.indices
+        {
+            let module:SymbolGraph.Module = graph.package.modules[i]
+            let dependencies:[SymbolGraph.Module] = try graph.dependencies(of: module)
 
             self.cultures.append(try .init(
-                include: &include,
-                exclude: tree.sink.exclude[i],
+                include: &_ignore,
+                exclude: graph.package.exclude[i],
                 package: self.root,
                 dependencies: dependencies,
                 module: module,

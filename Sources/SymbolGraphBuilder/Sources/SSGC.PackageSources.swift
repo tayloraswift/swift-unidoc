@@ -50,17 +50,16 @@ extension SSGC.PackageSources
         self.init(cultures: layout.cultures, scratch: scratch, root: layout.root)
     }
 
-    init(scanning tree:SSGC.PackageTree,
-        scratch:SSGC.PackageBuildDirectory,
-        include:inout [FilePath.Directory]) throws
+    init(scanning graph:SSGC.ModuleGraph,
+        scratch:SSGC.PackageBuildDirectory) throws
     {
-        self.init(layout: try .init(scanning: tree, include: &include), scratch: scratch)
+        self.init(layout: try .init(scanning: graph), scratch: scratch)
 
         guard
-        let snippetsDirectory:FilePath.Component = .init(tree.sink.snippets)
+        let snippetsDirectory:FilePath.Component = .init(graph.package.snippets)
         else
         {
-            throw SSGC.SnippetDirectoryError.invalid(tree.sink.snippets)
+            throw SSGC.SnippetDirectoryError.invalid(graph.package.snippets)
         }
 
         let snippets:FilePath.Directory = self.root.location / snippetsDirectory

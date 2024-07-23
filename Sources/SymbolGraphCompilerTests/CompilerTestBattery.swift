@@ -25,13 +25,19 @@ extension CompilerTestBattery
         {
             let base:Symbol.FileBase = "/swift/swift-unidoc/TestModules"
 
-            return try Self.inputs.map
+            return try Self.inputs.compactMap
             {
                 var typeChecker:SSGC.TypeChecker = .init()
-                let symbols:SSGC.SymbolDump = try .init(loading: $0,
+                guard
+                let symbols:SSGC.SymbolDump = tests.expect(value: try .init(loading: $0,
                     from: symbols,
                     base: base,
-                    as: .swift)
+                    as: .swift))
+                else
+                {
+                    return nil
+                }
+
                 try typeChecker.add(symbols: symbols)
                 return (
                     typeChecker.declarations(in: $0, language: .swift),

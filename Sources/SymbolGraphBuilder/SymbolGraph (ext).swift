@@ -37,7 +37,10 @@ extension SymbolGraph
                     loaded:[SSGC.SymbolDump]
                 ) = try profiler.measure(\.loadingSymbols)
                 {
-                    try culture.dependencies.reduce(into: ([], []))
+                    var constituents:[SymbolGraph.Module] = culture.dependencies
+                        constituents.append(culture.module)
+
+                    return try constituents.reduce(into: ([], []))
                     {
                         if  let dump:SSGC.SymbolDump = try symbolCache.load(module: $1.id,
                                 base: prefix,
@@ -52,7 +55,16 @@ extension SymbolGraph
                     }
                 }
 
-                print("missing modules:", symbols.missing)
+                print("Compiling documentation for \(id)...")
+
+                if !symbols.missing.isEmpty
+                {
+                    print("WARNING: \(symbols.missing.count) modules failed to dump symbols")
+                    for module:SymbolGraph.Module in symbols.missing
+                    {
+                        print("  - \(module.id)")
+                    }
+                }
 
                 let graphChecker:SSGC.TypeChecker = try profiler.measure(\.compiling)
                 {

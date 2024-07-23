@@ -23,8 +23,8 @@ extension PackageNode
         try self.init(id: id,
             predecessors: manifest.dependencies,
             platform: platform,
-            products: try manifest.products.filter { try predicate($0.type) },
-            targets: try .init(indexing: manifest.targets),
+            products: try manifest.products.values.filter { try predicate($0.type) },
+            targets: try .init(indexing: manifest.targets.values),
             root: manifest.root)
 
         if  let snippets:String = manifest.snippets
