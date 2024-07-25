@@ -10,11 +10,11 @@ extension SSGC
     struct BookSources
     {
         private(set)
-        var cultures:[NominalSources]
+        var cultures:[ModuleLayout]
         let root:PackageRoot
 
         private
-        init(cultures:[NominalSources] = [], root:PackageRoot)
+        init(cultures:[ModuleLayout] = [], root:PackageRoot)
         {
             self.cultures = cultures
             self.root = root
@@ -57,6 +57,13 @@ extension SSGC.BookSources:SSGC.DocumentationSources
 
     @_spi(testable) public
     var prefix:Symbol.FileBase? { .init(self.root.location.path.string) }
+
+
+    @_spi(testable) public
+    func constituents(of module:__owned SSGC.ModuleLayout) throws -> [SSGC.ModuleLayout]
+    {
+        [module]
+    }
 
     @_spi(testable) public
     func indexStore(for swift:SSGC.Toolchain) throws -> (any Markdown.SwiftLanguage.IndexStore)?

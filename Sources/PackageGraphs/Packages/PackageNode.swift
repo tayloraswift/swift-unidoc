@@ -14,9 +14,6 @@ struct PackageNode:Identifiable
     var dependencies:[any Identifiable<Symbol.Package>]
 
     public
-    var snippets:String
-
-    public
     var products:[SymbolGraph.Product]
     public
     var modules:[SymbolGraph.Module]
@@ -29,7 +26,6 @@ struct PackageNode:Identifiable
     @inlinable public
     init(id:Symbol.Package,
         dependencies:[any Identifiable<Symbol.Package>],
-        snippets:String = "Snippets",
         products:[SymbolGraph.Product],
         modules:[SymbolGraph.Module],
         exclude:[[String]],
@@ -37,7 +33,6 @@ struct PackageNode:Identifiable
     {
         self.id = id
         self.dependencies = dependencies
-        self.snippets = snippets
         self.products = products
         self.modules = modules
         self.exclude = exclude

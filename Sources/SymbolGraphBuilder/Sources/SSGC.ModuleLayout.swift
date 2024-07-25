@@ -6,7 +6,9 @@ import System
 extension SSGC
 {
     /// Stores information about the source files for a module.
-    struct NominalSources
+    @dynamicMemberLookup
+    @_spi(testable) public
+    struct ModuleLayout
     {
         private(set)
         var resources:[LazyFile]
@@ -14,9 +16,9 @@ extension SSGC
         /// in the relevant target’s sources directory.
         private(set)
         var markdown:[LazyFile]
-
+        /// Include paths for the module’s sources, usually appearing in C or C++ modules only.
         private(set)
-        var dependencies:[SymbolGraph.Module]
+        var include:[FilePath.Directory]
 
         private(set)
         var module:SymbolGraph.Module
@@ -25,24 +27,22 @@ extension SSGC
         private
         var origin:Origin?
 
-
         private
-        init(dependencies:[SymbolGraph.Module], module:SymbolGraph.Module, origin:Origin? = nil)
+        init(module:SymbolGraph.Module, origin:Origin? = nil)
         {
             self.resources = []
             self.markdown = []
-
-            self.dependencies = dependencies
+            self.include = []
             self.module = module
             self.origin = origin
         }
     }
 }
-extension SSGC.NominalSources
+extension SSGC.ModuleLayout
 {
     init(toolchain module:SymbolGraph.Module)
     {
-        self.init(dependencies: [], module: module)
+        self.init(module: module)
     }
 
     init(
@@ -50,19 +50,17 @@ extension SSGC.NominalSources
         bundle:borrowing FilePath.Directory,
         module:SymbolGraph.Module) throws
     {
-        self.init(dependencies: [], module: module)
+        self.init(module: module)
         try self.scan(bundle: bundle, package: package)
     }
 
     init(
-        include:inout [FilePath.Directory],
         exclude:borrowing [String],
         package:borrowing SSGC.PackageRoot,
-        dependencies:[SymbolGraph.Module],
         module:SymbolGraph.Module,
         count:[DefaultDirectory: Int]) throws
     {
-        self.init(dependencies: dependencies, module: module)
+        self.init(module: module)
 
         locations:
         if  let location:String = self.module.location
@@ -100,10 +98,17 @@ extension SSGC.NominalSources
             }
         }
 
-        include += try self.scan(exclude: exclude, package: package)
+        self.include = try self.scan(exclude: exclude, package: package)
     }
 }
-extension SSGC.NominalSources
+extension SSGC.ModuleLayout
+{
+    subscript<T>(dynamicMember keyPath:KeyPath<SymbolGraph.Module, T>) -> T
+    {
+        self.module[keyPath: keyPath]
+    }
+}
+extension SSGC.ModuleLayout
 {
     private mutating
     func scan(bundle directory:FilePath.Directory, package root:SSGC.PackageRoot) throws

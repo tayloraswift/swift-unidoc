@@ -208,7 +208,7 @@ extension SSGC.Compile
 
         if  self.name == .swift
         {
-            object = try workspace.build(some: SSGC.SpecialBuild.swift,
+            object = try workspace.build(some: SSGC.StandardLibraryBuild.swift,
                 toolchain: toolchain,
                 logger: logger,
                 status: status,

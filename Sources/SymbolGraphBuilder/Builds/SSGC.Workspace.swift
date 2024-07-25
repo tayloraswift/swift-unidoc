@@ -72,7 +72,7 @@ extension SSGC.Workspace
     }
 
     public
-    func build(special build:SSGC.SpecialBuild,
+    func build(special build:SSGC.StandardLibraryBuild,
         with swift:SSGC.Toolchain,
         clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
@@ -98,29 +98,10 @@ extension SSGC.Workspace
             into: artifacts,
             with: swift)
 
-        let symbols:SSGC.SymbolDumps = try .collect(from: artifacts)
-        let index:(any Markdown.SwiftLanguage.IndexStore)?
-        do
-        {
-            index = try package.indexStore(for: swift)
-        }
-        catch let error
-        {
-            print("""
-                Couldn’t load IndexStoreDB library, advanced syntax highlighting will be \
-                disabled! (\(error))
-                """)
-            index = nil
-        }
-
-        let compiled:SymbolGraph = try .compile(
-            cultures: package.cultures,
-            snippets: package.snippets,
-            symbols: symbols,
-            prefix: package.prefix,
+        let documentation:SymbolGraph = try package.link(symbols: try .collect(from: artifacts),
             logger: logger,
-            index: index)
+            with: swift)
 
-        return .init(metadata: metadata, graph: compiled)
+        return .init(metadata: metadata, graph: documentation)
     }
 }

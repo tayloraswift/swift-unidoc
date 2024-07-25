@@ -6,20 +6,20 @@ extension SSGC.ModuleGraph
     struct Vertex:Identifiable
     {
         let id:SSGC.PackageGraph.Vertex
-        let module:SymbolGraph.Module
+        let layout:SSGC.ModuleLayout
 
         private
-        init(id:SSGC.PackageGraph.Vertex, module:SymbolGraph.Module)
+        init(id:SSGC.PackageGraph.Vertex, layout:SSGC.ModuleLayout)
         {
             self.id = id
-            self.module = module
+            self.layout = layout
         }
     }
 }
 extension SSGC.ModuleGraph.Vertex
 {
-    init(module:SymbolGraph.Module, in package:Symbol.Package)
+    init(module layout:SSGC.ModuleLayout, in package:Symbol.Package)
     {
-        self.init(id: .init(package: package, module: module.id), module: module)
+        self.init(id: .init(package: package, module: layout.module.id), layout: layout)
     }
 }

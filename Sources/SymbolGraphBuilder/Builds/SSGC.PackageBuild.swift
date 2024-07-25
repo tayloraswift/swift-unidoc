@@ -257,9 +257,6 @@ extension SSGC.PackageBuild
 
         //  Dump the standard library’s symbols
         let standardLibrary:SSGC.StandardLibrary = .init(platform: try swift.platform())
-        try swift.dump(modules: standardLibrary.modules,
-            to: artifacts)
-
         for pin:SPM.DependencyPin in pins
         {
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
@@ -276,11 +273,60 @@ extension SSGC.PackageBuild
             with: &manifest,
             as: self.id.package)
 
+        var modulesToDump:[Symbol.Module: [FilePath.Directory]] = [:]
+        for module:SymbolGraph.Module in standardLibrary.modules
+        {
+            modulesToDump[module.id] = []
+        }
+        for module:SSGC.ModuleLayout in modules.sinkLayout.cultures
+        {
+            let constituents:[SSGC.ModuleLayout] = try modules.constituents(of: module)
+            let include:[FilePath.Directory] = constituents.reduce(into: [scratch.include])
+            {
+                $0 += $1.include
+            }
+            for constituent:SSGC.ModuleLayout in constituents
+            {
+                //  The Swift compiler won’t generate these automatically, so we need to extract
+                //  the symbols manually.
+                switch constituent.language
+                {
+                case .c?:   break
+                case .cpp?: break
+                default:    continue
+                }
+
+                modulesToDump[constituent.id] = include
+            }
+        }
+        for (module, include):(Symbol.Module, [FilePath.Directory]) in modulesToDump.sorted(
+            by: { $0.key < $1.key })
+        {
+            try swift.dump(module: module, to: artifacts, options: .default, include: include)
+        }
+
         //  This step is considered part of documentation building.
-        let sources:SSGC.PackageSources
+        var sources:SSGC.PackageSources = .init(scratch: scratch, modules: modules)
         do
         {
-            sources = try .init(scanning: modules, scratch: scratch)
+            let snippetsDirectory:FilePath.Component
+            if  let customDirectory:String = manifest.snippets
+            {
+                guard
+                let customDirectory:FilePath.Component = .init(customDirectory)
+                else
+                {
+                    throw SSGC.SnippetDirectoryError.invalid(customDirectory)
+                }
+
+                snippetsDirectory = customDirectory
+            }
+            else
+            {
+                snippetsDirectory = "Snippets"
+            }
+
+            try sources.detect(snippets: snippetsDirectory)
         }
         catch let error
         {
@@ -302,7 +348,7 @@ extension SSGC.PackageBuild
             manifests: manifestVersions,
             requirements: manifest.requirements,
             dependencies: try modules.dependenciesUsed(pins: pins),
-            products: .init(viewing: modules.package.products),
+            products: .init(viewing: modules.sink.products),
             display: manifest.name,
             root: sources.prefix)
 

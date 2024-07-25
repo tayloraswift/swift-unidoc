@@ -71,8 +71,8 @@ extension SPM.Manifest
 }
 extension SPM.Manifest
 {
-    /// The name of the snippets directory. This is supposed to be configurable, but due to
-    /// sheer incompetence, it is currently always the string `Snippets`.
+    /// The name of the snippets directory. This is supposed to be configurable, but in reality
+    /// it is not, so this always returns nil.
     @inlinable public
     var snippets:String? { nil }
 

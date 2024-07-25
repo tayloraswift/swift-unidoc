@@ -4,7 +4,7 @@ import System
 extension SSGC
 {
     public
-    struct SpecialBuild
+    struct StandardLibraryBuild
     {
         private
         init()
@@ -12,12 +12,12 @@ extension SSGC
         }
     }
 }
-extension SSGC.SpecialBuild
+extension SSGC.StandardLibraryBuild
 {
     public static
     var swift:Self { .init() }
 }
-extension SSGC.SpecialBuild:SSGC.DocumentationBuild
+extension SSGC.StandardLibraryBuild:SSGC.DocumentationBuild
 {
     func compile(updating _:SSGC.StatusStream?,
         into artifacts:FilePath.Directory,
@@ -31,8 +31,12 @@ extension SSGC.SpecialBuild:SSGC.DocumentationBuild
             triple: swift.triple,
             products: standardLibrary.products)
 
-        try swift.dump(modules: standardLibrary.modules, to: artifacts)
-        let sources:SSGC.SpecialSources = .init(modules: standardLibrary.modules)
+        for module:SymbolGraph.Module in standardLibrary.modules
+        {
+            try swift.dump(module: module.id, to: artifacts)
+        }
+
+        let sources:SSGC.StandardLibrarySources = .init(modules: standardLibrary.modules)
         return (metadata, sources)
     }
 }

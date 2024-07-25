@@ -143,7 +143,8 @@ extension SSGC.PackageGraph
 
         let standardLibrary:SSGC.StandardLibrary = .init(platform: self.platform)
 
-        return try .init(standardLibrary: standardLibrary.modules,
+        return try .init(
+            standardLibrary: standardLibrary.modules.map(SSGC.ModuleLayout.init(toolchain:)),
             sparseEdges: self.sparseEdges,
             dependencies: dependencies,
             sink: try .all(flattening: sinkManifest, on: self.platform, as: id))

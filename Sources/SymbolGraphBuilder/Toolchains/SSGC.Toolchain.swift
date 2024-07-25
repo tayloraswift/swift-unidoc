@@ -346,121 +346,94 @@ extension SSGC.Toolchain
 {
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
-    func dump(modules:[SymbolGraph.Module],
+    func dump(module id:Symbol.Module,
         to output:FilePath.Directory,
         options:SymbolDumpOptions = .default,
         include:[FilePath.Directory] = []) throws
     {
-        for module:SymbolGraph.Module in modules
+        print("Dumping symbols for module '\(id)'")
+
+        var arguments:[String] =
+        [
+            "symbolgraph-extract",
+
+            "-module-name",                     "\(id)",
+            "-target",                          "\(self.triple)",
+            "-output-dir",                      "\(output.path)",
+        ]
+
+        arguments.append("-minimum-access-level")
+        arguments.append("\(options.minimumACL)")
+
+        if  options.emitExtensionBlockSymbols
         {
-            let skip:Bool
-            switch module.type
-            {
-            case .binary:       skip = false
-            case .executable:   skip = true
-            case .regular:      skip = false
-            case .macro:        skip = false
-            case .plugin:       skip = true
-            case .snippet:      skip = true
-            case .system:       skip = true
-            case .test:         skip = true
-            case .book:         skip = true
-            }
+            arguments.append("-emit-extension-block-symbols")
+        }
+        if  options.includeInterfaceSymbols
+        {
+            arguments.append("-include-spi-symbols")
+        }
+        if  options.skipInheritedDocs
+        {
+            arguments.append("-skip-inherited-docs")
+        }
 
-            let id:Symbol.Module = module.id
+        #if os(macOS)
+        //  On macOS, dumping symbols without specifying the SDK will always fail.
+        //  Therefore, we always provide a default SDK.
+        let swiftSDK:SSGC.AppleSDK? = self.swiftSDK ?? .macOS
+        #else
+        let swiftSDK:SSGC.AppleSDK? = self.swiftSDK
+        #endif
 
-            if  skip
-            {
-                print("Skipping symbol dump for \(module.type) module '\(id)'")
-                continue
-            }
-            else
-            {
-                print("Dumping symbols for \(module.type) module '\(id)'")
-            }
+        if  let swiftSDK:SSGC.AppleSDK
+        {
+            arguments.append("-sdk")
+            arguments.append(swiftSDK.path)
+        }
 
-            var arguments:[String] =
-            [
-                "symbolgraph-extract",
+        if  self.pretty
+        {
+            arguments.append("-pretty-print")
+        }
+        for include:FilePath.Directory in include
+        {
+            arguments.append("-I")
+            arguments.append("\(include)")
+        }
 
-                "-module-name",                     "\(id)",
-                "-target",                          "\(self.triple)",
-                "-output-dir",                      "\(output.path)",
-            ]
+        let environment:SystemProcess.Environment = .inherit
+        {
+            $0["SWIFT_BACKTRACE"] = "enable=no"
+        }
+        let extractor:SystemProcess = try .init(command: self.swiftCommand,
+            arguments: arguments,
+            echo: true,
+            with: environment)
 
-            arguments.append("-minimum-access-level")
-            arguments.append("\(options.minimumACL)")
-
-            if  options.emitExtensionBlockSymbols
-            {
-                arguments.append("-emit-extension-block-symbols")
-            }
-            if  options.includeInterfaceSymbols
-            {
-                arguments.append("-include-spi-symbols")
-            }
-            if  options.skipInheritedDocs
-            {
-                arguments.append("-skip-inherited-docs")
-            }
-
-            #if os(macOS)
-            //  On macOS, dumping symbols without specifying the SDK will always fail.
-            //  Therefore, we always provide a default SDK.
-            let swiftSDK:SSGC.AppleSDK? = self.swiftSDK ?? .macOS
-            #else
-            let swiftSDK:SSGC.AppleSDK? = self.swiftSDK
-            #endif
-
-            if  let swiftSDK:SSGC.AppleSDK
-            {
-                arguments.append("-sdk")
-                arguments.append(swiftSDK.path)
-            }
-
-            if  self.pretty
-            {
-                arguments.append("-pretty-print")
-            }
-            for include:FilePath.Directory in include
-            {
-                arguments.append("-I")
-                arguments.append("\(include)")
-            }
-
-            let environment:SystemProcess.Environment = .inherit
-            {
-                $0["SWIFT_BACKTRACE"] = "enable=no"
-            }
-            let extractor:SystemProcess = try .init(command: self.swiftCommand,
-                arguments: arguments,
-                echo: true,
-                with: environment)
-
-            do
-            {
-                try extractor()
-            }
-            catch SystemProcessError.exit(139, _)
-            {
-                print("""
-                    Failed to dump symbols for module '\(id)' due to SIGSEGV \
-                    from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
-                    compiler; see https://github.com/apple/swift/issues/68767.
-                    """)
-            }
-            catch SystemProcessError.exit(134, _)
-            {
-                print("""
-                    Failed to dump symbols for module '\(id)' due to SIGABRT \
-                    from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
-                    compiler; see https://github.com/swiftlang/swift/issues/75318.
-                    """)
-            }
-            catch SystemProcessError.exit(let code, let invocation)
-            {
-                throw SSGC.PackageBuildError.swift_symbolgraph_extract(code, invocation)
-            }
+        do
+        {
+            try extractor()
+        }
+        catch SystemProcessError.exit(139, _)
+        {
+            print("""
+                Failed to dump symbols for module '\(id)' due to SIGSEGV \
+                from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
+                compiler; see https://github.com/apple/swift/issues/68767.
+                """)
+        }
+        catch SystemProcessError.exit(134, _)
+        {
+            print("""
+                Failed to dump symbols for module '\(id)' due to SIGABRT \
+                from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
+                compiler; see https://github.com/swiftlang/swift/issues/75318.
+                """)
+        }
+        catch SystemProcessError.exit(let code, let invocation)
+        {
+            throw SSGC.PackageBuildError.swift_symbolgraph_extract(code, invocation)
         }
     }
 }
