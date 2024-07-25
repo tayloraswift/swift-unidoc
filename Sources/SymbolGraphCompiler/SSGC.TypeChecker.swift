@@ -9,13 +9,16 @@ extension SSGC
     struct TypeChecker
     {
         private
+        let ignoreExportedInterfaces:Bool
+        private
         var declarations:DeclarationTable
         private
         var extensions:ExtensionTable
 
         public
-        init(threshold:Symbol.ACL = .public)
+        init(ignoreExportedInterfaces:Bool = true, threshold:Symbol.ACL = .public)
         {
+            self.ignoreExportedInterfaces = ignoreExportedInterfaces
             self.declarations = .init(threshold: threshold)
             self.extensions = .init()
         }
@@ -197,6 +200,11 @@ extension SSGC.TypeChecker
 
         if  member.culture != culture
         {
+            if  self.ignoreExportedInterfaces
+            {
+                return
+            }
+
             throw AssertionError.init(message: """
                 Found cross-module member relationship \
                 (from \(member.culture) in \(culture)), which should not be possible in \
@@ -293,6 +301,11 @@ extension SSGC.TypeChecker
 
             if  type.culture != culture
             {
+                if  self.ignoreExportedInterfaces
+                {
+                    return
+                }
+
                 throw AssertionError.init(message: """
                     Found cross-module conformance relationship \
                     (from \(type.culture) in \(culture)), which should not be possible in \
@@ -348,6 +361,11 @@ extension SSGC.TypeChecker
 
         if  subform.culture != culture
         {
+            if  self.ignoreExportedInterfaces
+            {
+                return
+            }
+
             throw AssertionError.init(message: """
                 Found retroactive superform relationship (from \(subform.culture) in \(culture))
                 """)
@@ -392,6 +410,11 @@ extension SSGC.TypeChecker
             guard heir.culture == culture
             else
             {
+                if  self.ignoreExportedInterfaces
+                {
+                    return
+                }
+
                 throw AssertionError.init(message: """
                     Found direct cross-module feature inheritance relationship in culture \
                     '\(culture)' adding feature '\(feature.value.path)' to type \
