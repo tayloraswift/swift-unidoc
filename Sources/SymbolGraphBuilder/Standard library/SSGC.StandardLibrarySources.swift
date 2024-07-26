@@ -18,7 +18,7 @@ extension SSGC
 }
 extension SSGC.StandardLibrarySources
 {
-    init(modules:consuming [SymbolGraph.Module])
+    init(modules:[SymbolGraph.Module])
     {
         self.init(cultures: modules.map(SSGC.ModuleLayout.init(toolchain:)))
     }

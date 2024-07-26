@@ -117,10 +117,10 @@ extension SSGC.Linker.Tables
     /// Indexes the declaration extended by the given extension and appends the (empty)
     /// declaration to the symbol graph, if it has not already been indexed. (This function
     /// checks for duplicates.)
+    @discardableResult
     mutating
-    func allocate(extension:SSGC.Extension) -> Int32
+    func allocate(decl:Symbol.Decl) -> Int32
     {
-        let decl:Symbol.Decl = `extension`.extended.type
         let scalar:Int32 =
         {
             switch $0

@@ -43,11 +43,11 @@ extension SSGC
         private
         var collations:ArticleCollations
 
-        public
+        private
         init(
-            plugins:[any Markdown.CodeLanguageType] = [],
+            plugins:[any Markdown.CodeLanguageType],
             modules:[SymbolGraph.Module],
-            root:Symbol.FileBase? = nil)
+            root:Symbol.FileBase?)
         {
             let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
             //  If we were given a plugin that says it can highlight swift,
@@ -67,7 +67,31 @@ extension SSGC
         }
     }
 }
+extension SSGC.Linker
+{
+    public
+    init(
+        plugins:[any Markdown.CodeLanguageType] = [],
+        modules:[SymbolGraph.Module],
+        allocating declarations:[SSGC.Declarations],
+        extensions:[SSGC.Extensions],
+        root:Symbol.FileBase? = nil)
+    {
+        self.init(plugins: plugins, modules: modules, root: root)
 
+        for declarations:SSGC.Declarations in declarations
+        {
+            self.allocate(declarations: declarations)
+        }
+        for extensions:SSGC.Extensions in extensions
+        {
+            for node:SSGC.Extension in extensions.compiled
+            {
+                self.tables.allocate(decl: node.extended.type)
+            }
+        }
+    }
+}
 extension SSGC.Linker
 {
     private mutating
@@ -98,7 +122,7 @@ extension SSGC.Linker
     ///
     /// For best results (smallest/most-orderly linked symbolgraph), you should
     /// call this method first, before calling any others.
-    public mutating
+    private mutating
     func allocate(declarations:SSGC.Declarations)
     {
         guard
@@ -163,7 +187,6 @@ extension SSGC.Linker
 }
 extension SSGC.Linker
 {
-    /// Allocates addresses for the given array of compiled extensions.
     /// This function also exposes any features manifested by the extensions for
     /// codelink resolution.
     ///
@@ -175,7 +198,7 @@ extension SSGC.Linker
     /// For best results (smallest/most-orderly linked symbolgraph), you should
     /// call this method second, after calling ``allocate(decls:)``.
     public mutating
-    func allocate(extensions:SSGC.Extensions) -> [(Int32, Int)]
+    func unfurl(extensions:SSGC.Extensions) -> [(Int32, Int)]
     {
         guard
         let culture:Int = self.tables.modules[extensions.culture]
@@ -186,10 +209,15 @@ extension SSGC.Linker
 
         return extensions.compiled.map
         {
+            let extendee:Int32 = self.tables.intern($0.extended.type)
+            if  extendee >= self.tables.graph.decls.nodes.endIndex
+            {
+                fatalError("Extendee '\($0.extended.type)' was never allocated!")
+            }
+
             let namespace:Int = self.tables.intern($0.signature.extended.namespace)
             let qualifier:Symbol.Module = self.tables.graph.namespaces[namespace]
 
-            let extendee:Int32 = self.tables.allocate(extension: $0)
 
             let conformances:[Int32] = self.addresses(of: $0.conformances)
             let features:[Int32] = self.addresses(of: $0.features)

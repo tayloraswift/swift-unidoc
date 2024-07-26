@@ -12,21 +12,6 @@ import System
 
 extension SSGC
 {
-    @_spi(testable) public
-    struct ModuleBuildPlan
-    {
-        let layout:ModuleLayout
-        let constituents:[ModuleLayout]
-
-        init(layout:ModuleLayout, constituents:[ModuleLayout])
-        {
-            self.layout = layout
-            self.constituents = constituents
-        }
-    }
-}
-extension SSGC
-{
     protocol DocumentationSources
     {
         var cultures:[ModuleLayout] { get }
@@ -144,22 +129,19 @@ extension SSGC.DocumentationSources
                 index = nil
             }
 
-            var linker:SSGC.Linker = .init(
-                plugins: [.swift(index: index)],
-                modules: cultures.map(\.module),
-                root: prefix)
-
-            profiler.measure(\.linking)
+            var linker:SSGC.Linker = profiler.measure(\.linking)
             {
-                for declarations:SSGC.Declarations in declarationsCompiled
-                {
-                    linker.allocate(declarations: declarations)
-                }
+                .init(
+                    plugins: [.swift(index: index)],
+                    modules: cultures.map(\.module),
+                    allocating: declarationsCompiled,
+                    extensions: extensionsCompiled,
+                    root: prefix)
             }
 
             let extensionPositions:[[(Int32, Int)]] = profiler.measure(\.linking)
             {
-                extensionsCompiled.map{ linker.allocate(extensions: $0) }
+                extensionsCompiled.map{ linker.unfurl(extensions: $0) }
             }
 
             let resources:[[SSGC.LazyFile]] = cultures.map(\.resources)

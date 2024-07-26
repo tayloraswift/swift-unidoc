@@ -7,7 +7,7 @@ extension PackageNode
     public static
     func all(flattening manifest:borrowing SPM.Manifest,
         on platform:borrowing SymbolGraphMetadata.Platform,
-        as id:consuming Symbol.Package) throws -> Self
+        as id:__owned Symbol.Package) throws -> Self
     {
         try .init(as: id, flattening: manifest, platform: platform) { _ in true }
     }
