@@ -149,13 +149,21 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     func compile(updating status:SSGC.StatusStream?,
         into artifacts:FilePath.Directory,
-        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata,
-        any SSGC.DocumentationSources)
+        with swift:SSGC.Toolchain,
+        clean:Bool = true) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
         switch self.type
         {
-        case .package:  try self.compileSwiftPM(updating: status, into: artifacts, with: swift)
-        case .book:     try self.compileBook(updating: status, into: artifacts, with: swift)
+        case .package:
+            try self.compileSwiftPM(updating: status,
+                into: artifacts,
+                with: swift,
+                clean: clean)
+
+        case .book:
+            try self.compileBook(updating: status,
+                into: artifacts,
+                with: swift)
         }
     }
 }
@@ -208,7 +216,8 @@ extension SSGC.PackageBuild
     @_spi(testable) public
     func compileSwiftPM(updating status:SSGC.StatusStream? = nil,
         into artifacts:FilePath.Directory,
-        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
+        with swift:SSGC.Toolchain,
+        clean:Bool = true) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         switch self.id
         {
@@ -245,8 +254,9 @@ extension SSGC.PackageBuild
         do
         {
             scratch = try swift.build(package: self.root, flags: self.flags.dumping(
-                symbols: .default,
-                to: artifacts))
+                    symbols: .default,
+                    to: artifacts),
+                clean: clean)
         }
         catch SystemProcessError.exit(let code, let invocation)
         {

@@ -21,8 +21,8 @@ extension SSGC.StandardLibraryBuild:SSGC.DocumentationBuild
 {
     func compile(updating _:SSGC.StatusStream?,
         into artifacts:FilePath.Directory,
-        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata,
-        any SSGC.DocumentationSources)
+        with swift:SSGC.Toolchain,
+        clean _:Bool) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
         let standardLibrary:SSGC.StandardLibrary = .init(platform: try swift.platform())
 

@@ -96,7 +96,8 @@ extension SSGC.Workspace
 
         (metadata, package) = try build.compile(updating: status,
             into: artifacts,
-            with: swift)
+            with: swift,
+            clean: clean)
 
         let documentation:SymbolGraph = try package.link(symbols: try .collect(from: artifacts),
             logger: logger,

@@ -304,10 +304,16 @@ extension SSGC.Toolchain
     }
 
     func build(package:FilePath.Directory,
-        flags:SSGC.PackageBuild.Flags = .init()) throws -> SSGC.PackageBuildDirectory
+        flags:SSGC.PackageBuild.Flags = .init(),
+        clean:Bool) throws -> SSGC.PackageBuildDirectory
     {
         let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
             location: package / self.scratch)
+
+        if  clean
+        {
+            try scratch.location.remove()
+        }
 
         var arguments:[String] =
         [
