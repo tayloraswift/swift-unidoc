@@ -18,7 +18,7 @@ import Unidoc
 extension SSGC
 {
     public
-    struct Linker:~Copyable
+    struct Linker//:~Copyable
     {
         private
         let doccommentParser:Markdown.Parser<Markdown.SwiftComment>
