@@ -118,20 +118,20 @@ extension SSGC.TypeChecker
         {
             for conformance:Symbol.ConformanceRelationship in part.conformances
             {
-                try self.insert(conformance, by: culture)
+                try conformance.do { try self.insert($0, by: culture) }
             }
             for inheritance:Symbol.InheritanceRelationship in part.inheritances
             {
-                try self.insert(inheritance, by: culture)
+                try inheritance.do { try self.insert($0, by: culture) }
             }
 
             for nesting:Symbol.RequirementRelationship in part.requirements
             {
-                try self.assign(nesting)
+                try nesting.do { try self.assign($0) }
             }
             for nesting:Symbol.MemberRelationship in part.memberships
             {
-                try self.assign(nesting, by: culture)
+                try nesting.do { try self.assign($0, by: culture) }
             }
         }
         //  SymbolGraphGen fails to emit a `memberOf` edge if the member is a default
@@ -162,37 +162,29 @@ extension SSGC.TypeChecker
         {
             for relationship:Symbol.FeatureRelationship in part.featurings
             {
-                try self.insert(relationship, by: culture)
+                try relationship.do { try self.insert($0, by: culture) }
             }
             for relationship:Symbol.IntrinsicWitnessRelationship in part.witnessings
             {
-                try self.insert(relationship, by: culture)
+                try relationship.do { try self.insert($0, by: culture) }
             }
             for relationship:Symbol.OverrideRelationship in part.overrides
             {
-                try self.insert(relationship, by: culture)
+                try relationship.do { try self.insert($0, by: culture) }
             }
         }
     }
 }
-extension SSGC.TypeChecker
-{
+extension SSGC.TypeChecker{
     /// Note that this is culture-agnostic because requirement relationships never cross
     /// modules.
     private mutating
     func assign(_ relationship:Symbol.RequirementRelationship) throws
     {
-        do
-        {
-            let target:SSGC.DeclObject = try self.declarations[relationship.target]
-            let source:SSGC.DeclObject = try self.declarations[relationship.source]
-            try source.assign(scope: target.id, by: relationship)
-            try target.add(requirement: source.id)
-        }
-        catch let error
-        {
-            throw SSGC.EdgeError.init(underlying: error, in: relationship)
-        }
+        let target:SSGC.DeclObject = try self.declarations[relationship.target]
+        let source:SSGC.DeclObject = try self.declarations[relationship.source]
+        try source.assign(scope: target.id, by: relationship)
+        try target.add(requirement: source.id)
     }
 
     private mutating
