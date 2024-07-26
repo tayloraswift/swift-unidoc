@@ -39,10 +39,10 @@ extension SSGC
         {
             self.signature = signature
             self.path = path
-            self.conformances = []
-            self.features = []
-            self.nested = []
-            self.blocks = []
+            self.conformances = conformances
+            self.features = features
+            self.nested = nested
+            self.blocks = blocks
         }
     }
 }
