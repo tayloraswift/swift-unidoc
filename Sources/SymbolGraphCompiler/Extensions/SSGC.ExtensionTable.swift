@@ -124,13 +124,26 @@ extension SSGC.ExtensionTable
                 }
             }
 
+            let conformances:[Symbol.Decl] = $1.conformances.sorted(selecting: culture)
+            let features:[Symbol.Decl] = $1.features.sorted(selecting: culture)
+            let nested:[Symbol.Decl] = $1.nested.sorted(selecting: culture)
+
+            //  Do not emit empty extensions
+            if  conformances.isEmpty,
+                features.isEmpty,
+                nested.isEmpty,
+                blocks.isEmpty
+            {
+                return
+            }
+
             blocks.sort { $0.id.name < $1.id.name }
 
             $0.append(.init(signature: $1.signature,
                 path: $1.path,
-                conformances: $1.conformances.sorted(selecting: culture),
-                features: $1.features.sorted(selecting: culture),
-                nested: $1.nested.sorted(selecting: culture),
+                conformances: conformances,
+                features: features,
+                nested: nested,
                 blocks: blocks.map { $0.block }))
         }
     }
