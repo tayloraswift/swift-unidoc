@@ -25,7 +25,7 @@ extension SSGC.ExtendedTypes
         }
         else
         {
-            throw SSGC.UnclaimedBlockError.init(unclaimed: block)
+            throw SSGC.Extension.BlockError.unclaimed(block)
         }
     }
 }
@@ -40,7 +40,7 @@ extension SSGC.ExtendedTypes
             guard case nil = self.extendees.updateValue(edge.target, forKey: edge.source)
             else
             {
-                throw SSGC.DuplicateSymbolError.block(edge.source)
+                throw SSGC.Extension.BlockError.duplicate(edge.source)
             }
         }
     }

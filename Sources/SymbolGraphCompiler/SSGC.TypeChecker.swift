@@ -182,10 +182,17 @@ extension SSGC.TypeChecker
     private mutating
     func assign(_ relationship:Symbol.RequirementRelationship) throws
     {
-        let target:SSGC.DeclObject = try self.declarations[relationship.target]
-        let source:SSGC.DeclObject = try self.declarations[relationship.source]
-        try source.assign(scope: target.id, by: relationship)
-        try target.add(requirement: source.id)
+        do
+        {
+            let target:SSGC.DeclObject = try self.declarations[relationship.target]
+            let source:SSGC.DeclObject = try self.declarations[relationship.source]
+            try source.assign(scope: target.id, by: relationship)
+            try target.add(requirement: source.id)
+        }
+        catch let error
+        {
+            throw SSGC.EdgeError.init(underlying: error, in: relationship)
+        }
     }
 
     private mutating
