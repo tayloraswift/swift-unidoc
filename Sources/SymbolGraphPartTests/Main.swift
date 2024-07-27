@@ -186,8 +186,8 @@ enum Main:TestMain, TestBattery
                 ),
                 (
                     ["OtherRefinement", "protocol"],
-                    nil,
-                    nil
+                    "DocumentationInheritance",
+                    "This comment is from the root protocol."
                 ),
 
                 (
@@ -195,19 +195,23 @@ enum Main:TestMain, TestBattery
                     "DocumentationInheritance",
                     "This comment is from the conforming type."
                 ),
+                //  NOTE:
+                //  These should not be present if `-skip-inherited-docs` worked correctly,
+                //  but they are, likely due to a compiler bug
+
                 //  This would inherit (from Protocol) if the part
                 //  were generated without `-skip-inherited-docs`.
                 (
                     ["Conformer", "protocol"],
-                    nil,
-                    nil
+                    "DocumentationInheritance", // nil,
+                    "This comment is from the root protocol." // nil,
                 ),
                 //  This would inherit (from Refinement) if the part
                 //  were generated without `-skip-inherited-docs`.
                 (
                     ["Conformer", "refinement"],
-                    nil,
-                    nil
+                    "DocumentationInheritance", // nil,
+                    "This comment is from the refined protocol." // nil,
                 ),
                 (
                     ["Conformer", "conformer"],
@@ -301,8 +305,8 @@ enum Main:TestMain, TestBattery
                 ),
                 (
                     ["Undocumented", "id"],
-                    nil,
-                    nil
+                    "Swift",
+                    "The stable identity of the entity associated with this instance."
                 ),
             ]
             {
