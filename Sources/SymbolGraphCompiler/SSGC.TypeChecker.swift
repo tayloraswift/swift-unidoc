@@ -334,7 +334,15 @@ extension SSGC.TypeChecker
         case .block(let symbol):
             //  Look up the extension associated with this block name.
             typeExtension = try self.extensions[named: symbol]
-            typeConformed = try self.declarations[typeExtension.extended.type]
+
+            guard
+            let type:SSGC.DeclObject = self.declarations[visible: typeExtension.extended.type]
+            else
+            {
+                return
+            }
+
+            typeConformed = type
 
             guard typeExtension.conditions == conformance.conditions
             else
