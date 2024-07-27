@@ -1,6 +1,7 @@
 public
 protocol ProtocolA
 {
+    /// This documentation comment is from ``ProtocolA``.
     func f()
 }
 

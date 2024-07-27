@@ -50,5 +50,20 @@ extension Main.DefaultImplementations:CompilerTestBattery
                 "s22DefaultImplementations9ProtocolBPAAE1fyyF",
             ])
         }
+
+        let declsBySymbol:[Symbol.Decl: SSGC.Decl] = declarations.namespaces.reduce(into: [:])
+        {
+            for decl:SSGC.Decl in $1.decls
+            {
+                $0[decl.id] = decl
+            }
+        }
+
+        //  This checks that we are stripping the inherited documentation comment
+        if  let protocolB_f:SSGC.Decl = tests.expect(
+                value: declsBySymbol["s22DefaultImplementations9ProtocolBPAAE1fyyF"])
+        {
+            tests.expect(nil: protocolB_f.comment)
+        }
     }
 }

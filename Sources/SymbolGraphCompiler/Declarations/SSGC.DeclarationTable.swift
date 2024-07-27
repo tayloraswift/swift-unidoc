@@ -136,11 +136,24 @@ extension SSGC.DeclarationTable
     {
         let included:[Symbol.Module: [SSGC.Decl]] = self.decls.values.reduce(into: [:])
         {
-            if  $1.access >= self.threshold,
-                $1.culture == culture
+            guard $1.access >= self.threshold, $1.culture == culture
+            else
             {
-                $0[$1.namespace, default: []].append($1.value)
+                return
             }
+
+            var decl:SSGC.Decl = $1.value
+
+            //  Strip duplicated doccomments
+            if  let documentationComment:SSGC.DocumentationComment = decl.comment,
+                let origin:Symbol.Decl = decl.origin,
+                let originComment:SSGC.DocumentationComment = self.decls[origin]?.value.comment,
+                    originComment.text == documentationComment.text
+            {
+                decl.comment = nil
+            }
+
+            $0[$1.namespace, default: []].append(decl)
         }
 
         var namespaces:[(Symbol.Module, [SSGC.Decl])] = included.sorted
