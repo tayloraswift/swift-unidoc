@@ -30,7 +30,7 @@ extension SSGC
 extension SSGC.DocumentationSources
 {
     func link(symbols:SSGC.SymbolDumps,
-        logger:SSGC.DocumentationLogger?,
+        logger:SSGC.DocumentationLogger,
         with swift:SSGC.Toolchain) throws -> SymbolGraph
     {
         let cultures:[SSGC.ModuleLayout] = self.cultures
@@ -194,14 +194,7 @@ extension SSGC.DocumentationSources
                 return try linker.link(extensions: extensionPositions, articles: articles)
             }
 
-            if  let logger:SSGC.DocumentationLogger
-            {
-                try logger.emit(messages: linker.status())
-            }
-            else
-            {
-                linker.status().emit(colors: .enabled)
-            }
+            try logger.emit(messages: linker.status())
 
             print("""
                 Linked documentation!

@@ -68,7 +68,7 @@ extension SSGC.Workspace
         with swift:SSGC.Toolchain,
         clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, logger: nil, status: nil, clean: clean)
+        try self.build(some: build, toolchain: swift, status: nil, clean: clean)
     }
 
     public
@@ -76,15 +76,15 @@ extension SSGC.Workspace
         with swift:SSGC.Toolchain,
         clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, logger: nil, status: nil, clean: clean)
+        try self.build(some: build, toolchain: swift, status: nil, clean: clean)
     }
 }
 extension SSGC.Workspace
 {
     func build<Build>(some build:consuming Build,
         toolchain swift:SSGC.Toolchain,
-        logger:SSGC.DocumentationLogger?,
         status:SSGC.StatusStream?,
+        logger:SSGC.DocumentationLogger = .init(file: nil),
         clean:Bool) throws -> SymbolGraphObject<Void>
         where Build:SSGC.DocumentationBuild
     {

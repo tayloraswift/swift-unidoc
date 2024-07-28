@@ -194,21 +194,44 @@ extension SSGC.Compile
     private
     func launch(workspace:SSGC.Workspace, status:SSGC.StatusStream?) throws
     {
+        if  let path:FilePath = self.outputLog
+        {
+            try path.open(.writeOnly,
+                permissions: (.rw, .r, .r),
+                options: [.create, .truncate])
+            {
+                try self.launch(workspace: workspace,
+                    status: status,
+                    logger: .init(file: $0))
+            }
+        }
+        else
+        {
+            try self.launch(workspace: workspace,
+                status: status,
+                logger: .init(file: nil))
+        }
+    }
+
+    private
+    func launch(workspace:SSGC.Workspace,
+        status:SSGC.StatusStream?,
+        logger:SSGC.DocumentationLogger) throws
+    {
         let toolchain:SSGC.Toolchain = try .detect(swiftRuntime: self.swiftRuntime,
             swiftCache: self.swiftCache,
             swiftPath: self.swiftPath,
             swiftSDK: self.swiftSDK,
             pretty: self.pretty)
 
-        let logger:SSGC.DocumentationLogger? = self.outputLog.map(SSGC.DocumentationLogger.init)
         let object:SymbolGraphObject<Void>
 
         if  self.name == .swift
         {
             object = try workspace.build(some: SSGC.StandardLibraryBuild.swift,
                 toolchain: toolchain,
-                logger: logger,
                 status: status,
+                logger: logger,
                 clean: self.cleanArtifacts)
         }
         else if
@@ -228,8 +251,8 @@ extension SSGC.Compile
 
             object = try workspace.build(some: build,
                 toolchain: toolchain,
-                logger: logger,
                 status: status,
+                logger: logger,
                 clean: self.cleanArtifacts)
         }
         else if
@@ -261,8 +284,8 @@ extension SSGC.Compile
 
             object = try workspace.build(some: build,
                 toolchain: toolchain,
-                logger: logger,
                 status: status,
+                logger: logger,
                 clean: self.cleanArtifacts)
         }
         else
