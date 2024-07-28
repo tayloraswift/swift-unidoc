@@ -7,6 +7,7 @@ enum Main:TestMain
     let all:[any TestBattery.Type] =
     [
         DefaultImplementations.self,
+        FeatureInheritance.self,
         ExternalExtensionsWithConformances.self,
         ExternalExtensionsWithConstraints.self,
         InternalExtensionsWithConformances.self,

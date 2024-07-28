@@ -65,99 +65,44 @@ extension SSGC.Workspace
 {
     public
     func build(package build:SSGC.PackageBuild,
-        with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
+        with swift:SSGC.Toolchain,
+        clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, logger: nil, status: nil)
+        try self.build(some: build, toolchain: swift, status: nil, clean: clean)
     }
 
     public
-    func build(special build:SSGC.SpecialBuild,
-        with swift:SSGC.Toolchain) throws -> SymbolGraphObject<Void>
+    func build(special build:SSGC.StandardLibraryBuild,
+        with swift:SSGC.Toolchain,
+        clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, logger: nil, status: nil)
+        try self.build(some: build, toolchain: swift, status: nil, clean: clean)
     }
 }
 extension SSGC.Workspace
 {
     func build<Build>(some build:consuming Build,
         toolchain swift:SSGC.Toolchain,
-        logger:SSGC.DocumentationLogger?,
-        status:SSGC.StatusStream?) throws -> SymbolGraphObject<Void>
+        status:SSGC.StatusStream?,
+        logger:SSGC.DocumentationLogger = .init(file: nil),
+        clean:Bool) throws -> SymbolGraphObject<Void>
         where Build:SSGC.DocumentationBuild
     {
         let metadata:SymbolGraphMetadata
         let package:any SSGC.DocumentationSources
 
-        let output:FilePath.Directory = self.artifacts
-        try output.create(clean: true)
+        let artifacts:FilePath.Directory = self.artifacts
+        try artifacts.create(clean: clean)
 
         (metadata, package) = try build.compile(updating: status,
-            into: output,
+            into: artifacts,
+            with: swift,
+            clean: clean)
+
+        let documentation:SymbolGraph = try package.link(symbols: try .collect(from: artifacts),
+            logger: logger,
             with: swift)
 
-        let symbols:[Symbol.Module: [SymbolGraphPart.ID]] = try output.reduce(
-            into: [:])
-        {
-            //  We don’t want to *parse* the JSON yet to discover the culture,
-            //  because the JSON can be very large, and parsing JSON is very
-            //  expensive (compared to parsing BSON). So we trust that the file
-            //  name is correct and indicates what is contained within the file.
-            let filename:FilePath.Component = try $1.get()
-            guard
-            let id:SymbolGraphPart.ID = .init("\(filename)")
-            else
-            {
-                return
-            }
-
-            switch id.namespace
-            {
-            case    "CDispatch",                    // too low-level
-                    "CFURLSessionInterface",        // too low-level
-                    "CFXMLInterface",               // too low-level
-                    "CoreFoundation",               // too low-level
-                    "Glibc",                        // linux-gnu specific
-                    "SwiftGlibc",                   // linux-gnu specific
-                    "SwiftOnoneSupport",            // contains no symbols
-                    "SwiftOverlayShims",            // too low-level
-                    "SwiftShims",                   // contains no symbols
-                    "_Builtin_intrinsics",          // contains only one symbol, free(_:)
-                    "_Builtin_stddef_max_align_t",  // contains only two symbols
-                    "_InternalStaticMirror",        // unbuildable
-                    "_InternalSwiftScan",           // unbuildable
-                    "_SwiftConcurrencyShims",       // contains only two symbols
-                    "std":                          // unbuildable
-                return
-
-            default:
-                $0[id.culture, default: []].append(id)
-            }
-        }
-
-        let index:(any Markdown.SwiftLanguage.IndexStore)?
-        do
-        {
-            index = try package.indexStore(for: swift)
-        }
-        catch let error
-        {
-            print("""
-                Couldn’t load IndexStoreDB library, advanced syntax highlighting will be \
-                disabled! (\(error))
-                """)
-            index = nil
-        }
-
-        let compiled:SymbolGraph = try .compile(
-            cultures: package.cultures.map
-            {
-                ($0, .init(location: output, parts: symbols[$0.module.id, default: []]))
-            },
-            snippets: package.snippets,
-            prefix: package.prefix,
-            logger: logger,
-            index: index)
-
-        return .init(metadata: metadata, graph: compiled)
+        return .init(metadata: metadata, graph: documentation)
     }
 }

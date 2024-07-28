@@ -1,7 +1,7 @@
 import SymbolGraphs
 import System
 
-extension SSGC.NominalSources
+extension SSGC.ModuleLayout
 {
     enum DefaultDirectory:Equatable, Hashable
     {
@@ -11,7 +11,7 @@ extension SSGC.NominalSources
         case tests
     }
 }
-extension SSGC.NominalSources.DefaultDirectory
+extension SSGC.ModuleLayout.DefaultDirectory
 {
     init?(for type:SymbolGraph.ModuleType)
     {
@@ -29,7 +29,7 @@ extension SSGC.NominalSources.DefaultDirectory
         }
     }
 }
-extension SSGC.NominalSources.DefaultDirectory
+extension SSGC.ModuleLayout.DefaultDirectory
 {
     var name:FilePath.Component
     {

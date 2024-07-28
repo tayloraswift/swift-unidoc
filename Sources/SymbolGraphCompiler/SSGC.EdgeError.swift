@@ -5,27 +5,19 @@ import TraceableErrors
 extension SSGC
 {
     public
-    struct EdgeError:Error, Sendable
+    struct EdgeError<Relationship>:Error, Sendable where Relationship:SymbolRelationship
     {
         public
-        let relationship:Symbol.AnyRelationship
+        let relationship:Relationship
         public
         let underlying:any Error
 
         public
-        init(underlying:any Error, in relationship:Symbol.AnyRelationship)
+        init(underlying:any Error, in relationship:Relationship)
         {
             self.underlying = underlying
             self.relationship = relationship
         }
-    }
-}
-extension SSGC.EdgeError:Equatable
-{
-    public static
-    func == (lhs:Self, rhs:Self) -> Bool
-    {
-        lhs.relationship == rhs.relationship && lhs.underlying == rhs.underlying
     }
 }
 extension SSGC.EdgeError:TraceableError

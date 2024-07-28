@@ -1,5 +1,5 @@
 {
-  "originHash" : "e74849abb93467217d096bda7d01332e7e3f80470f9048e31a2fdfcf9d8f7543",
+  "originHash" : "e1c5cc4ace736cccef5f71a952c605710d2cec5a38e764f1fdd77ddea7a13409",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser",
       "state" : {
-        "revision" : "0fbc8848e389af3bb55c182bc19ca9d5dc2f255b",
-        "version" : "1.4.0"
+        "revision" : "41982a3656a71c768319979febd796c6fd111d5c",
+        "version" : "1.5.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "054ccde704e7d74f216b74692133851b2821d0a0",
-        "version" : "0.23.0"
+        "revision" : "7ab51deffb552454eb9902a124c9d4064fe58039",
+        "version" : "0.23.1"
       }
     },
     {

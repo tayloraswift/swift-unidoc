@@ -5,10 +5,6 @@ import Signatures
 import Sources
 import Symbols
 
-@available(*, deprecated, renamed: "SymbolGraphPart.Vertex")
-public
-typealias SymbolDescription = SymbolGraphPart.Vertex
-
 extension SymbolGraphPart
 {
     @frozen public
@@ -24,18 +20,18 @@ extension SymbolGraphPart
         let final:Bool
 
         public
-        let doccomment:Doccomment?
-        public
         let `extension`:ExtensionContext
         public
         let signature:Signature<Symbol.Decl>
-
-        /// The source location of this symbol, if known. The file string is the
-        /// absolute path to the relevant source file, and starts with `file://`.
-        public
-        let location:SourceLocation<String>?
         public
         let path:UnqualifiedPath
+
+        public
+        var doccomment:Doccomment?
+        /// The source location of this symbol, if known. The file string is the absolute path
+        /// to the relevant source file.
+        public
+        var location:SourceLocation<Symbol.File>?
 
         private
         init(
@@ -43,21 +39,21 @@ extension SymbolGraphPart
             acl:Symbol.ACL,
             phylum:Phylum,
             final:Bool,
-            doccomment:Doccomment?,
             extension:ExtensionContext,
             signature:Signature<Symbol.Decl>,
-            location:SourceLocation<String>?,
-            path:UnqualifiedPath)
+            path:UnqualifiedPath,
+            doccomment:Doccomment?,
+            location:SourceLocation<Symbol.File>?)
         {
             self.usr = usr
             self.acl = acl
             self.phylum = phylum
             self.final = final
-            self.doccomment = doccomment
             self.extension = `extension`
             self.signature = signature
-            self.location = location
             self.path = path
+            self.doccomment = doccomment
+            self.location = location
         }
     }
 }
@@ -73,7 +69,7 @@ extension SymbolGraphPart.Vertex
         extension:ExtensionContext,
         fragments:__owned [Signature<Symbol.Decl>.Fragment],
         generics:Signature<Symbol.Decl>.Generics,
-        location:SourceLocation<String>?,
+        location:SourceLocation<Symbol.File>?,
         path:UnqualifiedPath)
     {
         var keywords:Signature<Symbol.Decl>.Expanded.InterestingKeywords = .init()
@@ -147,11 +143,11 @@ extension SymbolGraphPart.Vertex
             phylum: phylum,
             //  Actors would also imply `final`, but we don’t want to flatten that here.
             final: keywords.final,
-            doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
             extension: `extension`,
             signature: signature,
-            location: location,
-            path: simplified)
+            path: simplified,
+            doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
+            location: location)
     }
 }
 extension SymbolGraphPart.Vertex:JSONObjectDecodable
@@ -227,15 +223,15 @@ extension SymbolGraphPart.Vertex:JSONObjectDecodable
                 {
                     (try $0[.line].decode(), try $0[.column].decode())
                 }
-                if  let position:SourcePosition = .init(line: line, column: column)
-                {
-                    return .init(position: position, file: try $0[.file].decode())
-                }
+                guard
+                let position:SourcePosition = .init(line: line, column: column)
                 else
                 {
                     //  integer overflow.
                     return nil
                 }
+
+                return .init(position: position, file: try .uri(file: try $0[.file].decode()))
             },
             path: try json[.path].decode())
     }

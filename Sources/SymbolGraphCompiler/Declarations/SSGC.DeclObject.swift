@@ -13,31 +13,38 @@ extension SSGC
     class DeclObject
     {
         let conditions:[GenericConstraint<Symbol.Decl>]
-        let namespace:Namespace.ID
-        let culture:Int
+        let namespace:Symbol.Module
+        let culture:Symbol.Module
+        let access:Symbol.ACL
+
+        var conformances:[Symbol.Decl: [GenericConstraint<Symbol.Decl>]]
 
         /// The type of the superforms tracked by ``\.value.superforms``.
         var superforms:(any SuperformRelationship.Type)?
-        /// The symbols this scalar is lexically-nested in. This may include an extension block
-        /// symbol.
+
+        /// The symbols this scalar is lexically-nested in.
         ///
         /// Remarkably, it is possible for certain (Objective C) declarations to have more than
         /// one lexical parent. For example, base class methods can be shared by multiple
         /// subclasses in addition to the base class.
-        var scopes:Set<Symbol.USR>
+        private(set)
+        var scopes:Set<Symbol.Decl>
 
         private(set)
         var value:Decl
 
         init(conditions:[GenericConstraint<Symbol.Decl>],
-            namespace:Namespace.ID,
-            culture:Int,
+            namespace:Symbol.Module,
+            culture:Symbol.Module,
+            access:Symbol.ACL,
             value:Decl)
         {
             self.conditions = conditions
             self.namespace = namespace
             self.culture = culture
+            self.access = access
 
+            self.conformances = [:]
             self.superforms = nil
             self.scopes = []
 
@@ -73,7 +80,7 @@ extension SSGC.DeclObject
         }
     }
     /// Assigns a lexical scope to this scalar object.
-    func assign(scope relationship:some NestingRelationship) throws
+    func assign(scope:Symbol.Decl, by relationship:some NestingRelationship) throws
     {
         guard relationship.validate(source: self.value.phylum)
         else
@@ -82,17 +89,26 @@ extension SSGC.DeclObject
         }
 
         //  Only (Objective) C declarations can have multiple lexical scopes.
-        if  case .s = self.id.language,
-            let scope:Symbol.USR = self.scopes.first,
-                scope != relationship.scope
+        switch self.scopes.first
         {
-            throw SSGC.SemanticError.already(has: .scope(scope))
+        case scope?:
+            break
+
+        case let existing?:
+            if  case .s = self.id.language
+            {
+                throw SSGC.SemanticError.already(has: .scope(existing))
+            }
+            else
+            {
+                fallthrough
+            }
+
+        case nil:
+            self.scopes.insert(scope)
         }
-        else
-        {
-            self.scopes.insert(relationship.scope)
-            self.kinks += relationship.kinks
-        }
+
+        self.kinks += relationship.kinks
 
         if  let origin:Symbol.Decl = relationship.origin
         {
@@ -102,9 +118,9 @@ extension SSGC.DeclObject
     /// Adds a superform to this scalar object.
     ///
     /// Each scalar can only accept a single type of superform. For example, if
-    /// a scalar is the source of a ``SymbolRelationship DefaultImplementation``
+    /// a scalar is the source of an ``IntrinsicWitnessRelationship``
     /// relationship, it can receive additional superforms of that type, but it
-    /// cannot receive a ``SymbolRelationship Override``, because a scalar cannot
+    /// cannot receive a ``OverrideRelationship``, because a scalar cannot
     /// be a default implementation and a protocol requirement at the same time.
     func add<Superform>(superform relationship:Superform) throws
         where Superform:SuperformRelationship
@@ -153,13 +169,5 @@ extension SSGC.DeclObject
         }
 
         self.value.inhabitants.insert(inhabitant)
-    }
-    /// Adds an *unqualified* feature to this scalar object.
-    ///
-    /// If you know the feature’s extension constraints, add it
-    /// to an appropriate ``ExtensionObject`` instead.
-    func add(feature:Symbol.Decl, where unknown:Never?)
-    {
-        self.value.features.insert(feature)
     }
 }

@@ -18,7 +18,7 @@ extension SymbolGraph
 extension SymbolGraph.Table
 {
     @inlinable public
-    init(viewing elements:consuming [Element])
+    init(viewing elements:[Element])
     {
         self.init(storage: .init(elements: elements))
     }

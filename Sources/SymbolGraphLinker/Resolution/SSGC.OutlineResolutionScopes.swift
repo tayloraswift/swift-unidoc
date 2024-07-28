@@ -47,10 +47,10 @@ extension SSGC.OutlineResolutionScopes
         scope:[String] = [])
     {
         self.init(resources: culture.resources,
-            codelink: .init(namespace: namespace ?? culture.module,
+            codelink: .init(namespace: namespace ?? culture.id,
                 imports: culture.imports,
                 path: scope),
-            doclink: .init(namespace: culture.module),
+            doclink: .init(namespace: culture.id),
             origin: origin)
     }
 }

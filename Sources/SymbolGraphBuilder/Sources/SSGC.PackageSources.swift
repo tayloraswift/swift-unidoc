@@ -20,49 +20,35 @@ extension SSGC
     @_spi(testable) public
     struct PackageSources
     {
-        let cultures:[NominalSources]
-
         @_spi(testable) public internal(set)
         var snippets:[LazyFile]
 
         let scratch:PackageBuildDirectory
-        let root:PackageRoot
 
         private
+        let modules:ModuleGraph
+
         init(
-            cultures:[NominalSources],
             snippets:[LazyFile] = [],
             scratch:PackageBuildDirectory,
-            root:PackageRoot)
+            modules:ModuleGraph)
         {
-            self.cultures = cultures
             self.snippets = snippets
             self.scratch = scratch
-            self.root = root
+            self.modules = modules
         }
     }
 }
 extension SSGC.PackageSources
 {
     private
-    init(layout:Layout, scratch:consuming SSGC.PackageBuildDirectory)
+    var root:SSGC.PackageRoot { self.modules.sinkLayout.root }
+}
+extension SSGC.PackageSources
+{
+    mutating
+    func detect(snippets snippetsDirectory:FilePath.Component) throws
     {
-        self.init(cultures: layout.cultures, scratch: scratch, root: layout.root)
-    }
-
-    init(scanning package:borrowing PackageNode,
-        scratch:consuming SSGC.PackageBuildDirectory,
-        include:inout [FilePath.Directory]) throws
-    {
-        self.init(layout: try .init(scanning: package, include: &include), scratch: scratch)
-
-        guard
-        let snippetsDirectory:FilePath.Component = .init(package.snippets)
-        else
-        {
-            throw SSGC.SnippetDirectoryError.invalid(package.snippets)
-        }
-
         let snippets:FilePath.Directory = self.root.location / snippetsDirectory
         if !snippets.exists()
         {
@@ -103,7 +89,13 @@ extension SSGC.PackageSources
 }
 extension SSGC.PackageSources:SSGC.DocumentationSources
 {
+    var cultures:[SSGC.ModuleLayout] { self.modules.sinkLayout.cultures }
     var prefix:Symbol.FileBase? { .init(self.root.location.path.string) }
+
+    func constituents(of module:__owned SSGC.ModuleLayout) throws -> [SSGC.ModuleLayout]
+    {
+        try self.modules.constituents(of: module)
+    }
 
     @_spi(testable) public
     func indexStore(for swift:SSGC.Toolchain) throws -> (any Markdown.SwiftLanguage.IndexStore)?

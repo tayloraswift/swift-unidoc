@@ -25,23 +25,22 @@ extension SSGC.ExtendedTypes
         }
         else
         {
-            throw SSGC.UnclaimedBlockError.init(unclaimed: block)
+            throw SSGC.Extension.BlockError.unclaimed(block)
         }
     }
 }
 extension SSGC.ExtendedTypes
 {
-    init(indexing colony:__shared SymbolGraphPart) throws
+    init(indexing extensions:__shared [Symbol.ExtensionRelationship]) throws
     {
         self.init()
 
-        for case .extension(let relationship) in colony.relationships
+        for edge:Symbol.ExtensionRelationship in extensions
         {
-            guard case nil = self.extendees.updateValue(relationship.target,
-                    forKey: relationship.source)
+            guard case nil = self.extendees.updateValue(edge.target, forKey: edge.source)
             else
             {
-                throw SSGC.DuplicateSymbolError.block(relationship.source)
+                throw SSGC.Extension.BlockError.duplicate(edge.source)
             }
         }
     }

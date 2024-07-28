@@ -14,15 +14,13 @@ extension SSGC.Extension
 
         init?(location:SourceLocation<Symbol.File>?, comment:SSGC.DocumentationComment?)
         {
-            if case (nil, nil) = (location, comment)
+            if  case (nil, nil) = (location, comment)
             {
                 return nil
             }
-            else
-            {
-                self.location = location
-                self.comment = comment
-            }
+
+            self.location = location
+            self.comment = comment
         }
     }
 }

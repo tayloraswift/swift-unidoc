@@ -44,7 +44,7 @@ extension Main.LinkResolution:TestBattery
                     culture: .init(
                         resources: [:],
                         imports: [],
-                        module: "ThisModule"),
+                        id: "ThisModule"),
                     origin: nil,
                     scope: []))
                 {
@@ -67,7 +67,7 @@ extension Main.LinkResolution:TestBattery
                     culture: .init(
                         resources: [:],
                         imports: [],
-                        module: "ThisModule"),
+                        id: "ThisModule"),
                     origin: nil,
                     scope: ["A"]))
                 {
@@ -108,7 +108,7 @@ extension Main.LinkResolution:TestBattery
                     culture: .init(
                         resources: [:],
                         imports: ["OtherModule"],
-                        module: "ThisModule"),
+                        id: "ThisModule"),
                     origin: nil,
                     scope: []))
                 {
@@ -129,7 +129,7 @@ extension Main.LinkResolution:TestBattery
                     culture: .init(
                         resources: [:],
                         imports: [],
-                        module: "ThisModule"),
+                        id: "ThisModule"),
                     origin: nil,
                     scope: []))
                 {
@@ -157,7 +157,7 @@ extension Main.LinkResolution:TestBattery
                 culture: .init(
                     resources: [:],
                     imports: [],
-                    module: "ThisModule"),
+                    id: "ThisModule"),
                 origin: nil,
                 scope: []))
             {
@@ -193,7 +193,7 @@ extension Main.LinkResolution:TestBattery
                 culture: .init(
                     resources: [:],
                     imports: ["OtherModule"],
-                    module: "ThisModule"),
+                    id: "ThisModule"),
                 origin: nil,
                 scope: []))
             {
