@@ -51,17 +51,23 @@ extension SSGC.DocumentationSources
                 let symbols:
                 (
                     missing:[SSGC.ModuleLayout],
-                    loaded:[SSGC.SymbolDump]
+                    loaded:[SSGC.SymbolCulture]
                 ) = try profiler.measure(\.loadingSymbols)
                 {
                     let constituents:[SSGC.ModuleLayout] = try self.constituents(of: module)
+                    let selection:Set<Symbol.Module> = constituents.reduce(into: [])
+                    {
+                        $0.insert($1.id)
+                    }
+
                     return try constituents.reduce(into: ([], []))
                     {
-                        if  let dump:SSGC.SymbolDump = try symbolCache.load(module: $1.id,
+                        if  let module:SSGC.SymbolCulture = try symbolCache.load(module: $1.id,
+                                filter: selection,
                                 base: prefix,
                                 as: $1.language ?? .swift)
                         {
-                            $0.loaded.append(dump)
+                            $0.loaded.append(module)
                         }
                         else
                         {

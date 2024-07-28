@@ -27,49 +27,49 @@ extension SSGC
 extension SSGC.TypeChecker
 {
     public mutating
-    func add(symbols dump:SSGC.SymbolDump) throws
+    func add(symbols culture:SSGC.SymbolCulture) throws
     {
-        var culture:Symbol.Module? = nil
-        for part:SSGC.SymbolDump.Part in dump.parts
+        var id:Symbol.Module? = nil
+        for part:SSGC.SymbolDump in culture.symbols
         {
             guard
-            let culture:Symbol.Module
+            let id:Symbol.Module
             else
             {
-                culture = part.culture
+                id = part.culture
                 continue
             }
 
-            guard culture == part.culture
+            guard id == part.culture
             else
             {
                 throw CultureError.init(
                     underlying: SSGC.UnexpectedModuleError.culture(part.culture, in: .init(
                         culture: part.culture,
                         colony: part.colony)),
-                    culture: culture)
+                    culture: id)
             }
         }
 
-        if  let culture:Symbol.Module
+        if  let id:Symbol.Module
         {
-            try self.add(symbols: dump, as: culture)
+            try self.add(symbols: culture, from: id)
         }
     }
 
     private mutating
-    func add(symbols dump:SSGC.SymbolDump, as culture:Symbol.Module) throws
+    func add(symbols culture:SSGC.SymbolCulture, from id:Symbol.Module) throws
     {
         /// We use this to look up protocols by name instead of symbol. This is needed in order
         /// to work around some bizarre lib/SymbolGraphGen bugs.
         var protocolsByName:[UnqualifiedPath: Symbol.Decl] = [:]
         var children:[SSGC.DeclObject] = []
         //  Pass I. Gather scalars, extension blocks, and extension relationships.
-        for part:SSGC.SymbolDump.Part in dump.parts
+        for part:SSGC.SymbolDump in culture.symbols
         {
             //  Map extension block names to extended type identifiers.
             let extensions:SSGC.ExtendedTypes = try .init(indexing: part.extensions)
-            let namespace:Symbol.Module = part.colony ?? culture
+            let namespace:Symbol.Module = part.colony ?? id
 
             for vertex:SymbolGraphPart.Vertex in part.vertices
             {
@@ -86,12 +86,12 @@ extension SSGC.TypeChecker
                         self.extensions.include(vertex,
                             extending: try extensions.extendee(of: symbol),
                             namespace: namespace,
-                            culture: culture)
+                            culture: id)
 
                     case .scalar(let symbol):
                         let decl:SSGC.DeclObject = self.declarations.include(vertex,
                             namespace: namespace,
-                            culture: culture)
+                            culture: id)
 
                         if  case .decl(.protocol) = vertex.phylum
                         {
@@ -114,15 +114,15 @@ extension SSGC.TypeChecker
         }
 
         //  Pass II. Populate protocol conformance tables and nesting relationships.
-        for part:SSGC.SymbolDump.Part in dump.parts
+        for part:SSGC.SymbolDump in culture.symbols
         {
             for conformance:Symbol.ConformanceRelationship in part.conformances
             {
-                try conformance.do { try self.insert($0, by: culture) }
+                try conformance.do { try self.insert($0, by: id) }
             }
             for inheritance:Symbol.InheritanceRelationship in part.inheritances
             {
-                try inheritance.do { try self.insert($0, by: culture) }
+                try inheritance.do { try self.insert($0, by: id) }
             }
 
             for nesting:Symbol.RequirementRelationship in part.requirements
@@ -131,7 +131,7 @@ extension SSGC.TypeChecker
             }
             for nesting:Symbol.MemberRelationship in part.memberships
             {
-                try nesting.do { try self.assign($0, by: culture) }
+                try nesting.do { try self.assign($0, by: id) }
             }
         }
         //  SymbolGraphGen fails to emit a `memberOf` edge if the member is a default
@@ -154,23 +154,23 @@ extension SSGC.TypeChecker
 
             let inferred:Symbol.MemberRelationship = .init(decl.id, in: .scalar(parent))
 
-            try self.assign(inferred, by: culture)
+            try self.assign(inferred, by: id)
         }
 
         //  Pass II. Populate remaining relationships.
-        for part:SSGC.SymbolDump.Part in dump.parts
+        for part:SSGC.SymbolDump in culture.symbols
         {
             for relationship:Symbol.FeatureRelationship in part.featurings
             {
-                try relationship.do { try self.insert($0, by: culture) }
+                try relationship.do { try self.insert($0, by: id) }
             }
             for relationship:Symbol.IntrinsicWitnessRelationship in part.witnessings
             {
-                try relationship.do { try self.insert($0, by: culture) }
+                try relationship.do { try self.insert($0, by: id) }
             }
             for relationship:Symbol.OverrideRelationship in part.overrides
             {
-                try relationship.do { try self.insert($0, by: culture) }
+                try relationship.do { try self.insert($0, by: id) }
             }
         }
     }

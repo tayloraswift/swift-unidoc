@@ -25,12 +25,13 @@ extension CompilerTestBattery
         {
             let base:Symbol.FileBase = "/swift/swift-unidoc/TestModules"
 
+            var symbolCache:SSGC.SymbolCache = .init(symbols: symbols)
             var typeChecker:SSGC.TypeChecker = .init()
             for module:Symbol.Module in ["Swift", "_Concurrency"]
             {
                 guard
-                let symbols:SSGC.SymbolDump = tests.expect(value: try .init(loading: module,
-                    from: symbols,
+                let symbols:SSGC.SymbolCulture = tests.expect(value: try symbolCache.load(
+                    module: module,
                     base: base,
                     as: .swift))
                 else
@@ -44,8 +45,8 @@ extension CompilerTestBattery
             return try Self.inputs.compactMap
             {
                 guard
-                let symbols:SSGC.SymbolDump = tests.expect(value: try .init(loading: $0,
-                    from: symbols,
+                let symbols:SSGC.SymbolCulture = tests.expect(value: try symbolCache.load(
+                    module: $0,
                     base: base,
                     as: .swift))
                 else

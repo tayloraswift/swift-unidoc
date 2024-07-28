@@ -1,62 +1,119 @@
-import LexicalPaths
 import SymbolGraphParts
 import Symbols
 
 extension SSGC
 {
     @frozen public
-    struct SymbolDump
+    struct SymbolDump:Sendable
     {
-        let language:Phylum.Language
-        let parts:[Part]
+        let culture:Symbol.Module
+        let colony:Symbol.Module?
+
+        private(set)
+        var conformances:[Symbol.ConformanceRelationship]
+        private(set)
+        var inheritances:[Symbol.InheritanceRelationship]
+
+        private(set)
+        var requirements:[Symbol.RequirementRelationship]
+        private(set)
+        var memberships:[Symbol.MemberRelationship]
+
+        private(set)
+        var witnessings:[Symbol.IntrinsicWitnessRelationship]
+        private(set)
+        var featurings:[Symbol.FeatureRelationship]
+        private(set)
+        var overrides:[Symbol.OverrideRelationship]
+        private(set)
+        var extensions:[Symbol.ExtensionRelationship]
+
+        private(set)
+        var vertices:[SymbolGraphPart.Vertex]
 
         private
-        init(language:Phylum.Language, parts:[Part])
+        init(culture:Symbol.Module, colony:Symbol.Module?, vertices:[SymbolGraphPart.Vertex])
         {
-            self.language = language
-            self.parts = parts
+            self.culture = culture
+            self.colony = colony
+
+            self.conformances = []
+            self.inheritances = []
+
+            self.requirements = []
+            self.memberships = []
+
+            self.witnessings = []
+            self.featurings = []
+            self.overrides = []
+            self.extensions = []
+
+            self.vertices = vertices
         }
     }
 }
 extension SSGC.SymbolDump
 {
-    public
-    init(language:Phylum.Language,
-        parts:__owned [SymbolGraphPart],
-        base:__shared Symbol.FileBase?) throws
+    private
+    init(from part:borrowing SymbolGraphPart)
     {
-        var parts:[SymbolGraphPart] = consume parts
-        for i in parts.indices
+        self.init(culture: part.culture, colony: part.colony, vertices: part.vertices)
+
+        for relationship:Symbol.AnyRelationship in part.relationships
+        {
+            switch relationship
+            {
+            case .conformance(let edge):        self.conformances.append(edge)
+            case .inheritance(let edge):        self.inheritances.append(edge)
+            case .requirement(let edge):        self.requirements.append(edge)
+            case .member(let edge):             self.memberships.append(edge)
+            case .intrinsicWitness(let edge):   self.witnessings.append(edge)
+            case .feature(let edge):            self.featurings.append(edge)
+            case .override(let edge):           self.overrides.append(edge)
+            case .extension(let edge):          self.extensions.append(edge)
+            }
+        }
+
+        //  Sort vertices and edges for determinism, since lib/SymbolGraphGen does not.
+        self.vertices.sort { $0.usr < $1.usr }
+
+        self.conformances.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.inheritances.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.requirements.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.memberships.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.witnessings.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.featurings.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.overrides.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+        self.extensions.sort { ($0.source, $0.target) < ($1.source, $1.target) }
+    }
+
+    public
+    init(from part:borrowing SymbolGraphPart, base:borrowing Symbol.FileBase?) throws
+    {
+        self.init(from: part)
+
+        for j:Int in self.vertices.indices
         {
             try
             {
-                for j:Int in $0.vertices.indices
+                //  Deport foreign doccomments.
+                if  let doccomment:SymbolGraphPart.Vertex.Doccomment = $0.doccomment,
+                        doccomment.culture != self.culture
                 {
-                    let culture:Symbol.Module = $0.culture
-                    try
-                    {
-                        //  Deport foreign doccomments.
-                        if  let doccomment:SymbolGraphPart.Vertex.Doccomment = $0.doccomment,
-                                doccomment.culture != culture
-                        {
-                            $0.doccomment = nil
-                        }
-                        //  Trim file path prefixes.
-                        guard
-                        let base:Symbol.FileBase = base
-                        else
-                        {
-                            $0.location = nil
-                            return
-                        }
-
-                        try $0.location?.file.rebase(against: base)
-
-                    } (&$0.vertices[j])
+                    $0.doccomment = nil
                 }
-            } (&parts[i])
-        }
+                //  Trim file path prefixes.
+                guard
+                let base:Symbol.FileBase = base
+                else
+                {
+                    $0.location = nil
+                    return
+                }
 
-        self.init(language: language, parts: parts.map(Part.init(from:)))
+                try $0.location?.file.rebase(against: base)
+
+            } (&self.vertices[j])
+        }
     }
 }

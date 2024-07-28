@@ -6,14 +6,16 @@ import System
 
 extension SSGC
 {
+    @_spi(testable) public
     struct SymbolCache
     {
         private
         let symbols:SymbolDumps
         private
-        var entries:[Symbol.Module: SymbolDump]
+        var entries:[SymbolGraphPart.ID: SymbolDump]
 
-        init(symbols:SymbolDumps, entries:[Symbol.Module: SymbolDump] = [:])
+        @_spi(testable) public
+        init(symbols:SymbolDumps, entries:[SymbolGraphPart.ID: SymbolDump] = [:])
         {
             self.symbols = symbols
             self.entries = entries
@@ -22,19 +24,51 @@ extension SSGC
 }
 extension SSGC.SymbolCache
 {
-    mutating
+    @_spi(testable) public mutating
     func load(module:Symbol.Module,
+        filter:Set<Symbol.Module> = [],
         base:Symbol.FileBase?,
-        as language:Phylum.Language) throws -> SSGC.SymbolDump?
+        as language:Phylum.Language) throws -> SSGC.SymbolCulture?
     {
-        try
+        guard
+        var parts:[SymbolGraphPart.ID] = self.symbols.modules[module]
+        else
         {
-            $0 = try $0 ?? .init(loading: module,
-                from: self.symbols,
-                base: base,
-                as: language)
+            return nil
+        }
 
-            return $0
-        } (&self.entries[module])
+        parts.removeAll
+        {
+            if  let colony:Symbol.Module = $0.colony, !filter.isEmpty
+            {
+                !filter.contains(colony)
+            }
+            else
+            {
+                false
+            }
+        }
+
+        if  parts.isEmpty
+        {
+            return nil
+        }
+
+        parts.sort { $0.basename < $1.basename }
+
+        let dumps:[SSGC.SymbolDump] = try parts.map
+        {
+            (id:SymbolGraphPart.ID) in try
+            {
+                let symbols:SSGC.SymbolDump = try $0 ?? .init(loading: id,
+                    from: self.symbols.location,
+                    base: base)
+
+                $0 = symbols
+                return symbols
+            } (&self.entries[id])
+        }
+
+        return .init(language: language, symbols: dumps)
     }
 }
