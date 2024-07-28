@@ -170,12 +170,4 @@ extension SSGC.DeclObject
 
         self.value.inhabitants.insert(inhabitant)
     }
-    /// Adds an *unqualified* feature to this scalar object.
-    ///
-    /// If you know the feature’s extension constraints, add it
-    /// to an appropriate ``ExtensionObject`` instead.
-    // func add(feature:Symbol.Decl, where unknown:Never?)
-    // {
-    //     self.value.features.insert(feature)
-    // }
 }

@@ -43,13 +43,6 @@ extension SSGC
         /// The compiler does not check for inheritance cycles.
         public internal(set)
         var superforms:Set<Symbol.Decl>
-        /// The *unqualified* features inherited by this scalar. Avoid adding
-        /// features here; if the feature’s extension constraints are known,
-        /// add them to an appropriate ``ExtensionObject`` instead.
-        ///
-        /// This field only exists because of an upstream bug in SymbolGraphGen.
-        // public internal(set)
-        // var features:Set<Symbol.Decl>
 
         /// A scalar that has documentation that is relevant, but less specific
         /// to this scalar.
@@ -59,7 +52,7 @@ extension SSGC
         var kinks:Phylum.Decl.Kinks
 
         public
-        var comment:SSGC.DocumentationComment?
+        var comment:DocumentationComment?
 
 
         init(id:Symbol.Decl,
@@ -68,7 +61,7 @@ extension SSGC
             phylum:Phylum.Decl,
             path:UnqualifiedPath,
             kinks:Phylum.Decl.Kinks,
-            comment:SSGC.DocumentationComment?)
+            comment:DocumentationComment?)
         {
             self.id = id
 

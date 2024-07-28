@@ -40,7 +40,6 @@ extension DigraphExplorer<TargetNode>.Nodes
             }
         }
         /// The list of targets that *directly* depend on each (explored) target.
-        // var consumers:[String: [TargetNode]] = [:]
         var directedEdges:[(String, String)] = []
         let included:[String: TargetNode] = try explorer.conquer
         {

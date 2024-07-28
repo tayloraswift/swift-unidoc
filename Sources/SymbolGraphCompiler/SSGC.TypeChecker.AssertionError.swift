@@ -10,3 +10,7 @@ extension SSGC.TypeChecker
         }
     }
 }
+extension SSGC.TypeChecker.AssertionError:CustomStringConvertible
+{
+    var description:String { self.message }
+}

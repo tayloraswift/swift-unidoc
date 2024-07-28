@@ -91,8 +91,6 @@ extension SSGC
             help: "The git ref to check out")
         var ref:String? = nil
 
-        //  swift-argument-parser experiences an inexplicable segfault if this flag is defined,
-        //  for some reason...
 
         @Flag(
             name: [.customLong("clean-artifacts")],
@@ -102,7 +100,6 @@ extension SSGC
                 from generated documentation
                 """)
         var cleanArtifacts:Bool = false
-
 
         @Flag(
             name: [.customLong("remove-build")],
