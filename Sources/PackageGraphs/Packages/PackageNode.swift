@@ -1,5 +1,6 @@
 import SymbolGraphs
 import Symbols
+import TopologicalSorting
 
 /// A package node is a flattened representation of a package manifest.
 /// Creating one involves assigning an identity to a package manifest
@@ -11,9 +12,6 @@ struct PackageNode:Identifiable
     let id:Symbol.Package
     public
     var dependencies:[any Identifiable<Symbol.Package>]
-
-    public
-    var snippets:String
 
     public
     var products:[SymbolGraph.Product]
@@ -28,7 +26,6 @@ struct PackageNode:Identifiable
     @inlinable public
     init(id:Symbol.Package,
         dependencies:[any Identifiable<Symbol.Package>],
-        snippets:String = "Snippets",
         products:[SymbolGraph.Product],
         modules:[SymbolGraph.Module],
         exclude:[[String]],
@@ -36,17 +33,11 @@ struct PackageNode:Identifiable
     {
         self.id = id
         self.dependencies = dependencies
-        self.snippets = snippets
         self.products = products
         self.modules = modules
         self.exclude = exclude
         self.root = root
     }
-}
-extension PackageNode:DigraphNode
-{
-    @inlinable public
-    var predecessors:Predecessors { .init(self.dependencies) }
 }
 extension PackageNode
 {
@@ -98,7 +89,24 @@ extension PackageNode
             }
         }
 
-        self.dependencies = try Self.order(topologically: dependencies).compactMap
+        let directedEdges:[(Symbol.Package, Symbol.Package)] = dependencies.reduce(into: [])
+        {
+            for dependency:any Identifiable<Symbol.Package> in $1.dependencies
+            {
+                $0.append((dependency.id, $1.id))
+            }
+        }
+
+        //  FIXME: in Swift 6, it will be legal to have cyclic package dependencies!
+        guard
+        let dependenciesOrdered:[PackageNode] = dependencies.sortedTopologically(
+            by: directedEdges)
+        else
+        {
+            throw DigraphCycleError<PackageNode>.init()
+        }
+
+        self.dependencies = dependenciesOrdered.compactMap
         {
             actuallyUsed.contains($0.id)
                 ? declared[$0.id] ?? TransitiveDependency.init(id: $0.id)

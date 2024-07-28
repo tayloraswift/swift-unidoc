@@ -1,6 +1,6 @@
 import Symbols
 
-struct ProductNode:DigraphNode
+struct ProductNode:Identifiable
 {
     let id:Symbol.Product
     let predecessors:[Symbol.Product]

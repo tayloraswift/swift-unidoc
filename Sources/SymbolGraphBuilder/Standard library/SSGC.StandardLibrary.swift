@@ -1,36 +1,48 @@
 import SymbolGraphs
-import System
 
 extension SSGC
 {
-    public
-    struct SpecialBuild
+    struct StandardLibrary
     {
+        let products:SymbolGraph.Table<SymbolGraph.ProductPlane, SymbolGraph.Product>
+        let modules:[SymbolGraph.Module]
+
         private
-        init()
+        init(products:SymbolGraph.Table<SymbolGraph.ProductPlane, SymbolGraph.Product>,
+            modules:[SymbolGraph.Module])
         {
+            self.products = products
+            self.modules = modules
         }
     }
 }
-extension SSGC.SpecialBuild
+extension SSGC.StandardLibrary
 {
-    public static
-    var swift:Self { .init() }
-}
-extension SSGC.SpecialBuild:SSGC.DocumentationBuild
-{
-    func compile(updating _:SSGC.StatusStream?,
-        into artifacts:FilePath.Directory,
-        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata,
-        any SSGC.DocumentationSources)
+    init(platform:SymbolGraphMetadata.Platform)
     {
-        //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
-        let modules:[SymbolGraph.Module]
-        switch try swift.platform()
+        switch platform
         {
-        case .macOS:
-            modules =
-            [
+        case .macOS:    self = .macOS
+        case .linux:    self = .linux
+        default:        fatalError("Unsupported platform: \(platform)")
+        }
+    }
+}
+//  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
+extension SSGC.StandardLibrary
+{
+    static var macOS:Self
+    {
+        .init(
+            products: [
+                .init(name: "__stdlib__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(0 ... 4)),
+                .init(name: "__corelibs__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(0 ... 7)),
+            ],
+            modules: [
                 //  0:
                 .toolchain(module: "Swift"),
                 //  1:
@@ -56,14 +68,21 @@ extension SSGC.SpecialBuild:SSGC.DocumentationBuild
                 //  7:
                 .toolchain(module: "Foundation",
                     dependencies: 0, 5),
-            ]
+            ])
+    }
 
-        case .linux:
-            fallthrough
-
-        default:
-            modules =
-            [
+    static var linux:Self
+    {
+        .init(
+            products: [
+                .init(name: "__stdlib__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(0 ... 7)),
+                .init(name: "__corelibs__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(0 ... 13)),
+            ],
+            modules: [
                 //  0:
                 .toolchain(module: "Swift"),
                 //  1:
@@ -106,27 +125,10 @@ extension SSGC.SpecialBuild:SSGC.DocumentationBuild
                 // 12:
                 .toolchain(module: "FoundationXML",
                     dependencies: 0, 8, 10),
-                // 12:
+                // 13:
                 .toolchain(module: "XCTest",
                     dependencies: 0),
-            ]
-        }
-
-        let metadata:SymbolGraphMetadata = .swift(swift.version,
-            commit: swift.commit,
-            triple: swift.triple,
-            products:
-            [
-                .init(name: "__stdlib__", type: .library(.automatic),
-                    dependencies: [],
-                    cultures: [Int].init(0 ... 7)),
-                .init(name: "__corelibs__", type: .library(.automatic),
-                    dependencies: [],
-                    cultures: [Int].init(modules.indices)),
             ])
-
-        try swift.dump(modules: modules, to: artifacts)
-        let sources:SSGC.SpecialSources = .init(modules: modules)
-        return (metadata, sources)
     }
 }
+

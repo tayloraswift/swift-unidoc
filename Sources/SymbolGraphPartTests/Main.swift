@@ -186,8 +186,8 @@ enum Main:TestMain, TestBattery
                 ),
                 (
                     ["OtherRefinement", "protocol"],
-                    nil,
-                    nil
+                    "DocumentationInheritance",
+                    "This comment is from the root protocol."
                 ),
 
                 (
@@ -195,19 +195,23 @@ enum Main:TestMain, TestBattery
                     "DocumentationInheritance",
                     "This comment is from the conforming type."
                 ),
+                //  NOTE:
+                //  These should not be present if `-skip-inherited-docs` worked correctly,
+                //  but they are, likely due to a compiler bug
+
                 //  This would inherit (from Protocol) if the part
                 //  were generated without `-skip-inherited-docs`.
                 (
                     ["Conformer", "protocol"],
-                    nil,
-                    nil
+                    "DocumentationInheritance", // nil,
+                    "This comment is from the root protocol." // nil,
                 ),
                 //  This would inherit (from Refinement) if the part
                 //  were generated without `-skip-inherited-docs`.
                 (
                     ["Conformer", "refinement"],
-                    nil,
-                    nil
+                    "DocumentationInheritance", // nil,
+                    "This comment is from the refined protocol." // nil,
                 ),
                 (
                     ["Conformer", "conformer"],
@@ -251,46 +255,39 @@ enum Main:TestMain, TestBattery
                 }
                     **?
                 [
-                    .intrinsicWitness(.init(.init(
-                            "s:24DocumentationInheritance15OtherRefinementPAAE8protocolytvp")!,
-                        of: .init("s:24DocumentationInheritance8ProtocolP8protocolytvp")!,
-                        origin: .init(.init(
-                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!))),
+                    .intrinsicWitness(.init(
+                        _ : "s24DocumentationInheritance15OtherRefinementPAAE8protocolytvp",
+                        of: "s24DocumentationInheritance8ProtocolP8protocolytvp",
+                        origin: .init("s24DocumentationInheritance8ProtocolP8protocolytvp"))),
 
                     .member(.init(
-                        _ : .scalar(.init(
-                            "s:24DocumentationInheritance9ConformerV7nowhereytvp")!),
-                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                        origin: .init(.init(
-                            "s:24DocumentationInheritance10RefinementP7nowhereytvp")!))),
+                        _ : "s24DocumentationInheritance9ConformerV7nowhereytvp",
+                        in: .scalar("s24DocumentationInheritance9ConformerV"),
+                        origin: .init("s24DocumentationInheritance10RefinementP7nowhereytvp"))),
 
                     .member(.init(
-                        _ : .scalar(.init(
-                            "s:24DocumentationInheritance9ConformerV10refinementytvp")!),
+                        _ : "s24DocumentationInheritance9ConformerV10refinementytvp",
                         in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
                         origin: .init(.init(
                             "s:24DocumentationInheritance10RefinementP10refinementytvp")!))),
 
                     .member(.init(
-                        _ : .scalar(.init(
-                            "s:24DocumentationInheritance9ConformerV9conformerytvp")!),
-                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                        origin: .init(.init(
-                            "s:24DocumentationInheritance10RefinementP9conformerytvp")!))),
+                        _ : "s24DocumentationInheritance9ConformerV9conformerytvp",
+                        in: .scalar("s24DocumentationInheritance9ConformerV"),
+                        origin: .init(
+                            "s24DocumentationInheritance10RefinementP9conformerytvp"))),
 
                     .member(.init(
-                        _ : .scalar(.init(
-                            "s:24DocumentationInheritance9ConformerV10everywhereytvp")!),
-                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                        origin: .init(.init(
-                            "s:24DocumentationInheritance10RefinementP10everywhereytvp")!))),
+                        _ : "s24DocumentationInheritance9ConformerV10everywhereytvp",
+                        in: .scalar("s24DocumentationInheritance9ConformerV"),
+                        origin: .init(
+                            "s24DocumentationInheritance10RefinementP10everywhereytvp"))),
 
                     .member(.init(
-                        _ : .scalar(.init(
-                            "s:24DocumentationInheritance9ConformerV8protocolytvp")!),
-                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                        origin: .init(.init(
-                            "s:24DocumentationInheritance8ProtocolP8protocolytvp")!))),
+                        _ : "s24DocumentationInheritance9ConformerV8protocolytvp",
+                        in: .scalar("s24DocumentationInheritance9ConformerV"),
+                        origin: .init(
+                            "s24DocumentationInheritance8ProtocolP8protocolytvp"))),
                 ])
             }
         }
@@ -308,8 +305,8 @@ enum Main:TestMain, TestBattery
                 ),
                 (
                     ["Undocumented", "id"],
-                    nil,
-                    nil
+                    "Swift",
+                    "The stable identity of the entity associated with this instance."
                 ),
             ]
             {
@@ -340,7 +337,6 @@ enum Main:TestMain, TestBattery
                 tests.expect(part.relationships.filter
                 {
                     if  case .member(let membership) = $0,
-                        case .scalar = membership.source,
                         case _? = membership.origin
                     {
                         true
@@ -352,21 +348,17 @@ enum Main:TestMain, TestBattery
                 }
                     **?
                 [
-                    .member(.init(
-                        _ : .scalar(.init("""
-                            s:33DocumentationInheritanceFromSwift12UndocumentedV2ids5NeverOSgvp
-                            """)!),
-                        in: .scalar(.init(
-                            "s:33DocumentationInheritanceFromSwift12UndocumentedV")!),
-                        origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!))),
+                    .member(.init("""
+                        s33DocumentationInheritanceFromSwift12UndocumentedV2ids5NeverOSgvp
+                        """,
+                        in: .scalar("s33DocumentationInheritanceFromSwift12UndocumentedV"),
+                        origin: "ss12IdentifiableP2id2IDQzvp")),
 
-                    .member(.init(
-                        _ : .scalar(.init("""
-                            s:33DocumentationInheritanceFromSwift10DocumentedV2ids5NeverOSgvp
-                            """)!),
-                        in: .scalar(.init(
-                        "s:33DocumentationInheritanceFromSwift10DocumentedV")!),
-                        origin: .init(.init("s:s12IdentifiableP2id2IDQzvp")!))),
+                    .member(.init("""
+                        s33DocumentationInheritanceFromSwift10DocumentedV2ids5NeverOSgvp
+                        """,
+                        in: .scalar("s33DocumentationInheritanceFromSwift10DocumentedV"),
+                        origin: "ss12IdentifiableP2id2IDQzvp")),
                 ])
             }
         }

@@ -25,6 +25,15 @@ extension Unidoc
         func extend(pipeline:inout Mongo.PipelineEncoder)
     }
 }
+
+#if compiler(>=6.0)
+extension Unidoc.AliasingQuery
+{
+    public
+    typealias Collation = SimpleCollation
+}
+#endif
+
 extension Unidoc.AliasingQuery
 {
     @inlinable public

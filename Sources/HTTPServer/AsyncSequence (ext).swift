@@ -44,11 +44,10 @@ extension AsyncSequence where Element:Sendable
     func iterate(concurrently width:Int,
         with body:@Sendable @escaping (Element) async -> ()) async throws
     {
+        var iterator:AsyncIterator = self.makeAsyncIterator()
         let exit:Result<Void, any Error> = await withTaskGroup(of: Void.self)
         {
             (tasks:inout TaskGroup<Void>) in
-
-            var iterator:AsyncIterator = self.makeAsyncIterator()
 
             do
             {

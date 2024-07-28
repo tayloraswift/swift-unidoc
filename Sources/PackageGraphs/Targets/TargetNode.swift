@@ -36,10 +36,3 @@ extension TargetNode:Identifiable
     @inlinable public
     var id:String { self.name }
 }
-extension TargetNode:DigraphNode
-{
-    /// Returns a lazy wrapper around `dependencies.targets` that functions as a collection
-    /// of target dependency names.
-    @inlinable public
-    var predecessors:Predecessors { .init(self.dependencies.targets) }
-}

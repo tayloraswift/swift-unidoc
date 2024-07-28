@@ -1,4 +1,5 @@
 import SymbolGraphCompiler
+import Symbols
 import Testing_
 
 extension Main
@@ -10,16 +11,13 @@ extension Main
 extension Main.InternalExtensionsWithConstraints:CompilerTestBattery
 {
     static
-    let inputs:[String] =
+    let inputs:[Symbol.Module] =
     [
         "InternalExtensionsWithConstraints",
     ]
 
     static
-    func run(tests:TestGroup,
-        nominations:SSGC.Nominations,
-        namespaces:[[SSGC.Namespace]],
-        extensions:[SSGC.Extension])
+    func run(tests:TestGroup, declarations:SSGC.Declarations, extensions:SSGC.Extensions)
     {
     }
 }

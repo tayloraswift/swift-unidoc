@@ -1,11 +1,22 @@
 #!/bin/bash
 
-swift build --package-path TestModules
+set -e
+
+swift build \
+    --package-path TestModules \
+    -Xswiftc -emit-symbol-graph \
+    -Xswiftc -emit-symbol-graph-dir -Xswiftc SymbolGraphs \
+    -Xswiftc -symbol-graph-minimum-access-level -Xswiftc internal \
+    -Xswiftc -emit-extension-block-symbols \
+    -Xswiftc -include-spi-symbols \
+    -Xswiftc -skip-inherited-docs \
+    -Xswiftc -pretty-print
+
 swift package --package-path TestModules dump-package > TestModules/Package.swift.json
 
-for TARGET in Swift $(basename -a -s .build TestModules/.build/debug/*.build)
+for TARGET in Swift _Concurrency
 do
-    swift symbolgraph-extract -I TestModules/.build/debug \
+    swift symbolgraph-extract \
         -target x86_64-unknown-linux-gnu \
         -minimum-access-level internal \
         -output-dir TestModules/SymbolGraphs \

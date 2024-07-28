@@ -12,24 +12,17 @@ extension Main
 extension Main.DefaultImplementations:CompilerTestBattery
 {
     static
-    let inputs:[String] =
+    let inputs:[Symbol.Module] =
     [
         "DefaultImplementations",
     ]
 
     static
-    func run(tests:TestGroup,
-        nominations:SSGC.Nominations,
-        namespaces:[[SSGC.Namespace]],
-        extensions:[SSGC.Extension])
+    func run(tests:TestGroup, declarations:SSGC.Declarations, extensions:SSGC.Extensions)
     {
-        var features:[Symbol.Decl: [Symbol.Decl]] = [:]
-        for namespace:SSGC.Namespace in namespaces.joined()
+        let features:[Symbol.Decl: [Symbol.Decl]] = extensions.compiled.reduce(into: [:])
         {
-            for decl:SSGC.Decl in namespace.decls
-            {
-                features[decl.id, default: []] += decl.features
-            }
+            $0[$1.signature.extended.type, default: []] += $1.features
         }
 
         if  let tests:TestGroup = tests / "DefaultImplementationInheritance",
@@ -43,7 +36,7 @@ extension Main.DefaultImplementations:CompilerTestBattery
             ])
         }
 
-        let nested:[Symbol.Decl: [Symbol.Decl]] = extensions.reduce(into: [:])
+        let nested:[Symbol.Decl: [Symbol.Decl]] = extensions.compiled.reduce(into: [:])
         {
             $0[$1.signature.extended.type, default: []] += $1.nested
         }
@@ -56,6 +49,21 @@ extension Main.DefaultImplementations:CompilerTestBattery
             [
                 "s22DefaultImplementations9ProtocolBPAAE1fyyF",
             ])
+        }
+
+        let declsBySymbol:[Symbol.Decl: SSGC.Decl] = declarations.namespaces.reduce(into: [:])
+        {
+            for decl:SSGC.Decl in $1.decls
+            {
+                $0[decl.id] = decl
+            }
+        }
+
+        //  This checks that we are stripping the inherited documentation comment
+        if  let protocolB_f:SSGC.Decl = tests.expect(
+                value: declsBySymbol["s22DefaultImplementations9ProtocolBPAAE1fyyF"])
+        {
+            tests.expect(nil: protocolB_f.comment)
         }
     }
 }

@@ -1,3 +1,4 @@
+import LexicalPaths
 import Signatures
 import Symbols
 
@@ -6,45 +7,58 @@ extension SSGC
     final
     class ExtensionObject
     {
-        private(set)
-        var value:Extension
+        let signature:ExtensionSignature
+        /// The full name of the extended type, not including the module namespace prefix.
+        let path:UnqualifiedPath
 
-        init(value:Extension)
+        /// Protocols the extended type conforms to.
+        private(set)
+        var conformances:[Symbol.Decl: Symbol.Module]
+        /// Members the extended type inherits from other types via subclassing,
+        /// protocol conformances, etc.
+        private(set)
+        var features:[Symbol.Decl: Symbol.Module]
+        /// Declarations directly nested in the extended type. Everything that
+        /// is lexically-scoped to the extended type, and was not inherited from
+        /// another type goes in this set.
+        private(set)
+        var nested:[Symbol.Decl: Symbol.Module]
+
+        /// Documentation comments and source locations for the various extension
+        /// blocks that make up this extension.
+        var blocks:[Symbol.Block: (Extension.Block, in:Symbol.Module)]
+
+        init(signature:ExtensionSignature, path:UnqualifiedPath)
         {
-            self.value = value
+            self.signature = signature
+            self.path = path
+
+            self.conformances = [:]
+            self.features = [:]
+            self.nested = [:]
+            self.blocks = [:]
         }
     }
 }
 extension SSGC.ExtensionObject
 {
-    var signature:SSGC.ExtensionSignature
+    func add(conformance:Symbol.Decl, by culture:Symbol.Module)
     {
-        self.value.signature
-    }
-    var extended:SSGC.ExtendedType
-    {
-        self.value.extended
-    }
-    var conditions:[GenericConstraint<Symbol.Decl>]
-    {
-        self.value.conditions
+        { _ in } (&self.conformances[conformance, default: culture])
     }
 
-    func add(conformance:Symbol.Decl)
+    func add(feature:Symbol.Decl, by culture:Symbol.Module)
     {
-        self.value.conformances.insert(conformance)
-    }
-    func add(feature:Symbol.Decl)
-    {
-        self.value.features.insert(feature)
-    }
-    func add(nested:Symbol.Decl)
-    {
-        self.value.nested.insert(nested)
+        { _ in } (&self.features[feature, default: culture])
     }
 
-    func append(block:SSGC.Extension.Block)
+    func add(nested:Symbol.Decl, by culture:Symbol.Module)
     {
-        self.value.blocks.append(block)
+        { _ in } (&self.nested[nested, default: culture])
     }
+}
+extension SSGC.ExtensionObject
+{
+    var conditions:[GenericConstraint<Symbol.Decl>] { self.signature.conditions }
+    var extended:SSGC.ExtendedType { self.signature.extended }
 }

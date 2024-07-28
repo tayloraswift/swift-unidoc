@@ -6,11 +6,11 @@ extension SSGC
     struct ExtendedType:Equatable, Hashable, Sendable
     {
         public
-        let namespace:Namespace.ID
+        let namespace:Symbol.Module
         public
         let type:Symbol.Decl
 
-        init(namespace:Namespace.ID, type:Symbol.Decl)
+        init(namespace:Symbol.Module, type:Symbol.Decl)
         {
             self.namespace = namespace
             self.type = type

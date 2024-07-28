@@ -17,6 +17,14 @@ extension Symbol.Decl
         }
     }
 }
+extension Symbol.Decl.Vector:Comparable
+{
+    @inlinable public
+    static func < (a:Self, b:Self) -> Bool
+    {
+        (a.feature, a.heir) < (b.feature, b.heir)
+    }
+}
 extension Symbol.Decl.Vector:CustomStringConvertible
 {
     @inlinable public

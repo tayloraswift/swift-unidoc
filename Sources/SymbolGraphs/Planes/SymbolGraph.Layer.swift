@@ -33,7 +33,10 @@ extension SymbolGraph.Layer
     {
         let symbol:Int32 = self.symbols.append(id)
         let node:Int32 = self.nodes.append(node)
-        precondition(symbol == node)
+        if  node != symbol
+        {
+            fatalError("SymbolGraph.Layer index mismatch (\(node) != \(symbol))")
+        }
         return node
     }
 }

@@ -13,15 +13,11 @@ extension SSGC
         /// The type extended by the relevant extension group.
         public
         let extended:ExtendedType
-        public
-        let culture:Int
 
         public
-        init(_ culture:Int, _ extended:ExtendedType,
-            where conditions:[GenericConstraint<Symbol.Decl>])
+        init(extending extended:ExtendedType, where conditions:[GenericConstraint<Symbol.Decl>])
         {
             self.conditions = conditions
-            self.culture = culture
             self.extended = extended
         }
     }
@@ -29,19 +25,19 @@ extension SSGC
 extension SSGC.ExtensionSignature:Comparable
 {
     public static
-    func < (lhs:Self, rhs:Self) -> Bool
+    func < (a:Self, b:Self) -> Bool
     {
-        if      (lhs.culture, lhs.extended) < (rhs.culture, rhs.extended)
+        if      a.extended < b.extended
         {
             true
         }
-        else if (lhs.culture, lhs.extended) > (rhs.culture, rhs.extended)
+        else if a.extended > b.extended
         {
             false
         }
         else
         {
-            lhs.conditions.lexicographicallyPrecedes(rhs.conditions)
+            a.conditions.lexicographicallyPrecedes(b.conditions)
         }
     }
 }

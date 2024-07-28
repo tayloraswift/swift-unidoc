@@ -193,8 +193,11 @@ extension Unidoc.Linker.Table<Unidoc.Extension>
                 let features:[Unidoc.Scalar: [Unidoc.Scalar]] = `extension`.features.reduce(
                     into: [:])
                 {
-                    if  let p:Unidoc.Scalar = context.current.scope(of: $1),
-                        let f:Unidoc.Scalar = context.current.scalars.decls[$1]
+                    //  The feature might have been declared in a different package!
+                    //  This started happening when SSGC stopped emitting unqualified features
+                    //  as this was previously handled in ``linkCultures``.
+                    if  let f:Unidoc.Scalar = context.current.scalars.decls[$1],
+                        let p:Unidoc.Scalar = context[f.package]?.scope(of: f)
                     {
                         $0[p, default: []].append(f)
                     }

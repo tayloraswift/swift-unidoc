@@ -7,7 +7,7 @@ extension PackageNode
     public static
     func all(flattening manifest:borrowing SPM.Manifest,
         on platform:borrowing SymbolGraphMetadata.Platform,
-        as id:consuming Symbol.Package) throws -> Self
+        as id:__owned Symbol.Package) throws -> Self
     {
         try .init(as: id, flattening: manifest, platform: platform) { _ in true }
     }
@@ -23,14 +23,9 @@ extension PackageNode
         try self.init(id: id,
             predecessors: manifest.dependencies,
             platform: platform,
-            products: try manifest.products.filter { try predicate($0.type) },
-            targets: try .init(indexing: manifest.targets),
+            products: try manifest.products.values.filter { try predicate($0.type) },
+            targets: try .init(indexing: manifest.targets.values),
             root: manifest.root)
-
-        if  let snippets:String = manifest.snippets
-        {
-            self.snippets = snippets
-        }
     }
     private
     init(id:Symbol.Package,

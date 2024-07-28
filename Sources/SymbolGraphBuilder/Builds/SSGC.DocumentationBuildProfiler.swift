@@ -1,8 +1,8 @@
 import SymbolGraphs
 
-extension SymbolGraph
+extension SSGC
 {
-    struct BuildProfiler
+    struct DocumentationBuildProfiler
     {
         var loadingSymbols:Duration
         var loadingSources:Duration
@@ -23,7 +23,7 @@ extension SymbolGraph
         }
     }
 }
-extension SymbolGraph.BuildProfiler
+extension SSGC.DocumentationBuildProfiler
 {
     mutating
     func measure<T>(_ category:WritableKeyPath<Self, Duration>,

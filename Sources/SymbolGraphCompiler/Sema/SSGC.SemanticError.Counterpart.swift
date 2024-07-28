@@ -6,6 +6,6 @@ extension SSGC.SemanticError
     enum Counterpart:Equatable, Sendable
     {
         case origin(Symbol.Decl)
-        case scope(Symbol.USR)
+        case scope(Symbol.Decl)
     }
 }

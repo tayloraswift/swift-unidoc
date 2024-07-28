@@ -1,6 +1,6 @@
 import System
 
-extension SSGC.NominalSources
+extension SSGC.ModuleLayout
 {
     enum Origin
     {

@@ -5,8 +5,8 @@ extension SSGC
     public
     enum UndefinedSymbolError:Equatable, Error, Sendable
     {
-        case block(Symbol.Block)
-        case scalar(Symbol.Decl)
+        case declaration(Symbol.Decl)
+        case `extension`(Symbol.Block)
     }
 }
 extension SSGC.UndefinedSymbolError:CustomStringConvertible
@@ -16,10 +16,10 @@ extension SSGC.UndefinedSymbolError:CustomStringConvertible
     {
         switch self
         {
-        case .block(let symbol):
-            "Undefined extension block symbol '\(symbol)'."
-        case .scalar(let symbol):
-            "Undefined (or external) scalar symbol '\(symbol)'."
+        case .extension(let symbol):
+            "Undefined extension block '\(symbol)'"
+        case .declaration(let symbol):
+            "Undefined declaration '\(symbol)'"
         }
     }
 }

@@ -6,7 +6,7 @@ extension Symbol
     /// of art in the Swift and Clang compilers, it was judged to be the least confusing name
     /// among the possible alternatives.
     @frozen public
-    enum USR:Hashable, Equatable, Sendable
+    enum USR:Hashable, Equatable, Comparable, Sendable
     {
         /// A declaration vector. The Swift compiler calls these **synthesized
         /// value-declarations**.

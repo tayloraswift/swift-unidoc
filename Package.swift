@@ -92,7 +92,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.6.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.23.0")),
+            from: "0.23.1")),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
             from: "0.1.0")),
 
@@ -103,7 +103,7 @@ let package:Package = .init(
             from: "4.4.3")),
 
         .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(
-            from: "1.4.0")),
+            from: "1.5.0")),
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
         .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(
@@ -303,11 +303,13 @@ let package:Package = .init(
         .target(name: "PackageGraphs",
             dependencies: [
                 .target(name: "SymbolGraphs"),
+                .target(name: "TopologicalSorting"),
             ]),
 
         .target(name: "PackageMetadata",
             dependencies: [
                 .target(name: "PackageGraphs"),
+                .product(name: "OrderedCollections", package: "swift-collections"),
                 .product(name: "JSON", package: "swift-json"),
             ]),
 
@@ -430,6 +432,8 @@ let package:Package = .init(
 
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
+
+        .target(name: "TopologicalSorting"),
 
         .target(name: "UA",
             dependencies: [
@@ -642,8 +646,7 @@ let package:Package = .init(
 
         .executableTarget(name: "SymbolGraphCompilerTests",
             dependencies: [
-                .target(name: "SymbolGraphCompiler"),
-                .target(name: "System"),
+                .target(name: "SymbolGraphBuilder"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
@@ -682,6 +685,12 @@ let package:Package = .init(
             exclude:
             [
                 "directories",
+            ]),
+
+        .executableTarget(name: "TopologicalSortingTests",
+            dependencies: [
+                .target(name: "TopologicalSorting"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "UATests",

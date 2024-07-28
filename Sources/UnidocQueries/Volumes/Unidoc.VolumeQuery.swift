@@ -35,6 +35,17 @@ extension Unidoc
         func extend(pipeline:inout Mongo.PipelineEncoder)
     }
 }
+
+#if compiler(>=6.0)
+extension Unidoc.VolumeQuery
+{
+    public
+    typealias CollectionOrigin = Unidoc.DB.Volumes
+    public
+    typealias Collation = VolumeCollation
+}
+#endif
+
 extension Unidoc.VolumeQuery
 {
     @inlinable public static

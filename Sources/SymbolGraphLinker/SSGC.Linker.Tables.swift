@@ -20,9 +20,7 @@ extension SSGC.Linker
         private(set)
         var anchors:SSGC.AnchorResolver
 
-        /// Interned module names. This only contains modules that are not included in the
-        /// symbol graph being linked.
-        private
+        private(set)
         var modules:[Symbol.Module: Int]
 
         private
@@ -48,11 +46,17 @@ extension SSGC.Linker
 
             self.modules = [:]
 
+            for (c, module):(Int, SymbolGraph.Module) in modules.enumerated()
+            {
+                self.modules[module.id] = c
+            }
+
             self.articles = [:]
             self.decls = [:]
             self.files = [:]
 
             self.graph = .init(modules: modules)
+
         }
     }
 }
@@ -96,9 +100,9 @@ extension SSGC.Linker.Tables
     ///
     /// This function doesn’t check for duplicates.
     mutating
-    func allocate(decl:SSGC.Decl) -> Int32
+    func allocate(decl:SSGC.Decl, language:Phylum.Language) -> Int32
     {
-        let vertex:SymbolGraph.Decl = .init(language: decl.language,
+        let vertex:SymbolGraph.Decl = .init(language: language,
             phylum: decl.phylum,
             kinks: decl.kinks,
             path: decl.path)
@@ -113,10 +117,10 @@ extension SSGC.Linker.Tables
     /// Indexes the declaration extended by the given extension and appends the (empty)
     /// declaration to the symbol graph, if it has not already been indexed. (This function
     /// checks for duplicates.)
+    @discardableResult
     mutating
-    func allocate(extension:SSGC.Extension) -> Int32
+    func allocate(decl:Symbol.Decl) -> Int32
     {
-        let decl:Symbol.Decl = `extension`.extended.type
         let scalar:Int32 =
         {
             switch $0
@@ -190,15 +194,6 @@ extension SSGC.Linker.Tables
                 return index
             }
         } (&self.modules[id])
-    }
-    mutating
-    func intern(_ id:SSGC.Namespace.ID) -> Int
-    {
-        switch id
-        {
-        case .index(let culture):   culture
-        case .nominated(let id):    self.intern(id)
-        }
     }
 }
 
@@ -434,7 +429,7 @@ extension SSGC.Linker.Tables
             namespace: self.graph.namespaces[`extension`.namespace],
             culture: .init(resources: resources[`extension`.culture],
                 imports: imports,
-                module: self.graph.namespaces[`extension`.culture]),
+                id: self.graph.namespaces[`extension`.culture]),
             origin: nil,
             scope: article.scope)
 

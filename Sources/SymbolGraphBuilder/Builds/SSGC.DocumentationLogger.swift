@@ -6,11 +6,12 @@ extension SSGC
     @frozen public
     struct DocumentationLogger
     {
-        let path:FilePath
+        let file:FileDescriptor?
 
-        init(path:FilePath)
+        public
+        init(file:FileDescriptor?)
         {
-            self.path = path
+            self.file = file
         }
     }
 }
@@ -18,12 +19,15 @@ extension SSGC.DocumentationLogger
 {
     func emit(messages:consuming DiagnosticMessages) throws
     {
-        try self.path.open(.writeOnly,
-            permissions: (.rw, .r, .r),
-            options: [.create, .truncate])
+        guard
+        let file:FileDescriptor = self.file
+        else
         {
-            let text:String = "\(messages)"
-            try $0.writeAll(text.utf8)
+            messages.emit(colors: .enabled)
+            return
         }
+
+        let text:String = "\(messages)"
+        try file.writeAll(text.utf8)
     }
 }
