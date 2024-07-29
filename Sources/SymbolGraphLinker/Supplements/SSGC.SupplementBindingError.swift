@@ -7,13 +7,13 @@ extension SSGC
     struct SupplementBindingError:Error
     {
         let resolved:SupplementBinding
-        let codelink:Codelink
+        let selector:UCF.Selector
 
         init(_ resolved:SupplementBinding,
-            codelink:Codelink)
+            selector:UCF.Selector)
         {
             self.resolved = resolved
-            self.codelink = codelink
+            self.selector = selector
         }
     }
 }
@@ -26,13 +26,13 @@ extension SSGC.SupplementBindingError
         {
         case .none(in: let culture):
             """
-                article binding '\(self.codelink)' does not refer to a declaration \
+                article binding '\(self.selector)' does not refer to a declaration \
                 in its module, \(culture)
                 """
 
         case .vector:
             """
-                article binding '\(self.codelink)' cannot refer to a vector symbol
+                article binding '\(self.selector)' cannot refer to a vector symbol
                 """
         }
     }
@@ -48,13 +48,13 @@ extension SSGC.SupplementBindingError:Diagnostic
         {
         case .none(in: let culture):
             output[.warning] = """
-            article binding '\(self.codelink)' does not refer to a declaration \
+            article binding '\(self.selector)' does not refer to a declaration \
             in its module, \(culture)
             """
 
         case .vector:
             output[.warning] = """
-            article binding '\(self.codelink)' cannot refer to a vector symbol
+            article binding '\(self.selector)' cannot refer to a vector symbol
             """
         }
     }

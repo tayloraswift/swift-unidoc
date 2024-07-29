@@ -1,7 +1,7 @@
 import UCF
 import Symbols
 
-extension Codelink.Suffix.Legacy.Filter
+extension UCF.KeywordFilter
 {
     static
     func ~= (self:Self, phylum:Phylum.Decl?) -> Bool
@@ -15,30 +15,28 @@ extension Codelink.Suffix.Legacy.Filter
 
         switch  (phylum, self)
         {
-        case    (.actor,                .class),
+        case    (.actor,                .actor),
                 (.associatedtype,       .associatedtype),
-                (.case,                 .enum_case),
+                (.case,                 .case),
                 (.class,                .class),
                 (.deinitializer,        .deinit),
                 (.enum,                 .enum),
                 (.func(nil),            .func),
-                (.func(nil),            .func_op),
-                (.func(.instance),      .method),
-                (.func(.class?),        .type_method),
-                (.func(.static?),       .type_method),
-                (.func(.static?),       .func_op),
+                (.func(.instance),      .func),
+                (.func(.class?),        .class_func),
+                (.func(.static?),       .static_func),
                 (.initializer,          .`init`),
                 (.macro,                .macro),
                 (.protocol,             .protocol),
                 (.struct,               .struct),
                 (.subscript(.instance), .subscript),
-                (.subscript(.class),    .type_subscript),
-                (.subscript(.static),   .type_subscript),
+                (.subscript(.class),    .class_subscript),
+                (.subscript(.static),   .static_subscript),
                 (.typealias,            .typealias),
                 (.var(nil),             .var),
-                (.var(.instance?),      .property),
-                (.var(.class?),         .type_property),
-                (.var(.static?),        .type_property):
+                (.var(.instance?),      .var),
+                (.var(.class?),         .class_var),
+                (.var(.static?),        .static_var):
             return true
 
         default:

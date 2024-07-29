@@ -1,26 +1,26 @@
 import UCF
 import SourceDiagnostics
 
-extension CodelinkResolutionError
+extension UCF.OverloadResolutionError
 {
     @frozen public
     struct Note
     {
         public
-        let suggested:Codelink
+        let suggested:UCF.Selector
         public
-        let target:CodelinkResolver<Symbolicator.Address>.Overload.Target
+        let target:UCF.Overload<Symbolicator.Address>.Target
 
         @inlinable public
-        init(suggested:Codelink,
-            target:CodelinkResolver<Symbolicator.Address>.Overload.Target)
+        init(suggested:UCF.Selector,
+            target:UCF.Overload<Symbolicator.Address>.Target)
         {
             self.suggested = suggested
             self.target = target
         }
     }
 }
-extension CodelinkResolutionError.Note:DiagnosticNote
+extension UCF.OverloadResolutionError.Note:DiagnosticNote
 {
     @inlinable public static
     func += (output:inout DiagnosticOutput<Symbolicator>, self:Self)

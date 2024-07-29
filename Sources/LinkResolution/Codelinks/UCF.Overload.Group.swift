@@ -1,16 +1,18 @@
-extension CodelinkResolver
+import UCF
+
+extension UCF.Overload
 {
     @frozen public
-    enum Overloads:Equatable, Hashable
+    enum Group:Equatable, Hashable
     {
-        case one  (Overload)
-        case some([Overload])
+        case one  (UCF.Overload<Scalar>)
+        case some([UCF.Overload<Scalar>])
     }
 }
-extension CodelinkResolver.Overloads:Sendable where Scalar:Sendable
+extension UCF.Overload.Group:Sendable where Scalar:Sendable
 {
 }
-extension CodelinkResolver.Overloads
+extension UCF.Overload.Group
 {
     var isEmpty:Bool
     {
@@ -21,13 +23,13 @@ extension CodelinkResolver.Overloads
         }
     }
 }
-extension CodelinkResolver.Overloads
+extension UCF.Overload.Group
 {
-    init(filtering overloads:[CodelinkResolver<Scalar>.Overload],
-        where predicate:(CodelinkResolver<Scalar>.Overload) throws -> Bool) rethrows
+    init(filtering overloads:[UCF.Overload<Scalar>],
+        where predicate:(UCF.Overload<Scalar>) throws -> Bool) rethrows
     {
         self = .some([])
-        for overload:CodelinkResolver<Scalar>.Overload in overloads where
+        for overload:UCF.Overload<Scalar> in overloads where
             try predicate(overload)
         {
             self.overload(with: overload)
@@ -58,7 +60,7 @@ extension CodelinkResolver.Overloads
     }
 
     @inlinable public mutating
-    func overload(with overload:CodelinkResolver<Scalar>.Overload)
+    func overload(with overload:UCF.Overload<Scalar>)
     {
         switch self
         {

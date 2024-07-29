@@ -1,4 +1,4 @@
-extension Codelink.Path
+extension UCF.Selector.Path
 {
     struct OperatorHead
     {
@@ -8,7 +8,7 @@ extension Codelink.Path
         }
     }
 }
-extension Codelink.Path.OperatorHead
+extension UCF.Selector.Path.OperatorHead
 {
     @inlinable public
     init?(_ codepoint:Unicode.Scalar)

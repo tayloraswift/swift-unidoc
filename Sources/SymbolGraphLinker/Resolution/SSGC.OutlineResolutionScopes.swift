@@ -1,5 +1,6 @@
 import LinkResolution
 import Symbols
+import UCF
 
 extension SSGC
 {
@@ -7,13 +8,13 @@ extension SSGC
     struct OutlineResolutionScopes
     {
         let resources:[String: SSGC.Resource]
-        let codelink:CodelinkResolver<Int32>.Scope
+        let codelink:UCF.ResolutionScope
         let doclink:DoclinkResolver.Scope
         let origin:Int32?
 
         private
         init(resources:[String: SSGC.Resource],
-            codelink:CodelinkResolver<Int32>.Scope,
+            codelink:UCF.ResolutionScope,
             doclink:DoclinkResolver.Scope,
             origin:Int32?)
         {

@@ -11,15 +11,15 @@ extension Unidoc
     struct Resolver:~Copyable
     {
         private
-        let codelinks:CodelinkResolver<Scalar>
+        let codelinks:UCF.Overload<Scalar>.Resolver
         private
-        let caseless:CodelinkResolver<Scalar>
+        let caseless:UCF.Overload<Scalar>.Resolver
         private(set)
         var context:Linker
 
         init(
-            codelinks:CodelinkResolver<Scalar>,
-            caseless:CodelinkResolver<Scalar>,
+            codelinks:UCF.Overload<Scalar>.Resolver,
+            caseless:UCF.Overload<Scalar>.Resolver,
             context:consuming Linker)
         {
             self.codelinks = codelinks
@@ -141,7 +141,7 @@ extension Unidoc.Resolver
     func resolve(ucf link:String, at location:SourceLocation<Unidoc.Scalar>?) -> Unidoc.Outline
     {
         guard
-        let codelink:Codelink = .init(link)
+        let selector:UCF.Selector = .init(link)
         else
         {
             //  Somehow, a symbolgraph was compiled with an unparseable codelink!
@@ -151,21 +151,21 @@ extension Unidoc.Resolver
             return .fallback(link)
         }
 
-        let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
+        let resolution:UCF.Overload<Unidoc.Scalar>.Target?
 
-        switch self.codelinks.resolve(codelink)
+        switch self.codelinks.resolve(selector)
         {
         case .some(let overloads):
-            self.diagnostics[location] = CodelinkResolutionError<Unidoc.Symbolicator>.init(
+            self.diagnostics[location] = UCF.OverloadResolutionError<Unidoc.Symbolicator>.init(
                 overloads: overloads,
-                codelink: codelink)
+                selector: selector)
             resolution = nil
 
         case .one(let overload):
             resolution = overload.target
         }
 
-        return self.context.format(codelink: codelink, to: resolution)
+        return self.context.format(codelink: selector, to: resolution)
     }
 
     private mutating
@@ -183,7 +183,7 @@ extension Unidoc.Resolver
         }
 
         guard
-        let codelink:Codelink = .equivalent(to: doclink)
+        let selector:UCF.Selector = .equivalent(to: doclink)
         else
         {
             //  We don’t really support cross-package doclinks yet.
@@ -193,22 +193,22 @@ extension Unidoc.Resolver
             return .fallback(link)
         }
 
-        let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
+        let resolution:UCF.Overload<Unidoc.Scalar>.Target?
 
         //  TODO: improve diagnostics
-        switch self.codelinks.resolve(codelink)
+        switch self.codelinks.resolve(selector)
         {
         case .some(let overloads):
-            self.diagnostics[location] = CodelinkResolutionError<Unidoc.Symbolicator>.init(
+            self.diagnostics[location] = UCF.OverloadResolutionError<Unidoc.Symbolicator>.init(
                 overloads: overloads,
-                codelink: codelink)
+                selector: selector)
             resolution = nil
 
         case .one(let overload):
             resolution = overload.target
         }
 
-        return self.context.format(codelink: codelink, to: resolution)
+        return self.context.format(codelink: selector, to: resolution)
     }
 
     private mutating
@@ -234,18 +234,18 @@ extension Unidoc.Resolver
         //  FIXME: codelink is probably not the right model type here. All of these paths will
         //  be slash (`/`) separated.
         if  let slash:String.Index,
-            let codelink:Codelink = .translate(
+            let codelink:UCF.Selector = .translate(
                 domain: url[start ..< slash],
                 path: url[slash...])
         {
-            let resolution:CodelinkResolver<Unidoc.Scalar>.Overload.Target?
+            let resolution:UCF.Overload<Unidoc.Scalar>.Target?
 
             //  Translation always lowercases the URL, so we need to use the collated table.
             switch self.caseless.resolve(codelink)
             {
             case .some(let overloads):
                 guard
-                let overload:CodelinkResolver<Unidoc.Scalar>.Overload = overloads.first
+                let overload:UCF.Overload<Unidoc.Scalar> = overloads.first
                 else
                 {
                     //  Not an error, this was only speculative.

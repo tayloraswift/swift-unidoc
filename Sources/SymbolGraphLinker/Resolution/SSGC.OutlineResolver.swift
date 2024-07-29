@@ -11,7 +11,7 @@ extension SSGC
     struct OutlineResolver:~Copyable
     {
         private
-        let codelinks:CodelinkResolver<Int32>
+        let codelinks:UCF.Overload<Int32>.Resolver
         private
         let doclinks:DoclinkResolver
         private
@@ -20,7 +20,7 @@ extension SSGC
         var tables:Linker.Tables
 
         init(
-            codelinks:CodelinkResolver<Int32>,
+            codelinks:UCF.Overload<Int32>.Resolver,
             doclinks:DoclinkResolver,
             origin:Int32?,
             tables:consuming Linker.Tables)
@@ -47,7 +47,7 @@ extension SSGC.OutlineResolver
         at location:SourceLocation<Int32>?) -> Int32?
     {
         guard
-        let codelink:Codelink = .init(renamed)
+        let selector:UCF.Selector = .init(renamed)
         else
         {
             self.diagnostics[location] = SSGC.RenameParsingError.init(
@@ -56,7 +56,7 @@ extension SSGC.OutlineResolver
             return nil
         }
 
-        switch self.codelinks.resolve(codelink)
+        switch self.codelinks.resolve(selector)
         {
         case .one(let overload):
             return switch overload.target
@@ -69,13 +69,13 @@ extension SSGC.OutlineResolver
             self.diagnostics[location] = SSGC.RenameTargetError.init(
                 overloads: overloads,
                 redirect: redirect,
-                target: codelink)
+                target: selector)
             return nil
         }
     }
 
     mutating
-    func outline(_ codelink:Codelink,
+    func outline(_ codelink:UCF.Selector,
         at source:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {
         switch self.codelinks.resolve(codelink)
@@ -97,9 +97,9 @@ extension SSGC.OutlineResolver
             }
 
         case .some(let overloads):
-            self.diagnostics[source] = CodelinkResolutionError<SSGC.Symbolicator>.init(
+            self.diagnostics[source] = UCF.OverloadResolutionError<SSGC.Symbolicator>.init(
                 overloads: overloads,
-                codelink: codelink)
+                selector: codelink)
 
             return nil
         }
