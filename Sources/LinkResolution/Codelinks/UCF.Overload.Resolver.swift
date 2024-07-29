@@ -2,29 +2,32 @@ import UCF
 import Symbols
 import Unidoc
 
-@frozen public
-struct CodelinkResolver<Scalar> where Scalar:Hashable
+extension UCF.Overload
 {
-    public
-    let table:Table
-    public
-    let scope:Scope
-
-    @inlinable public
-    init(table:Table, scope:Scope)
+    @frozen public
+    struct Resolver
     {
-        self.table = table
-        self.scope = scope
+        public
+        let table:Table
+        public
+        let scope:UCF.ResolutionScope
+
+        @inlinable public
+        init(table:Table, scope:UCF.ResolutionScope)
+        {
+            self.table = table
+            self.scope = scope
+        }
     }
 }
-extension CodelinkResolver
+extension UCF.Overload.Resolver
 {
     @_specialize(where Scalar == Int32)
     @_specialize(where Scalar == Unidoc.Scalar)
     public
-    func resolve(_ link:Codelink) -> Overloads
+    func resolve(_ selector:UCF.Selector) -> UCF.Overload<Scalar>.Group
     {
-        switch link.base
+        switch selector.base
         {
         case .relative:
             if  let namespace:Symbol.Module = self.scope.namespace
@@ -32,11 +35,11 @@ extension CodelinkResolver
                 for index:Int in
                     (self.scope.path.startIndex ... self.scope.path.endIndex).reversed()
                 {
-                    let overloads:Overloads = self.table.query(
+                    let overloads:UCF.Overload<Scalar>.Group = self.table.query(
                         qualified: ["\(namespace)"]
                             + self.scope.path[..<index]
-                            + link.path.components,
-                        suffix: link.suffix)
+                            + selector.path.components,
+                        suffix: selector.suffix)
 
                     guard overloads.isEmpty
                     else
@@ -48,9 +51,9 @@ extension CodelinkResolver
             for namespace:Symbol.Module in self.scope.imports where
                 namespace != self.scope.namespace
             {
-                let overloads:Overloads = self.table.query(
-                    qualified: ["\(namespace)"] + link.path.components,
-                    suffix: link.suffix)
+                let overloads:UCF.Overload<Scalar>.Group = self.table.query(
+                    qualified: ["\(namespace)"] + selector.path.components,
+                    suffix: selector.suffix)
 
                 guard overloads.isEmpty
                 else
@@ -62,7 +65,8 @@ extension CodelinkResolver
             fallthrough
 
         case .qualified:
-            return self.table.query(qualified: link.path.components, suffix: link.suffix)
+            return self.table.query(qualified: selector.path.components,
+                suffix: selector.suffix)
         }
     }
 }

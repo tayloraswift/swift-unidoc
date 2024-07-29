@@ -1,7 +1,7 @@
-extension Codelink
+extension UCF
 {
     @frozen public
-    enum Filter:Substring, Equatable, Hashable, Sendable
+    enum KeywordFilter:Substring, Equatable, Hashable, Sendable
     {
         case  actor             = "actor"
         case `associatedtype`   = "associatedtype"
@@ -25,10 +25,10 @@ extension Codelink
         case `var`              = "var"
     }
 }
-extension Codelink.Filter
+extension UCF.KeywordFilter
 {
     @inlinable public
-    init?(legacy:Codelink.Suffix.Legacy.Filter)
+    init?(legacy:UCF.LegacyFilter)
     {
         switch legacy
         {
@@ -54,12 +54,12 @@ extension Codelink.Filter
         }
     }
 }
-extension Codelink.Filter:CustomStringConvertible
+extension UCF.KeywordFilter:CustomStringConvertible
 {
     @inlinable public
     var description:String { .init(self.rawValue) }
 }
-extension Codelink.Filter:LosslessStringConvertible
+extension UCF.KeywordFilter:LosslessStringConvertible
 {
     @inlinable public
     init?(_ description:String)

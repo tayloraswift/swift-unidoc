@@ -1,9 +1,10 @@
 import Symbols
+import UCF
 
-extension CodelinkResolver
+extension UCF
 {
     @frozen public
-    struct Scope
+    struct ResolutionScope
     {
         public
         let namespace:Symbol.Module?

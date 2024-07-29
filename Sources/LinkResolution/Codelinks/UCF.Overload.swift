@@ -1,10 +1,11 @@
+import UCF
 import FNV1
 import Symbols
 
-extension CodelinkResolver
+extension UCF
 {
     @frozen public
-    struct Overload:Equatable, Hashable
+    struct Overload<Scalar>:Equatable, Hashable where Scalar:Hashable
     {
         public
         let target:Target
@@ -24,6 +25,6 @@ extension CodelinkResolver
         }
     }
 }
-extension CodelinkResolver.Overload:Sendable where Scalar:Sendable
+extension UCF.Overload:Sendable where Scalar:Sendable
 {
 }

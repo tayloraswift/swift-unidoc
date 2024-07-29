@@ -185,16 +185,16 @@ extension Unidoc.Linker
 }
 extension Unidoc.Linker
 {
-    func format(codelink:Codelink,
-        to target:CodelinkResolver<Unidoc.Scalar>.Overload.Target?) -> Unidoc.Outline
+    func format(codelink:UCF.Selector,
+        to target:UCF.Overload<Unidoc.Scalar>.Target?) -> Unidoc.Outline
     {
         guard
-        let target:CodelinkResolver<Unidoc.Scalar>.Overload.Target
+        let target:UCF.Overload<Unidoc.Scalar>.Target
         else
         {
             return .fallback(codelink.path.visible.joined(separator: "."))
         }
-        /// TODO: support fragment in `Codelink`?
+        /// TODO: support fragment in `UCF.Selector`?
         let text:SymbolGraph.OutlineText = .init(vector: codelink.path.visible, fragment: nil)
 
         switch target

@@ -7,13 +7,13 @@ extension SSGC
 {
     struct RenameTargetError:Error
     {
-        let overloads:[CodelinkResolver<Int32>.Overload]
+        let overloads:[UCF.Overload<Int32>]
         let redirect:UnqualifiedPath
-        let target:Codelink
+        let target:UCF.Selector
 
-        init(overloads:[CodelinkResolver<Int32>.Overload],
+        init(overloads:[UCF.Overload<Int32>],
             redirect:UnqualifiedPath,
-            target:Codelink)
+            target:UCF.Selector)
         {
             self.overloads = overloads
             self.redirect = redirect
@@ -43,7 +43,7 @@ extension SSGC.RenameTargetError:Diagnostic
         }
     }
 
-    var notes:[CodelinkResolutionError<SSGC.Symbolicator>.Note]
+    var notes:[UCF.OverloadResolutionError<SSGC.Symbolicator>.Note]
     {
         self.overloads.map
         {

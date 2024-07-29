@@ -29,7 +29,7 @@ extension DoclinkResolver
                 {
                     for index:Int in prefix.indices.reversed()
                     {
-                        let path:DoclinkResolutionPath = .join(prefix[...index] + link.path)
+                        let path:UCF.ResolutionPath = .join(prefix[...index] + link.path)
                         if  let address:Int32 = self.table.entries[path]
                         {
                             return address
@@ -65,7 +65,7 @@ extension DoclinkResolver
         default:                        return nil
         }
 
-        let path:DoclinkResolutionPath = .join([_].init(prefix) + doclink.path.dropFirst())
+        let path:UCF.ResolutionPath = .join([_].init(prefix) + doclink.path.dropFirst())
         return self.table.entries[path]
     }
 }

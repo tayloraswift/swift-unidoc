@@ -1,4 +1,4 @@
-extension Codelink
+extension UCF.Selector
 {
     @frozen public
     enum Base:Equatable, Hashable, Sendable

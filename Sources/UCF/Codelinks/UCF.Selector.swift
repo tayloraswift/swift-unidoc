@@ -1,24 +1,28 @@
 import FNV1
 
-@frozen public
-struct Codelink:Equatable, Hashable, Sendable
+extension UCF
 {
-    public
-    let base:Base
-    public
-    var path:Path
-    public
-    var suffix:Suffix?
-
-    @inlinable public
-    init(base:Base, path:Path = .init(), suffix:Suffix? = nil)
+    @frozen public
+    struct Selector:Equatable, Hashable, Sendable
     {
-        self.base = base
-        self.path = path
-        self.suffix = suffix
+        public
+        let base:Base
+        public
+        var path:Path
+        public
+        var suffix:Suffix?
+
+        @inlinable public
+        init(base:Base, path:Path = .init(), suffix:Suffix? = nil)
+        {
+            self.base = base
+            self.path = path
+            self.suffix = suffix
+        }
     }
 }
-extension Codelink:CustomStringConvertible
+
+extension UCF.Selector:CustomStringConvertible
 {
     public
     var description:String
@@ -52,19 +56,15 @@ extension Codelink:CustomStringConvertible
         case .hash(let hash)?:
             return "\(string) [\(hash)]"
 
-        case .legacy(let legacy):
-            if  let hash:FNV24 = legacy.hash
-            {
-                return "\(string)-swift.\(legacy.filter.rawValue)-\(hash)"
-            }
-            else
-            {
-                return "\(string)-swift.\(legacy.filter.rawValue)"
-            }
+        case .legacy(let filter, nil):
+            return "\(string)-swift.\(filter.rawValue)"
+
+        case .legacy(let filter, let hash?):
+            return "\(string)-swift.\(filter.rawValue)-\(hash)"
         }
     }
 }
-extension Codelink:LosslessStringConvertible
+extension UCF.Selector:LosslessStringConvertible
 {
     public
     init?(_ string:String)
@@ -121,7 +121,7 @@ extension Codelink:LosslessStringConvertible
         }
     }
 }
-extension Codelink
+extension UCF.Selector
 {
     private
     init?(base:Base, parsing string:Substring)
@@ -165,7 +165,7 @@ extension Codelink
                     return nil
                 }
 
-                if  let filter:Filter = .init(string[i ..< bracket])
+                if  let filter:UCF.KeywordFilter = .init(string[i ..< bracket])
                 {
                     self.suffix = .filter(filter)
                     return
@@ -194,7 +194,7 @@ extension Codelink
                 }
 
                 //  Parse a legacy DocC disambiguation suffix.
-                var filter:Suffix.Legacy.Filter? = nil
+                var filter:UCF.LegacyFilter? = nil
                 var hash:FNV24? = nil
 
                 while i < string.endIndex
@@ -244,17 +244,17 @@ extension Codelink
                     }
                 }
 
-                if  let filter:Suffix.Legacy.Filter
+                if  let filter:UCF.LegacyFilter
                 {
                     if  case nil = hash,
-                        let filter:Filter = .init(legacy: filter)
+                        let filter:UCF.KeywordFilter = .init(legacy: filter)
                     {
                         self.suffix = .filter(filter)
                         return
                     }
                     else
                     {
-                        self.suffix = .legacy(.init(filter: filter, hash: hash))
+                        self.suffix = .legacy(filter, hash)
                         return
                     }
                 }
@@ -279,7 +279,7 @@ extension Codelink
         return nil
     }
 }
-extension Codelink
+extension UCF.Selector
 {
     @inlinable public static
     func equivalent(to doclink:Doclink) -> Self?

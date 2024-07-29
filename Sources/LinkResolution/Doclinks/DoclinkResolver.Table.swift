@@ -1,10 +1,12 @@
+import UCF
+
 extension DoclinkResolver
 {
     @frozen public
     struct Table
     {
         @usableFromInline internal
-        var entries:[DoclinkResolutionPath: Int32]
+        var entries:[UCF.ResolutionPath: Int32]
 
         @inlinable public
         init()

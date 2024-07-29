@@ -1,7 +1,7 @@
-extension Codelink.Suffix.Legacy
+extension UCF
 {
     @frozen public
-    enum Filter:Substring, Equatable, Hashable, Sendable
+    enum LegacyFilter:Substring, Equatable, Hashable, Sendable
     {
         case `associatedtype`   = "associatedtype"
         case `enum`             = "enum"

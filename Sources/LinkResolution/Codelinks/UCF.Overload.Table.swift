@@ -3,13 +3,13 @@ import FNV1
 import LexicalPaths
 import Symbols
 
-extension CodelinkResolver
+extension UCF.Overload
 {
     @frozen public
     struct Table
     {
         @usableFromInline internal
-        var entries:[CodelinkResolutionPath: Overloads]
+        var entries:[UCF.ResolutionPath: Group]
 
         @inlinable public
         init()
@@ -18,10 +18,10 @@ extension CodelinkResolver
         }
     }
 }
-extension CodelinkResolver.Table:Sendable where Scalar:Sendable
+extension UCF.Overload.Table:Sendable where Scalar:Sendable
 {
 }
-extension CodelinkResolver.Table
+extension UCF.Overload.Table
 {
     public
     func caseless() -> Self
@@ -38,10 +38,10 @@ extension CodelinkResolver.Table
         return copy
     }
 }
-extension CodelinkResolver.Table
+extension UCF.Overload.Table
 {
     @inlinable public
-    subscript(namespace:Symbol.Module) -> CodelinkResolver<Scalar>.Overloads
+    subscript(namespace:Symbol.Module) -> UCF.Overload<Scalar>.Group
     {
         _read
         {
@@ -54,7 +54,7 @@ extension CodelinkResolver.Table
     }
     @inlinable public
     subscript(namespace:Symbol.Module,
-        path:UnqualifiedPath) -> CodelinkResolver<Scalar>.Overloads
+        path:UnqualifiedPath) -> UCF.Overload<Scalar>.Group
     {
         _read
         {
@@ -68,7 +68,7 @@ extension CodelinkResolver.Table
     @inlinable public
     subscript(namespace:Symbol.Module,
         path:UnqualifiedPath,
-        last:String) -> CodelinkResolver<Scalar>.Overloads
+        last:String) -> UCF.Overload<Scalar>.Group
     {
         _read
         {
@@ -80,14 +80,14 @@ extension CodelinkResolver.Table
         }
     }
 }
-extension CodelinkResolver.Table
+extension UCF.Overload.Table
 {
     func query(
         qualified path:[String],
-        suffix:Codelink.Suffix?) -> CodelinkResolver<Scalar>.Overloads
+        suffix:UCF.Selector.Suffix?) -> UCF.Overload<Scalar>.Group
     {
         guard
-        let overloads:CodelinkResolver<Scalar>.Overloads = self.entries[.join(path)]
+        let overloads:UCF.Overload<Scalar>.Group = self.entries[.join(path)]
         else
         {
             return .some([])
@@ -95,7 +95,7 @@ extension CodelinkResolver.Table
 
         guard
         case .some(let overloads) = overloads,
-        let suffix:Codelink.Suffix
+        let suffix:UCF.Selector.Suffix
         else
         {
             return overloads
@@ -103,14 +103,10 @@ extension CodelinkResolver.Table
 
         switch suffix
         {
-        case .legacy(let suffix):
-            guard
-            let hash:FNV24 = suffix.hash
-            else
-            {
-                return .init(filtering: overloads) { suffix.filter ~= $0.phylum }
-            }
+        case .legacy(let filter, nil):
+            return .init(filtering: overloads) { filter ~= $0.phylum }
 
+        case .legacy(_, let hash?):
             return .init(filtering: overloads) { hash == $0.hash }
 
         case .hash(let hash):

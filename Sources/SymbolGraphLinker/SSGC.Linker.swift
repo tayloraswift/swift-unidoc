@@ -531,7 +531,8 @@ extension SSGC.Linker
             return nil
         }
 
-        guard let codelink:Codelink = .init(binding.text.string)
+        guard
+        let selector:UCF.Selector = .init(binding.text.string)
         else
         {
             throw SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(binding.text)
@@ -539,18 +540,18 @@ extension SSGC.Linker
 
         //  A qualified codelink with a single component that matches the current
         //  namespace is also a way to mark the primary article for that module.
-        if  case .qualified = codelink.base,
-            codelink.path.components.count == 1,
-            codelink.path.components[0] == "\(namespace)"
+        if  case .qualified = selector.base,
+            selector.path.components.count == 1,
+            selector.path.components[0] == "\(namespace)"
         {
             return nil
         }
 
-        let resolver:CodelinkResolver<Int32> = .init(
+        let resolver:UCF.Overload<Int32>.Resolver = .init(
             table: self.tables.codelinks,
             scope: .init(namespace: namespace, imports: self.tables.importAll))
 
-        switch resolver.resolve(codelink)
+        switch resolver.resolve(selector)
         {
         case .one(let overload):
             switch overload.target
@@ -560,20 +561,20 @@ extension SSGC.Linker
 
             case .vector(let feature, self: let heir):
                 throw SSGC.SupplementBindingError.init(.vector(feature, self: heir),
-                    codelink: codelink)
+                    selector: selector)
             }
 
         case .some(let overloads):
             if  overloads.isEmpty
             {
                 throw SSGC.SupplementBindingError.init(.none(in: namespace),
-                    codelink: codelink)
+                    selector: selector)
             }
             else
             {
-                throw CodelinkResolutionError<SSGC.Symbolicator>.init(
+                throw UCF.OverloadResolutionError<SSGC.Symbolicator>.init(
                     overloads: overloads,
-                    codelink: codelink)
+                    selector: selector)
             }
         }
     }

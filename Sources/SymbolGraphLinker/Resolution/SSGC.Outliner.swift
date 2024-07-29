@@ -153,7 +153,7 @@ extension SSGC.Outliner
         self.cache(link.string)
         {
             guard
-            let codelink:Codelink = .init(link.string)
+            let codelink:UCF.Selector = .init(link.string)
             else
             {
                 self.resolver.diagnostics[link.source] =
@@ -193,7 +193,7 @@ extension SSGC.Outliner
             }
             //  Resolution might still succeed by reinterpreting the doclink as a codelink.
             else if
-                let codelink:Codelink = .equivalent(to: doclink),
+                let codelink:UCF.Selector = .equivalent(to: doclink),
                 let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
                     at: link.source)
             {

@@ -2,6 +2,7 @@ import LinkResolution
 import LexicalPaths
 import SymbolGraphs
 import Symbols
+import UCF
 import Unidoc
 
 extension SymbolGraph
@@ -18,10 +19,10 @@ extension SymbolGraph
         var conformances:Set<Unidoc.Vector>
 
         private(set)
-        var codelinks:CodelinkResolver<Unidoc.Scalar>.Table
+        var codelinks:UCF.Overload<Unidoc.Scalar>.Table
         /// This is needed to support URL translation from other package indexes.
         private(set)
-        var caseless:CodelinkResolver<Unidoc.Scalar>.Table
+        var caseless:UCF.Overload<Unidoc.Scalar>.Table
         private(set)
         var imports:[Symbol.Module]
 

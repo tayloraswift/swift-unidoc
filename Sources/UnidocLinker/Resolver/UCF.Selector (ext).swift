@@ -2,7 +2,7 @@ import FNV1
 import SymbolGraphs
 import UCF
 
-extension Codelink
+extension UCF.Selector
 {
     static func translate(domain:Substring, path:Substring) -> Self?
     {

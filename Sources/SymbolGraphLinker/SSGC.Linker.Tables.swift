@@ -13,7 +13,7 @@ extension SSGC.Linker
         var diagnostics:Diagnostics<SSGC.Symbolicator>
 
         @_spi(testable) public
-        var codelinks:CodelinkResolver<Int32>.Table
+        var codelinks:UCF.Overload<Int32>.Table
         @_spi(testable) public
         var doclinks:DoclinkResolver.Table
 
@@ -34,7 +34,7 @@ extension SSGC.Linker
 
         @_spi(testable) public
         init(diagnostics:Diagnostics<SSGC.Symbolicator> = .init(),
-            codelinks:CodelinkResolver<Int32>.Table = .init(),
+            codelinks:UCF.Overload<Int32>.Table = .init(),
             doclinks:DoclinkResolver.Table = .init(),
             anchors:SSGC.AnchorResolver = .init(),
             modules:[SymbolGraph.Module] = [])

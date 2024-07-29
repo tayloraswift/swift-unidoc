@@ -1,4 +1,6 @@
-extension CodelinkResolver.Overload
+import UCF
+
+extension UCF.Overload
 {
     @frozen public
     enum Target:Equatable, Hashable
@@ -7,6 +9,6 @@ extension CodelinkResolver.Overload
         case vector(Scalar, self:Scalar)
     }
 }
-extension CodelinkResolver.Overload.Target:Sendable where Scalar:Sendable
+extension UCF.Overload.Target:Sendable where Scalar:Sendable
 {
 }
