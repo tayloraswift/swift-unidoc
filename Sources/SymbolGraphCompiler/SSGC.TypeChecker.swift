@@ -540,34 +540,4 @@ extension SSGC.TypeChecker
             extensions: extensions,
             features: features)
     }
-
-    // public
-    // func declarations(in culture:Symbol.Module, language:Phylum.Language) -> SSGC.Declarations
-    // {
-    //     .init(namespaces: self.declarations.load(culture: culture),
-    //         language: language,
-    //         culture: culture)
-    // }
-
-    // public
-    // func extensions(in culture:Symbol.Module) throws -> SSGC.Extensions
-    // {
-    //     let extensions:[SSGC.Extension] = self.extensions.load(culture: culture)
-
-    //     let features:[Symbol.Decl: SSGC.ModuleIndex.Feature] = try extensions.reduce(into: [:])
-    //     {
-    //         for feature:Symbol.Decl in $1.features
-    //         {
-    //             try
-    //             {
-    //                 $0 = try $0 ?? .init(from: try self.declarations[feature].value)
-    //             } (&$0[feature])
-    //         }
-    //     }
-
-    //     return .init(resolvableLinks: self.resolvableLinks,
-    //         compiled: extensions,
-    //         features: features,
-    //         culture: culture)
-    // }
 }
