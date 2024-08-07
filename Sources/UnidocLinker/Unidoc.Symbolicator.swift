@@ -11,15 +11,15 @@ extension Unidoc
         @usableFromInline
         let demangler:Demangler?
         @usableFromInline
-        let root:Symbol.FileBase?
+        let base:Symbol.FileBase?
 
         private
         let context:Linker
 
-        init(context:consuming Linker, root:Symbol.FileBase?)
+        init(context:consuming Linker, base:Symbol.FileBase?)
         {
             self.demangler = .init()
-            self.root = root
+            self.base = base
 
             self.context = context
         }

@@ -159,7 +159,7 @@ extension Unidoc.Linker
     {
         let diagnostics:Diagnostics<Unidoc.Symbolicator> = self.diagnostics
         let symbols:Unidoc.Symbolicator = .init(context: self,
-            root: self.current.metadata.root)
+            base: self.current.metadata.root)
 
         return diagnostics.symbolicated(with: symbols)
     }
