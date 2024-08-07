@@ -214,13 +214,9 @@ extension SSGC.TypeChecker
             return
         }
 
-        if  member.culture != culture
+        guard self.ignoreExportedInterfaces || member.culture == culture
+        else
         {
-            if  self.ignoreExportedInterfaces
-            {
-                return
-            }
-
             throw AssertionError.init(message: """
                 Found cross-module member relationship \
                 (from \(member.culture) in \(culture)), which should not be possible in \
@@ -243,7 +239,8 @@ extension SSGC.TypeChecker
                 return
             }
 
-            if  scope.culture != culture
+            guard self.ignoreExportedInterfaces || scope.culture == culture
+            else
             {
                 throw AssertionError.init(message: """
                     Found cross-module member relationship \
@@ -315,13 +312,9 @@ extension SSGC.TypeChecker
                 return
             }
 
-            if  type.culture != culture
+            guard self.ignoreExportedInterfaces || type.culture == culture
+            else
             {
-                if  self.ignoreExportedInterfaces
-                {
-                    return
-                }
-
                 throw AssertionError.init(message: """
                     Found cross-module conformance relationship \
                     (from \(type.culture) in \(culture)), which should not be possible in \
@@ -383,13 +376,9 @@ extension SSGC.TypeChecker
             return
         }
 
-        if  subform.culture != culture
+        guard self.ignoreExportedInterfaces || subform.culture == culture
+        else
         {
-            if  self.ignoreExportedInterfaces
-            {
-                return
-            }
-
             throw AssertionError.init(message: """
                 Found retroactive superform relationship (from \(subform.culture) in \(culture))
                 """)
@@ -435,14 +424,9 @@ extension SSGC.TypeChecker
                 return
             }
 
-            guard heir.culture == culture
+            guard self.ignoreExportedInterfaces || heir.culture == culture
             else
             {
-                if  self.ignoreExportedInterfaces
-                {
-                    return
-                }
-
                 throw AssertionError.init(message: """
                     Found direct cross-module feature inheritance relationship in culture \
                     '\(culture)' adding feature '\(feature.value.path)' to type \

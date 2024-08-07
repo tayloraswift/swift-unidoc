@@ -133,28 +133,6 @@ extension SSGC.Linker
 }
 extension SSGC.Linker
 {
-    private mutating
-    func address(of decl:Symbol.Decl?) -> Int32?
-    {
-        decl.map { self.tables.intern($0) }
-    }
-    /// Returns an array of local scalars for an array of declaration symbols.
-    /// The scalar assignments reflect the order of the symbols in the array,
-    /// so you should sort them if you want deterministic addressing.
-    ///
-    /// This function doesn’t expose the declarations for codelink resolution,
-    /// because it is expected that the same symbols may appear in
-    /// the array arguments of multiple calls to this function, and it
-    /// is more efficient to expose declarations while performing a different
-    /// pass.
-    private mutating
-    func addresses(of decls:[Symbol.Decl]) -> [Int32]
-    {
-        decls.map { self.tables.intern($0) }
-    }
-}
-extension SSGC.Linker
-{
     /// Allocates and binds addresses for the given declarations. Binding consists of populating
     /// the full name and phylum of a declaration. This function also exposes each of the
     /// declarations for codelink resolution.
@@ -252,9 +230,9 @@ extension SSGC.Linker
             let qualifier:Symbol.Module = self.tables.graph.namespaces[namespace]
 
 
-            let conformances:[Int32] = self.addresses(of: $0.conformances)
-            let features:[Int32] = self.addresses(of: $0.features)
-            let nested:[Int32] = self.addresses(of: $0.nested)
+            let conformances:[Int32] = $0.conformances.map { self.tables.intern($0) }
+            let features:[Int32] = $0.features.map { self.tables.intern($0) }
+            let nested:[Int32] = $0.nested.map { self.tables.intern($0) }
 
             //  Expose features for codelink resolution.
             for (f, id):(Int32, Symbol.Decl) in zip(features, $0.features)
@@ -598,10 +576,10 @@ extension SSGC.Linker
         let signature:Signature<Int32> = decl.signature.map { self.tables.intern($0) }
 
         //  Sort for deterministic addresses.
-        let requirements:[Int32] = self.addresses(of: decl.requirements.sorted())
-        let inhabitants:[Int32] = self.addresses(of: decl.inhabitants.sorted())
-        let superforms:[Int32] = self.addresses(of: decl.superforms.sorted())
-        let origin:Int32? = self.address(of: decl.origin)
+        let requirements:[Int32] = decl.requirements.sorted().map { self.tables.intern($0) }
+        let inhabitants:[Int32] = decl.inhabitants.sorted().map { self.tables.intern($0) }
+        let superforms:[Int32] = decl.superforms.sorted().map { self.tables.intern($0) }
+        let origin:Int32? = decl.origin.map { self.tables.intern($0) }
 
         let location:SourceLocation<Int32>? = decl.location?.map
         {
