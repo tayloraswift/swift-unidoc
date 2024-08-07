@@ -19,3 +19,4 @@ extension SSGC
         var name:String { get }
     }
 }
+ 

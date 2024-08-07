@@ -12,7 +12,7 @@ protocol CompilerTestBattery:TestBattery
     var inputs:[Symbol.Module] { get }
 
     static
-    func run(tests:TestGroup, declarations:SSGC.Declarations, extensions:SSGC.Extensions)
+    func run(tests:TestGroup, module:SSGC.ModuleIndex)
 }
 extension CompilerTestBattery
 {
@@ -21,7 +21,7 @@ extension CompilerTestBattery
     {
         let symbols:SSGC.SymbolDumps = try .collect(from: "TestModules/SymbolGraphs")
 
-        let compiled:[(SSGC.Declarations, SSGC.Extensions)]? = (tests ! "Compilation").do
+        let modules:[SSGC.ModuleIndex]? = (tests ! "Compilation").do
         {
             let base:Symbol.FileBase = "/swift/swift-unidoc/TestModules"
 
@@ -44,39 +44,37 @@ extension CompilerTestBattery
 
             return try Self.inputs.compactMap
             {
-                guard
-                let symbols:SSGC.SymbolCulture = tests.expect(value: try symbolCache.load(
-                    module: $0,
-                    base: base,
-                    as: .swift))
+                if  let symbols:SSGC.SymbolCulture = tests.expect(value: try symbolCache.load(
+                        module: $0,
+                        base: base,
+                        as: .swift))
+                {
+                    try typeChecker.add(symbols: symbols)
+                }
                 else
                 {
                     return nil
                 }
 
-                try typeChecker.add(symbols: symbols)
-                return (
-                    typeChecker.declarations(in: $0, language: .swift),
-                    try typeChecker.extensions(in: $0)
-                )
+                return try typeChecker.load(in: $0)
             }
         }
 
         guard
-        let compiled:[(SSGC.Declarations, SSGC.Extensions)]
+        let modules:[SSGC.ModuleIndex]
         else
         {
             return
         }
 
-        for (declarations, extensions):(SSGC.Declarations, SSGC.Extensions) in compiled
+        for module:SSGC.ModuleIndex in modules
         {
-            Self.run(tests: tests, declarations: declarations, extensions: extensions)
+            Self.run(tests: tests, module: module)
 
             if  let tests:TestGroup = tests / "SourceLocations"
             {
 
-                for (_, decls):(_, [SSGC.Decl]) in declarations.namespaces
+                for (_, decls):(_, [SSGC.Decl]) in module.declarations
                 {
                     for decl:SSGC.Decl in decls
                     {

@@ -30,31 +30,31 @@ extension SSGC
 extension SSGC.DocumentationSources
 {
     func link(symbols:SSGC.SymbolDumps,
-        logger:SSGC.DocumentationLogger,
+        logger:SSGC.Logger,
         with swift:SSGC.Toolchain) throws -> SymbolGraph
     {
-        let cultures:[SSGC.ModuleLayout] = self.cultures
+        let moduleLayouts:[SSGC.ModuleLayout] = self.cultures
         let snippets:[SSGC.LazyFile] = self.snippets
         let prefix:Symbol.FileBase? = self.prefix
 
-        var declarationsCompiled:[SSGC.Declarations] = []
-        var extensionsCompiled:[SSGC.Extensions] = []
+        let moduleIndexes:[SSGC.ModuleIndex] 
 
         var profiler:SSGC.DocumentationBuildProfiler = .init()
         do
         {
             var symbolCache:SSGC.SymbolCache = .init(symbols: symbols)
 
-            for module:SSGC.ModuleLayout in cultures
+            moduleIndexes = try moduleLayouts.map
             {
-                let id:Symbol.Module = module.id
+                let id:Symbol.Module = $0.id
+                let constituents:[SSGC.ModuleLayout] = try self.constituents(of: $0)
+
                 let symbols:
                 (
                     missing:[SSGC.ModuleLayout],
                     loaded:[SSGC.SymbolCulture]
                 ) = try profiler.measure(\.loadingSymbols)
                 {
-                    let constituents:[SSGC.ModuleLayout] = try self.constituents(of: module)
                     let selection:Set<Symbol.Module> = constituents.reduce(into: [])
                     {
                         $0.insert($1.id)
@@ -95,10 +95,13 @@ extension SSGC.DocumentationSources
                     }
                 }
 
-                let language:Phylum.Language = module.language ?? .swift
+                var module:SSGC.ModuleIndex = try compiler.load(in: id)
 
-                declarationsCompiled.append(compiler.declarations(in: id, language: language))
-                extensionsCompiled.append(try compiler.extensions(in: id))
+                module.resources = $0.resources
+                module.markdown = $0.markdown
+                module.language = $0.language
+
+                return module
             }
 
             print("""
@@ -106,12 +109,12 @@ extension SSGC.DocumentationSources
                     time loading symbols    : \(profiler.loadingSymbols)
                     time compiling          : \(profiler.compiling)
                 cultures        : \(cultures.count)
-                namespaces      : \(declarationsCompiled.reduce(0) { $0 + $1.namespaces.count })
-                declarations    : \(declarationsCompiled.reduce(0)
+                namespaces      : \(moduleIndexes.reduce(0) { $0 + $1.declarations.count })
+                declarations    : \(moduleIndexes.reduce(0)
                 {
-                    $0 + $1.namespaces.reduce(0) { $0 + $1.decls.count }
+                    $0 + $1.declarations.reduce(0) { $0 + $1.decls.count }
                 })
-                extensions      : \(extensionsCompiled.reduce(0) { $0 + $1.compiled.count })
+                extensions      : \(moduleIndexes.reduce(0) { $0 + $1.extensions.count })
                 """)
         }
         catch let error
@@ -135,66 +138,31 @@ extension SSGC.DocumentationSources
                 index = nil
             }
 
-            var linker:SSGC.Linker = profiler.measure(\.linking)
+            let graph:SymbolGraph = try profiler.measure(\.linking)
             {
-                .init(
+                try .link(projectRoot: prefix,
                     plugins: [.swift(index: index)],
-                    modules: cultures.map(\.module),
-                    allocating: declarationsCompiled,
-                    extensions: extensionsCompiled,
-                    root: prefix)
-            }
-
-            let extensionPositions:[[(Int32, Int)]] = profiler.measure(\.linking)
-            {
-                extensionsCompiled.map{ linker.unfurl(extensions: $0) }
-            }
-
-            let resources:[[SSGC.LazyFile]] = cultures.map(\.resources)
-            let markdown:[[SSGC.LazyFile]] = cultures.map(\.markdown)
-            let snippets:[SSGC.LazyFile] = snippets
-
-            let articles:[[SSGC.Article]] = try profiler.measure(\.linking)
-            {
-                //  Calling this is mandatory, even if there are no supplements!
-                try linker.attach(resources: resources,
+                    modules: moduleLayouts.map(\.module),
+                    indexes: moduleIndexes,
                     snippets: snippets,
-                    markdown: markdown)
-            }
-
-            for resource:SSGC.LazyFile in (consume resources).joined()
+                    logger: logger)
+            } 
+            
+            for resource:SSGC.LazyFile in moduleLayouts.lazy.map(\.resources).joined()
             {
                 profiler.loadingSources += resource.loadingTime
                 profiler.linking -= resource.loadingTime
             }
-            for markdown:SSGC.LazyFile in (consume markdown).joined()
+            for markdown:SSGC.LazyFile in moduleLayouts.lazy.map(\.markdown).joined()
             {
                 profiler.loadingSources += markdown.loadingTime
                 profiler.linking -= markdown.loadingTime
             }
-            for snippet:SSGC.LazyFile in (consume snippets)
+            for snippet:SSGC.LazyFile in snippets
             {
                 profiler.loadingSources += snippet.loadingTime
                 profiler.linking -= snippet.loadingTime
             }
-
-            let graph:SymbolGraph = try profiler.measure(\.linking)
-            {
-                for declarations:SSGC.Declarations in declarationsCompiled
-                {
-                    try linker.collate(declarations: declarations)
-                }
-                for (extensions, extensionPositions):(SSGC.Extensions, [(Int32, Int)]) in zip(
-                    extensionsCompiled,
-                    extensionPositions)
-                {
-                    try linker.collate(extensions: extensions.compiled, at: extensionPositions)
-                }
-
-                return try linker.link(extensions: extensionPositions, articles: articles)
-            }
-
-            try logger.emit(messages: linker.status())
 
             print("""
                 Linked documentation!

@@ -18,9 +18,9 @@ extension Main.DefaultImplementations:CompilerTestBattery
     ]
 
     static
-    func run(tests:TestGroup, declarations:SSGC.Declarations, extensions:SSGC.Extensions)
+    func run(tests:TestGroup, module:SSGC.ModuleIndex)
     {
-        let features:[Symbol.Decl: [Symbol.Decl]] = extensions.compiled.reduce(into: [:])
+        let features:[Symbol.Decl: [Symbol.Decl]] = module.extensions.reduce(into: [:])
         {
             $0[$1.signature.extended.type, default: []] += $1.features
         }
@@ -36,7 +36,7 @@ extension Main.DefaultImplementations:CompilerTestBattery
             ])
         }
 
-        let nested:[Symbol.Decl: [Symbol.Decl]] = extensions.compiled.reduce(into: [:])
+        let nested:[Symbol.Decl: [Symbol.Decl]] = module.extensions.reduce(into: [:])
         {
             $0[$1.signature.extended.type, default: []] += $1.nested
         }
@@ -51,7 +51,7 @@ extension Main.DefaultImplementations:CompilerTestBattery
             ])
         }
 
-        let declsBySymbol:[Symbol.Decl: SSGC.Decl] = declarations.namespaces.reduce(into: [:])
+        let declsBySymbol:[Symbol.Decl: SSGC.Decl] = module.declarations.reduce(into: [:])
         {
             for decl:SSGC.Decl in $1.decls
             {

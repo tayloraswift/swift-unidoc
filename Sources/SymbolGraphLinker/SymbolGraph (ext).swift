@@ -1,9 +1,34 @@
 import FNV1
 import InlineArray
 import InlineDictionary
+import MarkdownABI
 import SourceDiagnostics
 import SymbolGraphs
+import Symbols
 
+extension SymbolGraph
+{
+    public
+    static func link(projectRoot:Symbol.FileBase? = nil,
+        plugins:consuming [any Markdown.CodeLanguageType] = [],
+        modules:consuming [SymbolGraph.Module],
+        indexes:consuming [SSGC.ModuleIndex],
+        snippets:[any SSGC.ResourceFile],
+        logger:any DiagnosticLogger) throws -> Self 
+    {
+        var linker:SSGC.Linker = .init(plugins: plugins, modules: modules)
+        try linker.attach(snippets: snippets, indexes: indexes, projectRoot: projectRoot)
+        try linker.collate()
+
+        let graph:SymbolGraph = linker.link()
+
+        try logger.emit(messages: linker.diagnostics.symbolicated(with: .init(
+            graph: graph,
+            base: projectRoot)))
+
+        return graph
+    } 
+}
 extension SymbolGraph
 {
     mutating

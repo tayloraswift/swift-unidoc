@@ -11,24 +11,12 @@ extension SSGC
     struct OutlineResolver:~Copyable
     {
         private
-        let codelinks:UCF.Overload<Int32>.Resolver
-        private
-        let doclinks:DoclinkResolver
-        private
-        let origin:Int32?
-
+        let scopes:OutlineResolutionScopes
         var tables:Linker.Tables
 
-        init(
-            codelinks:UCF.Overload<Int32>.Resolver,
-            doclinks:DoclinkResolver,
-            origin:Int32?,
-            tables:consuming Linker.Tables)
+        init(scopes:OutlineResolutionScopes, tables:consuming Linker.Tables)
         {
-            self.codelinks = codelinks
-            self.doclinks = doclinks
-            self.origin = origin
-
+            self.scopes = scopes
             self.tables = tables
         }
     }
@@ -40,7 +28,28 @@ extension SSGC.OutlineResolver
         _read   { yield  self.tables.diagnostics }
         _modify { yield &self.tables.diagnostics }
     }
+}
+extension SSGC.OutlineResolver
+{
+    var resources:[String: SSGC.Resource] { self.scopes.resources }
 
+    private
+    var origin:Int32? { self.scopes.origin }
+
+    private
+    var codelinks:UCF.Overload<Int32>.Resolver
+    {
+        .init(table: self.tables.codelinks, scope: self.scopes.codelink)
+    }
+
+    private
+    var doclinks:DoclinkResolver
+    {
+        .init(table: self.tables.doclinks, scope: self.scopes.doclink)
+    }
+}
+extension SSGC.OutlineResolver
+{
     mutating
     func resolve(rename renamed:String,
         of redirect:UnqualifiedPath,

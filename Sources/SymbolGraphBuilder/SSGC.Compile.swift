@@ -216,7 +216,7 @@ extension SSGC.Compile
     private
     func launch(workspace:SSGC.Workspace,
         status:SSGC.StatusStream?,
-        logger:SSGC.DocumentationLogger) throws
+        logger:SSGC.Logger) throws
     {
         let toolchain:SSGC.Toolchain = try .detect(swiftRuntime: self.swiftRuntime,
             swiftCache: self.swiftCache,
