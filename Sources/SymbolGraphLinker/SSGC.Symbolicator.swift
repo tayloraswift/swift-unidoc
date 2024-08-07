@@ -10,15 +10,15 @@ extension SSGC
         public
         let demangler:Demangler?
         public
-        let root:Symbol.FileBase?
+        let base:Symbol.FileBase?
 
         private
         let graph:SymbolGraph
 
-        init(graph:SymbolGraph, root:Symbol.FileBase?)
+        init(graph:SymbolGraph, base:Symbol.FileBase?)
         {
             self.demangler = .init()
-            self.root = root
+            self.base = base
 
             self.graph = graph
         }

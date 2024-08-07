@@ -11,7 +11,7 @@ protocol DiagnosticSymbolicator<Address>
     subscript(file address:Address) -> Symbol.File? { get }
 
     var demangler:Demangler? { get }
-    var root:Symbol.FileBase? { get }
+    var base:Symbol.FileBase? { get }
 }
 extension DiagnosticSymbolicator
 {
@@ -60,10 +60,10 @@ extension DiagnosticSymbolicator
     @inlinable public
     func path(of scalar:Address) -> String?
     {
-        if  let root:Symbol.FileBase = self.root,
+        if  let base:Symbol.FileBase = self.base,
             let file:Symbol.File = self[file: scalar]
         {
-            "\(root.path)/\(file)"
+            "\(base.path)/\(file)"
         }
         else
         {

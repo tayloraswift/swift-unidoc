@@ -17,7 +17,7 @@ extension Main.InternalExtensionsWithConstraints:CompilerTestBattery
     ]
 
     static
-    func run(tests:TestGroup, declarations:SSGC.Declarations, extensions:SSGC.Extensions)
+    func run(tests:TestGroup, module:SSGC.ModuleIndex)
     {
     }
 }

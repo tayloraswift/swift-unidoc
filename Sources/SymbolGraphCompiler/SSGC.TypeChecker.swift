@@ -1,7 +1,9 @@
 import LexicalPaths
+import LinkResolution
 import Signatures
 import SymbolGraphParts
 import Symbols
+import UCF
 
 extension SSGC
 {
@@ -15,12 +17,16 @@ extension SSGC
         private
         var extensions:ExtensionTable
 
+        private
+        var resolvableLinks:UCF.ResolutionTable<Overload>
+
         public
         init(ignoreExportedInterfaces:Bool = true, threshold:Symbol.ACL = .public)
         {
             self.ignoreExportedInterfaces = ignoreExportedInterfaces
             self.declarations = .init(threshold: threshold)
             self.extensions = .init()
+            self.resolvableLinks = .init()
         }
     }
 }
@@ -60,6 +66,8 @@ extension SSGC.TypeChecker
     private mutating
     func add(symbols culture:SSGC.SymbolCulture, from id:Symbol.Module) throws
     {
+        self.resolvableLinks[id].append(.module(id))
+
         /// We use this to look up protocols by name instead of symbol. This is needed in order
         /// to work around some bizarre lib/SymbolGraphGen bugs.
         var protocolsByName:[UnqualifiedPath: Symbol.Decl] = [:]
@@ -100,6 +108,14 @@ extension SSGC.TypeChecker
                         else if !decl.value.path.prefix.isEmpty
                         {
                             children.append(decl)
+                        }
+
+                        if  decl.culture == id
+                        {
+                            //  If this is not a re-exported symbol, make it available for
+                            //  link resolution.
+                            self.resolvableLinks[namespace, decl.value.path].append(
+                                .decl(decl.value))
                         }
 
                     case .vector:
@@ -175,7 +191,8 @@ extension SSGC.TypeChecker
         }
     }
 }
-extension SSGC.TypeChecker{
+extension SSGC.TypeChecker
+{
     /// Note that this is culture-agnostic because requirement relationships never cross
     /// modules.
     private mutating
@@ -197,13 +214,9 @@ extension SSGC.TypeChecker{
             return
         }
 
-        if  member.culture != culture
+        guard self.ignoreExportedInterfaces || member.culture == culture
+        else
         {
-            if  self.ignoreExportedInterfaces
-            {
-                return
-            }
-
             throw AssertionError.init(message: """
                 Found cross-module member relationship \
                 (from \(member.culture) in \(culture)), which should not be possible in \
@@ -226,7 +239,8 @@ extension SSGC.TypeChecker{
                 return
             }
 
-            if  scope.culture != culture
+            guard self.ignoreExportedInterfaces || scope.culture == culture
+            else
             {
                 throw AssertionError.init(message: """
                     Found cross-module member relationship \
@@ -298,13 +312,9 @@ extension SSGC.TypeChecker
                 return
             }
 
-            if  type.culture != culture
+            guard self.ignoreExportedInterfaces || type.culture == culture
+            else
             {
-                if  self.ignoreExportedInterfaces
-                {
-                    return
-                }
-
                 throw AssertionError.init(message: """
                     Found cross-module conformance relationship \
                     (from \(type.culture) in \(culture)), which should not be possible in \
@@ -366,13 +376,9 @@ extension SSGC.TypeChecker
             return
         }
 
-        if  subform.culture != culture
+        guard self.ignoreExportedInterfaces || subform.culture == culture
+        else
         {
-            if  self.ignoreExportedInterfaces
-            {
-                return
-            }
-
             throw AssertionError.init(message: """
                 Found retroactive superform relationship (from \(subform.culture) in \(culture))
                 """)
@@ -398,30 +404,29 @@ extension SSGC.TypeChecker
             return
         }
 
+        let heir:SSGC.DeclObject
+
         switch relationship.target
         {
         case .vector(let symbol):
             //  Nothing can be a member of a vector symbol.
             throw SSGC.UnexpectedSymbolError.vector(symbol)
 
-        case .scalar(let heir):
+        case .scalar(let symbol):
             //  If the colonial graph was generated with '-emit-extension-symbols',
             //  we should never see an external type reference here.
-            guard
-            let heir:SSGC.DeclObject = self.declarations[visible: heir]
+            if  let decl:SSGC.DeclObject = self.declarations[visible: symbol]
+            {
+                heir = decl
+            }
             else
             {
                 return
             }
 
-            guard heir.culture == culture
+            guard self.ignoreExportedInterfaces || heir.culture == culture
             else
             {
-                if  self.ignoreExportedInterfaces
-                {
-                    return
-                }
-
                 throw AssertionError.init(message: """
                     Found direct cross-module feature inheritance relationship in culture \
                     '\(culture)' adding feature '\(feature.value.path)' to type \
@@ -466,6 +471,16 @@ extension SSGC.TypeChecker
         case .block(let block):
             //  Look up the extension associated with this block name.
             let group:SSGC.ExtensionObject = try self.extensions[named: block]
+
+            if  let extendee:SSGC.DeclObject = self.declarations[visible: group.extended.type]
+            {
+                heir = extendee
+            }
+            else
+            {
+                return
+            }
+
             if  group.extended.type == relationship.source.heir
             {
                 group.add(feature: feature.id, by: culture)
@@ -480,24 +495,19 @@ extension SSGC.TypeChecker
                     """)
             }
         }
+
+        self.resolvableLinks[heir.namespace, heir.value.path, feature.value.path.last].append(
+            .feature(feature.value, self: heir.id))
     }
 }
 extension SSGC.TypeChecker
 {
-    public
-    func declarations(in culture:Symbol.Module, language:Phylum.Language) -> SSGC.Declarations
-    {
-        .init(namespaces: self.declarations.load(culture: culture),
-            language: language,
-            culture: culture)
-    }
-
-    public
-    func extensions(in culture:Symbol.Module) throws -> SSGC.Extensions
+    public __consuming
+    func load(in culture:Symbol.Module) throws -> SSGC.ModuleIndex
     {
         let extensions:[SSGC.Extension] = self.extensions.load(culture: culture)
 
-        let features:[Symbol.Decl: SSGC.Extensions.Feature] = try extensions.reduce(into: [:])
+        let features:[Symbol.Decl: SSGC.ModuleIndex.Feature] = try extensions.reduce(into: [:])
         {
             for feature:Symbol.Decl in $1.features
             {
@@ -508,6 +518,10 @@ extension SSGC.TypeChecker
             }
         }
 
-        return .init(compiled: extensions, features: features, culture: culture)
+        return .init(id: culture,
+            resolvableLinks: self.resolvableLinks,
+            declarations: self.declarations.load(culture: culture),
+            extensions: extensions,
+            features: features)
     }
 }

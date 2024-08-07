@@ -18,16 +18,13 @@ extension SSGC
     @_spi(testable) public
     struct Outliner:~Copyable
     {
-        private
-        let resources:[String: SSGC.Resource]
-        private
+        private(set)
         var resolver:OutlineResolver
         private
         var cache:Cache
 
-        init(resources:[String: SSGC.Resource], resolver:consuming OutlineResolver)
+        init(resolver:consuming OutlineResolver)
         {
-            self.resources = resources
             self.resolver = resolver
             self.cache = .init()
         }
@@ -43,7 +40,7 @@ extension SSGC.Outliner
     private
     func locate(resource name:String) -> SSGC.Resource?
     {
-        if  let resource:SSGC.Resource = self.resources[name]
+        if  let resource:SSGC.Resource = self.resolver.resources[name]
         {
             return resource
         }
@@ -62,16 +59,16 @@ extension SSGC.Outliner
             default:        return nil
             }
 
-            return self.resources["\(name[..<dot])@2x\(name[dot...])"]
-                ?? self.resources["\(name[..<dot])~dark\(name[dot...])"]
-                ?? self.resources["\(name[..<dot])~dark@2x\(name[dot...])"]
+            return self.resolver.resources["\(name[..<dot])@2x\(name[dot...])"]
+                ?? self.resolver.resources["\(name[..<dot])~dark\(name[dot...])"]
+                ?? self.resolver.resources["\(name[..<dot])~dark@2x\(name[dot...])"]
         }
         for guess:String in ["svg", "webp", "png", "jpg", "jpeg", "gif"]
         {
-            if  let resource:SSGC.Resource = self.resources["\(name).\(guess)"]
-                ?? self.resources["\(name)@2x.\(guess)"]
-                ?? self.resources["\(name)~dark.\(guess)"]
-                ?? self.resources["\(name)~dark@2x.\(guess)"]
+            if  let resource:SSGC.Resource = self.resolver.resources["\(name).\(guess)"]
+                ?? self.resolver.resources["\(name)@2x.\(guess)"]
+                ?? self.resolver.resources["\(name)~dark.\(guess)"]
+                ?? self.resolver.resources["\(name)~dark@2x.\(guess)"]
             {
                 return resource
             }

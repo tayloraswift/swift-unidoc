@@ -4,7 +4,7 @@ import System
 extension SSGC
 {
     @frozen public
-    struct DocumentationLogger
+    struct Logger
     {
         let file:FileDescriptor?
 
@@ -15,8 +15,9 @@ extension SSGC
         }
     }
 }
-extension SSGC.DocumentationLogger
+extension SSGC.Logger:DiagnosticLogger
 {
+    public
     func emit(messages:consuming DiagnosticMessages) throws
     {
         guard
@@ -31,3 +32,4 @@ extension SSGC.DocumentationLogger
         try file.writeAll(text.utf8)
     }
 }
+ 

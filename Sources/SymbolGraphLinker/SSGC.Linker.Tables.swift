@@ -1,6 +1,7 @@
 import LinkResolution
 import MarkdownSemantics
 import SourceDiagnostics
+import SymbolGraphCompiler
 import SymbolGraphs
 import Symbols
 import UCF
@@ -200,7 +201,7 @@ extension SSGC.Linker.Tables
 extension SSGC.Linker.Tables
 {
     mutating
-    func index(article:Markdown.SemanticDocument, id scope:Int32?)
+    func index(normalizing article:Markdown.SemanticDocument, id scope:Int32?)
     {
         let anchors:SSGC.AnchorTable = self.anchors.index(
             article: article.details,
@@ -320,12 +321,8 @@ extension SSGC.Linker.Tables
     func resolving<Success>(with scopes:SSGC.OutlineResolutionScopes,
         do body:(inout SSGC.Outliner) throws -> Success) rethrows -> Success
     {
-        var outliner:SSGC.Outliner = .init(resources: scopes.resources,
-            resolver: .init(
-                codelinks: .init(table: self.codelinks, scope: scopes.codelink),
-                doclinks: .init(table: self.doclinks, scope: scopes.doclink),
-                origin: scopes.origin,
-                tables: consume self))
+        var outliner:SSGC.Outliner = .init(
+            resolver: .init(scopes: scopes, tables: consume self))
         do
         {
             let success:Success = try body(&outliner)
@@ -421,13 +418,13 @@ extension SSGC.Linker.Tables
     mutating
     func link(article:SSGC.ArticleCollation,
         extension e:(i:Int32, j:Int),
-        resources:[[String: SSGC.Resource]],
+        contexts:[SSGC.Linker.Context],
         imports:[Symbol.Module])
     {
         let `extension`:SymbolGraph.Extension = self.graph.decls.nodes[e.i].extensions[e.j]
         let scopes:SSGC.OutlineResolutionScopes = .init(
             namespace: self.graph.namespaces[`extension`.namespace],
-            culture: .init(resources: resources[`extension`.culture],
+            culture: .init(resources: contexts[`extension`.culture].resources,
                 imports: imports,
                 id: self.graph.namespaces[`extension`.culture]),
             origin: nil,

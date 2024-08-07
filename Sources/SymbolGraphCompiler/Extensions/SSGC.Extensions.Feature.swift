@@ -1,6 +1,6 @@
 import Symbols
 
-extension SSGC.Extensions
+extension SSGC.ModuleIndex
 {
     /// The bare minimum information needed to describe an inherited feature.
     @frozen public
@@ -18,7 +18,7 @@ extension SSGC.Extensions
         }
     }
 }
-extension SSGC.Extensions.Feature
+extension SSGC.ModuleIndex.Feature
 {
     init(from decl:borrowing SSGC.Decl)
     {
