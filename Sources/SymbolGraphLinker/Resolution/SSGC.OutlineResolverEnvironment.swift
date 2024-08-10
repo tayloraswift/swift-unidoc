@@ -5,29 +5,37 @@ import UCF
 extension SSGC
 {
     @_spi(testable) public
-    struct OutlineResolutionScopes
+    struct OutlineResolverEnvironment
     {
-        let resources:[String: SSGC.Resource]
-        let codelink:UCF.ResolutionScope
-        let doclink:UCF.ArticleScope
         let origin:Int32?
 
+        let causalLinks:UCF.ResolutionTable<UCF.CausalOverload>
+        let resources:[String: SSGC.Resource]
+        let codelink:UCF.ResolutionScope
+        /// The scope to use when resolving `doc:` links. The namespace may be different from
+        /// the namespace used for codelink resolution. For example, an article bound to an
+        /// extension `Swift.Int.foo` uses `Swift` as the namespace for codelink resolution, but
+        /// the article’s own culture for doclink resolution.
+        let doclink:UCF.ArticleScope
+
         private
-        init(resources:[String: SSGC.Resource],
+        init(origin:Int32?,
+            causalLinks:UCF.ResolutionTable<UCF.CausalOverload>,
+            resources:[String: SSGC.Resource],
             codelink:UCF.ResolutionScope,
-            doclink:UCF.ArticleScope,
-            origin:Int32?)
+            doclink:UCF.ArticleScope)
         {
+            self.origin = origin
+            self.causalLinks = causalLinks
             self.resources = resources
             self.codelink = codelink
             self.doclink = doclink
-            self.origin = origin
         }
     }
 }
-extension SSGC.OutlineResolutionScopes
+extension SSGC.OutlineResolverEnvironment
 {
-    /// Creates resolution scopes.
+    /// Creates a link resolution environment.
     ///
     /// -   Parameters:
     ///     -   namespace:
@@ -42,16 +50,17 @@ extension SSGC.OutlineResolutionScopes
     ///     -   scope:
     ///         Additional implicit path components for codelink resolutions only.
     @_spi(testable) public
-    init(namespace:Symbol.Module? = nil,
+    init(origin:Int32?,
+        namespace:Symbol.Module? = nil,
         context:SSGC.Linker.Context,
-        origin:Int32?,
         scope:[String] = [])
     {
-        self.init(resources: context.resources,
+        self.init(origin: origin,
+            causalLinks: context.causalLinks,
+            resources: context.resources,
             codelink: .init(namespace: namespace ?? context.id,
                 imports: [],
                 path: scope),
-            doclink: .init(namespace: context.id),
-            origin: origin)
+            doclink: .init(namespace: context.id))
     }
 }

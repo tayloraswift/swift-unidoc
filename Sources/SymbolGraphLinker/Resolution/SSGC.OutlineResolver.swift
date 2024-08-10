@@ -12,10 +12,10 @@ extension SSGC
     struct OutlineResolver:~Copyable
     {
         private
-        let scopes:OutlineResolutionScopes
+        let scopes:OutlineResolverEnvironment
         var tables:Linker.Tables
 
-        init(scopes:OutlineResolutionScopes, tables:consuming Linker.Tables)
+        init(scopes:OutlineResolverEnvironment, tables:consuming Linker.Tables)
         {
             self.scopes = scopes
             self.tables = tables
@@ -40,13 +40,56 @@ extension SSGC.OutlineResolver
     private
     var codelinks:UCF.ProjectWideResolver
     {
-        .init(global: self.tables.packageLinks, scope: self.scopes.codelink)
+        .init(scope: self.scopes.codelink,
+            global: self.tables.packageLinks,
+            causal: self.scopes.causalLinks)
     }
 
     private
     var doclinks:UCF.ArticleResolver
     {
         .init(table: self.tables.articleLinks, scope: self.scopes.doclink)
+    }
+}
+extension SSGC.OutlineResolver
+{
+    func locate(resource name:String) -> SSGC.Resource?
+    {
+        if  let resource:SSGC.Resource = self.resources[name]
+        {
+            return resource
+        }
+
+        if  let dot:String.Index = name.lastIndex(of: ".")
+        {
+            //  We can only fuzz file names for image resources!
+            switch name[name.index(after: dot)...]
+            {
+            case "gif":     break
+            case "jpg":     break
+            case "jpeg":    break
+            case "png":     break
+            case "svg":     break
+            case "webp":    break
+            default:        return nil
+            }
+
+            return self.resources["\(name[..<dot])@2x\(name[dot...])"]
+                ?? self.resources["\(name[..<dot])~dark\(name[dot...])"]
+                ?? self.resources["\(name[..<dot])~dark@2x\(name[dot...])"]
+        }
+        for guess:String in ["svg", "webp", "png", "jpg", "jpeg", "gif"]
+        {
+            if  let resource:SSGC.Resource = self.resources["\(name).\(guess)"]
+                ?? self.resources["\(name)@2x.\(guess)"]
+                ?? self.resources["\(name)~dark.\(guess)"]
+                ?? self.resources["\(name)~dark@2x.\(guess)"]
+            {
+                return resource
+            }
+        }
+
+        return nil
     }
 }
 extension SSGC.OutlineResolver

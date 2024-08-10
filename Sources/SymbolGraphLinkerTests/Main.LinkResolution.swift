@@ -43,10 +43,9 @@ extension Main.LinkResolution:TestBattery
 
             if  let tests:TestGroup = tests / "Unscoped"
             {
-                tables.resolving(with: .init(
+                tables.resolving(with: .init(origin: nil,
                     namespace: nil,
                     context: .init(id: "ThisModule"),
-                    origin: nil,
                     scope: []))
                 {
                     tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
@@ -63,10 +62,9 @@ extension Main.LinkResolution:TestBattery
             }
             if  let tests:TestGroup = tests / "Scoped"
             {
-                tables.resolving(with: .init(
+                tables.resolving(with: .init(origin: nil,
                     namespace: nil,
                     context: .init(id: "ThisModule"),
-                    origin: nil,
                     scope: ["A"]))
                 {
                     tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
@@ -89,7 +87,6 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
-            tables.packageLinks.modules = ["OtherModule", "ThisModule"]
             tables.packageLinks["OtherModule", .init(["A"], "b")].append(.init(
                 phylum: .func(.instance),
                 decl: 0,
@@ -106,10 +103,10 @@ extension Main.LinkResolution:TestBattery
 
             if  let tests:TestGroup = tests / "Unscoped"
             {
-                tables.resolving(with: .init(
+                tables.packageLinks.modules = ["OtherModule", "ThisModule"]
+                tables.resolving(with: .init(origin: nil,
                     namespace: nil,
                     context: .init(id: "ThisModule"),
-                    origin: nil,
                     scope: []))
                 {
                     tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
@@ -124,10 +121,10 @@ extension Main.LinkResolution:TestBattery
 
             if  let tests:TestGroup = tests / "Invisible"
             {
-                tables.resolving(with: .init(
+                tables.packageLinks.modules = []
+                tables.resolving(with: .init(origin: nil,
                     namespace: nil,
                     context: .init(id: "ThisModule"),
-                    origin: nil,
                     scope: []))
                 {
                     tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
@@ -149,10 +146,9 @@ extension Main.LinkResolution:TestBattery
             tables.articleLinks[.tutorials("ThisModule"), "GettingStarted"] = 1
             tables.articleLinks[.tutorials("ThisModule"), "OtherTutorial"] = 2
 
-            tables.resolving(with: .init(
+            tables.resolving(with: .init(origin: nil,
                 namespace: nil,
                 context: .init(id: "ThisModule"),
-                origin: nil,
                 scope: []))
             {
 
@@ -182,10 +178,9 @@ extension Main.LinkResolution:TestBattery
             tables.articleLinks[.tutorials("OtherModule"), "GettingStarted"] = 1
             tables.articleLinks[.tutorials("OtherModule"), "OtherTutorial"] = 2
 
-            tables.resolving(with: .init(
+            tables.resolving(with: .init(origin: nil,
                 namespace: nil,
                 context: .init(id: "ThisModule"),
-                origin: nil,
                 scope: []))
             {
 

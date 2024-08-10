@@ -7,16 +7,17 @@ extension UCF
     struct ProjectWideResolver
     {
         @usableFromInline
+        let scope:ResolutionScope
+
+        @usableFromInline
         let global:ResolutionTable<PackageOverload>
         @usableFromInline
         let causal:ResolutionTable<CausalOverload>?
-        @usableFromInline
-        let scope:ResolutionScope
 
         @inlinable public
-        init(global:ResolutionTable<PackageOverload>,
-            causal:ResolutionTable<CausalOverload>? = nil,
-            scope:ResolutionScope)
+        init(scope:ResolutionScope,
+            global:ResolutionTable<PackageOverload>,
+            causal:ResolutionTable<CausalOverload>? = nil)
         {
             self.global = global
             self.causal = causal

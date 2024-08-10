@@ -226,8 +226,10 @@ extension SSGC.Linker.Tables
             return nil
         }
 
-        let resolver:UCF.ProjectWideResolver = .init(global: self.packageLinks,
-            scope: .init(namespace: namespace, imports: []))
+        let resolver:UCF.ProjectWideResolver = .init(scope: .init(
+                namespace: namespace,
+                imports: []),
+            global: self.packageLinks)
 
         switch resolver.resolve(selector)
         {
@@ -373,11 +375,11 @@ extension SSGC.Linker.Tables
 extension SSGC.Linker.Tables
 {
     @_spi(testable) public mutating
-    func resolving<Success>(with scopes:SSGC.OutlineResolutionScopes,
+    func resolving<Success>(with environment:SSGC.OutlineResolverEnvironment,
         do body:(inout SSGC.Outliner) throws -> Success) rethrows -> Success
     {
         var outliner:SSGC.Outliner = .init(
-            resolver: .init(scopes: scopes, tables: consume self))
+            resolver: .init(scopes: environment, tables: consume self))
         do
         {
             let success:Success = try body(&outliner)
@@ -394,9 +396,11 @@ extension SSGC.Linker.Tables
     mutating
     func link(article:SSGC.Article, in context:SSGC.Linker.Context, at c:Int)
     {
-        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(with: .init(
-            context: context,
-            origin: article.id(in: c)))
+        let environment:SSGC.OutlineResolverEnvironment = .init(origin: article.id(in: c),
+            context: context)
+
+        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(
+            with: environment)
         {
             $0.link(body: article.body, file: article.file)
         }
@@ -439,10 +443,9 @@ extension SSGC.Linker.Tables
                 return // Nothing to do.
             }
 
-            ((linked, topics), rename) = self.resolving(with: .init(
+            ((linked, topics), rename) = self.resolving(with: .init(origin: id,
                 namespace: namespace,
                 context: context,
-                origin: id,
                 scope: article?.scope ?? decl.phylum.scope(trimming: decl.path)))
             {
                 (outliner:inout SSGC.Outliner) in
@@ -477,13 +480,13 @@ extension SSGC.Linker.Tables
         contexts:[SSGC.Linker.Context])
     {
         let `extension`:SymbolGraph.Extension = self.graph.decls.nodes[e.i].extensions[e.j]
-        let scopes:SSGC.OutlineResolutionScopes = .init(
+        let environment:SSGC.OutlineResolverEnvironment = .init(origin: nil,
             namespace: self.graph.namespaces[`extension`.namespace],
             context: contexts[`extension`.culture],
-            origin: nil,
             scope: article.scope)
 
-        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(with: scopes)
+        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(
+            with: environment)
         {
             $0.link(body: article.combined, file: article.file)
         }
