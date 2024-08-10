@@ -9,13 +9,13 @@ extension SSGC
     {
         let resources:[String: SSGC.Resource]
         let codelink:UCF.ResolutionScope
-        let doclink:DoclinkResolver.Scope
+        let doclink:UCF.ArticleScope
         let origin:Int32?
 
         private
         init(resources:[String: SSGC.Resource],
             codelink:UCF.ResolutionScope,
-            doclink:DoclinkResolver.Scope,
+            doclink:UCF.ArticleScope,
             origin:Int32?)
         {
             self.resources = resources

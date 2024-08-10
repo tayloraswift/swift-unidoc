@@ -12,8 +12,7 @@ extension SSGC.ArticleError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<SSGC.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<SSGC.Symbolicator>)
     {
         switch self
         {
@@ -23,5 +22,9 @@ extension SSGC.ArticleError:Diagnostic
             article in the same module
             """
         }
+    }
+
+    func emit(details output:inout DiagnosticOutput<SSGC.Symbolicator>)
+    {
     }
 }

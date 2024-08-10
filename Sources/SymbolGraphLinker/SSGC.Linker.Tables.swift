@@ -14,9 +14,9 @@ extension SSGC.Linker
         var diagnostics:Diagnostics<SSGC.Symbolicator>
 
         @_spi(testable) public
-        var codelinks:UCF.Overload<Int32>.Table
+        var packageLinks:UCF.ResolutionTable<UCF.PackageOverload>
         @_spi(testable) public
-        var doclinks:DoclinkResolver.Table
+        var articleLinks:UCF.ArticleTable
 
         private(set)
         var anchors:SSGC.AnchorResolver
@@ -35,14 +35,14 @@ extension SSGC.Linker
 
         @_spi(testable) public
         init(diagnostics:Diagnostics<SSGC.Symbolicator> = .init(),
-            codelinks:UCF.Overload<Int32>.Table = .init(),
-            doclinks:DoclinkResolver.Table = .init(),
+            packageLinks:UCF.ResolutionTable<UCF.PackageOverload> = .init(),
+            articleLinks:UCF.ArticleTable = .init(),
             anchors:SSGC.AnchorResolver = .init(),
             modules:[SymbolGraph.Module] = [])
         {
             self.diagnostics = diagnostics
-            self.codelinks = codelinks
-            self.doclinks = doclinks
+            self.packageLinks = packageLinks
+            self.articleLinks = articleLinks
             self.anchors = anchors
 
             self.modules = [:]
@@ -200,6 +200,61 @@ extension SSGC.Linker.Tables
 
 extension SSGC.Linker.Tables
 {
+    func resolve(binding:Markdown.InlineAutolink, in namespace:Symbol.Module) throws -> Int32?
+    {
+        //  Special rule for article bindings: if the text of the codelink matches
+        //  the current namespace, then the article is the primary article for
+        //  that module.
+        if  binding.text.string == "\(namespace)"
+        {
+            return nil
+        }
+
+        guard
+        let selector:UCF.Selector = .init(binding.text.string)
+        else
+        {
+            throw SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(binding.text)
+        }
+
+        //  A qualified codelink with a single component that matches the current
+        //  namespace is also a way to mark the primary article for that module.
+        if  case .qualified = selector.base,
+            selector.path.components.count == 1,
+            selector.path.components[0] == "\(namespace)"
+        {
+            return nil
+        }
+
+        let resolver:UCF.ProjectWideResolver = .init(global: self.packageLinks,
+            scope: .init(namespace: namespace, imports: []))
+
+        switch resolver.resolve(selector)
+        {
+        case .module(let module):
+            throw SSGC.SupplementBindingError.init(selector: selector,
+                variant: .moduleNotAllowed(module, expected: namespace))
+
+        case .ambiguous(let overloads, rejected: let rejected):
+            throw SSGC.SupplementBindingError.init(selector: selector,
+                variant: .ambiguousBinding(overloads, rejected: rejected))
+
+        case .overload(let overload):
+            guard case let overload as UCF.PackageOverload = overload
+            else
+            {
+                fatalError("umimplemented: supplement binding not within current package!!!")
+            }
+            if  let heir:Int32 = overload.heir
+            {
+                throw SSGC.SupplementBindingError.init(selector: selector,
+                    variant: .vectorNotAllowed(overload.decl, self: heir))
+            }
+
+            return overload.decl
+        }
+    }
+
     mutating
     func index(normalizing article:Markdown.SemanticDocument, id scope:Int32?)
     {

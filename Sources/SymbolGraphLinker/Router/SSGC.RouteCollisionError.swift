@@ -13,7 +13,7 @@ extension SSGC.RouteCollisionError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static func += (output:inout DiagnosticOutput<SSGC.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<Symbolicator>)
     {
         switch self
         {
@@ -24,13 +24,18 @@ extension SSGC.RouteCollisionError:Diagnostic
         }
     }
 
-    var notes:[SSGC.RouteCollision]
+    func emit(details output:inout DiagnosticOutput<Symbolicator>)
     {
         switch self
         {
-        case    .hash(_, let collisions),
-                .path(_, let collisions):
-            collisions.map(SSGC.RouteCollision.init(colliding:))
+        case .hash(_, let collisions), .path(_, let collisions):
+            for colliding:Int32 in collisions
+            {
+                output[.note] = """
+                symbol (\(output.symbolicator[colliding])) \
+                does not have a unique URL
+                """
+            }
         }
     }
 }

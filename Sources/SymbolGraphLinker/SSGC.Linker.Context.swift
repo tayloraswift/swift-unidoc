@@ -1,6 +1,6 @@
 import SymbolGraphCompiler
-import Symbols 
-import UCF 
+import Symbols
+import UCF
 
 extension SSGC.Linker
 {
@@ -10,9 +10,9 @@ extension SSGC.Linker
         var decls:[(value:SSGC.Decl, i:Int32, n:Symbol.Module)]
 
         var resources:[String: SSGC.Resource]
-        var overloads:UCF.ResolutionTable<SSGC.Overload>
-
         var articles:[SSGC.Article]
+
+        var causalLinks:UCF.ResolutionTable<UCF.CausalOverload>
 
         init()
         {
@@ -20,9 +20,8 @@ extension SSGC.Linker
             self.decls = []
 
             self.resources = [:]
-            self.overloads = [:]
-
             self.articles = []
+            self.causalLinks = [:]
         }
     }
 }

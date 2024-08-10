@@ -1,9 +1,10 @@
 import LexicalPaths
 import LinkResolution
 import MarkdownAST
+import SourceDiagnostics
 import Sources
 import SymbolGraphs
-import SourceDiagnostics
+import Symbols
 import UCF
 
 extension SSGC
@@ -37,15 +38,15 @@ extension SSGC.OutlineResolver
     var origin:Int32? { self.scopes.origin }
 
     private
-    var codelinks:UCF.Overload<Int32>.Resolver
+    var codelinks:UCF.ProjectWideResolver
     {
-        .init(table: self.tables.codelinks, scope: self.scopes.codelink)
+        .init(global: self.tables.packageLinks, scope: self.scopes.codelink)
     }
 
     private
-    var doclinks:DoclinkResolver
+    var doclinks:UCF.ArticleResolver
     {
-        .init(table: self.tables.doclinks, scope: self.scopes.doclink)
+        .init(table: self.tables.articleLinks, scope: self.scopes.doclink)
     }
 }
 extension SSGC.OutlineResolver
@@ -67,16 +68,24 @@ extension SSGC.OutlineResolver
 
         switch self.codelinks.resolve(selector)
         {
-        case .one(let overload):
-            return switch overload.target
-            {
-            case .scalar(let id):           id
-            case .vector(let id, self: _):  id
-            }
+        case .overload(let overload as UCF.PackageOverload):
+            //  For renames, we do not distinguish between members and features.
+            return overload.decl
 
-        case .some(let overloads):
+        case .overload(let overload as UCF.CausalOverload):
+            //  This rename points to a symbol is a package dependency.
+            return self.tables.intern(overload.id)
+
+        case .ambiguous(let overloads, rejected: _):
             self.diagnostics[location] = SSGC.RenameTargetError.init(
                 overloads: overloads,
+                redirect: redirect,
+                target: selector)
+            return nil
+
+        default:
+            self.diagnostics[location] = SSGC.RenameTargetError.init(
+                overloads: [],
                 redirect: redirect,
                 target: selector)
             return nil
@@ -87,32 +96,47 @@ extension SSGC.OutlineResolver
     func outline(_ codelink:UCF.Selector,
         at source:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {
+        let text:SymbolGraph.OutlineText = .init(vector: codelink.path.visible, fragment: nil)
+
         switch self.codelinks.resolve(codelink)
         {
-        case .some([]):
-            return nil
-
-        case .one(let overload):
-            let text:SymbolGraph.OutlineText = .init(vector: codelink.path.visible,
-                fragment: nil)
-
-            switch overload.target
-            {
-            case .scalar(let id):
-                return .vertex(id, text: text)
-
-            case .vector(let id, self: let heir):
-                return .vector(id, self: heir, text: text)
-            }
-
-        case .some(let overloads):
-            self.diagnostics[source] = UCF.OverloadResolutionError<SSGC.Symbolicator>.init(
+        case .ambiguous(let overloads, rejected: let rejected):
+            self.diagnostics[source] = UCF.ResolutionError<SSGC.Symbolicator>.init(
                 overloads: overloads,
+                rejected: rejected,
                 selector: codelink)
 
             return nil
+
+        case .overload(let overload as UCF.PackageOverload):
+            if  let heir:Int32 = overload.heir
+            {
+                return .vector(heir, self: heir, text: text)
+            }
+            else
+            {
+                return .vertex(overload.decl, text: text)
+            }
+
+        case .overload(let overload):
+            let decl:Int32 = self.tables.intern(overload.id)
+
+            if  case let overload as UCF.CausalOverload = overload,
+                let heir:Symbol.Decl = overload.heir
+            {
+                return .vector(decl, self: self.tables.intern(heir), text: text)
+            }
+            else
+            {
+                return .vertex(decl, text: text)
+            }
+
+        case .module(let module):
+            return .vertex(self.tables.intern(module) * .module, text: text)
+
         }
     }
+
     mutating
     func outline(_ doclink:Doclink,
         at source:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?

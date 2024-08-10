@@ -27,15 +27,19 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
-            tables.codelinks["ThisModule", .init(["A"], "b")].overload(
-                with: .init(target: .scalar(0),
-                    phylum: .func(.instance),
-                    hash: .init(hashing: "x")))
+            tables.packageLinks["ThisModule", .init(["A"], "b")].append(.init(
+                phylum: .func(.instance),
+                decl: 0,
+                heir: nil,
+                hash: .init(hashing: "x"),
+                id: "x"))
 
-            tables.codelinks["ThisModule", .init(["A"], "c")].overload(
-                with: .init(target: .scalar(1),
-                    phylum: .func(.instance),
-                    hash: .init(hashing: "y")))
+            tables.packageLinks["ThisModule", .init(["A"], "c")].append(.init(
+                phylum: .func(.instance),
+                decl: 1,
+                heir: nil,
+                hash: .init(hashing: "y"),
+                id: "y"))
 
             if  let tests:TestGroup = tests / "Unscoped"
             {
@@ -91,15 +95,19 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
-            tables.codelinks["OtherModule", .init(["A"], "b")].overload(
-                with: .init(target: .scalar(0),
-                    phylum: .func(.instance),
-                    hash: .init(hashing: "x")))
+            tables.packageLinks["OtherModule", .init(["A"], "b")].append(.init(
+                phylum: .func(.instance),
+                decl: 0,
+                heir: nil,
+                hash: .init(hashing: "x"),
+                id: "x"))
 
-            tables.codelinks["OtherModule", .init(["A"], "c")].overload(
-                with: .init(target: .scalar(1),
-                    phylum: .func(.instance),
-                    hash: .init(hashing: "y")))
+            tables.packageLinks["OtherModule", .init(["A"], "c")].append(.init(
+                phylum: .func(.instance),
+                decl: 1,
+                heir: nil,
+                hash: .init(hashing: "y"),
+                id: "y"))
 
             if  let tests:TestGroup = tests / "Unscoped"
             {
@@ -148,9 +156,9 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
-            tables.doclinks[.documentation("ThisModule"), "GettingStarted"] = 0
-            tables.doclinks[.tutorials("ThisModule"), "GettingStarted"] = 1
-            tables.doclinks[.tutorials("ThisModule"), "OtherTutorial"] = 2
+            tables.articleLinks[.documentation("ThisModule"), "GettingStarted"] = 0
+            tables.articleLinks[.tutorials("ThisModule"), "GettingStarted"] = 1
+            tables.articleLinks[.tutorials("ThisModule"), "OtherTutorial"] = 2
 
             tables.resolving(with: .init(
                 namespace: nil,
@@ -184,9 +192,9 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
-            tables.doclinks[.documentation("OtherModule"), "GettingStarted"] = 0
-            tables.doclinks[.tutorials("OtherModule"), "GettingStarted"] = 1
-            tables.doclinks[.tutorials("OtherModule"), "OtherTutorial"] = 2
+            tables.articleLinks[.documentation("OtherModule"), "GettingStarted"] = 0
+            tables.articleLinks[.tutorials("OtherModule"), "GettingStarted"] = 1
+            tables.articleLinks[.tutorials("OtherModule"), "OtherTutorial"] = 2
 
             tables.resolving(with: .init(
                 namespace: nil,

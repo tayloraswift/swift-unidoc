@@ -1,39 +1,18 @@
 import LinkResolution
-import UCF
 import SourceDiagnostics
+import UCF
 
 extension SSGC
 {
     struct SupplementBindingError:Error
     {
-        let resolved:SupplementBinding
         let selector:UCF.Selector
+        let variant:Variant
 
-        init(_ resolved:SupplementBinding,
-            selector:UCF.Selector)
+        init(selector:UCF.Selector, variant:Variant)
         {
-            self.resolved = resolved
             self.selector = selector
-        }
-    }
-}
-extension SSGC.SupplementBindingError
-{
-    private
-    var message:String
-    {
-        switch self.resolved
-        {
-        case .none(in: let culture):
-            """
-                article binding '\(self.selector)' does not refer to a declaration \
-                in its module, \(culture)
-                """
-
-        case .vector:
-            """
-                article binding '\(self.selector)' cannot refer to a vector symbol
-                """
+            self.variant = variant
         }
     }
 }
@@ -41,33 +20,52 @@ extension SSGC.SupplementBindingError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<SSGC.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<SSGC.Symbolicator>)
     {
-        switch self.resolved
+        switch self.variant
         {
-        case .none(in: let culture):
-            output[.warning] = """
-            article binding '\(self.selector)' does not refer to a declaration \
-            in its module, \(culture)
+        case .ambiguousBinding(let overloads, rejected: _):
+            output[.warning] = overloads.isEmpty ? """
+            article binding '\(self.selector)' does not refer to any declarations
+            """ : """
+            article binding '\(self.selector)' is ambiguous
             """
 
-        case .vector:
+        case .moduleNotAllowed(let module, expected: let expected):
+            output[.warning] = """
+            article binding '\(self.selector)' cannot refer to a module ('\(module)') other
+            than its own ('\(expected)')
+            """
+
+        case .vectorNotAllowed:
             output[.warning] = """
             article binding '\(self.selector)' cannot refer to a vector symbol
             """
         }
     }
 
-    var notes:[Note]
+    func emit(details output:inout DiagnosticOutput<SSGC.Symbolicator>)
     {
-        switch self.resolved
+        switch self.variant
         {
-        case .none(in: _):
-            []
+        case .ambiguousBinding(_, rejected: let rejected):
+            for overload:any UCF.ResolvableOverload in rejected
+            {
+                let suggested:UCF.Selector = self.selector.with(hash: overload.hash)
 
-        case .vector(let feature, self: _):
-            [.init(suggested: feature)]
+                output[.note] = """
+                did you mean '\(suggested)'? (\(output.symbolicator.demangle(overload.id)))
+                """
+            }
+
+        case .moduleNotAllowed:
+            break
+
+        case .vectorNotAllowed(let declaration, self: _):
+            output[.note] = """
+            did you mean to reference the inherited declaration? \
+            (\(output.symbolicator[declaration]))
+            """
         }
     }
 }

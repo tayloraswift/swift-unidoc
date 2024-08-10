@@ -19,8 +19,7 @@ extension SSGC.RenameParsingError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<SSGC.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<Symbolicator>)
     {
         output[.warning] += """
         rename target '\(self.target)' for '\(self.redirect)' could not be parsed

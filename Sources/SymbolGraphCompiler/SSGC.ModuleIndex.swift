@@ -8,10 +8,10 @@ extension SSGC
     struct ModuleIndex
     {
         public
-        let id:Symbol.Module 
+        let id:Symbol.Module
 
         public
-        let resolvableLinks:UCF.ResolutionTable<Overload>
+        let resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>
         public
         let declarations:[(id:Symbol.Module, decls:[Decl])]
         public
@@ -22,13 +22,13 @@ extension SSGC
         public
         var language:Phylum.Language?
         public
-        var markdown:[any SSGC.ResourceFile] 
+        var markdown:[any SSGC.ResourceFile]
         public
-        var resources:[any SSGC.ResourceFile] 
+        var resources:[any SSGC.ResourceFile]
 
 
         init(id:Symbol.Module,
-            resolvableLinks:UCF.ResolutionTable<Overload>,
+            resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>,
             declarations:[(id:Symbol.Module, decls:[Decl])],
             extensions:[SSGC.Extension],
             features:[Symbol.Decl: Feature],
@@ -44,33 +44,6 @@ extension SSGC
             self.language = language
             self.markdown = markdown
             self.resources = resources
-        }
-    }
-}
-extension SSGC
-{
-    @frozen public
-    struct Extensions
-    {
-        public
-        let resolvableLinks:UCF.ResolutionTable<Overload>
-        public
-        let compiled:[SSGC.Extension]
-        public
-        let features:[Symbol.Decl: ModuleIndex.Feature]
-        public
-        let culture:Symbol.Module
-
-
-        init(resolvableLinks:UCF.ResolutionTable<Overload>,
-            compiled:[SSGC.Extension],
-            features:[Symbol.Decl: ModuleIndex.Feature],
-            culture:Symbol.Module)
-        {
-            self.resolvableLinks = resolvableLinks
-            self.compiled = compiled
-            self.features = features
-            self.culture = culture
         }
     }
 }

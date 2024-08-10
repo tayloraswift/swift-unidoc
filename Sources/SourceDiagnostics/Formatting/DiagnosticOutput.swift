@@ -89,11 +89,9 @@ extension DiagnosticOutput
     {
         self.wrap(with: context)
         {
-            $0 += diagnostic
+            diagnostic.emit(summary: &$0)
         }
-        for note:DiagnosticType.Note in diagnostic.notes
-        {
-            self += note
-        }
+
+        diagnostic.emit(details: &self)
     }
 }

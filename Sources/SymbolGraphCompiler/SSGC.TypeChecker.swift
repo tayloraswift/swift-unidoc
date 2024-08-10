@@ -18,7 +18,7 @@ extension SSGC
         var extensions:ExtensionTable
 
         private
-        var resolvableLinks:UCF.ResolutionTable<Overload>
+        var resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>
 
         public
         init(ignoreExportedInterfaces:Bool = true, threshold:Symbol.ACL = .public)
@@ -66,7 +66,7 @@ extension SSGC.TypeChecker
     private mutating
     func add(symbols culture:SSGC.SymbolCulture, from id:Symbol.Module) throws
     {
-        self.resolvableLinks[id].append(.module(id))
+        self.resolvableLinks.modules.append(id)
 
         /// We use this to look up protocols by name instead of symbol. This is needed in order
         /// to work around some bizarre lib/SymbolGraphGen bugs.

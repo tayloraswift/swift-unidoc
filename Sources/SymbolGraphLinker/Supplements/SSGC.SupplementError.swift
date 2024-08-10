@@ -15,8 +15,7 @@ extension SSGC.SupplementError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<SSGC.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<SSGC.Symbolicator>)
     {
         switch self
         {

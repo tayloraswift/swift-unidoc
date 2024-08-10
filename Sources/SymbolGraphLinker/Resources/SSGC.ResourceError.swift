@@ -12,8 +12,7 @@ extension SSGC.ResourceError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<SSGC.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<Symbolicator>)
     {
         switch self
         {
