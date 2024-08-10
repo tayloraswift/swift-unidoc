@@ -67,16 +67,17 @@ extension SSGC.Linker
 {
     init(plugins:[any Markdown.CodeLanguageType] = [], modules:[SymbolGraph.Module])
     {
-        let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
         //  If we were given a plugin that says it can highlight swift,
         //  make it the default plugin for the doccomment parser.
+        let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
+        let tables:Tables = .init(modules: modules)
 
         self = .init(
             doccommentParser: .init(plugins: plugins, default: swift),
             markdownParser: .init(plugins: plugins),
             swiftParser: swift as? Markdown.SwiftLanguage,
-            contexts: .init(repeating: .init(), count: modules.count),
-            tables: .init(modules: modules))
+            contexts: tables.graph.cultures.map { .init(id: $0.id) },
+            tables: tables)
     }
 
     mutating
@@ -84,6 +85,19 @@ extension SSGC.Linker
         indexes:[SSGC.ModuleIndex],
         projectRoot:Symbol.FileBase?) throws
     {
+        /// Initialize the package-level resolution table with every module in at least one
+        /// module index. If we do not do this, we will not be able to resolve noncausal links
+        /// to symbols from extensions on types from other packages.
+        let modules:Set<Symbol.Module> = indexes.reduce(into: [])
+        {
+            for module:Symbol.Module in $1.resolvableLinks.modules
+            {
+                $0.insert(module)
+            }
+        }
+
+        self.tables.packageLinks.modules = modules.sorted()
+
         for (offset, module):(Int, SSGC.ModuleIndex) in zip(self.contexts.indices, indexes)
         {
             guard
@@ -231,8 +245,8 @@ extension SSGC.Linker
                 fatalError("Extendee '\($0.extended.type)' was never allocated!")
             }
 
-            let namespace:Int = self.tables.intern($0.signature.extended.namespace)
-            let qualifier:Symbol.Module = self.tables.graph.namespaces[namespace]
+            let namespace:Symbol.Module = $0.signature.extended.namespace
+            let namespacePosition:Int = self.tables.intern(namespace)
 
             let conformances:[Int32] = $0.conformances.map { self.tables.intern($0) }
             let features:[Int32] = $0.features.map { self.tables.intern($0) }
@@ -248,7 +262,7 @@ extension SSGC.Linker
                     continue
                 }
 
-                self.tables.packageLinks[qualifier, $0.path, feature.lastName].append(.init(
+                self.tables.packageLinks[namespace, $0.path, feature.lastName].append(.init(
                     phylum: feature.phylum,
                     decl: f,
                     heir: extendee,
@@ -258,7 +272,7 @@ extension SSGC.Linker
 
             let index:Int = self.tables.graph.decls.nodes[extendee].push(.init(
                 conditions: $0.conditions.map { $0.map { self.tables.intern($0) } },
-                namespace: namespace,
+                namespace: namespacePosition,
                 culture: offset,
                 conformances: conformances,
                 features: features,
@@ -669,25 +683,16 @@ extension SSGC.Linker
     mutating
     func link() -> SymbolGraph
     {
-        //  Register all known namespaces for codelink resolution.
-        for namespace:Symbol.Module in self.tables.graph.namespaces
-        {
-            self.tables.packageLinks.modules.append(namespace)
-        }
-
-        let imports:[Symbol.Module] = self.tables.importAll
-
         for (offset, context):(Int, Context) in zip(self.contexts.indices, self.contexts)
         {
-            let culture:Culture = .init(resources: context.resources,
-                imports: imports,
-                id: self.tables.graph.namespaces[offset])
-
             for (_, i, namespace):(SSGC.Decl, Int32, Symbol.Module) in context.decls
             {
                 /// Pass this even if nil, in case the declaration has a rename target.
                 let article:SSGC.ArticleCollation? = self.collations.move(i)
-                self.tables.link(article: article, of: culture, as: i, in: namespace)
+                self.tables.link(article: article,
+                    in: context,
+                    as: i,
+                    under: namespace)
             }
 
             for (_, i, j):(SSGC.Extension, Int32, Int) in context.extensions
@@ -701,13 +706,12 @@ extension SSGC.Linker
 
                 self.tables.link(article: article,
                     extension: (i, j),
-                    contexts: self.contexts,
-                    imports: imports)
+                    contexts: self.contexts)
             }
 
             for article:SSGC.Article in context.articles
             {
-                self.tables.link(article: article, of: culture, at: offset)
+                self.tables.link(article: article, in: context, at: offset)
             }
         }
 

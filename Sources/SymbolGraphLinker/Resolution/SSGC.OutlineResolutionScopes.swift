@@ -33,8 +33,8 @@ extension SSGC.OutlineResolutionScopes
     ///     -   namespace:
     ///         A namespace override, which supplants the module culture for codelink
     ///         resolutions only, if non-nil.
-    ///     -   culture:
-    ///         The module culture, which serves as the module qualifier for doclink
+    ///     -   context:
+    ///         The module context, which defines the module qualifier for doclink
     ///         resolutions, and also codelink resolutions if `namespace` is nil.
     ///     -   origin:
     ///         The id of the current documentation being linked. This will be used to optimize
@@ -43,15 +43,15 @@ extension SSGC.OutlineResolutionScopes
     ///         Additional implicit path components for codelink resolutions only.
     @_spi(testable) public
     init(namespace:Symbol.Module? = nil,
-        culture:SSGC.Linker.Culture,
+        context:SSGC.Linker.Context,
         origin:Int32?,
         scope:[String] = [])
     {
-        self.init(resources: culture.resources,
-            codelink: .init(namespace: namespace ?? culture.id,
-                imports: culture.imports,
+        self.init(resources: context.resources,
+            codelink: .init(namespace: namespace ?? context.id,
+                imports: [],
                 path: scope),
-            doclink: .init(namespace: culture.id),
+            doclink: .init(namespace: context.id),
             origin: origin)
     }
 }

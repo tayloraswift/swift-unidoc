@@ -45,10 +45,7 @@ extension Main.LinkResolution:TestBattery
             {
                 tables.resolving(with: .init(
                     namespace: nil,
-                    culture: .init(
-                        resources: [:],
-                        imports: [],
-                        id: "ThisModule"),
+                    context: .init(id: "ThisModule"),
                     origin: nil,
                     scope: []))
                 {
@@ -68,10 +65,7 @@ extension Main.LinkResolution:TestBattery
             {
                 tables.resolving(with: .init(
                     namespace: nil,
-                    culture: .init(
-                        resources: [:],
-                        imports: [],
-                        id: "ThisModule"),
+                    context: .init(id: "ThisModule"),
                     origin: nil,
                     scope: ["A"]))
                 {
@@ -95,6 +89,7 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
+            tables.packageLinks.modules = ["OtherModule", "ThisModule"]
             tables.packageLinks["OtherModule", .init(["A"], "b")].append(.init(
                 phylum: .func(.instance),
                 decl: 0,
@@ -113,10 +108,7 @@ extension Main.LinkResolution:TestBattery
             {
                 tables.resolving(with: .init(
                     namespace: nil,
-                    culture: .init(
-                        resources: [:],
-                        imports: ["OtherModule"],
-                        id: "ThisModule"),
+                    context: .init(id: "ThisModule"),
                     origin: nil,
                     scope: []))
                 {
@@ -134,10 +126,7 @@ extension Main.LinkResolution:TestBattery
             {
                 tables.resolving(with: .init(
                     namespace: nil,
-                    culture: .init(
-                        resources: [:],
-                        imports: [],
-                        id: "ThisModule"),
+                    context: .init(id: "ThisModule"),
                     origin: nil,
                     scope: []))
                 {
@@ -162,10 +151,7 @@ extension Main.LinkResolution:TestBattery
 
             tables.resolving(with: .init(
                 namespace: nil,
-                culture: .init(
-                    resources: [:],
-                    imports: [],
-                    id: "ThisModule"),
+                context: .init(id: "ThisModule"),
                 origin: nil,
                 scope: []))
             {
@@ -198,10 +184,7 @@ extension Main.LinkResolution:TestBattery
 
             tables.resolving(with: .init(
                 namespace: nil,
-                culture: .init(
-                    resources: [:],
-                    imports: ["OtherModule"],
-                    id: "ThisModule"),
+                context: .init(id: "ThisModule"),
                 origin: nil,
                 scope: []))
             {

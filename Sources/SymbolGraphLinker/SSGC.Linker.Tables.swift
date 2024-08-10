@@ -392,10 +392,11 @@ extension SSGC.Linker.Tables
     }
 
     mutating
-    func link(article:SSGC.Article, of culture:SSGC.Linker.Culture, at c:Int)
+    func link(article:SSGC.Article, in context:SSGC.Linker.Context, at c:Int)
     {
-        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(
-            with: .init(culture: culture, origin: article.id(in: c)))
+        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(with: .init(
+            context: context,
+            origin: article.id(in: c)))
         {
             $0.link(body: article.body, file: article.file)
         }
@@ -418,9 +419,9 @@ extension SSGC.Linker.Tables
 
     mutating
     func link(article:SSGC.ArticleCollation?,
-        of culture:SSGC.Linker.Culture,
+        in context:SSGC.Linker.Context,
         as id:Int32,
-        in namespace:Symbol.Module)
+        under namespace:Symbol.Module)
     {
         let linked:SymbolGraph.Article?
         let topics:[[Int32]]
@@ -440,7 +441,7 @@ extension SSGC.Linker.Tables
 
             ((linked, topics), rename) = self.resolving(with: .init(
                 namespace: namespace,
-                culture: culture,
+                context: context,
                 origin: id,
                 scope: article?.scope ?? decl.phylum.scope(trimming: decl.path)))
             {
@@ -473,15 +474,12 @@ extension SSGC.Linker.Tables
     mutating
     func link(article:SSGC.ArticleCollation,
         extension e:(i:Int32, j:Int),
-        contexts:[SSGC.Linker.Context],
-        imports:[Symbol.Module])
+        contexts:[SSGC.Linker.Context])
     {
         let `extension`:SymbolGraph.Extension = self.graph.decls.nodes[e.i].extensions[e.j]
         let scopes:SSGC.OutlineResolutionScopes = .init(
             namespace: self.graph.namespaces[`extension`.namespace],
-            culture: .init(resources: contexts[`extension`.culture].resources,
-                imports: imports,
-                id: self.graph.namespaces[`extension`.culture]),
+            context: contexts[`extension`.culture],
             origin: nil,
             scope: article.scope)
 
