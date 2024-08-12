@@ -5,7 +5,7 @@ import Symbols
 
 extension SSGC
 {
-    struct ExtensionTable
+    struct Extensions
     {
         /// Extensions indexed by signature.
         private
@@ -23,7 +23,7 @@ extension SSGC
         }
     }
 }
-extension SSGC.ExtensionTable
+extension SSGC.Extensions
 {
     mutating
     func include(_ vertex:SymbolGraphPart.Vertex,
@@ -57,7 +57,7 @@ extension SSGC.ExtensionTable
     }
 }
 
-extension SSGC.ExtensionTable
+extension SSGC.Extensions
 {
     subscript(named block:Symbol.Block) -> SSGC.ExtensionObject
     {
@@ -74,7 +74,7 @@ extension SSGC.ExtensionTable
         }
     }
 }
-extension SSGC.ExtensionTable
+extension SSGC.Extensions
 {
     subscript(extending extended:SSGC.DeclObject,
         where conditions:[GenericConstraint<Symbol.Decl>]) -> SSGC.ExtensionObject
@@ -109,7 +109,7 @@ extension SSGC.ExtensionTable
         }
     }
 }
-extension SSGC.ExtensionTable
+extension SSGC.Extensions
 {
     func load(culture:Symbol.Module) -> [SSGC.Extension]
     {

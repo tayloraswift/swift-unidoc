@@ -3,8 +3,7 @@ import Symbols
 
 extension SSGC
 {
-    public
-    struct DeclarationTable
+    struct Declarations
     {
         private
         let threshold:Symbol.ACL
@@ -22,7 +21,7 @@ extension SSGC
         }
     }
 }
-extension SSGC.DeclarationTable
+extension SSGC.Declarations
 {
     mutating
     func include(_ vertex:SymbolGraphPart.Vertex,
@@ -77,7 +76,7 @@ extension SSGC.DeclarationTable
         return decl
     }
 }
-extension SSGC.DeclarationTable
+extension SSGC.Declarations
 {
     /// Loads the declaration object for the specified symbol, throwing an error if the
     /// declaration does not exist.
@@ -126,7 +125,7 @@ extension SSGC.DeclarationTable
         }
     }
 }
-extension SSGC.DeclarationTable
+extension SSGC.Declarations
 {
     /// Loads all the scalars belonging to the specified culture that have been compiled so far.
     ///

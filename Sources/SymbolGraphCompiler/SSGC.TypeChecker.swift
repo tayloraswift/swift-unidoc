@@ -13,9 +13,9 @@ extension SSGC
         private
         let ignoreExportedInterfaces:Bool
         private
-        var declarations:DeclarationTable
+        var declarations:Declarations
         private
-        var extensions:ExtensionTable
+        var extensions:Extensions
 
         private
         var resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>
