@@ -108,23 +108,15 @@ extension SSGC.Outliner
     {
         self.cache(link.string)
         {
-            guard
-            let codelink:UCF.Selector = .init(link.string)
+            if  let codelink:UCF.Selector = .init(link.string)
+            {
+                return self.resolver.outline(codelink, at: link.source)
+            }
             else
             {
-                self.resolver.diagnostics[link.source] =
-                    SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
-
+                self.resolver.diagnostics[link.source] = SSGC.AutolinkParsingError.init(link)
                 return nil
             }
-
-            if  let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
-                    at: link.source)
-            {
-                return outline
-            }
-
-            return .unresolved(ucf: link.string, location: link.source.start)
         }
     }
     private mutating
@@ -132,34 +124,15 @@ extension SSGC.Outliner
     {
         self.cache(link.string)
         {
-            guard
-            let doclink:Doclink = .init(doc: link.string[...])
+            if  let doclink:Doclink = .init(doc: link.string[...])
+            {
+                return self.resolver.outline(doclink, at: link.source)
+            }
             else
             {
-                self.resolver.diagnostics[link.source] =
-                    SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
-
+                self.resolver.diagnostics[link.source] = SSGC.AutolinkParsingError.init(link)
                 return nil
             }
-
-            if  let outline:SymbolGraph.Outline = self.resolver.outline(doclink,
-                    at: link.source)
-            {
-                return outline
-            }
-            //  Resolution might still succeed by reinterpreting the doclink as a codelink.
-            else if
-                let codelink:UCF.Selector = .equivalent(to: doclink),
-                let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
-                    at: link.source)
-            {
-                return outline
-            }
-
-            self.resolver.diagnostics[link.source] =
-                Warning.doclinkNotStaticallyResolvable(doclink)
-
-            return .unresolved(doc: link.string, location: link.source.start)
         }
     }
 

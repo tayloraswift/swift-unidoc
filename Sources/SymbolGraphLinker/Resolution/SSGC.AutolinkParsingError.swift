@@ -4,8 +4,7 @@ import Sources
 
 extension SSGC
 {
-    struct AutolinkParsingError<Symbolicator>:Equatable, Error
-        where Symbolicator:DiagnosticSymbolicator
+    struct AutolinkParsingError:Equatable, Error
     {
         let string:String
         let source:SourceReference<Markdown.Source>?
@@ -26,9 +25,11 @@ extension SSGC.AutolinkParsingError
 }
 extension SSGC.AutolinkParsingError:Diagnostic
 {
-    func emit(summary output:inout DiagnosticOutput<Symbolicator>)
+    typealias Symbolicator = SSGC.Symbolicator
+
+    func emit(summary output:inout DiagnosticOutput<SSGC.Symbolicator>)
     {
-        output[.warning] += """
+        output[.error] += """
         autolink expression '\(self.string)' could not be parsed
         """
     }

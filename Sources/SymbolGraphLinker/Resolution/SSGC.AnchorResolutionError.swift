@@ -27,15 +27,15 @@ extension SSGC.AnchorResolutionError:Diagnostic
     {
         if  let scope:Int32 = self.scope
         {
-            output[.warning] += """
-            Link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
+            output[.error] += """
+            link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
             its target page (\(output.symbolicator[scope]))
             """
         }
         else
         {
-            output[.warning] += """
-            Link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
+            output[.error] += """
+            link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
             its target page (unknown extension)
             """
         }

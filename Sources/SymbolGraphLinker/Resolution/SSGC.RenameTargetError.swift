@@ -29,13 +29,15 @@ extension SSGC.RenameTargetError:Diagnostic
     {
         if  self.overloads.isEmpty
         {
-            output[.warning] += """
+            output[.error] += """
             rename target '\(self.target)' for '\(self.redirect)' \
             does not refer to any known declarations
             """
         }
         else
         {
+            //  There is no way to disambiguate a rename target, so this is a warning and not
+            //  an error.
             output[.warning] += """
             rename target '\(self.target)' for '\(self.redirect)' is ambiguous
             """

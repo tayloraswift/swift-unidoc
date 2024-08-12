@@ -17,7 +17,7 @@ extension SSGC.ArticleError:Diagnostic
         switch self
         {
         case .duplicated(name: let name):
-            output[.warning] = """
+            output[.error] = """
             markdown article cannot have the same mangled name ('\(name)') as another \
             article in the same module
             """

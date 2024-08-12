@@ -21,7 +21,7 @@ extension SSGC.RenameParsingError:Diagnostic
 
     func emit(summary output:inout DiagnosticOutput<Symbolicator>)
     {
-        output[.warning] += """
+        output[.error] += """
         rename target '\(self.target)' for '\(self.redirect)' could not be parsed
         """
     }

@@ -25,20 +25,20 @@ extension SSGC.SupplementBindingError:Diagnostic
         switch self.variant
         {
         case .ambiguousBinding(let overloads, rejected: _):
-            output[.warning] = overloads.isEmpty ? """
+            output[.error] = overloads.isEmpty ? """
             article binding '\(self.selector)' does not refer to any declarations
             """ : """
             article binding '\(self.selector)' is ambiguous
             """
 
         case .moduleNotAllowed(let module, expected: let expected):
-            output[.warning] = """
+            output[.error] = """
             article binding '\(self.selector)' cannot refer to a module ('\(module)') other
             than its own ('\(expected)')
             """
 
         case .vectorNotAllowed:
-            output[.warning] = """
+            output[.error] = """
             article binding '\(self.selector)' cannot refer to a vector symbol
             """
         }

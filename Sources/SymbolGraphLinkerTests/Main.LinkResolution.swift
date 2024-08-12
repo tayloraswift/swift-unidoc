@@ -130,10 +130,7 @@ extension Main.LinkResolution:TestBattery
                     tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
                     tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.c"))))
 
-                    tests.expect($0.outlines() ..? [
-                        .unresolved(ucf: "A.b", location: nil),
-                        .unresolved(ucf: "A.c", location: nil)
-                    ])
+                    tests.expect($0.outlines() ..? [])
                 }
             }
         }

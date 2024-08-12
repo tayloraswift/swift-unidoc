@@ -18,9 +18,9 @@ extension SSGC.RouteCollisionError:Diagnostic
         switch self
         {
         case .hash(let hash, _):
-            output[.warning] = "hash collision on [\(hash)]"
+            output[.error] = "hash collision on [\(hash)]"
         case .path(.main(let path), _):
-            output[.warning] = "path collision on '\(path)'"
+            output[.error] = "path collision on '\(path)'"
         }
     }
 

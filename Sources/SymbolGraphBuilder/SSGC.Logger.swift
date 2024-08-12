@@ -6,11 +6,13 @@ extension SSGC
     @frozen public
     struct Logger
     {
+        let ignoreErrors:Bool
         let file:FileDescriptor?
 
         public
-        init(file:FileDescriptor?)
+        init(ignoreErrors:Bool = false, file:FileDescriptor?)
         {
+            self.ignoreErrors = ignoreErrors
             self.file = file
         }
     }
@@ -20,6 +22,11 @@ extension SSGC.Logger:DiagnosticLogger
     public
     func emit(messages:consuming DiagnosticMessages) throws
     {
+        if  self.ignoreErrors
+        {
+            messages.demoteErrors(to: .warning)
+        }
+
         guard
         let file:FileDescriptor = self.file
         else
@@ -32,4 +39,3 @@ extension SSGC.Logger:DiagnosticLogger
         try file.writeAll(text.utf8)
     }
 }
- 

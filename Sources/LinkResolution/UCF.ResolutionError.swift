@@ -31,7 +31,7 @@ extension UCF.ResolutionError:Diagnostic
     @inlinable public
     func emit(summary:inout DiagnosticOutput<Symbolicator>)
     {
-        summary[.warning] += self.overloads.isEmpty ? """
+        summary[.error] += self.overloads.isEmpty ? """
         selector '\(self.selector)' does not refer to any known declarations
         """ : """
         selector '\(self.selector)' is ambiguous

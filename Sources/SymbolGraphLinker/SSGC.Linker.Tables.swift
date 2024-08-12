@@ -214,7 +214,7 @@ extension SSGC.Linker.Tables
         let selector:UCF.Selector = .init(binding.text.string)
         else
         {
-            throw SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(binding.text)
+            throw SSGC.AutolinkParsingError.init(binding.text)
         }
 
         //  A qualified codelink with a single component that matches the current

@@ -20,22 +20,22 @@ extension SSGC.SupplementError:Diagnostic
         switch self
         {
         case .multiple:
-            output[.warning] = """
+            output[.error] = """
             markdown supplement extends a symbol that already has a supplement
             """
 
         case .untitled:
-            output[.warning] = """
+            output[.error] = """
             markdown supplement has no title
             """
 
         case .untitledTutorial:
-            output[.warning] = """
+            output[.error] = """
             markdown tutorial has no title
             """
 
         case .extraBlocksInTutorial:
-            output[.warning] = """
+            output[.error] = """
             markdown tutorial contains extra blocks
             """
         }
