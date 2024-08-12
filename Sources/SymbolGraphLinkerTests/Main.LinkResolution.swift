@@ -127,8 +127,8 @@ extension Main.LinkResolution:TestBattery
                     context: .init(id: "ThisModule"),
                     scope: []))
                 {
-                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
-                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.c"))))
+                    tests.expect(nil: $0.outline(reference: .lexical(ucf: _string("A.b"))))
+                    tests.expect(nil: $0.outline(reference: .lexical(ucf: _string("A.c"))))
 
                     tests.expect($0.outlines() ..? [])
                 }
