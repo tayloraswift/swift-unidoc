@@ -1,17 +1,15 @@
 public
-protocol Diagnostic<Symbolicator>:DiagnosticNote
+protocol Diagnostic<Symbolicator>
 {
-    override
     associatedtype Symbolicator:DiagnosticSymbolicator
-    associatedtype Note:DiagnosticNote<Symbolicator>
 
-    static override
-    func += (output:inout DiagnosticOutput<Symbolicator>, self:Self)
-
-    var notes:[Note] { get }
+    func emit(summary:inout DiagnosticOutput<Symbolicator>)
+    func emit(details:inout DiagnosticOutput<Symbolicator>)
 }
-extension Diagnostic where Note == Self
+extension Diagnostic
 {
     @inlinable public
-    var notes:[Self] { [] }
+    func emit(details:inout DiagnosticOutput<Symbolicator>)
+    {
+    }
 }

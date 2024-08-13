@@ -1,6 +1,7 @@
 import Symbols
+import UCF
 
-extension DoclinkResolver
+extension UCF.ArticleTable
 {
     @frozen public
     enum Prefix
@@ -9,7 +10,7 @@ extension DoclinkResolver
         case tutorials(Symbol.Module)
     }
 }
-extension DoclinkResolver.Prefix:RandomAccessCollection
+extension UCF.ArticleTable.Prefix:RandomAccessCollection
 {
     @inlinable public
     var startIndex:Int { 0 }

@@ -15,28 +15,27 @@ extension SSGC.SupplementError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<SSGC.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<SSGC.Symbolicator>)
     {
         switch self
         {
         case .multiple:
-            output[.warning] = """
+            output[.error] = """
             markdown supplement extends a symbol that already has a supplement
             """
 
         case .untitled:
-            output[.warning] = """
+            output[.error] = """
             markdown supplement has no title
             """
 
         case .untitledTutorial:
-            output[.warning] = """
+            output[.error] = """
             markdown tutorial has no title
             """
 
         case .extraBlocksInTutorial:
-            output[.warning] = """
+            output[.error] = """
             markdown tutorial contains extra blocks
             """
         }

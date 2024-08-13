@@ -12,7 +12,7 @@ protocol CompilerTestBattery:TestBattery
     var inputs:[Symbol.Module] { get }
 
     static
-    func run(tests:TestGroup, declarations:SSGC.Declarations, extensions:SSGC.Extensions)
+    func run(tests:TestGroup, module:SSGC.ModuleIndex)
 }
 extension CompilerTestBattery
 {
@@ -21,8 +21,15 @@ extension CompilerTestBattery
     {
         let symbols:SSGC.SymbolDumps = try .collect(from: "TestModules/SymbolGraphs")
 
-        let compiled:[(SSGC.Declarations, SSGC.Extensions)]? = (tests ! "Compilation").do
+        let module:SSGC.ModuleIndex? = (tests ! "Compilation").do
         {
+            guard
+            let subject:Symbol.Module = Self.inputs.last
+            else
+            {
+                fatalError("No subject module!")
+            }
+
             let base:Symbol.FileBase = "/swift/swift-unidoc/TestModules"
 
             var symbolCache:SSGC.SymbolCache = .init(symbols: symbols)
@@ -42,49 +49,40 @@ extension CompilerTestBattery
                 try typeChecker.add(symbols: symbols)
             }
 
-            return try Self.inputs.compactMap
+            for module:Symbol.Module in Self.inputs
             {
-                guard
-                let symbols:SSGC.SymbolCulture = tests.expect(value: try symbolCache.load(
-                    module: $0,
-                    base: base,
-                    as: .swift))
-                else
+                if  let symbols:SSGC.SymbolCulture = tests.expect(value: try symbolCache.load(
+                        module: module,
+                        base: base,
+                        as: .swift))
                 {
-                    return nil
+                    try typeChecker.add(symbols: symbols)
                 }
-
-                try typeChecker.add(symbols: symbols)
-                return (
-                    typeChecker.declarations(in: $0, language: .swift),
-                    try typeChecker.extensions(in: $0)
-                )
             }
+
+            return try typeChecker.load(in: subject)
         }
 
         guard
-        let compiled:[(SSGC.Declarations, SSGC.Extensions)]
+        let module:SSGC.ModuleIndex
         else
         {
             return
         }
 
-        for (declarations, extensions):(SSGC.Declarations, SSGC.Extensions) in compiled
+        Self.run(tests: tests, module: module)
+
+        if  let tests:TestGroup = tests / "SourceLocations"
         {
-            Self.run(tests: tests, declarations: declarations, extensions: extensions)
 
-            if  let tests:TestGroup = tests / "SourceLocations"
+            for (_, decls):(_, [SSGC.Decl]) in module.declarations
             {
-
-                for (_, decls):(_, [SSGC.Decl]) in declarations.namespaces
+                for decl:SSGC.Decl in decls
                 {
-                    for decl:SSGC.Decl in decls
+                    if  let location:SourceLocation<Symbol.File> = tests.expect(
+                            value: decl.location)
                     {
-                        if  let location:SourceLocation<Symbol.File> = tests.expect(
-                                value: decl.location)
-                        {
-                            tests.expect(true: location.file.path.starts(with: "Snippets/"))
-                        }
+                        tests.expect(true: location.file.path.starts(with: "Snippets/"))
                     }
                 }
             }

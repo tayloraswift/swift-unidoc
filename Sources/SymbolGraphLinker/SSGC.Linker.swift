@@ -18,7 +18,7 @@ import Unidoc
 extension SSGC
 {
     public
-    struct Linker//:~Copyable
+    struct Linker:~Copyable
     {
         private
         let doccommentParser:Markdown.Parser<Markdown.SwiftComment>
@@ -26,11 +26,9 @@ extension SSGC
         let markdownParser:Markdown.Parser<Markdown.SwiftFlavor>
         private
         let swiftParser:Markdown.SwiftLanguage?
-        private
-        let root:Symbol.FileBase?
 
         private
-        var resources:[[String: Resource]]
+        var contexts:[Context]
         private
         var snippets:[String: Markdown.Snippet]
         private
@@ -45,22 +43,20 @@ extension SSGC
 
         private
         init(
-            plugins:[any Markdown.CodeLanguageType],
-            modules:[SymbolGraph.Module],
-            root:Symbol.FileBase?)
+            doccommentParser:Markdown.Parser<Markdown.SwiftComment>,
+            markdownParser:Markdown.Parser<Markdown.SwiftFlavor>,
+            swiftParser:Markdown.SwiftLanguage?,
+            contexts:[Context],
+            tables:Tables)
         {
-            let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
-            //  If we were given a plugin that says it can highlight swift,
-            //  make it the default plugin for the doccomment parser.
-            self.doccommentParser = .init(plugins: plugins, default: swift)
-            self.markdownParser = .init(plugins: plugins)
-            self.swiftParser = swift as? Markdown.SwiftLanguage
-            self.root = root
+            self.doccommentParser = doccommentParser
+            self.markdownParser = markdownParser
+            self.swiftParser = swiftParser
 
-            self.resources = []
+            self.contexts = contexts
             self.snippets = [:]
             self.router = .init()
-            self.tables = .init(modules: modules)
+            self.tables = tables
 
             self.supplements = [:]
             self.collations = .init()
@@ -69,49 +65,87 @@ extension SSGC
 }
 extension SSGC.Linker
 {
-    public
-    init(
-        plugins:[any Markdown.CodeLanguageType] = [],
-        modules:[SymbolGraph.Module],
-        allocating declarations:[SSGC.Declarations],
-        extensions:[SSGC.Extensions],
-        root:Symbol.FileBase? = nil)
+    init(plugins:[any Markdown.CodeLanguageType] = [], modules:[SymbolGraph.Module])
     {
-        self.init(plugins: plugins, modules: modules, root: root)
+        //  If we were given a plugin that says it can highlight swift,
+        //  make it the default plugin for the doccomment parser.
+        let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
+        let tables:Tables = .init(modules: modules)
 
-        for declarations:SSGC.Declarations in declarations
+        self = .init(
+            doccommentParser: .init(plugins: plugins, default: swift),
+            markdownParser: .init(plugins: plugins),
+            swiftParser: swift as? Markdown.SwiftLanguage,
+            contexts: tables.graph.cultures.map { .init(id: $0.id) },
+            tables: tables)
+    }
+
+    mutating
+    func attach(snippets:[any SSGC.ResourceFile],
+        indexes:[SSGC.ModuleIndex],
+        projectRoot:Symbol.FileBase?) throws
+    {
+        /// Initialize the package-level resolution table with every module in at least one
+        /// module index. If we do not do this, we will not be able to resolve noncausal links
+        /// to symbols from extensions on types from other packages.
+        let modules:Set<Symbol.Module> = indexes.reduce(into: [])
         {
-            self.allocate(declarations: declarations)
-        }
-        for extensions:SSGC.Extensions in extensions
-        {
-            for node:SSGC.Extension in extensions.compiled
+            for module:Symbol.Module in $1.resolvableLinks.modules
             {
-                self.tables.allocate(decl: node.extended.type)
+                $0.insert(module)
             }
         }
-    }
-}
-extension SSGC.Linker
-{
-    private mutating
-    func address(of decl:Symbol.Decl?) -> Int32?
-    {
-        decl.map { self.tables.intern($0) }
-    }
-    /// Returns an array of local scalars for an array of declaration symbols.
-    /// The scalar assignments reflect the order of the symbols in the array,
-    /// so you should sort them if you want deterministic addressing.
-    ///
-    /// This function doesn’t expose the declarations for codelink resolution,
-    /// because it is expected that the same symbols may appear in
-    /// the array arguments of multiple calls to this function, and it
-    /// is more efficient to expose declarations while performing a different
-    /// pass.
-    private mutating
-    func addresses(of decls:[Symbol.Decl]) -> [Int32]
-    {
-        decls.map { self.tables.intern($0) }
+
+        self.tables.packageLinks.modules = modules.sorted()
+
+        for (offset, module):(Int, SSGC.ModuleIndex) in zip(self.contexts.indices, indexes)
+        {
+            guard
+            case offset? = self.tables.modules[module.id]
+            else
+            {
+                fatalError("Module '\(module.id)' appears in the wrong array position!")
+            }
+
+            {
+                $0.causalLinks = module.resolvableLinks
+                $0.resources = module.resources.reduce(into: [:])
+                {
+                    $0[$1.name] = .init(file: $1, id: self.tables.intern($1.path))
+                }
+            } (&self.contexts[offset])
+
+            self.allocate(declarations: module.declarations,
+                as: module.language ?? .swift,
+                at: offset)
+        }
+        //  This needs to be done in two passes, because unfurling extensions can intern
+        //  additional symbols, which would otherwise create holes in the address space.
+        for module:SSGC.ModuleIndex in indexes
+        {
+            for node:SSGC.Extension in module.extensions
+            {
+                self.tables.allocate(decl: node.extendee.id)
+            }
+        }
+
+        for (offset, module):(Int, SSGC.ModuleIndex) in zip(self.contexts.indices, indexes)
+        {
+            self.unfurl(extensions: module.extensions,
+                featuresBySymbol: module.features,
+                at: offset)
+        }
+
+        //  We attach snippets first, because they can be referenced by the markdown
+        //  supplements. This works even if the snippet captions contain references to articles,
+        //  because we only eagarly inline snippet captions as markdown AST nodes; codelink
+        //  resolution does not take place until we link the written documentation.
+        try self.attach(snippets: snippets, projectRoot: projectRoot)
+
+        for (offset, module):(Int, SSGC.ModuleIndex) in zip(self.contexts.indices, indexes)
+        {
+            try self.attach(markdown: module.markdown, at: offset)
+        }
     }
 }
 extension SSGC.Linker
@@ -123,43 +157,46 @@ extension SSGC.Linker
     /// For best results (smallest/most-orderly linked symbolgraph), you should
     /// call this method first, before calling any others.
     private mutating
-    func allocate(declarations:SSGC.Declarations)
+    func allocate(declarations:[(id:Symbol.Module, decls:[SSGC.Decl])],
+        as language:Phylum.Language,
+        at offset:Int)
     {
-        guard
-        let i:Int = self.tables.modules[declarations.culture]
-        else
-        {
-            fatalError("No such module '\(declarations.culture)'")
-        }
-
-        let destinations:[SymbolGraph.Namespace] = declarations.namespaces.map
+        let destinations:[SymbolGraph.Namespace] = declarations.map
         {
             .init(
-                range: self.allocate(decls: $0.decls, language: declarations.language),
+                range: self.allocate(decls: $0.decls, language: language),
                 index: self.tables.intern($0.id))
         }
 
-        for (namespace, destination):
-            ((id:Symbol.Module, decls:[SSGC.Decl]), SymbolGraph.Namespace) in zip(
-            declarations.namespaces,
-            destinations)
         {
-            for (scalar, decl) in zip(destination.range, namespace.decls)
-            {
-                let hash:FNV24 = .init(truncating: .decl(decl.id))
-                //  Make the decl visible to codelink resolution.
-                self.tables.codelinks[namespace.id, decl.path].overload(with: .init(
-                    target: .scalar(scalar),
-                    phylum: decl.phylum,
-                    hash: hash))
-                //  Assign the decl a URI, and record the decl’s hash
-                //  so we will know if it has a hash collision.
-                self.router[namespace.id, decl.path, decl.phylum][hash, default: []]
-                    .append(scalar)
-            }
-        }
+            $0.reserveCapacity(destinations.reduce(0) { $0 + $1.range.count })
 
-        self.tables.graph.cultures[i].namespaces = destinations
+            for (namespace, destination):
+                ((id:Symbol.Module, decls:[SSGC.Decl]), SymbolGraph.Namespace) in zip(
+                declarations,
+                destinations)
+            {
+                for (i, decl) in zip(destination.range, namespace.decls)
+                {
+                    let hash:FNV24 = .decl(decl.id)
+                    //  Make the decl visible to codelink resolution.
+                    self.tables.packageLinks[namespace.id, decl.path].append(.init(
+                        phylum: decl.phylum,
+                        decl: i,
+                        heir: nil,
+                        hash: hash,
+                        id: decl.id))
+                    //  Assign the decl a URI, and record the decl’s hash
+                    //  so we will know if it has a hash collision.
+                    self.router[namespace.id, decl.path, decl.phylum][hash, default: []]
+                        .append(i)
+
+                    $0.append((decl, i, namespace.id))
+                }
+            }
+        } (&self.contexts[offset].decls)
+
+        self.tables.graph.cultures[offset].namespaces = destinations
     }
 
     private mutating
@@ -184,9 +221,7 @@ extension SSGC.Linker
             fatalError("cannot allocate empty declaration array")
         }
     }
-}
-extension SSGC.Linker
-{
+
     /// This function also exposes any features manifested by the extensions for
     /// codelink resolution.
     ///
@@ -197,106 +232,80 @@ extension SSGC.Linker
     ///
     /// For best results (smallest/most-orderly linked symbolgraph), you should
     /// call this method second, after calling ``allocate(decls:)``.
-    public mutating
-    func unfurl(extensions:SSGC.Extensions) -> [(Int32, Int)]
+    private mutating
+    func unfurl(extensions:[SSGC.Extension],
+        featuresBySymbol:[Symbol.Decl: SSGC.ModuleIndex.Feature],
+        at offset:Int)
     {
-        guard
-        let culture:Int = self.tables.modules[extensions.culture]
-        else
+        self.contexts[offset].extensions = extensions.map
         {
-            fatalError("No such module '\(extensions.culture)'")
-        }
-
-        return extensions.compiled.map
-        {
-            let extendee:Int32 = self.tables.intern($0.extended.type)
+            let extendee:Int32 = self.tables.intern($0.extendee.id)
             if  extendee >= self.tables.graph.decls.nodes.endIndex
             {
-                fatalError("Extendee '\($0.extended.type)' was never allocated!")
+                fatalError("Extendee '\($0.extendee.id)' was never allocated!")
             }
 
-            let namespace:Int = self.tables.intern($0.signature.extended.namespace)
-            let qualifier:Symbol.Module = self.tables.graph.namespaces[namespace]
+            let namespace:Symbol.Module = $0.extendee.namespace
+            let namespacePosition:Int = self.tables.intern(namespace)
 
-
-            let conformances:[Int32] = self.addresses(of: $0.conformances)
-            let features:[Int32] = self.addresses(of: $0.features)
-            let nested:[Int32] = self.addresses(of: $0.nested)
+            let conformances:[Int32] = $0.conformances.map { self.tables.intern($0) }
+            let features:[Int32] = $0.features.map { self.tables.intern($0) }
+            let nested:[Int32] = $0.nested.map { self.tables.intern($0) }
 
             //  Expose features for codelink resolution.
             for (f, id):(Int32, Symbol.Decl) in zip(features, $0.features)
             {
                 guard
-                let feature:SSGC.Extensions.Feature = extensions.features[id]
+                let feature:SSGC.ModuleIndex.Feature = featuresBySymbol[id]
                 else
                 {
                     continue
                 }
 
-                let hash:FNV24 = .init(
-                    hashing: "\(Symbol.Decl.Vector.init(id, self: $0.extended.type))")
+                let featureAlias:UCF.PackageOverload = .init(
+                    phylum: feature.phylum,
+                    decl: f,
+                    heir: extendee,
+                    hash: .decl(.init(id, self: $0.extendee.id)),
+                    id: id)
 
-                self.tables.codelinks[qualifier, $0.path, feature.lastName].overload(
-                    with: .init(target: .vector(f, self: extendee),
-                        phylum: feature.phylum,
-                        hash: hash))
+                self.tables.packageLinks[namespace, $0.extendee.path, feature.lastName]
+                    .append(featureAlias)
             }
 
             let index:Int = self.tables.graph.decls.nodes[extendee].push(.init(
                 conditions: $0.conditions.map { $0.map { self.tables.intern($0) } },
-                namespace: namespace,
-                culture: culture,
+                namespace: namespacePosition,
+                culture: offset,
                 conformances: conformances,
                 features: features,
                 nested: nested))
 
-            return (extendee, index)
+            return ($0, extendee, index)
         }
     }
 }
 extension SSGC.Linker
 {
-    public mutating
-    func attach(
-        resources:[[any SSGC.ResourceFile]],
-        snippets:[any SSGC.ResourceFile],
-        markdown:[[any SSGC.ResourceFile]]) throws -> [[SSGC.Article]]
-    {
-        //  We attach snippets first, because they can be referenced by the markdown
-        //  supplements. This works even if the snippet captions contain references to articles,
-        //  because we only eagarly inline snippet captions as markdown AST nodes; codelink
-        //  resolution does not take place until we link the written documentation.
-        self.resources = resources.map
-        {
-            $0.reduce(into: [:])
-            {
-                $0[$1.name] = .init(file: $1, id: self.tables.intern($1.path))
-            }
-        }
-        self.snippets = try self.attach(snippets: snippets)
-        return          try self.attach(markdown: markdown)
-    }
-
     private mutating
-    func attach(
-        snippets:[any SSGC.ResourceFile]) throws -> [String: Markdown.Snippet]
+    func attach(snippets:[any SSGC.ResourceFile], projectRoot:Symbol.FileBase?) throws
     {
         guard
         let swift:Markdown.SwiftLanguage = self.swiftParser
         else
         {
-            return [:]
+            return
         }
 
         //  Right now we only do one pass over the snippets, since no one should be referencing
         //  snippets from other snippets.
-        return try snippets.reduce(into: [:])
+        self.snippets = try snippets.reduce(into: [:])
         {
             let indexID:String?
 
-            if  let root:Symbol.FileBase = self.root
+            if  let projectRoot:Symbol.FileBase
             {
-                indexID = "\(root.path)/\($1.path)"
+                indexID = "\(projectRoot.path)/\($1.path)"
             }
             else
             {
@@ -315,82 +324,47 @@ extension SSGC.Linker
     }
 
     private mutating
-    func attach(markdown:[[any SSGC.ResourceFile]]) throws -> [[SSGC.Article]]
+    func attach(markdown:[any SSGC.ResourceFile], at offset:Int) throws
     {
-        let articles:[[SSGC.Article]] = try markdown.indices.map
+        let namespace:Symbol.Module = self.tables.graph.namespaces[offset]
+
+        var range:(first:Int32, last:Int32)? = nil
+        var articles:[SSGC.Article] = []
+
+        for file:any SSGC.ResourceFile in markdown
         {
-            let namespace:Symbol.Module = self.tables.graph.namespaces[$0]
-
-            var range:(first:Int32, last:Int32)? = nil
-            var articles:[SSGC.Article] = []
-
-            for file:any SSGC.ResourceFile in markdown[$0]
+            if  let article:SSGC.Article = try self.attach(supplement: file, in: namespace)
             {
-                if  let article:SSGC.Article = try self.attach(supplement: file, in: namespace)
+                articles.append(article)
+
+                guard case .standalone(id: let id) = article.type
+                else
                 {
-                    articles.append(article)
+                    continue
+                }
 
-                    guard case .standalone(id: let id) = article.type
-                    else
-                    {
-                        continue
-                    }
-
-                    switch range
-                    {
-                    case  nil:              range = (id,    id)
-                    case (let first, _)?:   range = (first, id)
-                    }
+                switch range
+                {
+                case  nil:              range = (id,    id)
+                case (let first, _)?:   range = (first, id)
                 }
             }
-
-            self.tables.graph.cultures[$0].articles = range.map
-            {
-                $0.first ... $0.last
-            }
-
-            /// If there are any options with `global` scope, we need to propogate them
-            /// to every other article in the same culture!
-            var global:Markdown.SemanticMetadata.Options = [:]
-            for article:SSGC.Article in articles
-            {
-                global.propogate(from: article.body.metadata.options)
-            }
-            for i:Int in articles.indices
-            {
-                articles[i].body.metadata.options.propogate(from: global)
-            }
-
-            return articles
         }
 
-        //  Now that standalone articles have all been exposed for doclink resolution,
-        //  we can link them. But before doing that, we need to register all known namespaces
-        //  for codelink resolution.
-        for (n, namespace):(Int, Symbol.Module) in zip(
-            self.tables.graph.namespaces.indices,
-            self.tables.graph.namespaces)
+        /// If there are any options with `global` scope, we need to propogate them
+        /// to every other article in the same culture!
+        var global:Markdown.SemanticMetadata.Options = [:]
+        for article:SSGC.Article in articles
         {
-            self.tables.codelinks[namespace].overload(with: .init(
-                target: .scalar(n * .module),
-                phylum: nil,
-                hash: .init(truncating: .module(namespace))))
+            global.propogate(from: article.body.metadata.options)
         }
-
-        for (c, articles):(Int, [SSGC.Article]) in zip(articles.indices, articles)
+        for i:Int in articles.indices
         {
-            let resources:[String: SSGC.Resource] = self.resources[c]
-            for article:SSGC.Article in articles
-            {
-                try self.tables.inline(resources: resources,
-                    into: article.body.details,
-                    with: self.swiftParser)
-
-                self.tables.index(article: article.body, id: article.id(in: c))
-            }
+            articles[i].body.metadata.options.propogate(from: global)
         }
 
-        return articles
+        self.tables.graph.cultures[offset].articles = range.map { $0.first ... $0.last }
+        self.contexts[offset].articles = articles
     }
 
     /// Parses and stores the given supplemental documentation if it has a binding
@@ -408,7 +382,7 @@ extension SSGC.Linker
 
         let name:String = supplement.name
 
-        let prefix:DoclinkResolver.Prefix
+        let prefix:UCF.ArticleTable.Prefix
 
         let title:Markdown.Bytecode
         let titleLocation:SourceReference<Markdown.Source>?
@@ -444,15 +418,16 @@ extension SSGC.Linker
             let decl:Int32?
             do
             {
-                decl = try self.resolve(decl: binding, in: namespace)
+                decl = try self.tables.resolve(binding: binding, in: namespace)
             }
             catch let diagnosis as any Diagnostic<SSGC.Symbolicator>
             {
                 self.tables.diagnostics[binding.source] = diagnosis
                 return nil
             }
-            catch
+            catch let error
             {
+                self.tables.diagnostics[binding.source] = .error(error)
                 return nil
             }
 
@@ -502,7 +477,7 @@ extension SSGC.Linker
         if  let id:Int32 = self.tables.allocate(article: id, title: title)
         {
              //  Make the standalone article visible for doclink resolution.
-            self.tables.doclinks[prefix, name] = id
+            self.tables.articleLinks[prefix, name] = id
             self.router[route][nil, default: []].append(id)
             return .init(type: .standalone(id: id), file: file, body: supplement.body)
         }
@@ -518,108 +493,53 @@ extension SSGC.Linker
             return nil
         }
     }
-
-    private
-    func resolve(decl binding:Markdown.InlineAutolink,
-        in namespace:Symbol.Module) throws -> Int32?
-    {
-        //  Special rule for article bindings: if the text of the codelink matches
-        //  the current namespace, then the article is the primary article for
-        //  that module.
-        if  binding.text.string == "\(namespace)"
-        {
-            return nil
-        }
-
-        guard
-        let selector:UCF.Selector = .init(binding.text.string)
-        else
-        {
-            throw SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(binding.text)
-        }
-
-        //  A qualified codelink with a single component that matches the current
-        //  namespace is also a way to mark the primary article for that module.
-        if  case .qualified = selector.base,
-            selector.path.components.count == 1,
-            selector.path.components[0] == "\(namespace)"
-        {
-            return nil
-        }
-
-        let resolver:UCF.Overload<Int32>.Resolver = .init(
-            table: self.tables.codelinks,
-            scope: .init(namespace: namespace, imports: self.tables.importAll))
-
-        switch resolver.resolve(selector)
-        {
-        case .one(let overload):
-            switch overload.target
-            {
-            case .scalar(let scalar):
-                return scalar
-
-            case .vector(let feature, self: let heir):
-                throw SSGC.SupplementBindingError.init(.vector(feature, self: heir),
-                    selector: selector)
-            }
-
-        case .some(let overloads):
-            if  overloads.isEmpty
-            {
-                throw SSGC.SupplementBindingError.init(.none(in: namespace),
-                    selector: selector)
-            }
-            else
-            {
-                throw UCF.OverloadResolutionError<SSGC.Symbolicator>.init(
-                    overloads: overloads,
-                    selector: selector)
-            }
-        }
-    }
 }
 
 extension SSGC.Linker
 {
-    /// Links declarations that have already been assigned addresses.
-    ///
-    /// This throws an error if and only if a file system error occurs. This is fatal because
-    /// there is already logic in the linker to handle the case where files are missing.
-    public mutating
-    func collate(declarations:SSGC.Declarations) throws
+    /// This throws an error if and only if a file system error occurs. This is fatal
+    /// because there is already logic in the linker to handle the case where files are
+    /// missing.
+    mutating
+    func collate() throws
     {
-        guard
-        let c:Int = self.tables.modules[declarations.culture]
-        else
+        for (offset, context):(Int, Context) in zip(self.contexts.indices, self.contexts)
         {
-            fatalError("No such module '\(declarations.culture)'")
+            for article:SSGC.Article in context.articles
+            {
+                let id:Int32 = article.id(in: offset)
+
+                try self.tables.inline(resources: context.resources,
+                    into: article.body.details,
+                    with: self.swiftParser)
+
+                self.tables.index(normalizing: article.body, id: id)
+            }
         }
 
-        let destinations:[SymbolGraph.Namespace] = self.tables.graph.cultures[c].namespaces
-        let resources:[String: SSGC.Resource] = self.resources[c]
-
-        for ((_, decls), destination):((_, [SSGC.Decl]), SymbolGraph.Namespace) in zip(
-            declarations.namespaces,
-            destinations)
+        for context:Context in self.contexts
         {
-            for (i, decl):(Int32, SSGC.Decl) in zip(destination.range, decls)
+            for (d, i, _):(SSGC.Decl, Int32, Symbol.Module) in context.decls
             {
-                try self.collate(decl: decl, with: resources, at: i)
+                try self.collate(decl: d, at: i, context: context)
+            }
+            for (e, i, j):(SSGC.Extension, Int32, Int) in context.extensions
+            {
+                try self.collate(extension: e, at: i, index: j)
             }
         }
     }
 
     private mutating
-    func collate(decl:SSGC.Decl, with resources:[String: SSGC.Resource], at i:Int32) throws
+    func collate(decl:SSGC.Decl, at i:Int32, context:Context) throws
     {
         let signature:Signature<Int32> = decl.signature.map { self.tables.intern($0) }
 
         //  Sort for deterministic addresses.
-        let requirements:[Int32] = self.addresses(of: decl.requirements.sorted())
-        let inhabitants:[Int32] = self.addresses(of: decl.inhabitants.sorted())
-        let superforms:[Int32] = self.addresses(of: decl.superforms.sorted())
-        let origin:Int32? = self.address(of: decl.origin)
+        let requirements:[Int32] = decl.requirements.sorted().map { self.tables.intern($0) }
+        let inhabitants:[Int32] = decl.inhabitants.sorted().map { self.tables.intern($0) }
+        let superforms:[Int32] = decl.superforms.sorted().map { self.tables.intern($0) }
+        let origin:Int32? = decl.origin.map { self.tables.intern($0) }
 
         let location:SourceLocation<Int32>? = decl.location?.map
         {
@@ -673,11 +593,11 @@ extension SSGC.Linker
 
         if  let article:SSGC.ArticleCollation
         {
-            try self.tables.inline(resources: resources,
+            try self.tables.inline(resources: context.resources,
                 into: article.combined.details,
                 with: self.swiftParser)
 
-            self.tables.index(article: article.combined, id: i)
+            self.tables.index(normalizing: article.combined, id: i)
 
             self.collations[i] = article
         }
@@ -699,124 +619,114 @@ extension SSGC.Linker
     ///
     /// This throws an error if and only if a file system error occurs. This is fatal because
     /// there is already logic in the linker to handle the case where files are missing.
-    public mutating
-    func collate(extensions:[SSGC.Extension], at positions:[(Int32, Int)]) throws
+    private mutating
+    func collate(extension:SSGC.Extension, at i:Int32, index j:Int) throws
     {
-        for ((i, j), `extension`):((Int32, Int), SSGC.Extension) in zip(positions, extensions)
-        {
-            //  Extensions can have many constituent extension blocks, each potentially
-            //  with its own doccomment. It’s not clear to me how to combine them,
-            //  so for now, we just keep the longest doccomment and discard all the others,
-            //  like DocC does. (Except DocC does this across all extensions with the
-            //  same extended type.)
-            //  https://github.com/apple/swift-docc/pull/369
-            var location:SourceLocation<Symbol.File>? = nil
-            var comment:SSGC.DocumentationComment? = nil
-            var longest:Int = 0
+        //  Extensions can have many constituent extension blocks, each potentially
+        //  with its own doccomment. It’s not clear to me how to combine them,
+        //  so for now, we just keep the longest doccomment and discard all the others,
+        //  like DocC does. (Except DocC does this across all extensions with the
+        //  same extended type.)
+        //  https://github.com/apple/swift-docc/pull/369
+        var location:SourceLocation<Symbol.File>? = nil
+        var comment:SSGC.DocumentationComment? = nil
+        var longest:Int = 0
 
-            for block:SSGC.Extension.Block in `extension`.blocks
+        for block:SSGC.Extension.Block in `extension`.blocks
+        {
+            if  let current:SSGC.DocumentationComment = block.comment
             {
-                if  let current:SSGC.DocumentationComment = block.comment
+                //  This is really, really stupid, but we need a way to break
+                //  ties, and we can’t use source location for this, as it is
+                //  not always available.
+                let length:Int = current.text.count
+                if (longest, comment?.text ?? "") < (length, current.text)
                 {
-                    //  This is really, really stupid, but we need a way to break
-                    //  ties, and we can’t use source location for this, as it is
-                    //  not always available.
-                    let length:Int = current.text.count
-                    if (longest, comment?.text ?? "") < (length, current.text)
-                    {
-                        location = block.location
-                        comment = current
-                        longest = length
-                    }
+                    location = block.location
+                    comment = current
+                    longest = length
                 }
             }
-
-            guard
-            let comment:SSGC.DocumentationComment
-            else
-            {
-                continue
-            }
-
-            //  Only intern the file path for the extension block with the longest comment
-            let file:Int32? = location.map { self.tables.intern($0.file) }
-            let markdown:Markdown.Source = .init(comment: comment, in: file)
-
-            let collation:SSGC.ArticleCollation = .init(combined: markdown.parse(
-                    markdownParser: self.doccommentParser,
-                    snippetsTable: self.snippets,
-                    diagnostics: &self.tables.diagnostics),
-                scope: [String].init(`extension`.path),
-                file: file)
-
-            let c:Int = self.tables.graph.decls.nodes[i].extensions[j].culture
-
-            try self.tables.inline(resources: self.resources[c],
-                into: collation.combined.details,
-                with: self.swiftParser)
-
-            //  FIXME: We should index the anchors in the extension documentation, but
-            //  extensions have 2-dimensional coordinates, and we don’t currently have a way to
-            //  event link to them in the first place.
-            self.tables.index(article: collation.combined, id: nil)
-
-            self.collations[i, j] = collation
         }
+
+        guard
+        let comment:SSGC.DocumentationComment
+        else
+        {
+            return
+        }
+
+        //  Only intern the file path for the extension block with the longest comment
+        let file:Int32? = location.map { self.tables.intern($0.file) }
+        let markdown:Markdown.Source = .init(comment: comment, in: file)
+
+        let collation:SSGC.ArticleCollation = .init(combined: markdown.parse(
+                markdownParser: self.doccommentParser,
+                snippetsTable: self.snippets,
+                diagnostics: &self.tables.diagnostics),
+            scope: [String].init(`extension`.extendee.path),
+            file: file)
+
+        let c:Int = self.tables.graph.decls.nodes[i].extensions[j].culture
+
+        try self.tables.inline(resources: self.contexts[c].resources,
+            into: collation.combined.details,
+            with: self.swiftParser)
+
+        //  FIXME: We should index the anchors in the extension documentation, but
+        //  extensions have 2-dimensional coordinates, and we don’t currently have a way to
+        //  event link to them in the first place.
+        self.tables.index(normalizing: collation.combined, id: nil)
+
+        self.collations[i, j] = collation
     }
 }
 extension SSGC.Linker
 {
-    public mutating
-    func link(extensions:[[(Int32, Int)]], articles:[[SSGC.Article]]) throws -> SymbolGraph
+    mutating
+    func link() -> SymbolGraph
     {
-        let imports:[Symbol.Module] = self.tables.importAll
-
-        for c:Int in self.tables.graph.cultures.indices
+        for (offset, context):(Int, Context) in zip(self.contexts.indices, self.contexts)
         {
-            let culture:Culture = .init(resources: self.resources[c],
-                imports: imports,
-                id: self.tables.graph.namespaces[c])
-
-            for namespace:SymbolGraph.Namespace in self.tables.graph.cultures[c].namespaces
+            for (_, i, namespace):(SSGC.Decl, Int32, Symbol.Module) in context.decls
             {
-                let module:Symbol.Module = self.tables.graph.namespaces[namespace.index]
-                for i:Int32 in namespace.range
+                /// Pass this even if nil, in case the declaration has a rename target.
+                let article:SSGC.ArticleCollation? = self.collations.move(i)
+                self.tables.link(article: article,
+                    in: context,
+                    as: i,
+                    under: namespace)
+            }
+
+            for (_, i, j):(SSGC.Extension, Int32, Int) in context.extensions
+            {
+                guard
+                let article:SSGC.ArticleCollation = self.collations.move(i, j)
+                else
                 {
-                    let article:SSGC.ArticleCollation? = self.collations.move(i)
-                    self.tables.link(article: article, of: culture, as: i, in: module)
+                    continue
                 }
+
+                self.tables.link(article: article,
+                    extension: (i, j),
+                    contexts: self.contexts)
             }
 
-            for article:SSGC.Article in articles[c]
+            for article:SSGC.Article in context.articles
             {
-                self.tables.link(article: article, of: culture, at: c)
+                self.tables.link(article: article, in: context, at: offset)
             }
-        }
-
-        for (i, j):(Int32, Int) in extensions.joined()
-        {
-            guard
-            let article:SSGC.ArticleCollation = self.collations.move(i, j)
-            else
-            {
-                continue
-            }
-
-            self.tables.link(article: article,
-                extension: (i, j),
-                resources: self.resources,
-                imports: imports)
         }
 
         self.tables.graph.colorize(routes: self.router.paths, with: &self.tables.diagnostics)
         return self.tables.graph
     }
 
-    public consuming
-    func status() -> DiagnosticMessages
+    var diagnostics:Diagnostics<SSGC.Symbolicator>
     {
-        self.tables.diagnostics.symbolicated(with: .init(
-            graph: self.tables.graph,
-            root: self.root))
+        consuming get
+        {
+            self.tables.diagnostics
+        }
     }
 }

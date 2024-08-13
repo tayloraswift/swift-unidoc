@@ -26,3 +26,13 @@ do
         -pretty-print \
         -module-name $TARGET
 done
+
+swift symbolgraph-extract \
+    -target x86_64-unknown-linux-gnu \
+    -minimum-access-level internal \
+    -output-dir TestModules/Determinism \
+    -skip-inherited-docs \
+    -emit-extension-block-symbols \
+    -include-spi-symbols \
+    -pretty-print \
+    -module-name Swift

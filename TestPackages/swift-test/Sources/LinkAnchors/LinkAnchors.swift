@@ -9,11 +9,14 @@
 /// Link to current page: <doc:#Using-the-LinkAnchors-enum>
 /// Link to current page, alt: <doc:#using-the-linkanchors-enum>
 /// Link to current page, alt: <doc:#Using%20the%20LinkAnchors%20enum>
-/// Link to current page: <doc:LinkAnchors#Using-the-LinkAnchors-enum>
+/// Link to current page: <doc:LinkAnchors>
+/// Link to current page, roundabout: <doc:LinkAnchors#Contributing>
 ///
 /// ## Using the `LinkAnchors` enum
 ///
 /// Link to a member: ``LinkAnchors.a``
+///
+/// ## Contributing
 public
 enum LinkAnchors
 {

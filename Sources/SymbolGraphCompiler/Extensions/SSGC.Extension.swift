@@ -5,40 +5,40 @@ import Symbols
 extension SSGC
 {
     @frozen public
-    struct Extension
+    struct Extension:Equatable
     {
         public
-        let signature:ExtensionSignature
-        /// The full name of the extended type, not including the module namespace prefix.
+        let conditions:[GenericConstraint<Symbol.Decl>]
         public
-        let path:UnqualifiedPath
+        let extendee:Extendee
 
         /// Protocols the extended type conforms to.
-        public
-        let conformances:[Symbol.Decl]
+        public internal(set)
+        var conformances:[Symbol.Decl]
         /// Members the extended type inherits from other types via subclassing,
         /// protocol conformances, etc.
-        public
-        let features:[Symbol.Decl]
+        public internal(set)
+        var features:[Symbol.Decl]
         /// Declarations directly nested in the extended type. Everything that
         /// is lexically-scoped to the extended type, and was not inherited from
         /// another type goes in this set.
-        public
-        let nested:[Symbol.Decl]
+        public internal(set)
+        var nested:[Symbol.Decl]
         /// Documentation comments and source locations for the various extension
         /// blocks that make up this extension.
-        public
-        let blocks:[Block]
+        public internal(set)
+        var blocks:[Block]
 
-        init(signature:ExtensionSignature,
-            path:UnqualifiedPath,
+        init(conditions:[GenericConstraint<Symbol.Decl>],
+            extendee:Extendee,
             conformances:[Symbol.Decl],
             features:[Symbol.Decl],
             nested:[Symbol.Decl],
             blocks:[Block])
         {
-            self.signature = signature
-            self.path = path
+            self.conditions = conditions
+            self.extendee = extendee
+
             self.conformances = conformances
             self.features = features
             self.nested = nested
@@ -48,8 +48,5 @@ extension SSGC
 }
 extension SSGC.Extension
 {
-    @inlinable public
-    var conditions:[GenericConstraint<Symbol.Decl>] { self.signature.conditions }
-    @inlinable public
-    var extended:SSGC.ExtendedType { self.signature.extended }
+    var id:ID { .init(extending: self.extendee.id, where: self.conditions) }
 }

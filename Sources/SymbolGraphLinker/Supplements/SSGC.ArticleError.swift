@@ -12,16 +12,19 @@ extension SSGC.ArticleError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<SSGC.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<SSGC.Symbolicator>)
     {
         switch self
         {
         case .duplicated(name: let name):
-            output[.warning] = """
+            output[.error] = """
             markdown article cannot have the same mangled name ('\(name)') as another \
             article in the same module
             """
         }
+    }
+
+    func emit(details output:inout DiagnosticOutput<SSGC.Symbolicator>)
+    {
     }
 }

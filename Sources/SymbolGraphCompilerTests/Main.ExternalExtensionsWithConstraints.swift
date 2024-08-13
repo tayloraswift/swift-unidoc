@@ -13,11 +13,12 @@ extension Main.ExternalExtensionsWithConstraints:CompilerTestBattery
     static
     let inputs:[Symbol.Module] =
     [
+        "ExtendableTypesWithConstraints",
         "ExternalExtensionsWithConstraints",
     ]
 
     static
-    func run(tests:TestGroup, declarations:SSGC.Declarations, extensions:SSGC.Extensions)
+    func run(tests:TestGroup, module:SSGC.ModuleIndex)
     {
     }
 }

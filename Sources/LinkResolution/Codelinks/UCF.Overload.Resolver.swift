@@ -30,22 +30,19 @@ extension UCF.Overload.Resolver
         switch selector.base
         {
         case .relative:
-            if  let namespace:Symbol.Module = self.scope.namespace
+            for index:Int in
+                (self.scope.path.startIndex ... self.scope.path.endIndex).reversed()
             {
-                for index:Int in
-                    (self.scope.path.startIndex ... self.scope.path.endIndex).reversed()
-                {
-                    let overloads:UCF.Overload<Scalar>.Group = self.table.query(
-                        qualified: ["\(namespace)"]
-                            + self.scope.path[..<index]
-                            + selector.path.components,
-                        suffix: selector.suffix)
+                let overloads:UCF.Overload<Scalar>.Group = self.table.query(
+                    qualified: ["\(self.scope.namespace)"]
+                        + self.scope.path[..<index]
+                        + selector.path.components,
+                    suffix: selector.suffix)
 
-                    guard overloads.isEmpty
-                    else
-                    {
-                        return overloads
-                    }
+                guard overloads.isEmpty
+                else
+                {
+                    return overloads
                 }
             }
             for namespace:Symbol.Module in self.scope.imports where

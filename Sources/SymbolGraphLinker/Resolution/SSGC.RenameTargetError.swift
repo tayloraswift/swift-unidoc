@@ -7,11 +7,11 @@ extension SSGC
 {
     struct RenameTargetError:Error
     {
-        let overloads:[UCF.Overload<Int32>]
+        let overloads:[any UCF.ResolvableOverload]
         let redirect:UnqualifiedPath
         let target:UCF.Selector
 
-        init(overloads:[UCF.Overload<Int32>],
+        init(overloads:[any UCF.ResolvableOverload],
             redirect:UnqualifiedPath,
             target:UCF.Selector)
         {
@@ -25,33 +25,34 @@ extension SSGC.RenameTargetError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<SSGC.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<Symbolicator>)
     {
         if  self.overloads.isEmpty
         {
-            output[.warning] += """
+            output[.error] += """
             rename target '\(self.target)' for '\(self.redirect)' \
             does not refer to any known declarations
             """
         }
         else
         {
+            //  There is no way to disambiguate a rename target, so this is a warning and not
+            //  an error.
             output[.warning] += """
             rename target '\(self.target)' for '\(self.redirect)' is ambiguous
             """
         }
     }
 
-    var notes:[UCF.OverloadResolutionError<SSGC.Symbolicator>.Note]
+    func emit(details output:inout DiagnosticOutput<Symbolicator>)
     {
-        self.overloads.map
+        for overload:any UCF.ResolvableOverload in self.overloads
         {
-            .init(suggested: .init(
-                    base: self.target.base,
-                    path: self.target.path,
-                    suffix: .hash($0.hash)),
-                target: $0.target)
+            let suggested:UCF.Selector = self.target.with(hash: overload.hash)
+
+            output[.note] = """
+            did you mean '\(suggested)'? (\(output.symbolicator.demangle(overload.id)))
+            """
         }
     }
 }

@@ -1,36 +1,50 @@
-import UCF
 import Symbols
+import UCF
 
-@frozen public
-struct DoclinkResolver
+extension UCF
 {
-    public
-    let table:Table
-    public
-    let scope:Scope
-
-    @inlinable public
-    init(table:Table, scope:Scope)
+    @frozen public
+    struct ArticleTable
     {
-        self.table = table
-        self.scope = scope
+        @usableFromInline
+        var entries:[ResolutionPath: Int32]
+
+        @inlinable public
+        init()
+        {
+            self.entries = [:]
+        }
     }
 }
-extension DoclinkResolver
+extension UCF.ArticleTable
 {
-    public
-    func resolve(_ link:Doclink) -> Int32?
+    @inlinable public
+    subscript(prefix:Prefix, name:String) -> Int32?
+    {
+        _read
+        {
+            yield  self.entries[.join(prefix + [name])]
+        }
+        _modify
+        {
+            yield &self.entries[.join(prefix + [name])]
+        }
+    }
+}
+extension UCF.ArticleTable
+{
+    func resolve(_ link:Doclink, in scope:UCF.ArticleScope) -> Int32?
     {
         if !link.absolute
         {
-            if  let namespace:Symbol.Module = self.scope.namespace
+            if  let namespace:Symbol.Module = scope.namespace
             {
                 for prefix:Prefix in [.documentation(namespace), .tutorials(namespace)]
                 {
                     for index:Int in prefix.indices.reversed()
                     {
                         let path:UCF.ResolutionPath = .join(prefix[...index] + link.path)
-                        if  let address:Int32 = self.table.entries[path]
+                        if  let address:Int32 = self.entries[path]
                         {
                             return address
                         }
@@ -38,19 +52,18 @@ extension DoclinkResolver
                 }
             }
         }
-        return self.table.entries[.join(link.path)]
+        return self.entries[.join(link.path)]
     }
 
-    public
-    func resolve(_ doclink:Doclink, docc:Bool) -> Int32?
+    func resolve(_ doclink:Doclink, docc:Bool, in scope:UCF.ArticleScope) -> Int32?
     {
-        if  let resolved:Int32 = self.resolve(doclink)
+        if  let resolved:Int32 = self.resolve(doclink, in: scope)
         {
             return resolved
         }
 
         guard docc,
-        let namespace:Symbol.Module = self.scope.namespace
+        let namespace:Symbol.Module = scope.namespace
         else
         {
             return nil
@@ -66,6 +79,6 @@ extension DoclinkResolver
         }
 
         let path:UCF.ResolutionPath = .join([_].init(prefix) + doclink.path.dropFirst())
-        return self.table.entries[path]
+        return self.entries[path]
     }
 }

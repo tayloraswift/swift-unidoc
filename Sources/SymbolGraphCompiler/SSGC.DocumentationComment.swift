@@ -4,7 +4,7 @@ import Symbols
 extension SSGC
 {
     @frozen public
-    struct DocumentationComment
+    struct DocumentationComment:Equatable
     {
         public
         let start:SourcePosition?

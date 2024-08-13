@@ -1,10 +1,14 @@
 import Symbols
+import UCF
 
-extension SSGC
+extension SSGC.SupplementBindingError
 {
-    enum SupplementBinding
+    enum Variant:Sendable
     {
-        case none(in:Symbol.Module)
-        case vector(Int32, self:Int32)
+        case ambiguousBinding([any UCF.ResolvableOverload],
+            rejected:[any UCF.ResolvableOverload])
+
+        case moduleNotAllowed(Symbol.Module, expected:Symbol.Module)
+        case vectorNotAllowed(Int32, self:Int32)
     }
 }

@@ -30,8 +30,7 @@ extension DroppedExtensionsError:Diagnostic
 {
     typealias Symbolicator = Unidoc.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<Unidoc.Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<Unidoc.Symbolicator>)
     {
         switch self.affected
         {

@@ -1,9 +1,10 @@
 import Symbols
+import UCF
 
-extension DoclinkResolver
+extension UCF
 {
     @frozen public
-    struct Scope
+    struct ArticleScope
     {
         public
         let namespace:Symbol.Module?

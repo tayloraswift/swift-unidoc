@@ -71,7 +71,8 @@ struct LinkResolution:UnidocDatabaseTestBattery
                     ],
                 ],
                 fragmentLinks: [
-                    "Using the LinkAnchors enum"
+                    "Using the LinkAnchors enum",
+                    "Contributing"
                 ]),
 
             .init(name: "InternalLinks",

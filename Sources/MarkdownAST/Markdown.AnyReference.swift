@@ -27,13 +27,18 @@ extension Markdown
 extension Markdown.AnyReference
 {
     @inlinable public
-    static func link(url:__owned Markdown.SourceString) -> Self { .link(url: .init(from: url)) }
+    static func link(url:__owned Markdown.SourceString,
+        provenance:Markdown.SourceURL.Provenance = .attribute) -> Self
+    {
+        .link(url: .init(url: url, provenance: provenance))
+    }
 }
 extension Markdown.AnyReference
 {
     @inlinable public
     init(_ autolink:Markdown.InlineAutolink)
     {
-        self = autolink.code ? .lexical(ucf: autolink.text) : .link(url: autolink.text)
+        let text:Markdown.SourceString = autolink.text
+        self = autolink.code ? .lexical(ucf: text) : .link(url: text, provenance: .autolink)
     }
 }

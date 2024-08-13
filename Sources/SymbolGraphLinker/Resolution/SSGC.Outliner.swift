@@ -18,16 +18,13 @@ extension SSGC
     @_spi(testable) public
     struct Outliner:~Copyable
     {
-        private
-        let resources:[String: SSGC.Resource]
-        private
+        private(set)
         var resolver:OutlineResolver
         private
         var cache:Cache
 
-        init(resources:[String: SSGC.Resource], resolver:consuming OutlineResolver)
+        init(resolver:consuming OutlineResolver)
         {
-            self.resources = resources
             self.resolver = resolver
             self.cache = .init()
         }
@@ -38,48 +35,7 @@ extension SSGC.Outliner
     consuming
     func move() -> SSGC.Linker.Tables { self.resolver.tables }
 }
-extension SSGC.Outliner
-{
-    private
-    func locate(resource name:String) -> SSGC.Resource?
-    {
-        if  let resource:SSGC.Resource = self.resources[name]
-        {
-            return resource
-        }
 
-        if  let dot:String.Index = name.lastIndex(of: ".")
-        {
-            //  We can only fuzz file names for image resources!
-            switch name[name.index(after: dot)...]
-            {
-            case "gif":     break
-            case "jpg":     break
-            case "jpeg":    break
-            case "png":     break
-            case "svg":     break
-            case "webp":    break
-            default:        return nil
-            }
-
-            return self.resources["\(name[..<dot])@2x\(name[dot...])"]
-                ?? self.resources["\(name[..<dot])~dark\(name[dot...])"]
-                ?? self.resources["\(name[..<dot])~dark@2x\(name[dot...])"]
-        }
-        for guess:String in ["svg", "webp", "png", "jpg", "jpeg", "gif"]
-        {
-            if  let resource:SSGC.Resource = self.resources["\(name).\(guess)"]
-                ?? self.resources["\(name)@2x.\(guess)"]
-                ?? self.resources["\(name)~dark.\(guess)"]
-                ?? self.resources["\(name)~dark@2x.\(guess)"]
-            {
-                return resource
-            }
-        }
-
-        return nil
-    }
-}
 extension SSGC.Outliner
 {
     @_spi(testable)
@@ -107,7 +63,7 @@ extension SSGC.Outliner
             switch url.scheme
             {
             case nil, "doc"?:
-                return self.outline(doc: url.suffix)
+                return self.outline(doc: url.suffix, as: url.provenance)
 
             case let scheme?:
                 return self.cache.add(outline: .url("\(scheme):\(url.suffix)",
@@ -136,7 +92,7 @@ extension SSGC.Outliner
             return self.cache.add(outline: .location(location))
         }
 
-        if  let resource:SSGC.Resource = self.locate(resource: name.string)
+        if  let resource:SSGC.Resource = self.resolver.locate(resource: name.string)
         {
             //  Historical note: we used to encode this as a vertex outline.
             return self.cache.add(
@@ -152,58 +108,32 @@ extension SSGC.Outliner
     {
         self.cache(link.string)
         {
-            guard
-            let codelink:UCF.Selector = .init(link.string)
+            if  let codelink:UCF.Selector = .init(link.string)
+            {
+                return self.resolver.outline(codelink, at: link.source)
+            }
             else
             {
-                self.resolver.diagnostics[link.source] =
-                    SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
-
+                self.resolver.diagnostics[link.source] = SSGC.AutolinkParsingError.init(link)
                 return nil
             }
-
-            if  let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
-                    at: link.source)
-            {
-                return outline
-            }
-
-            return .unresolved(ucf: link.string, location: link.source.start)
         }
     }
     private mutating
-    func outline(doc link:Markdown.SourceString) -> Int?
+    func outline(doc link:Markdown.SourceString,
+        as provenance:Markdown.SourceURL.Provenance) -> Int?
     {
         self.cache(link.string)
         {
-            guard
-            let doclink:Doclink = .init(doc: link.string[...])
+            if  let doclink:Doclink = .init(doc: link.string[...])
+            {
+                return self.resolver.outline(doclink, at: link.source, as: provenance)
+            }
             else
             {
-                self.resolver.diagnostics[link.source] =
-                    SSGC.AutolinkParsingError<SSGC.Symbolicator>.init(link)
-
+                self.resolver.diagnostics[link.source] = SSGC.AutolinkParsingError.init(link)
                 return nil
             }
-
-            if  let outline:SymbolGraph.Outline = self.resolver.outline(doclink,
-                    at: link.source)
-            {
-                return outline
-            }
-            //  Resolution might still succeed by reinterpreting the doclink as a codelink.
-            else if
-                let codelink:UCF.Selector = .equivalent(to: doclink),
-                let outline:SymbolGraph.Outline = self.resolver.outline(codelink,
-                    at: link.source)
-            {
-                return outline
-            }
-
-            self.resolver.diagnostics[link.source] =
-                Warning.doclinkNotStaticallyResolvable(doclink)
-
-            return .unresolved(doc: link.string, location: link.source.start)
         }
     }
 

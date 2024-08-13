@@ -230,7 +230,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 ["barbiecore", "barbie", "dreamhouse", "keys"][...],
                 [
                     "Int": 1,
-                    "max": 2, // expands to two components because it is a vector symbol
+                    "max": 1,
                     "ID": 1,
                     "Barbie": 1,
                 ] as [String: Int]
