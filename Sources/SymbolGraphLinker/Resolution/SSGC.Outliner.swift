@@ -63,7 +63,7 @@ extension SSGC.Outliner
             switch url.scheme
             {
             case nil, "doc"?:
-                return self.outline(doc: url.suffix)
+                return self.outline(doc: url.suffix, as: url.provenance)
 
             case let scheme?:
                 return self.cache.add(outline: .url("\(scheme):\(url.suffix)",
@@ -120,13 +120,14 @@ extension SSGC.Outliner
         }
     }
     private mutating
-    func outline(doc link:Markdown.SourceString) -> Int?
+    func outline(doc link:Markdown.SourceString,
+        as provenance:Markdown.SourceURL.Provenance) -> Int?
     {
         self.cache(link.string)
         {
             if  let doclink:Doclink = .init(doc: link.string[...])
             {
-                return self.resolver.outline(doclink, at: link.source)
+                return self.resolver.outline(doclink, at: link.source, as: provenance)
             }
             else
             {

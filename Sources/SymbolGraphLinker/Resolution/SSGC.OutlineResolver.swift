@@ -157,7 +157,8 @@ extension SSGC.OutlineResolver
 
     mutating
     func outline(_ doclink:Doclink,
-        at source:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
+        at source:SourceReference<Markdown.Source>,
+        as provenance:Markdown.SourceURL.Provenance) -> SymbolGraph.Outline?
     {
         let page:Int32
 
@@ -200,8 +201,14 @@ extension SSGC.OutlineResolver
                 return nil
             }
 
-            self.diagnostics[source] = SSGC.OutlineDiagnostic.suggestReformat(doclink,
-                to: codelink)
+            if  case nil = doclink.fragment,
+                case .autolink = provenance
+            {
+                //  Only emit this diagnostic if the suggested replacement would not lose
+                //  information!
+                self.diagnostics[source] = SSGC.OutlineDiagnostic.suggestReformat(doclink,
+                    to: codelink)
+            }
 
             //  Doclinks can never display more than one path component, so the second component
             //  of the target is never meaningful.

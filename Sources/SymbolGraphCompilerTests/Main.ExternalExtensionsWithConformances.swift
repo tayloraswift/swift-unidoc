@@ -13,6 +13,7 @@ extension Main.ExternalExtensionsWithConformances:CompilerTestBattery
     static
     let inputs:[Symbol.Module] =
     [
+        "ExtendableTypesWithConstraints",
         "ExternalExtensionsWithConformances",
     ]
 

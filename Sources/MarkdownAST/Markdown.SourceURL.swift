@@ -6,13 +6,16 @@ extension Markdown
     struct SourceURL
     {
         public
+        let provenance:Provenance
+        public
         var scheme:String?
         public
         var suffix:SourceString
 
-        @inlinable public
-        init(scheme:String?, suffix:SourceString)
+        @inlinable
+        init(scheme:String?, suffix:SourceString, provenance:Provenance = .attribute)
         {
+            self.provenance = provenance
             self.scheme = scheme
             self.suffix = suffix
         }
@@ -26,9 +29,9 @@ extension Markdown.SourceURL:CustomStringConvertible
 extension Markdown.SourceURL
 {
     @usableFromInline
-    init(from url:Markdown.SourceString)
+    init(url:Markdown.SourceString, provenance:Provenance = .attribute)
     {
-        self.init(scheme: nil, suffix: url)
+        self.init(scheme: nil, suffix: url, provenance: provenance)
 
         //  URL parsing is incredibly tough.
         //
