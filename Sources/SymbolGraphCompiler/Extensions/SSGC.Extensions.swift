@@ -28,7 +28,6 @@ extension SSGC.Extensions
     mutating
     func include(_ vertex:SymbolGraphPart.Vertex,
         extending type:__owned Symbol.Decl,
-        namespace:Symbol.Module,
         culture:Symbol.Module)
     {
         guard
@@ -39,11 +38,10 @@ extension SSGC.Extensions
             fatalError("vertex is not an extension block!")
         }
 
-        let signature:SSGC.ExtensionSignature = .init(
-            extending: .init(namespace: namespace, type: type),
-            where: vertex.extension.conditions)
+        let signature:SSGC.ExtensionSignature = .init(extending: type,
+            where: Set.init(vertex.extension.conditions))
 
-        let extensionObject:SSGC.ExtensionObject = self[signature, path: vertex.path]
+        let extensionObject:SSGC.ExtensionObject = self[signature]
         //  Assume there is a possibility this culture is re-exporting another culture’s
         //  extension block.
         if  let extensionBlock:SSGC.Extension.Block = .init(
@@ -77,20 +75,19 @@ extension SSGC.Extensions
 extension SSGC.Extensions
 {
     subscript(extending extended:SSGC.DeclObject,
-        where conditions:[GenericConstraint<Symbol.Decl>]) -> SSGC.ExtensionObject
+        where conditions:Set<GenericConstraint<Symbol.Decl>>) -> SSGC.ExtensionObject
     {
         mutating get
         {
             let signature:SSGC.ExtensionSignature = .init(
-                extending: .init(namespace: extended.namespace, type: extended.id),
+                extending: extended.id,
                 where: conditions)
-            return self[signature, path: extended.value.path]
+            return self[signature]
         }
     }
 
     private
-    subscript(signature:SSGC.ExtensionSignature,
-        path path:UnqualifiedPath) -> SSGC.ExtensionObject
+    subscript(signature:SSGC.ExtensionSignature) -> SSGC.ExtensionObject
     {
         mutating get
         {
@@ -101,7 +98,7 @@ extension SSGC.Extensions
                 }
                 else
                 {
-                    let object:SSGC.ExtensionObject = .init(signature: signature, path: path)
+                    let object:SSGC.ExtensionObject = .init(signature: signature)
                     $0 = object
                     return object
                 }
@@ -111,11 +108,16 @@ extension SSGC.Extensions
 }
 extension SSGC.Extensions
 {
-    func load(culture:Symbol.Module) -> [SSGC.Extension]
+    func load(culture:Symbol.Module,
+        with declarations:SSGC.Declarations) throws -> [SSGC.Extension]
     {
-        self.groups.values.reduce(into: [])
+        /// Gather extension members attributable to the specified culture, simplifying the
+        /// extension signatures by inspecting the extended declaration. This may coalesce
+        /// multiple extension objects into a single extension layer.
+        let coalesced:[SSGC.Extension.ID: SSGC.ExtensionLayer] = try self.groups.values.reduce(
+            into: [:])
         {
-            var blocks:[(id:Symbol.Block, block:SSGC.Extension.Block)] = $1.blocks.reduce(
+            let blocks:[(id:Symbol.Block, block:SSGC.Extension.Block)] = $1.blocks.reduce(
                 into: [])
             {
                 if  case (let id, (let block, in: culture)) = $1
@@ -124,11 +126,11 @@ extension SSGC.Extensions
                 }
             }
 
-            let conformances:[Symbol.Decl] = $1.conformances.sorted(selecting: culture)
-            let features:[Symbol.Decl] = $1.features.sorted(selecting: culture)
-            let nested:[Symbol.Decl] = $1.nested.sorted(selecting: culture)
+            let conformances:[Symbol.Decl] = $1.conformances.select(culture: culture)
+            let features:[Symbol.Decl] = $1.features.select(culture: culture)
+            let nested:[Symbol.Decl] = $1.nested.select(culture: culture)
 
-            //  Do not emit empty extensions
+            //  Skip empty extensions
             if  conformances.isEmpty,
                 features.isEmpty,
                 nested.isEmpty,
@@ -137,14 +139,56 @@ extension SSGC.Extensions
                 return
             }
 
-            blocks.sort { $0.id.name < $1.id.name }
+            let extendedType:SSGC.DeclObject = try declarations[$1.signature.extendee]
+            let introduced:Set<GenericConstraint<Symbol.Decl>> = $1.signature.conditions.filter
+            {
+                /// Lint tautological `Self:#Self` constraints. These exist in extensions to
+                /// ``RawRepresentable`` in the standard library, and removing them may coalesce
+                /// extension objects.
+                if  case .where("Self", is: .conformer, to: let conformance) = $0,
+                    case extendedType.id? = conformance.nominal
+                {
+                    return false
+                }
+                /// Filter out constraints that are already stated in the base declaration.
+                /// This by itself should not coalesce extension objects.
+                if  extendedType.conditions.contains($0)
+                {
+                    return false
+                }
+                else
+                {
+                    return true
+                }
+            }
 
-            $0.append(.init(signature: $1.signature,
-                path: $1.path,
-                conformances: conformances,
-                features: features,
-                nested: nested,
-                blocks: blocks.map { $0.block }))
+            let extendee:SSGC.Extendee = .init(namespace: extendedType.namespace,
+                path: extendedType.value.path,
+                id: extendedType.id)
+
+            let id:SSGC.Extension.ID = .init(extending: extendee.id,
+                where: introduced.sorted())
+            ;
+            {
+                $0.conformances.formUnion(conformances)
+                $0.features.formUnion(features)
+                $0.nested.formUnion(nested)
+                $0.blocks += blocks
+
+            } (&$0[id, default: .init(extendee: extendee)])
         }
+
+        /// Sort the extension members, and the extensions themselves, for deterministic output.
+        var extensions:[SSGC.Extension] = coalesced.map
+        {
+            .init(conditions: $0.conditions,
+                extendee: $1.extendee,
+                conformances: $1.conformances.sorted(),
+                features: $1.features.sorted(),
+                nested: $1.nested.sorted(),
+                blocks: $1.blocks.sorted { $0.id.name < $1.id.name} .map { $0.block })
+        }
+        extensions.sort { $0.id < $1.id }
+        return extensions
     }
 }

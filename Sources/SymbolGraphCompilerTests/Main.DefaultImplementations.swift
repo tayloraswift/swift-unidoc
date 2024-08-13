@@ -22,7 +22,7 @@ extension Main.DefaultImplementations:CompilerTestBattery
     {
         let features:[Symbol.Decl: [Symbol.Decl]] = module.extensions.reduce(into: [:])
         {
-            $0[$1.signature.extended.type, default: []] += $1.features
+            $0[$1.extendee.id, default: []] += $1.features
         }
 
         if  let tests:TestGroup = tests / "DefaultImplementationInheritance",
@@ -38,7 +38,7 @@ extension Main.DefaultImplementations:CompilerTestBattery
 
         let nested:[Symbol.Decl: [Symbol.Decl]] = module.extensions.reduce(into: [:])
         {
-            $0[$1.signature.extended.type, default: []] += $1.nested
+            $0[$1.extendee.id, default: []] += $1.nested
         }
 
         if  let tests:TestGroup = tests / "DefaultImplementationScopes",

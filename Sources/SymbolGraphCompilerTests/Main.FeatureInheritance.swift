@@ -22,7 +22,7 @@ extension Main.FeatureInheritance:CompilerTestBattery
     {
         let features:[Symbol.Decl: [Symbol.Decl]] = module.extensions.reduce(into: [:])
         {
-            $0[$1.signature.extended.type, default: []] += $1.features
+            $0[$1.extendee.id, default: []] += $1.features
         }
 
         if  let tests:TestGroup = tests / "RandomAccessType",

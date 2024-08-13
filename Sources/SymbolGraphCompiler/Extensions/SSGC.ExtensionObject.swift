@@ -8,8 +8,6 @@ extension SSGC
     class ExtensionObject
     {
         let signature:ExtensionSignature
-        /// The full name of the extended type, not including the module namespace prefix.
-        let path:UnqualifiedPath
 
         /// Protocols the extended type conforms to.
         private(set)
@@ -28,10 +26,9 @@ extension SSGC
         /// blocks that make up this extension.
         var blocks:[Symbol.Block: (Extension.Block, in:Symbol.Module)]
 
-        init(signature:ExtensionSignature, path:UnqualifiedPath)
+        init(signature:ExtensionSignature)
         {
             self.signature = signature
-            self.path = path
 
             self.conformances = [:]
             self.features = [:]
@@ -59,6 +56,6 @@ extension SSGC.ExtensionObject
 }
 extension SSGC.ExtensionObject
 {
-    var conditions:[GenericConstraint<Symbol.Decl>] { self.signature.conditions }
-    var extended:SSGC.ExtendedType { self.signature.extended }
+    var conditions:Set<GenericConstraint<Symbol.Decl>> { self.signature.conditions }
+    var extendee:Symbol.Decl { self.signature.extendee }
 }

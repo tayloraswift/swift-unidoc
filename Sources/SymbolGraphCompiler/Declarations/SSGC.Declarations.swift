@@ -1,3 +1,4 @@
+import Signatures
 import SymbolGraphParts
 import Symbols
 
@@ -55,8 +56,10 @@ extension SSGC.Declarations
                 kinks[is: .open] = true
             }
 
+            /// Note that the universal conditions are not guaranteed to be in any particular
+            /// order, so modeling them as a set loses no information.
             let decl:SSGC.DeclObject = .init(
-                conditions: vertex.extension.conditions,
+                conditions: Set.init(vertex.extension.conditions),
                 namespace: namespace,
                 culture: culture,
                 access: vertex.acl,

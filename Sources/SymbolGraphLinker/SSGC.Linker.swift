@@ -125,7 +125,7 @@ extension SSGC.Linker
         {
             for node:SSGC.Extension in module.extensions
             {
-                self.tables.allocate(decl: node.extended.type)
+                self.tables.allocate(decl: node.extendee.id)
             }
         }
 
@@ -239,13 +239,13 @@ extension SSGC.Linker
     {
         self.contexts[offset].extensions = extensions.map
         {
-            let extendee:Int32 = self.tables.intern($0.extended.type)
+            let extendee:Int32 = self.tables.intern($0.extendee.id)
             if  extendee >= self.tables.graph.decls.nodes.endIndex
             {
-                fatalError("Extendee '\($0.extended.type)' was never allocated!")
+                fatalError("Extendee '\($0.extendee.id)' was never allocated!")
             }
 
-            let namespace:Symbol.Module = $0.signature.extended.namespace
+            let namespace:Symbol.Module = $0.extendee.namespace
             let namespacePosition:Int = self.tables.intern(namespace)
 
             let conformances:[Int32] = $0.conformances.map { self.tables.intern($0) }
@@ -262,12 +262,15 @@ extension SSGC.Linker
                     continue
                 }
 
-                self.tables.packageLinks[namespace, $0.path, feature.lastName].append(.init(
+                let featureAlias:UCF.PackageOverload = .init(
                     phylum: feature.phylum,
                     decl: f,
                     heir: extendee,
-                    hash: .decl(.init(id, self: $0.extended.type)),
-                    id: id))
+                    hash: .decl(.init(id, self: $0.extendee.id)),
+                    id: id)
+
+                self.tables.packageLinks[namespace, $0.extendee.path, feature.lastName]
+                    .append(featureAlias)
             }
 
             let index:Int = self.tables.graph.decls.nodes[extendee].push(.init(
@@ -661,7 +664,7 @@ extension SSGC.Linker
                 markdownParser: self.doccommentParser,
                 snippetsTable: self.snippets,
                 diagnostics: &self.tables.diagnostics),
-            scope: [String].init(`extension`.path),
+            scope: [String].init(`extension`.extendee.path),
             file: file)
 
         let c:Int = self.tables.graph.decls.nodes[i].extensions[j].culture

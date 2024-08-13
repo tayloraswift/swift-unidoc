@@ -93,7 +93,6 @@ extension SSGC.TypeChecker
                     //  as internal, but SymbolGraphGen doesn’t care what we think.
                         self.extensions.include(vertex,
                             extending: try extensions.extendee(of: symbol),
-                            namespace: namespace,
                             culture: id)
 
                     case .scalar(let symbol):
@@ -276,10 +275,10 @@ extension SSGC.TypeChecker
                 //  The member’s extension constraints don’t match the extension
                 //  object’s signature!
                 throw SSGC.ExtensionSignatureError.init(expected: group.signature,
-                    declared: member.conditions)
+                    declared: member.conditions.sorted())
             }
 
-            try member.assign(scope: group.extended.type, by: relationship)
+            try member.assign(scope: group.extendee, by: relationship)
         }
     }
 }
@@ -294,6 +293,8 @@ extension SSGC.TypeChecker
         {
             return
         }
+
+        let conditions:Set<GenericConstraint<Symbol.Decl>> = .init(conformance.conditions)
 
         let typeExtension:SSGC.ExtensionObject
         let typeConformed:SSGC.DeclObject
@@ -338,7 +339,7 @@ extension SSGC.TypeChecker
             }
             //  Generate an implicit, internal extension for this conformance,
             //  if one does not already exist.
-            typeExtension = self.extensions[extending: type, where: conformance.conditions]
+            typeExtension = self.extensions[extending: type, where: conditions]
             typeConformed = type
 
         case .block(let symbol):
@@ -346,7 +347,7 @@ extension SSGC.TypeChecker
             typeExtension = try self.extensions[named: symbol]
 
             guard
-            let type:SSGC.DeclObject = self.declarations[visible: typeExtension.extended.type]
+            let type:SSGC.DeclObject = self.declarations[visible: typeExtension.extendee]
             else
             {
                 return
@@ -354,14 +355,14 @@ extension SSGC.TypeChecker
 
             typeConformed = type
 
-            guard typeExtension.conditions == conformance.conditions
+            guard typeExtension.conditions == conditions
             else
             {
                 throw SSGC.ExtensionSignatureError.init(expected: typeExtension.signature)
             }
         }
 
-        typeConformed.conformances[target.id] = conformance.conditions
+        typeConformed.conformances[target.id, default: []].insert(conditions)
         typeExtension.add(conformance: target.id, by: culture)
     }
 
@@ -453,8 +454,37 @@ extension SSGC.TypeChecker
                     """)
             }
 
+            let conditions:Set<GenericConstraint<Symbol.Decl>>?
+            do
+            {
+                conditions = try heir.conformances[conformance]?.simplify(
+                    with: self.declarations)
+            }
+            catch SSGC.ConstraintReductionError.chimaeric(let reduced, from: let lists)
+            {
+                throw AssertionError.init(message: """
+                    Failed to simplify constraints for conditional conformance \
+                    (\(conformance)) of '\(heir.value.path)' because multiple conflicting \
+                    conformances unify to a heterogeneous set of constraints
+
+                    Declared constraints: \(lists)
+                    Simplified constraints: \(reduced)
+                    """)
+            }
+            catch SSGC.ConstraintReductionError.redundant(let reduced, from: let lists)
+            {
+                throw AssertionError.init(message: """
+                    Failed to simplify constraints for conditional conformance \
+                    (\(conformance)) of '\(heir.value.path)' because at least one of the \
+                    constraint lists had redundancies within itself
+
+                    Declared constraints: \(lists)
+                    Simplified constraints: \(reduced)
+                    """)
+            }
+
             guard
-            let conditions:[GenericConstraint<Symbol.Decl>] = heir.conformances[conformance]
+            let conditions:Set<GenericConstraint<Symbol.Decl>>
             else
             {
                 throw AssertionError.init(message: """
@@ -472,7 +502,7 @@ extension SSGC.TypeChecker
             //  Look up the extension associated with this block name.
             let group:SSGC.ExtensionObject = try self.extensions[named: block]
 
-            if  let extendee:SSGC.DeclObject = self.declarations[visible: group.extended.type]
+            if  let extendee:SSGC.DeclObject = self.declarations[visible: group.extendee]
             {
                 heir = extendee
             }
@@ -481,15 +511,15 @@ extension SSGC.TypeChecker
                 return
             }
 
-            if  group.extended.type == relationship.source.heir
+            if  group.extendee == relationship.source.heir
             {
                 group.add(feature: feature.id, by: culture)
             }
             else
             {
                 throw AssertionError.init(message: """
-                    Found feature '\(feature.value.path)' on type '\(group.path)' \
-                    (\(group.extended.type)) from extension (\(block)) but the feature itself \
+                    Found feature '\(feature.value.path)' on type '\(heir.value.path)' \
+                    (\(heir.id)) from extension (\(block)) but the feature itself \
                     may only be inherited by a type with mangled name matching \
                     \(relationship.source.heir)
                     """)
@@ -505,7 +535,8 @@ extension SSGC.TypeChecker
     public __consuming
     func load(in culture:Symbol.Module) throws -> SSGC.ModuleIndex
     {
-        let extensions:[SSGC.Extension] = self.extensions.load(culture: culture)
+        let extensions:[SSGC.Extension] = try self.extensions.load(culture: culture,
+            with: self.declarations)
 
         let features:[Symbol.Decl: SSGC.ModuleIndex.Feature] = try extensions.reduce(into: [:])
         {
