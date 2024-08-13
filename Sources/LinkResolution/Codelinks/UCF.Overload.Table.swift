@@ -8,7 +8,7 @@ extension UCF.Overload
     @frozen public
     struct Table
     {
-        @usableFromInline internal
+        @usableFromInline
         var entries:[UCF.ResolutionPath: Group]
 
         @inlinable public

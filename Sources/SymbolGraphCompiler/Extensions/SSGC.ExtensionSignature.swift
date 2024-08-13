@@ -3,41 +3,19 @@ import Symbols
 
 extension SSGC
 {
-    @frozen public
     struct ExtensionSignature:Equatable, Hashable, Sendable
     {
         /// The generic constraints of the relevant extension group.
-        /// An empty array represents an unconstrained extension.
-        public
-        let conditions:[GenericConstraint<Symbol.Decl>]
+        /// An empty set represents an unconstrained extension.
+        let conditions:Set<GenericConstraint<Symbol.Decl>>
         /// The type extended by the relevant extension group.
-        public
-        let extended:ExtendedType
+        let extendee:Symbol.Decl
 
-        public
-        init(extending extended:ExtendedType, where conditions:[GenericConstraint<Symbol.Decl>])
+        init(extending extendee:Symbol.Decl,
+            where conditions:Set<GenericConstraint<Symbol.Decl>>)
         {
             self.conditions = conditions
-            self.extended = extended
-        }
-    }
-}
-extension SSGC.ExtensionSignature:Comparable
-{
-    public static
-    func < (a:Self, b:Self) -> Bool
-    {
-        if      a.extended < b.extended
-        {
-            true
-        }
-        else if a.extended > b.extended
-        {
-            false
-        }
-        else
-        {
-            a.conditions.lexicographicallyPrecedes(b.conditions)
+            self.extendee = extendee
         }
     }
 }

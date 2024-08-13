@@ -18,11 +18,11 @@ extension Main.FeatureInheritance:CompilerTestBattery
     ]
 
     static
-    func run(tests:TestGroup, declarations:SSGC.Declarations, extensions:SSGC.Extensions)
+    func run(tests:TestGroup, module:SSGC.ModuleIndex)
     {
-        let features:[Symbol.Decl: [Symbol.Decl]] = extensions.compiled.reduce(into: [:])
+        let features:[Symbol.Decl: [Symbol.Decl]] = module.extensions.reduce(into: [:])
         {
-            $0[$1.signature.extended.type, default: []] += $1.features
+            $0[$1.extendee.id, default: []] += $1.features
         }
 
         if  let tests:TestGroup = tests / "RandomAccessType",

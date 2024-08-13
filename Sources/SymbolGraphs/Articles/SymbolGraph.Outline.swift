@@ -18,12 +18,14 @@ extension SymbolGraph
 }
 extension SymbolGraph.Outline
 {
+    @available(*, unavailable, message: "Obsoleted in 0.10.0.")
     @inlinable public static
     func unresolved(doc link:String, location:SourceLocation<Int32>?) -> Self
     {
         .unresolved(.init(link: link, type: .doc, location: location))
     }
 
+    @available(*, unavailable, message: "Obsoleted in 0.10.0.")
     @inlinable public static
     func unresolved(ucf link:String, location:SourceLocation<Int32>?) -> Self
     {

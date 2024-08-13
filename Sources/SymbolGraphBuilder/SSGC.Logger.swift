@@ -4,21 +4,29 @@ import System
 extension SSGC
 {
     @frozen public
-    struct DocumentationLogger
+    struct Logger
     {
+        let ignoreErrors:Bool
         let file:FileDescriptor?
 
         public
-        init(file:FileDescriptor?)
+        init(ignoreErrors:Bool = false, file:FileDescriptor?)
         {
+            self.ignoreErrors = ignoreErrors
             self.file = file
         }
     }
 }
-extension SSGC.DocumentationLogger
+extension SSGC.Logger:DiagnosticLogger
 {
+    public
     func emit(messages:consuming DiagnosticMessages) throws
     {
+        if  self.ignoreErrors
+        {
+            messages.demoteErrors(to: .warning)
+        }
+
         guard
         let file:FileDescriptor = self.file
         else

@@ -12,12 +12,22 @@ extension SSGC
     final
     class DeclObject
     {
-        let conditions:[GenericConstraint<Symbol.Decl>]
+        let conditions:Set<GenericConstraint<Symbol.Decl>>
         let namespace:Symbol.Module
         let culture:Symbol.Module
         let access:Symbol.ACL
 
-        var conformances:[Symbol.Decl: [GenericConstraint<Symbol.Decl>]]
+        /// The outer set is populated by redundant implicit conformances produced by
+        /// lib/SymbolGraphGen.
+        ///
+        /// ```
+        /// Foo<T>:Equatable where T:Equatable
+        /// Foo<T>:Equatable where T:Hashable
+        /// ```
+        ///
+        /// In the example above, the second conformance likely originated from a
+        /// `Foo<T>:Hashable where T:Hashable` conformance.
+        var conformances:[Symbol.Decl: Set<Set<GenericConstraint<Symbol.Decl>>>]
 
         /// The type of the superforms tracked by ``\.value.superforms``.
         var superforms:(any SuperformRelationship.Type)?
@@ -33,7 +43,7 @@ extension SSGC
         private(set)
         var value:Decl
 
-        init(conditions:[GenericConstraint<Symbol.Decl>],
+        init(conditions:Set<GenericConstraint<Symbol.Decl>>,
             namespace:Symbol.Module,
             culture:Symbol.Module,
             access:Symbol.ACL,

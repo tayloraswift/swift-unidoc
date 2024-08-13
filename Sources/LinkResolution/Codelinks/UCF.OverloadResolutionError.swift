@@ -25,33 +25,41 @@ extension UCF
 }
 extension UCF.OverloadResolutionError:Diagnostic
 {
-    @inlinable public static
-    func += (output:inout DiagnosticOutput<Symbolicator>, self:Self)
+    @inlinable public
+    func emit(summary:inout DiagnosticOutput<Symbolicator>)
     {
         if  self.overloads.isEmpty
         {
-            output[.warning] += """
+            summary[.warning] += """
             selector '\(self.selector)' does not refer to any known declarations
             """
         }
         else
         {
-            output[.warning] += """
+            summary[.warning] += """
             selector '\(self.selector)' is ambiguous
             """
         }
     }
 
     @inlinable public
-    var notes:[Note]
+    func emit(details:inout DiagnosticOutput<Symbolicator>)
     {
-        self.overloads.map
+        for overload:UCF.Overload<Symbolicator.Address> in self.overloads
         {
-            .init(suggested: .init(
-                    base: self.selector.base,
-                    path: self.selector.path,
-                    suffix: .hash($0.hash)),
-                target: $0.target)
+            let suggested:UCF.Selector = .init(
+                base: self.selector.base,
+                path: self.selector.path,
+                suffix: .hash(overload.hash))
+
+            switch overload.target
+            {
+            case    .scalar(let scalar),
+                    .vector(let scalar, self: _):
+                details[.note] = """
+                did you mean '\(suggested)'? (\(details.symbolicator[scalar]))
+                """
+            }
         }
     }
 }

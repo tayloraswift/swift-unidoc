@@ -27,25 +27,25 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
-            tables.codelinks["ThisModule", .init(["A"], "b")].overload(
-                with: .init(target: .scalar(0),
-                    phylum: .func(.instance),
-                    hash: .init(hashing: "x")))
+            tables.packageLinks["ThisModule", .init(["A"], "b")].append(.init(
+                phylum: .func(.instance),
+                decl: 0,
+                heir: nil,
+                hash: .init(hashing: "x"),
+                id: "x"))
 
-            tables.codelinks["ThisModule", .init(["A"], "c")].overload(
-                with: .init(target: .scalar(1),
-                    phylum: .func(.instance),
-                    hash: .init(hashing: "y")))
+            tables.packageLinks["ThisModule", .init(["A"], "c")].append(.init(
+                phylum: .func(.instance),
+                decl: 1,
+                heir: nil,
+                hash: .init(hashing: "y"),
+                id: "y"))
 
             if  let tests:TestGroup = tests / "Unscoped"
             {
-                tables.resolving(with: .init(
+                tables.resolving(with: .init(origin: nil,
                     namespace: nil,
-                    culture: .init(
-                        resources: [:],
-                        imports: [],
-                        id: "ThisModule"),
-                    origin: nil,
+                    context: .init(id: "ThisModule"),
                     scope: []))
                 {
                     tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
@@ -62,13 +62,9 @@ extension Main.LinkResolution:TestBattery
             }
             if  let tests:TestGroup = tests / "Scoped"
             {
-                tables.resolving(with: .init(
+                tables.resolving(with: .init(origin: nil,
                     namespace: nil,
-                    culture: .init(
-                        resources: [:],
-                        imports: [],
-                        id: "ThisModule"),
-                    origin: nil,
+                    context: .init(id: "ThisModule"),
                     scope: ["A"]))
                 {
                     tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
@@ -91,25 +87,26 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
-            tables.codelinks["OtherModule", .init(["A"], "b")].overload(
-                with: .init(target: .scalar(0),
-                    phylum: .func(.instance),
-                    hash: .init(hashing: "x")))
+            tables.packageLinks["OtherModule", .init(["A"], "b")].append(.init(
+                phylum: .func(.instance),
+                decl: 0,
+                heir: nil,
+                hash: .init(hashing: "x"),
+                id: "x"))
 
-            tables.codelinks["OtherModule", .init(["A"], "c")].overload(
-                with: .init(target: .scalar(1),
-                    phylum: .func(.instance),
-                    hash: .init(hashing: "y")))
+            tables.packageLinks["OtherModule", .init(["A"], "c")].append(.init(
+                phylum: .func(.instance),
+                decl: 1,
+                heir: nil,
+                hash: .init(hashing: "y"),
+                id: "y"))
 
             if  let tests:TestGroup = tests / "Unscoped"
             {
-                tables.resolving(with: .init(
+                tables.packageLinks.modules = ["OtherModule", "ThisModule"]
+                tables.resolving(with: .init(origin: nil,
                     namespace: nil,
-                    culture: .init(
-                        resources: [:],
-                        imports: ["OtherModule"],
-                        id: "ThisModule"),
-                    origin: nil,
+                    context: .init(id: "ThisModule"),
                     scope: []))
                 {
                     tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
@@ -124,22 +121,16 @@ extension Main.LinkResolution:TestBattery
 
             if  let tests:TestGroup = tests / "Invisible"
             {
-                tables.resolving(with: .init(
+                tables.packageLinks.modules = []
+                tables.resolving(with: .init(origin: nil,
                     namespace: nil,
-                    culture: .init(
-                        resources: [:],
-                        imports: [],
-                        id: "ThisModule"),
-                    origin: nil,
+                    context: .init(id: "ThisModule"),
                     scope: []))
                 {
-                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.b"))))
-                    tests.expect(value: $0.outline(reference: .lexical(ucf: _string("A.c"))))
+                    tests.expect(nil: $0.outline(reference: .lexical(ucf: _string("A.b"))))
+                    tests.expect(nil: $0.outline(reference: .lexical(ucf: _string("A.c"))))
 
-                    tests.expect($0.outlines() ..? [
-                        .unresolved(ucf: "A.b", location: nil),
-                        .unresolved(ucf: "A.c", location: nil)
-                    ])
+                    tests.expect($0.outlines() ..? [])
                 }
             }
         }
@@ -148,17 +139,13 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
-            tables.doclinks[.documentation("ThisModule"), "GettingStarted"] = 0
-            tables.doclinks[.tutorials("ThisModule"), "GettingStarted"] = 1
-            tables.doclinks[.tutorials("ThisModule"), "OtherTutorial"] = 2
+            tables.articleLinks[.documentation("ThisModule"), "GettingStarted"] = 0
+            tables.articleLinks[.tutorials("ThisModule"), "GettingStarted"] = 1
+            tables.articleLinks[.tutorials("ThisModule"), "OtherTutorial"] = 2
 
-            tables.resolving(with: .init(
+            tables.resolving(with: .init(origin: nil,
                 namespace: nil,
-                culture: .init(
-                    resources: [:],
-                    imports: [],
-                    id: "ThisModule"),
-                origin: nil,
+                context: .init(id: "ThisModule"),
                 scope: []))
             {
 
@@ -184,17 +171,13 @@ extension Main.LinkResolution:TestBattery
         {
             var tables:SSGC.Linker.Tables = .init()
 
-            tables.doclinks[.documentation("OtherModule"), "GettingStarted"] = 0
-            tables.doclinks[.tutorials("OtherModule"), "GettingStarted"] = 1
-            tables.doclinks[.tutorials("OtherModule"), "OtherTutorial"] = 2
+            tables.articleLinks[.documentation("OtherModule"), "GettingStarted"] = 0
+            tables.articleLinks[.tutorials("OtherModule"), "GettingStarted"] = 1
+            tables.articleLinks[.tutorials("OtherModule"), "OtherTutorial"] = 2
 
-            tables.resolving(with: .init(
+            tables.resolving(with: .init(origin: nil,
                 namespace: nil,
-                culture: .init(
-                    resources: [:],
-                    imports: ["OtherModule"],
-                    id: "ThisModule"),
-                origin: nil,
+                context: .init(id: "ThisModule"),
                 scope: []))
             {
 

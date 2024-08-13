@@ -23,21 +23,30 @@ extension SSGC.AnchorResolutionError:Diagnostic
 {
     typealias Symbolicator = SSGC.Symbolicator
 
-    static
-    func += (output:inout DiagnosticOutput<Symbolicator>, self:Self)
+    func emit(summary output:inout DiagnosticOutput<Symbolicator>)
     {
         if  let scope:Int32 = self.scope
         {
-            output[.warning] += """
-            Link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
+            output[.error] += """
+            link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
             its target page (\(output.symbolicator[scope]))
             """
         }
         else
         {
-            output[.warning] += """
-            Link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
+            output[.error] += """
+            link fragment '\(self.fragment)' (\(self.id)) does not match any linkable anchor on
             its target page (unknown extension)
+            """
+        }
+    }
+
+    func emit(details output:inout DiagnosticOutput<Symbolicator>)
+    {
+        for note:Note in self.notes
+        {
+            output[.note] = """
+            available choice '\(note.fragment)' (\(note.id))
             """
         }
     }

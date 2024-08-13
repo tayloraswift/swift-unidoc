@@ -9,7 +9,7 @@ extension SSGC
 {
     /// A scalar is the smallest “unit” a symbol can be broken down into.
     @frozen public
-    struct Decl:Identifiable, Sendable
+    struct Decl:Identifiable, Equatable, Sendable
     {
         public
         let id:Symbol.Decl

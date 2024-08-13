@@ -2,7 +2,7 @@
 struct DiagnosticMessages
 {
     private
-    let fragments:[DiagnosticFragment]
+    var fragments:[DiagnosticFragment]
 
     init(fragments:[DiagnosticFragment])
     {
@@ -21,6 +21,20 @@ extension DiagnosticMessages:CustomStringConvertible
 }
 extension DiagnosticMessages
 {
+    public mutating
+    func demoteErrors(to level:DiagnosticPrefix)
+    {
+        for i:Int in self.fragments.indices
+        {
+            {
+                if  case .message(.error, let message) = $0
+                {
+                    $0 = .message(level, message)
+                }
+            } (&self.fragments[i])
+        }
+    }
+
     public
     func emit(colors:TerminalColors)
     {

@@ -228,9 +228,10 @@ let package:Package = .init(
 
         .target(name: "LinkResolution",
             dependencies: [
-                .target(name: "UCF"),
+                .target(name: "InlineArray"),
                 .target(name: "SourceDiagnostics"),
                 .target(name: "Symbols"),
+                .target(name: "UCF"),
                 //  This dependency is present for (questionable?) performance reasons.
                 .target(name: "Unidoc"),
             ]),
@@ -373,13 +374,13 @@ let package:Package = .init(
 
         .target(name: "SymbolGraphCompiler",
             dependencies: [
+                .target(name: "LinkResolution"),
                 .target(name: "SymbolGraphParts"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
 
         .target(name: "SymbolGraphLinker",
             dependencies: [
-                .target(name: "LinkResolution"),
                 .target(name: "InlineArray"),
                 .target(name: "InlineDictionary"),
                 .target(name: "MarkdownParsing"),

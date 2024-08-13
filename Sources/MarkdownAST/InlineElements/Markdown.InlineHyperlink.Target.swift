@@ -49,7 +49,7 @@ extension Markdown.InlineHyperlink.Target
             self = .url(.init(scheme: nil, suffix: trimmed))
 
         default:
-            self = .url(.init(from: .init(source: source, string: target)))
+            self = .url(.init(url: .init(source: source, string: target)))
         }
     }
 }

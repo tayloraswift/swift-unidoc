@@ -1,6 +1,7 @@
 import LinkResolution
 import MarkdownSemantics
 import SourceDiagnostics
+import SymbolGraphCompiler
 import SymbolGraphs
 import Symbols
 import UCF
@@ -13,9 +14,9 @@ extension SSGC.Linker
         var diagnostics:Diagnostics<SSGC.Symbolicator>
 
         @_spi(testable) public
-        var codelinks:UCF.Overload<Int32>.Table
+        var packageLinks:UCF.ResolutionTable<UCF.PackageOverload>
         @_spi(testable) public
-        var doclinks:DoclinkResolver.Table
+        var articleLinks:UCF.ArticleTable
 
         private(set)
         var anchors:SSGC.AnchorResolver
@@ -34,14 +35,14 @@ extension SSGC.Linker
 
         @_spi(testable) public
         init(diagnostics:Diagnostics<SSGC.Symbolicator> = .init(),
-            codelinks:UCF.Overload<Int32>.Table = .init(),
-            doclinks:DoclinkResolver.Table = .init(),
+            packageLinks:UCF.ResolutionTable<UCF.PackageOverload> = .init(),
+            articleLinks:UCF.ArticleTable = .init(),
             anchors:SSGC.AnchorResolver = .init(),
             modules:[SymbolGraph.Module] = [])
         {
             self.diagnostics = diagnostics
-            self.codelinks = codelinks
-            self.doclinks = doclinks
+            self.packageLinks = packageLinks
+            self.articleLinks = articleLinks
             self.anchors = anchors
 
             self.modules = [:]
@@ -199,8 +200,65 @@ extension SSGC.Linker.Tables
 
 extension SSGC.Linker.Tables
 {
+    func resolve(binding:Markdown.InlineAutolink, in namespace:Symbol.Module) throws -> Int32?
+    {
+        //  Special rule for article bindings: if the text of the codelink matches
+        //  the current namespace, then the article is the primary article for
+        //  that module.
+        if  binding.text.string == "\(namespace)"
+        {
+            return nil
+        }
+
+        guard
+        let selector:UCF.Selector = .init(binding.text.string)
+        else
+        {
+            throw SSGC.AutolinkParsingError.init(binding.text)
+        }
+
+        //  A qualified codelink with a single component that matches the current
+        //  namespace is also a way to mark the primary article for that module.
+        if  case .qualified = selector.base,
+            selector.path.components.count == 1,
+            selector.path.components[0] == "\(namespace)"
+        {
+            return nil
+        }
+
+        let resolver:UCF.ProjectWideResolver = .init(scope: .init(
+                namespace: namespace,
+                imports: []),
+            global: self.packageLinks)
+
+        switch resolver.resolve(selector)
+        {
+        case .module(let module):
+            throw SSGC.SupplementBindingError.init(selector: selector,
+                variant: .moduleNotAllowed(module, expected: namespace))
+
+        case .ambiguous(let overloads, rejected: let rejected):
+            throw SSGC.SupplementBindingError.init(selector: selector,
+                variant: .ambiguousBinding(overloads, rejected: rejected))
+
+        case .overload(let overload):
+            guard case let overload as UCF.PackageOverload = overload
+            else
+            {
+                fatalError("umimplemented: supplement binding not within current package!!!")
+            }
+            if  let heir:Int32 = overload.heir
+            {
+                throw SSGC.SupplementBindingError.init(selector: selector,
+                    variant: .vectorNotAllowed(overload.decl, self: heir))
+            }
+
+            return overload.decl
+        }
+    }
+
     mutating
-    func index(article:Markdown.SemanticDocument, id scope:Int32?)
+    func index(normalizing article:Markdown.SemanticDocument, id scope:Int32?)
     {
         let anchors:SSGC.AnchorTable = self.anchors.index(
             article: article.details,
@@ -317,15 +375,11 @@ extension SSGC.Linker.Tables
 extension SSGC.Linker.Tables
 {
     @_spi(testable) public mutating
-    func resolving<Success>(with scopes:SSGC.OutlineResolutionScopes,
+    func resolving<Success>(with environment:SSGC.OutlineResolverEnvironment,
         do body:(inout SSGC.Outliner) throws -> Success) rethrows -> Success
     {
-        var outliner:SSGC.Outliner = .init(resources: scopes.resources,
-            resolver: .init(
-                codelinks: .init(table: self.codelinks, scope: scopes.codelink),
-                doclinks: .init(table: self.doclinks, scope: scopes.doclink),
-                origin: scopes.origin,
-                tables: consume self))
+        var outliner:SSGC.Outliner = .init(
+            resolver: .init(scopes: environment, tables: consume self))
         do
         {
             let success:Success = try body(&outliner)
@@ -340,10 +394,13 @@ extension SSGC.Linker.Tables
     }
 
     mutating
-    func link(article:SSGC.Article, of culture:SSGC.Linker.Culture, at c:Int)
+    func link(article:SSGC.Article, in context:SSGC.Linker.Context, at c:Int)
     {
+        let environment:SSGC.OutlineResolverEnvironment = .init(origin: article.id(in: c),
+            context: context)
+
         let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(
-            with: .init(culture: culture, origin: article.id(in: c)))
+            with: environment)
         {
             $0.link(body: article.body, file: article.file)
         }
@@ -366,9 +423,9 @@ extension SSGC.Linker.Tables
 
     mutating
     func link(article:SSGC.ArticleCollation?,
-        of culture:SSGC.Linker.Culture,
+        in context:SSGC.Linker.Context,
         as id:Int32,
-        in namespace:Symbol.Module)
+        under namespace:Symbol.Module)
     {
         let linked:SymbolGraph.Article?
         let topics:[[Int32]]
@@ -386,10 +443,9 @@ extension SSGC.Linker.Tables
                 return // Nothing to do.
             }
 
-            ((linked, topics), rename) = self.resolving(with: .init(
+            ((linked, topics), rename) = self.resolving(with: .init(origin: id,
                 namespace: namespace,
-                culture: culture,
-                origin: id,
+                context: context,
                 scope: article?.scope ?? decl.phylum.scope(trimming: decl.path)))
             {
                 (outliner:inout SSGC.Outliner) in
@@ -421,19 +477,16 @@ extension SSGC.Linker.Tables
     mutating
     func link(article:SSGC.ArticleCollation,
         extension e:(i:Int32, j:Int),
-        resources:[[String: SSGC.Resource]],
-        imports:[Symbol.Module])
+        contexts:[SSGC.Linker.Context])
     {
         let `extension`:SymbolGraph.Extension = self.graph.decls.nodes[e.i].extensions[e.j]
-        let scopes:SSGC.OutlineResolutionScopes = .init(
+        let environment:SSGC.OutlineResolverEnvironment = .init(origin: nil,
             namespace: self.graph.namespaces[`extension`.namespace],
-            culture: .init(resources: resources[`extension`.culture],
-                imports: imports,
-                id: self.graph.namespaces[`extension`.culture]),
-            origin: nil,
+            context: contexts[`extension`.culture],
             scope: article.scope)
 
-        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(with: scopes)
+        let (linked, topics):(SymbolGraph.Article, [[Int32]]) = self.resolving(
+            with: environment)
         {
             $0.link(body: article.combined, file: article.file)
         }

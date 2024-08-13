@@ -1,4 +1,3 @@
-import SourceDiagnostics
 import UCF
 
 extension SSGC.AnchorResolutionError
@@ -13,17 +12,5 @@ extension SSGC.AnchorResolutionError
             self.id = id
             self.fragment = fragment
         }
-    }
-}
-extension SSGC.AnchorResolutionError.Note:DiagnosticNote
-{
-    typealias Symbolicator = SSGC.Symbolicator
-
-    static
-    func += (output:inout DiagnosticOutput<Symbolicator>, self:Self)
-    {
-        output[.note] = """
-        available choice '\(self.fragment)' (\(self.id))
-        """
     }
 }
