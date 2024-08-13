@@ -21,8 +21,15 @@ extension CompilerTestBattery
     {
         let symbols:SSGC.SymbolDumps = try .collect(from: "TestModules/SymbolGraphs")
 
-        let modules:[SSGC.ModuleIndex]? = (tests ! "Compilation").do
+        let module:SSGC.ModuleIndex? = (tests ! "Compilation").do
         {
+            guard
+            let subject:Symbol.Module = Self.inputs.last
+            else
+            {
+                fatalError("No subject module!")
+            }
+
             let base:Symbol.FileBase = "/swift/swift-unidoc/TestModules"
 
             var symbolCache:SSGC.SymbolCache = .init(symbols: symbols)
@@ -42,47 +49,40 @@ extension CompilerTestBattery
                 try typeChecker.add(symbols: symbols)
             }
 
-            return try Self.inputs.compactMap
+            for module:Symbol.Module in Self.inputs
             {
                 if  let symbols:SSGC.SymbolCulture = tests.expect(value: try symbolCache.load(
-                        module: $0,
+                        module: module,
                         base: base,
                         as: .swift))
                 {
                     try typeChecker.add(symbols: symbols)
                 }
-                else
-                {
-                    return nil
-                }
-
-                return try typeChecker.load(in: $0)
             }
+
+            return try typeChecker.load(in: subject)
         }
 
         guard
-        let modules:[SSGC.ModuleIndex]
+        let module:SSGC.ModuleIndex
         else
         {
             return
         }
 
-        for module:SSGC.ModuleIndex in modules
+        Self.run(tests: tests, module: module)
+
+        if  let tests:TestGroup = tests / "SourceLocations"
         {
-            Self.run(tests: tests, module: module)
 
-            if  let tests:TestGroup = tests / "SourceLocations"
+            for (_, decls):(_, [SSGC.Decl]) in module.declarations
             {
-
-                for (_, decls):(_, [SSGC.Decl]) in module.declarations
+                for decl:SSGC.Decl in decls
                 {
-                    for decl:SSGC.Decl in decls
+                    if  let location:SourceLocation<Symbol.File> = tests.expect(
+                            value: decl.location)
                     {
-                        if  let location:SourceLocation<Symbol.File> = tests.expect(
-                                value: decl.location)
-                        {
-                            tests.expect(true: location.file.path.starts(with: "Snippets/"))
-                        }
+                        tests.expect(true: location.file.path.starts(with: "Snippets/"))
                     }
                 }
             }
