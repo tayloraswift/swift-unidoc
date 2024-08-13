@@ -5,7 +5,7 @@ import Symbols
 extension SSGC
 {
     @frozen public
-    struct Extension
+    struct Extension:Equatable
     {
         public
         let conditions:[GenericConstraint<Symbol.Decl>]

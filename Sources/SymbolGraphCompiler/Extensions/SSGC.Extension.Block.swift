@@ -5,7 +5,7 @@ import Symbols
 extension SSGC.Extension
 {
     @frozen public
-    struct Block
+    struct Block:Equatable
     {
         public
         let location:SourceLocation<Symbol.File>?

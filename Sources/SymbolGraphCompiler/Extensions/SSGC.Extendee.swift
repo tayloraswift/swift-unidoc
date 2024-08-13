@@ -4,7 +4,7 @@ import Symbols
 extension SSGC
 {
     @frozen public
-    struct Extendee
+    struct Extendee:Equatable
     {
         /// The module namespace of the extended type. This is not necessarily the culture of
         /// the extended type, if the extended type itself is nested in a type in another
