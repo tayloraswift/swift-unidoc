@@ -98,6 +98,14 @@ extension UCF.ResolutionTable
 }
 extension UCF.ResolutionTable
 {
+    public
+    func resolve(qualified path:UCF.Selector.Path,
+        matching suffix:UCF.Selector.Suffix?) -> UCF.Resolution<Overload>
+    {
+        var search:Search = .init(matching: suffix)
+        return self.resolve(qualified: path, with: &search)
+    }
+
     func resolve(_ selector:UCF.Selector,
         in scope:UCF.ResolutionScope) -> UCF.Resolution<Overload>
     {
@@ -138,17 +146,24 @@ extension UCF.ResolutionTable
             }
         }
 
+        return self.resolve(qualified: selector.path, with: &search)
+    }
+
+    private
+    func resolve(qualified path:UCF.Selector.Path,
+        with search:inout Search) -> UCF.Resolution<Overload>
+    {
         //  If we got this far, assume the first path component is a module name.
-        if  selector.path.components.count == 1
+        if  path.components.count == 1
         {
-            let path:UCF.ResolutionPath = .init(string: selector.path.components[0])
+            let path:UCF.ResolutionPath = .init(string: path.components[0])
             if  let module:Symbol.Module = self.modules[path]
             {
                 return .module(module)
             }
         }
 
-        let path:UCF.ResolutionPath = .join(selector.path.components)
+        let path:UCF.ResolutionPath = .join(path.components)
         if  let list:InlineArray<Overload> = self.entries[path]
         {
             search.add(list)

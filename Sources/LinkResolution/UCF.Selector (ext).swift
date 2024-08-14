@@ -17,33 +17,25 @@ extension UCF.Selector
             if  let c:Int = path.firstIndex(of: "documentation")
             {
                 let d:Int = path.index(after: c)
-                let suffix:Suffix?
-
                 if  let last:Int = path.indices.last
                 {
-                    suffix =
                     {
                         if  let hyphen:String.Index = $0.firstIndex(of: "-"),
-                            let hash:FNV24 = .init($0[..<hyphen], radix: 10)
+                            let _:Int = .init($0[..<hyphen], radix: 10)
                         {
+                            //  These numeric prefixes are not FNV-1 hashes, they seem to be
+                            //  ordinal numbers generated opaquely by Apple. We can strip them
+                            //  in the hopes that the bare path is resolvable, but we can’t use
+                            //  them to help disambiguate anything.
                             $0 = $0[$0.index(after: hyphen)...]
-                            return .hash(hash)
-                        }
-                        else
-                        {
-                            return nil
                         }
                     } (&path[last])
-                }
-                else
-                {
-                    suffix = nil
                 }
 
                 return .init(
                     base: .qualified,
                     path: .init(components: path[d...].map { $0.lowercased() }),
-                    suffix: suffix)
+                    suffix: nil)
             }
             else
             {
