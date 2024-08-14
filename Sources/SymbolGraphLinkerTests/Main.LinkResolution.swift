@@ -103,7 +103,10 @@ extension Main.LinkResolution:TestBattery
 
             if  let tests:TestGroup = tests / "Unscoped"
             {
-                tables.packageLinks.modules = ["OtherModule", "ThisModule"]
+                var tables:SSGC.Linker.Tables = tables
+                tables.packageLinks.register("OtherModule")
+                tables.packageLinks.register("ThisModule")
+
                 tables.resolving(with: .init(origin: nil,
                     namespace: nil,
                     context: .init(id: "ThisModule"),
@@ -121,7 +124,6 @@ extension Main.LinkResolution:TestBattery
 
             if  let tests:TestGroup = tests / "Invisible"
             {
-                tables.packageLinks.modules = []
                 tables.resolving(with: .init(origin: nil,
                     namespace: nil,
                     context: .init(id: "ThisModule"),

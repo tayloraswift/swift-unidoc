@@ -9,7 +9,10 @@ extension SSGC.Linker
     struct Context
     {
         let id:Symbol.Module
+
         var causalLinks:UCF.ResolutionTable<UCF.CausalOverload>
+        /// This is needed to support URL translation from other package indexes.
+        var causalURLs:UCF.ResolutionTable<UCF.CausalOverload>
 
         var extensions:[(value:SSGC.Extension, i:Int32, j:Int)]
         var decls:[(value:SSGC.Decl, i:Int32, n:Symbol.Module)]
@@ -20,13 +23,16 @@ extension SSGC.Linker
         @_spi(testable) public
         init(id:Symbol.Module,
             causalLinks:UCF.ResolutionTable<UCF.CausalOverload> = [:],
+            causalURLs:UCF.ResolutionTable<UCF.CausalOverload> = [:],
             extensions:[(value:SSGC.Extension, i:Int32, j:Int)] = [],
             decls:[(value:SSGC.Decl, i:Int32, n:Symbol.Module)] = [],
             resources:[String: SSGC.Resource] = [:],
             articles:[SSGC.Article] = [])
         {
             self.id = id
+
             self.causalLinks = causalLinks
+            self.causalURLs = causalURLs
 
             self.extensions = extensions
             self.decls = decls

@@ -19,6 +19,10 @@ extension UCF
 }
 extension UCF.ResolutionPath
 {
+    func lowercased() -> Self { .init(string: self.string.lowercased()) }
+}
+extension UCF.ResolutionPath
+{
     @inlinable
     init(_ namespace:Symbol.Module)
     {

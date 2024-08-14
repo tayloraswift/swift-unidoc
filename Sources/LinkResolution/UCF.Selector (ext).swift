@@ -1,9 +1,10 @@
 import FNV1
-import SymbolGraphs
 import UCF
 
+//  TODO: this does not belong in this module
 extension UCF.Selector
 {
+    public
     static func translate(domain:Substring, path:Substring) -> Self?
     {
         //  Does this look like a link to Swift documentation? If so, we probably already have a
