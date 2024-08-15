@@ -104,7 +104,7 @@ extension LinkResolution.TestCase
                     continue
                 }
 
-                internalLinks[full, default: []].append("")
+                internalLinks[full, default: []].append("__attribute")
 
             case .path(let display, let scalars):
                 guard
