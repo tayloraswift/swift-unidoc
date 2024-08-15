@@ -155,19 +155,19 @@ extension SymbolGraphPart.Vertex:JSONObjectDecodable
     public
     enum CodingKey:String, Sendable
     {
-        case acl = "accessLevel"
+        case accessLevel
         case availability
 
-        case declaration = "declarationFragments"
-        case doccomment = "docComment"
+        case declarationFragments
+        case docComment
 
-        case `extension` = "swiftExtension"
-        case generics = "swiftGenerics"
+        case swiftExtension
+        case swiftGenerics
 
         case names
         enum Names:String, Sendable
         {
-            case subheading = "subHeading"
+            case subHeading
         }
 
         case identifier
@@ -176,8 +176,8 @@ extension SymbolGraphPart.Vertex:JSONObjectDecodable
             case precise
         }
 
-        case interfaces = "spi"
-        case path = "pathComponents"
+        case spi
+        case pathComponents
         case kind
         enum Kind:String, Sendable
         {
@@ -187,12 +187,12 @@ extension SymbolGraphPart.Vertex:JSONObjectDecodable
         case location
         enum Location:String, Sendable
         {
-            case file = "uri"
+            case uri
             case position
             enum Position:String, Sendable
             {
                 case line
-                case column = "character"
+                case character
             }
         }
     }
@@ -205,23 +205,23 @@ extension SymbolGraphPart.Vertex:JSONObjectDecodable
             {
                 try $0[.precise].decode()
             },
-            acl: try json[.acl].decode(),
+            acl: try json[.accessLevel].decode(),
             phylum: try json[.kind].decode(using: CodingKey.Kind.self)
             {
                 try $0[.identifier].decode()
             },
             availability: try json[.availability]?.decode() ?? .init(),
-            doccomment: try json[.doccomment]?.decode(),
-            interfaces: try json[.interfaces]?.decode(as: Bool.self) { $0 ? .init() : nil },
-            extension: try json[.extension]?.decode() ?? .init(),
-            fragments: try json[.declaration].decode(),
-            generics: try json[.generics]?.decode() ?? .init(),
+            doccomment: try json[.docComment]?.decode(),
+            interfaces: try json[.spi]?.decode(as: Bool.self) { $0 ? .init() : nil },
+            extension: try json[.swiftExtension]?.decode() ?? .init(),
+            fragments: try json[.declarationFragments].decode(),
+            generics: try json[.swiftGenerics]?.decode() ?? .init(),
             location: try json[.location]?.decode(using: CodingKey.Location.self)
             {
                 let (line, column):(Int, Int) = try $0[.position].decode(
                     using: CodingKey.Location.Position.self)
                 {
-                    (try $0[.line].decode(), try $0[.column].decode())
+                    (try $0[.line].decode(), try $0[.character].decode())
                 }
                 guard
                 let position:SourcePosition = .init(line: line, column: column)
@@ -231,8 +231,8 @@ extension SymbolGraphPart.Vertex:JSONObjectDecodable
                     return nil
                 }
 
-                return .init(position: position, file: try .uri(file: try $0[.file].decode()))
+                return .init(position: position, file: try .uri(file: try $0[.uri].decode()))
             },
-            path: try json[.path].decode())
+            path: try json[.pathComponents].decode())
     }
 }
