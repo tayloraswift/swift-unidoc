@@ -24,10 +24,12 @@ extension SSGC
 }
 extension SSGC.Declarations
 {
+    /// Returns the declaration object, or nil if it has already been indexed, or does not meet
+    /// the minimum visibility threshold.
     mutating
     func include(_ vertex:SymbolGraphPart.Vertex,
         namespace:Symbol.Module,
-        culture:Symbol.Module) -> SSGC.DeclObject
+        culture:Symbol.Module) -> SSGC.DeclObject?
     {
         guard
         case .scalar(let symbol) = vertex.usr,
@@ -37,11 +39,12 @@ extension SSGC.Declarations
             fatalError("vertex is not a decl!")
         }
 
-        let decl:SSGC.DeclObject =
+        let decl:SSGC.DeclObject? =
         {
-            if  let decl:SSGC.DeclObject = $0
+            guard case nil = $0
+            else
             {
-                return decl
+                return nil
             }
 
             var kinks:Phylum.Decl.Kinks = []
@@ -72,7 +75,7 @@ extension SSGC.Declarations
                     comment: vertex.doccomment.map { .init($0.text, at: $0.start) } ?? nil))
 
             $0 = decl
-            return decl
+            return decl.access < self.threshold ? nil : decl
 
         } (&self.decls[symbol])
 

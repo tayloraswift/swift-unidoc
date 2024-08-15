@@ -26,12 +26,15 @@ extension SymbolGraphPart.Vertex.ExtensionContext:JSONObjectDecodable
     public
     enum CodingKey:String, Sendable
     {
-        case conditions = "constraints"
+        case constraints
+
+        @available(*, unavailable, message: "Not useful")
+        case extendedModule
     }
 
     public
     init(json:JSON.ObjectDecoder<CodingKey>) throws
     {
-        self.init(conditions: try json[.conditions]?.decode() ?? [])
+        self.init(conditions: try json[.constraints]?.decode() ?? [])
     }
 }
