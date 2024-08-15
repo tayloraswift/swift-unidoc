@@ -493,31 +493,10 @@ extension SSGC.TypeChecker
             let conformance:Symbol.Decl = feature.scopes.first
             else
             {
-                //  We hit this on an extremely unusual edge case where a feature and an heir
-                //  are public, but the protocol the feature is defined on is not. Here is some
-                //  valid Swift code that demonstrates this:
-                //
-                /*  ```
-                    protocol P
-                    {
-                    }
-                    extension P
-                    {
-                        public
-                        func f()
-                        {
-                        }
-                    }
-
-                    public
-                    struct S:P
-                    {
-                    }
-                    ```
-                */
-                //  Ideally, lib/SymbolGraphGen would not emit the feature in this case, but
-                //  it does anyway.
-                return
+                throw AssertionError.init(message: """
+                    Declaration '\(feature.value.path)' has '\(feature.access)' access but \
+                    has no known lexical parents
+                    """)
             }
 
             guard feature.scopes.count == 1
