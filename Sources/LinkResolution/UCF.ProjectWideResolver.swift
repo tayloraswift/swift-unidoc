@@ -1,3 +1,4 @@
+import FNV1
 import InlineArray
 import UCF
 
@@ -30,7 +31,7 @@ extension UCF.ProjectWideResolver
     public
     func resolve(_ selector:UCF.Selector) -> UCF.Resolution<any UCF.ResolvableOverload>
     {
-        var rejected:[any UCF.ResolvableOverload]
+        var rejected:[FNV24: any UCF.ResolvableOverload]
 
         if  let causal:UCF.ResolutionTable<UCF.CausalOverload> = self.causal
         {
@@ -43,18 +44,18 @@ extension UCF.ProjectWideResolver
                 return .overload(overload)
 
             case .ambiguous(let overloads, rejected: let rejections):
-                rejected = rejections
+                rejected = rejections.reduce(into: [:]) { $0[$1.hash] = $1 }
 
                 guard overloads.isEmpty
                 else
                 {
-                    return .ambiguous(overloads, rejected: rejected)
+                    return .ambiguous(overloads, rejected: [_].init(rejected.values))
                 }
             }
         }
         else
         {
-            rejected = []
+            rejected = [:]
         }
 
         switch self.global.resolve(selector, in: self.scope)
@@ -66,9 +67,12 @@ extension UCF.ProjectWideResolver
             return .overload(overload)
 
         case .ambiguous(let overloads, rejected: let rejections):
-            rejected += rejections
+            for overload:any UCF.ResolvableOverload in rejections
+            {
+                rejected[overload.hash] = overload
+            }
 
-            return .ambiguous(overloads, rejected: rejected)
+            return .ambiguous(overloads, rejected: [_].init(rejected.values))
         }
     }
 }
