@@ -450,7 +450,37 @@ extension SSGC.TypeChecker
                     """)
             }
             guard
-            let conformance:Symbol.Decl = feature.scopes.first, feature.scopes.count == 1
+            let conformance:Symbol.Decl = feature.scopes.first
+            else
+            {
+                //  We hit this on an extremely unusual edge case where a feature and an heir
+                //  are public, but the protocol the feature is defined on is not. Here is some
+                //  valid Swift code that demonstrates this:
+                //
+                /*  ```
+                    protocol P
+                    {
+                    }
+                    extension P
+                    {
+                        public
+                        func f()
+                        {
+                        }
+                    }
+
+                    public
+                    struct S:P
+                    {
+                    }
+                    ```
+                */
+                //  Ideally, lib/SymbolGraphGen would not emit the feature in this case, but
+                //  it does anyway.
+                return
+            }
+
+            guard feature.scopes.count == 1
             else
             {
                 throw AssertionError.init(message: """
