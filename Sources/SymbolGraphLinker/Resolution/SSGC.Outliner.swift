@@ -66,8 +66,7 @@ extension SSGC.Outliner
                 return self.outline(doc: url.suffix, as: url.provenance)
 
             case let scheme?:
-                return self.cache.add(outline: .url("\(scheme):\(url.suffix)",
-                    location: url.suffix.source.start))
+                return self.outline(url: url, scheme: scheme)
             }
 
         case .file(let link):
@@ -101,6 +100,24 @@ extension SSGC.Outliner
 
         self.resolver.diagnostics[name.source] = SSGC.ResourceError.fileNotFound(name.string)
         return nil
+    }
+
+    private mutating
+    func outline(url:Markdown.SourceURL, scheme:String) -> Int?
+    {
+        let translated:SymbolGraph.Outline?
+
+        switch scheme
+        {
+        case "http":    translated = self.resolver.translate(url: url)
+        case "https":   translated = self.resolver.translate(url: url)
+        default:        translated = nil
+        }
+
+        //  TODO: log translations?
+
+        return self.cache.add(outline: translated ?? .url("\(scheme):\(url.suffix)",
+            location: url.suffix.source.start))
     }
 
     private mutating

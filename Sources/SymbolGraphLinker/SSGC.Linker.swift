@@ -90,13 +90,15 @@ extension SSGC.Linker
         /// to symbols from extensions on types from other packages.
         let modules:Set<Symbol.Module> = indexes.reduce(into: [])
         {
-            for module:Symbol.Module in $1.resolvableLinks.modules
+            for module:Symbol.Module in $1.resolvableModules
             {
                 $0.insert(module)
             }
         }
-
-        self.tables.packageLinks.modules = modules.sorted()
+        for module:Symbol.Module in modules
+        {
+            self.tables.packageLinks.register(module)
+        }
 
         for (offset, module):(Int, SSGC.ModuleIndex) in zip(self.contexts.indices, indexes)
         {
@@ -109,6 +111,7 @@ extension SSGC.Linker
 
             {
                 $0.causalLinks = module.resolvableLinks
+                $0.causalURLs = module.resolvableLinks.caseFolded()
                 $0.resources = module.resources.reduce(into: [:])
                 {
                     $0[$1.name] = .init(file: $1, id: self.tables.intern($1.path))

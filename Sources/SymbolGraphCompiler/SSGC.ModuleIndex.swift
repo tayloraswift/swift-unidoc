@@ -11,6 +11,8 @@ extension SSGC
         let id:Symbol.Module
 
         public
+        let resolvableModules:[Symbol.Module]
+        public
         let resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>
         public
         let declarations:[(id:Symbol.Module, decls:[Decl])]
@@ -28,6 +30,7 @@ extension SSGC
 
 
         init(id:Symbol.Module,
+            resolvableModules:[Symbol.Module],
             resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>,
             declarations:[(id:Symbol.Module, decls:[Decl])],
             extensions:[SSGC.Extension],
@@ -37,6 +40,7 @@ extension SSGC
             resources:[any SSGC.ResourceFile] = [])
         {
             self.id = id
+            self.resolvableModules = resolvableModules
             self.resolvableLinks = resolvableLinks
             self.declarations = declarations
             self.extensions = extensions
