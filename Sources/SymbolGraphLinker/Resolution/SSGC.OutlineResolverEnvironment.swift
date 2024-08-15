@@ -10,6 +10,7 @@ extension SSGC
         let origin:Int32?
 
         let causalLinks:UCF.ResolutionTable<UCF.CausalOverload>
+        let causalURLs:UCF.ResolutionTable<UCF.CausalOverload>
         let resources:[String: SSGC.Resource]
         let codelink:UCF.ResolutionScope
         /// The scope to use when resolving `doc:` links. The namespace may be different from
@@ -21,12 +22,14 @@ extension SSGC
         private
         init(origin:Int32?,
             causalLinks:UCF.ResolutionTable<UCF.CausalOverload>,
+            causalURLs:UCF.ResolutionTable<UCF.CausalOverload>,
             resources:[String: SSGC.Resource],
             codelink:UCF.ResolutionScope,
             doclink:UCF.ArticleScope)
         {
             self.origin = origin
             self.causalLinks = causalLinks
+            self.causalURLs = causalURLs
             self.resources = resources
             self.codelink = codelink
             self.doclink = doclink
@@ -57,6 +60,7 @@ extension SSGC.OutlineResolverEnvironment
     {
         self.init(origin: origin,
             causalLinks: context.causalLinks,
+            causalURLs: context.causalURLs,
             resources: context.resources,
             codelink: .init(namespace: namespace ?? context.id,
                 imports: [],

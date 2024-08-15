@@ -94,11 +94,7 @@ struct LinkResolution:UnidocDatabaseTestBattery
                 //  direct link.
                 internalLinks: [
                     "Swift.String.Index": [
-                        //  TODO:
-                        //  This is not a bug, but it is a missed optimization opportunity. We
-                        //  do not need to resolve the two leading path components, as they will
-                        //  never be shown to the user.
-                        "swift string index",
+                        "__attribute",
                     ],
                 ],
                 externalLinks: [

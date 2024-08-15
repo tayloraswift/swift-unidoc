@@ -136,6 +136,44 @@ extension SSGC.OutlineResolver
     }
 
     mutating
+    func translate(url:Markdown.SourceURL) -> SymbolGraph.Outline?
+    {
+        guard
+        let translatable:UCF.Selector = url.translatableSelector
+        else
+        {
+            return nil
+        }
+
+        switch self.scopes.causalURLs.resolve(
+            qualified: translatable.path,
+            matching: translatable.suffix)
+        {
+        case .module(let module):
+            //  Unidoc linker doesn’t currently support `symbol` outlines that are not
+            //  declarations, so for now we just synthesize a normal vertex outline.
+            let text:SymbolGraph.OutlineText = .init(path: "\(module)", fragment: nil)
+            return .vertex(self.tables.intern(module) * .module, text: text)
+
+        case .overload(let overload):
+            return .symbol(self.tables.intern(overload.id))
+
+        case .ambiguous(let overloads, rejected: let rejected):
+            if  overloads.isEmpty
+            {
+                return nil
+            }
+
+            self.diagnostics[url.suffix.source] = UCF.ResolutionError<SSGC.Symbolicator>.init(
+                overloads: overloads,
+                rejected: rejected,
+                selector: translatable)
+
+            return nil
+        }
+    }
+
+    mutating
     func outline(_ codelink:UCF.Selector,
         at source:SourceReference<Markdown.Source>) -> SymbolGraph.Outline?
     {

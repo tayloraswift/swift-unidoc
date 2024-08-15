@@ -19,6 +19,8 @@ extension SSGC
 
         private
         var resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>
+        private
+        var resolvableModules:[Symbol.Module]
 
         public
         init(ignoreExportedInterfaces:Bool = true, threshold:Symbol.ACL = .public)
@@ -26,7 +28,9 @@ extension SSGC
             self.ignoreExportedInterfaces = ignoreExportedInterfaces
             self.declarations = .init(threshold: threshold)
             self.extensions = .init()
-            self.resolvableLinks = .init()
+
+            self.resolvableLinks = [:]
+            self.resolvableModules = []
         }
     }
 }
@@ -66,7 +70,8 @@ extension SSGC.TypeChecker
     private mutating
     func add(symbols culture:SSGC.SymbolCulture, from id:Symbol.Module) throws
     {
-        self.resolvableLinks.modules.append(id)
+        self.resolvableModules.append(id)
+        self.resolvableLinks.register(id)
 
         /// We use this to look up protocols by name instead of symbol. This is needed in order
         /// to work around some bizarre lib/SymbolGraphGen bugs.
@@ -550,6 +555,7 @@ extension SSGC.TypeChecker
         }
 
         return .init(id: culture,
+            resolvableModules: self.resolvableModules,
             resolvableLinks: self.resolvableLinks,
             declarations: self.declarations.load(culture: culture),
             extensions: extensions,
