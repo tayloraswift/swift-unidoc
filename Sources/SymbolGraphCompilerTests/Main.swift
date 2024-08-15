@@ -9,6 +9,7 @@ enum Main:TestMain
         Determinism.self,
         DefaultImplementations.self,
         FeatureInheritance.self,
+        FeatureInheritanceAccessControl.self,
         ExternalExtensionsWithConformances.self,
         ExternalExtensionsWithConstraints.self,
         InternalExtensionsWithConformances.self,
