@@ -13,9 +13,9 @@ extension SSGC
     class DeclObject
     {
         let conditions:Set<GenericConstraint<Symbol.Decl>>
-        let namespace:Symbol.Module
+        var namespace:Symbol.Module
         let culture:Symbol.Module
-        let access:Symbol.ACL
+        var access:Symbol.ACL
 
         /// The outer set is populated by redundant implicit conformances produced by
         /// lib/SymbolGraphGen.

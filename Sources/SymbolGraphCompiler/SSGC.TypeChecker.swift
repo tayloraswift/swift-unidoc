@@ -76,7 +76,7 @@ extension SSGC.TypeChecker
         /// We use this to look up protocols by name instead of symbol. This is needed in order
         /// to work around some bizarre lib/SymbolGraphGen bugs.
         var protocolsByName:[UnqualifiedPath: Symbol.Decl] = [:]
-        var children:[SSGC.DeclObject] = []
+        var children:[Int: [SSGC.DeclObject]] = [:]
         //  Pass I. Gather scalars, extension blocks, and extension relationships.
         for part:SSGC.SymbolDump in culture.symbols
         {
@@ -91,33 +91,40 @@ extension SSGC.TypeChecker
                     switch vertex.usr
                     {
                     case .block(let symbol):
-                    //  We *do* in fact care about extension blocks that only contain
-                    //  internal/private members, because they might contain a conformance
-                    //  to an internal protocol that inherits from a public protocol.
-                    //  SymbolGraphGen probably shouldn’t be marking these extension blocks
-                    //  as internal, but SymbolGraphGen doesn’t care what we think.
+                        //  We *do* in fact care about extension blocks that only contain
+                        //  internal/private members, because they might contain a conformance
+                        //  to an internal protocol that inherits from a public protocol.
+                        //  SymbolGraphGen probably shouldn’t be marking these extension blocks
+                        //  as internal, but SymbolGraphGen doesn’t care what we think.
                         self.extensions.include(vertex,
                             extending: try extensions.extendee(of: symbol),
                             culture: id)
 
                     case .scalar(let symbol):
+                        guard
                         let decl:SSGC.DeclObject = self.declarations.include(vertex,
                             namespace: namespace,
                             culture: id)
+                        else
+                        {
+                            //  Declaration is private or re-exported.
+                            continue
+                        }
 
                         if  case .decl(.protocol) = vertex.phylum
                         {
                             protocolsByName[vertex.path] = symbol
                         }
-                        else if !decl.value.path.prefix.isEmpty
-                        {
-                            children.append(decl)
-                        }
 
-                        if  decl.culture == id
+                        let depth:Int = decl.value.path.prefix.count
+                        if  depth > 0
                         {
-                            //  If this is not a re-exported symbol, make it available for
-                            //  link resolution.
+                            children[depth, default: []].append(decl)
+                        }
+                        else
+                        {
+                            //  We need to wait until the next pass for the nested declarations,
+                            //  because we do not know if their namespaces are correct yet.
                             self.resolvableLinks[namespace, decl.value.path].append(
                                 .decl(decl.value))
                         }
@@ -154,7 +161,7 @@ extension SSGC.TypeChecker
                 try nesting.do { try self.assign($0, by: id) }
             }
         }
-        //  SymbolGraphGen fails to emit a `memberOf` edge if the member is a default
+        //  lib/SymbolGraphGen fails to emit a `memberOf` edge if the member is a default
         //  implementation of a protocol requirement. Because the requirement might be a
         //  requirement from a different protocol than the protocol containing the default
         //  implementation, this means we need to use lexical name lookup to resolve the true
@@ -162,7 +169,7 @@ extension SSGC.TypeChecker
         //
         //  Luckily for us, this lib/SymbolGraphGen bug only seems to affect default
         //  implementations that implement requirements from protocols in the current module.
-        for decl:SSGC.DeclObject in children
+        for decl:SSGC.DeclObject in children.values.joined()
         {
             guard decl.scopes.isEmpty,
             let parent:UnqualifiedPath = .init(decl.value.path.prefix),
@@ -175,6 +182,39 @@ extension SSGC.TypeChecker
             let inferred:Symbol.MemberRelationship = .init(decl.id, in: .scalar(parent))
 
             try self.assign(inferred, by: id)
+        }
+        //  lib/SymbolGraphGen will place nested declarations under the wrong namespace if the
+        //  outer type was re-exported from another module. This is a bug in lib/SymbolGraphGen.
+        //  There is an alternative source of this information, in the `extendedModule` field of
+        //  the extension context, but this field is only present for declarations that are
+        //  physically written in an extension block, and also does not specify the correct
+        //  namespace for types under more than one level of nesting.
+        //
+        //  Therefore, we need to correct the namespaces by actually inspecting the extended
+        //  types of nested declarations. It is most efficient to visit the shallower
+        //  declarations first, as this avoids the need to traverse the entire path hierarchy.
+        for (_, decls):(Int, [SSGC.DeclObject]) in children.sorted(by: { $0.key < $1.key })
+        {
+            for decl:SSGC.DeclObject in decls
+            {
+                guard
+                let scope:Symbol.Decl = decl.scopes.first,
+                let scope:SSGC.DeclObject = self.declarations[visible: scope]
+                else
+                {
+                    //  If we can’t find the parent, this symbol is probably a public member of
+                    //  a private type, which is a common bug in lib/SymbolGraphGen.
+                    decl.access = .private
+                    continue
+                }
+
+                let namespace:Symbol.Module = scope.namespace
+
+                decl.access = min(decl.access, scope.access)
+                decl.namespace = namespace
+
+                self.resolvableLinks[namespace, decl.value.path].append(.decl(decl.value))
+            }
         }
 
         //  Pass II. Populate remaining relationships.
@@ -453,31 +493,10 @@ extension SSGC.TypeChecker
             let conformance:Symbol.Decl = feature.scopes.first
             else
             {
-                //  We hit this on an extremely unusual edge case where a feature and an heir
-                //  are public, but the protocol the feature is defined on is not. Here is some
-                //  valid Swift code that demonstrates this:
-                //
-                /*  ```
-                    protocol P
-                    {
-                    }
-                    extension P
-                    {
-                        public
-                        func f()
-                        {
-                        }
-                    }
-
-                    public
-                    struct S:P
-                    {
-                    }
-                    ```
-                */
-                //  Ideally, lib/SymbolGraphGen would not emit the feature in this case, but
-                //  it does anyway.
-                return
+                throw AssertionError.init(message: """
+                    Declaration '\(feature.value.path)' has '\(feature.access)' access but \
+                    has no known lexical parents
+                    """)
             }
 
             guard feature.scopes.count == 1
