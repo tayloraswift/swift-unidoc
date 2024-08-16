@@ -80,6 +80,8 @@ enum Main:TestMain, TestBattery
                     project: "swift-snippets",
                     among: "TestPackages")
 
+                try workspace.cache.create()
+
                 let (_, sources):(_, SSGC.PackageSources) = try package.compileSwiftPM(
                     cache: workspace.cache,
                     with: toolchain)
