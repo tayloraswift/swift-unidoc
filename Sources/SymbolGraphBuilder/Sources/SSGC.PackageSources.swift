@@ -24,6 +24,7 @@ extension SSGC
         var snippets:[LazyFile]
 
         let scratch:PackageBuildDirectory
+        let symbols:[FilePath.Directory]
 
         private
         let modules:ModuleGraph
@@ -31,10 +32,12 @@ extension SSGC
         init(
             snippets:[LazyFile] = [],
             scratch:PackageBuildDirectory,
+            symbols:[FilePath.Directory],
             modules:ModuleGraph)
         {
             self.snippets = snippets
             self.scratch = scratch
+            self.symbols = symbols
             self.modules = modules
         }
     }

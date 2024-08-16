@@ -239,13 +239,14 @@ extension SSGC.Compile
         {
             let build:SSGC.PackageBuild = .local(project: self.name,
                 among: search,
+                using: ".build.ssgc",
                 as: self.type)
 
             defer
             {
                 if  self.removeBuild
                 {
-                    try? (build.root / toolchain.scratch).remove()
+                    try? build.scratch.location.remove()
                 }
             }
 
@@ -267,11 +268,6 @@ extension SSGC.Compile
                 {
                     try? repoClone.remove()
                 }
-                else if
-                    self.removeBuild
-                {
-                    try? (repoClone / toolchain.scratch).remove()
-                }
             }
 
             let build:SSGC.PackageBuild = try .remote(project: self.name,
@@ -279,6 +275,14 @@ extension SSGC.Compile
                 at: ref,
                 as: self.type,
                 in: workspace)
+
+            defer
+            {
+                if  self.removeBuild
+                {
+                    try? build.scratch.location.remove()
+                }
+            }
 
             try status?.send(.didCloneRepository)
 

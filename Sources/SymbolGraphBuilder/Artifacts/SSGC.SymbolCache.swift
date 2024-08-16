@@ -31,13 +31,13 @@ extension SSGC.SymbolCache
         as language:Phylum.Language) throws -> SSGC.SymbolCulture?
     {
         guard
-        var parts:[SymbolGraphPart.ID] = self.symbols.modules[module]
+        var files:SSGC.SymbolFiles = self.symbols.modules[module]
         else
         {
             return nil
         }
 
-        parts.removeAll
+        files.parts.removeAll
         {
             if  let colony:Symbol.Module = $0.colony, !filter.isEmpty
             {
@@ -49,19 +49,19 @@ extension SSGC.SymbolCache
             }
         }
 
-        if  parts.isEmpty
+        if  files.parts.isEmpty
         {
             return nil
         }
 
-        parts.sort { $0.basename < $1.basename }
+        files.parts.sort { $0.basename < $1.basename }
 
-        let dumps:[SSGC.SymbolDump] = try parts.map
+        let dumps:[SSGC.SymbolDump] = try files.parts.map
         {
             (id:SymbolGraphPart.ID) in try
             {
                 let symbols:SSGC.SymbolDump = try $0 ?? .init(loading: id,
-                    from: self.symbols.location,
+                    from: files.location,
                     base: base)
 
                 $0 = symbols
