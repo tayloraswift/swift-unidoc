@@ -1,3 +1,4 @@
+import FNV1
 import SourceDiagnostics
 import UCF
 
@@ -5,6 +6,7 @@ extension SSGC
 {
     enum OutlineDiagnostic:Equatable, Error
     {
+        case annealedIncorrectHash(in:UCF.Selector, to:FNV24)
         case unresolvedAbsolute(Doclink)
         case suggestReformat(Doclink, to:UCF.Selector)
     }
@@ -17,8 +19,14 @@ extension SSGC.OutlineDiagnostic:Diagnostic
     {
         switch self
         {
+        case .annealedIncorrectHash(in: let selector, to: _):
+            output[.warning] = """
+            codelink '\(selector)' is unambiguous, but the hash does not match the resolved \
+            declaration
+            """
+
         case .unresolvedAbsolute(let doclink):
-            output[.note] = """
+            output[.warning] = """
             doclink '\(doclink)' does not resolve to any article (or tutorial) in this package
             """
 
@@ -33,6 +41,11 @@ extension SSGC.OutlineDiagnostic:Diagnostic
     {
         switch self
         {
+        case .annealedIncorrectHash(in: _, to: let hash):
+            output[.note] = """
+            replace the hash with [\(hash)] to suppress this warning
+            """
+
         case .unresolvedAbsolute:
             output[.note] = """
             absolute doclinks may only refer to articles (or tutorials), not to symbol \
