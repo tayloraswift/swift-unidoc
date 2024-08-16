@@ -56,6 +56,9 @@ extension SSGC.BookSources:SSGC.DocumentationSources
     var snippets:[SSGC.LazyFile] { [] }
 
     @_spi(testable) public
+    var symbols:[FilePath.Directory] { [] }
+
+    @_spi(testable) public
     var prefix:Symbol.FileBase? { .init(self.root.location.path.string) }
 
 

@@ -28,7 +28,7 @@ struct LinkResolution:UnidocDatabaseTestBattery
         do
         {
             //  Use the cached binary if available.
-            swift = try .load(swift: toolchain.version, in: workspace.location)
+            swift = try .load(swift: toolchain.id, in: workspace.location)
         }
         catch
         {

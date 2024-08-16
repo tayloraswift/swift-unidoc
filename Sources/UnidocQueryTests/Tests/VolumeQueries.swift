@@ -31,7 +31,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
                     package: .init(name: package),
                     commit: .init(name: tag),
                     triple: swift.triple,
-                    swift: swift.version),
+                    swift: swift.id),
                 graph: .init(modules: []))
 
             empty.roundtrip(for: tests, in: workspace.location)

@@ -20,23 +20,23 @@ extension SSGC.StandardLibraryBuild
 extension SSGC.StandardLibraryBuild:SSGC.DocumentationBuild
 {
     func compile(updating _:SSGC.StatusStream?,
-        into artifacts:FilePath.Directory,
+        cache:FilePath.Directory,
         with swift:SSGC.Toolchain,
         clean _:Bool) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
         let standardLibrary:SSGC.StandardLibrary = .init(platform: try swift.platform())
 
-        let metadata:SymbolGraphMetadata = .swift(swift.version,
+        let artifacts:FilePath.Directory = try swift.dump(standardLibrary: standardLibrary,
+            options: .default,
+            cache: cache)
+
+        let metadata:SymbolGraphMetadata = .swift(swift.id,
             commit: swift.commit,
             triple: swift.triple,
             products: standardLibrary.products)
 
-        for module:SymbolGraph.Module in standardLibrary.modules
-        {
-            try swift.dump(module: module.id, to: artifacts)
-        }
-
-        let sources:SSGC.StandardLibrarySources = .init(modules: standardLibrary.modules)
+        let sources:SSGC.StandardLibrarySources = .init(modules: standardLibrary.modules,
+            symbols: [artifacts])
         return (metadata, sources)
     }
 }
