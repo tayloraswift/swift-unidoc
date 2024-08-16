@@ -293,34 +293,47 @@ extension SSGC.OutlineResolver
     func target(of codelink:UCF.Selector,
         at source:SourceReference<Markdown.Source>) -> (Int32, Int32?)?
     {
+        let chosen:any UCF.ResolvableOverload
+
         switch self.codelinks.resolve(codelink)
         {
-        case .ambiguous(let overloads, rejected: let rejected):
-            self.diagnostics[source] = UCF.ResolutionError<SSGC.Symbolicator>.init(
-                overloads: overloads,
-                rejected: rejected,
-                selector: codelink)
-
-            return nil
+        case .module(let module):
+            return (self.tables.intern(module) * .module, nil)
 
         case .overload(let overload as UCF.PackageOverload):
             return (overload.decl, overload.heir)
 
         case .overload(let overload):
-            let decl:Int32 = self.tables.intern(overload.id)
+            chosen = overload
 
-            if  case let overload as UCF.CausalOverload = overload,
-                let heir:Symbol.Decl = overload.heir
-            {
-                return (decl, self.tables.intern(heir))
-            }
+        case .ambiguous(let overloads, rejected: let rejected):
+            guard overloads.isEmpty, rejected.count == 1
             else
             {
-                return (decl, nil)
+                self.diagnostics[source] = UCF.ResolutionError<SSGC.Symbolicator>.init(
+                    overloads: overloads,
+                    rejected: rejected,
+                    selector: codelink)
+                return nil
             }
 
-        case .module(let module):
-            return (self.tables.intern(module) * .module, nil)
+            chosen = rejected[0]
+
+            self.diagnostics[source] = SSGC.OutlineDiagnostic.annealedIncorrectHash(
+                in: codelink,
+                to: chosen.hash)
+        }
+
+        let decl:Int32 = self.tables.intern(chosen.id)
+
+        if  case let chosen as UCF.CausalOverload = chosen,
+            let heir:Symbol.Decl = chosen.heir
+        {
+            return (decl, self.tables.intern(heir))
+        }
+        else
+        {
+            return (decl, nil)
         }
     }
 }
