@@ -31,19 +31,7 @@ extension SSGC.Workspace
     private
     init(location:FilePath.Directory)
     {
-        if  location.path.isAbsolute
-        {
-            self.init(absolute: location)
-        }
-        else if
-            let current:FilePath.Directory = .current()
-        {
-            self.init(absolute: .init(path: current.path.appending(location.path.components)))
-        }
-        else
-        {
-            fatalError("Couldn’t determine the current working directory.")
-        }
+        self.init(absolute: location.absolute())
     }
 
     public static
