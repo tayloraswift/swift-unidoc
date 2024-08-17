@@ -24,7 +24,7 @@ enum Main:TestMain, TestBattery
 
                     """))
             {
-                tests.expect(swift.version ==? .init(version: .v(5, 8, 0),
+                tests.expect(swift.id ==? .init(version: .v(5, 8, 0),
                     nightly: .DEVELOPMENT_SNAPSHOT))
                 tests.expect(swift.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
             }
@@ -35,7 +35,7 @@ enum Main:TestMain, TestBattery
 
                     """))
             {
-                tests.expect(swift.version ==? .init(version: .v(5, 10, 0), nightly: nil))
+                tests.expect(swift.id ==? .init(version: .v(5, 10, 0), nightly: nil))
                 tests.expect(swift.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
             }
             if  let tests:TestGroup = tests / "Xcode",
@@ -46,7 +46,7 @@ enum Main:TestMain, TestBattery
 
                     """))
             {
-                tests.expect(swift.version ==? .init(version: .v(5, 10, 0), nightly: nil))
+                tests.expect(swift.id ==? .init(version: .v(5, 10, 0), nightly: nil))
                 tests.expect(swift.triple ==? .init("arm64", "apple", "macosx14.0", nil))
             }
         }
@@ -67,7 +67,7 @@ enum Main:TestMain, TestBattery
                 try workspace.build(special: .swift, with: toolchain)
             })
         {
-            docs.roundtrip(for: tests, in: workspace.artifacts)
+            docs.roundtrip(for: tests, in: workspace.location)
         }
 
         #if canImport(IndexStoreDB)
@@ -80,10 +80,10 @@ enum Main:TestMain, TestBattery
                     project: "swift-snippets",
                     among: "TestPackages")
 
-                try workspace.artifacts.create()
+                try workspace.cache.create()
 
                 let (_, sources):(_, SSGC.PackageSources) = try package.compileSwiftPM(
-                    into: workspace.artifacts,
+                    cache: workspace.cache,
                     with: toolchain)
 
                 let parser:Markdown.SwiftLanguage = .swift(
@@ -148,7 +148,7 @@ enum Main:TestMain, TestBattery
                 tests.expect(docs.graph.cultures.count >? 0)
                 tests.expect(docs.graph.decls.nodes.count >? 0)
 
-                docs.roundtrip(for: tests, in: workspace.artifacts)
+                docs.roundtrip(for: tests, in: workspace.location)
             }
         }
 
@@ -231,7 +231,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.artifacts)
+            docs.roundtrip(for: tests, in: workspace.location)
         }
 
         //  https://github.com/tayloraswift/swift-unidoc/issues/211
@@ -258,7 +258,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.artifacts)
+            docs.roundtrip(for: tests, in: workspace.location)
         }
         #endif
 
@@ -284,7 +284,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.artifacts)
+            docs.roundtrip(for: tests, in: workspace.location)
         }
 
         //  The swift-async-dns-resolver repo includes a git submodule, so we should be able
@@ -309,7 +309,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.artifacts)
+            docs.roundtrip(for: tests, in: workspace.location)
         }
 
         //  SwiftSyntax is a morbidly obese package. If we can handle SwiftSyntax,
@@ -331,7 +331,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.artifacts)
+            docs.roundtrip(for: tests, in: workspace.location)
         }
 
         //  The swift-snapshot-testing package at 1.17.0 has a dependency on SwiftSyntax with
@@ -357,7 +357,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.artifacts)
+            docs.roundtrip(for: tests, in: workspace.location)
         }
         #endif
 
@@ -399,7 +399,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.articles.nodes.count >? 0)
             tests.expect(docs.graph.decls.nodes.count ==? 0)
 
-            docs.roundtrip(for: tests, in: workspace.artifacts)
+            docs.roundtrip(for: tests, in: workspace.location)
         }
     }
 }

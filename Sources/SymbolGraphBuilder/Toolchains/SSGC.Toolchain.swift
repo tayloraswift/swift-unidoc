@@ -28,12 +28,8 @@ extension SSGC
         private
         let swiftSDK:AppleSDK?
 
-        /// What to name the scratch directory.
         public
-        let scratch:FilePath.Component
-
-        public
-        let version:SwiftVersion
+        let id:SwiftVersion
         public
         let commit:SymbolGraphMetadata.Commit?
         public
@@ -47,8 +43,7 @@ extension SSGC
             swiftRuntime:FilePath.Directory?,
             swiftCache:FilePath.Directory?,
             swiftSDK:AppleSDK?,
-            scratch:FilePath.Component,
-            version:SwiftVersion,
+            id:SwiftVersion,
             commit:SymbolGraphMetadata.Commit?,
             triple:Triple,
             pretty:Bool)
@@ -57,8 +52,7 @@ extension SSGC
             self.swiftRuntime = swiftRuntime
             self.swiftCache = swiftCache
             self.swiftSDK = swiftSDK
-            self.scratch = scratch
-            self.version = version
+            self.id = id
             self.commit = commit
             self.triple = triple
             self.pretty = pretty
@@ -73,7 +67,6 @@ extension SSGC.Toolchain
         swiftRuntime:FilePath.Directory? = nil,
         swiftCache:FilePath.Directory? = nil,
         swiftSDK:SSGC.AppleSDK? = nil,
-        scratch:FilePath.Component = ".build.ssgc",
         pretty:Bool = false) throws
     {
         //  Splash should consist of two complete lines and a final newline. If the final
@@ -111,16 +104,16 @@ extension SSGC.Toolchain
             throw SSGC.ToolchainError.malformedSplash
         }
 
-        let swift:SwiftVersion
+        let id:SwiftVersion
         if  let version:NumericVersion = .init(toolchain[k])
         {
-            swift = .init(version: PatchVersion.init(padding: version))
+            id = .init(version: PatchVersion.init(padding: version))
         }
 
         else if
             let version:MinorVersion = .init(toolchain[k].prefix { $0 != "-" })
         {
-            swift = .init(
+            id = .init(
                 version: .v(version.components.major, version.components.minor, 0),
                 nightly: .DEVELOPMENT_SNAPSHOT)
         }
@@ -130,7 +123,7 @@ extension SSGC.Toolchain
         }
 
         let commit:SymbolGraphMetadata.Commit?
-        if  case nil = swift.nightly,
+        if  case nil = id.nightly,
             let word:Substring = toolchain[toolchain.index(after: k)...].first
         {
             commit = .parenthesizedSwiftRelease(word)
@@ -145,8 +138,7 @@ extension SSGC.Toolchain
             swiftRuntime: swiftRuntime,
             swiftCache: swiftCache,
             swiftSDK: swiftSDK,
-            scratch: scratch,
-            version: swift,
+            id: id,
             commit: commit,
             triple: triple,
             pretty: pretty)
@@ -304,17 +296,9 @@ extension SSGC.Toolchain
     }
 
     func build(package:FilePath.Directory,
-        flags:SSGC.PackageBuild.Flags = .init(),
-        clean:Bool) throws -> SSGC.PackageBuildDirectory
+        using scratch:SSGC.PackageBuildDirectory,
+        flags:SSGC.PackageBuild.Flags = .init()) throws
     {
-        let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
-            location: package / self.scratch)
-
-        if  clean
-        {
-            try scratch.location.remove()
-        }
-
         var arguments:[String] =
         [
             "build",
@@ -344,12 +328,32 @@ extension SSGC.Toolchain
         }
 
         try SystemProcess.init(command: self.swiftCommand, arguments: arguments, echo: true)()
-
-        return scratch
     }
 }
 extension SSGC.Toolchain
 {
+    func dump(standardLibrary:SSGC.StandardLibrary,
+        options:SymbolDumpOptions = .default,
+        cache:FilePath.Directory) throws -> FilePath.Directory
+    {
+        let cached:FilePath.Directory = cache / "swift@\(self.id.version)"
+
+        if !cached.exists()
+        {
+            let temporary:FilePath.Directory = cache / "swift"
+            try temporary.create(clean: true)
+
+            for module:SymbolGraph.Module in standardLibrary.modules
+            {
+                try self.dump(module: module.id, to: temporary, options: options)
+            }
+
+            try temporary.move(replacing: cached)
+        }
+
+        return cached
+    }
+
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
     func dump(module id:Symbol.Module,

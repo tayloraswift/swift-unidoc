@@ -1,6 +1,7 @@
 import MarkdownABI
 import SymbolGraphs
 import Symbols
+import System
 
 extension SSGC
 {
@@ -8,19 +9,21 @@ extension SSGC
     struct StandardLibrarySources
     {
         let cultures:[ModuleLayout]
+        let symbols:[FilePath.Directory]
 
         private
-        init(cultures:[ModuleLayout])
+        init(cultures:[ModuleLayout], symbols:[FilePath.Directory])
         {
             self.cultures = cultures
+            self.symbols = symbols
         }
     }
 }
 extension SSGC.StandardLibrarySources
 {
-    init(modules:[SymbolGraph.Module])
+    init(modules:[SymbolGraph.Module], symbols:[FilePath.Directory])
     {
-        self.init(cultures: modules.map(SSGC.ModuleLayout.init(toolchain:)))
+        self.init(cultures: modules.map(SSGC.ModuleLayout.init(toolchain:)), symbols: symbols)
     }
 }
 extension SSGC.StandardLibrarySources:SSGC.DocumentationSources

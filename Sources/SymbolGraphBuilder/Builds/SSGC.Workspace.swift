@@ -22,7 +22,7 @@ extension SSGC
 extension SSGC.Workspace
 {
     @inlinable public
-    var artifacts:FilePath.Directory { self.location / "artifacts" }
+    var cache:FilePath.Directory { self.location / "cache" }
     @inlinable public
     var checkouts:FilePath.Directory { self.location / "checkouts" }
 }
@@ -31,19 +31,7 @@ extension SSGC.Workspace
     private
     init(location:FilePath.Directory)
     {
-        if  location.path.isAbsolute
-        {
-            self.init(absolute: location)
-        }
-        else if
-            let current:FilePath.Directory = .current()
-        {
-            self.init(absolute: .init(path: current.path.appending(location.path.components)))
-        }
-        else
-        {
-            fatalError("Couldn’t determine the current working directory.")
-        }
+        self.init(absolute: location.absolute())
     }
 
     public static
@@ -56,7 +44,7 @@ extension SSGC.Workspace
     func create(at location:FilePath.Directory) throws -> Self
     {
         let workspace:Self = .init(location: location)
-        try workspace.artifacts.create()
+        try workspace.cache.create()
         try workspace.checkouts.create()
         return workspace
     }
@@ -91,15 +79,15 @@ extension SSGC.Workspace
         let metadata:SymbolGraphMetadata
         let package:any SSGC.DocumentationSources
 
-        let artifacts:FilePath.Directory = self.artifacts
-        try artifacts.create(clean: clean)
+        let cache:FilePath.Directory = self.cache
+        try cache.create(clean: clean)
 
         (metadata, package) = try build.compile(updating: status,
-            into: artifacts,
+            cache: cache,
             with: swift,
             clean: clean)
 
-        let documentation:SymbolGraph = try package.link(symbols: try .collect(from: artifacts),
+        let documentation:SymbolGraph = try package.link(
             logger: logger,
             with: swift)
 
