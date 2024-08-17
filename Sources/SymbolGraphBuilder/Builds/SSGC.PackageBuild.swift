@@ -119,31 +119,18 @@ extension SSGC.PackageBuild
         as type:SSGC.ProjectType = .package,
         flags:Flags = .init()) -> Self
     {
+        /// The projects path could be absolute or relative. If it’s relative, we need to
+        /// convert it to an absolute path.
+        let projects:FilePath.Directory = projects.absolute()
         let project:FilePath.Directory = projects / "\(projectName)"
         let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
             location: project / scratchName)
 
-        if  project.path.isAbsolute
-        {
-            return .init(id: .unversioned(projectName),
-                scratch: scratch,
-                flags: flags,
-                root: project,
-                type: type)
-        }
-        else if
-            let current:FilePath.Directory = .current()
-        {
-            return .init(id: .unversioned(projectName),
-                scratch: scratch,
-                flags: flags,
-                root: .init(path: current.path.appending(project.path.components)),
-                type: type)
-        }
-        else
-        {
-            fatalError("Couldn’t determine the current working directory.")
-        }
+        return .init(id: .unversioned(projectName),
+            scratch: scratch,
+            flags: flags,
+            root: project,
+            type: type)
     }
 
     /// Clones or pulls the specified package from a git repository, checking out
