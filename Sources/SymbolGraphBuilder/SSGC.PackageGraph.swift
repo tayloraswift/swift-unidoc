@@ -132,10 +132,13 @@ extension SSGC.PackageGraph
 
         self.createEdges(from: sinkManifest, as: id)
 
-        print("""
-            Note: the following packages were never used in any documentation-bearing product:
-            """)
-
+        if !self.packagesUnused.isEmpty
+        {
+            print("""
+                Note: \
+                the following packages were never used in any documentation-bearing product:
+                """)
+        }
         for (i, package):(Int, Symbol.Package) in self.packagesUnused.sorted().enumerated()
         {
             print("\(i + 1). \(package)")

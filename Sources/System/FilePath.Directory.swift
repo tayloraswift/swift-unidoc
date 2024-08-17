@@ -77,6 +77,17 @@ extension FilePath.Directory
         try SystemProcess.init(command: "rm", "-rf", "\(self.path)")()
     }
 
+    public
+    func move(into location:FilePath.Directory) throws
+    {
+        try SystemProcess.init(command: "mv", "\(self.path)", "\(location.path)/.")()
+    }
+    public
+    func move(replacing destination:FilePath.Directory) throws
+    {
+        try SystemProcess.init(command: "mv", "-f", "\(self.path)", "\(destination.path)")()
+    }
+
     /// Returns true if a directory exists at ``path``, returns false if
     /// the file does not exist or is not a directory. This method follows symlinks.
     public

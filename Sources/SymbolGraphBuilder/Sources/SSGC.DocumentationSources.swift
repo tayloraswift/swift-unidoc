@@ -14,6 +14,8 @@ extension SSGC
 {
     protocol DocumentationSources
     {
+        var symbols:[FilePath.Directory] { get }
+
         var cultures:[ModuleLayout] { get }
         var snippets:[LazyFile] { get }
 
@@ -29,20 +31,18 @@ extension SSGC
 }
 extension SSGC.DocumentationSources
 {
-    func link(symbols:SSGC.SymbolDumps,
-        logger:SSGC.Logger,
-        with swift:SSGC.Toolchain) throws -> SymbolGraph
+    func link(logger:SSGC.Logger, with swift:SSGC.Toolchain) throws -> SymbolGraph
     {
         let moduleLayouts:[SSGC.ModuleLayout] = self.cultures
         let snippets:[SSGC.LazyFile] = self.snippets
         let prefix:Symbol.FileBase? = self.prefix
 
-        let moduleIndexes:[SSGC.ModuleIndex] 
+        let moduleIndexes:[SSGC.ModuleIndex]
 
         var profiler:SSGC.DocumentationBuildProfiler = .init()
         do
         {
-            var symbolCache:SSGC.SymbolCache = .init(symbols: symbols)
+            var symbolCache:SSGC.SymbolCache = .init(symbols: try .collect(from: self.symbols))
 
             moduleIndexes = try moduleLayouts.map
             {
@@ -146,8 +146,8 @@ extension SSGC.DocumentationSources
                     indexes: moduleIndexes,
                     snippets: snippets,
                     logger: logger)
-            } 
-            
+            }
+
             for resource:SSGC.LazyFile in moduleLayouts.lazy.map(\.resources).joined()
             {
                 profiler.loadingSources += resource.loadingTime

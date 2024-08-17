@@ -14,6 +14,8 @@ extension SSGC
         /// What is being built.
         let id:ID
 
+        let scratch:PackageBuildDirectory
+
         /// Additional flags to pass to the Swift compiler.
         var flags:Flags
 
@@ -22,9 +24,14 @@ extension SSGC
         let type:ProjectType
 
         private
-        init(id:ID, flags:Flags, root:FilePath.Directory, type:ProjectType)
+        init(id:ID,
+            scratch:PackageBuildDirectory,
+            flags:Flags,
+            root:FilePath.Directory,
+            type:ProjectType)
         {
             self.id = id
+            self.scratch = scratch
             self.flags = flags
             self.root = root
             self.type = type
@@ -33,6 +40,7 @@ extension SSGC
 }
 extension SSGC.PackageBuild
 {
+    private
     func listExtraManifests() throws -> [MinorVersion]
     {
         var versions:[MinorVersion] = []
@@ -57,6 +65,36 @@ extension SSGC.PackageBuild
 
         return versions
     }
+
+    private
+    func modulesToDump(
+        among modules:SSGC.ModuleGraph) throws -> [(Symbol.Module, [FilePath.Directory])]
+    {
+        var modulesToDump:[Symbol.Module: [FilePath.Directory]] = [:]
+        for module:SSGC.ModuleLayout in modules.sinkLayout.cultures
+        {
+            let constituents:[SSGC.ModuleLayout] = try modules.constituents(of: module)
+            let include:[FilePath.Directory] = constituents.reduce(into: [self.scratch.include])
+            {
+                $0 += $1.include
+            }
+            for constituent:SSGC.ModuleLayout in constituents
+            {
+                //  The Swift compiler won’t generate these automatically, so we need to extract
+                //  the symbols manually.
+                switch constituent.language
+                {
+                case .c?:   break
+                case .cpp?: break
+                default:    continue
+                }
+
+                modulesToDump[constituent.id] = include
+            }
+        }
+
+        return modulesToDump.sorted { $0.key < $1.key }
+    }
 }
 extension SSGC.PackageBuild
 {
@@ -74,31 +112,25 @@ extension SSGC.PackageBuild
     ///     -   flags:
     ///         Additional flags to pass to the Swift compiler.
     public static
-    func local(project name:Symbol.Package,
+    func local(
+        project projectName:Symbol.Package,
         among projects:FilePath.Directory,
+        using scratchName:FilePath.Component = ".build.ssgc",
         as type:SSGC.ProjectType = .package,
         flags:Flags = .init()) -> Self
     {
-        let project:FilePath.Directory = projects / "\(name)"
-        if  project.path.isAbsolute
-        {
-            return .init(id: .unversioned(name),
-                flags: flags,
-                root: project,
-                type: type)
-        }
-        else if
-            let current:FilePath.Directory = .current()
-        {
-            return .init(id: .unversioned(name),
-                flags: flags,
-                root: .init(path: current.path.appending(project.path.components)),
-                type: type)
-        }
-        else
-        {
-            fatalError("Couldn’t determine the current working directory.")
-        }
+        /// The projects path could be absolute or relative. If it’s relative, we need to
+        /// convert it to an absolute path.
+        let projects:FilePath.Directory = projects.absolute()
+        let project:FilePath.Directory = projects / "\(projectName)"
+        let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
+            location: project / scratchName)
+
+        return .init(id: .unversioned(projectName),
+            scratch: scratch,
+            flags: flags,
+            root: project,
+            type: type)
     }
 
     /// Clones or pulls the specified package from a git repository, checking out
@@ -118,7 +150,7 @@ extension SSGC.PackageBuild
     ///     -   workspace:
     ///         The directory in which this function will create folders.
     public static
-    func remote(project name:Symbol.Package,
+    func remote(project projectName:Symbol.Package,
         from repository:String,
         at reference:String,
         as type:SSGC.ProjectType = .package,
@@ -126,19 +158,26 @@ extension SSGC.PackageBuild
         flags:Flags = .init(),
         clean:Bool = false) throws -> Self
     {
-        let checkout:SSGC.Checkout = try .checkout(project: name,
+        let checkout:SSGC.Checkout = try .checkout(project: projectName,
             from: repository,
             at: reference,
             in: workspace,
             clean: clean)
 
+        /// This is a far less-common use case than the local one, so we don’t support
+        /// customizing the scratch directory name.
+        let scratchName:FilePath.Component = ".build.ssgc"
+        let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
+            location: checkout.location / scratchName)
+
         let version:AnyVersion = .init(reference)
-        let pin:SPM.DependencyPin = .init(identity: name,
+        let pin:SPM.DependencyPin = .init(identity: projectName,
             location: .remote(url: repository),
             revision: checkout.revision,
             version: version)
 
         return .init(id: .versioned(pin, reference: reference),
+            scratch: scratch,
             flags: flags,
             root: checkout.location,
             type: type)
@@ -148,7 +187,7 @@ extension SSGC.PackageBuild
 extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     func compile(updating status:SSGC.StatusStream?,
-        into artifacts:FilePath.Directory,
+        cache:FilePath.Directory,
         with swift:SSGC.Toolchain,
         clean:Bool = true) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
@@ -156,13 +195,13 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         {
         case .package:
             try self.compileSwiftPM(updating: status,
-                into: artifacts,
+                cache: cache,
                 with: swift,
                 clean: clean)
 
         case .book:
             try self.compileBook(updating: status,
-                into: artifacts,
+                cache: cache,
                 with: swift)
         }
     }
@@ -172,7 +211,7 @@ extension SSGC.PackageBuild
 {
     @_spi(testable) public
     func compileBook(updating status:SSGC.StatusStream? = nil,
-        into artifacts:FilePath.Directory,
+        cache _:FilePath.Directory,
         with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.BookSources)
     {
         switch self.id
@@ -201,7 +240,7 @@ extension SSGC.PackageBuild
                 name: self.id.package),
             commit: self.id.commit,
             triple: swift.triple,
-            swift: swift.version,
+            swift: swift.id,
             tools: nil,
             manifests: [],
             requirements: [],
@@ -215,10 +254,19 @@ extension SSGC.PackageBuild
 
     @_spi(testable) public
     func compileSwiftPM(updating status:SSGC.StatusStream? = nil,
-        into artifacts:FilePath.Directory,
+        cache:FilePath.Directory,
         with swift:SSGC.Toolchain,
         clean:Bool = true) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
+        if  clean
+        {
+            try self.scratch.location.remove()
+        }
+        /// Note that the Swift compiler already uses a subdirectory named `artifacts`, so we
+        /// name ours `ssgc` to avoid conflicts
+        let artifacts:FilePath.Directory = self.scratch.location / "ssgc"
+        try artifacts.create(clean: false)
+
         switch self.id
         {
         case .unversioned(let package):
@@ -250,29 +298,26 @@ extension SSGC.PackageBuild
 
         try status?.send(.didResolveDependencies)
 
-        let scratch:SSGC.PackageBuildDirectory
         do
         {
-            scratch = try swift.build(package: self.root, flags: self.flags.dumping(
-                    symbols: .default,
-                    to: artifacts),
-                clean: clean)
+            try swift.build(package: self.root,
+                using: self.scratch,
+                flags: self.flags.dumping(symbols: .default, to: artifacts))
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
             throw SSGC.PackageBuildError.swift_build(code, invocation)
         }
 
-        var packages:SSGC.PackageGraph = .init(platform: try swift.platform())
+        let platform:SymbolGraphMetadata.Platform = try swift.platform()
+        var packages:SSGC.PackageGraph = .init(platform: platform)
 
-        //  Dump the standard library’s symbols
-        let standardLibrary:SSGC.StandardLibrary = .init(platform: try swift.platform())
         for pin:SPM.DependencyPin in pins
         {
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
 
             let manifest:SPM.Manifest = try swift.manifest(
-                package: scratch.location / "checkouts" / "\(pin.location.name)",
+                package: self.scratch.location / "checkouts" / "\(pin.location.name)",
                 json: artifacts / "\(pin.identity).package.json",
                 leaf: false)
 
@@ -283,40 +328,21 @@ extension SSGC.PackageBuild
             with: &manifest,
             as: self.id.package)
 
-        var modulesToDump:[Symbol.Module: [FilePath.Directory]] = [:]
-        for module:SymbolGraph.Module in standardLibrary.modules
-        {
-            modulesToDump[module.id] = []
-        }
-        for module:SSGC.ModuleLayout in modules.sinkLayout.cultures
-        {
-            let constituents:[SSGC.ModuleLayout] = try modules.constituents(of: module)
-            let include:[FilePath.Directory] = constituents.reduce(into: [scratch.include])
-            {
-                $0 += $1.include
-            }
-            for constituent:SSGC.ModuleLayout in constituents
-            {
-                //  The Swift compiler won’t generate these automatically, so we need to extract
-                //  the symbols manually.
-                switch constituent.language
-                {
-                case .c?:   break
-                case .cpp?: break
-                default:    continue
-                }
-
-                modulesToDump[constituent.id] = include
-            }
-        }
-        for (module, include):(Symbol.Module, [FilePath.Directory]) in modulesToDump.sorted(
-            by: { $0.key < $1.key })
+        //  Dump the standard library’s symbols, unless they’re already cached.
+        let artifactsCached:FilePath.Directory = try swift.dump(
+            standardLibrary: .init(platform: platform),
+            options: .default,
+            cache: cache)
+        for (module, include):(Symbol.Module, [FilePath.Directory]) in try self.modulesToDump(
+            among: modules)
         {
             try swift.dump(module: module, to: artifacts, options: .default, include: include)
         }
 
         //  This step is considered part of documentation building.
-        var sources:SSGC.PackageSources = .init(scratch: scratch, modules: modules)
+        var sources:SSGC.PackageSources = .init(scratch: self.scratch,
+            symbols: [artifacts, artifactsCached],
+            modules: modules)
         do
         {
             let snippetsDirectory:FilePath.Component
@@ -343,17 +369,13 @@ extension SSGC.PackageBuild
             throw SSGC.DocumentationBuildError.scanning(error)
         }
 
-        //  try swift.dump(modules: sources.cultures.lazy.map(\.module),
-        //      to: artifacts,
-        //      include: include)
-
         let metadata:SymbolGraphMetadata = .init(
             package: .init(
                 scope: self.id.pin?.location.owner,
                 name: self.id.package),
             commit: self.id.commit,
             triple: swift.triple,
-            swift: swift.version,
+            swift: swift.id,
             tools: manifest.format,
             manifests: manifestVersions,
             requirements: manifest.requirements,
