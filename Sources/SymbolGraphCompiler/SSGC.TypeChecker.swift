@@ -370,7 +370,7 @@ extension SSGC.TypeChecker
 
             if  let origin:Symbol.Decl = conformance.origin
             {
-                try type.assign(origin: origin)
+                type.assign(origin: origin)
             }
             if  case .protocol = type.value.phylum
             {

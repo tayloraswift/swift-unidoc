@@ -150,12 +150,17 @@ extension SSGC.Declarations
             var decl:SSGC.Decl = $1.value
 
             //  Strip duplicated doccomments
-            if  let documentationComment:SSGC.DocumentationComment = decl.comment,
-                let origin:Symbol.Decl = decl.origin,
-                let originComment:SSGC.DocumentationComment = self.decls[origin]?.value.comment,
-                    originComment.text == documentationComment.text
+            if  let documentationComment:SSGC.DocumentationComment = decl.comment
             {
-                decl.comment = nil
+                for origin:Symbol.Decl in decl.origins
+                {
+                    if  let origin:SSGC.Decl = self.decls[origin]?.value,
+                        let originComment:SSGC.DocumentationComment = origin.comment,
+                            originComment.text == documentationComment.text
+                    {
+                        decl.comment = nil
+                    }
+                }
             }
 
             $0[$1.namespace, default: []].append(decl)

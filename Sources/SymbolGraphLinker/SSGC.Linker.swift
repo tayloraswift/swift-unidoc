@@ -542,7 +542,9 @@ extension SSGC.Linker
         let requirements:[Int32] = decl.requirements.sorted().map { self.tables.intern($0) }
         let inhabitants:[Int32] = decl.inhabitants.sorted().map { self.tables.intern($0) }
         let superforms:[Int32] = decl.superforms.sorted().map { self.tables.intern($0) }
-        let origin:Int32? = decl.origin.map { self.tables.intern($0) }
+        /// We don’t have a great way to choose which origin to keep, so we just keep the first
+        /// one in alphabetical order.
+        let origin:Int32? = decl.origins.sorted().first.map { self.tables.intern($0) }
 
         let location:SourceLocation<Int32>? = decl.location?.map
         {
