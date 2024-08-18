@@ -1,4 +1,5 @@
 import HTTPServer
+import LZ77
 import S3
 import S3Client
 
@@ -42,6 +43,11 @@ extension Unidoc.BuildArtifact
             else
             {
                 Log[.warning] = "No destination bucket configured for exporting build logs!"
+                for log:Unidoc.BuildLog in self.logs
+                {
+                    print(String.init(decoding: try Gzip.extract(from: log.text.bytes),
+                        as: Unicode.UTF8.self))
+                }
             }
         }
 

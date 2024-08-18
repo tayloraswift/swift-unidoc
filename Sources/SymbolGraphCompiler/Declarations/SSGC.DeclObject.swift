@@ -78,16 +78,9 @@ extension SSGC.DeclObject
 extension SSGC.DeclObject
 {
     /// Assigns an origin to this scalar object.
-    func assign(origin:Symbol.Decl) throws
+    func assign(origin:Symbol.Decl)
     {
-        switch self.value.origin
-        {
-        case nil, origin?:
-            self.value.origin = origin
-
-        case let other?:
-            throw SSGC.SemanticError.already(has: .origin(other))
-        }
+        self.value.origins.insert(origin)
     }
     /// Assigns a lexical scope to this scalar object.
     func assign(scope:Symbol.Decl, by relationship:some NestingRelationship) throws
@@ -107,7 +100,7 @@ extension SSGC.DeclObject
         case let existing?:
             if  case .s = self.id.language
             {
-                throw SSGC.SemanticError.already(has: .scope(existing))
+                throw SSGC.LexicalScopeError.multiple(existing, scope)
             }
             else
             {
@@ -122,7 +115,7 @@ extension SSGC.DeclObject
 
         if  let origin:Symbol.Decl = relationship.origin
         {
-            try self.assign(origin: origin)
+            self.assign(origin: origin)
         }
     }
     /// Adds a superform to this scalar object.
@@ -155,7 +148,7 @@ extension SSGC.DeclObject
         }
         if  let origin:Symbol.Decl = relationship.origin
         {
-            try self.assign(origin: origin)
+            self.assign(origin: origin)
         }
     }
     /// Adds a requirement to this scalar object, assuming it is a protocol.

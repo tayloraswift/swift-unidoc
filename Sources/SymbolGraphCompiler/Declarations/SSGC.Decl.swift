@@ -44,10 +44,11 @@ extension SSGC
         public internal(set)
         var superforms:Set<Symbol.Decl>
 
-        /// A scalar that has documentation that is relevant, but less specific
-        /// to this scalar.
+        /// Scalars that potentially have documentation that is relevant, but less specific
+        /// to this scalar. Only one will be ultimately used, but the others are kept for
+        /// de-duplication purposes.
         public internal(set)
-        var origin:Symbol.Decl?
+        var origins:Set<Symbol.Decl>
         public internal(set)
         var kinks:Phylum.Decl.Kinks
 
@@ -73,7 +74,7 @@ extension SSGC
             self.requirements = []
             self.inhabitants = []
             self.superforms = []
-            self.origin = nil
+            self.origins = []
 
             self.kinks = kinks
             self.comment = comment

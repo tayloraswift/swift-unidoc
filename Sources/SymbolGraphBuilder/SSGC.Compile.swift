@@ -182,6 +182,9 @@ extension SSGC.Compile
         }
         catch let error as SSGC.DocumentationBuildError
         {
+            //  We need to print the error here, otherwise it will be lost.
+            print(error)
+
             switch error
             {
             case .scanning: try status.send(.failedToLoadSymbolGraph)
