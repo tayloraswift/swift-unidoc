@@ -92,20 +92,26 @@ extension SSGC.DeclObject
         }
 
         //  Only (Objective) C declarations can have multiple lexical scopes.
+        //  https://github.com/swiftlang/swift/blob/main/docs/ABI/Mangling.rst
         switch self.scopes.first
         {
         case scope?:
             break
 
         case let existing?:
-            if  case .s = self.id.language
-            {
-                throw SSGC.LexicalScopeError.multiple(existing, scope)
-            }
+            guard case .s = self.id.language
             else
             {
                 fallthrough
             }
+
+            let suffix:Substring = self.id.suffix
+            if  suffix.starts(with: "SC") || suffix.starts(with: "So")
+            {
+                fallthrough
+            }
+
+            throw SSGC.LexicalScopeError.multiple(existing, scope)
 
         case nil:
             self.scopes.insert(scope)
