@@ -39,7 +39,7 @@ extension Unidoc.Linker
         var articles:[Unidoc.ArticleVertex]
         var decls:[Unidoc.DeclVertex]
 
-        var groups:Unidoc.Volume.Groups
+        var groups:Unidoc.Mesh.Groups
 
         private
         init(

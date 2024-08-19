@@ -1,4 +1,5 @@
 import BSON
+import MD5
 
 extension Unidoc
 {
@@ -10,19 +11,28 @@ extension Unidoc
         public
         let id:Edge<Edition>
 
+        public
+        let targetABI:MD5?
+        public
+        let targetChanged:Bool
+
         @inlinable
-        init(id:Edge<Edition>)
+        init(id:Edge<Edition>, targetABI:MD5?, targetChanged:Bool)
         {
             self.id = id
+            self.targetABI = targetABI
+            self.targetChanged = targetChanged
         }
     }
 }
 extension Unidoc.EditionDependency
 {
     @inlinable public
-    init(source:Unidoc.Edition, target:Unidoc.Edition)
+    init(source:Unidoc.Edition, target:Unidoc.Edition, targetABI:MD5?)
     {
-        self.init(id: .init(source: source, target: target))
+        self.init(id: .init(source: source, target: target),
+            targetABI: targetABI,
+            targetChanged: false)
     }
 }
 extension Unidoc.EditionDependency
@@ -38,6 +48,8 @@ extension Unidoc.EditionDependency
     enum CodingKey:String, Sendable
     {
         case id = "_id"
+        case targetABI = "B"
+        case targetChanged = "C"
     }
 }
 extension Unidoc.EditionDependency:BSONDocumentEncodable
@@ -46,6 +58,8 @@ extension Unidoc.EditionDependency:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
+        bson[.targetABI] = self.targetABI
+        bson[.targetChanged] = self.targetChanged ? true : nil
     }
 }
 extension Unidoc.EditionDependency:BSONDocumentDecodable
@@ -53,6 +67,8 @@ extension Unidoc.EditionDependency:BSONDocumentDecodable
     public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(id: try bson[.id].decode())
+        self.init(id: try bson[.id].decode(),
+            targetABI: try bson[.targetABI]?.decode(),
+            targetChanged: try bson[.targetChanged]?.decode() ?? false)
     }
 }

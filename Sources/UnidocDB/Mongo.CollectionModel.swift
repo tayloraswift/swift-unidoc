@@ -577,6 +577,21 @@ extension Mongo.CollectionModel
         let updates:Mongo.Updates<Element.ID> = try response.updates()
         return updates.selected == 0 ? nil : updates.modified == 1
     }
+
+    @inlinable package
+    func updateMany(with session:Mongo.Session,
+        do encode:(inout Mongo.UpdateListEncoder<Mongo.Many>) throws -> ()) async throws -> Int
+    {
+        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
+            command: Mongo.Update<Mongo.Many, Element.ID>.init(Self.name)
+            {
+                try encode(&$0)
+            },
+            against: self.database)
+
+        let updates:Mongo.Updates<Element.ID> = try response.updates()
+        return updates.modified
+    }
 }
 
 extension Mongo.CollectionModel where Element:Mongo.MasterCodingModel
@@ -651,7 +666,7 @@ extension Mongo.CollectionModel
         try await self.delete(with: session) { $0["_id"] = id }
     }
 
-    @inlinable internal
+    @inlinable
     func delete(with session:Mongo.Session,
         matching predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Bool
     {

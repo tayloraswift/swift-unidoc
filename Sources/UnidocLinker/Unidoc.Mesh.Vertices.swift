@@ -1,8 +1,13 @@
-extension Unidoc.Volume
+import UnidocRecords
+
+extension Unidoc.Mesh
 {
     @frozen public
     struct Vertices:Sendable
     {
+        public
+        let landing:Unidoc.LandingVertex
+
         public
         var articles:[Unidoc.ArticleVertex]
         public
@@ -15,26 +20,24 @@ extension Unidoc.Volume
         var products:[Unidoc.ProductVertex]
         public
         var foreign:[Unidoc.ForeignVertex]
-        public
-        var landing:Unidoc.LandingVertex
 
         @inlinable public
-        init(
-            articles:[Unidoc.ArticleVertex],
-            cultures:[Unidoc.CultureVertex],
-            decls:[Unidoc.DeclVertex],
-            files:[Unidoc.FileVertex],
-            products:[Unidoc.ProductVertex],
-            foreign:[Unidoc.ForeignVertex],
-            landing:Unidoc.LandingVertex)
+        init(landing:Unidoc.LandingVertex,
+            articles:[Unidoc.ArticleVertex] = [],
+            cultures:[Unidoc.CultureVertex] = [],
+            decls:[Unidoc.DeclVertex] = [],
+            files:[Unidoc.FileVertex] = [],
+            products:[Unidoc.ProductVertex] = [],
+            foreign:[Unidoc.ForeignVertex] = [])
         {
+            self.landing = landing
+
             self.articles = articles
             self.cultures = cultures
             self.decls = decls
             self.files = files
             self.products = products
             self.foreign = foreign
-            self.landing = landing
         }
     }
 }
