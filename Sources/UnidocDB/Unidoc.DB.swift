@@ -1,5 +1,6 @@
 import BSON
 import FNV1
+import MD5
 import MongoDB
 import SemanticVersions
 import SHA1
@@ -314,12 +315,13 @@ extension Unidoc.DB
             }
         }
 
-        let volume:Unidoc.Volume = try await self.link(&snapshot,
+        let linked:Unidoc.Mesh = try await self.link(&snapshot,
             symbol: documentation.metadata.package.id,
             loader: nil as NoLoader?,
             realm: realm,
             with: session)
-        let symbol:Symbol.Volume = volume.metadata.symbol
+        /// This is here to workaround a Swift compiler bug.
+        let volume:Symbol.Volume = linked.volume
 
         let uploaded:Unidoc.UploadStatus = try await self.snapshots.upsert(
             snapshot: /* consume */ snapshot, // https://github.com/apple/swift/issues/71605
@@ -327,9 +329,9 @@ extension Unidoc.DB
 
         let uplinked:Unidoc.UplinkStatus = .init(
             edition: uploaded.edition,
-            volume: symbol,
+            volume: volume,
             hiddenByPackage: true,
-            delta: try await self.fill(volume: consume volume,
+            delta: try await self.fillVolume(from: consume linked,
                 hidden: false,
                 with: session))
 
@@ -432,23 +434,23 @@ extension Unidoc.DB
         /// volume.
         var snapshot:Unidoc.Snapshot = stored
 
-        let volume:Unidoc.Volume = try await self.link(&snapshot,
+        let linked:Unidoc.Mesh = try await self.link(&snapshot,
             symbol: package.symbol,
             loader: loader,
             realm: package.realm,
             with: session)
-        let symbol:Symbol.Volume = volume.metadata.symbol
+        /// This is here to workaround a Swift compiler bug.
+        let volume:Symbol.Volume = linked.volume
 
         if  stored != snapshot
         {
             try await self.snapshots.update(some: snapshot, with: session)
         }
 
-        return .init(
-            edition: id,
-            volume: symbol,
+        return .init(edition: id,
+            volume: volume,
             hiddenByPackage: package.hidden,
-            delta: try await self.fill(volume: consume volume,
+            delta: try await self.fillVolume(from: consume linked,
                 hidden: package.hidden,
                 with: session))
     }
@@ -513,15 +515,25 @@ extension Unidoc.DB
 extension Unidoc.DB
 {
     private
-    func fillEdges(from metadata:Unidoc.VolumeMetadata,
+    func fillEdges(from boundaries:[Unidoc.Mesh.Boundary],
+        dependent:Unidoc.Edition,
+        dependentABI:MD5,
+        latest:Bool,
         hidden:Bool,
         with session:Mongo.Session) async throws
     {
-        try await self.editionDependencies.insert(dependencies: metadata.dependencies,
-            dependent: metadata.id,
+        //  Create edition dependencies. These dependencies are initially marked as clean,
+        //  because we just linked the snapshot against them.
+        try await self.editionDependencies.create(dependent: dependent,
+            from: boundaries,
             with: session)
 
-        guard metadata.latest
+        //  Dirty any dependencies on this edition if the ABI has changed.
+        try await self.editionDependencies.update(dependencyABI: dependentABI,
+            dependency: dependent,
+            with: session)
+
+        guard latest
         else
         {
             return
@@ -529,18 +541,18 @@ extension Unidoc.DB
 
         if  hidden
         {
-            try await self.packageDependencies.clear(dependent: metadata.id, with: session)
+            try await self.packageDependencies.clear(dependent: dependent, with: session)
         }
         else
         {
-            try await self.packageDependencies.update(dependencies: metadata.dependencies,
-                dependent: metadata.id,
+            try await self.packageDependencies.update(dependent: dependent,
+                from: boundaries,
                 with: session)
         }
     }
 
     private
-    func fill(volume:consuming Unidoc.Volume,
+    func fillVolume(from mesh:consuming Unidoc.Mesh,
         hidden:Bool,
         with session:Mongo.Session) async throws -> Unidoc.SurfaceDelta?
     {
@@ -559,15 +571,15 @@ extension Unidoc.DB
         //  We could get the best of both worlds by decompressing the search index before
         //  transferring it out to Amazon CloudFront. But that just doesn’t seem worth the CPU
         //  cycles, either for us or for Amazon.
-        let search:Unidoc.TextResource<Symbol.Volume> = .init(id: volume.id,
-            text: .init(compressing: volume.index.utf8))
+        let search:Unidoc.TextResource<Symbol.Volume> = .init(id: mesh.volume,
+            text: .init(compressing: mesh.index.utf8))
 
-        let volumeReplaced:Bool = try await self.unlink(volume: volume.metadata,
+        let volumeReplaced:Bool = try await self.unlink(volume: mesh.metadata,
             with: session)
 
         //  If there is a volume generated from a prerelease with the same patch number,
         //  we need to delete that too.
-        if  let occupant:Unidoc.VolumeMetadata = try await self.volumes.find(named: volume.id,
+        if  let occupant:Unidoc.VolumeMetadata = try await self.volumes.find(named: mesh.volume,
                 with: session)
         {
             //  We should not clear release versions by name, only by coordinate.
@@ -580,21 +592,26 @@ extension Unidoc.DB
             try await self.unlink(volume: occupant, with: session)
         }
 
-        try await self.volumes.insert(some: volume.metadata, with: session)
+        try await self.volumes.insert(some: mesh.metadata, with: session)
         try await self.search.insert(some: search, with: session)
-        try await self.trees.insert(some: volume.trees, with: session)
+        try await self.trees.insert(some: mesh.trees, with: session)
 
-        try await self.vertices.insert(volume.vertices, with: session)
-        try await self.groups.insert(volume.groups,
-            realm: volume.metadata.latest ? volume.metadata.realm : nil,
+        try await self.vertices.insert(mesh.vertices, with: session)
+        try await self.groups.insert(mesh.groups,
+            realm: mesh.metadata.latest ? mesh.metadata.realm : nil,
             with: session)
 
-        try await self.fillEdges(from: volume.metadata, hidden: hidden, with: session)
+        try await self.fillEdges(from: mesh.boundaries,
+            dependent: mesh.id,
+            dependentABI: mesh.packageABI,
+            latest: mesh.metadata.latest,
+            hidden: hidden,
+            with: session)
 
         let surfaceDelta:Unidoc.SurfaceDelta?
-        if  volume.metadata.latest
+        if  mesh.metadata.latest
         {
-            var new:Unidoc.Sitemap = volume.sitemap()
+            var new:Unidoc.Sitemap = mesh.sitemap()
 
             if  let sitemapDelta:Unidoc.SitemapDelta = try await self.sitemaps.diff(new: new,
                     with: session)
@@ -635,13 +652,13 @@ extension Unidoc.DB
         }
 
         alignment:
-        if  let latest:Unidoc.Edition = volume.latest
+        if  let latest:Unidoc.Edition = mesh.latestRelease
         {
             try await session.update(database: self.id,
                 with: Volumes.AlignLatest.init(to: latest))
 
             guard
-            let realm:Unidoc.Realm = volume.metadata.realm
+            let realm:Unidoc.Realm = mesh.metadata.realm
             else
             {
                 break alignment
@@ -719,20 +736,13 @@ extension Unidoc.DB
         symbol package:Symbol.Package,
         loader:(some Unidoc.GraphLoader)?,
         realm:Unidoc.Realm?,
-        with session:Mongo.Session) async throws -> Unidoc.Volume
+        with session:Mongo.Session) async throws -> Unidoc.Mesh
     {
         try await self.pin(&snapshot, with: session)
+
         var linker:Unidoc.Linker = try await self.snapshots.load(for: snapshot,
             from: loader,
             with: session)
-
-        let dependencies:[Unidoc.VolumeMetadata.Dependency] = linker.dependencies(
-            pinned: snapshot.pins)
-
-        let mesh:Unidoc.Linker.Mesh = linker.link(primary: snapshot.metadata,
-            pins: snapshot.pins)
-
-        linker.status().emit(colors: .enabled)
 
         let latestRelease:Unidoc.Edition?
         let thisRelease:PatchVersion?
@@ -811,30 +821,19 @@ extension Unidoc.DB
             version = "__max"
         }
 
-        let metadata:Unidoc.VolumeMetadata = .init(id: snapshot.id,
-            dependencies: dependencies,
-            display: snapshot.metadata.display,
-            refname: snapshot.metadata.commit?.name,
-            symbol: .init(
-                //  We want the version component of the volume symbol to be stable,
-                //  so we only encode the patch version, even if the symbol graph is
-                //  from a prerelease tag.
-                package: package,
-                version: version),
-            latest: snapshot.id == latestRelease,
-            realm: realm,
-            patch: thisRelease,
-            products: mesh.products,
-            cultures: mesh.cultures)
+        let mesh:Unidoc.Mesh = linker.link(primary: snapshot.metadata,
+            pins: snapshot.pins,
+            latestRelease: latestRelease,
+            thisRelease: thisRelease,
+            //  We want the version component of the volume symbol to be stable,
+            //  so we only encode the patch version, even if the symbol graph is
+            //  from a prerelease tag.
+            as: .init(package: package, version: version),
+            in: realm)
 
-        let volume:Unidoc.Volume = .init(latest: latestRelease,
-            metadata: metadata,
-            vertices: mesh.vertices,
-            groups: mesh.groups,
-            index: mesh.index,
-            trees: mesh.trees)
+        linker.status().emit(colors: .enabled)
 
-        return volume
+        return mesh
     }
 }
 extension Unidoc.DB

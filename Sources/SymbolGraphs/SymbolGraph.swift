@@ -71,19 +71,16 @@ extension SymbolGraph
 extension SymbolGraph
 {
     @inlinable public
-    func link<T>(
-        static transform:(Int32) throws -> T,
+    func link<T>(_ transform:(Symbol.Module, Int32) throws -> T,
         dynamic link:(Symbol.Module) throws -> T) rethrows -> [T]
     {
         var elements:[T] = [] ; elements.reserveCapacity(self.namespaces.count)
 
-        for index:Int in self.cultures.indices
+        for (index, id):(Int, Symbol.Module) in zip(self.namespaces.indices, self.namespaces)
         {
-            elements.append(try transform(index * .module))
-        }
-        for colony:Symbol.Module in self.namespaces[self.cultures.endIndex...]
-        {
-            elements.append(try link(colony))
+            elements.append(self.cultures.indices.contains(index)
+                ? try transform(id, index * .module)
+                : try link(id))
         }
 
         return elements

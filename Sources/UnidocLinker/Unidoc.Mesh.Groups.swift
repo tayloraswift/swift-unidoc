@@ -1,4 +1,6 @@
-extension Unidoc.Volume
+import UnidocRecords
+
+extension Unidoc.Mesh
 {
     @frozen public
     struct Groups:Sendable
