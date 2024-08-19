@@ -66,7 +66,7 @@ extension Unidoc.DB.Groups:Mongo.CollectionModel
 extension Unidoc.DB.Groups
 {
     @discardableResult
-    func insert(_ groups:Unidoc.Volume.Groups,
+    func insert(_ groups:Unidoc.Mesh.Groups,
         realm:Unidoc.Realm?,
         with session:Mongo.Session) async throws -> Mongo.Insertions
     {

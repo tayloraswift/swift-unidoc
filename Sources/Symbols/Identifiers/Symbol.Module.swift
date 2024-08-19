@@ -1,17 +1,25 @@
 extension Symbol
 {
     @frozen public
-    struct Module:LosslessStringConvertible, Equatable, Hashable, Sendable
+    struct Module:Equatable, Hashable, Sendable
     {
         public
-        let description:String
+        let mangled:String
 
         @inlinable public
-        init(_ description:String)
+        init(_ mangled:String)
         {
-            self.description = description
+            self.mangled = mangled
         }
     }
+}
+extension Symbol.Module:CustomStringConvertible
+{
+    @inlinable public
+    var description:String { self.mangled }
+}
+extension Symbol.Module:LosslessStringConvertible
+{
 }
 extension Symbol.Module:ExpressibleByStringLiteral
 {
@@ -24,10 +32,7 @@ extension Symbol.Module:ExpressibleByStringLiteral
 extension Symbol.Module:Comparable
 {
     @inlinable public static
-    func < (lhs:Self, rhs:Self) -> Bool
-    {
-        lhs.description < rhs.description
-    }
+    func < (a:Self, b:Self) -> Bool { a.mangled < b.mangled }
 }
 extension Symbol.Module
 {

@@ -1,47 +1,96 @@
-import BSON
 import JSON
 import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.Linker
+extension Unidoc.Mesh
 {
-    @frozen public
-    struct Mesh:~Copyable
+    @frozen @usableFromInline
+    struct Interior
     {
         public
-        var vertices:Unidoc.Volume.Vertices
+        var vertices:Vertices
         public
-        var groups:Unidoc.Volume.Groups
+        var groups:Groups
         public
         var index:JSON
         public
         var trees:[Unidoc.TypeTree]
-        public
-        var products:[Unidoc.Noun]
-        public
-        var cultures:[Unidoc.Noun]
 
         private
-        init(vertices:Unidoc.Volume.Vertices,
-            groups:Unidoc.Volume.Groups,
+        init(vertices:Vertices,
+            groups:Groups,
             index:JSON,
-            trees:[Unidoc.TypeTree],
-            products:[Unidoc.Noun],
-            cultures:[Unidoc.Noun])
+            trees:[Unidoc.TypeTree])
         {
             self.vertices = vertices
             self.groups = groups
             self.index = index
             self.trees = trees
-            self.products = products
-            self.cultures = cultures
         }
     }
 }
-extension Unidoc.Linker.Mesh
+extension Unidoc.Mesh.Interior
 {
+    init(primary metadata:SymbolGraphMetadata,
+        pins:[Unidoc.Edition?],
+        with linker:inout Unidoc.Linker)
+    {
+        let current:Unidoc.Edition = linker.current.id
+        let symbols:(linkable:Int, linked:Int) = linker.current.scalars.decls.reduce(
+            into: (0, 0))
+        {
+            guard
+            let id:Unidoc.Scalar = $1
+            else
+            {
+                $0.linkable += 1
+                return
+            }
+
+            if  id.edition != current
+            {
+                $0.linkable += 1
+                $0.linked += 1
+            }
+        }
+
+        let landingVertex:Unidoc.LandingVertex = .init(id: current.global,
+            snapshot: .init(abi: metadata.abi,
+                latestManifest: metadata.tools,
+                extraManifests: metadata.manifests,
+                requirements: metadata.requirements,
+                commit: metadata.commit?.sha1,
+                symbolsLinkable: symbols.linkable,
+                symbolsLinked: symbols.linked),
+            packages: pins.compactMap(\.?.package))
+
+        var tables:Unidoc.Linker.Tables = .init(context: consume linker)
+
+        let conformances:Unidoc.Linker.Table<Unidoc.Conformers> = tables.linkConformingTypes()
+        let products:[Unidoc.ProductVertex] = tables.linkProducts()
+        let cultures:[Unidoc.CultureVertex] = tables.linkCultures()
+
+        let articles:[Unidoc.ArticleVertex] = tables.articles
+        let decls:[Unidoc.DeclVertex] = tables.decls
+        let groups:Unidoc.Mesh.Groups = tables.groups
+        let extensions:Unidoc.Linker.Table<Unidoc.Extension> = tables.extensions
+
+        linker = (consume tables).context
+
+        self.init(around: landingVertex,
+            conformances: conformances,
+            extensions: extensions,
+            products: products,
+            cultures: cultures,
+            articles: articles,
+            decls: decls,
+            groups: groups,
+            linker: linker)
+    }
+
+    private
     init(around landing:consuming Unidoc.LandingVertex,
         conformances:consuming Unidoc.Linker.Table<Unidoc.Conformers>,
         extensions:consuming Unidoc.Linker.Table<Unidoc.Extension>,
@@ -49,7 +98,7 @@ extension Unidoc.Linker.Mesh
         cultures:consuming [Unidoc.CultureVertex],
         articles:consuming [Unidoc.ArticleVertex],
         decls:consuming [Unidoc.DeclVertex],
-        groups:consuming Unidoc.Volume.Groups,
+        groups:consuming Unidoc.Mesh.Groups,
         linker:borrowing Unidoc.Linker)
     {
         var cultures:[Unidoc.CultureVertex] = cultures
@@ -190,32 +239,15 @@ extension Unidoc.Linker.Mesh
 
         let (trees, index):([Unidoc.TypeTree], JSON) = mapper.build(cultures: cultures)
 
-        self.init(vertices: .init(
+        self.init(vertices: .init(landing: landing,
                 articles: articles,
                 cultures: cultures,
                 decls: decls,
                 files: files,
                 products: copy products,
-                foreign: foreign,
-                landing: landing),
+                foreign: foreign),
             groups: groups,
             index: index,
-            trees: trees,
-            products: products.map
-            {
-                .init(shoot: $0.shoot, type: .stem(.package, nil))
-            }
-                .sorted
-            {
-                $0.shoot < $1.shoot
-            },
-            cultures: cultures.map
-            {
-                .init(shoot: $0.shoot, type: .stem(.package, nil))
-            }
-                .sorted
-            {
-                $0.shoot < $1.shoot
-            })
+            trees: trees)
     }
 }

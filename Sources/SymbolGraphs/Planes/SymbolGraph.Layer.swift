@@ -64,16 +64,17 @@ extension SymbolGraph.Layer
 extension SymbolGraph.Layer
 {
     @inlinable public
-    func link<T>(
-        static transform:(Int32) throws -> T,
+    func link<T>(_ transform:(Node.ID, Int32) throws -> T,
         dynamic link:(Node.ID) throws -> T) rethrows -> SymbolGraph.Table<Node.Plane, T>
     {
         var elements:[T] = [] ; elements.reserveCapacity(self.symbols.count)
 
         for index:Int32 in self.symbols.indices
         {
-            elements.append(self.contains(citizen: index) ? try transform(index) :
-                try link(self.symbols[index]))
+            let id:Node.ID = self.symbols[index]
+            elements.append(self.contains(citizen: index)
+                ? try transform(id, index)
+                : try link(id))
         }
 
         return .init(viewing: elements)

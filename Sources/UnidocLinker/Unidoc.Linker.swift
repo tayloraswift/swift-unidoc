@@ -1,11 +1,12 @@
 import LinkResolution
-import UCF
+import MD5
 import SemanticVersions
 import Signatures
+import SourceDiagnostics
 import SymbolGraphs
 import Symbols
+import UCF
 import Unidoc
-import SourceDiagnostics
 import UnidocRecords
 
 extension Unidoc
@@ -100,58 +101,48 @@ extension Unidoc.Linker
 extension Unidoc.Linker
 {
     public mutating
-    func link(primary metadata:SymbolGraphMetadata, pins:[Unidoc.Edition?]) -> Mesh
+    func link(primary metadata:SymbolGraphMetadata,
+        pins pinnedDependencies:[Unidoc.Edition?],
+        latestRelease:Unidoc.Edition?,
+        thisRelease:PatchVersion?,
+        as volume:Symbol.Volume,
+        in realm:Unidoc.Realm?) -> Unidoc.Mesh
     {
-        let current:Unidoc.Edition = self.current.id
-        let symbols:(linkable:Int, linked:Int) = self.current.scalars.decls.reduce(into: (0, 0))
-        {
-            guard
-            let id:Unidoc.Scalar = $1
-            else
+        let boundaries:[Unidoc.Mesh.Boundary] = self.boundaries(pinned: pinnedDependencies)
+        let interior:Unidoc.Mesh.Interior = .init(primary: metadata,
+            pins: pinnedDependencies,
+            with: &self)
+
+        let metadata:Unidoc.VolumeMetadata = .init(id: self.current.id,
+            dependencies: boundaries.map(\.target),
+            display: metadata.display,
+            refname: metadata.commit?.name,
+            symbol: volume,
+            latest: self.current.id == latestRelease,
+            realm: realm,
+            patch: thisRelease,
+            products: interior.vertices.products.map
             {
-                $0.linkable += 1
-                return
+                .init(shoot: $0.shoot, type: .stem(.package, nil))
             }
-
-            if  id.edition != current
+                .sorted
             {
-                $0.linkable += 1
-                $0.linked += 1
+                $0.shoot < $1.shoot
+            },
+            cultures: interior.vertices.cultures.map
+            {
+                .init(shoot: $0.shoot, type: .stem(.package, nil))
             }
-        }
+                .sorted
+            {
+                $0.shoot < $1.shoot
+            })
 
-        let landingVertex:Unidoc.LandingVertex = .init(id: current.global,
-            snapshot: .init(abi: metadata.abi,
-                latestManifest: metadata.tools,
-                extraManifests: metadata.manifests,
-                requirements: metadata.requirements,
-                commit: metadata.commit?.sha1,
-                symbolsLinkable: symbols.linkable,
-                symbolsLinked: symbols.linked),
-            packages: pins.compactMap(\.?.package))
-
-        var tables:Tables = .init(context: consume self)
-
-        let conformances:Table<Unidoc.Conformers> = tables.linkConformingTypes()
-        let products:[Unidoc.ProductVertex] = tables.linkProducts()
-        let cultures:[Unidoc.CultureVertex] = tables.linkCultures()
-
-        let articles:[Unidoc.ArticleVertex] = tables.articles
-        let decls:[Unidoc.DeclVertex] = tables.decls
-        let groups:Unidoc.Volume.Groups = tables.groups
-        let extensions:Table<Unidoc.Extension> = tables.extensions
-
-        self = (consume tables).context
-
-        return .init(around: landingVertex,
-            conformances: conformances,
-            extensions: extensions,
-            products: products,
-            cultures: cultures,
-            articles: articles,
-            decls: decls,
-            groups: groups,
-            linker: self)
+        return .init(latestRelease: latestRelease,
+            packageABI: self.current.scalars.hash,
+            boundaries: boundaries,
+            metadata: metadata,
+            interior: interior)
     }
 
     public consuming
@@ -256,46 +247,54 @@ extension Unidoc.Linker
 }
 extension Unidoc.Linker
 {
-    public
-    func dependencies(pinned:[Unidoc.Edition?]) -> [Unidoc.VolumeMetadata.Dependency]
+    private
+    func boundaries(pinned:[Unidoc.Edition?]) -> [Unidoc.Mesh.Boundary]
     {
-        var dependencies:[Unidoc.VolumeMetadata.Dependency] = []
-            dependencies.reserveCapacity(self.current.metadata.dependencies.count + 1)
+        var boundaries:[Unidoc.Mesh.Boundary] = []
+            boundaries.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
         if  self.current.metadata.package.name != .swift,
             let swift:Graph = self[.swift]
         {
-            dependencies.append(.init(exonym: .swift,
-                requirement: nil,
-                resolution: nil,
-                pin: .linked(swift.id)))
+            boundaries.append(.init(
+                targetABI: swift.scalars.hash,
+                target: .init(exonym: .swift,
+                    requirement: nil,
+                    resolution: nil,
+                    pin: .linked(swift.id))))
         }
         for (id, dependency):(Unidoc.Edition?, SymbolGraphMetadata.Dependency) in zip(pinned,
             self.current.metadata.dependencies)
         {
+            let pinABI:MD5?
             let pin:Unidoc.VolumeMetadata.DependencyPin?
 
-            if  let id:Unidoc.Edition = self[dependency.package.name]?.id
+            if  let graph:Graph = self[dependency.package.name]
             {
-                pin = .linked(id)
+                pinABI = graph.scalars.hash
+                pin = .linked(graph.id)
             }
             else if
                 let id:Unidoc.Edition
             {
+                pinABI = nil
                 pin = .pinned(id)
             }
             else
             {
+                pinABI = nil
                 pin = nil
             }
 
-            dependencies.append(.init(exonym: dependency.package.name,
-                requirement: dependency.requirement,
-                resolution: dependency.version.release,
-                pin: pin))
+            boundaries.append(.init(
+                targetABI: pinABI,
+                target: .init(exonym: dependency.package.name,
+                    requirement: dependency.requirement,
+                    resolution: dependency.version.release,
+                    pin: pin)))
         }
 
-        return dependencies
+        return boundaries
     }
 
     func modules() -> [SymbolGraph.ModuleContext]
