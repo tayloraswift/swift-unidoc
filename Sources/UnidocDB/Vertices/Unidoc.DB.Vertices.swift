@@ -74,7 +74,7 @@ extension Unidoc.DB.Vertices:Mongo.RecodableModel
 extension Unidoc.DB.Vertices
 {
     @discardableResult
-    func insert(_ vertices:Unidoc.Volume.Vertices,
+    func insert(_ vertices:Unidoc.Mesh.Vertices,
         with session:Mongo.Session) async throws -> Mongo.Insertions
     {
         let response:Mongo.InsertResponse = try await session.run(

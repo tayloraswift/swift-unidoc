@@ -63,13 +63,13 @@ extension Unidoc.DB.PackageDependencies:Mongo.RecodableModel
 }
 extension Unidoc.DB.PackageDependencies
 {
-    func update(dependencies:[Unidoc.VolumeMetadata.Dependency],
-        dependent source:Unidoc.Edition,
+    func update(dependent source:Unidoc.Edition,
+        from boundaries:[Unidoc.Mesh.Boundary],
         with session:Mongo.Session) async throws
     {
-        let dependencies:[Unidoc.PackageDependency] = dependencies.reduce(into: [])
+        let dependencies:[Unidoc.PackageDependency] = boundaries.reduce(into: [])
         {
-            if  let package:Unidoc.Package = $1.pin?.edition.package
+            if  let package:Unidoc.Package = $1.target.pin?.edition.package
             {
                 $0.append(.init(source: source, target: package))
             }

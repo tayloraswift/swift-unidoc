@@ -142,7 +142,6 @@ extension Unidoc.Linker.Graph
     {
         (declaration - self.id).map(self.scope(of:)) ?? nil
     }
-
 }
 extension Unidoc.Linker.Graph
 {
