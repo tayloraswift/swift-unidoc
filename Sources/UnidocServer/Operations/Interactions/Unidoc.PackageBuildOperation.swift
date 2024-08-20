@@ -1,8 +1,8 @@
 import HTTP
 import MongoDB
-import UnidocUI
 import Symbols
 import UnidocDB
+import UnidocUI
 
 extension Unidoc
 {

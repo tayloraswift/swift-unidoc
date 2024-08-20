@@ -1,7 +1,7 @@
 import HTTP
 import Media
-import UnidocUI
 import Unidoc
+import UnidocUI
 
 extension Unidoc.PackageAlignOperation
 {

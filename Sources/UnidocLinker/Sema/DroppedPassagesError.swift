@@ -1,5 +1,5 @@
-import Unidoc
 import SourceDiagnostics
+import Unidoc
 
 enum DroppedPassagesError:Equatable, Error
 {

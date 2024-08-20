@@ -1,8 +1,8 @@
 import MarkdownABI
 import MarkdownAST
+import OrderedCollections
 import Snippets
 import Symbols
-import OrderedCollections
 
 extension Markdown
 {

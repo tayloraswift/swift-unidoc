@@ -1,8 +1,8 @@
 import MongoDB
 import SymbolGraphs
 import Symbols
-import UnidocRecords
 import UnidocDB
+import UnidocRecords
 
 extension Unidoc
 {

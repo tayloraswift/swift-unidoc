@@ -1,8 +1,8 @@
 import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
-import Testing_
 import SourceDiagnostics
+import Testing_
 
 @_spi(testable)
 import SymbolGraphLinker

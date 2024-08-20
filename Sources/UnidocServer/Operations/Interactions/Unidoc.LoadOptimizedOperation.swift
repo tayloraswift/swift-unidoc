@@ -2,8 +2,8 @@ import HTTP
 import MD5
 import Media
 import MongoDB
-import UnidocRender
 import UnidocDB
+import UnidocRender
 import URI
 
 extension Unidoc

@@ -2,8 +2,8 @@ import HTML
 import HTTP
 import Media
 import MongoDB
-import UnidocUI
 import UnidocRender
+import UnidocUI
 import URI
 
 extension Unidoc

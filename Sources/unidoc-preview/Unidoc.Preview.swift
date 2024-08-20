@@ -3,8 +3,8 @@ import HTTPServer
 import MongoDB
 import NIOPosix
 import NIOSSL
-import System_ArgumentParser
 import System
+import System_ArgumentParser
 import UnidocServer
 
 extension Unidoc

@@ -2,10 +2,10 @@ import HTML
 import HTTP
 import MarkdownABI
 import MongoDB
-import UnidocRender
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
+import UnidocRender
 
 extension Unidoc
 {

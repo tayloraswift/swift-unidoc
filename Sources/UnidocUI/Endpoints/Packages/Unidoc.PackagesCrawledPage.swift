@@ -1,10 +1,10 @@
 import BSON
-import HTTP
 import HTML
+import HTTP
 import ISO
-import UnidocRender
 import UnidocDB
 import UnidocQueries
+import UnidocRender
 import UnixCalendar
 import UnixTime
 import URI

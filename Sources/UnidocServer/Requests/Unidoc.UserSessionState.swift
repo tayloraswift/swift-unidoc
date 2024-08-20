@@ -1,5 +1,5 @@
-import URI
 import UnidocRender
+import URI
 
 extension Unidoc
 {

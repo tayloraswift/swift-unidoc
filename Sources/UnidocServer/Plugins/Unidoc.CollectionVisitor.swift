@@ -1,5 +1,5 @@
-import UnidocDB
 import MongoDB
+import UnidocDB
 
 extension Unidoc
 {

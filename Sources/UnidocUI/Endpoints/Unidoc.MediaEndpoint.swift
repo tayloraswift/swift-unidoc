@@ -1,9 +1,9 @@
 import HTTP
 import Media
 import MongoQL
-import UnidocRender
 import UnidocDB
 import UnidocQueries
+import UnidocRender
 
 extension Unidoc
 {
