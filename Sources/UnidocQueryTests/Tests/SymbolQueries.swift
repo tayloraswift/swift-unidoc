@@ -68,7 +68,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
 
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query)),
+                        value: try await db.query(with: query)),
                     let vertex:Unidoc.DeclVertex = tests.expect(
                         value: output.principal?.vertex?.decl)
                 {
@@ -86,7 +86,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
 
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query)),
+                        value: try await db.query(with: query)),
                     let principal:Unidoc.PrincipalOutput = tests.expect(
                         value: output.principal),
                     tests.expect(principal.matches.count >? 1),
@@ -106,7 +106,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
 
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query)),
+                        value: try await db.query(with: query)),
                     let principal:Unidoc.PrincipalOutput = tests.expect(
                         value: output.principal),
                     let _:Unidoc.AnyVertex = tests.expect(value: principal.vertex)
@@ -125,7 +125,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.RedirectOutput = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query)),
+                        value: try await db.query(with: query)),
                     let vertex:Unidoc.DeclVertex = tests.expect(
                         value: output.matches.first?.decl)
                 {
@@ -159,7 +159,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 await tests.do
                 {
                     if  let output:Unidoc.VertexOutput = tests.expect(
-                            value: try await db.session.query(database: db.id, with: query)),
+                            value: try await db.query(with: query)),
                         let _:Unidoc.AnyVertex = tests.expect(value: output.principal?.vertex)
                     {
                     }
@@ -174,7 +174,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query)),
+                        value: try await db.query(with: query)),
                     let vertex:Unidoc.CultureVertex = tests.expect(
                         value: output.principal?.vertex?.culture),
                     let tree:Unidoc.TypeTree = tests.expect(
@@ -235,7 +235,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query)),
+                        value: try await db.query(with: query)),
                     let vertex:Unidoc.AnyVertex = tests.expect(
                         value: output.principal?.vertex),
                     let tree:Unidoc.TypeTree = tests.expect(
@@ -301,7 +301,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query)),
+                        value: try await db.query(with: query)),
                     let _:Unidoc.AnyVertex = tests.expect(
                         value: output.principal?.vertex)
                 {

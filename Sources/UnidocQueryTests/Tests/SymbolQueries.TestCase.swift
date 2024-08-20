@@ -60,7 +60,7 @@ extension SymbolQueries.TestCase
         await self.tests.do
         {
             if  let output:Unidoc.VertexOutput = self.tests.expect(
-                    value: try await db.session.query(database: db.id, with: self.query)),
+                    value: try await db.query(with: self.query)),
                 let _:Unidoc.AnyVertex = self.tests.expect(value: output.principal?.vertex)
             {
                 let secondaries:[Unidoc.Scalar: Substring] = output.vertices.reduce(

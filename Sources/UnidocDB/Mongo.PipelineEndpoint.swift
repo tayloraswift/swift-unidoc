@@ -73,3 +73,13 @@ extension Mongo.PipelineEndpoint
         }
     }
 }
+extension Mongo.PipelineEndpoint
+{
+    /// A shorthand for calling ``pull(from:with:)`` with the ``DatabaseModel/id`` and
+    /// ``DatabaseModel/session`` of the given `database`.
+    @inlinable public mutating
+    func pull(from database:some Mongo.DatabaseModel) async throws
+    {
+        try await self.pull(from: database.id, with: database.session)
+    }
+}

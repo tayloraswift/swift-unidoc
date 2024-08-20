@@ -34,8 +34,7 @@ extension Unidoc.LoadOptimizedOperation:Unidoc.PublicOperation
     func load(from server:Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let db:Unidoc.DB = try await server.db.session()
-        try await self.base.pull(from: db.id, with: db.session)
+        try await self.base.pull(from: try await server.db.session())
 
         let etag:MD5? = self.etag
 
