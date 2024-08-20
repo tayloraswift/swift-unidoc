@@ -1,6 +1,6 @@
 import MarkdownAST
-import Sources
 import SourceDiagnostics
+import Sources
 
 extension Markdown.Source:DiagnosticFrame
 {

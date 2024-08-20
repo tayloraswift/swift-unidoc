@@ -1,5 +1,5 @@
-import Symbols
 import JSON
+import Symbols
 
 extension Unidoc
 {

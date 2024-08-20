@@ -1,12 +1,12 @@
 #if canImport(Darwin)
 
-import func Darwin.getcwd
 import func Darwin.free
+import func Darwin.getcwd
 
 #elseif canImport(Glibc)
 
-import func Glibc.getcwd
 import func Glibc.free
+import func Glibc.getcwd
 
 #else
 #error("unsupported platform")

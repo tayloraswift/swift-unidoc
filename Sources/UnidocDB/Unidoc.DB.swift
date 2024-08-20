@@ -9,8 +9,8 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocAPI
-import UnidocRecords_LZ77
 import UnidocLinker
+import UnidocRecords_LZ77
 @_spi(testable)
 import UnidocRecords
 import UnixTime

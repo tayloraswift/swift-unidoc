@@ -1,14 +1,14 @@
 #if canImport(IndexStoreDB)
 
+import HTML
 import class IndexStoreDB.IndexStoreDB
-import MarkdownPluginSwift_IndexStoreDB
 import MarkdownPluginSwift
+import MarkdownPluginSwift_IndexStoreDB
 import MarkdownRendering
 @_spi(testable)
 import SymbolGraphBuilder
 import Symbols
 import Testing_
-import HTML
 
 extension Main
 {

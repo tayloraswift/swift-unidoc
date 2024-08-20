@@ -188,6 +188,6 @@ extension SnippetParser
         }
 
         self.complete.append(self.current)
-        return (self.captionText, complete)
+        return (self.captionText, self.complete)
     }
 }

@@ -1,5 +1,5 @@
-import UnidocRender
 import UnidocRecords
+import UnidocRender
 
 extension Unidoc
 {

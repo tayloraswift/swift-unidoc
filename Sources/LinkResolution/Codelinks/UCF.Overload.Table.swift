@@ -1,7 +1,7 @@
-import UCF
 import FNV1
 import LexicalPaths
 import Symbols
+import UCF
 
 extension UCF.Overload
 {

@@ -1,5 +1,5 @@
-import UCF
 import MarkdownAST
+import UCF
 
 extension Markdown
 {

@@ -2,13 +2,13 @@ import GitHubAPI
 import GitHubClient
 import HTTP
 import MongoDB
-import UnidocUI
 import SemanticVersions
 import SHA1
 import SymbolGraphs
 import Symbols
 import UnidocDB
 import UnidocRecords
+import UnidocUI
 
 extension Unidoc
 {
