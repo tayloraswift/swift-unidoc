@@ -18,7 +18,7 @@ extension Mongo
 }
 extension Mongo.UpdateQuery
 {
-    @inlinable internal
+    @inlinable
     var command:Mongo.Update<Effect, Target.Element.ID>
     {
         .init(Target.name)

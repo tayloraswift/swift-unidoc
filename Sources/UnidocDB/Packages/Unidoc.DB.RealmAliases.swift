@@ -44,10 +44,10 @@ extension Unidoc.DB.RealmAliases:Mongo.CollectionModel
 }
 extension Unidoc.DB.RealmAliases
 {
-    public
+    @inlinable public
     func insert(alias:String,
         of coordinate:Unidoc.Realm) async throws
     {
-        try await self.insert(some: Unidoc.RealmAlias.init(id: alias, coordinate: coordinate))
+        try await self.insert(.init(id: alias, coordinate: coordinate))
     }
 }

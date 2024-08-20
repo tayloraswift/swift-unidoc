@@ -56,12 +56,6 @@ extension Unidoc.DB.PackageDependencies:Mongo.CollectionModel
 }
 extension Unidoc.DB.PackageDependencies:Mongo.RecodableModel
 {
-    public
-    func recode() async throws -> (modified:Int, of:Int)
-    {
-        try await self.recode(through: Unidoc.PackageDependency.self,
-            by: .now.advanced(by: .seconds(30)))
-    }
 }
 extension Unidoc.DB.PackageDependencies
 {

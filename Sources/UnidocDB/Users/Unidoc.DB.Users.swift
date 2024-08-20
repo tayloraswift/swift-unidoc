@@ -112,7 +112,14 @@ extension Unidoc.DB.Users
     public
     func update(access:[Unidoc.Account], user:Unidoc.Account) async throws -> Bool?
     {
-        try await self.update(field: .access, of: user, to: access)
+        try await self.update
+        {
+            $0
+            {
+                $0[.q] { $0[Element[.id]] = user }
+                $0[.u] { $0[.set] { $0[Element[.access]] = access } }
+            }
+        }
     }
 }
 extension Unidoc.DB.Users

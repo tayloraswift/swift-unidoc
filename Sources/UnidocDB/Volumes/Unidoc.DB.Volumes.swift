@@ -99,12 +99,6 @@ extension Unidoc.DB.Volumes:Mongo.CollectionModel
 }
 extension Unidoc.DB.Volumes:Mongo.RecodableModel
 {
-    public
-    func recode() async throws -> (modified:Int, of:Int)
-    {
-        try await self.recode(through: Unidoc.VolumeMetadata.self,
-            by: .now.advanced(by: .seconds(30)))
-    }
 }
 extension Unidoc.DB.Volumes
 {

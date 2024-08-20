@@ -28,7 +28,8 @@ extension Mongo
 }
 extension Mongo.PipelineQuery
 {
-    @inlinable internal
+    /// TODO: this should not be public.
+    @inlinable package
     func command(stride:Iteration.Stride?) -> Mongo.Aggregate<Iteration>
     {
         .init(CollectionOrigin.name,

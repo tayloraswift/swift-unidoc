@@ -1,7 +1,5 @@
 import BSON
 import MongoDB
-import Unidoc
-import UnidocRecords
 
 extension Mongo
 {
@@ -71,18 +69,22 @@ extension Mongo.CollectionModel where Capacity == (bytes:Int, count:Int?)
         }
     }
 }
-extension Mongo.CollectionModel where Capacity == (bytes:Int, count:Int?)
+extension Mongo.CollectionModel
+    where Capacity == (bytes:Int, count:Int?), Element:BSONDecodable
 {
-    func find<Decodable>(_:Decodable.Type = Decodable.self,
-        last count:Int) async throws -> [Decodable]
-        where   Decodable:BSONDocumentDecodable,
-                Decodable:Sendable
+    /// Returns the most recent `count` documents in this capped collection, in ascending
+    /// natural order. The first element in the returned array is the newest.
+    ///
+    /// This method is only available for capped collections, as it relies on the natural order
+    /// of documents in the collection.
+    @inlinable public
+    func find(last count:Int) async throws -> [Element]
     {
         try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<Decodable>>.init(Self.name,
+            command: Mongo.Find<Mongo.SingleBatch<Element>>.init(Self.name,
                 limit: count)
             {
-                $0[.sort, using: Decodable.CodingKey.self] { $0[.natural] = (-) }
+                $0[.sort, using: BSON.Key.self] { $0[.natural] = (-) }
             },
             against: self.database)
     }
@@ -302,98 +304,44 @@ extension Mongo.CollectionModel
 }
 extension Mongo.CollectionModel
 {
-    /// Decode and re-encode all documents in this collection using the specified master type.
-    func recode<Master>(through _:Master.Type = Master.self,
-        stride:Int = 4096,
-        by deadline:ContinuousClock.Instant) async throws -> (modified:Int, of:Int)
-        where   Master:BSONDocumentDecodable,
-                Master:BSONDocumentEncodable,
-                Master:Identifiable<Element.ID>,
-                Master:Sendable
-    {
-        var modified:Int = 0
-        var selected:Int = 0
-        try await session.run(
-            command: Mongo.Find<Mongo.Cursor<Master>>.init(Self.name,
-                stride: stride,
-                limit: .max),
-            against: self.database,
-            by: deadline)
-        {
-            for try await batch:[Master] in $0
-            {
-                let updates:Mongo.Updates<Element.ID> = try await self.update(some: batch)
-
-                modified += updates.modified
-                selected += updates.selected
-            }
-        }
-
-        return (modified, selected)
-    }
-
-    /// Decode and re-encode all documents in this collection **one at a time** with the
-    /// provided closure.
-    func recode<Master>(
-        by deadline:ContinuousClock.Instant,
-        _ migrate:(inout Master) async throws -> ()) async throws -> (modified:Int, of:Int)
-        where   Master:BSONDocumentDecodable,
-                Master:BSONDocumentEncodable,
-                Master:Identifiable<Element.ID>,
-                Master:Sendable
-    {
-        var modified:Int = 0
-        var selected:Int = 0
-        try await session.run(
-            command: Mongo.Find<Mongo.Cursor<Master>>.init(Self.name,
-                stride: 1,
-                limit: .max),
-            against: self.database,
-            by: deadline)
-        {
-            for try await one:[Master] in $0
-            {
-                for var master:Master in consume one
-                {
-                    try await migrate(&master)
-
-                    switch try await self.update(some: master)
-                    {
-                    case nil:
-                        continue // something raced us.
-
-                    case true?:
-                        modified += 1
-                        fallthrough
-
-                    case false?:
-                        selected += 1
-                    }
-                }
-            }
-        }
-
-        return (modified, selected)
-    }
-
-}
-extension Mongo.CollectionModel
-{
+    public
     typealias Insertable = BSONDocumentEncodable & Identifiable<Element.ID>
 
-    func insert(
-        some elements:some Collection<some Insertable>) async throws
+    @inlinable
+    func insert(some elements:some Sequence<some Insertable>) async throws
     {
-        if  elements.isEmpty
+        var count:Int = 0
+        let response:Mongo.InsertResponse = try await session.run(
+            command: Mongo.Insert.init(Self.name,
+                writeConcern: .majority)
+            {
+                $0[.ordered] = false
+            }
+                documents:
+            {
+                for element:some Insertable in elements
+                {
+                    $0.append(element)
+                    count += 1
+                }
+            },
+            against: self.database)
+
+        if  count == 0
         {
             return
         }
+
+        let _:Mongo.Insertions = try response.insertions()
+    }
+
+    @inlinable
+    func insert(some element:some Insertable) async throws
+    {
         let response:Mongo.InsertResponse = try await session.run(
-            command: Mongo.Insert.init(Self.name,
-                writeConcern: .majority,
-                encoding: elements)
+            command: Mongo.Insert.init(Self.name, writeConcern: .majority)
             {
-                $0[.ordered] = false
+                $0.append(element)
             },
             against: self.database)
 
@@ -402,20 +350,7 @@ extension Mongo.CollectionModel
 }
 extension Mongo.CollectionModel
 {
-    func insert(some element:some Insertable) async throws
-    {
-        let response:Mongo.InsertResponse = try await session.run(
-            command: Mongo.Insert.init(Self.name,
-                writeConcern: .majority,
-                encoding: [element]),
-            against: self.database)
-
-        let _:Mongo.Insertions = try response.insertions()
-    }
-}
-
-extension Mongo.CollectionModel
-{
+    @inlinable
     func upsert(
         some elements:some Sequence<some Insertable>) async throws -> Mongo.Updates<Element.ID>
     {
@@ -432,7 +367,7 @@ extension Mongo.CollectionModel
         return try response.updates()
     }
 
-    @discardableResult
+    @inlinable
     func upsert(some element:some Insertable) async throws -> Element.ID?
     {
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
@@ -444,6 +379,65 @@ extension Mongo.CollectionModel
 
         let updates:Mongo.Updates<Element.ID> = try response.updates()
         return updates.upserted.first?.id
+    }
+}
+
+extension Mongo.CollectionModel where Element:Insertable
+{
+    /// Inserts a single instance of this collection’s ``Element`` type, which is **not**
+    /// expected to already exist in the collection.
+    @inlinable public
+    func insert(_ element:Element) async throws
+    {
+        try await self.insert(some: element)
+    }
+
+    /// Inserts multiple instances of this collection’s ``Element`` type, **none of which** are
+    /// expected to already exist in the collection.
+    @inlinable public
+    func insert(_ elements:some Sequence<Element>) async throws
+    {
+        try await self.insert(some: elements)
+    }
+
+    /// Inserts a single instance of this collection’s ``Element`` type, which is expected to
+    /// replace an **existing** document with the same ``Identifiable/id``.
+    ///
+    /// >   Returns:
+    ///     True if the document was modified, false if the document was not modified, and nil
+    ///     if the document was not found.
+    @discardableResult
+    @inlinable public
+    func replace(_ element:Element) async throws -> Bool?
+    {
+        try await self.update(some: element)
+    }
+
+    /// Inserts multiple instances of this collection’s ``Element`` type, each of which is
+    /// expected to replace an **existing** document with the same ``Identifiable/id``.
+    @discardableResult
+    @inlinable public
+    func replace(_ elements:some Sequence<Element>) async throws -> Mongo.Updates<Element.ID>
+    {
+        try await self.update(some: elements)
+    }
+
+    /// Inserts a single instance of this collection’s ``Element`` type, replacing any existing
+    /// document with the same ``Identifiable/id``.
+    @discardableResult
+    @inlinable public
+    func upsert(_ element:Element) async throws -> Element.ID?
+    {
+        try await self.upsert(some: element)
+    }
+
+    /// Inserts multiple instances of this collection’s ``Element`` type, each of which
+    /// potentially replacing an existing document with the same ``Identifiable/id``.
+    @discardableResult
+    @inlinable public
+    func upsert(_ elements:some Sequence<Element>) async throws -> Mongo.Updates<Element.ID>
+    {
+        try await self.upsert(some: elements)
     }
 }
 
@@ -506,8 +500,10 @@ extension Mongo.CollectionModel
         return element
     }
 }
+
 extension Mongo.CollectionModel
 {
+    @inlinable
     func update(
         some elements:some Sequence<some Insertable>) async throws -> Mongo.Updates<Element.ID>
     {
@@ -523,10 +519,9 @@ extension Mongo.CollectionModel
 
         return try response.updates()
     }
-    /// Replaces an *existing* document having the same identifier as the passed document with
-    /// the passed document. Returns true if the document was modified, false if the document
-    /// was not modified, and nil if the document was not found.
+
     @discardableResult
+    @inlinable
     func update(some element:some Insertable) async throws -> Bool?
     {
         let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
@@ -573,65 +568,6 @@ extension Mongo.CollectionModel
         return updates.modified
     }
 }
-
-extension Mongo.CollectionModel where Element:Mongo.MasterCodingModel
-{
-    @discardableResult
-    func update(field:Element.CodingKey,
-        of target:Element.ID,
-        to value:some BSONEncodable) async throws -> Bool?
-    {
-        try await self.update
-        {
-            $0.update(field: Element[field], by: "_id", of: target, to: value)
-        }
-    }
-
-    @discardableResult
-    func update(field:Element.CodingKey,
-        by index:Element.CodingKey,
-        of key:some BSONEncodable,
-        to value:some BSONEncodable) async throws -> Bool?
-    {
-        try await self.update
-        {
-            $0.update(field: Element[field], by: Element[index], of: key, to: value)
-        }
-    }
-}
-extension Mongo.CollectionModel where Element:Mongo.MasterCodingModel, Element:BSONDecodable
-{
-    @discardableResult
-    func reset<Value>(field:Element.CodingKey,
-        of existing:Element.ID,
-        to value:Value?) async throws -> Element? where Value:BSONEncodable
-    {
-        let (after, _):(Element?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Existing<Element>>.init(Self.name,
-            returning: .new)
-            {
-                $0[.query]
-                {
-                    $0["_id"] = existing
-                }
-                $0[.update]
-                {
-                    if  let value:Value
-                    {
-                        $0[.set] { $0[Element[field]] = value }
-                    }
-                    else
-                    {
-                        $0[.unset] { $0[Element[field]] = () }
-                    }
-                }
-            },
-            against: self.database)
-
-        return after
-    }
-}
-
 extension Mongo.CollectionModel
 {
     /// Deletes up to one document having the specified identifier, returning true if a
@@ -676,33 +612,5 @@ extension Mongo.CollectionModel
 
         let deletions:Mongo.Deletions = try response.deletions()
         return deletions.deleted
-    }
-}
-//  TODO: we need to unify ``Unidoc.Scalar`` and ``Unidoc.Group`, most likely by introducing
-//  a new type ``Unidoc.Vertex``.
-extension Mongo.CollectionModel // where Element.ID == Unidoc.Scalar
-{
-    /// Deletes all records from the collection within the specified zone.
-    func clear(range:Unidoc.Edition) async throws
-    {
-        let response:Mongo.DeleteResponse = try await session.run(
-            command: Mongo.Delete<Mongo.Many>.init(Self.name)
-            {
-                $0
-                {
-                    $0[.limit] = .unlimited
-                    $0[.q]
-                    {
-                        $0[.and]
-                        {
-                            $0 { $0["_id"] { $0[.gte] = range.min } }
-                            $0 { $0["_id"] { $0[.lte] = range.max } }
-                        }
-                    }
-                }
-            },
-            against: self.database)
-
-        let _:Mongo.Deletions = try response.deletions()
     }
 }

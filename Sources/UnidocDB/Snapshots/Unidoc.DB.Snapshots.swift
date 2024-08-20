@@ -77,10 +77,9 @@ extension Unidoc.DB.Snapshots:Mongo.CollectionModel
 }
 extension Unidoc.DB.Snapshots
 {
-    public
-    func upsert(snapshot:Unidoc.Snapshot) async throws -> Unidoc.UploadStatus
+    func store(snapshot:Unidoc.Snapshot) async throws -> Unidoc.UploadStatus
     {
-        switch try await self.upsert(some: snapshot)
+        switch try await self.upsert(snapshot)
         {
         case nil:   .init(edition: snapshot.id, updated: true)
         case  _?:   .init(edition: snapshot.id, updated: false)
