@@ -22,9 +22,9 @@ extension Unidoc.LoadExplainedOperation:Unidoc.PublicOperation
     func load(from server:Unidoc.Server,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
-        let explanation:String = try await session.explain(
-            database: server.db.unidoc.id,
+        let db:Unidoc.DB = try await server.db.session()
+        let explanation:String = try await db.session.explain(
+            database: db.id,
             query: self.query)
 
         return .ok(.init(content: .init(

@@ -13,11 +13,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -93,10 +96,9 @@ extension Unidoc.DB.Packages:Mongo.CollectionModel
 extension Unidoc.DB.Packages:Mongo.RecodableModel
 {
     public
-    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    func recode() async throws -> (modified:Int, of:Int)
     {
         try await self.recode(through: Unidoc.PackageMetadata.self,
-            with: session,
             by: .now.advanced(by: .seconds(30)))
     }
 }
@@ -104,34 +106,29 @@ extension Unidoc.DB.Packages
 {
     public
     func reset(media:Unidoc.PackageMedia?,
-        of package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+        of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
         try await self.reset(field: .media,
             of: package,
-            to: media,
-            with: session)
+            to: media)
     }
 
     public
     func reset(platformPreference triple:Triple?,
-        of package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+        of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
         try await self.reset(field: .platformPreference,
             of: package,
-            to: triple,
-            with: session)
+            to: triple)
     }
 }
 extension Unidoc.DB.Packages
 {
     public
     func insert(editor:Unidoc.Account,
-        into package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+        into package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package, with: session)
+        try await self.modify(existing: package)
         {
             $0[.addToSet]
             {
@@ -141,10 +138,9 @@ extension Unidoc.DB.Packages
     }
     public
     func revoke(editor:Unidoc.Account,
-        from package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+        from package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package, with: session)
+        try await self.modify(existing: package)
         {
             $0[.pull]
             {
@@ -156,26 +152,23 @@ extension Unidoc.DB.Packages
 extension Unidoc.DB.Packages
 {
     public
-    func update(metadata:Unidoc.PackageMetadata,
-        with session:Mongo.Session) async throws -> Bool?
+    func update(metadata:Unidoc.PackageMetadata) async throws -> Bool?
     {
-        try await self.update(some: metadata, with: session)
+        try await self.update(some: metadata)
     }
 
     public
     func update(package:Unidoc.Package,
-        symbol:Symbol.Package,
-        with session:Mongo.Session) async throws -> Bool?
+        symbol:Symbol.Package) async throws -> Bool?
     {
-        try await self.update(field: .symbol, of: package, to: symbol, with: session)
+        try await self.update(field: .symbol, of: package, to: symbol)
     }
 
     public
     func update(package:Unidoc.Package,
-        repo:Unidoc.PackageRepo?,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+        repo:Unidoc.PackageRepo?) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package, with: session)
+        try await self.modify(existing: package)
         {
             if  let repo:Unidoc.PackageRepo
             {
@@ -190,10 +183,9 @@ extension Unidoc.DB.Packages
 
     public
     func update(package:Unidoc.Package,
-        hidden:Bool,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+        hidden:Bool) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package, with: session)
+        try await self.modify(existing: package)
         {
             if  hidden
             {
@@ -214,8 +206,7 @@ extension Unidoc.DB.Packages
 
     public
     func updateWebhook(configurationURL:String,
-        repo:Unidoc.PackageRepo,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+        repo:Unidoc.PackageRepo) async throws -> Unidoc.PackageMetadata?
     {
         let package:Unidoc.PackageByGitHubID
 
@@ -224,7 +215,7 @@ extension Unidoc.DB.Packages
         case .github(let origin):   package = .init(id: origin.id)
         }
 
-        return try await self.modify(existing: package, with: session)
+        return try await self.modify(existing: package)
         {
             $0[.set]
             {
@@ -235,10 +226,9 @@ extension Unidoc.DB.Packages
     }
 
     public
-    func detachWebhook(package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Unidoc.PackageMetadata?
+    func detachWebhook(package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package, with: session)
+        try await self.modify(existing: package)
         {
             $0[.unset]
             {
@@ -249,8 +239,7 @@ extension Unidoc.DB.Packages
 }
 extension Unidoc.DB.Packages
 {
-    func scan(
-        with session:Mongo.Session) async throws -> Unidoc.TextResource<Unidoc.DB.Metadata.Key>
+    func scan() async throws -> Unidoc.TextResource<Unidoc.DB.Metadata.Key>
     {
         //  TODO: this should project the `_id`
         let json:JSON = try await .array

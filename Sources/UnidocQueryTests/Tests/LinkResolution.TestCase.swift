@@ -37,7 +37,7 @@ extension LinkResolution
 }
 extension LinkResolution.TestCase
 {
-    func run(tests:TestGroup, session:Mongo.Session, unidoc:Unidoc.DB) async throws
+    func run(tests:TestGroup, db:Unidoc.DB) async throws
     {
         let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
             volume: .init("swift-test"),
@@ -45,7 +45,7 @@ extension LinkResolution.TestCase
 
         guard
         let output:Unidoc.VertexOutput = tests.expect(
-            value: try await session.query(database: unidoc.id, with: query)),
+            value: try await db.session.query(database: db.id, with: query)),
         let vertex:Unidoc.AnyVertex = tests.expect(
             value: output.principal?.vertex)
         else

@@ -18,7 +18,7 @@ extension Unidoc
 extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         guard
@@ -30,8 +30,7 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
 
         /// If the builder is recovering from a crash, kill any builds that had previously been
         /// assigned to it.
-        let _:Int = try await server.db.packageBuilds.killBuilds(builder: self.id,
-            with: session)
+        let _:Int = try await db.packageBuilds.killBuilds(builder: self.id)
 
         let labels:Unidoc.BuildLabels? = try await withThrowingTaskGroup(
             of: Unidoc.BuildLabels?.self)

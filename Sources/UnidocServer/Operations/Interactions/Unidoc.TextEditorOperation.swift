@@ -18,7 +18,7 @@ extension Unidoc
 extension Unidoc.TextEditorOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let action:Unidoc.PostAction
@@ -32,7 +32,7 @@ extension Unidoc.TextEditorOperation:Unidoc.AdministrativeOperation
         }
 
         let text:Unidoc.TextResource<Unidoc.DB.Metadata.Key>? =
-            try await server.db.metadata.find(id: .robots_txt, with: session)
+            try await db.metadata.find(id: .robots_txt)
 
         let page:Unidoc.TextEditorPage = .init(
             string: try text.map

@@ -11,8 +11,7 @@ struct LinkResolution:UnidocDatabaseTestBattery
 
     static
     func run(tests:TestGroup,
-        pool:Mongo.SessionPool,
-        unidoc:Unidoc.DB) async throws
+        db:Unidoc.DB) async throws
     {
         let workspace:SSGC.Workspace = try .create(at: ".testing")
         let toolchain:SSGC.Toolchain = try .detect(pretty: true)
@@ -35,13 +34,11 @@ struct LinkResolution:UnidocDatabaseTestBattery
             swift = try workspace.build(special: .swift, with: toolchain)
         }
 
-        let session:Mongo.Session = try await .init(from: pool)
-
-        tests.expect(try await unidoc.store(linking: swift, with: session).0 ==? .init(
+        tests.expect(try await db.store(linking: swift).0 ==? .init(
             edition: .init(package: 0, version: 0),
             updated: false))
 
-        tests.expect(try await unidoc.store(linking: example, with: session).0 ==? .init(
+        tests.expect(try await db.store(linking: example).0 ==? .init(
             edition: .init(package: 1, version: -1),
             updated: false))
 
@@ -118,7 +115,7 @@ struct LinkResolution:UnidocDatabaseTestBattery
 
             await tests.do
             {
-                try await `case`.run(tests: tests, session: session, unidoc: unidoc)
+                try await `case`.run(tests: tests, db: db)
             }
         }
     }

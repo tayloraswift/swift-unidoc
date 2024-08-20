@@ -11,11 +11,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -97,17 +100,15 @@ extension Unidoc.DB.Volumes:Mongo.CollectionModel
 extension Unidoc.DB.Volumes:Mongo.RecodableModel
 {
     public
-    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    func recode() async throws -> (modified:Int, of:Int)
     {
         try await self.recode(through: Unidoc.VolumeMetadata.self,
-            with: session,
             by: .now.advanced(by: .seconds(30)))
     }
 }
 extension Unidoc.DB.Volumes
 {
-    func find(named symbol:Symbol.Volume,
-        with session:Mongo.Session) async throws -> Unidoc.VolumeMetadata?
+    func find(named symbol:Symbol.Volume) async throws -> Unidoc.VolumeMetadata?
     {
         try await session.run(
             command: Mongo.Find<Mongo.Single<Unidoc.VolumeMetadata>>.init(Self.name,
@@ -131,8 +132,7 @@ extension Unidoc.DB.Volumes
 extension Unidoc.DB.Volumes
 {
     /// Returns the latest release version of the specified package, if one exists.
-    func latestRelease(of package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> PatchView?
+    func latestRelease(of package:Unidoc.Package) async throws -> PatchView?
     {
         let results:[PatchView] = try await session.run(
             command: self.latestRelease(of: package),

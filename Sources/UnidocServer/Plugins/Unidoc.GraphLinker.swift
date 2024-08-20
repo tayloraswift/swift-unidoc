@@ -42,7 +42,7 @@ extension Unidoc.GraphLinker:Unidoc.CollectionVisitor
     }
 
     public mutating
-    func tour(in db:Unidoc.DB, with session:Mongo.Session) async throws
+    func tour(in db:Unidoc.DB) async throws
     {
         while true
         {
@@ -50,15 +50,13 @@ extension Unidoc.GraphLinker:Unidoc.CollectionVisitor
             async
             let cooldown:Void = Task.sleep(for: .seconds(5))
 
-            for queued:Unidoc.DB.Snapshots.QueuedOperation in try await db.snapshots.pending(8,
-                with: session)
+            for queued:Unidoc.DB.Snapshots.QueuedOperation in try await db.snapshots.pending(8)
             {
                 async
                 let cooldown:Void = Task.sleep(for: .seconds(5))
 
                 try await self.perform(operation: queued,
-                    updating: db,
-                    with: session)
+                    updating: db)
 
                 try await cooldown
             }
@@ -71,8 +69,7 @@ extension Unidoc.GraphLinker
 {
     private mutating
     func perform(operation:Unidoc.DB.Snapshots.QueuedOperation,
-        updating unidoc:Unidoc.DB,
-        with session:Mongo.Session) async throws
+        updating db:Unidoc.DB) async throws
     {
         defer
         {
@@ -86,21 +83,18 @@ extension Unidoc.GraphLinker
         {
         case .uplinkInitial, .uplinkRefresh:
             let status:Unidoc.UplinkStatus? = try await self.uplink(snapshot: operation.edition,
-                updating: unidoc,
-                with: session)
+                updating: db)
 
             event = status.map(Event.uplinked(_:))
 
         case .unlink:
-            let status:Unidoc.UnlinkStatus? = try await unidoc.unlink(operation.edition,
-                with: session)
+            let status:Unidoc.UnlinkStatus? = try await db.unlink(operation.edition)
 
             event = status.map(Event.unlinked(_:))
 
         case .delete:
             //  Okay if the volume has already been unlinked, which causes this to return nil.
-            if  let unlink:Unidoc.UnlinkStatus = try await unidoc.unlink(operation.edition,
-                    with: session)
+            if  let unlink:Unidoc.UnlinkStatus = try await db.unlink(operation.edition)
             {
                 switch unlink
                 {
@@ -142,7 +136,7 @@ extension Unidoc.GraphLinker
                 deletedS3 = false
             }
 
-            if  try await unidoc.snapshots.delete(id: operation.edition,  with: session)
+            if  try await db.snapshots.delete(id: operation.edition)
             {
                 event = .deleted(.deleted(operation.edition, fromS3: deletedS3))
             }
@@ -152,7 +146,7 @@ extension Unidoc.GraphLinker
             }
         }
 
-        try await session.update(database: unidoc.id,
+        try await db.session.update(database: db.id,
             with: Unidoc.DB.Snapshots.ClearAction.one(operation.edition))
 
         if  let event:Event
@@ -167,13 +161,10 @@ extension Unidoc.GraphLinker
 
     private
     func uplink(snapshot id:Unidoc.Edition,
-        updating unidoc:Unidoc.DB,
-        with session:Mongo.Session) async throws -> Unidoc.UplinkStatus?
+        updating db:Unidoc.DB) async throws -> Unidoc.UplinkStatus?
     {
         guard
-        let status:Unidoc.UplinkStatus = try await unidoc.uplink(id,
-            from: self.graphs,
-            with: session)
+        let status:Unidoc.UplinkStatus = try await db.uplink(id, from: self.graphs)
         else
         {
             return nil
@@ -181,10 +172,9 @@ extension Unidoc.GraphLinker
 
         if !status.hidden
         {
-            _ = try await unidoc.docsFeed.push(.init(
+            _ = try await db.docsFeed.push(.init(
                     discovered: .now(),
-                    volume: status.edition),
-                with: session)
+                    volume: status.edition))
         }
 
         return status

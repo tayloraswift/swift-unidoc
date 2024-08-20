@@ -12,11 +12,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -103,10 +106,9 @@ extension Unidoc.DB.Editions:Mongo.CollectionModel
 extension Unidoc.DB.Editions:Mongo.RecodableModel
 {
     public
-    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    func recode() async throws -> (modified:Int, of:Int)
     {
         try await self.recode(through: Unidoc.EditionMetadata.self,
-            with: session,
             by: .now.advanced(by: .seconds(60)))
     }
 }

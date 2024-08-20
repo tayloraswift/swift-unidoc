@@ -28,8 +28,8 @@ extension Unidoc.LoadEditionStateOperation:Unidoc.PublicOperation
     func load(from server:Unidoc.Server,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let session:Mongo.Session
         let remaining:Int?
+        let db:Unidoc.DB
 
         switch self.authorization
         {
@@ -40,11 +40,11 @@ extension Unidoc.LoadEditionStateOperation:Unidoc.PublicOperation
             return .unauthorized("Missing authorization header\n")
 
         case .api(let authorization):
-            session = try await .init(from: server.db.sessions)
-            remaining = try await server.db.users.charge(apiKey: authorization.apiKey,
+            db = try await server.db.session()
+            remaining = try await db.users.charge(
+                apiKey: authorization.apiKey,
                 user: authorization.id,
-                cost: 1,
-                with: session)
+                cost: 1)
         }
 
         guard
@@ -55,10 +55,9 @@ extension Unidoc.LoadEditionStateOperation:Unidoc.PublicOperation
         }
 
         guard
-        let edition:Unidoc.EditionState = try await server.db.unidoc.editionState(
+        let edition:Unidoc.EditionState = try await db.editionState(
             package: self.package,
-            version: self.version,
-            with: session)
+            version: self.version)
         else
         {
             return .resource("No such edition\n", status: 404)

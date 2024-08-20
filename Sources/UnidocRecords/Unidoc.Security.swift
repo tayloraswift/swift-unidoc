@@ -1,7 +1,7 @@
 extension Unidoc
 {
     @frozen public
-    enum ServerSecurity:Equatable, Sendable
+    enum Security:Equatable, Sendable
     {
         /// The server will enforce account-level permissions.
         case enforced

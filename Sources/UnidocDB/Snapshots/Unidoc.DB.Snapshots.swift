@@ -15,11 +15,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -75,10 +78,9 @@ extension Unidoc.DB.Snapshots:Mongo.CollectionModel
 extension Unidoc.DB.Snapshots
 {
     public
-    func upsert(snapshot:Unidoc.Snapshot,
-        with session:Mongo.Session) async throws -> Unidoc.UploadStatus
+    func upsert(snapshot:Unidoc.Snapshot) async throws -> Unidoc.UploadStatus
     {
-        switch try await self.upsert(some: snapshot, with: session)
+        switch try await self.upsert(some: snapshot)
         {
         case nil:   .init(edition: snapshot.id, updated: true)
         case  _?:   .init(edition: snapshot.id, updated: false)
@@ -88,20 +90,19 @@ extension Unidoc.DB.Snapshots
 extension Unidoc.DB.Snapshots
 {
     func load(for snapshot:Unidoc.Snapshot,
-        from loader:(some Unidoc.GraphLoader)?,
-        with session:Mongo.Session) async throws -> Unidoc.Linker
+        from loader:(some Unidoc.GraphLoader)?) async throws -> Unidoc.Linker
     {
         let exonyms:[Unidoc.Edition: Symbol.Package] = snapshot.exonyms()
         var objects:[SymbolGraphObject<Unidoc.Edition>] = []
             objects.reserveCapacity(1 + exonyms.count)
 
         if  snapshot.metadata.package.name != .swift,
-            let swift:Unidoc.Snapshot = try await self.loadStandardLibrary(with: session)
+            let swift:Unidoc.Snapshot = try await self.loadStandardLibrary()
         {
             objects.append(try await swift.load(with: loader))
         }
 
-        for other:Unidoc.Snapshot in try await self.load(exonyms.keys.sorted(), with: session)
+        for other:Unidoc.Snapshot in try await self.load(exonyms.keys.sorted())
         {
             var object:SymbolGraphObject<Unidoc.Edition> = try await other.load(with: loader)
             if  let exonym:Symbol.Package = exonyms[other.id]
@@ -130,8 +131,7 @@ extension Unidoc.DB.Snapshots
 extension Unidoc.DB.Snapshots
 {
     private
-    func loadStandardLibrary(
-        with session:Mongo.Session) async throws -> Unidoc.Snapshot?
+    func loadStandardLibrary() async throws -> Unidoc.Snapshot?
     {
         try await session.run(
             command: Mongo.Find<Mongo.Single<Unidoc.Snapshot>>.init(Self.name,
@@ -150,8 +150,7 @@ extension Unidoc.DB.Snapshots
     }
 
     private
-    func load(_ pins:[Unidoc.Edition],
-        with session:Mongo.Session) async throws -> [Unidoc.Snapshot]
+    func load(_ pins:[Unidoc.Edition]) async throws -> [Unidoc.Snapshot]
     {
         try await session.run(
             command: Mongo.Find<Mongo.Cursor<Unidoc.Snapshot>>.init(Self.name,
@@ -174,8 +173,7 @@ extension Unidoc.DB.Snapshots
 {
     /// Returns a single batch of symbol graphs that are queued for linking.
     public
-    func pending(_ limit:Int,
-        with session:Mongo.Session) async throws -> [QueuedOperation]
+    func pending(_ limit:Int) async throws -> [QueuedOperation]
     {
         try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<QueuedOperation>>.init(Self.name,
@@ -201,8 +199,7 @@ extension Unidoc.DB.Snapshots
     /// versions.
     public
     func oldest(_ limit:Int,
-        until version:PatchVersion,
-        with session:Mongo.Session) async throws -> [Unidoc.Edition]
+        until version:PatchVersion) async throws -> [Unidoc.Edition]
     {
         let editions:[Mongo.IdentityDocument<Unidoc.Edition>] = try await session.run(
             command: Mongo.Find<

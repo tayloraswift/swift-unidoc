@@ -11,11 +11,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -45,8 +48,7 @@ extension Unidoc.DB.DocsFeed:Mongo.CollectionModel
 extension Unidoc.DB.DocsFeed
 {
     public
-    func push(_ activity:Activity<Unidoc.Edition>,
-        with session:Mongo.Session) async throws -> Bool
+    func push(_ activity:Activity<Unidoc.Edition>) async throws -> Bool
     {
         let (_, inserted):(Activity<Unidoc.Edition>, UnixMillisecond?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Upserting<

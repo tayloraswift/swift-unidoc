@@ -18,14 +18,10 @@ extension Unidoc
 extension Unidoc.TextUpdateOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let _:Bool? = try await server.db.metadata.update(with: session)
-        {
-            $0.upsert(self.text)
-        }
-
+        let _:Bool? = try await db.metadata.update { $0.upsert(self.text) }
         return .redirect(.seeOther("/robots.txt"))
     }
 }

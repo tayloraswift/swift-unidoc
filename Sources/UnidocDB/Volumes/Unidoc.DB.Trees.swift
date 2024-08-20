@@ -1,4 +1,4 @@
-import MongoQL
+import MongoDB
 import Unidoc
 import UnidocRecords
 
@@ -9,10 +9,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }

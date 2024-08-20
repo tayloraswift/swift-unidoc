@@ -23,9 +23,9 @@ extension Unidoc
 }
 extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
 {
-    func perform(on server:Unidoc.Server,
-        payload:__owned [UInt8],
-        session:Mongo.Session) async throws -> HTTP.ServerResponse
+    func perform(with payload:[UInt8],
+        on server:Unidoc.Server,
+        db:Unidoc.DB) async throws -> HTTP.ServerResponse
     {
         let bson:BSON.Document = .init(bytes: payload[...])
 
@@ -33,10 +33,9 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
         {
         case .report:
             let report:Unidoc.BuildReport = try .init(bson: bson)
-            try await server.db.packageBuilds.updateBuild(
+            try await db.packageBuilds.updateBuild(
                 package: report.package,
-                entered: report.entered,
-                with: session)
+                entered: report.entered)
 
         case .labeled:
             var artifact:Unidoc.BuildArtifact = try .init(bson: bson)
@@ -46,19 +45,17 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
             {
             case .failure(let reason):
                 logs = try await artifact.export(from: server)
-                try await server.db.packageBuilds.finishBuild(
+                try await db.packageBuilds.finishBuild(
                     package: artifact.package,
                     failure: reason,
-                    logs: logs,
-                    with: session)
+                    logs: logs)
 
             case .success(let snapshot):
                 /// A successful (labeled) build also sets the platform preference, since we now
                 /// know that the package can be built on that platform.
-                let _metadata:Unidoc.PackageMetadata? = try await server.db.packages.reset(
+                let _metadata:Unidoc.PackageMetadata? = try await db.packages.reset(
                     platformPreference: snapshot.metadata.triple,
-                    of: snapshot.id.package,
-                    with: session)
+                    of: snapshot.id.package)
 
                 /// Right now, exporting build logs for private repositories is a security
                 /// hazard, because the logs contain secrets, and the log URLs are easily
@@ -75,26 +72,22 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
 
                 logs = try await artifact.export(from: server, _logsIncluded: _logsIncluded)
 
-                try await server.db.packageBuilds.finishBuild(
+                try await db.packageBuilds.finishBuild(
                     package: artifact.package,
                     failure: nil,
-                    logs: logs,
-                    with: session)
+                    logs: logs)
 
-                let _:Unidoc.UploadStatus = try await server.db.snapshots.upsert(
-                    snapshot: snapshot,
-                    with: session)
+                let _:Unidoc.UploadStatus = try await db.snapshots.upsert(snapshot: snapshot)
             }
 
         case .labeling:
             let documentation:SymbolGraphObject<Void> = try .init(bson: bson)
 
-            var (snapshot, _):(Unidoc.Snapshot, _?) = try await server.db.unidoc.label(
+            var (snapshot, _):(Unidoc.Snapshot, _?) = try await db.label(
                 documentation: documentation,
                 //  This is probably the standard library, or some other ‘special’ package, so
                 //  we don’t want it to appear in the activity feed.
-                action: .uplinkRefresh,
-                with: session)
+                action: .uplinkRefresh)
 
             if  let bucket:AWS.S3.Bucket = server.bucket.graphs
             {
@@ -105,12 +98,9 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
                 try await snapshot.moveSymbolGraph(to: s3)
             }
 
-            try await server.db.packageBuilds.finishBuild(package: snapshot.id.package,
-                with: session)
+            try await db.packageBuilds.finishBuild(package: snapshot.id.package)
 
-            let _:Unidoc.UploadStatus = try await server.db.unidoc.snapshots.upsert(
-                snapshot: snapshot,
-                with: session)
+            let _:Unidoc.UploadStatus = try await db.snapshots.upsert(snapshot: snapshot)
         }
 
         return .noContent

@@ -11,11 +11,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -61,8 +64,7 @@ extension Unidoc.DB.PackageBuilds:Mongo.CollectionModel
 extension Unidoc.DB.PackageBuilds
 {
     public
-    func selectBuild(await awaits:Bool,
-        with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
+    func selectBuild(await awaits:Bool) async throws -> Unidoc.BuildMetadata?
     {
         //  Find a build, any build...
         if  let build:Unidoc.BuildMetadata = try await session.run(
@@ -123,8 +125,7 @@ extension Unidoc.DB.PackageBuilds
     public
     func submitBuild(
         request:Unidoc.BuildRequest<Void>,
-        package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Bool
+        package:Unidoc.Package) async throws -> Bool
     {
         do
         {
@@ -161,8 +162,7 @@ extension Unidoc.DB.PackageBuilds
 
     public
     func cancelBuild(
-        package:Unidoc.Package,
-        with session:Mongo.Session) async throws -> Bool
+        package:Unidoc.Package) async throws -> Bool
     {
         let deleted:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.One>.init(Self.name)
@@ -187,8 +187,7 @@ extension Unidoc.DB.PackageBuilds
     func assignBuild(
         request:Unidoc.BuildBehavior,
         package:Unidoc.Package,
-        builder:Unidoc.Account,
-        with session:Mongo.Session) async throws -> Bool
+        builder:Unidoc.Account) async throws -> Bool
     {
         let (update, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Existing<Unidoc.BuildMetadata>>.init(Self.name,
@@ -224,8 +223,7 @@ extension Unidoc.DB.PackageBuilds
     public
     func updateBuild(
         package:Unidoc.Package,
-        entered:Unidoc.BuildStage,
-        with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
+        entered:Unidoc.BuildStage) async throws -> Unidoc.BuildMetadata?
     {
         let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Existing<Unidoc.BuildMetadata>>.init(Self.name,
@@ -257,8 +255,7 @@ extension Unidoc.DB.PackageBuilds
     func finishBuild(
         package:Unidoc.Package,
         failure:Unidoc.BuildFailure? = nil,
-        logs:[Unidoc.BuildLogType] = [],
-        with session:Mongo.Session) async throws -> Unidoc.BuildMetadata?
+        logs:[Unidoc.BuildLogType] = []) async throws -> Unidoc.BuildMetadata?
     {
         let (status, _):(Unidoc.BuildMetadata?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Existing<Unidoc.BuildMetadata>>.init(Self.name,
@@ -302,10 +299,9 @@ extension Unidoc.DB.PackageBuilds
     }
 
     public
-    func lintBuilds(startedBefore:UnixMillisecond,
-        with session:Mongo.Session) async throws -> Int
+    func lintBuilds(startedBefore:UnixMillisecond) async throws -> Int
     {
-        try await self.killBuilds(with: session)
+        try await self.killBuilds
         {
             $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
             $0[Unidoc.BuildMetadata[.progress] / Unidoc.BuildProgress[.started]]
@@ -316,10 +312,9 @@ extension Unidoc.DB.PackageBuilds
     }
 
     public
-    func killBuilds(builder:Unidoc.Account,
-        with session:Mongo.Session) async throws -> Int
+    func killBuilds(builder:Unidoc.Account) async throws -> Int
     {
-        try await self.killBuilds(with: session)
+        try await self.killBuilds
         {
             $0[Unidoc.BuildMetadata[.progress]] { $0[.exists] = true }
             $0[Unidoc.BuildMetadata[.progress] / Unidoc.BuildProgress[.builder]] = builder
@@ -327,8 +322,7 @@ extension Unidoc.DB.PackageBuilds
     }
 
     private
-    func killBuilds(with session:Mongo.Session,
-        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
+    func killBuilds(where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
     {
         let failure:Unidoc.BuildFailure = .killed
         let response:Mongo.UpdateResponse = try await session.run(

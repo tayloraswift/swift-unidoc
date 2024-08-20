@@ -23,10 +23,10 @@ extension Unidoc
 extension Unidoc.LinkerOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        try await session.update(database: server.db.unidoc.id, with: self.queue)
+        try await db.session.update(database: db.id, with: self.queue)
         return .redirect(.seeOther(self.from ?? "/admin"))
     }
 }

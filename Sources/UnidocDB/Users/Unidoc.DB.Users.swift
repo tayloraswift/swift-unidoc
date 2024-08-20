@@ -9,11 +9,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable public
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -61,8 +64,7 @@ extension Unidoc.DB.Users
     /// thread while it waits for the system to generate a random number. This cookie is only
     /// secure if the system's random number generator is secure.
     public
-    func update(user:Unidoc.User,
-        with session:Mongo.Session) async throws -> Unidoc.UserSecrets
+    func update(user:Unidoc.User) async throws -> Unidoc.UserSecrets
     {
         let (secrets, _):(Unidoc.UserSecrets, Unidoc.Account?) = try await session.run(
             command: Mongo.FindAndModify<
@@ -85,8 +87,7 @@ extension Unidoc.DB.Users
     }
 
     public
-    func update(users:[Unidoc.User],
-        with session:Mongo.Session) async throws -> Mongo.Updates<Unidoc.Account>
+    func update(users:[Unidoc.User]) async throws -> Mongo.Updates<Unidoc.Account>
     {
         let updated:Mongo.UpdateResponse<Unidoc.Account> = try await session.run(
             command: Mongo.Update<Mongo.Many, Unidoc.Account>.init(Self.name)
@@ -109,11 +110,9 @@ extension Unidoc.DB.Users
     /// **Replaces** the access list for the given user with the specified list, returning
     /// true if the user exists and the list was modified from its previous value.
     public
-    func update(access:[Unidoc.Account],
-        user:Unidoc.Account,
-        with session:Mongo.Session) async throws -> Bool?
+    func update(access:[Unidoc.Account], user:Unidoc.Account) async throws -> Bool?
     {
-        try await self.update(field: .access, of: user, to: access, with: session)
+        try await self.update(field: .access, of: user, to: access)
     }
 }
 extension Unidoc.DB.Users
@@ -123,8 +122,7 @@ extension Unidoc.DB.Users
     /// Returns nil if the user does not exist.
     public
     func scramble(secret:Unidoc.User.CodingKey,
-        user:Unidoc.Account,
-        with session:Mongo.Session) async throws -> Unidoc.UserSecrets?
+        user:Unidoc.Account) async throws -> Unidoc.UserSecrets?
     {
         let (updated, _):(Unidoc.UserSecrets?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Existing<Unidoc.UserSecrets>>.init(Self.name,
@@ -162,8 +160,7 @@ extension Unidoc.DB.Users
     public
     func airdrop(
         reset:Int,
-        limit:Int,
-        with session:Mongo.Session) async throws -> Int
+        limit:Int) async throws -> Int
     {
         let accounts:[Mongo.IdentityDocument<Unidoc.Account>] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<Mongo.IdentityDocument<Unidoc.Account>>>.init(
@@ -221,10 +218,7 @@ extension Unidoc.DB.Users
     /// If the key is nil, this function will charge the `user` unconditionally, and so some
     /// other means of authenticating the user must be used.
     public
-    func charge(apiKey:Int64?,
-        user:Unidoc.Account,
-        cost:Int = 1,
-        with session:Mongo.Session) async throws -> Int?
+    func charge(apiKey:Int64?, user:Unidoc.Account, cost:Int = 1) async throws -> Int?
     {
         let (meter, _):(Unidoc.UserMeter?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Existing<Unidoc.UserMeter>>.init(Self.name,
@@ -258,8 +252,7 @@ extension Unidoc.DB.Users
     /// Checks if the given credentials matches the associated user, returning the user's ID and
     /// access level if the credentials are valid.
     public
-    func validate(user:Unidoc.UserSession,
-        with session:Mongo.Session) async throws -> Unidoc.UserRights?
+    func validate(user:Unidoc.UserSession) async throws -> Unidoc.UserRights?
     {
         try await session.run(
             command: Mongo.Find<Mongo.Single<Unidoc.UserRights>>.init(Self.name, limit: 1)

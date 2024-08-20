@@ -36,7 +36,7 @@ extension Unidoc.PackageBuildOperation
 extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let metadata:Unidoc.PackageMetadata?
@@ -56,7 +56,7 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
             request = nil
 
         case .cancelSymbolic(let symbol):
-            metadata = try await server.db.unidoc.package(named: symbol, with: session)
+            metadata = try await db.package(named: symbol)
 
             guard
             let metadata:Unidoc.PackageMetadata
@@ -70,10 +70,9 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
 
         case .submitSymbolic(let symbol):
             guard
-            let outputs:Unidoc.EditionOutput = try await server.db.unidoc.edition(
+            let outputs:Unidoc.EditionOutput = try await db.edition(
                 package: symbol.package,
-                version: .name(symbol.ref),
-                with: session),
+                version: .name(symbol.ref)),
             let edition:Unidoc.Edition = outputs.edition?.id
             else
             {
@@ -85,25 +84,20 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
             request = .init(version: .id(edition), rebuild: true)
         }
 
-        if  let rejection:HTTP.ServerResponse = try await server.authorize(
+        if  let rejection:HTTP.ServerResponse = try await db.authorize(
                 package: metadata,
                 loading: package,
                 account: self.account,
-                rights: self.rights,
-                with: session)
+                rights: self.rights)
         {
             return rejection
         }
 
         if  let request:Unidoc.BuildRequest<Void>
         {
-            _ = try await server.db.packageBuilds.submitBuild(request: request,
-                package: package,
-                with: session)
+            _ = try await db.packageBuilds.submitBuild(request: request, package: package)
         }
-        else if try await server.db.packageBuilds.cancelBuild(
-                package: package,
-                with: session)
+        else if try await db.packageBuilds.cancelBuild(package: package)
         {
         }
         else

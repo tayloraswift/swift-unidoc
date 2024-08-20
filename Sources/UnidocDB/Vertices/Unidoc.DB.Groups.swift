@@ -10,10 +10,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -67,8 +71,7 @@ extension Unidoc.DB.Groups
 {
     @discardableResult
     func insert(_ groups:Unidoc.Mesh.Groups,
-        realm:Unidoc.Realm?,
-        with session:Mongo.Session) async throws -> Mongo.Insertions
+        realm:Unidoc.Realm?) async throws -> Mongo.Insertions
     {
         let response:Mongo.InsertResponse = try await session.run(
             command: Mongo.Insert.init(Self.name,

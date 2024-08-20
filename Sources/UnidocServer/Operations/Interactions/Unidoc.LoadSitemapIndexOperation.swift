@@ -25,14 +25,12 @@ extension Unidoc.LoadSitemapIndexOperation:Unidoc.PublicOperation
     func load(from server:Unidoc.Server,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let db:Unidoc.Database = server.db
-
-        let session:Mongo.Session = try await .init(from: db.sessions)
+        let db:Unidoc.DB = try await server.db.session()
         let index:XML.Sitemap = try await .index
         {
             (xml:inout XML.Sitemap.ContentEncoder) in
 
-            try await db.sitemaps.list(with: session)
+            try await db.sitemaps.list()
             {
                 for sitemap:Unidoc.SitemapIndexEntry in $0
                 {
