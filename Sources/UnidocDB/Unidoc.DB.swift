@@ -205,8 +205,7 @@ extension Unidoc.DB
     public
     func index(realm:String) async throws -> (realm:Unidoc.RealmMetadata, new:Bool)
     {
-        let autoincrement:Unidoc.Autoincrement<Unidoc.RealmMetadata> = try await session.query(
-            database: self.id,
+        let autoincrement:Unidoc.Autoincrement<Unidoc.RealmMetadata> = try await self.query(
             with: Unidoc.AutoincrementQuery<RealmAliases, Realms>.init(symbol: realm))
             ?? .first
 
@@ -244,7 +243,7 @@ extension Unidoc.DB
             //  Symbols are the same.
             return
         }
-        let _:Never? = try await session.query(database: self.id, with: query)
+        let _:Never? = try await self.query(with: query)
     }
 
     public
@@ -296,8 +295,7 @@ extension Unidoc.DB
         }
 
         //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let placement:Unidoc.Autoincrement<Unidoc.PackageMetadata> = try await session.query(
-            database: self.id,
+        let placement:Unidoc.Autoincrement<Unidoc.PackageMetadata> = try await self.query(
             with: Unidoc.AutoincrementQuery<PackageAliases, Packages>.init(symbol: package))
             ?? .first
 
@@ -343,8 +341,7 @@ extension Unidoc.DB
         sha1:SHA1?) async throws -> (edition:Unidoc.EditionMetadata, new:Bool)
     {
         //  Placement involves autoincrement, which is why this cannot be done in an update.
-        let placement:Unidoc.EditionPlacement = try await session.query(
-            database: self.id,
+        let placement:Unidoc.EditionPlacement = try await self.query(
             with: Unidoc.EditionPlacementQuery.init(package: package, refname: name))
             ?? .first
 
@@ -705,8 +702,7 @@ extension Unidoc.DB
         alignment:
         if  let latest:Unidoc.Edition = mesh.latestRelease
         {
-            try await session.update(database: self.id,
-                with: Volumes.AlignLatest.init(to: latest))
+            try await self.update(with: Volumes.AlignLatest.init(to: latest))
 
             guard
             let realm:Unidoc.Realm = mesh.metadata.realm
@@ -715,8 +711,7 @@ extension Unidoc.DB
                 break alignment
             }
 
-            try await session.update(database: self.id,
-                with: Groups.AlignLatest.init(to: latest, in: realm))
+            try await self.update(with: Groups.AlignLatest.init(to: latest, in: realm))
         }
 
         return surfaceDelta
@@ -750,8 +745,7 @@ extension Unidoc.DB
 
         var pins:[Symbol.Package: Unidoc.Edition] = [:]
 
-        for dependency:Symbol.PackageDependency<Unidoc.Edition> in try await session.query(
-            database: self.id,
+        for dependency:Symbol.PackageDependency<Unidoc.Edition> in try await self.query(
             with: query)
         {
             pins[dependency.package] = dependency.version
@@ -895,8 +889,7 @@ extension Unidoc.DB
     public
     func align(package:Unidoc.Package, realm:Unidoc.Realm?) async throws
     {
-        try await session.update(database: self.id,
-            with: Unidoc.DB.Packages.AlignRealm.aligning(package))
+        try await self.update(with: Unidoc.DB.Packages.AlignRealm.aligning(package))
 
         groups:
         if  let realm:Unidoc.Realm
@@ -908,19 +901,17 @@ extension Unidoc.DB
                 break groups
             }
 
-            try await session.update(database: self.id,
-                with: Groups.AlignLatest.init(to: latest.id, in: realm))
+            try await self.update(with: Groups.AlignLatest.init(to: latest.id, in: realm))
         }
         else
         {
-            try await session.update(database: self.id,
-                with: Groups.ClearLatest.init(from: package))
+            try await self.update(with: Groups.ClearLatest.init(from: package))
         }
 
-        try await session.update(database: self.id,
-            with: Volumes.AlignRealm.init(range: .package(package), to: realm))
+        try await self.update(with: Volumes.AlignRealm.init(
+            range: .package(package),
+            to: realm))
 
-        try await session.update(database: self.id,
-            with: Unidoc.DB.Packages.AlignRealm.aligned(package, to: realm))
+        try await self.update(with: Packages.AlignRealm.aligned(package, to: realm))
     }
 }

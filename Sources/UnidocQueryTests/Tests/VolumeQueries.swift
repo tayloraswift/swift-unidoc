@@ -46,9 +46,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(
-                            database: db.id,
-                            with: query)),
+                        value: try await db.query(with: query)),
                     let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
@@ -65,9 +63,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(
-                            database: db.id,
-                            with: query)),
+                        value: try await db.query(with: query)),
                     let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
@@ -84,9 +80,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(
-                            database: db.id,
-                            with: query)),
+                        value: try await db.query(with: query)),
                     let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
@@ -103,9 +97,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.session.query(
-                            database: db.id,
-                            with: query)),
+                        value: try await db.query(with: query)),
                     let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))

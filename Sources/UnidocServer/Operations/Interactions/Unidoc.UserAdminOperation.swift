@@ -27,7 +27,7 @@ extension Unidoc.UserAdminOperation:Unidoc.AdministrativeOperation
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         var endpoint:Unidoc.UserSettingsEndpoint = .init(query: .another(self.account))
-        try await endpoint.pull(from: db.id, with: db.session)
+        try await endpoint.pull(from: db)
         return endpoint.response(as: format, admin: true)
     }
 }

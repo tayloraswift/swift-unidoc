@@ -146,8 +146,7 @@ extension Unidoc.GraphLinker
             }
         }
 
-        try await db.session.update(database: db.id,
-            with: Unidoc.DB.Snapshots.ClearAction.one(operation.edition))
+        try await db.update(with: Unidoc.DB.Snapshots.ClearAction.one(operation.edition))
 
         if  let event:Event
         {

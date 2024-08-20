@@ -26,7 +26,7 @@ extension Unidoc.LinkerOperation:Unidoc.AdministrativeOperation
         db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        try await db.session.update(database: db.id, with: self.queue)
+        try await db.update(with: self.queue)
         return .redirect(.seeOther(self.from ?? "/admin"))
     }
 }

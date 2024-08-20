@@ -95,7 +95,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let index:Unidoc.TextResourceOutput = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query)),
+                        value: try await db.query(with: query)),
                     let _:MD5 = tests.expect(value: index.hash)
                 {
                     switch index.text
@@ -130,7 +130,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query))
+                        value: try await db.query(with: query))
                     else
                     {
                         return
@@ -150,7 +150,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query))
+                        value: try await db.query(with: query))
                     else
                     {
                         return
@@ -178,7 +178,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query))
+                        value: try await db.query(with: query))
                     else
                     {
                         return
@@ -205,7 +205,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await db.session.query(database: db.id, with: query))
+                        value: try await db.query(with: query))
                     else
                     {
                         return

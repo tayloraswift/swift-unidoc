@@ -45,7 +45,7 @@ extension LinkResolution.TestCase
 
         guard
         let output:Unidoc.VertexOutput = tests.expect(
-            value: try await db.session.query(database: db.id, with: query)),
+            value: try await db.query(with: query)),
         let vertex:Unidoc.AnyVertex = tests.expect(
             value: output.principal?.vertex)
         else

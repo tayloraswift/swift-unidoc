@@ -86,7 +86,7 @@ extension Unidoc.ExportOperation:Unidoc.PublicOperation
         var endpoint:Unidoc.ExportEndpoint = .init(rateLimit: .init(remaining: remaining),
             query: self.request)
 
-        try await endpoint.pull(from: db.id, with: db.session)
+        try await endpoint.pull(from: db)
 
         do
         {

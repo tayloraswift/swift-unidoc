@@ -23,12 +23,8 @@ extension Unidoc.LoadExplainedOperation:Unidoc.PublicOperation
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let db:Unidoc.DB = try await server.db.session()
-        let explanation:String = try await db.session.explain(
-            database: db.id,
-            query: self.query)
-
         return .ok(.init(content: .init(
-            body: .string(explanation),
+            body: .string(try await db.explain(query: self.query)),
             type: .text(.plain, charset: .utf8))))
     }
 }
