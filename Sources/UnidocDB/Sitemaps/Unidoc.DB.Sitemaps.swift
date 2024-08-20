@@ -11,11 +11,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -34,8 +37,7 @@ extension Unidoc.DB.Sitemaps:Mongo.CollectionModel
 extension Unidoc.DB.Sitemaps
 {
     public
-    func list(with session:Mongo.Session,
-        _ yield:([Unidoc.SitemapIndexEntry]) throws -> Void) async throws
+    func list(_ yield:([Unidoc.SitemapIndexEntry]) throws -> Void) async throws
     {
         try await session.run(command: Unidoc.SitemapIndexQuery.list.command(stride: 4096),
             against: self.database,
@@ -48,11 +50,10 @@ extension Unidoc.DB.Sitemaps
         }
     }
 
-    func diff(new:Unidoc.Sitemap,
-        with session:Mongo.Session) async throws -> Unidoc.SitemapDelta?
+    func diff(new:Unidoc.Sitemap) async throws -> Unidoc.SitemapDelta?
     {
         guard
-        let old:Unidoc.Sitemap = try await self.find(id: new.id, with: session)
+        let old:Unidoc.Sitemap = try await self.find(id: new.id)
         else
         {
             return nil

@@ -13,12 +13,8 @@ struct PackageQueries:UnidocDatabaseTestBattery
     typealias Configuration = Main.Configuration
 
     static
-    func run(tests:TestGroup,
-        pool:Mongo.SessionPool,
-        unidoc:Unidoc.DB) async throws
+    func run(tests:TestGroup, db:Unidoc.DB) async throws
     {
-        let session:Mongo.Session = try await .init(from: pool)
-
         let empty:SymbolGraph = .init(modules: [])
         var docs:SymbolGraphObject<Void>
 
@@ -43,14 +39,14 @@ struct PackageQueries:UnidocDatabaseTestBattery
                     products: []),
                 graph: empty)
 
-            status.swift = try await unidoc.store(docs: docs, with: session)
+            status.swift = try await db.store(docs: docs)
         }
         do
         {
             docs.metadata.package.name = "swift-debut"
             docs.metadata.commit = nil
 
-            status.debut = try await unidoc.store(docs: docs, with: session)
+            status.debut = try await db.store(docs: docs)
         }
         do
         {
@@ -58,28 +54,28 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs.metadata.commit = .init(name: "0.1.2",
                 sha1: 0xffffffffffffffffffffffffffffffffffffffff)
 
-            status.fearless.0 = try await unidoc.store(docs: docs, with: session)
+            status.fearless.0 = try await db.store(docs: docs)
         }
         do
         {
             docs.metadata.commit = .init(name: "0.1.3",
                 sha1: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)
 
-            status.fearless.1 = try await unidoc.store(docs: docs, with: session)
+            status.fearless.1 = try await db.store(docs: docs)
         }
         do
         {
             docs.metadata.package.name = "swift-speak-now"
             docs.metadata.commit = nil
 
-            status.speakNow.0 = try await unidoc.store(docs: docs, with: session)
+            status.speakNow.0 = try await db.store(docs: docs)
         }
         do
         {
             docs.metadata.commit = .init(name: "0.3.0",
                 sha1: 0xffffffffffffffffffffffffffffffffffffffff)
 
-            status.speakNow.1 = try await unidoc.store(docs: docs, with: session)
+            status.speakNow.1 = try await db.store(docs: docs)
         }
         do
         {
@@ -87,7 +83,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             docs.metadata.commit = .init(name: "0.4.0",
                 sha1: 0xffffffffffffffffffffffffffffffffffffffff)
 
-            status.red = try await unidoc.store(docs: docs, with: session)
+            status.red = try await db.store(docs: docs)
         }
 
         if  let tests:TestGroup = tests / "AllPackages"
@@ -99,7 +95,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let index:Unidoc.TextResourceOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.session.query(database: db.id, with: query)),
                     let _:MD5 = tests.expect(value: index.hash)
                 {
                     switch index.text
@@ -134,7 +130,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query))
+                        value: try await db.session.query(database: db.id, with: query))
                     else
                     {
                         return
@@ -154,7 +150,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query))
+                        value: try await db.session.query(database: db.id, with: query))
                     else
                     {
                         return
@@ -182,7 +178,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query))
+                        value: try await db.session.query(database: db.id, with: query))
                     else
                     {
                         return
@@ -209,7 +205,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 {
                     guard
                     let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query))
+                        value: try await db.session.query(database: db.id, with: query))
                     else
                     {
                         return

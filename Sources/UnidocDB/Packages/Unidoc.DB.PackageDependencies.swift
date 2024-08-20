@@ -9,11 +9,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -54,18 +57,16 @@ extension Unidoc.DB.PackageDependencies:Mongo.CollectionModel
 extension Unidoc.DB.PackageDependencies:Mongo.RecodableModel
 {
     public
-    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
+    func recode() async throws -> (modified:Int, of:Int)
     {
         try await self.recode(through: Unidoc.PackageDependency.self,
-            with: session,
             by: .now.advanced(by: .seconds(30)))
     }
 }
 extension Unidoc.DB.PackageDependencies
 {
     func update(dependent source:Unidoc.Edition,
-        from boundaries:[Unidoc.Mesh.Boundary],
-        with session:Mongo.Session) async throws
+        from boundaries:[Unidoc.Mesh.Boundary]) async throws
     {
         let dependencies:[Unidoc.PackageDependency] = boundaries.reduce(into: [])
         {
@@ -119,7 +120,7 @@ extension Unidoc.DB.PackageDependencies
 
     /// If `source` is a Latest Release Version, this method **will not** restore the edges that
     /// existed prior to the latest release.
-    func clear(dependent source:Unidoc.Edition, with session:Mongo.Session) async throws
+    func clear(dependent source:Unidoc.Edition) async throws
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name)

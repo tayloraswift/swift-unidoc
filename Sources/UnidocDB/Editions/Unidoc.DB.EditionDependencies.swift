@@ -9,11 +9,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
         @inlinable
-        init(database:Mongo.Database)
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -65,8 +68,7 @@ extension Unidoc.DB.EditionDependencies:Mongo.CollectionModel
 extension Unidoc.DB.EditionDependencies
 {
     func create(dependent:Unidoc.Edition,
-        from boundaries:[Unidoc.Mesh.Boundary],
-        with session:Mongo.Session) async throws
+        from boundaries:[Unidoc.Mesh.Boundary]) async throws
     {
         let dependencies:[Unidoc.EditionDependency] = boundaries.reduce(into: [])
         {
@@ -88,7 +90,7 @@ extension Unidoc.DB.EditionDependencies
         let _:Mongo.Insertions = try response.insertions()
     }
 
-    func clear(dependent:Unidoc.Edition, with session:Mongo.Session) async throws
+    func clear(dependent:Unidoc.Edition) async throws
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name)
@@ -112,10 +114,9 @@ extension Unidoc.DB.EditionDependencies
     /// ``Unidoc.EditionDependency/targetABI`` does not match `dependencyABI`.
     @discardableResult
     func update(dependencyABI:MD5,
-        dependency:Unidoc.Edition,
-        with session:Mongo.Session) async throws -> Int
+        dependency:Unidoc.Edition) async throws -> Int
     {
-        try await self.updateMany(with: session)
+        try await self.updateMany
         {
             $0
             {

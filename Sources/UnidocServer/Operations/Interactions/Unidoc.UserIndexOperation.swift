@@ -59,9 +59,8 @@ extension Unidoc.UserIndexOperation
                 return .init(github: user, initialLimit: server.db.policy.apiLimitPerReset)
             }
 
-            let session:Mongo.Session = try await .init(from: server.db.sessions)
-            let secrets:Unidoc.UserSecrets = try await server.db.users.update(user: user,
-                with: session)
+            let db:Unidoc.DB = try await server.db.session()
+            let secrets:Unidoc.UserSecrets = try await db.users.update(user: user)
 
             guard
             let web:Unidoc.UserSession.Web = secrets.web
@@ -114,14 +113,12 @@ extension Unidoc.UserIndexOperation
                     symbol: $0.organization.login)
             }
 
-            let session:Mongo.Session = try await .init(from: server.db.sessions)
-            let _:Mongo.Updates<Unidoc.Account> = try await server.db.users.update(users: users,
-                with: session)
+            let db:Unidoc.DB = try await server.db.session()
+            let _:Mongo.Updates<Unidoc.Account> = try await db.users.update(users: users)
 
             guard
-            let _:Bool = try await server.db.users.update(access: users.map(\.id),
-                user: .init(type: .github, user: current.id),
-                with: session)
+            let _:Bool = try await db.users.update(access: users.map(\.id),
+                user: .init(type: .github, user: current.id))
             else
             {
                 return .resource("No such user", status: 404)

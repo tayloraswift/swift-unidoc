@@ -32,16 +32,13 @@ extension Unidoc.MeteredOperation
     /// responsibility of the caller to check this if it is using a dynamic cost formula.
     ///
     /// This isn’t called automatically, to allow for maximum customization.
-    func charge(cost:Int,
-        from server:Unidoc.Server,
-        with session:Mongo.Session) async throws -> Unidoc.PolicyErrorPage?
+    func charge(cost:Int, in db:Unidoc.DB) async throws -> Unidoc.PolicyErrorPage?
     {
         //  The cost for administratrices is not *zero*, mainly so that it’s easier for us to
         //  tell if the rate limiting system is working.
-        if  let _:Int = try await server.db.users.charge(apiKey: nil,
+        if  let _:Int = try await db.users.charge(apiKey: nil,
                 user: self.account,
-                cost: self.rights.level == .administratrix ? 1 : 8,
-                with: session)
+                cost: self.rights.level == .administratrix ? 1 : 8)
         {
             return nil
         }

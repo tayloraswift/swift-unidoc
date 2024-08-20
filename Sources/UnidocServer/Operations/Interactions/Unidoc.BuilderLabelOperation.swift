@@ -18,13 +18,11 @@ extension Unidoc
 extension Unidoc.BuilderLabelOperation:Unidoc.MachineOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         guard
-        let edition:Unidoc.EditionState = try await server.db.unidoc.editionState(
-            of: self.request.version,
-            with: session),
+        let edition:Unidoc.EditionState = try await db.editionState(of: self.request.version),
         let labels:Unidoc.BuildLabels = try await server.github?.resolve(edition,
             rebuild: self.request.rebuild)
         else

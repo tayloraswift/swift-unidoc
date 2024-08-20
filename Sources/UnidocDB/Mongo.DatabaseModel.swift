@@ -10,41 +10,21 @@ extension Mongo
     /// identifying a database. Therefore, it is often helpful to wrap a ``Mongo.Database``
     /// in an application-specific type to avoid cluttering ``Mongo.Database`` with extensions.
     public
-    protocol DatabaseModel:Identifiable<Database>, Equatable, Sendable
+    protocol DatabaseModel:Identifiable<Database>
     {
-        init(id:Database)
+        var session:Session { get }
+        var id:Database { get }
 
-        func setup(with session:Session) async throws
+        func setup() async throws
     }
 }
 extension Mongo.DatabaseModel
 {
-    public static
-    func setup(as id:Mongo.Database, in pool:consuming Mongo.SessionPool) async -> Self
-    {
-        let database:Self = .init(id: id)
-
-        do
-        {
-            try await database.setup(with: try await .init(from: pool))
-        }
-        catch let error
-        {
-            print(error)
-            print("""
-                warning: some indexes are no longer valid. \
-                the database '\(database.id)' likely needs to be rebuilt.
-                """)
-        }
-
-        return database
-    }
-
     /// Drops and reinitializes the database. This destroys *all* its data!
     public
-    func drop(with session:Mongo.Session) async throws
+    func drop() async throws
     {
-        try await session.run(command: Mongo.DropDatabase.init(), against: self.id)
-        try await self.setup(with: session)
+        try await self.session.run(command: Mongo.DropDatabase.init(), against: self.id)
+        try await self.setup()
     }
 }

@@ -14,7 +14,7 @@ extension Unidoc
 extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         switch self
@@ -46,7 +46,7 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
             return .ok(page.resource(format: format))
 
         case .replicaSet:
-            let configuration:Mongo.ReplicaSetConfiguration = try await session.run(
+            let configuration:Mongo.ReplicaSetConfiguration = try await db.session.run(
                 command: Mongo.ReplicaSetGetConfiguration.init(),
                 against: .admin)
 

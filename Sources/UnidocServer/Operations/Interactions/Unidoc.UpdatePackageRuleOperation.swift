@@ -36,15 +36,14 @@ extension Unidoc.UpdatePackageRuleOperation:Unidoc.RestrictedOperation
     }
 
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        if  let rejection:HTTP.ServerResponse = try await server.authorize(
+        if  let rejection:HTTP.ServerResponse = try await db.authorize(
                 loading: self.package,
                 account: self.account,
                 rights: self.rights,
-                require: .owner,
-                with: session)
+                require: .owner)
         {
             return rejection
         }
@@ -76,23 +75,19 @@ extension Unidoc.UpdatePackageRuleOperation:Unidoc.RestrictedOperation
                 return .resource("GitHub: \(error)\n", status: error.code ?? 400)
             }
 
-            let registered:Unidoc.UserSecrets = try await server.db.users.update(
-                user: .init(github: user, initialLimit: server.db.policy.apiLimitPerReset),
-                with: session)
+            let registered:Unidoc.UserSecrets = try await db.users.update(
+                user: .init(github: user, initialLimit: server.db.policy.apiLimitPerReset))
 
-            package = try await server.db.packages.insert(editor: registered.account,
-                into: self.package,
-                with: session)
+            package = try await db.packages.insert(editor: registered.account,
+                into: self.package)
 
         case .insertEditor(let editor):
-            package = try await server.db.packages.insert(editor: editor,
-                into: self.package,
-                with: session)
+            package = try await db.packages.insert(editor: editor,
+                into: self.package)
 
         case .revokeEditor(let editor):
-            package = try await server.db.packages.revoke(editor: editor,
-                from: self.package,
-                with: session)
+            package = try await db.packages.revoke(editor: editor,
+                from: self.package)
         }
 
         if  let package:Unidoc.PackageMetadata

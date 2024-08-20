@@ -15,9 +15,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
     typealias Configuration = Main.Configuration
 
     static
-    func run(tests:TestGroup,
-        pool:Mongo.SessionPool,
-        unidoc:Unidoc.DB) async throws
+    func run(tests:TestGroup, db:Unidoc.DB) async throws
     {
         let workspace:SSGC.Workspace = try .create(at: ".testing")
         let toolchain:SSGC.Toolchain = try .detect(pretty: true)
@@ -40,23 +38,19 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             swift = try workspace.build(special: .swift, with: toolchain)
         }
 
-        let session:Mongo.Session = try await .init(from: pool)
-
-        tests.expect(try await unidoc.store(linking: swift, with: session).0 ==? .init(
+        tests.expect(try await db.store(linking: swift).0 ==? .init(
             edition: .init(package: 0, version: 0),
             updated: false))
 
-        tests.expect(try await unidoc.store(linking: example, with: session).0 ==? .init(
+        tests.expect(try await db.store(linking: example).0 ==? .init(
             edition: .init(package: 1, version: -1),
             updated: false))
 
-        try await Self.run(decls: tests / "Decls",
-            session: session,
-            unidoc: unidoc)
+        try await Self.run(decls: tests / "Decls", db: db)
     }
 
     private static
-    func run(decls tests:TestGroup?, session:Mongo.Session, unidoc:Unidoc.DB) async throws
+    func run(decls tests:TestGroup?, db:Unidoc.DB) async throws
     {
         guard
         let tests:TestGroup
@@ -74,7 +68,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
 
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.session.query(database: db.id, with: query)),
                     let vertex:Unidoc.DeclVertex = tests.expect(
                         value: output.principal?.vertex?.decl)
                 {
@@ -92,7 +86,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
 
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.session.query(database: db.id, with: query)),
                     let principal:Unidoc.PrincipalOutput = tests.expect(
                         value: output.principal),
                     tests.expect(principal.matches.count >? 1),
@@ -112,7 +106,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             {
 
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.session.query(database: db.id, with: query)),
                     let principal:Unidoc.PrincipalOutput = tests.expect(
                         value: output.principal),
                     let _:Unidoc.AnyVertex = tests.expect(value: principal.vertex)
@@ -131,7 +125,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.RedirectOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.session.query(database: db.id, with: query)),
                     let vertex:Unidoc.DeclVertex = tests.expect(
                         value: output.matches.first?.decl)
                 {
@@ -165,7 +159,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 await tests.do
                 {
                     if  let output:Unidoc.VertexOutput = tests.expect(
-                            value: try await session.query(database: unidoc.id, with: query)),
+                            value: try await db.session.query(database: db.id, with: query)),
                         let _:Unidoc.AnyVertex = tests.expect(value: output.principal?.vertex)
                     {
                     }
@@ -180,7 +174,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.session.query(database: db.id, with: query)),
                     let vertex:Unidoc.CultureVertex = tests.expect(
                         value: output.principal?.vertex?.culture),
                     let tree:Unidoc.TypeTree = tests.expect(
@@ -241,7 +235,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.session.query(database: db.id, with: query)),
                     let vertex:Unidoc.AnyVertex = tests.expect(
                         value: output.principal?.vertex),
                     let tree:Unidoc.TypeTree = tests.expect(
@@ -307,7 +301,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.session.query(database: db.id, with: query)),
                     let _:Unidoc.AnyVertex = tests.expect(
                         value: output.principal?.vertex)
                 {
@@ -331,7 +325,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     ],
                     filter: .curators)
             {
-                await test.run(on: unidoc, with: session)
+                await test.run(on: db)
             }
         }
 
@@ -363,7 +357,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     ],
                     filter: .extensions)
             {
-                await test.run(on: unidoc, with: session)
+                await test.run(on: db)
             }
             if  let test:TestCase = .init(tests / "PlasticKeychain",
                     package: "swift-malibu",
@@ -381,7 +375,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                     ],
                     filter: .extensions)
             {
-                await test.run(on: unidoc, with: session)
+                await test.run(on: db)
             }
         }
 
@@ -396,9 +390,8 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         let setup:TestGroup = tests ! "Setup"
         let realm:Unidoc.Realm? = await setup.do
         {
-            let (realm, new):(Unidoc.RealmMetadata, Bool) = try await unidoc.index(
-                realm: "barbieland",
-                with: session)
+            let (realm, new):(Unidoc.RealmMetadata, Bool) = try await db.index(
+                realm: "barbieland")
 
             setup.expect(true: new)
             setup.expect(realm.id ==? 0)
@@ -431,10 +424,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 ],
                 filter: .extensions)
         {
-            try await unidoc.align(package: 0, realm: realm, with: session)
-            try await unidoc.align(package: 1, realm: realm, with: session)
+            try await db.align(package: 0, realm: realm)
+            try await db.align(package: 1, realm: realm)
 
-            await test.run(on: unidoc, with: session)
+            await test.run(on: db)
         }
         if  let test:TestCase = .init(tests / "RealmContainingStandardLibrary",
                 package: "swift",
@@ -454,10 +447,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 ],
                 filter: .extensions)
         {
-            try await unidoc.align(package: 0, realm: realm, with: session)
-            try await unidoc.align(package: 1, realm: nil, with: session)
+            try await db.align(package: 0, realm: realm)
+            try await db.align(package: 1, realm: nil)
 
-            await test.run(on: unidoc, with: session)
+            await test.run(on: db)
         }
         if  let test:TestCase = .init(tests / "RealmContainingPackage",
                 package: "swift",
@@ -477,10 +470,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 ],
                 filter: .extensions)
         {
-            try await unidoc.align(package: 0, realm: nil, with: session)
-            try await unidoc.align(package: 1, realm: realm, with: session)
+            try await db.align(package: 0, realm: nil)
+            try await db.align(package: 1, realm: realm)
 
-            await test.run(on: unidoc, with: session)
+            await test.run(on: db)
         }
         if  let test:TestCase = .init(tests / "RealmContainingNeither",
                 package: "swift",
@@ -500,10 +493,10 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 ],
                 filter: .extensions)
         {
-            try await unidoc.align(package: 0, realm: nil, with: session)
-            try await unidoc.align(package: 1, realm: nil, with: session)
+            try await db.align(package: 0, realm: nil)
+            try await db.align(package: 1, realm: nil)
 
-            await test.run(on: unidoc, with: session)
+            await test.run(on: db)
         }
     }
 }

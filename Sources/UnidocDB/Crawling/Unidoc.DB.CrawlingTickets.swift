@@ -10,11 +10,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -43,13 +46,12 @@ extension Unidoc.DB.CrawlingTickets
     /// Creates tickets that do not exist yet, or updates the state of existing tickets. This
     /// won’t overwrite the scheduled times in existing tickets.
     public
-    func create(tickets:[Unidoc.CrawlingTicket<Unidoc.Package>],
-        with session:Mongo.Session) async throws -> Mongo.Updates<Unidoc.Package>
+    func create(tickets:[Element]) async throws -> Mongo.Updates<Unidoc.Package>
     {
         let response:Mongo.UpdateResponse<Unidoc.Package> = try await session.run(
             command: Mongo.Update<Mongo.Many, Unidoc.Package>.init(Self.name)
             {
-                for ticket:Unidoc.CrawlingTicket<Unidoc.Package> in tickets
+                for ticket:Element in tickets
                 {
                     $0
                     {
@@ -77,8 +79,7 @@ extension Unidoc.DB.CrawlingTickets
     }
 
     public
-    func find(stalest limit:Int,
-        with session:Mongo.Session) async throws -> [Unidoc.CrawlingTicket<Unidoc.Package>]
+    func find(stalest limit:Int) async throws -> [Element]
     {
         let command:Mongo.Find<Mongo.SingleBatch<Element>> = .init(Self.name,
             limit: limit)
@@ -95,10 +96,9 @@ extension Unidoc.DB.CrawlingTickets
     public
     func move(ticket:Unidoc.Package,
         time:UnixMillisecond,
-        last:UnixMillisecond? = nil,
-        with session:Mongo.Session) async throws -> Bool?
+        last:UnixMillisecond? = nil) async throws -> Bool?
     {
-        try await self.update(with: session)
+        try await self.update
         {
             $0
             {

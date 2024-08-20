@@ -33,6 +33,6 @@ extension Unidoc.GraphLinkerPlugin:Unidoc.ServerPlugin
         {
             .init(threads: context.threads, niossl: context.niossl, bucket: $0)
         })
-        try await linker.watch(db: db.unidoc, with: db.sessions)
+        try await linker.watch(db: db)
     }
 }

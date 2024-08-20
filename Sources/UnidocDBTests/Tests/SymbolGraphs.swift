@@ -12,9 +12,8 @@ struct SymbolGraphs:MongoTestBattery
     static
     func run(tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
-        let database:Unidoc.DB = await .setup(as: database, in: pool)
-
-        let session:Mongo.Session = try await .init(from: pool)
+        let database:Unidoc.DB = .init(session: try await .init(from: pool), in: database)
+        try await database.setup()
 
         let triple:Triple = .init("x86_64-unknown-linux-gnu")!
         let empty:SymbolGraph = .init(modules: [])
@@ -34,7 +33,7 @@ struct SymbolGraphs:MongoTestBattery
                     products: []),
                 graph: empty)
 
-            tests.expect(try await database.store(docs: docs, with: session) ==? .init(
+            tests.expect(try await database.store(docs: docs) ==? .init(
                 edition: .init(package: 0, version: 0),
                 updated: false))
         }
@@ -46,7 +45,7 @@ struct SymbolGraphs:MongoTestBattery
             docs.metadata.package.name = "swift-not-named-swift"
             docs.metadata.commit = nil
 
-            tests.expect(try await database.store(docs: docs, with: session) ==? .init(
+            tests.expect(try await database.store(docs: docs) ==? .init(
                 edition: .init(package: 1, version: -1),
                 updated: false))
         }
@@ -57,7 +56,7 @@ struct SymbolGraphs:MongoTestBattery
             docs.metadata.commit = .init(name: "1.2.3",
                 sha1: 0xffffffffffffffffffffffffffffffffffffffff)
 
-            tests.expect(try await database.store(docs: docs, with: session) ==? .init(
+            tests.expect(try await database.store(docs: docs) ==? .init(
                 edition: .init(package: 1, version: 0),
                 updated: false))
         }
@@ -68,7 +67,7 @@ struct SymbolGraphs:MongoTestBattery
             docs.metadata.commit = .init(name: "2.0.0-beta1",
                 sha1: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)
 
-            tests.expect(try await database.store(docs: docs, with: session) ==? .init(
+            tests.expect(try await database.store(docs: docs) ==? .init(
                 edition: .init(package: 1, version: 1),
                 updated: false))
         }
@@ -78,7 +77,7 @@ struct SymbolGraphs:MongoTestBattery
 
             docs.metadata.commit = nil
 
-            tests.expect(try await database.store(docs: docs, with: session) ==? .init(
+            tests.expect(try await database.store(docs: docs) ==? .init(
                 edition: .init(package: 1, version: -1),
                 updated: true))
         }
@@ -89,7 +88,7 @@ struct SymbolGraphs:MongoTestBattery
             docs.metadata.commit = .init(name: "2.0.0-beta1",
                 sha1: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)
 
-            tests.expect(try await database.store(docs: docs, with: session) ==? .init(
+            tests.expect(try await database.store(docs: docs) ==? .init(
                 edition: .init(package: 1, version: 1),
                 updated: true))
         }
@@ -100,7 +99,7 @@ struct SymbolGraphs:MongoTestBattery
             docs.metadata.commit = .init(name: "1.2.3",
                 sha1: 0xffffffffffffffffffffffffffffffffffffffff)
 
-            tests.expect(try await database.store(docs: docs, with: session) ==? .init(
+            tests.expect(try await database.store(docs: docs) ==? .init(
                 edition: .init(package: 1, version: 0),
                 updated: true))
         }
@@ -110,12 +109,11 @@ struct SymbolGraphs:MongoTestBattery
 
             tests.expect(value: try? await database.alias(
                 existing: docs.metadata.package.id,
-                package: docs.metadata.package.name,
-                with: session))
+                package: docs.metadata.package.name))
 
             docs.metadata.package.scope = nil
 
-            tests.expect(try await database.store(docs: docs, with: session) ==? .init(
+            tests.expect(try await database.store(docs: docs) ==? .init(
                 edition: .init(package: 1, version: 0),
                 updated: true))
         }
@@ -125,7 +123,7 @@ struct SymbolGraphs:MongoTestBattery
 
             docs.metadata.package.scope = "banana"
 
-            tests.expect(try await database.store(docs: docs, with: session) ==? .init(
+            tests.expect(try await database.store(docs: docs) ==? .init(
                 edition: .init(package: 2, version: 0),
                 updated: false))
         }

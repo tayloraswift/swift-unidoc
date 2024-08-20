@@ -63,16 +63,6 @@ extension Unidoc
 extension Unidoc.Server
 {
     @inlinable public
-    var security:Unidoc.ServerSecurity
-    {
-        switch self.options.mode
-        {
-        case .development(_, let options):  options.security
-        case .production:                   .enforced
-        }
-    }
-
-    @inlinable public
     var github:(any GitHub.Integration)? { self.options.github }
     @inlinable public
     var bucket:Unidoc.Buckets { self.options.bucket }
@@ -103,7 +93,7 @@ extension Unidoc.Server
     func format(username:String?, locale:ISO.Locale?) -> Unidoc.RenderFormat
     {
         .init(
-            security: self.security,
+            security: self.db.policy.security,
             username: username,
             locale: locale ?? .init(language: .en),
             assets: self.options.cloudfront ? .cloudfront : .local,
@@ -115,12 +105,24 @@ extension Unidoc.Server
     //  TODO: this really should be manually-triggered and should not run every time.
     func _setup() async throws
     {
-        let session:Mongo.Session = try await .init(from: self.db.sessions)
+        let db:Unidoc.DB = try await self.db.session()
+
+        do
+        {
+            try await db.setup()
+        }
+        catch let error
+        {
+            print(error)
+            print("""
+                warning: some indexes are no longer valid, \
+                the database '\(db.id)' likely needs to be rebuilt
+                """)
+        }
 
         //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
         //  want to be able to change it without restarting the server.
-        let _:Unidoc.UserSecrets = try await self.db.users.update(user: .init(machine: 0),
-            with: session)
+        let _:Unidoc.UserSecrets = try await db.users.update(user: .init(machine: 0))
     }
 
     func update() async throws
@@ -132,9 +134,7 @@ extension Unidoc.Server
             let promise:Promise = update.promise
             let payload:[UInt8] = update.payload
 
-            await (/* consume */ update).operation.perform(on: self,
-                payload: payload,
-                request: promise)
+            await update.operation.serve(request: promise, with: payload, from: self)
         }
     }
 }
@@ -159,11 +159,10 @@ extension Unidoc.Server
         case .api(let session):     user = .api(session)
         }
 
-        let session:Mongo.Session = try await .init(from: self.db.sessions)
+        let db:Unidoc.DB = try await self.db.session()
 
         guard
-        let rights:Unidoc.UserRights = try await self.db.users.validate(user: user,
-            with: session)
+        let rights:Unidoc.UserRights = try await db.users.validate(user: user)
         else
         {
             return .notFound("No such user\n")
@@ -299,59 +298,5 @@ extension Unidoc.Server
             let page:Unidoc.ServerErrorPage = .init(error: error)
             return .error(page.resource(format: self.format(for: request)))
         }
-    }
-}
-extension Unidoc.Server
-{
-    func authorize(package preloaded:Unidoc.PackageMetadata? = nil,
-        loading id:Unidoc.Package,
-        account:Unidoc.Account?,
-        rights:Unidoc.UserRights,
-        require minimum:Unidoc.PackageRights = .editor,
-        with session:Mongo.Session) async throws -> HTTP.ServerResponse?
-    {
-        guard
-        case .enforced = self.security,
-        case .human = rights.level
-        else
-        {
-            //  Only enforce ownership rules for humans.
-            return nil
-        }
-
-        guard
-        let account:Unidoc.Account
-        else
-        {
-            return .unauthorized("You must be logged in to perform this operation!\n")
-        }
-
-        let package:Unidoc.PackageMetadata
-
-        if  let preloaded:Unidoc.PackageMetadata
-        {
-            package = preloaded
-        }
-        else if
-            let metadata:Unidoc.PackageMetadata = try await self.db.packages.find(id: id,
-                with: session)
-        {
-            package = metadata
-        }
-        else
-        {
-            return .notFound("No such package\n")
-        }
-
-        let rights:Unidoc.PackageRights = .of(account: account,
-            access: rights.access,
-            rulers: package.rulers)
-
-        if  rights >= minimum
-        {
-            return nil
-        }
-
-        return .forbidden("You are not authorized to edit this package!\n")
     }
 }

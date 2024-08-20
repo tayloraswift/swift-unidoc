@@ -14,6 +14,6 @@ extension Mongo
     public
     protocol RecodableModel
     {
-        func recode(with session:Session) async throws -> (modified:Int, of:Int)
+        func recode() async throws -> (modified:Int, of:Int)
     }
 }

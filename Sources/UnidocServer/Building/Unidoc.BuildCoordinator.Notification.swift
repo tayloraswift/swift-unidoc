@@ -62,14 +62,14 @@ extension Unidoc.BuildCoordinator
 extension Unidoc.BuildCoordinator.Notification
 {
     func match(with subscription:__owned Unidoc.BuildCoordinator.Subscription,
-        in db:Unidoc.Database,
+        in database:Unidoc.Database,
         registrar:any Unidoc.Registrar) async -> Unidoc.BuildCoordinator.Subscription?
     {
         let labels:Unidoc.BuildLabels?
         do
         {
             labels = try await self.match(with: subscription.assignee,
-                in: db,
+                in: database,
                 registrar: registrar)
         }
         catch let error
@@ -100,20 +100,19 @@ extension Unidoc.BuildCoordinator.Notification
 
     private
     func match(with assignee:Unidoc.Account,
-        in db:Unidoc.Database,
+        in database:Unidoc.Database,
         registrar:any Unidoc.Registrar) async throws -> Unidoc.BuildLabels?
     {
-        let session:Mongo.Session = try await .init(from: db.sessions)
+        let db:Unidoc.DB = try await database.session()
 
         //  We need to ensure we are querying the state of the database *after* we received the
         //  original notification, so that we do not experience reversed ordering.
-        session.synchronize(to: self.appeared)
+        db.session.synchronize(to: self.appeared)
 
         guard try await db.packageBuilds.assignBuild(
             request: self.request.behavior,
             package: self.package,
-            builder: assignee,
-            with: session)
+            builder: assignee)
         else
         {
             //  The build request no longer exists in the database, perhaps because it was
@@ -130,8 +129,7 @@ extension Unidoc.BuildCoordinator.Notification
         case .id(let id):                   version = .id(id)
         }
 
-        if  let edition:Unidoc.EditionState = try await db.unidoc.editionState(of: version,
-                with: session),
+        if  let edition:Unidoc.EditionState = try await db.editionState(of: version),
             let labels:Unidoc.BuildLabels = try await registrar.resolve(edition,
                 rebuild: self.request.rebuild)
         {
@@ -142,8 +140,7 @@ extension Unidoc.BuildCoordinator.Notification
             /// We don’t really care if something else raced us here.
             let _:Unidoc.BuildMetadata? = try await db.packageBuilds.finishBuild(
                 package: self.package,
-                failure: .noValidVersion,
-                with: session)
+                failure: .noValidVersion)
             return nil
         }
     }

@@ -10,11 +10,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -43,8 +46,7 @@ extension Unidoc.DB.CrawlingWindows
     /// Creates crawling windows, starting from today and going back up to `days` number of
     /// days. If some of the windows already exist, they are not reinitialized.
     public
-    func create(previous days:Days,
-        with session:Mongo.Session) async throws -> Mongo.Updates<UnixMillisecond>
+    func create(previous days:Days) async throws -> Mongo.Updates<UnixMillisecond>
     {
         let response:Mongo.UpdateResponse<UnixMillisecond> = try await session.run(
             command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
@@ -80,7 +82,7 @@ extension Unidoc.DB.CrawlingWindows
     /// Retrieves a single window that has not been crawled yet. Windows with lower expirations
     /// will be returned first.
     public
-    func pull(with session:Mongo.Session) async throws -> Unidoc.CrawlingWindow?
+    func pull() async throws -> Unidoc.CrawlingWindow?
     {
         let command:Mongo.Find<Mongo.Single<Unidoc.CrawlingWindow>> = .init(Self.name,
             limit: 1)
@@ -95,8 +97,8 @@ extension Unidoc.DB.CrawlingWindows
     /// Updates the state of an existing crawling window.
     @discardableResult
     public
-    func push(window:Unidoc.CrawlingWindow, with session:Mongo.Session) async throws -> Bool?
+    func push(window:Unidoc.CrawlingWindow) async throws -> Bool?
     {
-        try await self.update(some: window, with: session)
+        try await self.update(some: window)
     }
 }
