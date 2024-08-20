@@ -66,12 +66,6 @@ extension Unidoc.DB.Vertices:Mongo.CollectionModel
 }
 extension Unidoc.DB.Vertices:Mongo.RecodableModel
 {
-    public
-    func recode() async throws -> (modified:Int, of:Int)
-    {
-        try await self.recode(through: Unidoc.AnyVertex.self,
-            by: .now.advanced(by: .seconds(60)))
-    }
 }
 extension Unidoc.DB.Vertices
 {

@@ -36,7 +36,8 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
             case .volumes:              collection = db.volumes
             }
 
-            let (modified, selected):(Int, Int) = try await collection.recode()
+            let (modified, selected):(Int, Int) = try await collection.recode(stride: 4096,
+                by: .now.advanced(by: .seconds(60)))
             let complete:Unidoc._RecodePage.Complete = .init(
                 selected: selected,
                 modified: modified,

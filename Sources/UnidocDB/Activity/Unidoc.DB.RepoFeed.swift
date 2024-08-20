@@ -36,15 +36,17 @@ extension Unidoc.DB.RepoFeed:Mongo.CollectionModel
 }
 extension Unidoc.DB.RepoFeed
 {
+    @available(*, deprecated, renamed: "find(last:)")
     public
     func last(_ count:Int) async throws -> [Activity]
     {
         try await self.find(last: count)
     }
 
+    @available(*, deprecated, renamed: "insert(_:)")
     public
     func push(_ activity:Activity) async throws
     {
-        try await self.insert(some: activity)
+        try await self.insert(activity)
     }
 }

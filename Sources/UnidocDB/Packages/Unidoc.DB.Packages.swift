@@ -95,31 +95,39 @@ extension Unidoc.DB.Packages:Mongo.CollectionModel
 }
 extension Unidoc.DB.Packages:Mongo.RecodableModel
 {
-    public
-    func recode() async throws -> (modified:Int, of:Int)
-    {
-        try await self.recode(through: Unidoc.PackageMetadata.self,
-            by: .now.advanced(by: .seconds(30)))
-    }
 }
 extension Unidoc.DB.Packages
 {
+    private
+    func reset<Value>(field:Element.CodingKey,
+        of package:Element.ID,
+        to value:Value?) async throws -> Element? where Value:BSONEncodable
+    {
+        try await self.modify(existing: package, returning: .new)
+        {
+            if  let value:Value
+            {
+                $0[.set] { $0[Element[field]] = value }
+            }
+            else
+            {
+                $0[.unset] { $0[Element[field]] = () }
+            }
+        }
+    }
+
     public
     func reset(media:Unidoc.PackageMedia?,
         of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.reset(field: .media,
-            of: package,
-            to: media)
+        try await self.reset(field: .media, of: package, to: media)
     }
 
     public
     func reset(platformPreference triple:Triple?,
         of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.reset(field: .platformPreference,
-            of: package,
-            to: triple)
+        try await self.reset(field: .platformPreference, of: package, to: triple)
     }
 }
 extension Unidoc.DB.Packages
@@ -151,17 +159,11 @@ extension Unidoc.DB.Packages
 }
 extension Unidoc.DB.Packages
 {
+    @available(*, deprecated, renamed: "replace(_:)")
     public
     func update(metadata:Unidoc.PackageMetadata) async throws -> Bool?
     {
-        try await self.update(some: metadata)
-    }
-
-    public
-    func update(package:Unidoc.Package,
-        symbol:Symbol.Package) async throws -> Bool?
-    {
-        try await self.update(field: .symbol, of: package, to: symbol)
+        try await self.replace(metadata)
     }
 
     public

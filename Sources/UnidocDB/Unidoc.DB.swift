@@ -221,7 +221,7 @@ extension Unidoc.DB
             //  the ``Unidoc.RealmAlias`` document, but failed to insert the
             //  ``Unidoc.RealmMetadata`` document.
             let realm:Unidoc.RealmMetadata = .init(id: id, symbol: realm)
-            try await self.realms.insert(some: realm)
+            try await self.realms.insert(realm)
             return (realm, true)
 
         case .old(_, let realm?):
@@ -356,7 +356,7 @@ extension Unidoc.DB
                 name: name,
                 sha1: sha1)
             //  This can fail if we race with another process.
-            try await self.editions.insert(some: edition)
+            try await self.editions.insert(edition)
 
             return (edition, true)
 
@@ -365,7 +365,7 @@ extension Unidoc.DB
                     sha1 != edition.sha1
             {
                 edition.sha1 = sha1
-                try await self.editions.update(some: edition)
+                try await self.editions.replace(edition)
             }
 
             return (edition, false)
@@ -402,7 +402,7 @@ extension Unidoc.DB
         /// This is here to workaround a Swift compiler bug.
         let volume:Symbol.Volume = linked.volume
 
-        let uploaded:Unidoc.UploadStatus = try await self.snapshots.upsert(
+        let uploaded:Unidoc.UploadStatus = try await self.snapshots.store(
             snapshot: /* consume */ snapshot) // https://github.com/apple/swift/issues/71605
 
         let uplinked:Unidoc.UplinkStatus = .init(
@@ -424,7 +424,7 @@ extension Unidoc.DB
             documentation: docs,
             action: .uplinkInitial)
 
-        return try await self.snapshots.upsert(snapshot: snapshot)
+        return try await self.snapshots.store(snapshot: snapshot)
     }
 
     public
@@ -471,7 +471,7 @@ extension Unidoc.DB
                 name: "__local",
                 sha1: nil)
 
-            try await self.editions.upsert(some: edition)
+            try await self.editions.upsert(edition)
         }
 
         let snapshot:Unidoc.Snapshot = .init(id: edition.id,
@@ -510,7 +510,7 @@ extension Unidoc.DB
 
         if  stored != snapshot
         {
-            try await self.snapshots.update(some: snapshot)
+            try await self.snapshots.replace(snapshot)
         }
 
         return .init(edition: id,
@@ -643,9 +643,9 @@ extension Unidoc.DB
             try await self.unlink(volume: occupant)
         }
 
-        try await self.volumes.insert(some: mesh.metadata)
-        try await self.search.insert(some: search)
-        try await self.trees.insert(some: mesh.trees)
+        try await self.volumes.insert(mesh.metadata)
+        try await self.search.insert(search)
+        try await self.trees.insert(mesh.trees)
 
         try await self.vertices.insert(mesh.vertices)
         try await self.groups.insert(mesh.groups,
@@ -680,7 +680,7 @@ extension Unidoc.DB
                         : .replaced(sitemapDelta)
 
                     new.modified = .now()
-                    try await self.sitemaps.upsert(some: new)
+                    try await self.sitemaps.upsert(new)
                 }
             }
             else if hidden
@@ -691,7 +691,7 @@ extension Unidoc.DB
             {
                 //  No pre-existing sitemap.
                 surfaceDelta = .initial
-                try await self.sitemaps.upsert(some: new)
+                try await self.sitemaps.upsert(new)
             }
         }
         else
@@ -883,7 +883,7 @@ extension Unidoc.DB
     func rebuildPackageList() async throws
     {
         let index:Unidoc.TextResource<Unidoc.DB.Metadata.Key> = try await self.packages.scan()
-        try await self.metadata.upsert(some: index)
+        try await self.metadata.upsert(index)
     }
 
     public

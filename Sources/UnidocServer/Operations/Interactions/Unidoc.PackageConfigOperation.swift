@@ -110,12 +110,15 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
             rebuildPackageList = false
 
         case .symbol(let symbol):
-            let changed:Bool? = try await db.packages.update(
-                package: self.package,
-                symbol: symbol)
+            let previous:Unidoc.PackageMetadata? = try await db.packages.modify(
+                existing: self.package,
+                returning: .old)
+            {
+                $0[.set] { $0[Unidoc.PackageMetadata[.symbol]] = symbol }
+            }
 
-            updated = changed != nil ? symbol : nil
-            rebuildPackageList = changed ?? false
+            updated = previous == nil ? nil : symbol
+            rebuildPackageList = previous.map { $0.symbol != symbol } ?? false
 
         case .reset(let field):
             updated = try await self.reset(field: field, from: db.packages)

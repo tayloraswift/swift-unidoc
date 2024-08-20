@@ -77,7 +77,7 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
                     failure: nil,
                     logs: logs)
 
-                let _:Unidoc.UploadStatus = try await db.snapshots.upsert(snapshot: snapshot)
+                try await db.snapshots.upsert(snapshot)
             }
 
         case .labeling:
@@ -99,8 +99,7 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
             }
 
             try await db.packageBuilds.finishBuild(package: snapshot.id.package)
-
-            let _:Unidoc.UploadStatus = try await db.snapshots.upsert(snapshot: snapshot)
+            try await db.snapshots.upsert(snapshot)
         }
 
         return .noContent
