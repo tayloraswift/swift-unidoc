@@ -311,26 +311,27 @@ extension Mongo.CollectionModel
     func insert(some elements:some Sequence<some Insertable>) async throws
     {
         var count:Int = 0
-        let response:Mongo.InsertResponse = try await session.run(
-            command: Mongo.Insert.init(Self.name,
-                writeConcern: .majority)
+        let insert:Mongo.Insert = .init(Self.name, writeConcern: .majority)
+        {
+            $0[.ordered] = false
+        }
+            documents:
+        {
+            for element:some Insertable in elements
             {
-                $0[.ordered] = false
+                $0.append(element)
+                count += 1
             }
-                documents:
-            {
-                for element:some Insertable in elements
-                {
-                    $0.append(element)
-                    count += 1
-                }
-            },
-            against: self.database)
+        }
 
         if  count == 0
         {
             return
         }
+
+        let response:Mongo.InsertResponse = try await self.session.run(
+            command: insert,
+            against: self.database)
 
         let _:Mongo.Insertions = try response.insertions()
     }
@@ -338,7 +339,7 @@ extension Mongo.CollectionModel
     @inlinable
     func insert(some element:some Insertable) async throws
     {
-        let response:Mongo.InsertResponse = try await session.run(
+        let response:Mongo.InsertResponse = try await self.session.run(
             command: Mongo.Insert.init(Self.name, writeConcern: .majority)
             {
                 $0.append(element)
@@ -354,14 +355,23 @@ extension Mongo.CollectionModel
     func upsert(
         some elements:some Sequence<some Insertable>) async throws -> Mongo.Updates<Element.ID>
     {
-        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
-            command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
+        var count:Int = 0
+        let update:Mongo.Update<Mongo.One, Element.ID> = .init(Self.name)
+        {
+            for element:some BSONDocumentEncodable & Identifiable<Element.ID> in elements
             {
-                for element:some BSONDocumentEncodable & Identifiable<Element.ID> in elements
-                {
-                    $0.upsert(element)
-                }
-            },
+                $0.upsert(element)
+                count += 1
+            }
+        }
+
+        if  count == 0
+        {
+            return .init(selected: 0, modified: 0, upserted: [])
+        }
+
+        let response:Mongo.UpdateResponse<Element.ID> = try await self.session.run(
+            command: update,
             against: self.database)
 
         return try response.updates()
@@ -370,7 +380,7 @@ extension Mongo.CollectionModel
     @inlinable
     func upsert(some element:some Insertable) async throws -> Element.ID?
     {
-        let response:Mongo.UpdateResponse<Element.ID> = try await session.run(
+        let response:Mongo.UpdateResponse<Element.ID> = try await self.session.run(
             command: Mongo.Update<Mongo.One, Element.ID>.init(Self.name)
             {
                 $0.upsert(element)
