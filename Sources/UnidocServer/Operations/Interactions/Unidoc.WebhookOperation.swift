@@ -212,7 +212,7 @@ extension Unidoc.WebhookOperation
                 package: package.symbol,
                 refname: event.ref)
 
-            try await db.repoFeed.push(activity)
+            try await db.repoFeed.insert(activity)
         }
 
         return .created("")
