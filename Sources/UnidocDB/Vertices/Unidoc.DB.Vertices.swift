@@ -89,7 +89,8 @@ extension Unidoc.DB.Vertices
 
                 $0.append(Unidoc.AnyVertex.landing(vertices.landing))
             },
-            against: self.database)
+            against: self.database,
+            by: .now.advanced(by: .seconds(30)))
 
         return try response.insertions()
     }
