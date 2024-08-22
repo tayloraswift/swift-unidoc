@@ -1,10 +1,10 @@
+import Fingerprinting
 import HTTP
 import HTTPServer
 import ISO
 import NIOHPACK
 import NIOHTTP1
 import UA
-import Fingerprinting
 
 extension Unidoc
 {

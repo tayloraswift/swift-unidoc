@@ -2,8 +2,8 @@ import HTTP
 import MD5
 import Media
 import MongoDB
-import UnidocRender
 import UnidocDB
+import UnidocRender
 import URI
 
 extension Unidoc
@@ -34,9 +34,7 @@ extension Unidoc.LoadOptimizedOperation:Unidoc.PublicOperation
     func load(from server:Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let session:Mongo.Session = try await .init(from: server.db.sessions)
-
-        try await self.base.pull(from: server.db.unidoc.id, with: session)
+        try await self.base.pull(from: try await server.db.session())
 
         let etag:MD5? = self.etag
 

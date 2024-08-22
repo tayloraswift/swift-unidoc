@@ -290,6 +290,11 @@ let package:Package = .init(
 
         .target(name: "Media"),
 
+        .target(name: "_MongoDB",
+            dependencies: [
+                .product(name: "MongoDB", package: "swift-mongodb"),
+            ]),
+
         .target(name: "Multiparts",
             dependencies: [
                 .target(name: "Media"),
@@ -482,11 +487,11 @@ let package:Package = .init(
 
         .target(name: "UnidocDB",
             dependencies: [
+                .target(name: "_MongoDB"),
                 .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
                 .product(name: "UnixCalendar", package: "swift-unixtime"),
-                .product(name: "MongoDB", package: "swift-mongodb"),
             ]),
 
         .target(name: "UnidocRecords_LZ77",

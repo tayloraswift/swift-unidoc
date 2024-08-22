@@ -1,7 +1,7 @@
 import Signatures
+import SourceDiagnostics
 import SymbolGraphs
 import Unidoc
-import SourceDiagnostics
 
 extension Unidoc
 {

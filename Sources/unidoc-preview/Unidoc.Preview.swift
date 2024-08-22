@@ -3,8 +3,8 @@ import HTTPServer
 import MongoDB
 import NIOPosix
 import NIOSSL
-import System_ArgumentParser
 import System
+import System_ArgumentParser
 import UnidocServer
 
 extension Unidoc
@@ -137,8 +137,7 @@ extension Unidoc.Preview:AsyncParsableCommand
             @Sendable (pool:Mongo.SessionPool) in
             do
             {
-                let database:Unidoc.Database = .init(sessions: pool,
-                    unidoc: await .setup(as: "unidoc", in: pool))
+                let policy:Unidoc.SecurityPolicy = .init(security: options.mode.security)
                 {
                     $0.apiLimitInterval = .milliseconds(60_000)
                     $0.apiLimitPerReset = 10000
@@ -150,7 +149,7 @@ extension Unidoc.Preview:AsyncParsableCommand
                     context: context,
                     options: options,
                     builds: nil,
-                    db: database)
+                    db: .init(sessions: pool, unidoc: "unidoc",  policy: policy))
 
                 try await server.run()
             }

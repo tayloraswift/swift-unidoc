@@ -1,6 +1,6 @@
-import UCF
 import FNV1
 import Symbols
+import UCF
 
 extension UCF
 {

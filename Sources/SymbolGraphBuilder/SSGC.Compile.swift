@@ -2,8 +2,8 @@ import ArgumentParser
 import BSON
 import SymbolGraphs
 import Symbols
-import System_ArgumentParser
 import System
+import System_ArgumentParser
 
 extension SSGC
 {

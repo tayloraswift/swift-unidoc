@@ -55,7 +55,7 @@ extension Unidoc.Extension:Unidoc.LinkerIndexable
     func assemble(signature:Unidoc.ExtensionSignature,
         with linker:borrowing Unidoc.Linker) -> Unidoc.ExtensionGroup
     {
-        return .init(id: self.id.in(linker.current.id),
+        .init(id: self.id.in(linker.current.id),
             constraints: signature.conditions.constraints,
             culture: linker.current.id + signature.culture,
             scope: signature.extendee,

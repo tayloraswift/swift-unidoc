@@ -11,11 +11,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -41,13 +44,10 @@ extension Unidoc.DB.RealmAliases:Mongo.CollectionModel
 }
 extension Unidoc.DB.RealmAliases
 {
-    public
+    @inlinable public
     func insert(alias:String,
-        of coordinate:Unidoc.Realm,
-        with session:Mongo.Session) async throws
+        of coordinate:Unidoc.Realm) async throws
     {
-        try await self.insert(
-            some: Unidoc.RealmAlias.init(id: alias, coordinate: coordinate),
-            with: session)
+        try await self.insert(.init(id: alias, coordinate: coordinate))
     }
 }

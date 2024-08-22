@@ -3,9 +3,9 @@ import MarkdownABI
 import MarkdownAST
 import MarkdownParsing
 import MarkdownSemantics
-import Testing_
 import SourceDiagnostics
 import Symbols
+import Testing_
 
 @_spi(testable)
 import SymbolGraphLinker

@@ -12,8 +12,8 @@ struct Packages:MongoTestBattery
     static
     func run(tests:TestGroup, pool:Mongo.SessionPool, database:Mongo.Database) async throws
     {
-        let database:Unidoc.DB = await .setup(as: database, in: pool)
-        let session:Mongo.Session = try await .init(from: pool)
+        let database:Unidoc.DB = .init(session: try await .init(from: pool), in: database)
+        try await database.setup()
 
         do
         {
@@ -33,7 +33,7 @@ struct Packages:MongoTestBattery
                 ]
                 {
                     let (package, new):(Unidoc.PackageMetadata, Bool) =
-                        try await database.index(package: expected.symbol, with: session)
+                        try await database.index(package: expected.symbol)
 
                     tests.expect(package.id ==? expected.id)
                     tests.expect(new ==? expected.new)
@@ -49,14 +49,14 @@ struct Packages:MongoTestBattery
 
         await tests.do
         {
-            try await database.alias(existing: "a", package: "aa", with: session)
+            try await database.alias(existing: "a", package: "aa")
 
-            try await database.alias(existing: "b", package: "bb", with: session)
+            try await database.alias(existing: "b", package: "bb")
 
-            try await database.alias(existing: "c", package: "cc", with: session)
-            try await database.alias(existing: "c", package: "cc", with: session)
-            try await database.alias(existing: "cc", package: "ccc", with: session)
-            try await database.alias(existing: "cc", package: "ccc", with: session)
+            try await database.alias(existing: "c", package: "cc")
+            try await database.alias(existing: "c", package: "cc")
+            try await database.alias(existing: "cc", package: "ccc")
+            try await database.alias(existing: "cc", package: "ccc")
         }
 
         guard
@@ -81,8 +81,7 @@ struct Packages:MongoTestBattery
             ]
             {
                 let (package, new):(Unidoc.PackageMetadata, Bool) = try await database.index(
-                    package: queried,
-                    with: session)
+                    package: queried)
 
                 tests.expect(package.symbol ==? expected.symbol)
                 tests.expect(package.id ==? expected.id)

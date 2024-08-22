@@ -1,5 +1,5 @@
-import Sources
 import SourceDiagnostics
+import Sources
 
 extension SSGC
 {

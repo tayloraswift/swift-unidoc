@@ -1,5 +1,5 @@
-import UCF
 import SourceDiagnostics
+import UCF
 
 extension UCF
 {

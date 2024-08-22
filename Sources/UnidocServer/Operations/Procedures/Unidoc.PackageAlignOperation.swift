@@ -24,9 +24,9 @@ extension Unidoc
 }
 extension Unidoc.PackageAlignOperation:Unidoc.NonblockingOperation
 {
-    func enqueue(on server:Unidoc.Server,
-        payload:consuming [UInt8],
-        session:Mongo.Session) async throws -> Status
+    func enqueue(payload _:[UInt8],
+        on server:Unidoc.Server,
+        db:Unidoc.DB) async throws -> Status
     {
         let realm:Unidoc.Realm?
 
@@ -35,11 +35,11 @@ extension Unidoc.PackageAlignOperation:Unidoc.NonblockingOperation
             let target:Unidoc.RealmMetadata?
             if  self.force
             {
-                (target, _) = try await server.db.unidoc.index(realm: symbol, with: session)
+                (target, _) = try await db.index(realm: symbol)
             }
             else
             {
-                target = try await server.db.unidoc.realm(named: symbol, with: session)
+                target = try await db.realm(named: symbol)
             }
 
             guard
@@ -57,8 +57,7 @@ extension Unidoc.PackageAlignOperation:Unidoc.NonblockingOperation
         }
 
         guard
-        let package:Unidoc.PackageMetadata = try await server.db.packages.find(id: self.package,
-            with: session)
+        let package:Unidoc.PackageMetadata = try await db.packages.find(id: self.package)
         else
         {
             return .noSuchPackage
@@ -67,12 +66,12 @@ extension Unidoc.PackageAlignOperation:Unidoc.NonblockingOperation
         return .align(package, to: realm)
     }
 
-    func perform(on server:Unidoc.Server, session:Mongo.Session, status:Status) async
+    func perform(status:Status, on _:Unidoc.Server, db:Unidoc.DB) async
     {
         switch status
         {
         case .align(let package, let realm):
-            try? await server.db.unidoc.align(package: package.id, realm: realm, with: session)
+            try? await db.align(package: package.id, realm: realm)
 
         default:
             break

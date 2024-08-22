@@ -55,12 +55,12 @@ extension SymbolQueries.TestCase
             tests: tests)
     }
 
-    func run(on unidoc:Unidoc.DB, with session:Mongo.Session) async
+    func run(on db:Unidoc.DB) async
     {
         await self.tests.do
         {
             if  let output:Unidoc.VertexOutput = self.tests.expect(
-                    value: try await session.query(database: unidoc.id, with: self.query)),
+                    value: try await db.query(with: self.query)),
                 let _:Unidoc.AnyVertex = self.tests.expect(value: output.principal?.vertex)
             {
                 let secondaries:[Unidoc.Scalar: Substring] = output.vertices.reduce(

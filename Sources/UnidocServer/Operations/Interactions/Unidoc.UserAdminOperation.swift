@@ -23,11 +23,11 @@ extension Unidoc
 extension Unidoc.UserAdminOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         var endpoint:Unidoc.UserSettingsEndpoint = .init(query: .another(self.account))
-        try await endpoint.pull(from: server.db.unidoc.id, with: session)
+        try await endpoint.pull(from: db)
         return endpoint.response(as: format, admin: true)
     }
 }

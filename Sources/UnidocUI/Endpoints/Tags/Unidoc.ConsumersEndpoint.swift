@@ -1,9 +1,9 @@
 import HTTP
 import MongoDB
 import Symbols
+import UnidocDB
 import UnidocQueries
 import UnidocRender
-import UnidocDB
 import URI
 
 extension Unidoc

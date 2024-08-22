@@ -18,7 +18,7 @@ extension Unidoc
         /// consistent with any authentication that took place before calling this witness.
         consuming
         func load(from server:borrowing Server,
-            with session:Mongo.Session,
+            db database:Unidoc.DB,
             as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     }
 }
@@ -28,12 +28,12 @@ extension Unidoc.RestrictedOperation
     func load(from server:Unidoc.Server,
         with state:Unidoc.UserSessionState) async throws -> HTTP.ServerResponse?
     {
-        let session:Mongo.Session
+        let db:Unidoc.DB
 
-        switch server.security
+        switch server.db.policy.security
         {
         case .ignored:
-            session = try await .init(from: server.db.sessions)
+            db = try await server.db.session()
             //  Yes, we need to call this, even though we ignore the result.
             let _:Bool = self.admit(user: .init(level: .administratrix))
 
@@ -67,11 +67,10 @@ extension Unidoc.RestrictedOperation
                 user = .api(session)
             }
 
-            session = try await .init(from: server.db.sessions)
+            db = try await server.db.session()
 
             guard
-            let rights:Unidoc.UserRights = try await server.db.users.validate(user: user,
-                with: session)
+            let rights:Unidoc.UserRights = try await db.users.validate(user: user)
             else
             {
                 if  case .web = state.authorization
@@ -100,6 +99,6 @@ extension Unidoc.RestrictedOperation
             }
         }
 
-        return try await self.load(from: server, with: session, as: state.format)
+        return try await self.load(from: server, db: db, as: state.format)
     }
 }

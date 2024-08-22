@@ -1,9 +1,9 @@
 import LexicalPaths
 import Signatures
+import SourceDiagnostics
 import SymbolGraphs
 import Symbols
 import Unidoc
-import SourceDiagnostics
 import UnidocRecords
 
 extension Unidoc.Linker

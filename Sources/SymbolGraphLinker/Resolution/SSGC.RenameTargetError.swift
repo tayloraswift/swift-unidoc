@@ -1,7 +1,7 @@
-import UCF
-import LinkResolution
 import LexicalPaths
+import LinkResolution
 import SourceDiagnostics
+import UCF
 
 extension SSGC
 {

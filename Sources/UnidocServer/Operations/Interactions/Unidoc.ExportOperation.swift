@@ -58,8 +58,8 @@ extension Unidoc.ExportOperation:Unidoc.PublicOperation
     func load(from server:Unidoc.Server,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let session:Mongo.Session
         let remaining:Int?
+        let db:Unidoc.DB
 
         switch self.authorization
         {
@@ -70,10 +70,10 @@ extension Unidoc.ExportOperation:Unidoc.PublicOperation
             return .unauthorized("Missing authorization header\n")
 
         case .api(let authorization):
-            session = try await .init(from: server.db.sessions)
-            remaining = try await server.db.users.charge(apiKey: authorization.apiKey,
-                user: authorization.id,
-                with: session)
+            db = try await server.db.session()
+            remaining = try await db.users.charge(
+                apiKey: authorization.apiKey,
+                user: authorization.id)
         }
 
         guard
@@ -86,7 +86,7 @@ extension Unidoc.ExportOperation:Unidoc.PublicOperation
         var endpoint:Unidoc.ExportEndpoint = .init(rateLimit: .init(remaining: remaining),
             query: self.request)
 
-        try await endpoint.pull(from: server.db.unidoc.id, with: session)
+        try await endpoint.pull(from: db)
 
         do
         {

@@ -19,7 +19,7 @@ extension Unidoc
 extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         switch self
@@ -29,14 +29,15 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
 
             switch target
             {
-            case .packageDependencies:  collection = server.db.packageDependencies
-            case .packages:             collection = server.db.packages
-            case .editions:             collection = server.db.editions
-            case .vertices:             collection = server.db.vertices
-            case .volumes:              collection = server.db.volumes
+            case .packageDependencies:  collection = db.packageDependencies
+            case .packages:             collection = db.packages
+            case .editions:             collection = db.editions
+            case .vertices:             collection = db.vertices
+            case .volumes:              collection = db.volumes
             }
 
-            let (modified, selected):(Int, Int) = try await collection.recode(with: session)
+            let (modified, selected):(Int, Int) = try await collection.recode(stride: 4096,
+                by: .now.advanced(by: .seconds(60)))
             let complete:Unidoc._RecodePage.Complete = .init(
                 selected: selected,
                 modified: modified,
@@ -45,9 +46,8 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
             return .ok(complete.resource(format: format))
 
         case .telescope(last: let days):
-            let updates:Mongo.Updates = try await server.db.crawlingWindows.create(
-                previous: days,
-                with: session)
+            let updates:Mongo.Updates = try await db.crawlingWindows.create(
+                previous: days)
 
             return .ok("Updated \(updates.modified) of \(updates.selected) crawling windows.")
         }
