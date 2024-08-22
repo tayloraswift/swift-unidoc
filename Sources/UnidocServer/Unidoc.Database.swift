@@ -25,7 +25,7 @@ extension Unidoc
 }
 extension Unidoc.Database
 {
-    @inlinable
+    @inlinable public
     func session() async throws -> Unidoc.DB
     {
         let session:Mongo.Session = try await .init(from: self.sessions)
