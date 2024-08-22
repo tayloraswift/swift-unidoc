@@ -114,7 +114,8 @@ extension Unidoc.DB.Groups
                     }
                 }
             },
-            against: self.database)
+            against: self.database,
+            by: .now.advanced(by: .seconds(30)))
 
         return try response.insertions()
     }
