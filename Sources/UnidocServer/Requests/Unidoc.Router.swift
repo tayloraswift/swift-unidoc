@@ -6,8 +6,8 @@ import MD5
 import Media
 import Multiparts
 import Symbols
-import URI
 import UnixCalendar
+import URI
 
 extension Unidoc
 {

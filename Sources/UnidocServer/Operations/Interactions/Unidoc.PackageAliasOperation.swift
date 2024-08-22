@@ -1,8 +1,8 @@
 import HTTP
 import MongoDB
+import Symbols
 import UnidocDB
 import UnidocUI
-import Symbols
 
 extension Unidoc
 {
@@ -21,13 +21,10 @@ extension Unidoc
 extension Unidoc.PackageAliasOperation:Unidoc.AdministrativeOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        try await server.db.packageAliases.upsert(alias: self.alias,
-            of: self.package,
-            with: session)
-
+        try await db.packageAliases.upsert(alias: self.alias, of: self.package)
         return .redirect(.seeOther("\(Unidoc.RefsEndpoint[self.alias])"))
     }
 }

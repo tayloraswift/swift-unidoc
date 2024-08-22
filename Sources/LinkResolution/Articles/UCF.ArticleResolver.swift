@@ -1,5 +1,5 @@
-import UCF
 import Symbols
+import UCF
 
 extension UCF
 {

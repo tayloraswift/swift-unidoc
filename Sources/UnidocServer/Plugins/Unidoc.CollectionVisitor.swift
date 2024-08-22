@@ -1,5 +1,5 @@
-import UnidocDB
 import MongoDB
+import UnidocDB
 
 extension Unidoc
 {
@@ -12,7 +12,7 @@ extension Unidoc
         var title:String { get }
 
         mutating
-        func tour(in unidoc:Unidoc.DB, with session:Mongo.Session) async throws
+        func tour(in unidoc:Unidoc.DB) async throws
 
         mutating
         func publish(event:Event)
@@ -23,7 +23,7 @@ extension Unidoc
 extension Unidoc.CollectionVisitor
 {
     public mutating
-    func watch(db unidoc:Unidoc.DB, with pool:Mongo.SessionPool) async throws
+    func watch(db unidoc:Unidoc.Database) async throws
     {
         //  Otherwise the page will be empty until something is queued.
         self.publish()
@@ -37,8 +37,7 @@ extension Unidoc.CollectionVisitor
 
             do
             {
-                let session:Mongo.Session = try await .init(from: pool)
-                try await self.tour(in: unidoc, with: session)
+                try await self.tour(in: try await unidoc.session())
             }
             catch let error
             {

@@ -2,13 +2,13 @@ import GitHubAPI
 import GitHubClient
 import HTTP
 import MongoDB
-import UnidocUI
 import SemanticVersions
 import SHA1
 import SymbolGraphs
 import Symbols
 import UnidocDB
 import UnidocRecords
+import UnidocUI
 
 extension Unidoc
 {
@@ -31,7 +31,7 @@ extension Unidoc
 extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
 {
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         guard
@@ -46,9 +46,7 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
         switch self.subject
         {
         case .repo(owner: let owner, name: let name, githubInstallation: let appInstallation):
-            if  let error:Unidoc.PolicyErrorPage = try await self.charge(cost: 8,
-                    from: server,
-                    with: session)
+            if  let error:Unidoc.PolicyErrorPage = try await self.charge(cost: 8, in: db)
             {
                 return error.response(format: format)
             }
@@ -78,24 +76,20 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 return failure.response(format: format)
             }
 
-            (package, _) = try await server.db.unidoc.index(
-                package: "\(repo.owner.login).\(repo.name)",
+            (package, _) = try await db.index(package: "\(repo.owner.login).\(repo.name)",
                 repo: .github(repo, crawled: .now()),
-                mode: .automatic,
-                with: session)
+                mode: .automatic)
 
             //  If we are (re)indexing a package this way, we should create a crawling ticket
             //  for the repo, for lack of a proper interface for requesting this.
             if  case .public = repo.visibility
             {
-                _ = try await server.db.crawlingTickets.create(
-                    tickets: [.init(id: package.id, node: repo.node, time: .zero)],
-                    with: session)
+                _ = try await db.crawlingTickets.create(
+                    tickets: [.init(id: package.id, node: repo.node, time: .zero)])
             }
 
         case .ref(let id, ref: let name):
-            if  let metadata:Unidoc.PackageMetadata = try await server.db.packages.find(id: id,
-                    with: session)
+            if  let metadata:Unidoc.PackageMetadata = try await db.packages.find(id: id)
             {
                 package = metadata
             }
@@ -111,9 +105,7 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 return .notFound("Not a GitHub repository")
             }
 
-            if  let error:Unidoc.PolicyErrorPage = try await self.charge(cost: 8,
-                    from: server,
-                    with: session)
+            if  let error:Unidoc.PolicyErrorPage = try await self.charge(cost: 8, in: db)
             {
                 return error.response(format: format)
             }
@@ -159,12 +151,11 @@ extension Unidoc.PackageIndexOperation:Unidoc.MeteredOperation
                 sha1 = nil
             }
 
-            let (_, _):(Unidoc.EditionMetadata, Bool) = try await server.db.unidoc.index(
+            let (_, _):(Unidoc.EditionMetadata, Bool) = try await db.index(
                 package: package.id,
                 version: version,
                 name: ref.name,
-                sha1: sha1,
-                with: session)
+                sha1: sha1)
         }
 
         return .redirect(.seeOther("\(Unidoc.RefsEndpoint[package.symbol])"))

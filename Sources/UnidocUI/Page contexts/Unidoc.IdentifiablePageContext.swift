@@ -3,11 +3,11 @@ import LexicalPaths
 import MarkdownABI
 import MarkdownRendering
 import Signatures
-import UnidocRender
 import Symbols
 import Unidoc
 import UnidocDB
 import UnidocRecords
+import UnidocRender
 
 extension Unidoc
 {

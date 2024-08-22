@@ -10,11 +10,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -40,22 +43,14 @@ extension Unidoc.DB.PackageAliases:Mongo.CollectionModel
 }
 extension Unidoc.DB.PackageAliases
 {
-    public
-    func upsert(alias:Symbol.Package,
-        of coordinate:Unidoc.Package,
-        with session:Mongo.Session) async throws
+    @inlinable public
+    func upsert(alias:Symbol.Package, of coordinate:Unidoc.Package) async throws
     {
-        try await self.upsert(
-            some: Unidoc.PackageAlias.init(id: alias, coordinate: coordinate),
-            with: session)
+        try await self.upsert(.init(id: alias, coordinate: coordinate))
     }
 
-    func insert(alias:Symbol.Package,
-        of coordinate:Unidoc.Package,
-        with session:Mongo.Session) async throws
+    func insert(alias:Symbol.Package, of coordinate:Unidoc.Package) async throws
     {
-        try await self.insert(
-            some: Unidoc.PackageAlias.init(id: alias, coordinate: coordinate),
-            with: session)
+        try await self.insert(.init(id: alias, coordinate: coordinate))
     }
 }

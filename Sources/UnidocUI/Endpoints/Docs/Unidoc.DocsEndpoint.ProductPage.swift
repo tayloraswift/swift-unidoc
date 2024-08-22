@@ -1,6 +1,6 @@
 import HTML
-import UnidocRender
 import UnidocRecords
+import UnidocRender
 import URI
 
 extension Unidoc.DocsEndpoint

@@ -1,6 +1,6 @@
+import Fingerprinting
 import HTTP
 import Testing_
-import Fingerprinting
 
 extension Main
 {

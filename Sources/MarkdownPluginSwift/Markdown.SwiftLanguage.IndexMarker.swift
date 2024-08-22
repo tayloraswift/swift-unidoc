@@ -1,5 +1,5 @@
-import Symbols
 import Sources
+import Symbols
 
 extension Markdown.SwiftLanguage
 {

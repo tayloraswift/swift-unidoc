@@ -1,8 +1,8 @@
 import HTTP
 import MongoDB
-import UnidocRender
 import UnidocDB
 import UnidocQueries
+import UnidocRender
 import URI
 
 extension Unidoc

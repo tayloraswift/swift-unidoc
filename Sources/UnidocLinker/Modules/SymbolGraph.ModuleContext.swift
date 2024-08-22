@@ -1,5 +1,5 @@
-import LinkResolution
 import LexicalPaths
+import LinkResolution
 import SymbolGraphs
 import Symbols
 import UCF

@@ -1,8 +1,8 @@
 import HTML
 import Media
 import Symbols
-import URI
 import UnixTime
+import URI
 
 extension Unidoc
 {

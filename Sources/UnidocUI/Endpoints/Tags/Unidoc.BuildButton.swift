@@ -32,7 +32,7 @@ extension Unidoc.BuildButton
     static
     func edition(id:Unidoc.Edition, package:Symbol.Package, ref:String) -> Self
     {
-        return .init(symbols: .init(package: package, ref: ref[...]),
+        .init(symbols: .init(package: package, ref: ref[...]),
             package: id.package,
             version: id.version,
             cancel: false,
@@ -42,7 +42,7 @@ extension Unidoc.BuildButton
     static
     func latest(of package:Unidoc.PackageMetadata, cancel:Bool = false) -> Self
     {
-        return .init(symbols: .init(package: package.symbol, ref: nil),
+        .init(symbols: .init(package: package.symbol, ref: nil),
             package: package.id,
             version: nil,
             cancel: cancel,

@@ -94,13 +94,13 @@ extension Unidoc.WebhookOperation:Unidoc.PublicOperation
         {
         case .installation(let event):
             return try await self.handle(installation: event,
-                in: server.db,
-                at: .init(truncating: format.time))
+                at: .init(truncating: format.time),
+                in: try await server.db.session())
 
         case .create(let event):
             return try await self.handle(create: event,
-                in: server.db,
-                at: .init(truncating: format.time))
+                at: .init(truncating: format.time),
+                in: try await server.db.session())
 
         case .ignore(let type):
             return .ok("Ignored event type '\(type)'\n")
@@ -111,22 +111,20 @@ extension Unidoc.WebhookOperation
 {
     private __consuming
     func handle(installation event:GitHub.WebhookInstallation,
-        in db:Unidoc.Database,
-        at time:UnixMillisecond) async throws -> HTTP.ServerResponse
+        at time:UnixMillisecond,
+        in db:Unidoc.DB) async throws -> HTTP.ServerResponse
     {
-        let session:Mongo.Session = try await .init(from: db.sessions)
         let user:Unidoc.User = .init(githubInstallation: event.installation,
             initialLimit: db.policy.apiLimitPerReset)
 
         switch event.action
         {
         case .created:
-            let _:Unidoc.UserSecrets = try await db.users.update(user: user, with: session)
+            let _:Unidoc.UserSecrets = try await db.users.update(user: user)
             return .created("")
 
         case .deleted:
-            let modified:Unidoc.User? = try await db.users.modify(existing: user.id,
-                with: session)
+            let modified:Unidoc.User? = try await db.users.modify(existing: user.id)
             {
                 $0[.unset] { $0[Unidoc.User[.githubInstallation]] = () }
             }
@@ -138,8 +136,8 @@ extension Unidoc.WebhookOperation
 
     private __consuming
     func handle(create event:GitHub.WebhookCreate,
-        in db:Unidoc.Database,
-        at time:UnixMillisecond) async throws -> HTTP.ServerResponse
+        at time:UnixMillisecond,
+        in db:Unidoc.DB) async throws -> HTTP.ServerResponse
     {
         let repo:Unidoc.PackageRepo = try .github(event.repo, crawled: time)
 
@@ -164,24 +162,21 @@ extension Unidoc.WebhookOperation
             """
         }
 
-        let session:Mongo.Session = try await .init(from: db.sessions)
         let package:Unidoc.PackageMetadata
 
         if  let known:Unidoc.PackageMetadata = try await db.packages.updateWebhook(
                 configurationURL: repoWebhook,
-                repo: repo,
-                with: session)
+                repo: repo)
         {
             package = known
         }
         else if indexEligible
         {
-            (package, _) = try await db.unidoc.index(
+            (package, _) = try await db.index(
                 package: "\(event.repo.owner.login).\(event.repo.name)",
                 repo: repo,
                 repoWebhook: repoWebhook,
-                mode: .automatic,
-                with: session)
+                mode: .automatic)
         }
         else
         {
@@ -195,15 +190,14 @@ extension Unidoc.WebhookOperation
             return .ok("Ignored ref '\(event.ref)' because it is not a semantic version\n")
         }
 
-        let (_, new):(Unidoc.EditionMetadata, new:Bool) = try await db.unidoc.index(
+        let (_, new):(Unidoc.EditionMetadata, new:Bool) = try await db.index(
             package: package.id,
             version: version,
             name: event.ref,
-            sha1: nil,
-            with: session)
+            sha1: nil)
 
         //  If we got this far, we should destroy any crawling tickets this package has.
-        _ = try? await db.crawlingTickets.delete(id: package.id, with: session)
+        _ = try? await db.crawlingTickets.delete(id: package.id)
 
         guard new
         else
@@ -218,7 +212,7 @@ extension Unidoc.WebhookOperation
                 package: package.symbol,
                 refname: event.ref)
 
-            try await db.repoFeed.push(activity, with: session)
+            try await db.repoFeed.push(activity)
         }
 
         return .created("")

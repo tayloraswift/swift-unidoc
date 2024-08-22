@@ -1,6 +1,7 @@
 import HTTP
 import ISO
 import Media
+import UnidocRecords
 import UnixCalendar
 import UnixTime
 
@@ -10,7 +11,7 @@ extension Unidoc
     struct RenderFormat
     {
         public
-        var security:ServerSecurity
+        var security:Security
         public
         var username:String?
         public
@@ -25,7 +26,7 @@ extension Unidoc
 
         @inlinable public
         init(
-            security:ServerSecurity,
+            security:Security,
             username:String?,
             locale:ISO.Locale,
             assets:Assets,

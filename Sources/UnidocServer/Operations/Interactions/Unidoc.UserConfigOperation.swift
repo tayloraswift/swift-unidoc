@@ -33,7 +33,7 @@ extension Unidoc.UserConfigOperation:Unidoc.RestrictedOperation
     }
 
     func load(from server:Unidoc.Server,
-        with session:Mongo.Session,
+        db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         let redirect:Unidoc.Account?
@@ -58,9 +58,8 @@ extension Unidoc.UserConfigOperation:Unidoc.RestrictedOperation
             }
 
             guard
-            let _:Unidoc.UserSecrets = try await server.db.users.scramble(secret: .apiKey,
-                user: account,
-                with: session)
+            let _:Unidoc.UserSecrets = try await db.users.scramble(secret: .apiKey,
+                user: account)
             else
             {
                 return .notFound("No such user")

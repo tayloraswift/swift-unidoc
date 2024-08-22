@@ -15,14 +15,11 @@ struct VolumeQueries:UnidocDatabaseTestBattery
     typealias Configuration = Main.Configuration
 
     static
-    func run(tests:TestGroup,
-        pool:Mongo.SessionPool,
-        unidoc:Unidoc.DB) async throws
+    func run(tests:TestGroup, db:Unidoc.DB) async throws
     {
         let workspace:SSGC.Workspace = try .create(at: ".testing")
         let swift:SSGC.Toolchain = try .detect()
 
-        let session:Mongo.Session = try await .init(from: pool)
         let package:Symbol.Package = "swift-version-controlled"
 
         for (i, tag):(Int32, String) in zip(0..., ["0.1.0", "0.2.0", "1.0.0-beta.1"])
@@ -37,7 +34,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             empty.roundtrip(for: tests, in: workspace.location)
 
             let v:Unidoc.Version = .init(rawValue: i)
-            tests.expect(try await unidoc.store(linking: empty, with: session).0 ==? .init(
+            tests.expect(try await db.store(linking: empty).0 ==? .init(
                 edition: .init(package: 0, version: v),
                 updated: false))
         }
@@ -49,7 +46,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.query(with: query)),
                     let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
@@ -66,7 +63,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.query(with: query)),
                     let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
@@ -83,7 +80,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.query(with: query)),
                     let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
@@ -100,7 +97,7 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await session.query(database: unidoc.id, with: query)),
+                        value: try await db.query(with: query)),
                     let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
                 {
                     tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))

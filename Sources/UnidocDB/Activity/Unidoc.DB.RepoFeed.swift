@@ -8,11 +8,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -33,15 +36,17 @@ extension Unidoc.DB.RepoFeed:Mongo.CollectionModel
 }
 extension Unidoc.DB.RepoFeed
 {
+    @available(*, deprecated, renamed: "find(last:)")
     public
-    func last(_ count:Int, with session:Mongo.Session) async throws -> [Activity]
+    func last(_ count:Int) async throws -> [Activity]
     {
-        try await self.find(last: count, with: session)
+        try await self.find(last: count)
     }
 
+    @available(*, deprecated, renamed: "insert(_:)")
     public
-    func push(_ activity:Activity, with session:Mongo.Session) async throws
+    func push(_ activity:Activity) async throws
     {
-        try await self.insert(some: activity, with: session)
+        try await self.insert(activity)
     }
 }

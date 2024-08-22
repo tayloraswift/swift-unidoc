@@ -85,12 +85,10 @@ extension Unidoc.BuildCoordinator
     private nonisolated
     func pullNotification(from db:Unidoc.Database) async throws
     {
-        let session:Mongo.Session = try await .init(from: db.sessions)
+        let db:Unidoc.DB = try await db.session()
 
         guard
-        let metadata:Unidoc.BuildMetadata = try await db.packageBuilds.selectBuild(
-            await: true,
-            with: session),
+        let metadata:Unidoc.BuildMetadata = try await db.packageBuilds.selectBuild(await: true),
         let request:Unidoc.BuildRequest<Void> = metadata.request
         else
         {
@@ -98,7 +96,7 @@ extension Unidoc.BuildCoordinator
         }
 
         guard
-        let clusterTime:BSON.Timestamp = session.preconditionTime
+        let clusterTime:BSON.Timestamp = db.session.preconditionTime
         else
         {
             throw Unidoc.BuildCoordinatorAssertionError.missingClusterTime

@@ -1,4 +1,5 @@
 import UnidocAssets
+import UnidocRecords
 import UnidocRender
 
 extension Unidoc.ServerOptions
@@ -12,6 +13,16 @@ extension Unidoc.ServerOptions
 }
 extension Unidoc.ServerOptions.Mode
 {
+    @inlinable public
+    var security:Unidoc.Security
+    {
+        switch self
+        {
+        case .development(_, let options):  options.security
+        case .production:                   .enforced
+        }
+    }
+
     @inlinable
     var server:Unidoc.ServerType
     {

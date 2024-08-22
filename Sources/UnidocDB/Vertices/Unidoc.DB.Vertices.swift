@@ -10,11 +10,14 @@ extension Unidoc.DB
     {
         public
         let database:Mongo.Database
+        public
+        let session:Mongo.Session
 
-        @inlinable internal
-        init(database:Mongo.Database)
+        @inlinable
+        init(database:Mongo.Database, session:Mongo.Session)
         {
             self.database = database
+            self.session = session
         }
     }
 }
@@ -63,19 +66,11 @@ extension Unidoc.DB.Vertices:Mongo.CollectionModel
 }
 extension Unidoc.DB.Vertices:Mongo.RecodableModel
 {
-    public
-    func recode(with session:Mongo.Session) async throws -> (modified:Int, of:Int)
-    {
-        try await self.recode(through: Unidoc.AnyVertex.self,
-            with: session,
-            by: .now.advanced(by: .seconds(60)))
-    }
 }
 extension Unidoc.DB.Vertices
 {
     @discardableResult
-    func insert(_ vertices:Unidoc.Mesh.Vertices,
-        with session:Mongo.Session) async throws -> Mongo.Insertions
+    func insert(_ vertices:Unidoc.Mesh.Vertices) async throws -> Mongo.Insertions
     {
         let response:Mongo.InsertResponse = try await session.run(
             command: Mongo.Insert.init(Self.name,

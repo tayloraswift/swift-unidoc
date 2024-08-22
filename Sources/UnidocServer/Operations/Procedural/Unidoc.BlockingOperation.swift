@@ -7,26 +7,25 @@ extension Unidoc
     public
     protocol BlockingOperation:ProceduralOperation
     {
-        func perform(on server:Server,
-            payload:consuming [UInt8],
-            session:Mongo.Session) async throws -> HTTP.ServerResponse
+        func perform(with payload:[UInt8],
+            on server:Server,
+            db:DB) async throws -> HTTP.ServerResponse
     }
 }
 extension Unidoc.BlockingOperation
 {
     public
-    func perform(on server:Unidoc.Server,
-        payload:consuming [UInt8],
-        request:Unidoc.Server.Promise) async
+    func serve(request:Unidoc.Server.Promise,
+        with payload:[UInt8],
+        from server:Unidoc.Server) async
     {
         do
         {
-            let session:Mongo.Session = try await .init(from: server.db.sessions)
-            request.resume(returning: try await self.perform(on: server,
-                payload: payload,
-                session: session))
+            request.resume(returning: try await self.perform(with: payload,
+                on: server,
+                db: try await server.db.session()))
         }
-        catch
+        catch let error
         {
             request.resume(rendering: error, as: server.format)
         }

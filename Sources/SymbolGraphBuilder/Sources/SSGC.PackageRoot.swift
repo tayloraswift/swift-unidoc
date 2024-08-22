@@ -1,5 +1,5 @@
-import System
 import Symbols
+import System
 
 extension SSGC
 {

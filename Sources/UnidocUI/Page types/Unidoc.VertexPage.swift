@@ -1,8 +1,8 @@
 import HTML
 import JSON
-import UnidocRender
 import Unidoc
 import UnidocRecords
+import UnidocRender
 import URI
 
 extension Unidoc

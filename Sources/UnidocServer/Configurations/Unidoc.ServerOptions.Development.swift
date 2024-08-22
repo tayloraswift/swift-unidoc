@@ -1,11 +1,12 @@
 import S3
+import UnidocRecords
 import UnidocRender
 
 extension Unidoc.ServerOptions
 {
     /// Options for the server that are configurable in development mode.
     @frozen public
-    struct Development
+    struct Development:Sendable
     {
         /// Whether to enable CloudFront integration.
         public
@@ -22,7 +23,7 @@ extension Unidoc.ServerOptions
 
         /// Whether to enforce account-level permissions.
         public
-        var security:Unidoc.ServerSecurity
+        var security:Unidoc.Security
 
         /// The name of the replica set to use for development.
         public
