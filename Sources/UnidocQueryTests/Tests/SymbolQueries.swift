@@ -31,7 +31,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         do
         {
             //  Use the cached binary if available.
-            swift = try .load(swift: toolchain.id, in: workspace.location)
+            swift = try .load(swift: toolchain.splash.swift, in: workspace.location)
         }
         catch
         {

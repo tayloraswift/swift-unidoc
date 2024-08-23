@@ -34,7 +34,7 @@ struct PackageQueries:UnidocDatabaseTestBattery
                 metadata: .init(
                     package: .init(name: .swift),
                     commit: .init(name: "swift-5.8.1-RELEASE"),
-                    triple: toolchain.triple,
+                    triple: toolchain.splash.triple,
                     swift: .init(version: .v(5, 8, 1)),
                     products: []),
                 graph: empty)
