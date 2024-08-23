@@ -69,6 +69,11 @@ extension SSGC
         var swiftSDK:AppleSDK? = nil
 
         @Option(
+            name: [.customLong("ci")],
+            help: "Run in CI mode under the specified validation level")
+        var ci:ValidationBehavior? = nil
+
+        @Option(
             name: [.customLong("package-name"), .customShort("n")],
             help: """
                 The symbolic name of the project to build — \
@@ -197,6 +202,7 @@ extension SSGC.Compile
     private
     func launch(workspace:SSGC.Workspace, status:SSGC.StatusStream?) throws
     {
+        let validation:SSGC.ValidationBehavior = self.ci ?? .ignoreErrors
         if  let path:FilePath = self.outputLog
         {
             try path.open(.writeOnly,
@@ -205,14 +211,14 @@ extension SSGC.Compile
             {
                 try self.launch(workspace: workspace,
                     status: status,
-                    logger: .init(file: $0))
+                    logger: .init(validation: validation, file: $0))
             }
         }
         else
         {
             try self.launch(workspace: workspace,
                 status: status,
-                logger: .init(file: nil))
+                logger: .init(validation: validation, file: nil))
         }
     }
 

@@ -3,18 +3,31 @@ import System
 
 extension SSGC
 {
-    @frozen public
-    struct Logger
+    public final
+    class Logger
     {
-        let ignoreErrors:Bool
-        let file:FileDescriptor?
+        private
+        let validation:ValidationBehavior
+        private
+        let output:FileDescriptor?
+
+        private(set)
+        var failed:Bool
 
         public
-        init(ignoreErrors:Bool = false, file:FileDescriptor?)
+        init(validation:ValidationBehavior, file output:FileDescriptor?)
         {
-            self.ignoreErrors = ignoreErrors
-            self.file = file
+            self.validation = validation
+            self.output = output
+            self.failed = false
         }
+    }
+}
+extension SSGC.Logger
+{
+    static func `default`() -> Self
+    {
+        .init(validation: .ignoreErrors, file: nil)
     }
 }
 extension SSGC.Logger:DiagnosticLogger
@@ -22,13 +35,29 @@ extension SSGC.Logger:DiagnosticLogger
     public
     func emit(messages:consuming DiagnosticMessages) throws
     {
-        if  self.ignoreErrors
+        switch self.validation
         {
+        case .warningsAsErrors:
+            if  messages.status >= .warning
+            {
+                self.failed = true
+            }
+
+        case .failOnErrors:
+            if  messages.status >= .error
+            {
+                self.failed = true
+            }
+
+        case .ignoreErrors:
+            break
+
+        case .demoteErrors:
             messages.demoteErrors(to: .warning)
         }
 
         guard
-        let file:FileDescriptor = self.file
+        let output:FileDescriptor = self.output
         else
         {
             messages.emit(colors: .enabled)
@@ -36,6 +65,11 @@ extension SSGC.Logger:DiagnosticLogger
         }
 
         let text:String = "\(messages)"
-        try file.writeAll(text.utf8)
+        try output.writeAll(text.utf8)
+
+        if  self.failed
+        {
+            throw SSGC.ValidationError.init()
+        }
     }
 }
