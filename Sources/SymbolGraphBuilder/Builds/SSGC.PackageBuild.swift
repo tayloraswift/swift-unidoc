@@ -188,7 +188,7 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     func compile(updating status:SSGC.StatusStream?,
         cache:FilePath.Directory,
-        with swift:SSGC.Toolchain,
+        with toolchain:SSGC.Toolchain,
         clean:Bool = true) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
         switch self.type
@@ -196,13 +196,13 @@ extension SSGC.PackageBuild:SSGC.DocumentationBuild
         case .package:
             try self.compileSwiftPM(updating: status,
                 cache: cache,
-                with: swift,
+                with: toolchain,
                 clean: clean)
 
         case .book:
             try self.compileBook(updating: status,
                 cache: cache,
-                with: swift)
+                with: toolchain)
         }
     }
 }
@@ -212,7 +212,7 @@ extension SSGC.PackageBuild
     @_spi(testable) public
     func compileBook(updating status:SSGC.StatusStream? = nil,
         cache _:FilePath.Directory,
-        with swift:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.BookSources)
+        with toolchain:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.BookSources)
     {
         switch self.id
         {
@@ -239,8 +239,8 @@ extension SSGC.PackageBuild
                 scope: self.id.pin?.location.owner,
                 name: self.id.package),
             commit: self.id.commit,
-            triple: swift.triple,
-            swift: swift.id,
+            triple: toolchain.splash.triple,
+            swift: toolchain.splash.swift,
             tools: nil,
             manifests: [],
             requirements: [],
@@ -255,7 +255,7 @@ extension SSGC.PackageBuild
     @_spi(testable) public
     func compileSwiftPM(updating status:SSGC.StatusStream? = nil,
         cache:FilePath.Directory,
-        with swift:SSGC.Toolchain,
+        with toolchain:SSGC.Toolchain,
         clean:Bool = true) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
         if  clean
@@ -277,7 +277,7 @@ extension SSGC.PackageBuild
         }
 
         let manifestVersions:[MinorVersion] = try self.listExtraManifests()
-        var manifest:SPM.Manifest = try swift.manifest(package: self.root,
+        var manifest:SPM.Manifest = try toolchain.manifest(package: self.root,
             json: artifacts / "\(self.id.package).package.json",
             leaf: true)
 
@@ -289,7 +289,7 @@ extension SSGC.PackageBuild
         let pins:[SPM.DependencyPin]
         do
         {
-            pins = try swift.resolve(package: self.root)
+            pins = try toolchain.resolve(package: self.root)
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
@@ -300,7 +300,7 @@ extension SSGC.PackageBuild
 
         do
         {
-            try swift.build(package: self.root,
+            try toolchain.build(package: self.root,
                 using: self.scratch,
                 flags: self.flags.dumping(symbols: .default, to: artifacts))
         }
@@ -309,14 +309,14 @@ extension SSGC.PackageBuild
             throw SSGC.PackageBuildError.swift_build(code, invocation)
         }
 
-        let platform:SymbolGraphMetadata.Platform = try swift.platform()
+        let platform:SymbolGraphMetadata.Platform = try toolchain.platform()
         var packages:SSGC.PackageGraph = .init(platform: platform)
 
         for pin:SPM.DependencyPin in pins
         {
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
 
-            let manifest:SPM.Manifest = try swift.manifest(
+            let manifest:SPM.Manifest = try toolchain.manifest(
                 package: self.scratch.location / "checkouts" / "\(pin.location.name)",
                 json: artifacts / "\(pin.identity).package.json",
                 leaf: false)
@@ -329,14 +329,17 @@ extension SSGC.PackageBuild
             as: self.id.package)
 
         //  Dump the standard library’s symbols, unless they’re already cached.
-        let artifactsCached:FilePath.Directory = try swift.dump(
+        let artifactsCached:FilePath.Directory = try toolchain.dump(
             standardLibrary: .init(platform: platform),
             options: .default,
             cache: cache)
         for (module, include):(Symbol.Module, [FilePath.Directory]) in try self.modulesToDump(
             among: modules)
         {
-            try swift.dump(module: module, to: artifacts, options: .default, include: include)
+            try toolchain.dump(module: module,
+                to: artifacts,
+                options: .default,
+                include: include)
         }
 
         //  This step is considered part of documentation building.
@@ -374,8 +377,8 @@ extension SSGC.PackageBuild
                 scope: self.id.pin?.location.owner,
                 name: self.id.package),
             commit: self.id.commit,
-            triple: swift.triple,
-            swift: swift.id,
+            triple: toolchain.splash.triple,
+            swift: toolchain.splash.swift,
             tools: manifest.format,
             manifests: manifestVersions,
             requirements: manifest.requirements,
