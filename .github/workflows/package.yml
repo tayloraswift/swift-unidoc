@@ -23,7 +23,7 @@ jobs:
                 run: |
                     curl -L https://swiftlang.github.io/swiftly/swiftly-install.sh > swiftly.sh
                     chmod +x swiftly.sh
-                    ./swiftly.sh -y -p $SWIFTLY_PLATFORM
+                    ./swiftly.sh --no-import-pgp-keys -y -p $SWIFTLY_PLATFORM
 
             -   name: Setup Swift
                 run: |
