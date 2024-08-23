@@ -8,8 +8,8 @@ let package:Package = .init(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
-        .executable(name: "unidoc-build", targets: ["unidoc-build"]),
-        .executable(name: "unidoc-preview", targets: ["unidoc-preview"]),
+        .executable(name: "unidoc-tools", targets: ["unidoc-tools"]),
+        .executable(name: "unidoc-publish", targets: ["unidoc-publish"]),
 
         .library(name: "guides", targets: ["guides"]),
 
@@ -126,20 +126,20 @@ let package:Package = .init(
     targets: [
         .executableTarget(name: "ssgc",
             dependencies: [
-                .target(name: "ArgumentParsing"),
                 .target(name: "SymbolGraphBuilder"),
             ]),
 
-        .executableTarget(name: "unidoc-build",
-            dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .target(name: "UnidocClient"),
-            ]),
-
-        .executableTarget(name: "unidoc-preview",
+        .executableTarget(name: "unidoc-tools",
             dependencies: [
                 .target(name: "System_ArgumentParser"),
+                .target(name: "UnidocClient"),
                 .target(name: "UnidocServer"),
+            ]),
+
+        .executableTarget(name: "unidoc-publish",
+            dependencies: [
+                .target(name: "System_ArgumentParser"),
+                .target(name: "S3Client"),
             ]),
 
 

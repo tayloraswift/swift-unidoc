@@ -56,16 +56,15 @@ extension SSGC.Logger:DiagnosticLogger
             messages.demoteErrors(to: .warning)
         }
 
-        guard
-        let output:FileDescriptor = self.output
+        if  let output:FileDescriptor = self.output
+        {
+            let text:String = "\(messages)"
+            try output.writeAll(text.utf8)
+        }
         else
         {
             messages.emit(colors: .enabled)
-            return
         }
-
-        let text:String = "\(messages)"
-        try output.writeAll(text.utf8)
 
         if  self.failed
         {

@@ -1,5 +1,5 @@
 {
-  "originHash" : "b72014d151a03589198e77091a75155381b8092cf54216ba9560e49c0c4174ea",
+  "originHash" : "003e10f5ffc870afc97f57c6ee817430adbb87d12176c193a9f3cffcb6334e1d",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "7ab51deffb552454eb9902a124c9d4064fe58039",
-        "version" : "0.23.1"
+        "revision" : "78f6fa4f98e3dfb0c8054fa97b30360a185439c0",
+        "version" : "0.23.2"
       }
     },
     {
@@ -123,8 +123,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl",
       "state" : {
-        "revision" : "a9fa5efd86e7ce2e5c1b6de113262e58035ca251",
-        "version" : "2.27.1"
+        "revision" : "7b84abbdcef69cc3be6573ac12440220789dcd69",
+        "version" : "2.27.2"
       }
     },
     {
