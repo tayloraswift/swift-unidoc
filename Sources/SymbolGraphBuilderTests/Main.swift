@@ -18,36 +18,36 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "SplashParsing"
         {
             if  let tests:TestGroup = tests / "LinuxNightly",
-                let swift:SSGC.Toolchain = tests.expect(value: try? .init(parsing: """
+                let splash:SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
                     Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
                     Target: x86_64-unknown-linux-gnu
 
                     """))
             {
-                tests.expect(swift.id ==? .init(version: .v(5, 8, 0),
+                tests.expect(splash.swift ==? .init(version: .v(5, 8, 0),
                     nightly: .DEVELOPMENT_SNAPSHOT))
-                tests.expect(swift.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
+                tests.expect(splash.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
             }
             if  let tests:TestGroup = tests / "Linux",
-                let swift:SSGC.Toolchain = tests.expect(value: try? .init(parsing: """
+                let splash:SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
                     Swift version 5.10 (swift-5.10-RELEASE)
                     Target: x86_64-unknown-linux-gnu
 
                     """))
             {
-                tests.expect(swift.id ==? .init(version: .v(5, 10, 0), nightly: nil))
-                tests.expect(swift.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
+                tests.expect(splash.swift ==? .init(version: .v(5, 10, 0), nightly: nil))
+                tests.expect(splash.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
             }
             if  let tests:TestGroup = tests / "Xcode",
-                let swift:SSGC.Toolchain = tests.expect(value: try? .init(parsing: """
+                let splash:SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
                     swift-driver version: 1.90.11.1 \
                     Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
                     Target: arm64-apple-macosx14.0
 
                     """))
             {
-                tests.expect(swift.id ==? .init(version: .v(5, 10, 0), nightly: nil))
-                tests.expect(swift.triple ==? .init("arm64", "apple", "macosx14.0", nil))
+                tests.expect(splash.swift ==? .init(version: .v(5, 10, 0), nightly: nil))
+                tests.expect(splash.triple ==? .init("arm64", "apple", "macosx14.0", nil))
             }
         }
 

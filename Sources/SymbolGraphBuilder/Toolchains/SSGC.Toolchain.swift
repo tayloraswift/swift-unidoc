@@ -16,140 +16,34 @@ extension SSGC
     @frozen public
     struct Toolchain
     {
-        /// A path to a specific Swift toolchain to use, or just the string `"swift"`.
         private
-        let swiftCommand:String
-        /// A path to the Swift runtime directory to load the `libIndexStore.{so, dylib}` from.
-        private
-        let swiftRuntime:FilePath.Directory?
-        /// A path to the SwiftPM cache directory to use.
-        private
-        let swiftCache:FilePath.Directory?
-        private
-        let swiftSDK:AppleSDK?
-
+        let appleSDK:AppleSDK?
         public
-        let id:SwiftVersion
-        public
-        let commit:SymbolGraphMetadata.Commit?
-        public
-        let triple:Triple
+        let splash:Splash
+        private
+        let paths:Paths
 
         private
         let pretty:Bool
 
-        private
-        init(swiftCommand:String,
-            swiftRuntime:FilePath.Directory?,
-            swiftCache:FilePath.Directory?,
-            swiftSDK:AppleSDK?,
-            id:SwiftVersion,
-            commit:SymbolGraphMetadata.Commit?,
-            triple:Triple,
+        public
+        init(appleSDK:AppleSDK?,
+            splash:Splash,
+            paths:Paths,
             pretty:Bool)
         {
-            self.swiftCommand = swiftCommand
-            self.swiftRuntime = swiftRuntime
-            self.swiftCache = swiftCache
-            self.swiftSDK = swiftSDK
-            self.id = id
-            self.commit = commit
-            self.triple = triple
+            self.appleSDK = appleSDK
+            self.splash = splash
+            self.paths = paths
             self.pretty = pretty
         }
     }
 }
 extension SSGC.Toolchain
 {
-    public
-    init(parsing splash:String,
-        swiftCommand:String = "swift",
-        swiftRuntime:FilePath.Directory? = nil,
-        swiftCache:FilePath.Directory? = nil,
-        swiftSDK:SSGC.AppleSDK? = nil,
-        pretty:Bool = false) throws
-    {
-        //  Splash should consist of two complete lines and a final newline. If the final
-        //  newline isn’t present, the output was clipped.
-        let lines:[Substring] = splash.split(separator: "\n", omittingEmptySubsequences: false)
-        guard lines.count == 3
-        else
-        {
-            throw SSGC.ToolchainError.malformedSplash
-        }
-
-        let toolchain:[Substring] = lines[0].split(separator: " ")
-        let triple:[Substring] = lines[1].split(separator: " ")
-
-        guard
-            triple.count == 2,
-            triple[0] == "Target:",
-        let triple:Triple = .init(triple[1])
-        else
-        {
-            throw SSGC.ToolchainError.malformedSplash
-        }
-
-        var k:Int = toolchain.endIndex
-        for (i, j):(Int, Int) in zip(toolchain.indices, toolchain.indices.dropFirst())
-        {
-            if  toolchain[i ... j] == ["Swift", "version"]
-            {
-                k = toolchain.index(after: j)
-                break
-            }
-        }
-        if  k == toolchain.endIndex
-        {
-            throw SSGC.ToolchainError.malformedSplash
-        }
-
-        let id:SwiftVersion
-        if  let version:NumericVersion = .init(toolchain[k])
-        {
-            id = .init(version: PatchVersion.init(padding: version))
-        }
-
-        else if
-            let version:MinorVersion = .init(toolchain[k].prefix { $0 != "-" })
-        {
-            id = .init(
-                version: .v(version.components.major, version.components.minor, 0),
-                nightly: .DEVELOPMENT_SNAPSHOT)
-        }
-        else
-        {
-            throw SSGC.ToolchainError.malformedSwiftVersion
-        }
-
-        let commit:SymbolGraphMetadata.Commit?
-        if  case nil = id.nightly,
-            let word:Substring = toolchain[toolchain.index(after: k)...].first
-        {
-            commit = .parenthesizedSwiftRelease(word)
-        }
-        else
-        {
-            commit = nil
-        }
-
-        self.init(
-            swiftCommand: swiftCommand,
-            swiftRuntime: swiftRuntime,
-            swiftCache: swiftCache,
-            swiftSDK: swiftSDK,
-            id: id,
-            commit: commit,
-            triple: triple,
-            pretty: pretty)
-    }
-
     public static
-    func detect(
-        swiftRuntime:FilePath.Directory? = nil,
-        swiftCache:FilePath.Directory? = nil,
-        swiftPath:FilePath? = nil,
-        swiftSDK:SSGC.AppleSDK? = nil,
+    func detect(appleSDK:SSGC.AppleSDK? = nil,
+        paths:Paths = .init(swiftPM: nil, usr: nil),
         pretty:Bool = false) throws -> Self
     {
         let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
@@ -160,14 +54,10 @@ extension SSGC.Toolchain
             try? readable.close()
         }
 
-        let swift:String = swiftPath?.string ?? "swift"
-
-        try SystemProcess.init(command: swift, "--version", stdout: writable)()
-        return try .init(parsing: try readable.read(buffering: 1024),
-            swiftCommand: swift,
-            swiftRuntime: swiftRuntime,
-            swiftCache: swiftCache,
-            swiftSDK: swiftSDK,
+        try SystemProcess.init(command: paths.swiftCommand, "--version", stdout: writable)()
+        return .init(appleSDK: appleSDK,
+            splash: try .init(parsing: try readable.read(buffering: 1024)),
+            paths: paths,
             pretty: pretty)
     }
 }
@@ -177,58 +67,40 @@ extension SSGC.Toolchain
 
     func libIndexStore() throws -> IndexStoreLibrary
     {
-        let libraries:FilePath.Directory
-        let library:FilePath
-
-        #if os(macOS)
-
-            libraries = self.swiftRuntime ?? """
-            /Applications/Xcode.app/Contents/Developer/Toolchains\
-            /XcodeDefault.xctoolchain/usr/lib
-            """
-            library = libraries / "libIndexStore.dylib"
-
-        #else
-
-            libraries = self.swiftRuntime ?? "/usr/lib"
-            library = libraries / "libIndexStore.so"
-
-        #endif
-
-        return try .init(dylibPath: "\(library)")
+        try .init(dylibPath: "\(self.paths.libIndexStore)")
     }
 
     #endif
 
     func platform() throws -> SymbolGraphMetadata.Platform
     {
-        if      self.triple.os.starts(with: "linux")
+        if      self.splash.triple.os.starts(with: "linux")
         {
             return .linux
         }
-        else if self.triple.os.starts(with: "ios")
+        else if self.splash.triple.os.starts(with: "ios")
         {
             return .iOS
         }
-        else if self.triple.os.starts(with: "macos")
+        else if self.splash.triple.os.starts(with: "macos")
         {
             return .macOS
         }
-        else if self.triple.os.starts(with: "tvos")
+        else if self.splash.triple.os.starts(with: "tvos")
         {
             return .tvOS
         }
-        else if self.triple.os.starts(with: "watchos")
+        else if self.splash.triple.os.starts(with: "watchos")
         {
             return .watchOS
         }
-        else if self.triple.os.starts(with: "windows")
+        else if self.splash.triple.os.starts(with: "windows")
         {
             return .windows
         }
         else
         {
-            throw SSGC.ToolchainError.unsupportedTriple(self.triple)
+            throw SSGC.ToolchainError.unsupportedTriple(self.splash.triple)
         }
     }
 }
@@ -249,7 +121,7 @@ extension SSGC.Toolchain
                 permissions: (.rw, .r, .r),
                 options: [.create, .truncate])
             {
-                let dump:SystemProcess = try .init(command: self.swiftCommand,
+                let dump:SystemProcess = try .init(command: self.paths.swiftCommand,
                     "package", "dump-package",
                     "--package-path", "\(package)",
                     stdout: $0)
@@ -275,13 +147,15 @@ extension SSGC.Toolchain
             "update",
             "--package-path", "\(package)"
         ]
-        if  let path:FilePath.Directory = self.swiftCache
+        if  let path:FilePath.Directory = self.paths.swiftPM
         {
             arguments.append("--cache-path")
             arguments.append("\(path)")
         }
 
-        try SystemProcess.init(command: self.swiftCommand, arguments: arguments, echo: true)()
+        try SystemProcess.init(command: self.paths.swiftCommand,
+            arguments: arguments,
+            echo: true)()
 
         do
         {
@@ -306,7 +180,7 @@ extension SSGC.Toolchain
             "--package-path", "\(package)",
             "--scratch-path", "\(scratch.location)",
         ]
-        if  let path:FilePath.Directory = self.swiftCache
+        if  let path:FilePath.Directory = self.paths.swiftPM
         {
             arguments.append("--cache-path")
             arguments.append("\(path)")
@@ -327,7 +201,9 @@ extension SSGC.Toolchain
             arguments.append(flag)
         }
 
-        try SystemProcess.init(command: self.swiftCommand, arguments: arguments, echo: true)()
+        try SystemProcess.init(command: self.paths.swiftCommand,
+            arguments: arguments,
+            echo: true)()
     }
 }
 extension SSGC.Toolchain
@@ -336,7 +212,7 @@ extension SSGC.Toolchain
         options:SymbolDumpOptions = .default,
         cache:FilePath.Directory) throws -> FilePath.Directory
     {
-        let cached:FilePath.Directory = cache / "swift@\(self.id.version)"
+        let cached:FilePath.Directory = cache / "swift@\(self.splash.swift.version)"
 
         if !cached.exists()
         {
@@ -368,7 +244,7 @@ extension SSGC.Toolchain
             "symbolgraph-extract",
 
             "-module-name",                     "\(id)",
-            "-target",                          "\(self.triple)",
+            "-target",                          "\(self.splash.triple)",
             "-output-dir",                      "\(output.path)",
         ]
 
@@ -391,15 +267,15 @@ extension SSGC.Toolchain
         #if os(macOS)
         //  On macOS, dumping symbols without specifying the SDK will always fail.
         //  Therefore, we always provide a default SDK.
-        let swiftSDK:SSGC.AppleSDK? = self.swiftSDK ?? .macOS
+        let appleSDK:SSGC.AppleSDK? = self.appleSDK ?? .macOS
         #else
-        let swiftSDK:SSGC.AppleSDK? = self.swiftSDK
+        let appleSDK:SSGC.AppleSDK? = self.appleSDK
         #endif
 
-        if  let swiftSDK:SSGC.AppleSDK
+        if  let appleSDK:SSGC.AppleSDK
         {
             arguments.append("-sdk")
-            arguments.append(swiftSDK.path)
+            arguments.append(appleSDK.path)
         }
 
         if  self.pretty
@@ -416,7 +292,7 @@ extension SSGC.Toolchain
         {
             $0["SWIFT_BACKTRACE"] = "enable=no"
         }
-        let extractor:SystemProcess = try .init(command: self.swiftCommand,
+        let extractor:SystemProcess = try .init(command: self.paths.swiftCommand,
             arguments: arguments,
             echo: true,
             with: environment)
