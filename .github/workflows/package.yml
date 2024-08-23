@@ -13,9 +13,24 @@ jobs:
         env:
             UNIDOC_ENABLE_INDEXSTORE: "1"
             AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
+            SWIFTLY_PLATFORM: "ubuntu22.04"
+            SWIFTLY_SWIFT: "5.10.1"
             UNIDOC_PLATFORM: "linux-$(uname -i)"
             UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
+
         steps:
+            -   name: Setup Swiftly
+                run: |
+                    curl -L https://swiftlang.github.io/swiftly/swiftly-install.sh > swiftly.sh
+                    chmod +x swiftly.sh
+                    ./swiftly.sh -y -p $SWIFTLY_PLATFORM
+
+            -   name: Setup Swift
+                run: |
+                    swiftly install $SWIFTLY_SWIFT
+                    swiftly list
+                    swiftly use $SWIFTLY_SWIFT
+
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
