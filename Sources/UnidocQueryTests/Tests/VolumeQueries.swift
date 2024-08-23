@@ -27,8 +27,8 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             let empty:SymbolGraphObject<Void> = .init(metadata: .init(
                     package: .init(name: package),
                     commit: .init(name: tag),
-                    triple: swift.triple,
-                    swift: swift.id),
+                    triple: swift.splash.triple,
+                    swift: swift.splash.swift),
                 graph: .init(modules: []))
 
             empty.roundtrip(for: tests, in: workspace.location)

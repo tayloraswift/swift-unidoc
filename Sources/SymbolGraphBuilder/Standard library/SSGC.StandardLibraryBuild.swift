@@ -21,18 +21,18 @@ extension SSGC.StandardLibraryBuild:SSGC.DocumentationBuild
 {
     func compile(updating _:SSGC.StatusStream?,
         cache:FilePath.Directory,
-        with swift:SSGC.Toolchain,
+        with toolchain:SSGC.Toolchain,
         clean _:Bool) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
-        let standardLibrary:SSGC.StandardLibrary = .init(platform: try swift.platform())
+        let standardLibrary:SSGC.StandardLibrary = .init(platform: try toolchain.platform())
 
-        let artifacts:FilePath.Directory = try swift.dump(standardLibrary: standardLibrary,
+        let artifacts:FilePath.Directory = try toolchain.dump(standardLibrary: standardLibrary,
             options: .default,
             cache: cache)
 
-        let metadata:SymbolGraphMetadata = .swift(swift.id,
-            commit: swift.commit,
-            triple: swift.triple,
+        let metadata:SymbolGraphMetadata = .swift(toolchain.splash.swift,
+            commit: toolchain.splash.commit,
+            triple: toolchain.splash.triple,
             products: standardLibrary.products)
 
         let sources:SSGC.StandardLibrarySources = .init(modules: standardLibrary.modules,

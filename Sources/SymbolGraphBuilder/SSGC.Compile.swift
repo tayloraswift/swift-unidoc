@@ -46,10 +46,10 @@ extension SSGC
         var outputLog:FilePath? = nil
 
         @Option(
-            name: [.customLong("swift-runtime")],
-            help: "The path to the Swift runtime directory, usually ending in /usr/lib",
+            name: [.customLong("swift-toolchain"), .customShort("u")],
+            help: "The path to a Swift toolchain directory, usually ending in 'usr'",
             completion: .directory)
-        var swiftRuntime:FilePath.Directory? = nil
+        var swiftTools:FilePath.Directory?
 
         @Option(
             name: [.customLong("swiftpm-cache")],
@@ -58,15 +58,9 @@ extension SSGC
         var swiftCache:FilePath.Directory?
 
         @Option(
-            name: [.customLong("swift"), .customShort("s")],
-            help: "The path to the Swift toolchain",
-            completion: .file(extensions: []))
-        var swiftPath:FilePath? = nil
-
-        @Option(
             name: [.customLong("sdk"), .customShort("k")],
-            help: "The Swift SDK to use")
-        var swiftSDK:AppleSDK? = nil
+            help: "The Apple SDK to use")
+        var appleSDK:AppleSDK? = nil
 
         @Option(
             name: [.customLong("package-name"), .customShort("n")],
@@ -221,10 +215,8 @@ extension SSGC.Compile
         status:SSGC.StatusStream?,
         logger:SSGC.Logger) throws
     {
-        let toolchain:SSGC.Toolchain = try .detect(swiftRuntime: self.swiftRuntime,
-            swiftCache: self.swiftCache,
-            swiftPath: self.swiftPath,
-            swiftSDK: self.swiftSDK,
+        let toolchain:SSGC.Toolchain = try .detect(appleSDK: self.appleSDK,
+            paths: .init(swiftPM: self.swiftCache, usr: self.swiftTools),
             pretty: self.pretty)
 
         let object:SymbolGraphObject<Void>
