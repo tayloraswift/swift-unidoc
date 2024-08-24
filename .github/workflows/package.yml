@@ -44,7 +44,7 @@ jobs:
                 run: |
                     mkdir -p $GITHUB_WORKSPACE/$SWIFT_ID
                     tar -xzf $SWIFT_ID.tar.gz -C $GITHUB_WORKSPACE/$SWIFT_ID --strip 1
-                    ls -la $GITHUB_WORKSPACE/$SWIFT_ID
+                    ls -la $GITHUB_WORKSPACE/$SWIFT_ID/usr
                     echo "$GITHUB_WORKSPACE/$SWIFT_ID/usr/bin" >> $GITHUB_PATH
 
             -   name: Checkout repository
@@ -52,8 +52,8 @@ jobs:
 
             -   name: Build release
                 run: |
-                    swift --version
-                    swift build -c release \
+                    $GITHUB_WORKSPACE/$SWIFT_ID/usr/bin/swift --version
+                    $GITHUB_WORKSPACE/$SWIFT_ID/usr/bin/swift build -c release \
                         -Xcxx -I$GITHUB_WORKSPACE/$SWIFT_ID/usr/lib/swift \
                         -Xcxx -I$GITHUB_WORKSPACE/$SWIFT_ID/usr/lib/swift/Block
 
