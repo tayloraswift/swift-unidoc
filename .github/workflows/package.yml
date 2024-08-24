@@ -44,6 +44,7 @@ jobs:
                 run: |
                     mkdir -p $GITHUB_WORKSPACE/$SWIFT_ID
                     tar -xzf $SWIFT_ID.tar.gz -C $GITHUB_WORKSPACE/$SWIFT_ID --strip 1
+                    ls -la $GITHUB_WORKSPACE/$SWIFT_ID
                     echo "$GITHUB_WORKSPACE/$SWIFT_ID/usr/bin" >> $GITHUB_PATH
 
             -   name: Checkout repository
