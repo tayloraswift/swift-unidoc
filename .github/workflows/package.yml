@@ -22,6 +22,9 @@ jobs:
             UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
 
         steps:
+            -   name: Check secret
+                run: echo ${#AWS_S3_ACCESS_SECRET}
+
             -   name: Cache Swift toolchain
                 uses: actions/cache@v2
                 with:
@@ -65,5 +68,5 @@ jobs:
                     .build/release/unidoc-publish \
                         unidoc-tools \
                         /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc \
-                        --secret $AWS_S3_ACCESS_SECRET
+                        --secret "$AWS_S3_ACCESS_SECRET"
 
