@@ -8,8 +8,8 @@ let package:Package = .init(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
-        .executable(name: "unidoc-build", targets: ["unidoc-build"]),
-        .executable(name: "unidoc-preview", targets: ["unidoc-preview"]),
+        .executable(name: "unidoc-tools", targets: ["unidoc-tools"]),
+        .executable(name: "unidoc-publish", targets: ["unidoc-publish"]),
 
         .library(name: "guides", targets: ["guides"]),
 
@@ -94,7 +94,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.23.1")),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
-            from: "0.1.0")),
+            from: "0.1.5")),
 
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "1.1.0")),
@@ -126,20 +126,20 @@ let package:Package = .init(
     targets: [
         .executableTarget(name: "ssgc",
             dependencies: [
-                .target(name: "ArgumentParsing"),
                 .target(name: "SymbolGraphBuilder"),
             ]),
 
-        .executableTarget(name: "unidoc-build",
-            dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .target(name: "UnidocClient"),
-            ]),
-
-        .executableTarget(name: "unidoc-preview",
+        .executableTarget(name: "unidoc-tools",
             dependencies: [
                 .target(name: "System_ArgumentParser"),
+                .target(name: "UnidocClient"),
                 .target(name: "UnidocServer"),
+            ]),
+
+        .executableTarget(name: "unidoc-publish",
+            dependencies: [
+                .target(name: "System_ArgumentParser"),
+                .target(name: "S3Client"),
             ]),
 
 

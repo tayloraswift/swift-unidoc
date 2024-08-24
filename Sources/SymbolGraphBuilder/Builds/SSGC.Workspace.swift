@@ -72,7 +72,7 @@ extension SSGC.Workspace
     func build<Build>(some build:consuming Build,
         toolchain swift:SSGC.Toolchain,
         status:SSGC.StatusStream?,
-        logger:SSGC.Logger = .init(file: nil),
+        logger:SSGC.Logger = .default(),
         clean:Bool) throws -> SymbolGraphObject<Void>
         where Build:SSGC.DocumentationBuild
     {

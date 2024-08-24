@@ -1,5 +1,5 @@
-public 
-protocol DiagnosticLogger
+public
+protocol DiagnosticLogger:AnyObject
 {
     func emit(messages:consuming DiagnosticMessages) throws
 }

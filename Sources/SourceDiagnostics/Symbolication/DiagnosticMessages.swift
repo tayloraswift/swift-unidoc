@@ -4,9 +4,29 @@ struct DiagnosticMessages
     private
     var fragments:[DiagnosticFragment]
 
-    init(fragments:[DiagnosticFragment])
+    public
+    let status:DiagnosticLevel
+
+    private
+    init(fragments:[DiagnosticFragment], status:DiagnosticLevel)
     {
         self.fragments = fragments
+        self.status = status
+    }
+}
+extension DiagnosticMessages
+{
+    init(fragments:[DiagnosticFragment])
+    {
+        let status:DiagnosticLevel = fragments.reduce(into: .note)
+        {
+            if  case .message(let level, _) = $1
+            {
+                $0 = max($0, level)
+            }
+        }
+
+        self.init(fragments: fragments, status: status)
     }
 }
 extension DiagnosticMessages:CustomStringConvertible
@@ -22,7 +42,7 @@ extension DiagnosticMessages:CustomStringConvertible
 extension DiagnosticMessages
 {
     public mutating
-    func demoteErrors(to level:DiagnosticPrefix)
+    func demoteErrors(to level:DiagnosticLevel)
     {
         for i:Int in self.fragments.indices
         {

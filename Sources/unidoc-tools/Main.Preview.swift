@@ -7,7 +7,7 @@ import System
 import System_ArgumentParser
 import UnidocServer
 
-extension Unidoc
+extension Main
 {
     struct Preview
     {
@@ -47,7 +47,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.Preview
+extension Main.Preview
 {
     private
     var serverSSL:NIOSSLContext
@@ -84,9 +84,11 @@ extension Unidoc.Preview
     }
 }
 
-@main
-extension Unidoc.Preview:AsyncParsableCommand
+extension Main.Preview:AsyncParsableCommand
 {
+    public
+    static let configuration:CommandConfiguration = .init(commandName: "preview")
+
     func run() async throws
     {
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)

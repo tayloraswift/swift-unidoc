@@ -4,7 +4,7 @@ import Sources
 enum DiagnosticFragment
 {
     case heading(SourceLocation<String>?)
-    case message(DiagnosticPrefix, String)
+    case message(DiagnosticLevel, String)
     case context([DiagnosticLine])
 }
 extension DiagnosticFragment:CustomStringConvertible

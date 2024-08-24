@@ -170,7 +170,7 @@ extension SSGC.Linker
                 range: self.allocate(decls: $0.decls, language: language),
                 index: self.tables.intern($0.id))
         }
-
+        ;
         {
             $0.reserveCapacity(destinations.reduce(0) { $0 + $1.range.count })
 

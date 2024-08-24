@@ -4,12 +4,12 @@
 struct DiagnosticAlert
 {
     @usableFromInline
-    let type:DiagnosticPrefix
+    let type:DiagnosticLevel
     @usableFromInline
     let text:String
 
     @inlinable
-    init(type:DiagnosticPrefix, text:String)
+    init(type:DiagnosticLevel, text:String)
     {
         self.type = type
         self.text = text
