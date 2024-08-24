@@ -33,7 +33,7 @@ extension Main:AsyncParsableCommand
         let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
         let niossl:NIOSSLContext = try .init(configuration: .makeClientConfiguration())
 
-        let key:AWS.AccessKey = .init(id: "AKIAW6WXTH6AKEVUNFUY", secret: self.secret)
+        let key:AWS.AccessKey = .init(id: "AKIAW6WXTH6AJNFIOYV6", secret: self.secret)
         let bucket:AWS.S3.Bucket = .init(region: .us_east_1, name: "swiftinit")
 
         let s3:AWS.S3.Client = .init(threads: threads,
