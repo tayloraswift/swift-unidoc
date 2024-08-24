@@ -94,7 +94,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.23.1")),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
-            from: "0.1.0")),
+            from: "0.1.5")),
 
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "1.1.0")),

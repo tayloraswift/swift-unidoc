@@ -1,5 +1,5 @@
 {
-  "originHash" : "003e10f5ffc870afc97f57c6ee817430adbb87d12176c193a9f3cffcb6334e1d",
+  "originHash" : "4647999405d166e6fe4f271e90547ef81aac9f74358d949fa48b9e089e3518be",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-unixtime",
       "state" : {
-        "revision" : "4fcd9a7234483e852eed5ab7942b9fcf9b700a5b",
-        "version" : "0.1.4"
+        "revision" : "ee1fe7c2673e79621fdd13a814aff79920e7d105",
+        "version" : "0.1.5"
       }
     }
   ],

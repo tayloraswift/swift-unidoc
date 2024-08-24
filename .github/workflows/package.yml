@@ -47,6 +47,8 @@ jobs:
                     echo "$HOME/$SWIFT_ID/usr/bin" >> $GITHUB_PATH
                     cat $GITHUB_PATH
 
+            #   This clobbers everything in the current directory, which is why we installed
+            #   the Swift toolchain in the home directory.
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
