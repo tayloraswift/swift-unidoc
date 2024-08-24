@@ -9,7 +9,8 @@ import UCF
 
 extension SSGC
 {
-    struct OutlineResolver:~Copyable
+    //  https://github.com/apple/swift/issues/71606
+    struct OutlineResolver//:~Copyable
     {
         private
         let scopes:OutlineResolverEnvironment
