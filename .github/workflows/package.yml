@@ -42,22 +42,20 @@ jobs:
 
             -   name: Set up Swift
                 run: |
-                    mkdir -p $GITHUB_WORKSPACE/$SWIFT_ID
-                    tar -xzf $SWIFT_ID.tar.gz -C $GITHUB_WORKSPACE/$SWIFT_ID --strip 1
-                    echo "SWIFT_TOOLCHAIN=$GITHUB_WORKSPACE/$SWIFT_ID" >> $GITHUB_ENV
-                    echo "$GITHUB_WORKSPACE/$SWIFT_ID/usr/bin" >> $GITHUB_PATH
+                    mkdir -p $HOME/$SWIFT_ID
+                    tar -xzf $SWIFT_ID.tar.gz -C $HOME/$SWIFT_ID --strip 1
+                    echo "$HOME/$SWIFT_ID/usr/bin" >> $GITHUB_PATH
                     cat $GITHUB_PATH
-                    echo $SWIFT_TOOLCHAIN
 
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
             -   name: Build release
                 run: |
-                    $SWIFT_TOOLCHAIN/usr/bin/swift --version
-                    $SWIFT_TOOLCHAIN/usr/bin/swift build -c release \
-                        -Xcxx -I$SWIFT_TOOLCHAIN/usr/lib/swift \
-                        -Xcxx -I$SWIFT_TOOLCHAIN/usr/lib/swift/Block
+                    swift --version
+                    swift build -c release \
+                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift \
+                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift/Block
 
             -   name: Upload binaries
                 run: |
