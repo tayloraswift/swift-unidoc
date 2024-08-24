@@ -34,9 +34,8 @@ jobs:
             -   name: Build products
                 run: |
                     swift --version
-                    swift build -c release \
-                        --product unidoc-publish \
-                        --product unidoc-tools
+                    swift build -c release --product unidoc-publish
+                    swift build -c release --product unidoc-tools
 
             -   name: Upload products
                 run: |
@@ -92,8 +91,8 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
-            #   For some reason, Swift on Linux will not build all the products in one
-            #   invocation. We pass the same flags to both invocations to speed up the build.
+            #   For some reason, Swift cannot build both the products in one invocation.
+            #   We pass the same flags to both invocations to speed up the build.
             -   name: Build products
                 run: |
                     swift --version
