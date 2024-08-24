@@ -7,10 +7,6 @@ on:
         tags:
             -   '[0-9]+.[0-9]+.[0-9]+'
 
-    #   TODO: this does not need to run on every PR.
-    pull_request:
-        branches: [ master ]
-
 jobs:
     macos:
         runs-on: macos-14
