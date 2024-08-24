@@ -27,7 +27,6 @@ jobs:
                 run: |
                     swift --version
                     swift build -c release \
-                        --static-swift-stdlib \
                         --product unidoc-publish \
                         --product unidoc-tools
 
