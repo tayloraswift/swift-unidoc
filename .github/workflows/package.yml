@@ -44,18 +44,20 @@ jobs:
                 run: |
                     mkdir -p $GITHUB_WORKSPACE/$SWIFT_ID
                     tar -xzf $SWIFT_ID.tar.gz -C $GITHUB_WORKSPACE/$SWIFT_ID --strip 1
-                    ls -la $GITHUB_WORKSPACE/$SWIFT_ID/usr
+                    echo "SWIFT_TOOLCHAIN=$GITHUB_WORKSPACE/$SWIFT_ID" >> $GITHUB_ENV
                     echo "$GITHUB_WORKSPACE/$SWIFT_ID/usr/bin" >> $GITHUB_PATH
+                    cat $GITHUB_PATH
+                    echo $SWIFT_TOOLCHAIN
 
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
             -   name: Build release
                 run: |
-                    $GITHUB_WORKSPACE/$SWIFT_ID/usr/bin/swift --version
-                    $GITHUB_WORKSPACE/$SWIFT_ID/usr/bin/swift build -c release \
-                        -Xcxx -I$GITHUB_WORKSPACE/$SWIFT_ID/usr/lib/swift \
-                        -Xcxx -I$GITHUB_WORKSPACE/$SWIFT_ID/usr/lib/swift/Block
+                    $SWIFT_TOOLCHAIN/usr/bin/swift --version
+                    $SWIFT_TOOLCHAIN/usr/bin/swift build -c release \
+                        -Xcxx -I$SWIFT_TOOLCHAIN/usr/lib/swift \
+                        -Xcxx -I$SWIFT_TOOLCHAIN/usr/lib/swift/Block
 
             -   name: Upload binaries
                 run: |
