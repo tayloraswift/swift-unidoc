@@ -6,6 +6,7 @@ struct Main:AsyncParsableCommand
 {
     static let configuration:CommandConfiguration = .init(subcommands: [
             SSGC.Compile.self,
-            Local.self
+            Local.self,
+            Preview.self
         ])
 }

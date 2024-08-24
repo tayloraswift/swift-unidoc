@@ -21,7 +21,7 @@ struct DiagnosticOutput<Symbolicator>:~Copyable where Symbolicator:DiagnosticSym
 extension DiagnosticOutput
 {
     @inlinable public
-    subscript(type:DiagnosticPrefix) -> String
+    subscript(type:DiagnosticLevel) -> String
     {
         get
         {

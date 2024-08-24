@@ -1,0 +1,111 @@
+name: package
+
+on:
+    #   We build semver tags, and the master branch.
+    push:
+        branches: [ master ]
+        tags:
+            -   '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+    macos:
+        runs-on: macos-14
+        name: macOS
+
+        env:
+            DEVELOPER_DIR: "/Applications/Xcode_15.3.app/Contents/Developer"
+
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            -   name: Build products
+                env:
+                    UNIDOC_ENABLE_INDEXSTORE: "1"
+                run: |
+                    swift --version
+                    swift build -c release --product unidoc-publish
+                    swift build -c release --product unidoc-tools
+
+            -   name: Upload products
+                env:
+                    AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
+
+                    UNIDOC_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
+                    UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
+
+                run: |
+                    .build/release/unidoc-publish \
+                        unidoc-tools \
+                        /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc \
+                        --secret "$AWS_S3_ACCESS_SECRET"
+
+    linux:
+        runs-on: ubuntu-24.04
+        name: Ubuntu 24.04
+
+        env:
+            SWIFT_PREFIX: "swift-5.10.1-release/ubuntu2404/swift-5.10.1-RELEASE"
+            SWIFT_ID: "swift-5.10.1-RELEASE-ubuntu24.04"
+
+        steps:
+            -   name: Cache Swift toolchain
+                uses: actions/cache@v2
+                with:
+                    path: ${{ env.SWIFT_ID }}.tar.gz
+                    key: ${{ env.SWIFT_ID }}
+
+            -   name: Cache status
+                id:   cache_status
+                uses: andstor/file-existence-action@v1
+                with:
+                    files: ${{ env.SWIFT_ID }}.tar.gz
+
+            -   name: Download Swift
+                if: steps.cache_status.outputs.files_exists == 'false'
+                run: |
+                    curl https://download.swift.org/$SWIFT_PREFIX/$SWIFT_ID.tar.gz \
+                        --output $SWIFT_ID.tar.gz
+
+            -   name: Set up Swift
+                run: |
+                    mkdir -p $HOME/$SWIFT_ID
+                    tar -xzf $SWIFT_ID.tar.gz -C $HOME/$SWIFT_ID --strip 1
+                    echo "$HOME/$SWIFT_ID/usr/bin" >> $GITHUB_PATH
+                    cat $GITHUB_PATH
+
+            #   This clobbers everything in the current directory, which is why we installed
+            #   the Swift toolchain in the home directory.
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            #   For some reason, Swift cannot build both the products in one invocation.
+            #   We pass the same flags to both invocations to speed up the build.
+            -   name: Build products
+                env:
+                    UNIDOC_ENABLE_INDEXSTORE: "1"
+                run: |
+                    swift --version
+                    swift build -c release \
+                        --static-swift-stdlib \
+                        --product unidoc-publish \
+                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift \
+                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift/Block
+                    swift build -c release \
+                        --static-swift-stdlib \
+                        --product unidoc-tools \
+                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift \
+                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift/Block
+
+            -   name: Upload products
+                env:
+                    AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
+
+                    UNIDOC_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
+                    UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
+
+                run: |
+                    .build/release/unidoc-publish \
+                        unidoc-tools \
+                        /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc \
+                        --secret "$AWS_S3_ACCESS_SECRET"

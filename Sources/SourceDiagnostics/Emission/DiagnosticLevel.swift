@@ -1,11 +1,11 @@
 @frozen public
-enum DiagnosticPrefix:Equatable, Hashable, Comparable
+enum DiagnosticLevel:Equatable, Hashable, Comparable
 {
     case note
     case warning
     case error
 }
-extension DiagnosticPrefix:CustomStringConvertible
+extension DiagnosticLevel:CustomStringConvertible
 {
     @inlinable public
     var description:String
@@ -18,7 +18,7 @@ extension DiagnosticPrefix:CustomStringConvertible
         }
     }
 }
-extension DiagnosticPrefix
+extension DiagnosticLevel
 {
     var color:TerminalColor?
     {

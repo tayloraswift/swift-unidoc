@@ -5,8 +5,9 @@ import UnidocRecords
 
 extension Unidoc
 {
+    //  https://github.com/apple/swift/issues/71606
     @frozen public
-    struct Mesh:~Copyable
+    struct Mesh//:~Copyable
     {
         public
         let latestRelease:Edition?
