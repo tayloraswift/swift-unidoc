@@ -10,26 +10,41 @@ jobs:
     linux:
         runs-on: ubuntu-22.04
         name: Ubuntu 22.04
+
         env:
-            UNIDOC_ENABLE_INDEXSTORE: "1"
             AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
-            SWIFTLY_PLATFORM: "ubuntu22.04"
-            SWIFTLY_SWIFT: "5.10.1"
+
+            SWIFT_PREFIX: "swift-5.10.1-release/ubuntu2404/swift-5.10.1-RELEASE"
+            SWIFT_ID: "swift-5.10.1-RELEASE-ubuntu24.04"
+
+            UNIDOC_ENABLE_INDEXSTORE: "1"
             UNIDOC_PLATFORM: "linux-$(uname -i)"
             UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
 
         steps:
-            -   name: Setup Swiftly
-                run: |
-                    curl -L https://swiftlang.github.io/swiftly/swiftly-install.sh > swiftly.sh
-                    chmod +x swiftly.sh
-                    ./swiftly.sh -y -p $SWIFTLY_PLATFORM
+            -   name: Cache Swift toolchain
+                uses: actions/cache@v2
+                with:
+                    path: ${{ env.SWIFT_ID }}.tar.gz
+                    key: ${{ env.SWIFT_ID }}
 
-            -   name: Setup Swift
+            -   name: Cache status
+                id:   cache_status
+                uses: andstor/file-existence-action@v1
+                with:
+                    files: ${{ env.SWIFT_ID }}.tar.gz
+
+            -   name: Download Swift
+                if: steps.cache_status.outputs.files_exists == 'false'
                 run: |
-                    swiftly install $SWIFTLY_SWIFT
-                    swiftly list
-                    swiftly use $SWIFTLY_SWIFT
+                    curl https://download.swift.org/$SWIFT_PREFIX/$SWIFT_ID.tar.gz \
+                        --output $SWIFT_ID.tar.gz
+
+            -   name: Set up Swift
+                run: |
+                    mkdir -p $GITHUB_WORKSPACE/$SWIFT_ID
+                    tar -xzf $SWIFT_ID.tar.gz -C $GITHUB_WORKSPACE/$SWIFT_ID --strip 1
+                    echo "$GITHUB_WORKSPACE/$SWIFT_ID/usr/bin" >> $GITHUB_PATH
 
             -   name: Checkout repository
                 uses: actions/checkout@v3
@@ -38,8 +53,8 @@ jobs:
                 run: |
                     swift --version
                     swift build -c release \
-                        -Xcxx -I/usr/lib/swift \
-                        -Xcxx -I/usr/lib/swift/Block
+                        -Xcxx -I$GITHUB_WORKSPACE/$SWIFT_ID/usr/lib/swift \
+                        -Xcxx -I$GITHUB_WORKSPACE/$SWIFT_ID/usr/lib/swift/Block
 
             -   name: Upload binaries
                 run: |
