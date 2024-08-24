@@ -15,29 +15,29 @@ jobs:
     macos:
         runs-on: macos-14
         name: macOS
+
         env:
-            AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
-
             DEVELOPER_DIR: "/Applications/Xcode_15.3.app/Contents/Developer"
-
-            UNIDOC_ENABLE_INDEXSTORE: "1"
-            # According to
-            # https://github.com/actions/runner-images/tree/main#available-images ,
-            # the `macos-14` runner is always aarch64.
-            UNIDOC_PLATFORM: "macos-aarch64"
-            UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
 
         steps:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
             -   name: Build products
+                env:
+                    UNIDOC_ENABLE_INDEXSTORE: "1"
                 run: |
                     swift --version
                     swift build -c release --product unidoc-publish
                     swift build -c release --product unidoc-tools
 
             -   name: Upload products
+                env:
+                    AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
+
+                    UNIDOC_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
+                    UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
+
                 run: |
                     .build/release/unidoc-publish \
                         unidoc-tools \
@@ -49,16 +49,8 @@ jobs:
         name: Ubuntu 24.04
 
         env:
-            AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
-
             SWIFT_PREFIX: "swift-5.10.1-release/ubuntu2404/swift-5.10.1-RELEASE"
             SWIFT_ID: "swift-5.10.1-RELEASE-ubuntu24.04"
-
-            # Note that $(uname -i) cannot appear here, because it is not actually expandable
-            # in an `env` block.
-            UNIDOC_ENABLE_INDEXSTORE: "1"
-            UNIDOC_PLATFORM: "linux"
-            UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
 
         steps:
             -   name: Cache Swift toolchain
@@ -94,6 +86,8 @@ jobs:
             #   For some reason, Swift cannot build both the products in one invocation.
             #   We pass the same flags to both invocations to speed up the build.
             -   name: Build products
+                env:
+                    UNIDOC_ENABLE_INDEXSTORE: "1"
                 run: |
                     swift --version
                     swift build -c release \
@@ -108,9 +102,14 @@ jobs:
                         -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift/Block
 
             -   name: Upload products
+                env:
+                    AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
+
+                    UNIDOC_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
+                    UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
+
                 run: |
                     .build/release/unidoc-publish \
                         unidoc-tools \
-                        /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM-$(uname -i)/unidoc \
+                        /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc \
                         --secret "$AWS_S3_ACCESS_SECRET"
-
