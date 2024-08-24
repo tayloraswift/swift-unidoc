@@ -55,6 +55,23 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
+            -   name: Build uploader
+                run: |
+                    swift --version
+                    swift build -c release \
+                        --static-swift-stdlib \
+                        --product unidoc-publish \
+                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift \
+                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift/Block
+
+            -   name: Test uploader
+                run: |
+                    .build/release/unidoc-publish unidoc-publish /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc --secret "$AWS_S3_ACCESS_SECRET"
+                    .build/release/unidoc-publish \
+                        unidoc-publish \
+                        /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc \
+                        --secret "$AWS_S3_ACCESS_SECRET"
+
             -   name: Build release
                 run: |
                     swift --version
