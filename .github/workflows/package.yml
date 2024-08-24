@@ -7,6 +7,37 @@ on:
         branches: [ master ]
 
 jobs:
+    macos:
+        runs-on: macos-14
+        name: macOS
+        env:
+            AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
+
+            DEVELOPER_DIR: "/Applications/Xcode_15.3.app/Contents/Developer"
+
+            UNIDOC_ENABLE_INDEXSTORE: "1"
+            UNIDOC_PLATFORM: "macos"
+            UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
+
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            -   name: Build products
+                run: |
+                    swift --version
+                    swift build -c release \
+                        --static-swift-stdlib \
+                        --product unidoc-publish \
+                        --product unidoc-tools
+
+            -   name: Upload products
+                run: |
+                    .build/release/unidoc-publish \
+                        unidoc-tools \
+                        /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM-$(uname -i)/unidoc \
+                        --secret "$AWS_S3_ACCESS_SECRET"
+
     linux:
         runs-on: ubuntu-24.04
         name: Ubuntu 24.04
@@ -17,14 +48,13 @@ jobs:
             SWIFT_PREFIX: "swift-5.10.1-release/ubuntu2404/swift-5.10.1-RELEASE"
             SWIFT_ID: "swift-5.10.1-RELEASE-ubuntu24.04"
 
+            # Note that $(uname -i) cannot appear here, because it is not actually expandable
+            # in an `env` block.
             UNIDOC_ENABLE_INDEXSTORE: "1"
             UNIDOC_PLATFORM: "linux"
             UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
 
         steps:
-            -   name: Check secret
-                run: echo ${#AWS_S3_ACCESS_SECRET}
-
             -   name: Cache Swift toolchain
                 uses: actions/cache@v2
                 with:
@@ -55,32 +85,17 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
-            -   name: Build uploader
+            -   name: Build products
                 run: |
                     swift --version
                     swift build -c release \
                         --static-swift-stdlib \
                         --product unidoc-publish \
-                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift \
-                        -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift/Block
-
-            -   name: Test uploader
-                run: |
-                    .build/release/unidoc-publish \
-                        unidoc-publish \
-                        /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM-$(uname -i)/unidoc \
-                        --secret "$AWS_S3_ACCESS_SECRET"
-
-            -   name: Build tools
-                run: |
-                    swift --version
-                    swift build -c release \
-                        --static-swift-stdlib \
                         --product unidoc-tools \
                         -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift \
                         -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift/Block
 
-            -   name: Upload binaries
+            -   name: Upload products
                 run: |
                     .build/release/unidoc-publish \
                         unidoc-tools \
