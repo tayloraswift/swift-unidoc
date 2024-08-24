@@ -56,6 +56,7 @@ jobs:
                 run: |
                     swift --version
                     swift build -c release \
+                        --static-swift-stdlib \
                         -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift \
                         -Xcxx -I$HOME/$SWIFT_ID/usr/lib/swift/Block
 
