@@ -8,8 +8,8 @@ on:
 
 jobs:
     linux:
-        runs-on: ubuntu-22.04
-        name: Ubuntu 22.04
+        runs-on: ubuntu-24.04
+        name: Ubuntu 24.04
 
         env:
             AWS_S3_ACCESS_SECRET: ${{ secrets.AWS_S3_ACCESS_SECRET }}
