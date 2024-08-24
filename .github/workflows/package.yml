@@ -16,7 +16,10 @@ jobs:
             DEVELOPER_DIR: "/Applications/Xcode_15.3.app/Contents/Developer"
 
             UNIDOC_ENABLE_INDEXSTORE: "1"
-            UNIDOC_PLATFORM: "macos"
+            # According to
+            # https://github.com/actions/runner-images/tree/main#available-images ,
+            # the `macos-14` runner is always aarch64.
+            UNIDOC_PLATFORM: "macos-aarch64"
             UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
 
         steps:
@@ -34,7 +37,7 @@ jobs:
                 run: |
                     .build/release/unidoc-publish \
                         unidoc-tools \
-                        /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM-$(uname -i)/unidoc \
+                        /unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc \
                         --secret "$AWS_S3_ACCESS_SECRET"
 
     linux:
