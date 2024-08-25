@@ -60,9 +60,9 @@ extension Unidoc.DB.Users
     /// session cookie if the account was inserted, or the existing cookie if the account
     /// already exists.
     ///
-    /// This function always calls into ``Int64.random(in:)``, which might block the current
-    /// thread while it waits for the system to generate a random number. This cookie is only
-    /// secure if the system's random number generator is secure.
+    /// This function always calls into ``Int64.random(in:) [5F9PK]``, which might block the
+    /// current thread while it waits for the system to generate a random number. This cookie is
+    /// only secure if the system's random number generator is secure.
     public
     func update(user:Unidoc.User) async throws -> Unidoc.UserSecrets
     {

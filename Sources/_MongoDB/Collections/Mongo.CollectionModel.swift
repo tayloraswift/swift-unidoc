@@ -411,7 +411,7 @@ extension Mongo.CollectionModel where Element:Insertable
     }
 
     /// Inserts a single instance of this collection’s ``Element`` type, which is expected to
-    /// replace an **existing** document with the same ``Identifiable/id``.
+    /// replace an **existing** document with the same ``Identifiable/id [8T2WS]``.
     ///
     /// >   Returns:
     ///     True if the document was modified, false if the document was not modified, and nil
@@ -424,7 +424,7 @@ extension Mongo.CollectionModel where Element:Insertable
     }
 
     /// Inserts multiple instances of this collection’s ``Element`` type, each of which is
-    /// expected to replace an **existing** document with the same ``Identifiable/id``.
+    /// expected to replace an **existing** document with the same ``Identifiable/id [8T2WS]``.
     @discardableResult
     @inlinable public
     func replace(_ elements:some Sequence<Element>) async throws -> Mongo.Updates<Element.ID>
@@ -433,7 +433,7 @@ extension Mongo.CollectionModel where Element:Insertable
     }
 
     /// Inserts a single instance of this collection’s ``Element`` type, replacing any existing
-    /// document with the same ``Identifiable/id``.
+    /// document with the same ``Identifiable/id [8T2WS]``.
     @discardableResult
     @inlinable public
     func upsert(_ element:Element) async throws -> Element.ID?
@@ -442,7 +442,7 @@ extension Mongo.CollectionModel where Element:Insertable
     }
 
     /// Inserts multiple instances of this collection’s ``Element`` type, each of which
-    /// potentially replacing an existing document with the same ``Identifiable/id``.
+    /// potentially replacing an existing document with the same ``Identifiable/id [8T2WS]``.
     @discardableResult
     @inlinable public
     func upsert(_ elements:some Sequence<Element>) async throws -> Mongo.Updates<Element.ID>

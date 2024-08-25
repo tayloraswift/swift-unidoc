@@ -111,7 +111,7 @@ extension Unidoc.User:Mongo.MasterCodingModel
         case apiLimitLeft = "L"
         case apiKey = "A"
         /// The session cookie associated with this account, if logged in. This is generated
-        /// randomly in ``AccountDatabase.Users.update(account:with:)``.
+        /// randomly in ``DB.Users.update(user:)``.
         case cookie = "B"
         case symbol = "Y"
 

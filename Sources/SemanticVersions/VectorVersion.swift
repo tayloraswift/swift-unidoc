@@ -30,8 +30,8 @@ extension VectorVersion where Self:LosslessStringConvertible
     var description:String { self.components.description }
 
     /// Attempts to parse a semantic version from a dot-separated triple, such as `1.2.3`.
-    /// This initializer does not accept `v`-prefixed strings; use ``init(tag:)`` to accept
-    /// an optional `v` prefix.
+    /// This initializer does not accept `v`-prefixed strings; use
+    /// ``SemanticVersion.init(refname:)`` to accept an optional `v` prefix.
     @inlinable public
     init?(_ string:String)
     {

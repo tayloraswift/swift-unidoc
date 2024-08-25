@@ -165,71 +165,71 @@ extension Unidoc.AnyVertex
         /// an equality match instead of a range match.
         case zone = "Z"
 
-        /// Appears in ``Foreign`` only.
+        /// Appears in ``ForeignVertex`` only.
         case extendee = "j"
-        /// Appears in ``Article``, ``Decl``, ``Culture``, and ``File``.
+        /// Appears in ``ArticleVertex``, ``DeclVertex``, ``CultureVertex``, and ``FileVertex``.
         case symbol = "Y"
-        /// Appears in every vertex type except for ``File``. In ``Global``, it is always the
-        /// empty string.
+        /// Appears in every vertex type except for ``FileVertex``. In ``LandingVertex``, it is
+        /// always the empty string.
         case stem = "U"
 
-        /// Appears in ``Global`` only.
+        /// Appears in ``LandingVertex`` only.
         case packages = "k"
-        /// Appears in ``Global`` only.
+        /// Appears in ``LandingVertex`` only.
         case snapshot = "O"
 
-        /// Appears in ``Culture`` only.
+        /// Appears in ``CultureVertex`` only.
         case census = "S"
 
-        /// Only appears in ``Culture``.
+        /// Only appears in ``CultureVertex``.
         case module = "M"
 
-        /// Only appears in ``Product``.
+        /// Only appears in ``ProductVertex``.
         case product = "D"
-        /// Only appears in ``Product``. The field contains a list of scalars.
+        /// Only appears in ``ProductVertex``. The field contains a list of scalars.
         case constituents = "r"
 
-        /// Appears in ``Decl`` and ``Foreign``.
+        /// Appears in ``DeclVertex`` and ``ForeignVertex``.
         case flags = "L"
 
-        /// Only appears in ``Decl``.
+        /// Only appears in ``DeclVertex``.
         case signature_availability = "A"
-        /// Only appears in ``Decl``.
+        /// Only appears in ``DeclVertex``.
         case signature_abridged_bytecode = "B"
-        /// Only appears in ``Decl``.
+        /// Only appears in ``DeclVertex``.
         case signature_expanded_bytecode = "E"
-        /// Only appears in ``Decl``. The field contains a list of scalars.
+        /// Only appears in ``DeclVertex``. The field contains a list of scalars.
         case signature_expanded_scalars = "e"
-        /// Only appears in ``Decl``. The field contains a list of constraints,
+        /// Only appears in ``DeclVertex``. The field contains a list of constraints,
         /// which contain scalars.
         case signature_generics_constraints = "g"
-        /// Only appears in ``Decl``.
+        /// Only appears in ``DeclVertex``.
         case signature_generics_parameters = "G"
-        /// Only appears in ``Decl``.
+        /// Only appears in ``DeclVertex``.
         case signature_spis = "I"
-        /// Only appears in ``Decl``. The field contains a list of scalars.
+        /// Only appears in ``DeclVertex``. The field contains a list of scalars.
         case superforms = "p"
-        /// Appears in ``Article`` and ``Decl``. The field contains a scalar.
+        /// Appears in ``ArticleVertex`` and ``DeclVertex``. The field contains a scalar.
         case culture = "c"
-        /// Only appears in ``Decl``, and only when different from ``culture``.
+        /// Only appears in ``DeclVertex``, and only when different from ``culture``.
         /// The field contains a scalar.
         case colony = "n"
-        /// Only appears in ``Decl``. The field contains a list of scalars.
+        /// Only appears in ``DeclVertex``. The field contains a list of scalars.
         case scope = "x"
 
-        /// Only appears in ``Decl``. The field contains a scalar.
+        /// Only appears in ``DeclVertex``. The field contains a scalar.
         case renamed = "a"
-        /// Can appear in ``Article``, ``Culture``, or ``Decl``.
-        /// The field contains a scalar. In ``Article`` or ``Decl``, the file references a
-        /// markdown supplement.
+        /// Can appear in ``ArticleVertex``, ``CultureVertex``, or ``DeclVertex``.
+        /// The field contains a scalar. In ``ArticleVertex`` or ``DeclVertex``, the file
+        /// references a markdown supplement.
         case readme = "m"
-        /// Only appears in ``Decl``. The field contains a scalar.
+        /// Only appears in ``DeclVertex``. The field contains a scalar.
         case file = "f"
 
-        /// Only appears in ``Decl``.
+        /// Only appears in ``DeclVertex``.
         case position = "P"
 
-        /// Appears in ``Article``, and sometimes in ``Culture`` as well.
+        /// Appears in ``ArticleVertex``, and sometimes in ``CultureVertex`` as well.
         case headline = "T"
         /// Optional, but can appear in any master record.
         /// The field contains a passage, which contains a list of outlines,
@@ -240,14 +240,14 @@ extension Unidoc.AnyVertex
         /// each of which may contain a scalar.
         case details = "d"
 
-        /// Only appears in ``Decl``. The field contains a *group* scalar.
+        /// Only appears in ``DeclVertex``. The field contains a *group* scalar.
         case peers = "y"
-        /// Can appear in any master record except a ``File``.
+        /// Can appear in any master record except a ``FileVertex``.
         /// The field contains a *group* scalar. (Not a vertex scalar!)
         case group = "t"
 
         /// Extended FNV24 hash of the record’s symbol, appears in every vertex type except
-        /// for ``File``. In ``Global``, it is always zero.
+        /// for ``FileVertex``. In ``LandingVertex``, it is always zero.
         case hash = "H"
 
         @available(*, deprecated, renamed: "peers")

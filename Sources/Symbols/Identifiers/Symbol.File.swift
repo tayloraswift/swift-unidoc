@@ -3,7 +3,7 @@ extension Symbol
     @frozen public
     struct File:Equatable, Hashable, Sendable
     {
-        /// The path to the relevant file, relative to some ``FileRoot``.
+        /// The path to the relevant file, relative to some ``FileBase``.
         public
         let path:String
 

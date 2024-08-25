@@ -6,8 +6,9 @@ extension Symbol
         public
         var package:Package
         /// A string identifying the package version within the database.
-        /// If the ``refname`` is a `v`-prefixed semantic version, this
-        /// string encodes the version without the `v` prefix.
+        ///
+        /// If the ref name is a `v`-prefixed semantic version, this string encodes the version
+        /// without the `v` prefix.
         public
         var version:String
 

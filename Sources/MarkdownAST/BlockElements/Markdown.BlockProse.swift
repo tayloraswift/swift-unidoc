@@ -24,8 +24,9 @@ extension Markdown
             }
         }
 
-        /// Calls the superclass method, and then calls ``Markdown.TreeElement/outline(by:)``
-        /// on each of the inline elements in this container.
+        /// Calls the superclass method, and then calls
+        /// ``Markdown.InlineElement/outline(by:) [6AL0]`` on each of the inline elements in
+        /// this container.
         @inlinable public final override
         func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
         {

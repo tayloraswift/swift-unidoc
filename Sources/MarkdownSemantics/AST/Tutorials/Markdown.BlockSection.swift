@@ -5,7 +5,7 @@ extension Markdown
 {
     /// A `BlockSection` is our abstraction for the multitude of (redundant) section-like Apple
     /// directives. It renders as a `<section>` element and includes an automatically generated
-    /// `<h2>` element containing the section ``title``, if present. The `<h2>` element has
+    /// `<h2>` element containing the section `title`, if present. The `<h2>` element has
     /// a clickable anchor.
     public
     class BlockSection:BlockContainer<BlockElement>

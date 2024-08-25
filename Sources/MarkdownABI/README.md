@@ -57,4 +57,4 @@ Codewords and references can contain valid UTF-8 sequences. Therefore, they are 
 -   ``Markdown.CodeLanguageType``
 -   ``Markdown.DiffType``
 -   ``Markdown.PlainText``
--   ``Markdown.PlainText.Highligher``
+-   ``Markdown.PlainText.Highlighter``

@@ -19,7 +19,7 @@ extension Unidoc
         let node:GitHub.Node?
 
         /// When the repository content (as opposed to its metadata) was last pushed to.
-        /// This is usually different from ``updated``.
+        /// This is usually different from ``PackageRepo.updated``.
         public
         var pushed:UnixMillisecond
 

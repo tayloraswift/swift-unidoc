@@ -3,13 +3,14 @@ import MongoDB
 
 extension Mongo
 {
-    /// A type that expects a single batch of output documents from its ``query``.
+    /// A type that expects a single batch of output documents from its
+    /// ``PipelineEndpoint/query``.
     public
     protocol SingleBatchEndpoint<Query>:PipelineEndpoint
         where   Query.Iteration.Stride == Never,
                 Query.Iteration.Batch == [Query.Iteration.BatchElement]
     {
-        /// An **idempotent** accessor for a single batch of ``query`` outputs.
+        /// An **idempotent** accessor for a single batch of ``PipelineEndpoint/query`` outputs.
         ///
         /// The easiest way to implement this property is to declare a mutable stored property
         /// matching this requirement.
@@ -26,7 +27,7 @@ extension Mongo.SingleBatchEndpoint
     }
 
     /// A more-efficient, cursorless implementation of
-    /// ``Mongo/PipelineEndpoint.pull(from:with:)``.
+    /// ``Mongo/PipelineEndpoint.pull(from:with:) [1V15C]``.
     @inlinable public mutating
     func pull(from database:Mongo.Database, with session:Mongo.Session) async throws
     {

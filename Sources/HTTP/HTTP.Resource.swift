@@ -37,7 +37,7 @@ extension HTTP.Resource:ExpressibleByStringLiteral, ExpressibleByStringInterpola
 extension HTTP.Resource
 {
     /// Computes and populates the resource ``hash`` if it has not already been computed, and
-    /// drops the payload if it matches the given ``tag``.
+    /// drops the payload if it matches the given `tag`.
     public mutating
     func optimize(tag:MD5?)
     {
