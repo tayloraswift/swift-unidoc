@@ -11,8 +11,6 @@ extension SSGC
     struct TypeChecker
     {
         private
-        let ignoreExportedInterfaces:Bool
-        private
         var declarations:Declarations
         private
         var extensions:Extensions
@@ -23,9 +21,8 @@ extension SSGC
         var resolvableModules:[Symbol.Module]
 
         public
-        init(ignoreExportedInterfaces:Bool = true, threshold:Symbol.ACL = .public)
+        init(threshold:Symbol.ACL = .public)
         {
-            self.ignoreExportedInterfaces = ignoreExportedInterfaces
             self.declarations = .init(threshold: threshold)
             self.extensions = .init()
 
@@ -258,16 +255,6 @@ extension SSGC.TypeChecker
             return
         }
 
-        guard self.ignoreExportedInterfaces || member.culture == culture
-        else
-        {
-            throw AssertionError.init(message: """
-                Found cross-module member relationship \
-                (from \(member.culture) in \(culture)), which should not be possible in \
-                symbol dumps generated with '-emit-extension-symbols'
-                """)
-        }
-
         switch relationship.target
         {
         case .vector(let symbol):
@@ -275,22 +262,11 @@ extension SSGC.TypeChecker
             throw SSGC.UnexpectedSymbolError.vector(symbol)
 
         case .scalar(let scope):
-            //  We should never see an external type reference here either.
             guard
             let scope:SSGC.DeclObject = self.declarations[visible: scope]
             else
             {
                 return
-            }
-
-            guard self.ignoreExportedInterfaces || scope.culture == culture
-            else
-            {
-                throw AssertionError.init(message: """
-                    Found cross-module member relationship \
-                    (to \(scope.culture) in \(culture)), which should not be possible in \
-                    symbol dumps generated with '-emit-extension-symbols'
-                    """)
             }
 
             //  Enum cases are considered intrinsic members of their parent enum.
@@ -358,16 +334,6 @@ extension SSGC.TypeChecker
                 return
             }
 
-            guard self.ignoreExportedInterfaces || type.culture == culture
-            else
-            {
-                throw AssertionError.init(message: """
-                    Found cross-module conformance relationship \
-                    (from \(type.culture) in \(culture)), which should not be possible in \
-                    symbol dumps generated with '-emit-extension-symbols'
-                    """)
-            }
-
             if  let origin:Symbol.Decl = conformance.origin
             {
                 type.assign(origin: origin)
@@ -422,14 +388,6 @@ extension SSGC.TypeChecker
             return
         }
 
-        guard self.ignoreExportedInterfaces || subform.culture == culture
-        else
-        {
-            throw AssertionError.init(message: """
-                Found retroactive superform relationship (from \(subform.culture) in \(culture))
-                """)
-        }
-
         try subform.add(superform: relationship)
 
         /// Having a universal witness is not intrinsic, but it is useful to know
@@ -459,8 +417,6 @@ extension SSGC.TypeChecker
             throw SSGC.UnexpectedSymbolError.vector(symbol)
 
         case .scalar(let symbol):
-            //  If the colonial graph was generated with '-emit-extension-symbols',
-            //  we should never see an external type reference here.
             if  let decl:SSGC.DeclObject = self.declarations[visible: symbol]
             {
                 heir = decl
@@ -470,16 +426,6 @@ extension SSGC.TypeChecker
                 return
             }
 
-            guard self.ignoreExportedInterfaces || heir.culture == culture
-            else
-            {
-                throw AssertionError.init(message: """
-                    Found direct cross-module feature inheritance relationship in culture \
-                    '\(culture)' adding feature '\(feature.value.path)' to type \
-                    '\(heir.value.path)' from '\(heir.culture)', which should not be \
-                    possible in symbol dumps generated with '-emit-extension-symbols'
-                    """)
-            }
             guard heir.id == relationship.source.heir
             else
             {
@@ -579,16 +525,29 @@ extension SSGC.TypeChecker
                     """)
             }
         }
-
-        self.resolvableLinks[heir.namespace, heir.value.path, feature.value.path.last].append(
-            .feature(feature.value, self: heir.id))
     }
 }
 extension SSGC.TypeChecker
 {
-    public __consuming
+    public consuming
     func load(in culture:Symbol.Module) throws -> SSGC.ModuleIndex
     {
+        for `extension`:SSGC.ExtensionObject in self.extensions.all
+        {
+            //  We add the feature paths here and not in `insert(_:by:)` because those
+            //  edges are frequently duplicated, and it is hard to remove duplicate paths
+            //  after they have been added.
+            let extendee:SSGC.DeclObject = try self.declarations[`extension`.extendee]
+            for feature:Symbol.Decl in `extension`.features.keys
+            {
+                let feature:SSGC.Decl = try self.declarations[feature].value
+                let last:String = feature.path.last
+
+                self.resolvableLinks[extendee.namespace, extendee.value.path, last].append(
+                    .feature(feature, self: extendee.id))
+            }
+        }
+
         let extensions:[SSGC.Extension] = try self.extensions.load(culture: culture,
             with: self.declarations)
 
