@@ -11,8 +11,6 @@ extension SSGC
     struct TypeChecker
     {
         private
-        let ignoreExportedInterfaces:Bool
-        private
         var declarations:Declarations
         private
         var extensions:Extensions
@@ -23,9 +21,8 @@ extension SSGC
         var resolvableModules:[Symbol.Module]
 
         public
-        init(ignoreExportedInterfaces:Bool = true, threshold:Symbol.ACL = .public)
+        init(threshold:Symbol.ACL = .public)
         {
-            self.ignoreExportedInterfaces = ignoreExportedInterfaces
             self.declarations = .init(threshold: threshold)
             self.extensions = .init()
 
