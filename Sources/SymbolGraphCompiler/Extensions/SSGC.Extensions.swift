@@ -25,6 +25,13 @@ extension SSGC
 }
 extension SSGC.Extensions
 {
+    var all:Dictionary<SSGC.ExtensionSignature, SSGC.ExtensionObject>.Values
+    {
+        self.groups.values
+    }
+}
+extension SSGC.Extensions
+{
     mutating
     func include(_ vertex:SymbolGraphPart.Vertex,
         extending type:__owned Symbol.Decl,
@@ -114,7 +121,7 @@ extension SSGC.Extensions
         /// Gather extension members attributable to the specified culture, simplifying the
         /// extension signatures by inspecting the extended declaration. This may coalesce
         /// multiple extension objects into a single extension layer.
-        let coalesced:[SSGC.Extension.ID: SSGC.ExtensionLayer] = try self.groups.values.reduce(
+        let coalesced:[SSGC.Extension.ID: SSGC.ExtensionLayer] = try self.all.reduce(
             into: [:])
         {
             let blocks:[(id:Symbol.Block, block:SSGC.Extension.Block)] = $1.blocks.reduce(
