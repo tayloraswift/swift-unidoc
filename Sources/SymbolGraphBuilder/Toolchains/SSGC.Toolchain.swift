@@ -208,8 +208,10 @@ extension SSGC.Toolchain
 }
 extension SSGC.Toolchain
 {
+    /// Dumps the symbols for the standard library. Due to upstream bugs in the Swift compiler,
+    /// this methods disables extension block symbols by default.
     func dump(standardLibrary:SSGC.StandardLibrary,
-        options:SymbolDumpOptions = .default,
+        options:SymbolDumpOptions = .init(emitExtensionBlockSymbols: false),
         cache:FilePath.Directory) throws -> FilePath.Directory
     {
         let cached:FilePath.Directory = cache / "swift@\(self.splash.swift.version)"
@@ -234,7 +236,7 @@ extension SSGC.Toolchain
     /// output directory.
     func dump(module id:Symbol.Module,
         to output:FilePath.Directory,
-        options:SymbolDumpOptions = .default,
+        options:SymbolDumpOptions,
         include:[FilePath.Directory] = []) throws
     {
         print("Dumping symbols for module '\(id)'")

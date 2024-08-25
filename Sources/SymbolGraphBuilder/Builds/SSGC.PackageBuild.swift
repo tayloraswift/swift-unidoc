@@ -302,7 +302,7 @@ extension SSGC.PackageBuild
         {
             try toolchain.build(package: self.root,
                 using: self.scratch,
-                flags: self.flags.dumping(symbols: .default, to: artifacts))
+                flags: self.flags.dumping(symbols: .init(), to: artifacts))
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
@@ -331,14 +331,13 @@ extension SSGC.PackageBuild
         //  Dump the standard library’s symbols, unless they’re already cached.
         let artifactsCached:FilePath.Directory = try toolchain.dump(
             standardLibrary: .init(platform: platform),
-            options: .default,
             cache: cache)
         for (module, include):(Symbol.Module, [FilePath.Directory]) in try self.modulesToDump(
             among: modules)
         {
             try toolchain.dump(module: module,
                 to: artifacts,
-                options: .default,
+                options: .init(),
                 include: include)
         }
 

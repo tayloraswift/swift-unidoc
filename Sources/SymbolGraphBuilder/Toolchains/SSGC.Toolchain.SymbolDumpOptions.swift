@@ -9,26 +9,15 @@ extension SSGC.Toolchain
         var includeInterfaceSymbols:Bool
         var skipInheritedDocs:Bool
 
-        init(minimumACL:Symbol.ACL,
-            emitExtensionBlockSymbols:Bool,
-            includeInterfaceSymbols:Bool,
-            skipInheritedDocs:Bool)
+        init(minimumACL:Symbol.ACL = .internal,
+            emitExtensionBlockSymbols:Bool = true,
+            includeInterfaceSymbols:Bool = true,
+            skipInheritedDocs:Bool = true)
         {
             self.minimumACL = minimumACL
             self.emitExtensionBlockSymbols = emitExtensionBlockSymbols
             self.includeInterfaceSymbols = includeInterfaceSymbols
             self.skipInheritedDocs = skipInheritedDocs
         }
-    }
-}
-extension SSGC.Toolchain.SymbolDumpOptions
-{
-    static
-    var `default`:Self
-    {
-        .init(minimumACL: .internal,
-            emitExtensionBlockSymbols: true,
-            includeInterfaceSymbols: true,
-            skipInheritedDocs: true)
     }
 }
