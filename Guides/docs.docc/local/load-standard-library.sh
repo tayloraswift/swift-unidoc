@@ -1,1 +1,1 @@
-swift run -c release unidoc-build local swift
+swift run -c release unidoc-tools build local swift
