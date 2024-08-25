@@ -525,16 +525,29 @@ extension SSGC.TypeChecker
                     """)
             }
         }
-
-        self.resolvableLinks[heir.namespace, heir.value.path, feature.value.path.last].append(
-            .feature(feature.value, self: heir.id))
     }
 }
 extension SSGC.TypeChecker
 {
-    public __consuming
+    public consuming
     func load(in culture:Symbol.Module) throws -> SSGC.ModuleIndex
     {
+        for `extension`:SSGC.ExtensionObject in self.extensions.all
+        {
+            //  We add the feature paths here and not in `insert(_:by:)` because those
+            //  edges are frequently duplicated, and it is hard to remove duplicate paths
+            //  after they have been added.
+            let extendee:SSGC.DeclObject = try self.declarations[`extension`.extendee]
+            for feature:Symbol.Decl in `extension`.features.keys
+            {
+                let feature:SSGC.Decl = try self.declarations[feature].value
+                let last:String = feature.path.last
+
+                self.resolvableLinks[extendee.namespace, extendee.value.path, last].append(
+                    .feature(feature, self: extendee.id))
+            }
+        }
+
         let extensions:[SSGC.Extension] = try self.extensions.load(culture: culture,
             with: self.declarations)
 
