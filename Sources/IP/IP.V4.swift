@@ -1,6 +1,6 @@
 extension IP
 {
-    /// A native SwiftNIO ``IPv4Address`` is reference counted and resilient, and we
+    /// A native SwiftNIO `IPv4Address` is reference counted and resilient, and we
     /// would rather pass around an inline value type.
     @frozen public
     struct V4:Equatable, Hashable, Sendable

@@ -6,7 +6,7 @@ extension GitHub
     ///
     /// >   Note:
     /// This type would be named `GitHub.OAuthApp`, but then ``GitHub.App`` would have to be
-    /// named ``GitHub.AppApp``, and that would just be stupid.
+    /// named `GitHub.AppApp`, and that would just be stupid.
     @frozen public
     struct OAuth:GitHubApplication
     {

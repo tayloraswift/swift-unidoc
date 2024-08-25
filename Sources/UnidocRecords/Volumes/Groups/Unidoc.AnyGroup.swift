@@ -30,8 +30,7 @@ extension Unidoc.AnyGroup
         /// constraints, which contain scalars.
         case constraints = "g"
 
-        /// Always present in ``ExtensionGroup``, optional in ``TopicGroup``, and contains a
-        /// scalar.
+        /// Always present in ``ExtensionGroup``, and contains a scalar.
         case culture = "c"
         /// Always present in ``ExtensionGroup``, optional otherwise, and contains a scalar.
         /// Usually doesn’t need a secondary lookup.
@@ -60,18 +59,16 @@ extension Unidoc.AnyGroup
         /// each of which may contain a scalar.
         case overview = "o"
         /// Contains a passage, which contains a list of outlines,
-        /// each of which may contain a scalar. Only appears in ``Extension``.
+        /// each of which may contain a scalar. Only appears in ``ExtensionGroup``.
         case details = "d"
-        /// Appears in ``CuratorGroup``, ``IntrinsicGroup`` and ``TopicGroup``.
-        /// In ``TopicGroup``, the field contains links, some of which are scalars.
-        /// In ``CuratorGroup`` and ``IntrinsicGroup`` the field contains scalars, all of
-        /// which are, of course, scalars.
+        /// Appears in ``CuratorGroup`` and ``IntrinsicGroup``. The field contains scalars, all
+        /// of which are, of course, scalars.
         case items = "t"
 
-        /// Optional and appears in ``ConformingTypesGroup`` only.
+        /// Optional and appears in ``ConformerGroup`` only.
         /// The field contains a list of scalars.
         case unconditional = "u"
-        /// Optional and appears in ``ConformingTypesGroup`` only.
+        /// Optional and appears in ``ConformerGroup`` only.
         /// The field contains a list of conforming types, which contain scalars.
         case conditional = "k"
 

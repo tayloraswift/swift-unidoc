@@ -3,13 +3,14 @@ import MongoDB
 
 extension Mongo
 {
-    /// A type that expects a single output document from its ``query``.
+    /// A type that expects a single output document from its ``PipelineEndpoint/query``.
     public
     protocol SingleOutputEndpoint<Query>:PipelineEndpoint
         where   Query.Iteration.Stride == Never,
                 Query.Iteration.Batch == Query.Iteration.BatchElement?
     {
-        /// An **idempotent** accessor for the singular result of the ``query``.
+        /// An **idempotent** accessor for the singular result of the
+        /// ``PipelineEndpoint/query``.
         ///
         /// The easiest way to implement this property is to declare a mutable stored property
         /// matching this requirement.
@@ -30,7 +31,7 @@ extension Mongo.SingleOutputEndpoint
     }
 
     /// A more-efficient, cursorless implementation of
-    /// ``Mongo/PipelineEndpoint.pull(from:with:)``.
+    /// ``Mongo/PipelineEndpoint.pull(from:with:) [1V15C]``.
     @inlinable public mutating
     func pull(from database:Mongo.Database, with session:Mongo.Session) async throws
     {

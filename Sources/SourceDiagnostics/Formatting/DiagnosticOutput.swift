@@ -1,6 +1,6 @@
 import Sources
 
-/// A `DiagnosticOutput` is just an opaque list of ``DiagnosticFragment``s glued to some
+/// A `DiagnosticOutput` is just an opaque list of diagnostic fragments glued to some
 /// ``DiagnosticSymbolicator`` that individual ``Diagnostic``s can use to generate those
 /// messages.
 @frozen public

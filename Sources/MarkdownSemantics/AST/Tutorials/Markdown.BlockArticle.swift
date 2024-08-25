@@ -9,10 +9,10 @@ extension Markdown
         public
         var source:SourceReference<Source>?
 
-        /// The article’s headline, which was extracted from its ``Intro``.
+        /// The article’s headline, which was extracted from its `@Intro`.
         public private(set)
         var headline:String?
-        /// The article’s overview, which is an `@Intro` that has had its ``Intro/title``
+        /// The article’s overview, which is an `@Intro` that has had its `title`
         /// removed and stored in ``headline``.
         private(set)
         var overview:Intro?
