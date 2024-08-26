@@ -1,1 +1,1 @@
-swift run -c release unidoc-tools build local swift-nio -I /swift
+swift run -c release unidoc-tools local swift-nio -I /swift
