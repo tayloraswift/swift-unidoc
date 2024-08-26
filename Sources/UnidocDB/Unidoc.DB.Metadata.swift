@@ -5,7 +5,8 @@ import UnidocRecords
 
 extension Unidoc.DB
 {
-    /// A single-document collection containing a ``SearchIndex``.
+    /// A single-document collection containing a search index of all the packages in the
+    /// database.
     @frozen public
     struct Metadata
     {

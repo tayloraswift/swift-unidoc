@@ -15,7 +15,7 @@ extension Markdown
     {
         /// The absolute location of the markdown source within a larger source file,
         /// if known. If the markdown source was a standalone markdown file, this is
-        /// ``SourceLocation/zero``.
+        /// ``SourcePosition/zero``.
         public
         let origin:SourceLocation<Int32>?
         /// The unparsed markdown source text.

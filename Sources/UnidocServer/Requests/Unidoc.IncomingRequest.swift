@@ -10,7 +10,7 @@ import URI
 extension Unidoc
 {
     /// An `IncomingRequest` is a request that has not yet been routed to an operation through
-    /// a ``Router``.
+    /// a `Router`.
     @frozen public
     struct IncomingRequest:Sendable
     {

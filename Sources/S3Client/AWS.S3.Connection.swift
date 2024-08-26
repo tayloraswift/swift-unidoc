@@ -8,7 +8,7 @@ extension AWS.S3
 {
     /// Provides the API for interacting with an AWS S3 bucket.
     ///
-    /// The basic S3 object manipulations are ``put(content:using:path:with:timeout:)``,
+    /// The basic S3 object manipulations are ``put(object:using:path:with:timeout:)``,
     /// ``get(path:timeout:)``, and ``delete(path:)``. Of the three, only the PUT method
     /// currently supports authentication with an access key.
     ///

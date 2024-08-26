@@ -52,8 +52,8 @@ extension HTML.OutputStreamableMarkdown
     /// returns nil if successful. This function always closes any HTML elements
     /// it creates, even on error.
     ///
-    /// See ``TextOutputStreamableMarkdown.write(to:)`` for a simpler version of this function
-    /// that only renders visible text.
+    /// See ``TextOutputStreamableMarkdown.write(to:) [7FATH]`` for a simpler version of this
+    /// function that only renders visible text.
     public
     func render(to html:inout HTML.ContentEncoder) throws
     {

@@ -1,12 +1,12 @@
 # Previewing documentation locally
 
-This guide walks through how to use the `unidoc-preview` tool to preview documentation locally on macOS 14. This guide won’t make any effort to explain how Unidoc itself works, it is merely intended to demonstrate how to preview multi-package documentation as quickly as possible. For a more-detailed Linux-centric tour, see the <doc:Getting-started> guide.
+This guide walks through how to use the `unidoc preview` tool to preview documentation locally on macOS 14. This guide won’t make any effort to explain how Unidoc itself works, it is merely intended to demonstrate how to preview multi-package documentation as quickly as possible. For a more-detailed Linux-centric tour, see the <doc:Getting-started> guide.
 
 In this guide, you will:
 
 1.  Launch and initialize a `mongod` instance in a Docker container,
-2.  Build and run an instance of `unidoc-preview` on the macOS host,
-3.  Build the `unidoc-build` tool,
+2.  Build and run an instance of `unidoc preview` on the macOS host,
+3.  Build the `unidoc local` tool,
 4.  Generate documentation for the standard library, and
 5.  Generate documentation for two SwiftPM packages, one of which depends on the other.
 
@@ -44,23 +44,23 @@ docker exec -t unidoc-mongod-container /bin/mongosh --file /unidoc-rs-init.js
 ```
 
 
-## 3. Running `unidoc-preview`
+## 3. Running `unidoc preview`
 
-The `unidoc-preview` tool is an ordinary SwiftPM executable product. You can build and run it directly from your macOS host like this:
+The `unidoc preview` tool is an ordinary SwiftPM executable product. You can build and run it directly from your macOS host like this:
 
 ```bash
-swift run -c release unidoc-preview
+swift run -c release unidoc-tools preview
 ```
 
-The `unidoc-preview` tool will start a web server on [`http://localhost:8080`](http://localhost:8080).
+The `unidoc preview` tool will start a web server on [`http://localhost:8080`](http://localhost:8080).
 
 @Image(source: "Start page.png", alt: "Start page") {
->   The `unidoc-preview` start page.
+>   The `unidoc preview` start page.
 }
 
 ## 4. Generating documentation for the standard library
 
-Generate local documentation using the `unidoc-build local` subcommand. To start off, open a third terminal and generate the documentation for the standard library (`swift`).
+Generate local documentation using the `unidoc local` subcommand. To start off, open a third terminal and generate the documentation for the standard library (`swift`).
 
 @Code(file: load-standard-library.sh, title: load-standard-library.sh)
 
@@ -84,7 +84,7 @@ cd -
 Generating documentation for a package is similar to generating documentation for the standard library, except you need to specify a search path to a directory containing the project. Because you downloaded the `swift-collections` repository to a sibling directory, you can use `..` for the search path.
 
 ```bash
-swift run -c release unidoc-build local swift-collections -I ..
+swift run -c release unidoc-tools local swift-collections -I ..
 ```
 
 You should be able to view the symbol graph and its documentation at [`http://localhost:8080/tags/swift-collections`](http://localhost:8080/tags/swift-collections).
@@ -99,7 +99,7 @@ Finally, let’s generate documentation for a package that depends on `swift-col
 cd ..
 git clone https://github.com/apple/swift-async-algorithms
 cd -
-swift run -c release unidoc-build local swift-async-algorithms -I ..
+swift run -c release unidoc-tools local swift-async-algorithms -I ..
 ```
 
 

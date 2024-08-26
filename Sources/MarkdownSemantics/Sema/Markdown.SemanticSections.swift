@@ -69,7 +69,7 @@ extension Markdown.SemanticSections
 }
 extension Markdown.SemanticSections
 {
-    /// Calls ``visit`` recursively for all blocks in the structure.
+    /// Calls ``BlockElement/traverse(with:)`` recursively for all blocks in the structure.
     ///
     /// This coroutine visits the ``parameters``, then the ``returns``, then the ``throws``,
     /// and finally the ``article``.

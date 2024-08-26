@@ -2,7 +2,9 @@
 
 <strong><em><code>unidoc</code></em></strong>
 
-[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/ci.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/ci.yml)
+[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/test.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/test.yml)
+[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/docs.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/docs.yml)
+[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/package.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/package.yml)
 
 </div>
 

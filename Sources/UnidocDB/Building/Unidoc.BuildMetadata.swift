@@ -47,7 +47,7 @@ extension Unidoc.BuildMetadata:Mongo.MasterCodingModel
         case failure = "F"
         case logs = "L"
 
-        @available(*, deprecated, renamed: "selector")
+        @available(*, deprecated, renamed: "behavior")
         @inlinable public static
         var request:Self { .behavior }
     }

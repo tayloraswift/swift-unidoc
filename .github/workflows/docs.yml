@@ -1,0 +1,64 @@
+# This workflow builds the project under the “starter” configuration, namely, what you would get
+# if you ran `swift build` without any arguments. We use this to verify that we can generate the
+# documentation for Unidoc itself.
+name: documentation
+
+on:
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
+
+jobs:
+    linux:
+        runs-on: ubuntu-24.04
+        name: Ubuntu 24.04
+        env:
+            UNIDOC_ENABLE_INDEXSTORE: "0"
+        steps:
+            #   Important! We install an Ubuntu 22.04 Swift toolchain, and not the 24.04 one
+            #   because the 24.04 toolchain for some reason is built with assertions enabled,
+            #   which causes the Swift compiler to crash when building the package.
+            -   name: Install Swift
+                uses: tayloraswift/swift-install-action@master
+                with:
+                    swift-prefix: "swift-5.10.1-release/ubuntu2204/swift-5.10.1-RELEASE"
+                    swift-id: "swift-5.10.1-RELEASE-ubuntu22.04"
+
+            #   This installs an older version of Unidoc, not the one we are testing.
+            -   name: Install Unidoc
+                uses: tayloraswift/swift-unidoc-action@master
+                with:
+                    unidoc-version: "master"
+
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            -   name: Build documentation
+                run: |
+                    unidoc compile -I .. \
+                    --swift-toolchain $SWIFT_INSTALLATION \
+                    --ci fail-on-errors \
+                    --package-name swift-unidoc
+
+    macos:
+        runs-on: macos-14
+        name: macOS
+        env:
+            UNIDOC_ENABLE_INDEXSTORE: "0"
+            DEVELOPER_DIR: "/Applications/Xcode_15.3.app/Contents/Developer"
+
+        steps:
+            -   name: Install Unidoc
+                uses: tayloraswift/swift-unidoc-action@master
+                with:
+                    unidoc-version: "master"
+
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            -   name: Build documentation
+                run: |
+                    unidoc compile -I .. \
+                    --ci fail-on-errors \
+                    --package-name swift-unidoc
