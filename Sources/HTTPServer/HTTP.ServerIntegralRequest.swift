@@ -20,7 +20,7 @@ extension HTTP
 extension HTTP.ServerIntegralRequest
 {
     /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
-    /// for ``init?(get:headers:origin:)``.
+    /// for ``init(get:headers:origin:) [37U4H]``.
     ///
     /// Servers that expect to handle a lot of HTTP/1.1 GET requests should override this with
     /// a more efficient implementation.
@@ -33,7 +33,7 @@ extension HTTP.ServerIntegralRequest
     }
 
     /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
-    /// for ``init?(post:headers:origin:body:)``.
+    /// for ``init(post:headers:origin:body:) [XBU7]``.
     ///
     /// Servers that expect to handle a lot of HTTP/1.1 POST requests should override this with
     /// a more efficient implementation.

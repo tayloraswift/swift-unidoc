@@ -9,7 +9,7 @@ protocol DiagnosticFrame<File>
 
     /// The absolute location of the source ``text`` within a larger source file, if known. If
     /// the source text originated from a standalone file, this should be
-    /// ``SourceLocation/zero``.
+    /// ``SourcePosition/zero``.
     var origin:SourceLocation<File>? { get }
     /// The full source text.
     var text:String { get }

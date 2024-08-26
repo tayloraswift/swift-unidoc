@@ -12,7 +12,7 @@ extension Markdown.Table
         /// without any alignment attributes.
         ///
         /// This method will never actually be called, because ``Markdown.Table`` bypasses it
-        /// in favor of the ``emit(into:alignment:)`` method.
+        /// in favor of the (internal) `emit(into:alignment:)` method.
         public final override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {

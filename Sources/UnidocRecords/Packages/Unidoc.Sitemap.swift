@@ -7,10 +7,8 @@ import UnixTime
 
 extension Unidoc
 {
-    /// A sitemap is a list of all the pages in a volume.
-    ///
-    /// This type is namespaced to ``Unidoc`` and not ``Volume`` because we generally only
-    /// persist one sitemap per package.
+    /// A sitemap is a list of all the pages in a volume. We generally only persist one sitemap
+    /// per package.
     ///
     /// >   Note:
     ///     Per [sitemaps.org](https://sitemaps.org), the correct spelling is *Sitemap*,

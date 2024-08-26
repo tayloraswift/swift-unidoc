@@ -15,7 +15,7 @@ extension GenericConstraint
     /// `{ G: "0GenericParameterName.AssociatedType", C: "Array<Int>" }` .
     ///
     /// The ``nominal`` (`N`) field is usually integer-typed, but its BSON
-    /// representation is up to the generic ``Scalar`` parameter.
+    /// representation is up to the generic `Scalar` parameter.
     ///
     /// The ``spelling`` (`C`) field is always a string.
     ///

@@ -18,8 +18,8 @@ extension Mongo
         /// The replica on which to execute the ``query``.
         ///
         /// For pipelines that write to the database (e.g., pipelines containing an
-        /// ``Pipeline.Out/out`` or  ``Pipeline.Out/merge`` stage), this should be
-        /// ``ReadPreference/primary``.
+        /// ``PipelineEncoder.Out/out`` or  ``PipelineEncoder.Merge/merge`` stage), this should
+        /// be ``ReadPreference/primary``.
         ///
         /// Most read-only pipelines made available to end users should use
         /// ``ReadPreference.nearest`` or ``ReadPreference.secondaryPreferred``, as this allows
@@ -29,14 +29,14 @@ extension Mongo
         static
         var replica:ReadPreference { get }
 
-        /// The cursor iteration stride to use when executing the ``query``. Only types that iterate
-        /// cursors need to implement this.
+        /// The cursor iteration stride to use when executing the ``query``. Only types that
+        /// iterate cursors need to implement this.
         var stride:Query.Iteration.Stride { get }
         /// The query to execute.
         var query:Query { get }
 
-        /// Consumes a batch of output documents from the ``query``. Only types that iterate cursors
-        /// need to implement this.
+        /// Consumes a batch of output documents from the ``query``. Only types that iterate
+        /// cursors need to implement this.
         mutating
         func yield(batch:[Query.Iteration.BatchElement]) throws
 
@@ -75,7 +75,7 @@ extension Mongo.PipelineEndpoint
 }
 extension Mongo.PipelineEndpoint
 {
-    /// A shorthand for calling ``pull(from:with:)`` with the ``DatabaseModel/id`` and
+    /// A shorthand for calling ``pull(from:with:) [1U373]`` with the ``DatabaseModel/id`` and
     /// ``DatabaseModel/session`` of the given `database`.
     @inlinable public mutating
     func pull(from database:some Mongo.DatabaseModel) async throws
