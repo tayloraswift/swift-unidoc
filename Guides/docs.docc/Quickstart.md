@@ -5,24 +5,57 @@ This guide walks through how to use the `unidoc preview` tool to preview documen
 In this guide, you will:
 
 1.  Launch and initialize a `mongod` instance in a Docker container,
-2.  Build and run an instance of `unidoc preview` on the macOS host,
-3.  Build the `unidoc local` tool,
+2.  Build or install Unidoc on the macOS host,
+3.  Run an instance of `unidoc preview` on the macOS host,
 4.  Generate documentation for the standard library, and
 5.  Generate documentation for two SwiftPM packages, one of which depends on the other.
 
-Before you begin, clone the Unidoc repository and navigate to the root of the repository:
-
-```bash
-git clone https://github.com/tayloraswift/swift-unidoc
-cd swift-unidoc
-```
 
 ## 1. Install Docker
 
 The easiest way by far to preview documentation locally is to use Docker. You can download Docker Desktop for macOS from the [official website](https://www.docker.com/products/docker-desktop).
 
 
-## 2. Launching a `mongod` instance
+## 2. Install Unidoc
+
+Today, there are two main ways to install Unidoc — building it from source or downloading a pre-built binary.
+
+### Downloading a pre-built binary
+
+Pre-built binaries are available for a limited set of platforms.
+
+| Platform | Download |
+|----------|----------|
+| macOS    | [`macOS-ARM64/unidoc.gz`](https://static.swiftinit.org/unidoc/0.19.0/macOS-ARM64/unidoc.gz) |
+| Linux    | [`Linux-X64/unidoc.gz`](https://static.swiftinit.org/unidoc/0.19.0/Linux-X64/unidoc.gz) |
+
+
+You can download and install the binary in your home directory like this:
+
+@Code(file: unidoc-install.sh, title: unidoc-install.sh)
+
+
+### Building Unidoc from source
+
+Unidoc is an ordinary SwiftPM executable product. You can build it for your macOS host like this:
+
+@Code(file: unidoc-from-source.sh, title: unidoc-from-source.sh)
+
+Please note that the executable as built by SwiftPM is named `unidoc-tools`, which you should rename to `unidoc` when installing it.
+
+
+>   Important:
+>   The rest of this guide assumes you have installed Unidoc somewhere on your macOS host that is visible in your `PATH` and allows you to invoke it as `unidoc`.
+
+
+## 3. Launching a `mongod` instance
+
+If you have not already done so, clone the Unidoc project and navigate to the root of the repository:
+
+```bash
+git clone https://github.com/tayloraswift/swift-unidoc
+cd swift-unidoc
+```
 
 Use Docker Compose to launch a `mongod` instance in a container. This container is named `unidoc-mongod-container`. It has persistent state which `mongod` stores in a directory called `.mongod` at the root of the repository.
 
@@ -46,10 +79,10 @@ docker exec -t unidoc-mongod-container /bin/mongosh --file /unidoc-rs-init.js
 
 ## 3. Running `unidoc preview`
 
-The `unidoc preview` tool is an ordinary SwiftPM executable product. You can build and run it directly from your macOS host like this:
+The `unidoc preview` tool is a simple web server that links and serves documentation for local Swift packages. Run it directly from your macOS host like this:
 
 ```bash
-swift run -c release unidoc-tools preview
+unidoc preview
 ```
 
 The `unidoc preview` tool will start a web server on [`http://localhost:8080`](http://localhost:8080).
@@ -62,7 +95,9 @@ The `unidoc preview` tool will start a web server on [`http://localhost:8080`](h
 
 Generate local documentation using the `unidoc local` subcommand. To start off, open a third terminal and generate the documentation for the standard library (`swift`).
 
-@Code(file: load-standard-library.sh, title: load-standard-library.sh)
+```bash
+unidoc local swift
+```
 
 You should be able to view the symbol graph and its documentation at [`http://localhost:8080/tags/swift`](http://localhost:8080/tags/swift).
 
@@ -84,7 +119,7 @@ cd -
 Generating documentation for a package is similar to generating documentation for the standard library, except you need to specify a search path to a directory containing the project. Because you downloaded the `swift-collections` repository to a sibling directory, you can use `..` for the search path.
 
 ```bash
-swift run -c release unidoc-tools local swift-collections -I ..
+unidoc local swift-collections -I ..
 ```
 
 You should be able to view the symbol graph and its documentation at [`http://localhost:8080/tags/swift-collections`](http://localhost:8080/tags/swift-collections).
@@ -99,7 +134,7 @@ Finally, let’s generate documentation for a package that depends on `swift-col
 cd ..
 git clone https://github.com/apple/swift-async-algorithms
 cd -
-swift run -c release unidoc-tools local swift-async-algorithms -I ..
+unidoc local swift-async-algorithms -I ..
 ```
 
 
