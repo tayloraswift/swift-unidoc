@@ -8,7 +8,7 @@ let package:Package = .init(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
-        .executable(name: "unidoc-tools", targets: ["unidoc-tools"]),
+        .executable(name: "unidoc", targets: ["unidoc-tools"]),
         .executable(name: "unidoc-publish", targets: ["unidoc-publish"]),
 
         .library(name: "guides", targets: ["guides"]),
@@ -70,7 +70,6 @@ let package:Package = .init(
 
         .library(name: "UCF", targets: ["UCF"]),
 
-        .library(name: "Unidoc", targets: ["Unidoc"]),
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
         .library(name: "UnidocAssets_System", targets: ["UnidocAssets_System"]),
