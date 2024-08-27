@@ -209,15 +209,8 @@ extension Unidoc.Client<HTTP.Client2>
                 }
                 if  let usr:FilePath.Directory = toolchain.usr
                 {
-                    let lib:FilePath.Directory = usr / "lib"
-
-                    arguments.append("--swift-runtime")
-                    arguments.append("\(lib)")
-
-                    let swift:FilePath.Directory = usr / "bin" / "swift"
-
-                    arguments.append("--swift")
-                    arguments.append("\(swift)")
+                    arguments.append("--swift-toolchain")
+                    arguments.append("\(usr)")
                 }
                 if  let sdk:SSGC.AppleSDK = toolchain.sdk
                 {
