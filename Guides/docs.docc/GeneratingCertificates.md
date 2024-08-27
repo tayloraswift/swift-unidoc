@@ -1,8 +1,10 @@
 # Generating TLS certificates
 
-To simplify the implementation and facilitate testing, Unidoc uses TLS (HTTPS) everywhere, even when running locally.
-
 For a seamless development experience, we recommend using [mkcert](https://github.com/FiloSottile/mkcert) to generate a local certificate authority (CA) for your development environment.
+
+>   Note:
+>   Most Unidoc users do not need to generate their own certificates. As of Unidoc 0.17.0, the preview server can run locally in insecure mode.
+
 
 ## Installing mkcert
 
