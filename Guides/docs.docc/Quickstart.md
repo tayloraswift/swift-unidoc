@@ -26,8 +26,8 @@ Pre-built binaries are available for a limited set of platforms.
 
 | Platform | Download |
 |----------|----------|
-| macOS    | [`macOS-ARM64/unidoc.gz`](https://static.swiftinit.org/unidoc/0.19.0/macOS-ARM64/unidoc.gz) |
-| Linux    | [`Linux-X64/unidoc.gz`](https://static.swiftinit.org/unidoc/0.19.0/Linux-X64/unidoc.gz) |
+| macOS    | [`macOS-ARM64/unidoc.tar.gz`](https://static.swiftinit.org/unidoc/0.19.0/macOS-ARM64/unidoc.tar.gz) |
+| Linux    | [`Linux-X64/unidoc.tar.gz`](https://static.swiftinit.org/unidoc/0.19.0/Linux-X64/unidoc.tar.gz) |
 
 
 You can download and install the binary in your home directory like this:
