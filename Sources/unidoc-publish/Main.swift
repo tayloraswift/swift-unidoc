@@ -54,13 +54,16 @@ extension AWS.S3.Client
         as path:String) async throws
     {
         let release:FilePath.Directory = scratch / "release"
-        let executable:FilePath = release / name
-        let compressed:FilePath = release / "\(name).gz"
+        let archive:FilePath = release / "\(name).tar.gz"
 
         print("Compressing \(name)...")
 
-        try SystemProcess.init(command: "gzip", "-kf", "\(executable)")()
-        let file:[UInt8] = try compressed.read()
+        try SystemProcess.init(command: "tar",
+            "--use-compress-program='gzip -9'",
+            "-C", "\(release)",
+            "-cf", "\(archive)",
+            name)()
+        let file:[UInt8] = try archive.read()
 
         try await self.connect
         {
@@ -72,7 +75,7 @@ extension AWS.S3.Client
             //  These could be big files, even compressed, so we need to increase the timeout.
             try await $0.put(object: object,
                 using: .standard,
-                path: "\(path).gz",
+                path: "\(path).tar.gz",
                 with: key,
                 timeout: .seconds(1200))
         }

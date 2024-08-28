@@ -26,8 +26,8 @@ Pre-built binaries are available for a limited set of platforms.
 
 | Platform | Download |
 |----------|----------|
-| macOS    | [`macOS-ARM64/unidoc.gz`](https://static.swiftinit.org/unidoc/0.19.0/macOS-ARM64/unidoc.gz) |
-| Linux    | [`Linux-X64/unidoc.gz`](https://static.swiftinit.org/unidoc/0.19.0/Linux-X64/unidoc.gz) |
+| macOS    | [`macOS-ARM64/unidoc.tar.gz`](https://static.swiftinit.org/unidoc/0.19.0/macOS-ARM64/unidoc.tar.gz) |
+| Linux    | [`Linux-X64/unidoc.tar.gz`](https://static.swiftinit.org/unidoc/0.19.0/Linux-X64/unidoc.tar.gz) |
 
 
 You can download and install the binary in your home directory like this:
@@ -41,8 +41,6 @@ Unidoc is an ordinary SwiftPM executable product. You can build it for your macO
 
 @Code(file: unidoc-from-source.sh, title: unidoc-from-source.sh)
 
-Please note that the executable as built by SwiftPM is named `unidoc-tools`, which you should rename to `unidoc` when installing it.
-
 
 >   Important:
 >   The rest of this guide assumes you have installed Unidoc somewhere on your macOS host that is visible in your `PATH` and allows you to invoke it as `unidoc`.
@@ -50,31 +48,17 @@ Please note that the executable as built by SwiftPM is named `unidoc-tools`, whi
 
 ## 3. Launching a `mongod` instance
 
-If you have not already done so, clone the Unidoc project and navigate to the root of the repository:
+Unidoc can configure a `mongod` instance for you through the `unidoc init` command. This tool takes a directory path as an argument, which it uses to persist the state of the database. In the example below, we will create the documentation database in a directory named `unidoc` in your home directory.
 
 ```bash
-git clone https://github.com/tayloraswift/swift-unidoc
-cd swift-unidoc
+unidoc init ~/unidoc
 ```
 
-Use Docker Compose to launch a `mongod` instance in a container. This container is named `unidoc-mongod-container`. It has persistent state which `mongod` stores in a directory called `.mongod` at the root of the repository.
-
-```bash
-docker compose -f Guides/docs.docc/local/docker-compose.yml up
-```
+Please note that this will start a Docker container that runs continuously in the background. Therefore, if you want to dismantle the database, you must stop the container before deleting the persistence directory, otherwise it may recreate some of the files you delete.
 
 @Image(source: "Docker Desktop.png", alt: "Docker Desktop") {
 >   You should see the `unidoc-mongod-container` running in the Docker Desktop GUI.
 }
-
-
-The container is home to a MongoDB [replica set](https://www.mongodb.com/docs/manual/reference/replica-configuration/) which you need to initialize.
-
-Open a new terminal and run the following command to initialize the replica set:
-
-```bash
-docker exec -t unidoc-mongod-container /bin/mongosh --file /unidoc-rs-init.js
-```
 
 
 ## 3. Running `unidoc preview`
