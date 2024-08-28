@@ -59,9 +59,10 @@ extension AWS.S3.Client
         print("Compressing \(name)...")
 
         try SystemProcess.init(command: "tar",
-            "--use-compress-program='gzip -9'",
+            //  Sadly, tar on macOS doesn’t support this option.
+            //  "--use-compress-program='gzip -9'",
             "-C", "\(release)",
-            "-cf", "\(archive)",
+            "-czf", "\(archive)",
             name)()
         let file:[UInt8] = try archive.read()
 
