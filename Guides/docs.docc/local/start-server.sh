@@ -1,2 +1,2 @@
 swift --version
-swift run -c release unidoc-tools preview
+swift run -c release unidoc preview
