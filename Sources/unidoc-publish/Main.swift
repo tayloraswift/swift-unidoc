@@ -6,6 +6,8 @@ import NIOSSL
 import S3
 import S3Client
 import System
+import Unidoc
+import UnidocAssets_System
 
 struct Main
 {
@@ -58,12 +60,31 @@ extension AWS.S3.Client
 
         print("Compressing \(name)...")
 
-        try SystemProcess.init(command: "tar",
-            //  Sadly, tar on macOS doesn’t support this option.
-            //  "--use-compress-program='gzip -9'",
-            "-C", "\(release)",
+        var arguments:[String] = [
             "-czf", "\(archive)",
-            name)()
+            "-C", ".",
+        ]
+
+        let assets:FilePath.Directory = "Assets"
+        for asset:Unidoc.Asset in [
+            .main_css,
+            .main_css_map,
+            .main_js,
+            .main_js_map,
+            .literata45_woff2,
+            .literata47_woff2,
+            .literata75_woff2,
+            .literata77_woff2
+        ]
+        {
+            arguments.append("\(assets.path.appending(asset.source))")
+        }
+        //  This needs to come after the `.` location, as each `-C` is relative to the last.
+        arguments.append("-C")
+        arguments.append("\(release)")
+        arguments.append(name)
+
+        try SystemProcess.init(command: "tar", arguments: arguments, echo: true)()
         let file:[UInt8] = try archive.read()
 
         try await self.connect
