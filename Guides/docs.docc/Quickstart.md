@@ -24,13 +24,13 @@ Today, there are two main ways to install Unidoc — building it from source or 
 
 Pre-built binaries are available for a limited set of platforms.
 
-| Platform | Download |
+| Platform | String |
 |----------|----------|
-| macOS    | [`macOS-ARM64/unidoc.tar.gz`](https://static.swiftinit.org/unidoc/0.19.0/macOS-ARM64/unidoc.tar.gz) |
-| Linux    | [`Linux-X64/unidoc.tar.gz`](https://static.swiftinit.org/unidoc/0.19.0/Linux-X64/unidoc.tar.gz) |
+| macOS    | `macOS-ARM64` |
+| Linux    | `Linux-X64` |
 
 
-You can download and install the binary in your home directory like this:
+You can download and install the binary under `/usr/local/bin` like this:
 
 @Code(file: unidoc-install.sh, title: unidoc-install.sh)
 
@@ -40,10 +40,6 @@ You can download and install the binary in your home directory like this:
 Unidoc is an ordinary SwiftPM executable product. You can build it for your macOS host like this:
 
 @Code(file: unidoc-from-source.sh, title: unidoc-from-source.sh)
-
-
->   Important:
->   The rest of this guide assumes you have installed Unidoc somewhere on your macOS host that is visible in your `PATH` and allows you to invoke it as `unidoc`.
 
 
 ## 3. Launching a `mongod` instance
@@ -63,13 +59,15 @@ Please note that this will start a Docker container that runs continuously in th
 
 ## 3. Running `unidoc preview`
 
-The `unidoc preview` tool is a simple web server that links and serves documentation for local Swift packages. Run it directly from your macOS host like this:
+The `unidoc preview` tool is a simple web server that links and serves documentation for local Swift packages. Run it directly from the host like this:
 
 ```bash
 unidoc preview
 ```
 
 The `unidoc preview` tool will start a web server on [`http://localhost:8080`](http://localhost:8080).
+
+Please note that to serve the necessary CSS and JavaScript the server expects to find the `Assets` directory in the current working directory. These resources are included in the `unidoc.tar.gz` archives, and if built from source, they are also available in the `swift-unidoc` repository.
 
 @Image(source: "Start page.png", alt: "Start page") {
 >   The `unidoc preview` start page.
