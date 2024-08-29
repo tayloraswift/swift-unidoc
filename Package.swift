@@ -139,6 +139,7 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "System_ArgumentParser"),
                 .target(name: "S3Client"),
+                .target(name: "UnidocAssets_System"),
             ]),
 
 
