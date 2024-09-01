@@ -2,11 +2,11 @@ import SymbolGraphParts
 
 extension SymbolRelationship
 {
-    func `do`(_ body:(Self) throws -> Void) rethrows
+    func `do`<T>(_ body:(Self) throws -> T) rethrows -> T
     {
         do
         {
-            try body(self)
+            return try body(self)
         }
         catch let error
         {
