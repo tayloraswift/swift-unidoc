@@ -32,7 +32,7 @@ extension Unidoc.Linker
         var peers:[Int32: Unidoc.Group]
 
         private
-        var next:Next
+        var next:Unidoc.LinkerTables.Next
 
         private(set)
         var extensions:Unidoc.Linker.Table<Unidoc.Extension>
