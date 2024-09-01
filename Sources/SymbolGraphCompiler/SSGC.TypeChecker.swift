@@ -138,26 +138,42 @@ extension SSGC.TypeChecker
         }
 
         //  Pass II. Populate protocol conformance tables and nesting relationships.
-        for part:SSGC.SymbolDump in culture.symbols
+        let typesConformed:Set<SSGC.DeclObject> = try culture.symbols.reduce(into: [])
         {
-            for conformance:Symbol.ConformanceRelationship in part.conformances
+            for conformance:Symbol.ConformanceRelationship in $1.conformances
             {
-                try conformance.do { try self.insert($0, by: id) }
+                let typeConformed:SSGC.DeclObject? = try conformance.do
+                {
+                    try self.collectConformance($0, by: id)
+                }
+                if  let typeConformed:SSGC.DeclObject
+                {
+                    $0.insert(typeConformed)
+                }
             }
-            for inheritance:Symbol.InheritanceRelationship in part.inheritances
+
+            for inheritance:Symbol.InheritanceRelationship in $1.inheritances
             {
                 try inheritance.do { try self.insert($0, by: id) }
             }
 
-            for nesting:Symbol.RequirementRelationship in part.requirements
+            for nesting:Symbol.RequirementRelationship in $1.requirements
             {
                 try nesting.do { try self.assign($0) }
             }
-            for nesting:Symbol.MemberRelationship in part.memberships
+            for nesting:Symbol.MemberRelationship in $1.memberships
             {
                 try nesting.do { try self.assign($0, by: id) }
             }
         }
+
+        //  This uses information about the superforms of a type to simplify the constraints,
+        //  which is why it is done after the inheritance relationships are recorded.
+        for type:SSGC.DeclObject in typesConformed
+        {
+            try self.comptuteConformances(of: type, by: id)
+        }
+
         //  lib/SymbolGraphGen fails to emit a `memberOf` edge if the member is a default
         //  implementation of a protocol requirement. Because the requirement might be a
         //  requirement from a different protocol than the protocol containing the default
@@ -306,19 +322,18 @@ extension SSGC.TypeChecker
 extension SSGC.TypeChecker
 {
     private mutating
-    func insert(_ conformance:Symbol.ConformanceRelationship, by culture:Symbol.Module) throws
+    func collectConformance(_ conformance:Symbol.ConformanceRelationship,
+        by culture:Symbol.Module) throws -> SSGC.DeclObject?
     {
         guard
         let target:SSGC.DeclObject = self.declarations[visible: conformance.target]
         else
         {
-            return
+            return nil
         }
 
         let conditions:Set<GenericConstraint<Symbol.Decl>> = .init(conformance.conditions)
-
-        let typeExtension:SSGC.ExtensionObject
-        let typeConformed:SSGC.DeclObject
+        let conformer:SSGC.DeclObject
 
         switch conformance.source
         {
@@ -331,7 +346,7 @@ extension SSGC.TypeChecker
             let type:SSGC.DeclObject = self.declarations[visible: symbol]
             else
             {
-                return
+                return nil
             }
 
             if  let origin:Symbol.Decl = conformance.origin
@@ -346,35 +361,33 @@ extension SSGC.TypeChecker
                 try type.add(superform: Symbol.InheritanceRelationship.init(
                     by: type.id,
                     of: target.id))
-                return
+                return nil
             }
-            //  Generate an implicit, internal extension for this conformance,
-            //  if one does not already exist.
-            typeExtension = self.extensions[extending: type, where: conditions]
-            typeConformed = type
+
+            conformer = type
 
         case .block(let symbol):
             //  Look up the extension associated with this block name.
-            typeExtension = try self.extensions[named: symbol]
+            let named:SSGC.ExtensionObject = try self.extensions[named: symbol]
 
             guard
-            let type:SSGC.DeclObject = self.declarations[visible: typeExtension.extendee]
+            let type:SSGC.DeclObject = self.declarations[visible: named.extendee]
             else
             {
-                return
+                return nil
             }
 
-            typeConformed = type
+            conformer = type
 
-            guard typeExtension.conditions == conditions
+            guard named.conditions == conditions
             else
             {
-                throw SSGC.ExtensionSignatureError.init(expected: typeExtension.signature)
+                throw SSGC.ExtensionSignatureError.init(expected: named.signature)
             }
         }
 
-        typeConformed.conformances[target.id, default: []].insert(conditions)
-        typeExtension.add(conformance: target.id, by: culture)
+        conformer.conformanceStatements[target.id, default: []].insert(conditions)
+        return conformer
     }
 
     private mutating
@@ -397,7 +410,56 @@ extension SSGC.TypeChecker
             superform.kinks[is: .implemented] = true
         }
     }
+}
+extension SSGC.TypeChecker
+{
+    private mutating
+    func comptuteConformances(of type:SSGC.DeclObject, by culture:Symbol.Module) throws
+    {
+        for (conformance, overlapping):(Symbol.Decl, Set<Set<GenericConstraint<Symbol.Decl>>>)
+            in type.conformanceStatements
+        {
+            let canonical:Set<GenericConstraint<Symbol.Decl>>
+            do
+            {
+                canonical = try overlapping.simplified(with: self.declarations)
+            }
+            catch SSGC.ConstraintReductionError.chimaeric(let reduced, from: let lists)
+            {
+                throw AssertionError.init(message: """
+                    Failed to simplify constraints for conditional conformance \
+                    (\(conformance)) of '\(type.value.path)' because multiple conflicting \
+                    conformances unify to a heterogeneous set of constraints
 
+                    Declared constraints: \(lists)
+                    Simplified constraints: \(reduced)
+                    """)
+            }
+            catch SSGC.ConstraintReductionError.redundant(let reduced, from: let lists)
+            {
+                throw AssertionError.init(message: """
+                    Failed to simplify constraints for conditional conformance \
+                    (\(conformance)) of '\(type.value.path)' because at least one of the \
+                    constraint lists had redundancies within itself
+
+                    Declared constraints: \(lists)
+                    Simplified constraints: \(reduced)
+                    """)
+            }
+
+            type.conformances[conformance] = canonical
+            //  Generate an implicit, internal extension for this conformance,
+            //  if one does not already exist.
+            self.extensions[extending: type, where: canonical].add(conformance: conformance,
+                by: culture)
+        }
+
+        //  We don’t need this table anymore.
+        type.conformanceStatements = [:]
+    }
+}
+extension SSGC.TypeChecker
+{
     private mutating
     func insert(_ relationship:Symbol.FeatureRelationship, by culture:Symbol.Module) throws
     {
@@ -454,37 +516,8 @@ extension SSGC.TypeChecker
                     """)
             }
 
-            let conditions:Set<GenericConstraint<Symbol.Decl>>?
-            do
-            {
-                conditions = try heir.conformances[conformance]?.simplify(
-                    with: self.declarations)
-            }
-            catch SSGC.ConstraintReductionError.chimaeric(let reduced, from: let lists)
-            {
-                throw AssertionError.init(message: """
-                    Failed to simplify constraints for conditional conformance \
-                    (\(conformance)) of '\(heir.value.path)' because multiple conflicting \
-                    conformances unify to a heterogeneous set of constraints
-
-                    Declared constraints: \(lists)
-                    Simplified constraints: \(reduced)
-                    """)
-            }
-            catch SSGC.ConstraintReductionError.redundant(let reduced, from: let lists)
-            {
-                throw AssertionError.init(message: """
-                    Failed to simplify constraints for conditional conformance \
-                    (\(conformance)) of '\(heir.value.path)' because at least one of the \
-                    constraint lists had redundancies within itself
-
-                    Declared constraints: \(lists)
-                    Simplified constraints: \(reduced)
-                    """)
-            }
-
             guard
-            let conditions:Set<GenericConstraint<Symbol.Decl>>
+            let conditions:Set<GenericConstraint<Symbol.Decl>> = heir.conformances[conformance]
             else
             {
                 throw AssertionError.init(message: """
