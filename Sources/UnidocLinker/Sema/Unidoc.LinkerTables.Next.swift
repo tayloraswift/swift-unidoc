@@ -1,6 +1,6 @@
 import UnidocRecords
 
-extension Unidoc.Linker.Tables
+extension Unidoc.LinkerTables
 {
     /// A type that can generate ``Unidoc.Group`` identifiers.
     struct Next
@@ -17,7 +17,7 @@ extension Unidoc.Linker.Tables
         }
     }
 }
-extension Unidoc.Linker.Tables.Next
+extension Unidoc.LinkerTables.Next
 {
     mutating
     func callAsFunction(_ type:Unidoc.GroupType) -> Unidoc.Group
