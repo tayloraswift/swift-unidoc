@@ -75,7 +75,7 @@ extension Unidoc.Mesh.Interior
         let groups:Unidoc.Mesh.Groups
         let extensions:Unidoc.Linker.Table<Unidoc.Extension>
 
-        if  metadata.abi < .v(0, 10, 0)
+        if  metadata.abi < .v(0, 11, 0)
         {
             var tables:Unidoc.Linker.Tables = .init(context: consume linker)
 
