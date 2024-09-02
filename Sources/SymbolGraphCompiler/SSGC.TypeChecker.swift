@@ -171,7 +171,7 @@ extension SSGC.TypeChecker
         //  which is why it is done after the inheritance relationships are recorded.
         for type:SSGC.DeclObject in typesConformed
         {
-            try self.comptuteConformances(of: type, by: id)
+            try self.computeConformances(of: type, by: id)
         }
 
         //  lib/SymbolGraphGen fails to emit a `memberOf` edge if the member is a default
@@ -413,45 +413,75 @@ extension SSGC.TypeChecker
 }
 extension SSGC.TypeChecker
 {
-    private mutating
-    func comptuteConformances(of type:SSGC.DeclObject, by culture:Symbol.Module) throws
+    private
+    func computeConformance(where conditions:Set<Set<GenericConstraint<Symbol.Decl>>>,
+        to target:Symbol.Decl,
+        of type:SSGC.DeclObject) throws -> Set<GenericConstraint<Symbol.Decl>>
     {
-        for (conformance, overlapping):(Symbol.Decl, Set<Set<GenericConstraint<Symbol.Decl>>>)
+        do
+        {
+            return try conditions.simplified(with: self.declarations)
+        }
+        catch SSGC.ConstraintReductionError.chimaeric(let reduced, from: let lists)
+        {
+            throw AssertionError.init(message: """
+                Failed to simplify constraints for conditional conformance \
+                (\(target)) of '\(type.value.path)' because multiple conflicting \
+                conformances unify to a heterogeneous set of constraints
+
+                Declared constraints: \(lists)
+                Simplified constraints: \(reduced)
+                """)
+        }
+        catch SSGC.ConstraintReductionError.redundant(let reduced, from: let lists)
+        {
+            throw AssertionError.init(message: """
+                Failed to simplify constraints for conditional conformance \
+                (\(target)) of '\(type.value.path)' because at least one of the \
+                constraint lists had redundancies within itself
+
+                Declared constraints: \(lists)
+                Simplified constraints: \(reduced)
+                """)
+        }
+    }
+    private mutating
+    func computeConformances(of type:SSGC.DeclObject, by culture:Symbol.Module) throws
+    {
+        for (target, overlapping):(Symbol.Decl, Set<Set<GenericConstraint<Symbol.Decl>>>)
             in type.conformanceStatements
         {
-            let canonical:Set<GenericConstraint<Symbol.Decl>>
-            do
+            try
             {
-                canonical = try overlapping.simplified(with: self.declarations)
-            }
-            catch SSGC.ConstraintReductionError.chimaeric(let reduced, from: let lists)
-            {
-                throw AssertionError.init(message: """
-                    Failed to simplify constraints for conditional conformance \
-                    (\(conformance)) of '\(type.value.path)' because multiple conflicting \
-                    conformances unify to a heterogeneous set of constraints
+                //  A Swift type may only conform to a protocol once, even with different
+                //  conditional constraints.
+                //
+                //  Exiting here not only prevents us from doing unnecessary simplification
+                //  work, but also prevents us from accidentally capturing another module’s
+                //  conformances as our own.
+                //
+                //  For example: `Foundation` conforms `Array` to `Sequence` where `Element`
+                //  is `UInt8`. Because the constraints are different (and tighter) than the
+                //  original conformance, our regular de-duplication logic would not flag this
+                //  as a duplicate were it not for this guard.
+                guard case nil = $0
+                else
+                {
+                    return
+                }
 
-                    Declared constraints: \(lists)
-                    Simplified constraints: \(reduced)
-                    """)
-            }
-            catch SSGC.ConstraintReductionError.redundant(let reduced, from: let lists)
-            {
-                throw AssertionError.init(message: """
-                    Failed to simplify constraints for conditional conformance \
-                    (\(conformance)) of '\(type.value.path)' because at least one of the \
-                    constraint lists had redundancies within itself
+                let canonical:Set<GenericConstraint<Symbol.Decl>> = try self.computeConformance(
+                    where: overlapping,
+                    to: target,
+                    of: type)
 
-                    Declared constraints: \(lists)
-                    Simplified constraints: \(reduced)
-                    """)
-            }
+                //  Generate an implicit, internal extension for this conformance,
+                //  if one does not already exist.
+                self.extensions[extending: type, where: canonical].add(conformance: target,
+                    by: culture)
+                $0 = canonical
 
-            type.conformances[conformance] = canonical
-            //  Generate an implicit, internal extension for this conformance,
-            //  if one does not already exist.
-            self.extensions[extending: type, where: canonical].add(conformance: conformance,
-                by: culture)
+            } (&type.conformances[target])
         }
 
         //  We don’t need this table anymore.
