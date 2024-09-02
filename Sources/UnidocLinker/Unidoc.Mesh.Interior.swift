@@ -66,18 +66,48 @@ extension Unidoc.Mesh.Interior
                 symbolsLinked: symbols.linked),
             packages: pins.compactMap(\.?.package))
 
-        var tables:Unidoc.Linker.Tables = .init(context: consume linker)
+        let conformances:Unidoc.Linker.Table<Unidoc.Conformers>
+        let products:[Unidoc.ProductVertex]
+        let cultures:[Unidoc.CultureVertex]
 
-        let conformances:Unidoc.Linker.Table<Unidoc.Conformers> = tables.linkConformingTypes()
-        let products:[Unidoc.ProductVertex] = tables.linkProducts()
-        let cultures:[Unidoc.CultureVertex] = tables.linkCultures()
+        let articles:[Unidoc.ArticleVertex]
+        let decls:[Unidoc.DeclVertex]
+        let groups:Unidoc.Mesh.Groups
+        let extensions:Unidoc.Linker.Table<Unidoc.Extension>
 
-        let articles:[Unidoc.ArticleVertex] = tables.articles
-        let decls:[Unidoc.DeclVertex] = tables.decls
-        let groups:Unidoc.Mesh.Groups = tables.groups
-        let extensions:Unidoc.Linker.Table<Unidoc.Extension> = tables.extensions
+        if  metadata.abi < .v(0, 11, 0)
+        {
+            var tables:Unidoc.Linker.Tables = .init(context: consume linker)
 
-        linker = (consume tables).context
+            conformances = tables.linkConformingTypes()
+            products = tables.linkProducts()
+            cultures = tables.linkCultures()
+            articles = tables.articles
+            decls = tables.decls
+            groups = tables.groups
+            extensions = tables.extensions
+
+            linker = tables.context
+        }
+        else
+        {
+            var tables:Unidoc.LinkerTables = .init(linker: consume linker)
+
+            conformances = tables.linkConformingTypes()
+            products = tables.linkProducts()
+
+            tables.linkCurations()
+            tables.linkIntrinsics()
+
+            decls = tables.linkDecls()
+            articles = tables.linkArticles()
+            cultures = tables.linkCultures()
+
+            extensions = tables.extensions
+            groups = tables.groups
+
+            linker = tables.linker
+        }
 
         self.init(around: landingVertex,
             conformances: conformances,

@@ -27,6 +27,13 @@ extension Unidoc.Linker.Table:ExpressibleByDictionaryLiteral
         self.init(table: [:])
     }
 }
+extension Unidoc.Linker.Table:Sequence
+{
+    func makeIterator() -> Dictionary<Group.Signature, Group>.Iterator
+    {
+        self.table.makeIterator()
+    }
+}
 extension Unidoc.Linker.Table
 {
     consuming
@@ -79,6 +86,69 @@ extension Unidoc.Linker.Table<Unidoc.Conformers>
     }
 }
 
+extension Unidoc.Linker.Table<Unidoc.Extension>
+{
+    mutating
+    func add(extensions:[SymbolGraph.Extension],
+        extending extendee:Unidoc.Scalar,
+        context:inout Unidoc.Linker)
+    {
+        for `extension`:SymbolGraph.Extension in extensions
+        {
+            let conditions:Unidoc.ExtensionConditions = .init(
+                constraints: `extension`.conditions.map
+                {
+                    $0.map { context.current.scalars.decls[$0] }
+                },
+                culture: `extension`.culture)
+            ;
+            //  It’s possible for two locally-disjoint extensions to coalesce
+            //  into a single global extension due to failure to link scalars.
+            {
+                for local:Int32 in `extension`.conformances
+                {
+                    if  let id:Unidoc.Scalar = context.current.scalars.decls[local]
+                    {
+                        $0.conformances.append(id)
+                    }
+                }
+                //  The feature might have been declared in a different package!
+                //  This started happening when SSGC stopped emitting unqualified features
+                //  as this was previously handled in ``linkCultures``.
+                for local:Int32 in `extension`.features
+                {
+                    if  let id:Unidoc.Scalar = context.current.scalars.decls[local]
+                    {
+                        $0.features.append(id)
+                    }
+                }
+                for local:Int32 in `extension`.nested
+                {
+                    if  let id:Unidoc.Scalar = context.current.scalars.decls[local]
+                    {
+                        $0.nested.append(id)
+                    }
+                }
+
+                guard
+                let article:SymbolGraph.Article = `extension`.article
+                else
+                {
+                    return
+                }
+                guard case (nil, nil) = ($0.overview, $0.details)
+                else
+                {
+                    context.diagnostics[nil] = DroppedPassagesError.fromExtension($0.id,
+                        of: extendee)
+                    return
+                }
+
+                ($0.overview, $0.details) = context.link(article: article)
+            } (&self[.extends(extendee, where: conditions)])
+        }
+    }
+}
 extension Unidoc.Linker.Table<Unidoc.Extension>
 {
     /// Creates extension records from the given symbol graph extensions, performing any

@@ -27,7 +27,8 @@ extension SSGC
         ///
         /// In the example above, the second conformance likely originated from a
         /// `Foo<T>:Hashable where T:Hashable` conformance.
-        var conformances:[Symbol.Decl: Set<Set<GenericConstraint<Symbol.Decl>>>]
+        var conformanceStatements:[Symbol.Decl: Set<Set<GenericConstraint<Symbol.Decl>>>]
+        var conformances:[Symbol.Decl: Set<GenericConstraint<Symbol.Decl>>]
 
         /// The type of the superforms tracked by ``\.value.superforms``.
         var superforms:(any SuperformRelationship.Type)?
@@ -54,6 +55,7 @@ extension SSGC
             self.culture = culture
             self.access = access
 
+            self.conformanceStatements = [:]
             self.conformances = [:]
             self.superforms = nil
             self.scopes = []
@@ -61,6 +63,14 @@ extension SSGC
             self.value = value
         }
     }
+}
+extension SSGC.DeclObject:Equatable
+{
+    static func == (a:SSGC.DeclObject, b:SSGC.DeclObject) -> Bool { a === b }
+}
+extension SSGC.DeclObject:Hashable
+{
+    func hash(into hasher:inout Hasher) { hasher.combine(ObjectIdentifier.init(self)) }
 }
 extension SSGC.DeclObject
 {

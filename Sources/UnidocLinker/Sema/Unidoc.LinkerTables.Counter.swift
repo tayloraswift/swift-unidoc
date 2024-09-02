@@ -1,4 +1,4 @@
-extension Unidoc.Linker.Tables
+extension Unidoc.LinkerTables
 {
     struct Counter
     {
@@ -11,7 +11,7 @@ extension Unidoc.Linker.Tables
         }
     }
 }
-extension Unidoc.Linker.Tables.Counter
+extension Unidoc.LinkerTables.Counter
 {
     mutating
     func callAsFunction() -> Int
