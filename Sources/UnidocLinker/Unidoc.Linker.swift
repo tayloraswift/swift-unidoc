@@ -173,6 +173,11 @@ extension Unidoc.Linker
         self.current.id.package == package ?
         self.current : self.byPackage[package]
     }
+
+    subscript(decl id:Unidoc.Scalar) -> SymbolGraph.Decl?
+    {
+        self[id.package]?.decls[id.citizen]?.decl
+    }
 }
 extension Unidoc.Linker
 {
@@ -531,6 +536,84 @@ extension Unidoc.Linker
             self = (consume resolver).context
             throw error
         }
+    }
+}
+extension Unidoc.Linker
+{
+    mutating
+    func link(article:SymbolGraph.Article) -> (Unidoc.Passage?, Unidoc.Passage?)
+    {
+        let outlines:[Unidoc.Outline] = article.outlines.map { self.expand($0) }
+
+        let overview:Unidoc.Passage? = article.overview.isEmpty ? nil : .init(
+            outlines: .init(outlines[..<article.fold]),
+            markdown: article.overview)
+        let details:Unidoc.Passage? = article.details.isEmpty ? nil : .init(
+            outlines: .init(outlines[article.fold...]),
+            markdown: article.details)
+
+        return (overview, details)
+    }
+
+    private mutating
+    func expand(_ outline:SymbolGraph.Outline) -> Unidoc.Outline
+    {
+        switch outline
+        {
+        case .fragment(let fragment):
+            return .fragment(fragment)
+
+        case .location(let location):
+            //  File references never cross packages, so this is basically a no-op.
+            let line:Int? = location.position == .zero ? nil : location.position.line
+            return .bare(line: line, self.current.id + location.file)
+
+        case .symbol(let id):
+            guard let id:Unidoc.Scalar = self.current.scalars.decls[id]
+            else
+            {
+                return .fallback(nil)
+            }
+
+            return .bare(line: nil, id)
+
+        case .vertex(let id, text: let text):
+            if  case SymbolGraph.Plane.decl? = .of(id),
+                let id:Unidoc.Scalar = self.current.scalars.decls[id]
+            {
+                return .path(text, self.expand(id, to: text.words))
+            }
+            else if
+                let namespace:Int = id / .module,
+                let id:Unidoc.Scalar = self.current.scalars.modules[namespace]
+            {
+                return .path(text, [id])
+            }
+            else
+            {
+                return .path(text, [self.current.id + id])
+            }
+
+        case .vector(let feature, self: let heir, text: let text):
+            //  Only references to declarations can generate vectors. So we can assume
+            //  both components are declaration scalars.
+            if  let feature:Unidoc.Scalar = self.current.scalars.decls[feature],
+                let heir:Unidoc.Scalar = self.current.scalars.decls[heir]
+            {
+                return .path(text, self.expand((heir, feature), to: text.words))
+            }
+
+        case .unresolved(let unresolved):
+            //  In ABI version 0.10 and newer, we should only ever see URLs here.
+            switch unresolved.type
+            {
+            case .doc:  return .fallback("<unreachable>")
+            case .ucf:  return .fallback("<unreachable>")
+            case .url:  return .url(sanitizing: unresolved.link)
+            }
+        }
+
+        return .fallback("<unavailable>")
     }
 }
 extension Unidoc.Linker

@@ -3,32 +3,6 @@ import Symbols
 
 extension Set<Set<GenericConstraint<Symbol.Decl>>>
 {
-    mutating
-    func simplify(
-        with declarations:SSGC.Declarations) throws -> Set<GenericConstraint<Symbol.Decl>>
-    {
-        guard
-        var first:Set<GenericConstraint<Symbol.Decl>> = self.first
-        else
-        {
-            return []
-        }
-
-        if  self.count == 1
-        {
-            return first
-        }
-        else
-        {
-            first = try self.simplified(with: declarations)
-        }
-
-        //  Cache the simplified constraints so that the next query is faster.
-        self = [first]
-        return first
-    }
-
-    private
     func simplified(
         with declarations:SSGC.Declarations) throws -> Set<GenericConstraint<Symbol.Decl>>
     {
