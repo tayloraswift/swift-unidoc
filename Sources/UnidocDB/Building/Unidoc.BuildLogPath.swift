@@ -29,7 +29,7 @@ extension Unidoc.BuildLogPath
         //  As this is public-facing, we want it to be at least somewhat human-readable.
         """
         logs/\
-        \(self.id.instant.timestamp?.date.description ?? "0000-00-00")/\
+        \(self.id.date.timestamp?.date.description ?? "0000-00-00")/\
         \(self.id.edition.package)/\
         \(self.id.edition.version).\(self.type.name).log
         """

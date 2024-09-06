@@ -143,11 +143,14 @@ extension Unidoc.DB.PendingBuilds
             upserting: id,
             returning: .new)
         {
+            let now:UnixMillisecond = .now()
+
             $0[.setOnInsert] = Unidoc.PendingBuild.init(id: id,
-                enqueued: UnixMillisecond.now(),
+                enqueued: now,
                 launched: nil,
                 assignee: nil,
                 stage: nil,
+                date: now,
                 name: name)
         }
         return pendingBuild

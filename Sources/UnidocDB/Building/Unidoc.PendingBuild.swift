@@ -23,6 +23,9 @@ extension Unidoc
         public
         var stage:BuildStage?
 
+        /// This is used to identify the build when it completes.
+        public
+        let date:UnixMillisecond
         /// Used for display purposes only.
         public
         let name:Symbol.PackageAtRef
@@ -33,6 +36,7 @@ extension Unidoc
             launched:UnixMillisecond?,
             assignee:Account?,
             stage:BuildStage?,
+            date:UnixMillisecond,
             name:Symbol.PackageAtRef)
         {
             self.id = id
@@ -40,6 +44,7 @@ extension Unidoc
             self.launched = launched
             self.assignee = assignee
             self.stage = stage
+            self.date = date
             self.name = name
         }
     }
@@ -54,6 +59,7 @@ extension Unidoc.PendingBuild:Mongo.MasterCodingModel
         case launched = "L"
         case assignee = "A"
         case stage = "S"
+        case date = "T"
         case name = "N"
 
         case package = "p"
@@ -69,6 +75,7 @@ extension Unidoc.PendingBuild:BSONDocumentEncodable
         bson[.launched] = self.launched
         bson[.assignee] = self.assignee
         bson[.stage] = self.stage
+        bson[.date] = self.date
         bson[.name] = self.name
 
         bson[.package] = self.id.package
@@ -84,6 +91,7 @@ extension Unidoc.PendingBuild:BSONDocumentDecodable
             launched: try bson[.launched]?.decode(),
             assignee: try bson[.assignee]?.decode(),
             stage: try bson[.stage]?.decode(),
+            date: try bson[.date].decode(),
             name: try bson[.name].decode())
     }
 }

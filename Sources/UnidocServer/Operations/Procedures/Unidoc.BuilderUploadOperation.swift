@@ -58,7 +58,9 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
             ///
             /// Log secrecy is determined when the build starts, not when it finishes, to
             /// avoid leaking secrets if a repository is made public while a build is running.
-            var complete:Unidoc.CompleteBuild = .init(edition: build.edition,
+            var complete:Unidoc.CompleteBuild = .init(id: .init(
+                    edition: pending.id,
+                    date: pending.date),
                 launched: launched,
                 finished: finished,
                 failure: build.failure,
