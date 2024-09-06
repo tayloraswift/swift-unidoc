@@ -236,7 +236,7 @@ extension Unidoc.Router
         case .render:       return self.render()
         case .robots_txt:   return self.robots()
         case .rules:        return self.rules()
-        case .runs:         return nil // Unimplemented.
+        case .runs:         return self.runs()
         case .sitemap_xml:  return self.sitemap()
         case .sitemaps:     return self.sitemaps()
         case .stats:        return self.stats()
@@ -1073,7 +1073,7 @@ extension Unidoc.Router
     private mutating
     func consumers() -> Unidoc.AnyOperation?
     {
-        guard let symbol:Symbol.Package = self.descend()
+        guard let package:Symbol.Package = self.descend()
         else
         {
             return nil
@@ -1081,7 +1081,28 @@ extension Unidoc.Router
 
         let parameters:Unidoc.PipelineParameters = .init(self.query)
         return .explainable(Unidoc.ConsumersEndpoint.init(query: .init(
-                symbol: symbol,
+                symbol: package,
+                limit: 20,
+                page: parameters.page ?? 0,
+                as: self.authorization.account)),
+            parameters: parameters,
+            etag: self.etag)
+    }
+
+    private mutating
+    func runs() -> Unidoc.AnyOperation?
+    {
+        guard
+        let package:Symbol.Package = self.descend()
+        else
+        {
+            return nil
+        }
+
+        let parameters:Unidoc.PipelineParameters = .init(self.query)
+
+        return .explainable(Unidoc.CompleteBuildsEndpoint.init(query: .init(
+                symbol: package,
                 limit: 20,
                 page: parameters.page ?? 0,
                 as: self.authorization.account)),

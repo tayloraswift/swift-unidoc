@@ -13,18 +13,21 @@ extension Unidoc
         let package:PackageMetadata
         private
         let content:Paginated<Table>
+        private
+        let name:String
 
-        init(location:URI, package:PackageMetadata, content:Paginated<Table>)
+        init(location:URI, package:PackageMetadata, content:Paginated<Table>, name:String)
         {
             self.location = location
             self.package = package
             self.content = content
+            self.name = name
         }
     }
 }
 extension Unidoc.PackageCursorPage:Unidoc.RenderablePage
 {
-    var title:String { "Consumers · \(self.package.symbol)" }
+    var title:String { "\(self.name) · \(self.package.symbol)" }
 }
 extension Unidoc.PackageCursorPage:Unidoc.StaticPage
 {
