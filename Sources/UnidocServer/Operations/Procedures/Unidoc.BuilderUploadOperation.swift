@@ -51,12 +51,20 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
             let duration:Seconds = .seconds(build.seconds)
             let finished:UnixMillisecond = launched.advanced(by: .init(duration))
 
+            /// The logs are secret if the builder indicated that they are.
+            ///
+            /// Log secrecy is on a per-build basis, so that repositories can be made public
+            /// without accidentally exposing sensitive logs from the past.
+            ///
+            /// Log secrecy is determined when the build starts, not when it finishes, to
+            /// avoid leaking secrets if a repository is made public while a build is running.
             var complete:Unidoc.CompleteBuild = .init(edition: build.edition,
                 launched: launched,
                 finished: finished,
                 failure: build.failure,
                 name: pending.name,
-                logs: [])
+                logs: [],
+                logsAreSecret: build.logsAreSecret)
 
             complete.logs = try await build.export(as: complete.id, from: server)
 

@@ -45,7 +45,6 @@ extension Unidoc.CompleteBuildsTable:HTML.OutputStreamable
                 $0[.th] = "Run time"
                 $0[.th] = "Ref"
                 $0[.th] = "Status"
-                $0[.th] = "Logs"
             }
         }
 
@@ -66,49 +65,50 @@ extension Unidoc.CompleteBuildsTable:HTML.OutputStreamable
                     }
 
                     $0[.td] = row.name.ref
-
-                    switch row.failure
+                    $0[.td, { $0.class = "status"}]
                     {
-                    case nil:
-                        $0[.td] = "OK"
+                        switch row.failure
+                        {
+                        case nil:
+                            $0[.div] = "OK"
 
-                    case .killed?:
-                        $0[.td] = "Killed"
+                        case .killed?:
+                            $0[.div] = "Killed"
 
-                    case .noValidVersion?:
-                        $0[.td] = "No Valid Version"
+                        case .noValidVersion?:
+                            $0[.div] = "No Valid Version"
 
-                    case .failedToCloneRepository?:
-                        $0[.td] = "Failed to Clone Repo"
+                        case .failedToCloneRepository?:
+                            $0[.div] = "Failed to Clone Repo"
 
-                    case .failedToReadManifest?:
-                        $0[.td] = "Failed to Read Root Manifest"
+                        case .failedToReadManifest?:
+                            $0[.div] = "Failed to Read Root Manifest"
 
-                    case .failedToReadManifestForDependency?:
-                        $0[.td] = "Failed to Read Dependency Manifest"
+                        case .failedToReadManifestForDependency?:
+                            $0[.div] = "Failed to Read Dependency Manifest"
 
-                    case .failedToResolveDependencies?:
-                        $0[.td] = "Failed to Resolve Dependencies"
+                        case .failedToResolveDependencies?:
+                            $0[.div] = "Failed to Resolve Dependencies"
 
-                    case .failedToBuild?:
-                        $0[.td] = "Failed to Build Package"
+                        case .failedToBuild?:
+                            $0[.div] = "Failed to Build Package"
 
-                    case .failedToExtractSymbolGraph?:
-                        $0[.td] = "Failed to Extract Symbol Graph"
+                        case .failedToExtractSymbolGraph?:
+                            $0[.div] = "Failed to Extract Symbol Graph"
 
-                    case .failedToLoadSymbolGraph?:
-                        $0[.td] = "Failed to Load Symbol Graph"
+                        case .failedToLoadSymbolGraph?:
+                            $0[.div] = "Failed to Load Symbol Graph"
 
-                    case .failedToLinkSymbolGraph?:
-                        $0[.td] = "Failed to Link Symbol Graph"
+                        case .failedToLinkSymbolGraph?:
+                            $0[.div] = "Failed to Link Symbol Graph"
 
-                    case .failedForUnknownReason?:
-                        $0[.td] = "Failed for Unknown Reason"
-                    }
+                        case .failedForUnknownReason?:
+                            $0[.div] = "Failed for Unknown Reason"
+                        }
 
-                    $0[.td]
-                    {
-                        if  row.logs.isEmpty
+                        //  You need to be logged in to view build logs.
+                        guard case _? = self.view.global
+                        else
                         {
                             return
                         }
@@ -118,6 +118,17 @@ extension Unidoc.CompleteBuildsTable:HTML.OutputStreamable
                             $0[.button] = "•••"
                             $0[.ul]
                             {
+                                if  row.logs.isEmpty
+                                {
+                                    $0[.li] = "No logs available"
+                                }
+                                if  row.logsAreSecret, !self.view.editor
+                                {
+                                    $0[.li] = """
+                                    You are not authorized to view logs from this run.
+                                    """
+                                }
+
                                 for log:Unidoc.BuildLogType in row.logs
                                 {
                                     $0[.li]

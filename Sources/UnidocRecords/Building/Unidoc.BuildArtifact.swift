@@ -14,17 +14,21 @@ extension Unidoc
         var seconds:Int64
         public
         var logs:[BuildLog]
+        public
+        var logsAreSecret:Bool
 
         @inlinable public
         init(edition:Edition,
             outcome:Result<Snapshot, BuildFailure>,
             seconds:Int64 = 0,
-            logs:[BuildLog] = [])
+            logs:[BuildLog] = [],
+            logsAreSecret:Bool = false)
         {
             self.edition = edition
             self.seconds = seconds
             self.outcome = outcome
             self.logs = logs
+            self.logsAreSecret = logsAreSecret
         }
     }
 }
@@ -50,6 +54,7 @@ extension Unidoc.BuildArtifact
         case failure = "F"
         case seconds = "D"
         case logs = "L"
+        case logsAreSecret = "A"
     }
 }
 extension Unidoc.BuildArtifact:BSONDocumentEncodable
@@ -67,6 +72,7 @@ extension Unidoc.BuildArtifact:BSONDocumentEncodable
 
         bson[.seconds] = self.seconds
         bson[.logs] = self.logs.isEmpty ? nil : self.logs
+        bson[.logsAreSecret] = self.logsAreSecret
     }
 }
 extension Unidoc.BuildArtifact:BSONDocumentDecodable
@@ -89,6 +95,7 @@ extension Unidoc.BuildArtifact:BSONDocumentDecodable
             edition: try bson[.edition].decode(),
             outcome: outcome,
             seconds: try bson[.seconds].decode(),
-            logs: try bson[.logs]?.decode() ?? [])
+            logs: try bson[.logs]?.decode() ?? [],
+            logsAreSecret: try bson[.logsAreSecret].decode())
     }
 }
