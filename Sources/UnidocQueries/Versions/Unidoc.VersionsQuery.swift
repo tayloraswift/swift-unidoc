@@ -19,6 +19,8 @@ extension Unidoc
         public
         let limitDependents:Int
         public
+        let limitBuilds:Int
+        public
         let user:Account?
 
         @inlinable public
@@ -26,12 +28,14 @@ extension Unidoc
             limitTags:Int,
             limitBranches:Int = 32,
             limitDependents:Int = 32,
+            limitBuilds:Int = 8,
             as user:Account? = nil)
         {
             self.symbol = symbol
             self.limitTags = limitTags
             self.limitBranches = limitBranches
             self.limitDependents = limitDependents
+            self.limitBuilds = limitBuilds
             self.user = user
         }
     }
@@ -71,10 +75,6 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             from: Self.target,
             into: Output[.branches])
 
-        pipeline.loadDependents(limit: self.limitDependents,
-            from: Self.target,
-            into: Output[.dependents])
-
         //  Concatenate the two lists.
         pipeline[stage: .set, using: Output.CodingKey.self]
         {
@@ -99,13 +99,23 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
             $0[.aliases] { $0[.map] = aliases.map { $0[.id] } }
         }
 
-        //  Lookup the associated build.
+        Unidoc.ConsumersPageSegment.bridge(pipeline: &pipeline,
+            limit: self.limitDependents,
+            from: Self.target,
+            into: Output[.dependents])
+
+        Unidoc.CompleteBuildsPageSegment.bridge(pipeline: &pipeline,
+            limit: self.limitBuilds,
+            from: Self.target,
+            into: Output[.recentBuilds])
+
+        //  Lookup any queued or in-progress builds.
         pipeline[stage: .lookup]
         {
-            $0[.from] = Unidoc.DB.PackageBuilds.name
+            $0[.from] = Unidoc.DB.PendingBuilds.name
             $0[.localField] = Self.target / Unidoc.PackageMetadata[.id]
-            $0[.foreignField] = Unidoc.BuildMetadata[.id]
-            $0[.as] = Output[.build]
+            $0[.foreignField] = Unidoc.PendingBuild[.package]
+            $0[.as] = Output[.pendingBuilds]
         }
         //  Lookup the associated realm.
         pipeline[stage: .lookup]
@@ -127,7 +137,6 @@ extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
         //  Unbox single-element arrays.
         pipeline[stage: .set, using: Output.CodingKey.self]
         {
-            $0[.build] { $0[.first] = Output[.build] }
             $0[.realm] { $0[.first] = Output[.realm] }
             $0[.ticket] { $0[.first] = Output[.ticket] }
         }

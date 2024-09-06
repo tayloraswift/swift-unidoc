@@ -9,16 +9,16 @@ extension Unidoc
     struct PackageBuildOperation:MeteredOperation
     {
         let account:Account
-        let action:Action
-        let redirect:Symbol.Package
+        let symbol:Symbol.PackageAtRef
+        let action:Unidoc.BuildForm.Action
 
         var rights:Unidoc.UserRights
 
-        init(account:Account, action:Action, redirect:Symbol.Package)
+        init(account:Account, symbol:Symbol.PackageAtRef, action:Unidoc.BuildForm.Action)
         {
             self.account = account
+            self.symbol = symbol
             self.action = action
-            self.redirect = redirect
 
             self.rights = .init()
         }
@@ -26,11 +26,9 @@ extension Unidoc
 }
 extension Unidoc.PackageBuildOperation
 {
-    init(account:Unidoc.Account, build:DirectParameters)
+    init(account:Unidoc.Account, form:Unidoc.BuildForm)
     {
-        self.init(account: account,
-            action: build.request.map { .submit(build.package, $0) } ?? .cancel(build.package),
-            redirect: build.symbols.package)
+        self.init(account: account, symbol: form.symbol, action: form.action)
     }
 }
 extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
@@ -39,72 +37,41 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
         db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        let metadata:Unidoc.PackageMetadata?
-        let package:Unidoc.Package
-        let request:Unidoc.BuildRequest<Void>?
-
-        switch self.action
+        guard
+        let outputs:Unidoc.EditionOutput = try await db.edition(
+            package: self.symbol.package,
+            version: .name(self.symbol.ref)),
+        let edition:Unidoc.EditionMetadata = outputs.edition
+        else
         {
-        case .submit(let id, let build):
-            metadata = nil
-            package = id
-            request = build
-
-        case .cancel(let id):
-            metadata = nil
-            package = id
-            request = nil
-
-        case .cancelSymbolic(let symbol):
-            metadata = try await db.package(named: symbol)
-
-            guard
-            let metadata:Unidoc.PackageMetadata
-            else
-            {
-                return .notFound("No such package")
-            }
-
-            package = metadata.id
-            request = nil
-
-        case .submitSymbolic(let symbol):
-            guard
-            let outputs:Unidoc.EditionOutput = try await db.edition(
-                package: symbol.package,
-                version: .name(symbol.ref)),
-            let edition:Unidoc.Edition = outputs.edition?.id
-            else
-            {
-                return .notFound("No such edition")
-            }
-
-            metadata = outputs.package
-            package = outputs.package.id
-            request = .init(version: .id(edition), rebuild: true)
+            return .notFound("No such edition")
         }
 
         if  let rejection:HTTP.ServerResponse = try await db.authorize(
-                package: metadata,
-                loading: package,
+                package: outputs.package,
+                loading: edition.id.package,
                 account: self.account,
                 rights: self.rights)
         {
             return rejection
         }
 
-        if  let request:Unidoc.BuildRequest<Void>
+        //  From now on, use canonical names
+        let name:Symbol.PackageAtRef = .init(package: outputs.package.symbol, ref: edition.name)
+
+        switch self.action
         {
-            _ = try await db.packageBuilds.submitBuild(request: request, package: package)
-        }
-        else if try await db.packageBuilds.cancelBuild(package: package)
-        {
-        }
-        else
-        {
-            return .resource("Cannot cancel a build that has already started", status: 409)
+        case .submit:
+            _ = try await db.pendingBuilds.submitBuild(id: edition.id, name: name)
+
+        case .cancel:
+            guard try await db.pendingBuilds.cancelBuild(id: edition.id)
+            else
+            {
+                return .resource("Cannot cancel a build that has already started", status: 409)
+            }
         }
 
-        return .redirect(.seeOther("\(Unidoc.RefsEndpoint[self.redirect])"))
+        return .redirect(.seeOther("\(Unidoc.RefsEndpoint[name.package])"))
     }
 }

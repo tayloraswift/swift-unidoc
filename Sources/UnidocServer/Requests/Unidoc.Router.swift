@@ -236,6 +236,7 @@ extension Unidoc.Router
         case .render:       return self.render()
         case .robots_txt:   return self.robots()
         case .rules:        return self.rules()
+        case .runs:         return nil // Unimplemented.
         case .sitemap_xml:  return self.sitemap()
         case .sitemaps:     return self.sitemaps()
         case .stats:        return self.stats()
@@ -453,11 +454,11 @@ extension Unidoc.Router
         {
         case .build:
             if  let account:Unidoc.Account = self.authorization.account,
-                let build:Unidoc.PackageBuildOperation.DirectParameters = .init(from: form)
+                let build:Unidoc.BuildForm = .init(from: form)
             {
                 return .unordered(Unidoc.PackageBuildOperation.init(
                     account: account,
-                    build: build))
+                    form: build))
             }
 
         case .packageAlias:
@@ -864,8 +865,8 @@ extension Unidoc.Router
             }
 
             return .unordered(Unidoc.PackageBuildOperation.init(account: account,
-                action: .submitSymbolic(.init(package: symbol, ref: name)),
-                redirect: symbol))
+                symbol: .init(package: symbol, ref: name),
+                action: .submit))
 
         case "state":
             return .unordered(Unidoc.LoadEditionStateOperation.init(
@@ -917,15 +918,13 @@ extension Unidoc.Router
         {
         case .build:
             guard
-            let build:Unidoc.PackageBuildOperation.DirectParameters = .init(from: table)
+            let form:Unidoc.BuildForm = .init(from: table)
             else
             {
                 return nil
             }
 
-            return .syncHTML(Unidoc.BuildRequestPage.init(symbols: build.symbols,
-                cancel: build.request == nil,
-                action: uri))
+            return .syncHTML(Unidoc.BuildRequestPage.init(form: form, action: uri))
 
         case .unlink:
             really = .unlink(uri)

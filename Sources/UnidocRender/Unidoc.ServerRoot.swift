@@ -29,6 +29,7 @@ extension Unidoc
         case render
         case robots_txt = "robots.txt"
         case rules
+        case runs
         case sitemap_xml = "sitemap.xml"
         case stats
         case tags

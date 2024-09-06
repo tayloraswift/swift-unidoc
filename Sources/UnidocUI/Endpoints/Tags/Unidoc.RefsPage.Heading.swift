@@ -10,6 +10,8 @@ extension Unidoc.RefsPage
         case consumers
         case settings
         case settingsAdmin
+        case buildTools
+        case builds
         case importRefs
     }
 }
@@ -25,6 +27,8 @@ extension Unidoc.RefsPage.Heading:Identifiable
         case .consumers:        "ss:consumers"
         case .settings:         "ss:settings"
         case .settingsAdmin:    "ss:settings-admin"
+        case .buildTools:       "ss:build-tools"
+        case .builds:           "ss:builds"
         case .importRefs:       "ss:import-refs"
         }
     }
@@ -41,6 +45,8 @@ extension Unidoc.RefsPage.Heading:HTML.OutputStreamableHeading
         case .consumers:        "Consumers"
         case .settings:         "Settings"
         case .settingsAdmin:    "Admin actions"
+        case .buildTools:       "Request builds"
+        case .builds:           "Recent builds"
         case .importRefs:       "Add branches"
         }
     }

@@ -451,13 +451,12 @@ extension Mongo.CollectionModel where Element:Insertable
     }
 }
 
-extension Mongo.CollectionModel
+extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEncodable
 {
     @inlinable package
     func modify(upserting id:Element.ID,
         returning phase:Mongo.UpdatePhase = .new,
         do encode:(inout Mongo.UpdateEncoder) -> ()) async throws -> (state:Element, new:Bool)
-        where Element:BSONDecodable, Element.ID:BSONEncodable
     {
         let (element, upserted):(Element, Element.ID?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Upserting<Element, Element.ID>>.init(Self.name,
@@ -474,7 +473,6 @@ extension Mongo.CollectionModel
     func modify(existing id:Element.ID,
         returning phase:Mongo.UpdatePhase = .new,
         do encode:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
-        where Element:BSONDecodable, Element.ID:BSONEncodable
     {
         let (element, _):(Element?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Existing<Element>>.init(Self.name,
@@ -494,7 +492,6 @@ extension Mongo.CollectionModel
     func modify(existing predicate:some Mongo.PredicateEncodable,
         returning phase:Mongo.UpdatePhase = .new,
         do encode:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
-        where Element:BSONDecodable, Element.ID:BSONEncodable
     {
         let (element, _):(Element?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Existing<Element>>.init(Self.name,
@@ -509,8 +506,47 @@ extension Mongo.CollectionModel
             against: self.database)
         return element
     }
-}
 
+    @inlinable package
+    func remove(id:Element.ID) async throws -> Element?
+
+    {
+        let (element, _):(Element?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Removing<Element>>.init(Self.name,
+                returning: .deleted)
+            {
+                $0[.query] { $0["_id"] = id }
+            },
+            against: self.database)
+        return element
+    }
+
+    @inlinable package
+    func remove(matching predicate:some Mongo.PredicateEncodable) async throws -> Element?
+    {
+        let (element, _):(Element?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Removing<Element>>.init(Self.name,
+                returning: .deleted)
+            {
+                $0[.query] { predicate.encode(to: &$0) }
+            },
+            against: self.database)
+        return element
+    }
+
+    @inlinable package
+    func remove(where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Element?
+    {
+        let (element, _):(Element?, Never?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Removing<Element>>.init(Self.name,
+                returning: .deleted)
+            {
+                $0[.query, predicate]
+            },
+            against: self.database)
+        return element
+    }
+}
 extension Mongo.CollectionModel
 {
     @inlinable
@@ -589,8 +625,8 @@ extension Mongo.CollectionModel
         try await self.delete { $0["_id"] = id }
     }
 
-    @inlinable
-    func delete(matching predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Bool
+    @inlinable public
+    func delete(where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Bool
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.One>.init(Self.name)
@@ -607,7 +643,8 @@ extension Mongo.CollectionModel
         return deletions.deleted != 0
     }
 
-    func deleteAll(matching predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
+    @inlinable public
+    func deleteAll(where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name)

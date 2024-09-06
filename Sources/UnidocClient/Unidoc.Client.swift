@@ -70,14 +70,14 @@ extension Unidoc.Client<HTTP.Client2>
     /// Listens for SSGC updates over the provided pipe, uploading any intermediate reports to
     /// Unidoc server and returning the final report, without uploading it.
     private
-    func stream(from pipe:FilePath, package:Unidoc.Package) async throws -> Unidoc.BuildFailure?
+    func stream(from pipe:FilePath, edition:Unidoc.Edition) async throws -> Unidoc.BuildFailure?
     {
         try await SSGC.StatusStream.read(from: pipe)
         {
             //  Acknowledge the build request.
             try? await self.connect
             {
-                try await $0.upload(.init(package: package, entered: .cloningRepository))
+                try await $0.upload(.init(edition: edition, entered: .cloningRepository))
             }
 
             while let update:SSGC.StatusUpdate = try $0.next()
@@ -119,7 +119,7 @@ extension Unidoc.Client<HTTP.Client2>
 
                 try await self.connect
                 {
-                    try await $0.upload(.init(package: package, entered: stage))
+                    try await $0.upload(.init(edition: edition, entered: stage))
                 }
             }
 
@@ -237,9 +237,9 @@ extension Unidoc.Client<HTTP.Client2>
         }
 
         let failure:Unidoc.BuildFailure? = try await self.stream(from: status,
-            package: labels.coordinate.package)
+            edition: labels.coordinate)
 
-        var artifact:Unidoc.BuildArtifact = .init(package: labels.coordinate.package,
+        var artifact:Unidoc.BuildArtifact = .init(edition: labels.coordinate,
             outcome: .failure(failure ?? .failedForUnknownReason))
 
         //  Check the exit status of the child process.

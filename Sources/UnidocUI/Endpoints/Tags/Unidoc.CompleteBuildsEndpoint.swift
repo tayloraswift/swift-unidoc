@@ -9,58 +9,64 @@ import URI
 extension Unidoc
 {
     @frozen public
-    struct ConsumersEndpoint
+    struct CompleteBuildsEndpoint
     {
         public
-        let query:ConsumersQuery
+        let query:CompleteBuildsQuery
         public
-        var value:ConsumersQuery.Output?
+        var value:CompleteBuildsQuery.Output?
 
         @inlinable public
-        init(query:ConsumersQuery)
+        init(query:CompleteBuildsQuery)
         {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Unidoc.ConsumersEndpoint
+extension Unidoc.CompleteBuildsEndpoint
 {
     static
     subscript(package:Symbol.Package, page index:Int) -> URI
     {
-        var uri:URI = Unidoc.ServerRoot.consumers / "\(package)"
+        var uri:URI = Unidoc.ServerRoot.runs / "\(package)"
         uri["page"] = "\(index)"
         return uri
     }
 }
-extension Unidoc.ConsumersEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
+extension Unidoc.CompleteBuildsEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
 {
     @inlinable public static
     var replica:Mongo.ReadPreference { .nearest }
 }
-extension Unidoc.ConsumersEndpoint:HTTP.ServerEndpoint
+extension Unidoc.CompleteBuildsEndpoint:HTTP.ServerEndpoint
 {
     public consuming
     func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
         guard
-        let output:Unidoc.ConsumersQuery.Output = self.value
+        let output:Unidoc.CompleteBuildsQuery.Output = self.value
         else
         {
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let content:Unidoc.Paginated<Unidoc.ConsumersTable> = .init(
-            table: .init(package: output.package.symbol, rows: output.list),
+        let view:Unidoc.Permissions = format.security.permissions(package: output.package,
+            user: output.user)
+
+        let content:Unidoc.Paginated<Unidoc.CompleteBuildsTable> = .init(
+            table: .init(
+                package: output.package.symbol,
+                rows: output.list,
+                view: view),
             index: self.query.page,
             truncated: output.list.count >= self.query.limit)
 
-        let consumersPage:Unidoc.PackageCursorPage<Unidoc.ConsumersTable> = .init(
+        let completeBuildsPage:Unidoc.PackageCursorPage<Unidoc.CompleteBuildsTable> = .init(
             location: Self[content.table.package, page: content.index],
             package: output.package,
             content: content)
 
-        return .ok(consumersPage.resource(format: format))
+        return .ok(completeBuildsPage.resource(format: format))
     }
 }
