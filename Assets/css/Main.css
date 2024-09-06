@@ -1892,6 +1892,10 @@ table td.placeholder em {
 table[data-type] {
   width: 100%;
 }
+table[data-type] > tbody > tr > td > div.menu > ul {
+  right: 0;
+  min-width: 15rem;
+}
 
 table[data-type=constituents] td {
   font-style: italic;
@@ -1919,6 +1923,7 @@ table[data-type=consumers] td:first-child {
   font-style: italic;
 }
 
+table[data-type=complete-builds] td.ref,
 table[data-type=consumers] td.ref,
 table[data-type=refs] td.ref {
   overflow: hidden;
@@ -1970,12 +1975,13 @@ table[data-type=refs] > tbody > tr > td.graph > div:first-child > span:first-chi
 table[data-type=refs] > tbody > tr > td.graph > div:first-child > span.kb {
   font-weight: normal;
 }
-table[data-type=refs] > tbody > tr > td.graph > div.menu > ul {
-  right: 0;
-  min-width: 15rem;
-}
 table[data-type=refs] > tbody > tr.modern {
   font-weight: 700;
+}
+
+table[data-type=complete-builds] > tbody > tr > td.status {
+  display: flex;
+  justify-content: space-between;
 }
 
 ul.cards {

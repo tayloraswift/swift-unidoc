@@ -27,6 +27,8 @@ extension Unidoc
 
         public
         var logs:[BuildLogType]
+        public
+        var logsAreSecret:Bool
 
         @inlinable public
         init(edition:Edition,
@@ -34,14 +36,16 @@ extension Unidoc
             finished:UnixMillisecond,
             failure:BuildFailure?,
             name:Symbol.PackageAtRef,
-            logs:[BuildLogType] = [])
+            logs:[BuildLogType] = [],
+            logsAreSecret:Bool = false)
         {
             self.edition = edition
             self.launched = launched
             self.finished = finished
             self.failure = failure
-            self.logs = logs
             self.name = name
+            self.logs = logs
+            self.logsAreSecret = logsAreSecret
         }
     }
 }
@@ -60,6 +64,7 @@ extension Unidoc.CompleteBuild:Mongo.MasterCodingModel
         case failure = "E"
         case name = "N"
         case logs = "O"
+        case logsAreSecret = "A"
 
         case package = "p"
     }
@@ -74,6 +79,7 @@ extension Unidoc.CompleteBuild:BSONDocumentEncodable
         bson[.failure] = self.failure
         bson[.name] = self.name
         bson[.logs] = self.logs.isEmpty ? nil : self.logs
+        bson[.logsAreSecret] = self.logsAreSecret ? true : nil
 
         bson[.package] = self.id.edition.package
     }
@@ -89,6 +95,7 @@ extension Unidoc.CompleteBuild:BSONDocumentDecodable
             finished: try bson[.finished].decode(),
             failure: try bson[.failure]?.decode(),
             name: try bson[.name].decode(),
-            logs: try bson[.logs]?.decode() ?? [])
+            logs: try bson[.logs]?.decode() ?? [],
+            logsAreSecret: try bson[.logsAreSecret]?.decode() ?? false)
     }
 }

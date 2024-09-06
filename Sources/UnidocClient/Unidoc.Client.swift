@@ -254,9 +254,12 @@ extension Unidoc.Client<HTTP.Client2>
                 action: action))
         }
 
-        /// Attach build logs.
+        //  Attach build logs.
         try artifact.attach(log: output, as: .ssgc)
         try artifact.attach(log: diagnostics, as: .ssgcDiagnostics)
+
+        //  If the repo URL contains a token, we should keep the logs secret.
+        artifact.logsAreSecret = labels.repo.contains("@")
 
         artifact.seconds = (.now - started).components.seconds
 
