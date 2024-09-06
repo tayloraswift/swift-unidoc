@@ -81,10 +81,12 @@ extension Unidoc.RefsEndpoint:HTTP.ServerEndpoint
         let prereleaseTool:Unidoc.BuildFormTool = .shortcut(buildable: prerelease?.edition.name,
             submitted: submitted.prerelease,
             package: output.package.symbol,
+            label: "Build latest prerelease",
             view: view)
         let releaseTool:Unidoc.BuildFormTool = .shortcut(buildable: release?.edition.name,
             submitted: submitted.release,
             package: output.package.symbol,
+            label: "Build latest release",
             view: view)
 
         let buildTools:Unidoc.BuildTools = .init(

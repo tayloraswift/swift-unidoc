@@ -161,6 +161,60 @@ extension Unidoc.RefsPage
                 type: .branches)
         }
 
+        section[.h3] = Heading.importRefs
+        section[.form]
+        {
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Unidoc.Post[.packageIndex])"
+            $0.method = "post"
+
+            $0.class = "config"
+        }
+            content:
+        {
+            $0[.dl]
+            {
+                $0[.dt] = "Branch name"
+                $0[.dd]
+                {
+                    $0[.input]
+                    {
+                        $0.type = "hidden"
+                        $0.name = "package"
+                        $0.value = "\(self.package.id)"
+                    }
+
+                    $0[.input]
+                    {
+                        $0.type = "text"
+                        $0.name = "ref"
+                        $0.required = true
+                        $0.readonly = !self.view.editor
+
+                        $0.placeholder = "master"
+                        $0.pattern = #"^[a-zA-Z0-9_\-\.\/]+$"#
+                    }
+                }
+            }
+
+            $0[.button]
+            {
+                $0.class = "area"
+                $0.type = "submit"
+
+                if  case nil = self.view.global
+                {
+                    $0.disabled = true
+                    $0.title = "You are not logged in!"
+                }
+                else if !self.view.editor
+                {
+                    $0.disabled = true
+                    $0.title = "You are not an editor for this package!"
+                }
+            } = "Import ref"
+        }
+
         section[.h2] = Heading.consumers
 
         if  self.consumers.table.rows.isEmpty
@@ -358,7 +412,7 @@ extension Unidoc.RefsPage
             section[.form] = Unidoc.DisabledButton.init(label: "Refresh tags", view: self.view)
         }
 
-        section[.h2] = Heading.buildTools
+        section[.h2] = Heading.builds
         section += self.buildTools
 
         //  All logged-in users can see the build logs. The only reason they are not totally
@@ -366,65 +420,15 @@ extension Unidoc.RefsPage
         //  CDN firewall is less effective than our apex firewall.
         if !self.builds.table.rows.isEmpty
         {
-            section[.h3] = Heading.builds
+            section[.h3] = Heading.builtRecently
             section[.table] = self.builds.table
         }
-
-        section[.h3] = Heading.importRefs
-        section[.form]
+        if  let more:URI = self.builds.next
         {
-            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Unidoc.Post[.packageIndex])"
-            $0.method = "post"
-
-            $0.class = "config"
-        }
-            content:
-        {
-            $0[.dl]
-            {
-                $0[.dt] = "Branch name"
-                $0[.dd]
-                {
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
-                        $0.name = "package"
-                        $0.value = "\(self.package.id)"
-                    }
-
-                    $0[.input]
-                    {
-                        $0.type = "text"
-                        $0.name = "ref"
-                        $0.required = true
-                        $0.readonly = !self.view.editor
-
-                        $0.placeholder = "master"
-                        $0.pattern = #"^[a-zA-Z0-9_\-\.\/]+$"#
-                    }
-                }
-            }
-
-            $0[.button]
-            {
-                $0.class = "area"
-                $0.type = "submit"
-
-                if  case nil = self.view.global
-                {
-                    $0.disabled = true
-                    $0.title = "You are not logged in!"
-                }
-                else if !self.view.editor
-                {
-                    $0.disabled = true
-                    $0.title = "You are not an editor for this package!"
-                }
-            } = "Import ref"
+            section[.a] { $0.class = "area" ; $0.href = "\(more)" } = "View all builds"
         }
 
-        section[.h3] = "Build configuration"
+        section[.h3] = Heading.buildConfiguration
         section[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"

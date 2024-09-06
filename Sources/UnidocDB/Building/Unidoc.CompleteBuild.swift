@@ -1,5 +1,6 @@
 import BSON
 import MongoQL
+import Symbols
 import UnidocAPI
 import UnidocRecords
 import UnixTime
@@ -18,7 +19,12 @@ extension Unidoc
         let finished:UnixMillisecond
 
         public
-        var failure:BuildFailure?
+        let failure:BuildFailure?
+
+        /// Used for display purposes only.
+        public
+        let name:Symbol.PackageAtRef
+
         public
         var logs:[BuildLogType]
 
@@ -27,29 +33,16 @@ extension Unidoc
             launched:UnixMillisecond,
             finished:UnixMillisecond,
             failure:BuildFailure?,
-            logs:[BuildLogType])
+            name:Symbol.PackageAtRef,
+            logs:[BuildLogType] = [])
         {
             self.edition = edition
             self.launched = launched
             self.finished = finished
             self.failure = failure
             self.logs = logs
+            self.name = name
         }
-    }
-}
-extension Unidoc.CompleteBuild
-{
-    @inlinable public
-    init(id:Unidoc.BuildIdentifier,
-        finished:UnixMillisecond,
-        failure:Unidoc.BuildFailure?,
-        logs:[Unidoc.BuildLogType])
-    {
-        self.init(edition: id.edition,
-            launched: id.instant,
-            finished: finished,
-            failure: failure,
-            logs: logs)
     }
 }
 extension Unidoc.CompleteBuild:Identifiable
@@ -65,6 +58,7 @@ extension Unidoc.CompleteBuild:Mongo.MasterCodingModel
         case id = "_id"
         case finished = "F"
         case failure = "E"
+        case name = "N"
         case logs = "O"
 
         case package = "p"
@@ -78,6 +72,7 @@ extension Unidoc.CompleteBuild:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.finished] = self.finished
         bson[.failure] = self.failure
+        bson[.name] = self.name
         bson[.logs] = self.logs.isEmpty ? nil : self.logs
 
         bson[.package] = self.id.edition.package
@@ -88,9 +83,12 @@ extension Unidoc.CompleteBuild:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(id: try bson[.id].decode(),
+        let id:Unidoc.BuildIdentifier = try bson[.id].decode()
+        self.init(edition: id.edition,
+            launched: id.instant,
             finished: try bson[.finished].decode(),
             failure: try bson[.failure]?.decode(),
+            name: try bson[.name].decode(),
             logs: try bson[.logs]?.decode() ?? [])
     }
 }

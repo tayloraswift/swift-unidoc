@@ -7,10 +7,10 @@ extension Unidoc
     struct BuildFormTool
     {
         let form:BuildForm
-        let area:Bool
+        let area:BuildButton
         let disabled:Inhibitor?
 
-        init(form:BuildForm, area:Bool, disabled:Inhibitor? = nil)
+        init(form:BuildForm, area:BuildButton, disabled:Inhibitor? = nil)
         {
             self.form = form
             self.area = area
@@ -24,8 +24,11 @@ extension Unidoc.BuildFormTool
     func shortcut(buildable:String?,
         submitted:Bool,
         package:Symbol.Package,
+        label:String,
         view:Unidoc.Permissions) -> Self
     {
+        let area:Unidoc.BuildButton = .init(text: label, type: .zone)
+
         guard
         let buildable:String
         else
@@ -34,7 +37,7 @@ extension Unidoc.BuildFormTool
             return .init(form: .init(
                     symbol: .init(package: package, ref: ""),
                     action: .submit),
-                area: true,
+                area: area,
                 disabled: .unavailable)
         }
 
@@ -44,48 +47,49 @@ extension Unidoc.BuildFormTool
 
         if  submitted
         {
-            return .init(form: form, area: true, disabled: .alreadySubmitted)
+            return .init(form: form, area: area, disabled: .alreadySubmitted)
         }
 
         guard case _? = view.global
         else
         {
-            return .init(form: form, area: true, disabled: .unauthenticated)
+            return .init(form: form, area: area, disabled: .unauthenticated)
         }
 
         guard view.editor
         else
         {
-            return .init(form: form, area: true, disabled: .unauthorized)
+            return .init(form: form, area: area, disabled: .unauthorized)
         }
 
-        return .init(form: form, area: true)
+        return .init(form: form, area: area)
     }
 
     static
     func control(pending build:Unidoc.PendingBuild, view:Unidoc.Permissions) -> Self
     {
+        let area:Unidoc.BuildButton = .init(text: nil, type: .inline)
         let form:Unidoc.BuildForm = .init(symbol: build.name, action: .cancel)
 
         guard case nil = build.launched
         else
         {
-            return .init(form: form, area: true, disabled: .alreadyStarted)
+            return .init(form: form, area: area, disabled: .alreadyStarted)
         }
 
         guard case _? = view.global
         else
         {
-            return .init(form: form, area: true, disabled: .unauthenticated)
+            return .init(form: form, area: area, disabled: .unauthenticated)
         }
 
         guard view.editor
         else
         {
-            return .init(form: form, area: true, disabled: .unauthorized)
+            return .init(form: form, area: area, disabled: .unauthorized)
         }
 
-        return .init(form: form, area: true)
+        return .init(form: form, area: area)
     }
 }
 extension Unidoc.BuildFormTool:HTML.OutputStreamable
@@ -111,13 +115,18 @@ extension Unidoc.BuildFormTool:HTML.OutputStreamable
 
         switch self.form.action
         {
-        case .submit:   label = "Request build"
-        case .cancel:   label = "Cancel build"
+        case .submit:   label = self.area.text ?? "Request build"
+        case .cancel:   label = self.area.text ?? "Cancel build"
         }
 
         form[.button]
         {
-            $0.class = self.area ? "area" : "text"
+            switch self.area.type
+            {
+            case .inline:   $0.class = "text"
+            case .zone:     $0.class = "area"
+            }
+
             $0.type = "submit"
 
             guard

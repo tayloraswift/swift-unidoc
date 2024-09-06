@@ -46,6 +46,11 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
             }
         }
 
+        if  case .cancel = self.form.action
+        {
+            return
+        }
+
         form[.p]
         {
             $0[.label]
