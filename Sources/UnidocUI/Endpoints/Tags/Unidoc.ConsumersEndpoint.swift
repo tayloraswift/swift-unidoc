@@ -59,7 +59,8 @@ extension Unidoc.ConsumersEndpoint:HTTP.ServerEndpoint
         let consumersPage:Unidoc.PackageCursorPage<Unidoc.ConsumersTable> = .init(
             location: Self[content.table.package, page: content.index],
             package: output.package,
-            content: content)
+            content: content,
+            name: "Consumers")
 
         return .ok(consumersPage.resource(format: format))
     }

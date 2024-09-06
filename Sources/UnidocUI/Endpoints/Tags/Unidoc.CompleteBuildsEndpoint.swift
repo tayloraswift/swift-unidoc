@@ -65,7 +65,8 @@ extension Unidoc.CompleteBuildsEndpoint:HTTP.ServerEndpoint
         let completeBuildsPage:Unidoc.PackageCursorPage<Unidoc.CompleteBuildsTable> = .init(
             location: Self[content.table.package, page: content.index],
             package: output.package,
-            content: content)
+            content: content,
+            name: "Runs")
 
         return .ok(completeBuildsPage.resource(format: format))
     }
