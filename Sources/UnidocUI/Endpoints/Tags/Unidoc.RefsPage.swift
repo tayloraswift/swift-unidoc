@@ -12,7 +12,7 @@ extension Unidoc
         private
         let package:PackageMetadata
         private
-        let dependents:Paginated<ConsumersTable>
+        let consumers:Paginated<ConsumersTable>
         private
         let versions:Paginated<RefsTable>
         private
@@ -20,7 +20,9 @@ extension Unidoc
         private
         let aliases:[Symbol.Package]
         private
-        let build:BuildMetadata?
+        let buildTools:BuildTools
+        private
+        let builds:Paginated<CompleteBuildsTable>
         private
         let realm:RealmMetadata?
         private
@@ -28,20 +30,22 @@ extension Unidoc
 
         init(
             package:PackageMetadata,
-            dependents:Paginated<ConsumersTable>,
+            consumers:Paginated<ConsumersTable>,
             versions:Paginated<RefsTable>,
             branches:[VersionState],
             aliases:[Symbol.Package] = [],
-            build:BuildMetadata? = nil,
+            buildTools:BuildTools,
+            builds:Paginated<CompleteBuildsTable>,
             realm:RealmMetadata? = nil,
             ticket:CrawlingTicket<Package>? = nil)
         {
             self.package = package
-            self.dependents = dependents
+            self.consumers = consumers
             self.versions = versions
             self.branches = branches
             self.aliases = aliases
-            self.build = build
+            self.buildTools = buildTools
+            self.builds = builds
             self.realm = realm
             self.ticket = ticket
         }
@@ -159,15 +163,15 @@ extension Unidoc.RefsPage
 
         section[.h2] = Heading.consumers
 
-        if  self.dependents.table.isEmpty
+        if  self.consumers.table.rows.isEmpty
         {
             section[.p] { $0.class = "note" } = "This package has no known consumers!"
         }
         else
         {
-            section[.table] = self.dependents.table
+            section[.table] = self.consumers.table
         }
-        if  let more:URI = self.dependents.next
+        if  let more:URI = self.consumers.next
         {
             section[.a] { $0.class = "area" ; $0.href = "\(more)" } = "Browse more consumers"
         }
@@ -354,46 +358,16 @@ extension Unidoc.RefsPage
             section[.form] = Unidoc.DisabledButton.init(label: "Refresh tags", view: self.view)
         }
 
-        section[.div]
-        {
-            $0.class = "build-pipeline"
-        } = BuildTools.init(package: self.package,
-            build: self.build,
-            view: self.view,
-            back: self.location)
+        section[.h2] = Heading.buildTools
+        section += self.buildTools
 
         //  All logged-in users can see the build logs. The only reason they are not totally
         //  public is to prevent crawlers from making dynamic CloudFront requests, because the
         //  CDN firewall is less effective than our apex firewall.
-        if  case _? = self.view.global,
-            let build:Unidoc.BuildMetadata = self.build,
-            !build.logs.isEmpty
+        if !self.builds.table.rows.isEmpty
         {
-            section[.h3] = "Build logs"
-            section[.ol]
-            {
-                $0.class = "build-logs"
-            }
-                content:
-            {
-                for log:Unidoc.BuildLogType in build.logs
-                {
-                    $0[.li]
-                    {
-                        //  We never persist logs anywhere except in S3, where they are
-                        //  served through CloudFront. Therefore, we can safely hardcode
-                        //  the URL here.
-                        let path:Unidoc.BuildLogPath = .init(package: build.id, type: log)
-
-                        $0[.a]
-                        {
-                            $0.target = "_blank"
-                            $0.href = "https://static.swiftinit.org\(path)"
-                            $0.rel = .external
-                        } = log.name
-                    }
-                }
-            }
+            section[.h3] = Heading.builds
+            section[.table] = self.builds.table
         }
 
         section[.h3] = Heading.importRefs

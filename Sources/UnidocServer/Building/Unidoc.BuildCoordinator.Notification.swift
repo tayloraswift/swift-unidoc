@@ -10,9 +10,7 @@ extension Unidoc.BuildCoordinator
         private
         let appeared:BSON.Timestamp
         private
-        let package:Unidoc.Package
-        private
-        let request:Unidoc.BuildRequest<Void>
+        let request:Unidoc.Edition
 
         private
         let producer:CheckedContinuation<Void, any Error>
@@ -20,12 +18,10 @@ extension Unidoc.BuildCoordinator
         let producerAwaiting:ManagedAtomic<Bool>
 
         init(appeared:BSON.Timestamp,
-            package:Unidoc.Package,
-            request:Unidoc.BuildRequest<Void>,
+            request:Unidoc.Edition,
             producer:CheckedContinuation<Void, any Error>)
         {
             self.appeared = appeared
-            self.package = package
             self.request = request
             self.producer = producer
             self.producerAwaiting = .init(true)
@@ -109,10 +105,7 @@ extension Unidoc.BuildCoordinator.Notification
         //  original notification, so that we do not experience reversed ordering.
         db.session.synchronize(to: self.appeared)
 
-        guard try await db.packageBuilds.assignBuild(
-            request: self.request.behavior,
-            package: self.package,
-            builder: assignee)
+        guard try await db.pendingBuilds.assignBuild(id: self.request, to: assignee)
         else
         {
             //  The build request no longer exists in the database, perhaps because it was
@@ -121,26 +114,15 @@ extension Unidoc.BuildCoordinator.Notification
             return nil
         }
 
-        let version:Unidoc.BuildSelector<Unidoc.Package>
-
-        switch self.request.version
-        {
-        case .latest(let series, of: ()):   version = .latest(series, of: self.package)
-        case .id(let id):                   version = .id(id)
-        }
-
-        if  let edition:Unidoc.EditionState = try await db.editionState(of: version),
-            let labels:Unidoc.BuildLabels = try await registrar.resolve(edition,
-                rebuild: self.request.rebuild)
+        if  let edition:Unidoc.EditionState = try await db.editionState(of: .id(self.request)),
+            let labels:Unidoc.BuildLabels = try await registrar.resolve(edition, rebuild: true)
         {
             return labels
         }
         else
         {
-            /// We don’t really care if something else raced us here.
-            let _:Unidoc.BuildMetadata? = try await db.packageBuilds.finishBuild(
-                package: self.package,
-                failure: .noValidVersion)
+            /// Either the edition or the package, or both, no longer exist.
+            let _:Bool = try await db.pendingBuilds.cancelBuild(id: self.request)
             return nil
         }
     }
