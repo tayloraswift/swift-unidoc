@@ -206,6 +206,7 @@ extension Unidoc.DB.PendingBuilds
         }
     }
 
+    public
     func finishBuild(id:Unidoc.Edition) async throws -> Unidoc.PendingBuild?
     {
         try await self.remove
@@ -233,32 +234,5 @@ extension Unidoc.DB.PendingBuilds
             $0[Unidoc.PendingBuild[.launched]] { $0[.exists] = true }
             $0[Unidoc.PendingBuild[.assignee]] = assignee
         }
-    }
-}
-extension Unidoc.DB.PendingBuilds
-{
-    public
-    func completeBuild(id:Unidoc.Edition,
-        duration:Seconds) async throws -> (launched:UnixMillisecond, finished:UnixMillisecond)
-    {
-        let launched:UnixMillisecond
-        let finished:UnixMillisecond
-
-        if  let finishedBuild:Unidoc.PendingBuild = try await self.finishBuild(id: id),
-            let instant:UnixMillisecond = finishedBuild.launched
-        {
-            launched = instant
-            finished = launched.advanced(by: .init(duration))
-        }
-        else
-        {
-            //  Build was timed out on the server side, but still delivered to the server.
-            //  In this situation, we use the current time as the finish time, and work out
-            //  launch time by subtracting the duration from the finish time.
-            finished = .now()
-            launched = finished.regressed(by: .init(duration))
-        }
-
-        return (launched, finished)
     }
 }

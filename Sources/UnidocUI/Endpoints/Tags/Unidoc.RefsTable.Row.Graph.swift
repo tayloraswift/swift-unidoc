@@ -109,7 +109,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                         $0.method = "post"
                     } = Unidoc.BuildFormTool.init(
                         form: .init(symbol: self.symbol, action: .submit),
-                        area: false)
+                        area: .init(text: nil, type: .inline))
                 }
 
                 guard

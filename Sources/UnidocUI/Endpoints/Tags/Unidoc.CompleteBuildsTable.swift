@@ -43,6 +43,7 @@ extension Unidoc.CompleteBuildsTable:HTML.OutputStreamable
             $0[.tr]
             {
                 $0[.th] = "Run time"
+                $0[.th] = "Ref"
                 $0[.th] = "Status"
                 $0[.th] = "Logs"
             }
@@ -64,10 +65,12 @@ extension Unidoc.CompleteBuildsTable:HTML.OutputStreamable
                         } = duration.short
                     }
 
+                    $0[.td] = row.name.ref
+
                     switch row.failure
                     {
                     case nil:
-                        $0[.td]
+                        $0[.td] = "OK"
 
                     case .killed?:
                         $0[.td] = "Killed"

@@ -39,16 +39,23 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
         case .labeled:
             var build:Unidoc.BuildArtifact = try .init(bson: bson)
 
-            let launched:UnixMillisecond
-            let finished:UnixMillisecond
+            guard
+            let pending:Unidoc.PendingBuild = try await db.pendingBuilds.finishBuild(
+                id: build.edition),
+            let launched:UnixMillisecond = pending.launched
+            else
+            {
+                return .notFound("Build not found or timed-out\n")
+            }
 
-            (launched, finished) = try await db.pendingBuilds.completeBuild(id: build.edition,
-                duration: .seconds(build.seconds))
+            let duration:Seconds = .seconds(build.seconds)
+            let finished:UnixMillisecond = launched.advanced(by: .init(duration))
 
             var complete:Unidoc.CompleteBuild = .init(edition: build.edition,
                 launched: launched,
                 finished: finished,
                 failure: build.failure,
+                name: pending.name,
                 logs: [])
 
             complete.logs = try await build.export(as: complete.id, from: server)
