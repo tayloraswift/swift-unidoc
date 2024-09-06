@@ -8,10 +8,10 @@ import UnixTime
 extension Unidoc
 {
     @frozen public
-    struct CompleteBuild:Sendable
+    struct CompleteBuild:Identifiable, Sendable
     {
         public
-        let edition:Edition
+        let id:BuildIdentifier
 
         public
         let launched:UnixMillisecond
@@ -31,7 +31,7 @@ extension Unidoc
         var logsAreSecret:Bool
 
         @inlinable public
-        init(edition:Edition,
+        init(id:BuildIdentifier,
             launched:UnixMillisecond,
             finished:UnixMillisecond,
             failure:BuildFailure?,
@@ -39,7 +39,7 @@ extension Unidoc
             logs:[BuildLogType] = [],
             logsAreSecret:Bool = false)
         {
-            self.edition = edition
+            self.id = id
             self.launched = launched
             self.finished = finished
             self.failure = failure
@@ -49,17 +49,13 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.CompleteBuild:Identifiable
-{
-    @inlinable public
-    var id:Unidoc.BuildIdentifier { .init(edition: self.edition, instant: self.launched) }
-}
 extension Unidoc.CompleteBuild:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable, BSONDecodable
     {
         case id = "_id"
+        case launched = "L"
         case finished = "F"
         case failure = "E"
         case name = "N"
@@ -75,6 +71,7 @@ extension Unidoc.CompleteBuild:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
+        bson[.launched] = self.launched
         bson[.finished] = self.finished
         bson[.failure] = self.failure
         bson[.name] = self.name
@@ -89,9 +86,8 @@ extension Unidoc.CompleteBuild:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        let id:Unidoc.BuildIdentifier = try bson[.id].decode()
-        self.init(edition: id.edition,
-            launched: id.instant,
+        self.init(id: try bson[.id].decode(),
+            launched: try bson[.launched].decode(),
             finished: try bson[.finished].decode(),
             failure: try bson[.failure]?.decode(),
             name: try bson[.name].decode(),
