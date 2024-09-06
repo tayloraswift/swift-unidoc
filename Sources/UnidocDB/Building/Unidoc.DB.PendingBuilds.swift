@@ -143,12 +143,12 @@ extension Unidoc.DB.PendingBuilds
             upserting: id,
             returning: .new)
         {
-            $0[.setOnInsert]
-            {
-                $0[Unidoc.PendingBuild[.id]] = id
-                $0[Unidoc.PendingBuild[.enqueued]] = UnixMillisecond.now()
-                $0[Unidoc.PendingBuild[.name]] = name
-            }
+            $0[.setOnInsert] = Unidoc.PendingBuild.init(id: id,
+                enqueued: UnixMillisecond.now(),
+                launched: nil,
+                assignee: nil,
+                stage: nil,
+                name: name)
         }
         return pendingBuild
     }
