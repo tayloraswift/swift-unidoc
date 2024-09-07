@@ -51,15 +51,17 @@ extension Unidoc.ConsumersEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-         //let view:Unidoc.Permissions = format.security.permissions(package: output.dependency,
-         //    user: output.user)
-
-        let table:Unidoc.Paginated<Unidoc.ConsumersTable> = .init(
-            table: .init(dependency: output.dependency.symbol, rows: output.dependents),
+        let content:Unidoc.Paginated<Unidoc.ConsumersTable> = .init(
+            table: .init(package: output.package.symbol, rows: output.list),
             index: self.query.page,
-            truncated: output.dependents.count >= self.query.limit)
+            truncated: output.list.count >= self.query.limit)
 
-        let page:Unidoc.ConsumersPage = .init(package: output.dependency, table: table)
-        return .ok(page.resource(format: format))
+        let consumersPage:Unidoc.PackageCursorPage<Unidoc.ConsumersTable> = .init(
+            location: Self[content.table.package, page: content.index],
+            package: output.package,
+            content: content,
+            name: "Consumers")
+
+        return .ok(consumersPage.resource(format: format))
     }
 }

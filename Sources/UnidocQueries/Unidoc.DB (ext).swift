@@ -25,29 +25,28 @@ extension Unidoc.DB
     }
 
     public
-    func edition(package:Symbol.Package,
-        version:Unidoc.VersionPredicate) async throws -> Unidoc.EditionOutput?
+    func edition(named symbol:Symbol.PackageAtRef) async throws -> Unidoc.EditionOutput?
     {
-        try await self.query(
-            with: Unidoc.EditionMetadataSymbolicQuery.init(package: package, version: version))
+        try await self.query(with: Unidoc.EditionMetadataSymbolicQuery.init(
+            package: symbol.package,
+            version: .name(symbol.ref)))
     }
 
     public
-    func editionState(package:Symbol.Package,
-        version:Unidoc.VersionPredicate) async throws -> Unidoc.EditionState?
+    func ref(by symbol:Symbol.PackageAtRef) async throws -> Unidoc.RefState?
     {
-        try await self.query(
-            with: Unidoc.EditionStateSymbolicQuery.init(package: package, version: version))
+        try await self.query(with: Unidoc.RefStateSymbolicQuery.init(
+            package: symbol.package,
+            version: .name(symbol.ref)))
     }
 
     public
-    func editionState(
-        of selector:Unidoc.BuildSelector<Unidoc.Package>) async throws -> Unidoc.EditionState?
+    func ref(of selector:Unidoc.BuildSelector<Unidoc.Package>) async throws -> Unidoc.RefState?
     {
         switch selector
         {
         case .id(let id):
-            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateDirectQuery> = .init(
+            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.RefStateDirectQuery> = .init(
                 query: .init(package: id.package, version: .exact(id.version)))
 
             try await pipeline.pull(from: self)
@@ -55,7 +54,7 @@ extension Unidoc.DB
             return pipeline.value
 
         case .latest(let series, of: let package):
-            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.EditionStateDirectQuery> = .init(
+            var pipeline:Mongo.SingleOutputFromPrimary<Unidoc.RefStateDirectQuery> = .init(
                 query: .init(package: package, version: .match(.latest(series))))
 
             try await pipeline.pull(from: self)

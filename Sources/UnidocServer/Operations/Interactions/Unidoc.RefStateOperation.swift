@@ -6,24 +6,21 @@ import URI
 
 extension Unidoc
 {
-    struct LoadEditionStateOperation:Sendable
+    struct RefStateOperation:Sendable
     {
         private
         let authorization:Authorization
         private
-        let package:Symbol.Package
-        private
-        let version:VersionPredicate
+        let symbol:Symbol.PackageAtRef
 
-        init(authorization:Authorization, package:Symbol.Package, version:VersionPredicate)
+        init(authorization:Authorization, symbol:Symbol.PackageAtRef)
         {
             self.authorization = authorization
-            self.package = package
-            self.version = version
+            self.symbol = symbol
         }
     }
 }
-extension Unidoc.LoadEditionStateOperation:Unidoc.PublicOperation
+extension Unidoc.RefStateOperation:Unidoc.PublicOperation
 {
     func load(from server:Unidoc.Server,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
@@ -55,21 +52,35 @@ extension Unidoc.LoadEditionStateOperation:Unidoc.PublicOperation
         }
 
         guard
-        let edition:Unidoc.EditionState = try await db.editionState(
-            package: self.package,
-            version: self.version)
+        let ref:Unidoc.RefState = try await db.ref(by: self.symbol)
         else
         {
             return .resource("No such edition\n", status: 404)
         }
 
-        let report:Unidoc.EditionStateReport = .init(id: edition.version.edition.id,
-            volume: edition.version.volume?.symbol,
-            build: edition.build.map
-            {
-                .init(request: $0.request, stage: $0.progress?.stage, failure: $0.failure)
-            },
-            graph: edition.version.graph.map
+        let status:Unidoc.BuildStatus?
+
+        if  let pending:Unidoc.PendingBuild = ref.build
+        {
+            status = .init(request: pending.id, pending: pending.stage, failure: nil)
+        }
+        else if
+            let complete:Unidoc.CompleteBuild = ref.built
+        {
+            status = .init(
+                request: complete.id.edition,
+                pending: nil,
+                failure: complete.failure)
+        }
+        else
+        {
+            status = nil
+        }
+
+        let report:Unidoc.EditionStateReport = .init(id: ref.version.edition.id,
+            volume: ref.version.volume?.symbol,
+            build: status,
+            graph: ref.version.graph.map
             {
                 .init(action: $0.action, commit: $0.commit)
             })

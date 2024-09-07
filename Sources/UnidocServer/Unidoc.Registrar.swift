@@ -11,6 +11,6 @@ extension Unidoc
         func connect<T>(with access:Unidoc.RegistrarAccessMechanisms,
             _ body:(Session) async throws -> T) async throws -> T
 
-        func resolve(_ edition:EditionState, rebuild:Bool) async throws -> BuildLabels?
+        func resolve(_ edition:RefState, rebuild:Bool) async throws -> BuildLabels?
     }
 }

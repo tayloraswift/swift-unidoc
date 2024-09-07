@@ -33,6 +33,12 @@ table
 table[data-type]
 {
     width: 100%;
+
+    > tbody > tr > td > div.menu > ul
+    {
+        right: 0;
+        min-width: 15rem;
+    }
 }
 
 table[data-type='constituents']
@@ -74,6 +80,7 @@ table[data-type='consumers']
     }
 }
 
+table[data-type='complete-builds'],
 table[data-type='consumers'],
 table[data-type='refs']
 {
@@ -146,20 +153,23 @@ table[data-type='refs']
                     font-weight: normal;
                 }
             }
-
-            > div.menu
-            {
-                > ul
-                {
-                    right: 0;
-                    min-width: 15rem;
-                }
-            }
         }
     }
 
     > tbody > tr.modern
     {
         font-weight: 700;
+    }
+}
+
+table[data-type='complete-builds']
+{
+    > tbody > tr
+    {
+        > td.status
+        {
+            display: flex;
+            justify-content: space-between;
+        }
     }
 }

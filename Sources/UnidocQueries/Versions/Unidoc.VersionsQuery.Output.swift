@@ -21,7 +21,9 @@ extension Unidoc.VersionsQuery
         public
         var aliases:[Symbol.Package]
         public
-        var build:Unidoc.BuildMetadata?
+        var pendingBuilds:[Unidoc.PendingBuild]
+        public
+        var recentBuilds:[Unidoc.CompleteBuild]
         public
         var realm:Unidoc.RealmMetadata?
 
@@ -37,7 +39,8 @@ extension Unidoc.VersionsQuery
             versions:[Unidoc.VersionState],
             branches:[Unidoc.VersionState],
             aliases:[Symbol.Package],
-            build:Unidoc.BuildMetadata?,
+            pendingBuilds:[Unidoc.PendingBuild],
+            recentBuilds:[Unidoc.CompleteBuild],
             realm:Unidoc.RealmMetadata?,
             ticket:Unidoc.CrawlingTicket<Unidoc.Package>?,
             user:Unidoc.User?)
@@ -48,7 +51,8 @@ extension Unidoc.VersionsQuery
             self.branches = branches
             self.aliases = aliases
             self.ticket = ticket
-            self.build = build
+            self.pendingBuilds = pendingBuilds
+            self.recentBuilds = recentBuilds
             self.realm = realm
             self.user = user
         }
@@ -64,7 +68,8 @@ extension Unidoc.VersionsQuery.Output:Mongo.MasterCodingModel
         case branches
         case aliases
         case package
-        case build
+        case pendingBuilds
+        case recentBuilds
         case realm
         case ticket
         case user
@@ -80,7 +85,8 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
             versions: try bson[.versions].decode(),
             branches: try bson[.branches].decode(),
             aliases: try bson[.aliases].decode(),
-            build: try bson[.build]?.decode(),
+            pendingBuilds: try bson[.pendingBuilds]?.decode() ?? [],
+            recentBuilds: try bson[.recentBuilds]?.decode() ?? [],
             realm: try bson[.realm]?.decode(),
             ticket: try bson[.ticket]?.decode(),
             user: try bson[.user]?.decode())

@@ -5,11 +5,12 @@ extension Symbol
     {
         public
         var package:Package
+        /// A name corresponding to a git ref.
         public
-        var ref:Substring?
+        var ref:String
 
         @inlinable public
-        init(package:Package, ref:Substring?)
+        init(package:Package, ref:String)
         {
             self.package = package
             self.ref = ref
@@ -19,24 +20,22 @@ extension Symbol
 extension Symbol.PackageAtRef:CustomStringConvertible
 {
     @inlinable public
-    var description:String
-    {
-        self.ref.map { "\(self.package)/\($0)" } ?? "\(self.package)"
-    }
+    var description:String { "\(self.package)/\(self.ref)" }
 }
 extension Symbol.PackageAtRef:LosslessStringConvertible
 {
-    public
-    init(_ trunk:String)
+    @inlinable public
+    init?(_ description:some StringProtocol)
     {
-        if  let slash:String.Index = trunk.firstIndex(of: "/")
+        if  let slash:String.Index = description.firstIndex(of: "/")
         {
-            self.init(package: .init(trunk[..<slash]),
-                ref: trunk[trunk.index(after: slash)...])
+            self.init(
+                package: .init(description[..<slash]),
+                ref: .init(description[description.index(after: slash)...]))
         }
         else
         {
-            self.init(package: .init(trunk), ref: nil)
+            return nil
         }
     }
 }

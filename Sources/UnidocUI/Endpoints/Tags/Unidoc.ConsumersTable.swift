@@ -6,30 +6,21 @@ extension Unidoc
 {
     struct ConsumersTable
     {
-        private
-        let dependency:Symbol.Package
-        private
+        let package:Symbol.Package
         let rows:[PackageDependent]
 
-        init(dependency:Symbol.Package, rows:[PackageDependent])
+        init(package:Symbol.Package, rows:[PackageDependent])
         {
-            self.dependency = dependency
+            self.package = package
             self.rows = rows
         }
     }
-}
-extension Unidoc.ConsumersTable:RandomAccessCollection
-{
-    var startIndex:Int { self.rows.startIndex }
-    var endIndex:Int { self.rows.endIndex }
-
-    subscript(index:Int) -> Row { .init(dependent: self.rows[index]) }
 }
 extension Unidoc.ConsumersTable:Unidoc.IterableTable
 {
     func more(page index:Int) -> URI
     {
-        Unidoc.ConsumersEndpoint[self.dependency, page: index]
+        Unidoc.ConsumersEndpoint[self.package, page: index]
     }
 }
 extension Unidoc.ConsumersTable:HTML.OutputStreamable
@@ -55,9 +46,35 @@ extension Unidoc.ConsumersTable:HTML.OutputStreamable
 
         table[.tbody]
         {
-            for row:Row in self
+            for row:Unidoc.PackageDependent in self.rows
             {
-                $0[.tr] = row
+                $0[.tr]
+                {
+                    $0[.td]
+                    {
+                        $0[.a]
+                        {
+                            $0.href = "\(Unidoc.RefsEndpoint[row.package.symbol])"
+                        } = "\(row.package.symbol)"
+                    }
+
+                    $0[.td] { $0.class = "ref" } = row.edition.name
+
+                    $0[.td, { $0.class = "version" }]
+                    {
+                        guard
+                        let volume:Unidoc.VolumeMetadata = row.volume
+                        else
+                        {
+                            return
+                        }
+
+                        $0[.a]
+                        {
+                            $0.href = "\(Unidoc.DocsEndpoint[volume])"
+                        } = volume.symbol.version
+                    }
+                }
             }
         }
     }

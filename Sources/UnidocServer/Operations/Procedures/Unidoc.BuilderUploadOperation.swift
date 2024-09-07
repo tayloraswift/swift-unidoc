@@ -8,6 +8,7 @@ import S3Client
 import SymbolGraphs
 import UnidocDB
 import UnidocRecords
+import UnixTime
 
 extension Unidoc
 {
@@ -33,51 +34,53 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
         {
         case .report:
             let report:Unidoc.BuildReport = try .init(bson: bson)
-            try await db.packageBuilds.updateBuild(
-                package: report.package,
-                entered: report.entered)
+            try await db.pendingBuilds.updateBuild(id: report.edition, entered: report.entered)
 
         case .labeled:
-            var artifact:Unidoc.BuildArtifact = try .init(bson: bson)
-            let logs:[Unidoc.BuildLogType]
+            var build:Unidoc.BuildArtifact = try .init(bson: bson)
 
-            switch artifact.outcome
+            guard
+            let pending:Unidoc.PendingBuild = try await db.pendingBuilds.finishBuild(
+                id: build.edition),
+            let launched:UnixMillisecond = pending.launched
+            else
             {
-            case .failure(let reason):
-                logs = try await artifact.export(from: server)
-                try await db.packageBuilds.finishBuild(
-                    package: artifact.package,
-                    failure: reason,
-                    logs: logs)
+                return .notFound("Build not found or timed-out\n")
+            }
 
-            case .success(let snapshot):
+            let duration:Seconds = .seconds(build.seconds)
+            let finished:UnixMillisecond = launched.advanced(by: .init(duration))
+
+            /// The logs are secret if the builder indicated that they are.
+            ///
+            /// Log secrecy is on a per-build basis, so that repositories can be made public
+            /// without accidentally exposing sensitive logs from the past.
+            ///
+            /// Log secrecy is determined when the build starts, not when it finishes, to
+            /// avoid leaking secrets if a repository is made public while a build is running.
+            var complete:Unidoc.CompleteBuild = .init(id: .init(
+                    edition: pending.id,
+                    run: pending.run),
+                launched: launched,
+                finished: finished,
+                failure: build.failure,
+                name: pending.name,
+                logs: [],
+                logsAreSecret: build.logsAreSecret)
+
+            complete.logs = try await build.export(as: complete.id, from: server)
+
+            try await db.completeBuilds.upsert(complete)
+
+            if  case .success(let snapshot) = build.outcome
+            {
+                try await db.snapshots.upsert(snapshot)
+
                 /// A successful (labeled) build also sets the platform preference, since we now
                 /// know that the package can be built on that platform.
-                let _metadata:Unidoc.PackageMetadata? = try await db.packages.reset(
+                let _:Unidoc.PackageMetadata? = try await db.packages.reset(
                     platformPreference: snapshot.metadata.triple,
                     of: snapshot.id.package)
-
-                /// Right now, exporting build logs for private repositories is a security
-                /// hazard, because the logs contain secrets, and the log URLs are easily
-                /// predicted. For now, we just discard the logs for private repositories.
-                let _logsIncluded:Bool
-                if  case true? = _metadata?.repo?.private
-                {
-                    _logsIncluded = false
-                }
-                else
-                {
-                    _logsIncluded = true
-                }
-
-                logs = try await artifact.export(from: server, _logsIncluded: _logsIncluded)
-
-                try await db.packageBuilds.finishBuild(
-                    package: artifact.package,
-                    failure: nil,
-                    logs: logs)
-
-                try await db.snapshots.upsert(snapshot)
             }
 
         case .labeling:
@@ -98,7 +101,6 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
                 try await snapshot.moveSymbolGraph(to: s3)
             }
 
-            try await db.packageBuilds.finishBuild(package: snapshot.id.package)
             try await db.snapshots.upsert(snapshot)
         }
 

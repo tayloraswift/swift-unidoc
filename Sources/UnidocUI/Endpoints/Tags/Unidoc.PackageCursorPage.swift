@@ -5,32 +5,34 @@ import URI
 
 extension Unidoc
 {
-    struct ConsumersPage
+    struct PackageCursorPage<Table> where Table:IterableTable & HTML.OutputStreamable
     {
+        let location:URI
+
         private
         let package:PackageMetadata
         private
-        let page:Paginated<ConsumersTable>
+        let content:Paginated<Table>
+        private
+        let name:String
 
-        init(package:PackageMetadata, table page:Paginated<ConsumersTable>)
+        init(location:URI, package:PackageMetadata, content:Paginated<Table>, name:String)
         {
+            self.location = location
             self.package = package
-            self.page = page
+            self.content = content
+            self.name = name
         }
     }
 }
-extension Unidoc.ConsumersPage:Unidoc.RenderablePage
+extension Unidoc.PackageCursorPage:Unidoc.RenderablePage
 {
-    var title:String { "Consumers · \(self.package.symbol)" }
+    var title:String { "\(self.name) · \(self.package.symbol)" }
 }
-extension Unidoc.ConsumersPage:Unidoc.StaticPage
+extension Unidoc.PackageCursorPage:Unidoc.StaticPage
 {
-    var location:URI
-    {
-        Unidoc.ConsumersEndpoint[self.package.symbol, page: self.page.index]
-    }
 }
-extension Unidoc.ConsumersPage:Unidoc.ApplicationPage
+extension Unidoc.PackageCursorPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
@@ -51,7 +53,7 @@ extension Unidoc.ConsumersPage:Unidoc.ApplicationPage
 
         main[.section, { $0.class = "details" }]
         {
-            $0 += self.page
+            $0 += self.content
 
             $0[.a]
             {

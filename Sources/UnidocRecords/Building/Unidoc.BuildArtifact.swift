@@ -7,24 +7,40 @@ extension Unidoc
     struct BuildArtifact:Sendable
     {
         public
-        let package:Package
+        let edition:Edition
         public
         var outcome:Result<Snapshot, BuildFailure>
         public
         var seconds:Int64
         public
         var logs:[BuildLog]
+        public
+        var logsAreSecret:Bool
 
         @inlinable public
-        init(package:Package,
+        init(edition:Edition,
             outcome:Result<Snapshot, BuildFailure>,
             seconds:Int64 = 0,
-            logs:[BuildLog] = [])
+            logs:[BuildLog] = [],
+            logsAreSecret:Bool = false)
         {
-            self.package = package
+            self.edition = edition
             self.seconds = seconds
             self.outcome = outcome
             self.logs = logs
+            self.logsAreSecret = logsAreSecret
+        }
+    }
+}
+extension Unidoc.BuildArtifact
+{
+    @inlinable public
+    var failure:Unidoc.BuildFailure?
+    {
+        switch self.outcome
+        {
+        case .success:              nil
+        case .failure(let failure): failure
         }
     }
 }
@@ -33,11 +49,12 @@ extension Unidoc.BuildArtifact
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case package = "P"
+        case edition = "e"
         case payload = "S"
         case failure = "F"
         case seconds = "D"
         case logs = "L"
+        case logsAreSecret = "A"
     }
 }
 extension Unidoc.BuildArtifact:BSONDocumentEncodable
@@ -45,7 +62,7 @@ extension Unidoc.BuildArtifact:BSONDocumentEncodable
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.package] = self.package
+        bson[.edition] = self.edition
 
         switch self.outcome
         {
@@ -55,6 +72,7 @@ extension Unidoc.BuildArtifact:BSONDocumentEncodable
 
         bson[.seconds] = self.seconds
         bson[.logs] = self.logs.isEmpty ? nil : self.logs
+        bson[.logsAreSecret] = self.logsAreSecret
     }
 }
 extension Unidoc.BuildArtifact:BSONDocumentDecodable
@@ -74,9 +92,10 @@ extension Unidoc.BuildArtifact:BSONDocumentDecodable
         }
 
         self.init(
-            package: try bson[.package].decode(),
+            edition: try bson[.edition].decode(),
             outcome: outcome,
             seconds: try bson[.seconds].decode(),
-            logs: try bson[.logs]?.decode() ?? [])
+            logs: try bson[.logs]?.decode() ?? [],
+            logsAreSecret: try bson[.logsAreSecret].decode())
     }
 }

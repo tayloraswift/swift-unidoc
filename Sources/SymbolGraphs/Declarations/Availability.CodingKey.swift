@@ -31,6 +31,7 @@ extension Availability.CodingKey:RawRepresentable
         case "m":   self.init(.platform(.macOS))
         case "c":   self.init(.platform(.macCatalyst))
         case "t":   self.init(.platform(.tvOS))
+        case "v":   self.init(.platform(.visionOS))
         case "w":   self.init(.platform(.watchOS))
         case "n":   self.init(.platform(.windows))
         case "o":   self.init(.platform(.openBSD))
@@ -54,6 +55,7 @@ extension Availability.CodingKey:RawRepresentable
         case .platform(.macOS):                             "m"
         case .platform(.macCatalyst):                       "c"
         case .platform(.tvOS):                              "t"
+        case .platform(.visionOS):                          "v"
         case .platform(.watchOS):                           "w"
         case .platform(.windows):                           "n"
         case .platform(.openBSD):                           "o"

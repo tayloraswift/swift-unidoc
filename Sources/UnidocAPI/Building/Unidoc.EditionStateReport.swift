@@ -63,7 +63,7 @@ extension Unidoc.EditionStateReport
             }
         }
         else if
-            let stage:Unidoc.BuildStage = build.stage
+            let stage:Unidoc.BuildStage = build.pending
         {
             switch stage
             {
@@ -75,20 +75,7 @@ extension Unidoc.EditionStateReport
         }
         else
         {
-            switch build.request?.version
-            {
-            case .latest?:
-                return .QUEUED_FLOATING_VERSION
-
-            case .id(self.id)?:
-                return .QUEUED
-
-            case .id?:
-                return .QUEUED_DIFFERENT_VERSION
-
-            case .none:
-                return .DEFAULT
-            }
+            return self.id == build.request ? .QUEUED : .QUEUED_DIFFERENT_VERSION
         }
     }
 }
