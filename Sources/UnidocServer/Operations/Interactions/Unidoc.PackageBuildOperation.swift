@@ -38,9 +38,7 @@ extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         guard
-        let outputs:Unidoc.EditionOutput = try await db.edition(
-            package: self.symbol.package,
-            version: .name(self.symbol.ref)),
+        let outputs:Unidoc.EditionOutput = try await db.edition(named: self.symbol),
         let edition:Unidoc.EditionMetadata = outputs.edition
         else
         {
