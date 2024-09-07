@@ -11,13 +11,13 @@ extension Unidoc
         public
         let edition:Unidoc.Edition
         public
-        let date:UnixMillisecond
+        let run:UnixMillisecond
 
         @inlinable public
-        init(edition:Unidoc.Edition, date:UnixMillisecond)
+        init(edition:Unidoc.Edition, run:UnixMillisecond)
         {
             self.edition = edition
-            self.date = date
+            self.run = run
         }
     }
 }
@@ -27,7 +27,7 @@ extension Unidoc.BuildIdentifier:Mongo.MasterCodingModel
     enum CodingKey:String, Sendable, BSONDecodable
     {
         case edition = "e"
-        case date = "T"
+        case run = "T"
     }
 }
 extension Unidoc.BuildIdentifier:BSONDocumentEncodable
@@ -36,7 +36,7 @@ extension Unidoc.BuildIdentifier:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.edition] = self.edition
-        bson[.date] = self.date
+        bson[.run] = self.run
     }
 }
 extension Unidoc.BuildIdentifier:BSONDocumentDecodable
@@ -44,6 +44,6 @@ extension Unidoc.BuildIdentifier:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(edition: try bson[.edition].decode(), date: try bson[.date].decode())
+        self.init(edition: try bson[.edition].decode(), run: try bson[.run].decode())
     }
 }

@@ -58,12 +58,28 @@ extension Unidoc.RefStateOperation:Unidoc.PublicOperation
             return .resource("No such edition\n", status: 404)
         }
 
+        let status:Unidoc.BuildStatus?
+
+        if  let pending:Unidoc.PendingBuild = ref.build
+        {
+            status = .init(request: pending.id, pending: pending.stage, failure: nil)
+        }
+        else if
+            let complete:Unidoc.CompleteBuild = ref.built
+        {
+            status = .init(
+                request: complete.id.edition,
+                pending: nil,
+                failure: complete.failure)
+        }
+        else
+        {
+            status = nil
+        }
+
         let report:Unidoc.EditionStateReport = .init(id: ref.version.edition.id,
             volume: ref.version.volume?.symbol,
-            build: ref.build.map
-            {
-                .init(request: $0.request, stage: $0.progress?.stage, failure: $0.failure)
-            },
+            build: status,
             graph: ref.version.graph.map
             {
                 .init(action: $0.action, commit: $0.commit)

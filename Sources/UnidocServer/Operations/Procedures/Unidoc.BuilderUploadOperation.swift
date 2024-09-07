@@ -60,7 +60,7 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
             /// avoid leaking secrets if a repository is made public while a build is running.
             var complete:Unidoc.CompleteBuild = .init(id: .init(
                     edition: pending.id,
-                    date: pending.date),
+                    run: pending.run),
                 launched: launched,
                 finished: finished,
                 failure: build.failure,

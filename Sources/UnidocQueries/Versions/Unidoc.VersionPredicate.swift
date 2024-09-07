@@ -1,5 +1,4 @@
 import MongoQL
-import UnidocAPI
 
 extension Unidoc
 {
