@@ -10,6 +10,7 @@ extension Availability
         case macCatalyst
         case openBSD    = "OpenBSD"
         case tvOS
+        case visionOS
         case watchOS
         case windows    = "Windows"
 
@@ -41,6 +42,7 @@ extension Availability.PlatformDomain:CustomStringConvertible
         case .macCatalyst:                      "Mac Catalyst"
         case .openBSD:                          "OpenBSD"
         case .tvOS:                             "tvOS"
+        case .visionOS:                         "visionOS"
         case .watchOS:                          "watchOS"
         case .windows:                          "Windows"
         case .iOSApplicationExtension:          "iOS App Extension"
