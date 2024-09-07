@@ -13,15 +13,22 @@ extension Unidoc
         public
         let version:VersionState
         public
-        let build:BuildMetadata?
+        let build:PendingBuild?
+        public
+        let built:CompleteBuild?
         public
         let owner:User?
 
-        init(package:PackageMetadata, version:VersionState, build:BuildMetadata?, owner:User?)
+        init(package:PackageMetadata,
+            version:VersionState,
+            build:PendingBuild?,
+            built:CompleteBuild?,
+            owner:User?)
         {
             self.package = package
             self.version = version
             self.build = build
+            self.built = built
             self.owner = owner
         }
     }
@@ -34,6 +41,7 @@ extension Unidoc.RefState:Mongo.MasterCodingModel
         case package
         case version
         case build
+        case built
         case owner
     }
 }
@@ -46,6 +54,7 @@ extension Unidoc.RefState:BSONDocumentDecodable
             package: try bson[.package].decode(),
             version: try bson[.version].decode(),
             build: try bson[.build]?.decode(),
+            built: try bson[.built]?.decode(),
             owner: try bson[.owner]?.decode())
     }
 }

@@ -12,6 +12,9 @@ extension Unidoc
     {
         public
         let id:Edition
+        /// This is used to identify the build when it completes.
+        public
+        let run:UnixMillisecond
 
         public
         let enqueued:UnixMillisecond?
@@ -23,28 +26,26 @@ extension Unidoc
         public
         var stage:BuildStage?
 
-        /// This is used to identify the build when it completes.
-        public
-        let date:UnixMillisecond
         /// Used for display purposes only.
         public
         let name:Symbol.PackageAtRef
 
+
         @inlinable public
         init(id:Edition,
+            run:UnixMillisecond,
             enqueued:UnixMillisecond?,
             launched:UnixMillisecond?,
             assignee:Account?,
             stage:BuildStage?,
-            date:UnixMillisecond,
             name:Symbol.PackageAtRef)
         {
             self.id = id
+            self.run = run
             self.enqueued = enqueued
             self.launched = launched
             self.assignee = assignee
             self.stage = stage
-            self.date = date
             self.name = name
         }
     }
@@ -55,11 +56,11 @@ extension Unidoc.PendingBuild:Mongo.MasterCodingModel
     enum CodingKey:String, Sendable, BSONDecodable
     {
         case id = "_id"
+        case run = "T"
         case enqueued = "Q"
         case launched = "L"
         case assignee = "A"
         case stage = "S"
-        case date = "T"
         case name = "N"
 
         case package = "p"
@@ -71,11 +72,11 @@ extension Unidoc.PendingBuild:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
+        bson[.run] = self.run
         bson[.enqueued] = self.enqueued
         bson[.launched] = self.launched
         bson[.assignee] = self.assignee
         bson[.stage] = self.stage
-        bson[.date] = self.date
         bson[.name] = self.name
 
         bson[.package] = self.id.package
@@ -87,11 +88,11 @@ extension Unidoc.PendingBuild:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
+            run: try bson[.run].decode(),
             enqueued: try bson[.enqueued]?.decode(),
             launched: try bson[.launched]?.decode(),
             assignee: try bson[.assignee]?.decode(),
             stage: try bson[.stage]?.decode(),
-            date: try bson[.date].decode(),
             name: try bson[.name].decode())
     }
 }

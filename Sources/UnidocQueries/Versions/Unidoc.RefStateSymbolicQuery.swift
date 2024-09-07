@@ -44,17 +44,26 @@ extension Unidoc.RefStateSymbolicQuery:Unidoc.AliasingQuery
             owning: Unidoc.RefState[.package],
             as: Unidoc.RefState[.owner])
 
+        Unidoc.CompleteBuildsPageSegment.bridge(pipeline: &pipeline,
+            limit: 1,
+            from: Self.target,
+            into: Unidoc.RefState[.built])
+
         pipeline[stage: .lookup]
         {
-            $0[.from] = Unidoc.DB.PackageBuilds.name
-            $0[.localField] = Unidoc.RefState[.package] / Unidoc.PackageMetadata[.id]
-            $0[.foreignField] = Unidoc.BuildMetadata[.id]
+            $0[.from] = Unidoc.DB.PendingBuilds.name
+            $0[.localField] = Unidoc.RefState[.version]
+                / Unidoc.VersionState[.edition]
+                / Unidoc.EditionMetadata[.id]
+
+            $0[.foreignField] = Unidoc.PendingBuild[.id]
             $0[.as] = Unidoc.RefState[.build]
         }
 
         pipeline[stage: .set, using: Unidoc.RefState.CodingKey.self]
         {
             $0[.build] { $0[.first] = Unidoc.RefState[.build] }
+            $0[.built] { $0[.first] = Unidoc.RefState[.built] }
         }
     }
 }

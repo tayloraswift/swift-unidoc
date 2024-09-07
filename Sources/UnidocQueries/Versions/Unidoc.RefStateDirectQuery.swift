@@ -4,6 +4,7 @@ import UnidocDB
 
 extension Unidoc
 {
+    /// Note that this query does not return information about builds.
     struct RefStateDirectQuery
     {
         let package:Package
