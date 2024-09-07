@@ -22,8 +22,8 @@ extension Unidoc.BuilderLabelOperation:Unidoc.MachineOperation
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         guard
-        let edition:Unidoc.EditionState = try await db.editionState(of: self.request.version),
-        let labels:Unidoc.BuildLabels = try await server.github?.resolve(edition,
+        let ref:Unidoc.RefState = try await db.ref(of: self.request.version),
+        let labels:Unidoc.BuildLabels = try await server.github?.resolve(ref,
             rebuild: self.request.rebuild)
         else
         {

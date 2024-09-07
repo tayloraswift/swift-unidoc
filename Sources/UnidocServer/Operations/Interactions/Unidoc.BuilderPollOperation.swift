@@ -30,7 +30,7 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
 
         /// If the builder is recovering from a crash, kill any builds that had previously been
         /// assigned to it.
-        let _:Int = try await db.packageBuilds.killBuilds(builder: self.id)
+        let _:Int = try await db.pendingBuilds.killBuilds(by: self.id)
 
         let labels:Unidoc.BuildLabels? = try await withThrowingTaskGroup(
             of: Unidoc.BuildLabels?.self)

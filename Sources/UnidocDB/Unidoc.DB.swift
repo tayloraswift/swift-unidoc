@@ -54,6 +54,18 @@ extension Unidoc.DB
     }
 
     @inlinable public
+    var pendingBuilds:PendingBuilds
+    {
+        .init(database: self.id, session: self.session)
+    }
+
+    @inlinable public
+    var completeBuilds:CompleteBuilds
+    {
+        .init(database: self.id, session: self.session)
+    }
+
+    @inlinable public
     var repoFeed:RepoFeed
     {
         .init(database: self.id, session: self.session)
@@ -79,12 +91,6 @@ extension Unidoc.DB
 
     @inlinable public
     var packageAliases:PackageAliases
-    {
-        .init(database: self.id, session: self.session)
-    }
-
-    @inlinable public
-    var packageBuilds:PackageBuilds
     {
         .init(database: self.id, session: self.session)
     }
@@ -176,11 +182,12 @@ extension Unidoc.DB:Mongo.DatabaseModel
         try await self.crawlingWindows.setup()
         try await self.repoFeed.setup()
         try await self.docsFeed.setup()
+        try await self.pendingBuilds.setup()
+        try await self.completeBuilds.setup()
 
         try await self.realmAliases.setup()
         try await self.realms.setup()
         try await self.packageAliases.setup()
-        try await self.packageBuilds.setup()
         try await self.packages.setup()
         try await self.editions.setup()
         try await self.snapshots.setup()

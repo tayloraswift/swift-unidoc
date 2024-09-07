@@ -1,17 +1,21 @@
+import UnidocRecords
+import UnixCalendar
+import UnixTime
+
 extension Unidoc
 {
     @frozen public
     struct BuildLogPath
     {
         public
-        let package:Package
+        let id:BuildIdentifier
         public
         let type:BuildLogType
 
         @inlinable public
-        init(package:Package, type:BuildLogType)
+        init(id:BuildIdentifier, type:BuildLogType)
         {
-            self.package = package
+            self.id = id
             self.type = type
         }
     }
@@ -23,7 +27,12 @@ extension Unidoc.BuildLogPath
     var prefix:String
     {
         //  As this is public-facing, we want it to be at least somewhat human-readable.
-        "builds/\(self.package)/\(self.type.name).log"
+        """
+        logs/\
+        \(self.id.run.timestamp?.date.description ?? "0000-00-00")/\
+        \(self.id.edition.package)/\
+        \(self.id.edition.version).\(self.type.name).log
+        """
     }
 }
 extension Unidoc.BuildLogPath:CustomStringConvertible

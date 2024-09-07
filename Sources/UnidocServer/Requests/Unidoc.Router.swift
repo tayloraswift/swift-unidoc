@@ -137,6 +137,20 @@ extension Unidoc.Router
 
         return .init(next)
     }
+
+    mutating
+    func descendIntoRef() -> Symbol.PackageAtRef?
+    {
+        guard
+        let package:Symbol.Package = self.descend(),
+        let name:String = self.descend()
+        else
+        {
+            return nil
+        }
+
+        return .init(package: package, ref: name)
+    }
 }
 extension Unidoc.Router
 {
@@ -232,10 +246,11 @@ extension Unidoc.Router
         case .really:       return nil // POST only
         case .realm:        return self.realm()
         case .reference:    return self.docsLegacy()
-        case .ref:          return self.ref(form: nil)
+        case .ref:          return self.ref()
         case .render:       return self.render()
         case .robots_txt:   return self.robots()
         case .rules:        return self.rules()
+        case .runs:         return self.runs()
         case .sitemap_xml:  return self.sitemap()
         case .sitemaps:     return self.sitemaps()
         case .stats:        return self.stats()
@@ -407,6 +422,53 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
+    func ref() -> Unidoc.AnyOperation?
+    {
+        guard
+        let symbol:Symbol.PackageAtRef = self.descendIntoRef()
+        else
+        {
+            return nil
+        }
+
+        guard
+        case "state" = self.descend()
+        else
+        {
+            return nil
+        }
+
+        return .unordered(Unidoc.RefStateOperation.init(
+            authorization: self.authorization,
+            symbol: symbol))
+    }
+
+    private mutating
+    func ref(form _:URI.Query) -> Unidoc.AnyOperation?
+    {
+        guard
+        let account:Unidoc.Account = self.authorization.account,
+        let symbol:Symbol.PackageAtRef = self.descendIntoRef()
+        else
+        {
+            return nil
+        }
+
+        guard
+        case "build" = self.descend()
+        else
+        {
+            return nil
+        }
+
+        return .unordered(Unidoc.RefBuildOperation.init(account: account,
+            symbol: symbol,
+            action: .submit))
+    }
+}
+extension Unidoc.Router
+{
+    private mutating
     func builder() -> Unidoc.AnyOperation?
     {
         switch self.descend()
@@ -453,11 +515,11 @@ extension Unidoc.Router
         {
         case .build:
             if  let account:Unidoc.Account = self.authorization.account,
-                let build:Unidoc.PackageBuildOperation.DirectParameters = .init(from: form)
+                let build:Unidoc.BuildForm = .init(from: form)
             {
-                return .unordered(Unidoc.PackageBuildOperation.init(
+                return .unordered(Unidoc.RefBuildOperation.init(
                     account: account,
-                    build: build))
+                    form: build))
             }
 
         case .packageAlias:
@@ -837,48 +899,6 @@ extension Unidoc.Router
     }
 
     private mutating
-    func ref(form:URI.Query?) -> Unidoc.AnyOperation?
-    {
-        guard
-        let symbol:Symbol.Package = self.descend(),
-        let name:String = self.descend()
-        else
-        {
-            return nil
-        }
-
-        guard let next:String = self.descend()
-        else
-        {
-            return nil
-        }
-
-        switch next
-        {
-        case "build":
-            guard
-            let account:Unidoc.Account = self.authorization.account
-            else
-            {
-                return nil
-            }
-
-            return .unordered(Unidoc.PackageBuildOperation.init(account: account,
-                action: .submitSymbolic(.init(package: symbol, ref: name)),
-                redirect: symbol))
-
-        case "state":
-            return .unordered(Unidoc.LoadEditionStateOperation.init(
-                authorization: self.authorization,
-                package: symbol,
-                version: .name(name)))
-
-        default:
-            return nil
-        }
-    }
-
-    private mutating
     func render() -> Unidoc.AnyOperation?
     {
         guard
@@ -917,15 +937,13 @@ extension Unidoc.Router
         {
         case .build:
             guard
-            let build:Unidoc.PackageBuildOperation.DirectParameters = .init(from: table)
+            let form:Unidoc.BuildForm = .init(from: table)
             else
             {
                 return nil
             }
 
-            return .syncHTML(Unidoc.BuildRequestPage.init(symbols: build.symbols,
-                cancel: build.request == nil,
-                action: uri))
+            return .syncHTML(Unidoc.BuildRequestPage.init(form: form, action: uri))
 
         case .unlink:
             really = .unlink(uri)
@@ -1074,7 +1092,7 @@ extension Unidoc.Router
     private mutating
     func consumers() -> Unidoc.AnyOperation?
     {
-        guard let symbol:Symbol.Package = self.descend()
+        guard let package:Symbol.Package = self.descend()
         else
         {
             return nil
@@ -1082,7 +1100,28 @@ extension Unidoc.Router
 
         let parameters:Unidoc.PipelineParameters = .init(self.query)
         return .explainable(Unidoc.ConsumersEndpoint.init(query: .init(
-                symbol: symbol,
+                symbol: package,
+                limit: 20,
+                page: parameters.page ?? 0,
+                as: self.authorization.account)),
+            parameters: parameters,
+            etag: self.etag)
+    }
+
+    private mutating
+    func runs() -> Unidoc.AnyOperation?
+    {
+        guard
+        let package:Symbol.Package = self.descend()
+        else
+        {
+            return nil
+        }
+
+        let parameters:Unidoc.PipelineParameters = .init(self.query)
+
+        return .explainable(Unidoc.CompleteBuildsEndpoint.init(query: .init(
+                symbol: package,
                 limit: 20,
                 page: parameters.page ?? 0,
                 as: self.authorization.account)),

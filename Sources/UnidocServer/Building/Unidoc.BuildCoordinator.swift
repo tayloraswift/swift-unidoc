@@ -88,8 +88,7 @@ extension Unidoc.BuildCoordinator
         let db:Unidoc.DB = try await db.session()
 
         guard
-        let metadata:Unidoc.BuildMetadata = try await db.packageBuilds.selectBuild(await: true),
-        let request:Unidoc.BuildRequest<Void> = metadata.request
+        let pending:Unidoc.PendingBuild = try await db.pendingBuilds.selectBuild(await: true)
         else
         {
             throw Unidoc.BuildCoordinatorAssertionError.invalidChangeStreamElement
@@ -105,8 +104,7 @@ extension Unidoc.BuildCoordinator
         try await withCheckedThrowingContinuation
         {
             let notification:Notification = .init(appeared: clusterTime,
-                package: metadata.id,
-                request: request,
+                request: pending.id,
                 producer: $0)
 
             self.eventQueue.yield(.notify(notification))

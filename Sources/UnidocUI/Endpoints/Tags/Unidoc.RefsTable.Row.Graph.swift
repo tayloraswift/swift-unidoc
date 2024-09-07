@@ -7,14 +7,14 @@ extension Unidoc.RefsTable.Row
     struct Graph
     {
         private
-        let symbol:Symbol.Edition
+        let symbol:Symbol.PackageAtRef
 
         private
         let state:State
         private
         let view:Unidoc.Permissions
 
-        init(symbol:Symbol.Edition,
+        init(symbol:Symbol.PackageAtRef,
             state:State,
             view:Unidoc.Permissions)
         {
@@ -107,9 +107,9 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                         $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
                         $0.action = "\(Unidoc.Post[.build, confirm: true])"
                         $0.method = "post"
-                    } = Unidoc.BuildButton.edition(id: self.id,
-                        package: self.symbol.package,
-                        ref: self.symbol.ref)
+                    } = Unidoc.BuildFormTool.init(
+                        form: .init(symbol: self.symbol, action: .submit),
+                        area: .init(text: nil, type: .inline))
                 }
 
                 guard

@@ -6,9 +6,9 @@
 @import 'Calendar';
 @import 'Cards';
 @import 'code';
-@import 'div.build-pipeline';
 @import 'div.columns';
 @import 'div.constraints';
+@import 'div.hstack';
 @import 'div.menu';
 @import 'div.more';
 @import 'div.sidebar';
@@ -24,6 +24,7 @@
 @import 'nav.paginator';
 @import 'Notices';
 @import 'ol';
+@import 'ol.builds-pending';
 @import 'p';
 @import 'pre';
 @import 'Search';

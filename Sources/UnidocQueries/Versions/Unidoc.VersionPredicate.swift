@@ -1,9 +1,7 @@
 import MongoQL
-import UnidocAPI
 
 extension Unidoc
 {
-    @frozen public
     enum VersionPredicate:Sendable
     {
         case latest(VersionSeries)

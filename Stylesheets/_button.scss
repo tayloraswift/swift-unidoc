@@ -49,7 +49,12 @@ button.text:active
     color: var(--fg-accent);
     text-underline-offset: 0.35em;
 }
-button.text:hover
+button[disabled].text
+{
+    color: var(--fg-semi);
+    cursor: not-allowed;
+}
+button:not([disabled]).text:hover
 {
     text-decoration: underline;
 }
