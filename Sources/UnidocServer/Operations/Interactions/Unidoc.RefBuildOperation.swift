@@ -6,15 +6,15 @@ import UnidocUI
 
 extension Unidoc
 {
-    struct PackageBuildOperation:MeteredOperation
+    struct RefBuildOperation:MeteredOperation
     {
         let account:Account
         let symbol:Symbol.PackageAtRef
-        let action:Unidoc.BuildForm.Action
+        let action:BuildForm.Action
 
-        var rights:Unidoc.UserRights
+        var rights:UserRights
 
-        init(account:Account, symbol:Symbol.PackageAtRef, action:Unidoc.BuildForm.Action)
+        init(account:Account, symbol:Symbol.PackageAtRef, action:BuildForm.Action)
         {
             self.account = account
             self.symbol = symbol
@@ -24,14 +24,14 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackageBuildOperation
+extension Unidoc.RefBuildOperation
 {
     init(account:Unidoc.Account, form:Unidoc.BuildForm)
     {
         self.init(account: account, symbol: form.symbol, action: form.action)
     }
 }
-extension Unidoc.PackageBuildOperation:Unidoc.RestrictedOperation
+extension Unidoc.RefBuildOperation:Unidoc.RestrictedOperation
 {
     func load(from server:Unidoc.Server,
         db:Unidoc.DB,

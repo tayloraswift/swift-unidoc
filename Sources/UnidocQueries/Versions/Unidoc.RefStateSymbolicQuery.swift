@@ -5,7 +5,7 @@ import UnidocDB
 
 extension Unidoc
 {
-    struct EditionStateSymbolicQuery
+    struct RefStateSymbolicQuery
     {
         let package:Symbol.Package
         let version:VersionPredicate
@@ -17,11 +17,11 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.EditionStateSymbolicQuery:Mongo.PipelineQuery
+extension Unidoc.RefStateSymbolicQuery:Mongo.PipelineQuery
 {
-    typealias Iteration = Mongo.Single<Unidoc.EditionState>
+    typealias Iteration = Mongo.Single<Unidoc.RefState>
 }
-extension Unidoc.EditionStateSymbolicQuery:Unidoc.AliasingQuery
+extension Unidoc.RefStateSymbolicQuery:Unidoc.AliasingQuery
 {
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
     typealias CollectionTarget = Unidoc.DB.Packages
@@ -29,32 +29,32 @@ extension Unidoc.EditionStateSymbolicQuery:Unidoc.AliasingQuery
     var symbol:Symbol.Package { self.package }
 
     static
-    var target:Mongo.AnyKeyPath { Unidoc.EditionState[.package] }
+    var target:Mongo.AnyKeyPath { Unidoc.RefState[.package] }
 
     func extend(pipeline:inout Mongo.PipelineEncoder)
     {
         pipeline.loadTags(matching: self.version,
-            from: Unidoc.EditionState[.package],
-            into: Unidoc.EditionState[.version])
+            from: Unidoc.RefState[.package],
+            into: Unidoc.RefState[.version])
 
         //  Unbox single-element array.
-        pipeline[stage: .unwind] = Unidoc.EditionState[.version]
+        pipeline[stage: .unwind] = Unidoc.RefState[.version]
 
         pipeline.loadUser(
-            owning: Unidoc.EditionState[.package],
-            as: Unidoc.EditionState[.owner])
+            owning: Unidoc.RefState[.package],
+            as: Unidoc.RefState[.owner])
 
         pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.PackageBuilds.name
-            $0[.localField] = Unidoc.EditionState[.package] / Unidoc.PackageMetadata[.id]
+            $0[.localField] = Unidoc.RefState[.package] / Unidoc.PackageMetadata[.id]
             $0[.foreignField] = Unidoc.BuildMetadata[.id]
-            $0[.as] = Unidoc.EditionState[.build]
+            $0[.as] = Unidoc.RefState[.build]
         }
 
-        pipeline[stage: .set, using: Unidoc.EditionState.CodingKey.self]
+        pipeline[stage: .set, using: Unidoc.RefState.CodingKey.self]
         {
-            $0[.build] { $0[.first] = Unidoc.EditionState[.build] }
+            $0[.build] { $0[.first] = Unidoc.RefState[.build] }
         }
     }
 }

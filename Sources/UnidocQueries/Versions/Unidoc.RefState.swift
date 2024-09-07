@@ -6,7 +6,7 @@ import UnidocRecords
 extension Unidoc
 {
     @frozen public
-    struct EditionState:Sendable
+    struct RefState:Sendable
     {
         public
         let package:PackageMetadata
@@ -26,7 +26,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.EditionState:Mongo.MasterCodingModel
+extension Unidoc.RefState:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -37,7 +37,7 @@ extension Unidoc.EditionState:Mongo.MasterCodingModel
         case owner
     }
 }
-extension Unidoc.EditionState:BSONDocumentDecodable
+extension Unidoc.RefState:BSONDocumentDecodable
 {
     public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
