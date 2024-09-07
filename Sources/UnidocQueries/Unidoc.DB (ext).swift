@@ -25,19 +25,19 @@ extension Unidoc.DB
     }
 
     public
-    func edition(package:Symbol.Package,
-        version:Unidoc.VersionPredicate) async throws -> Unidoc.EditionOutput?
+    func edition(named symbol:Symbol.PackageAtRef) async throws -> Unidoc.EditionOutput?
     {
-        try await self.query(
-            with: Unidoc.EditionMetadataSymbolicQuery.init(package: package, version: version))
+        try await self.query(with: Unidoc.EditionMetadataSymbolicQuery.init(
+            package: symbol.package,
+            version: .name(symbol.ref)))
     }
 
     public
-    func editionState(package:Symbol.Package,
-        version:Unidoc.VersionPredicate) async throws -> Unidoc.EditionState?
+    func editionState(named symbol:Symbol.PackageAtRef) async throws -> Unidoc.EditionState?
     {
-        try await self.query(
-            with: Unidoc.EditionStateSymbolicQuery.init(package: package, version: version))
+        try await self.query(with: Unidoc.EditionStateSymbolicQuery.init(
+            package: symbol.package,
+            version: .name(symbol.ref)))
     }
 
     public

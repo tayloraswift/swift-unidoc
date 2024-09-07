@@ -11,15 +11,12 @@ extension Unidoc
         private
         let authorization:Authorization
         private
-        let package:Symbol.Package
-        private
-        let version:VersionPredicate
+        let symbol:Symbol.PackageAtRef
 
-        init(authorization:Authorization, package:Symbol.Package, version:VersionPredicate)
+        init(authorization:Authorization, symbol:Symbol.PackageAtRef)
         {
             self.authorization = authorization
-            self.package = package
-            self.version = version
+            self.symbol = symbol
         }
     }
 }
@@ -55,9 +52,7 @@ extension Unidoc.LoadEditionStateOperation:Unidoc.PublicOperation
         }
 
         guard
-        let edition:Unidoc.EditionState = try await db.editionState(
-            package: self.package,
-            version: self.version)
+        let edition:Unidoc.EditionState = try await db.editionState(named: self.symbol)
         else
         {
             return .resource("No such edition\n", status: 404)

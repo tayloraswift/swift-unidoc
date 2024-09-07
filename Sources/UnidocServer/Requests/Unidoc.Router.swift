@@ -137,6 +137,20 @@ extension Unidoc.Router
 
         return .init(next)
     }
+
+    mutating
+    func descendIntoRef() -> Symbol.PackageAtRef?
+    {
+        guard
+        let package:Symbol.Package = self.descend(),
+        let name:String = self.descend()
+        else
+        {
+            return nil
+        }
+
+        return .init(package: package, ref: name)
+    }
 }
 extension Unidoc.Router
 {
@@ -232,7 +246,7 @@ extension Unidoc.Router
         case .really:       return nil // POST only
         case .realm:        return self.realm()
         case .reference:    return self.docsLegacy()
-        case .ref:          return self.ref(form: nil)
+        case .ref:          return self.ref()
         case .render:       return self.render()
         case .robots_txt:   return self.robots()
         case .rules:        return self.rules()
@@ -403,6 +417,53 @@ extension Unidoc.Router
         {
             return nil
         }
+    }
+}
+extension Unidoc.Router
+{
+    private mutating
+    func ref() -> Unidoc.AnyOperation?
+    {
+        guard
+        let symbol:Symbol.PackageAtRef = self.descendIntoRef()
+        else
+        {
+            return nil
+        }
+
+        guard
+        case "state" = self.descend()
+        else
+        {
+            return nil
+        }
+
+        return .unordered(Unidoc.LoadEditionStateOperation.init(
+            authorization: self.authorization,
+            symbol: symbol))
+    }
+
+    private mutating
+    func ref(form _:URI.Query) -> Unidoc.AnyOperation?
+    {
+        guard
+        let account:Unidoc.Account = self.authorization.account,
+        let symbol:Symbol.PackageAtRef = self.descendIntoRef()
+        else
+        {
+            return nil
+        }
+
+        guard
+        case "build" = self.descend()
+        else
+        {
+            return nil
+        }
+
+        return .unordered(Unidoc.PackageBuildOperation.init(account: account,
+            symbol: symbol,
+            action: .submit))
     }
 }
 extension Unidoc.Router
@@ -835,48 +896,6 @@ extension Unidoc.Router
                 user: self.authorization.account)),
             parameters: .init(self.query),
             etag: self.etag)
-    }
-
-    private mutating
-    func ref(form:URI.Query?) -> Unidoc.AnyOperation?
-    {
-        guard
-        let symbol:Symbol.Package = self.descend(),
-        let name:String = self.descend()
-        else
-        {
-            return nil
-        }
-
-        guard let next:String = self.descend()
-        else
-        {
-            return nil
-        }
-
-        switch next
-        {
-        case "build":
-            guard
-            let account:Unidoc.Account = self.authorization.account
-            else
-            {
-                return nil
-            }
-
-            return .unordered(Unidoc.PackageBuildOperation.init(account: account,
-                symbol: .init(package: symbol, ref: name),
-                action: .submit))
-
-        case "state":
-            return .unordered(Unidoc.LoadEditionStateOperation.init(
-                authorization: self.authorization,
-                package: symbol,
-                version: .name(name)))
-
-        default:
-            return nil
-        }
     }
 
     private mutating
