@@ -438,7 +438,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .unordered(Unidoc.LoadEditionStateOperation.init(
+        return .unordered(Unidoc.RefStateOperation.init(
             authorization: self.authorization,
             symbol: symbol))
     }
@@ -461,7 +461,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .unordered(Unidoc.PackageBuildOperation.init(account: account,
+        return .unordered(Unidoc.RefBuildOperation.init(account: account,
             symbol: symbol,
             action: .submit))
     }
@@ -517,7 +517,7 @@ extension Unidoc.Router
             if  let account:Unidoc.Account = self.authorization.account,
                 let build:Unidoc.BuildForm = .init(from: form)
             {
-                return .unordered(Unidoc.PackageBuildOperation.init(
+                return .unordered(Unidoc.RefBuildOperation.init(
                     account: account,
                     form: build))
             }

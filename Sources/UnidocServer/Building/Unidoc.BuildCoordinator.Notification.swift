@@ -114,8 +114,8 @@ extension Unidoc.BuildCoordinator.Notification
             return nil
         }
 
-        if  let edition:Unidoc.EditionState = try await db.editionState(of: .id(self.request)),
-            let labels:Unidoc.BuildLabels = try await registrar.resolve(edition, rebuild: true)
+        if  let ref:Unidoc.RefState = try await db.ref(of: .id(self.request)),
+            let labels:Unidoc.BuildLabels = try await registrar.resolve(ref, rebuild: true)
         {
             return labels
         }

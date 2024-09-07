@@ -4,7 +4,7 @@ import UnidocDB
 
 extension Unidoc
 {
-    struct EditionStateDirectQuery
+    struct RefStateDirectQuery
     {
         let package:Package
         let version:VersionSelector
@@ -16,11 +16,11 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.EditionStateDirectQuery:Mongo.PipelineQuery
+extension Unidoc.RefStateDirectQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Unidoc.DB.Packages
     typealias Collation = SimpleCollation
-    typealias Iteration = Mongo.Single<Unidoc.EditionState>
+    typealias Iteration = Mongo.Single<Unidoc.RefState>
 
     var hint:Mongo.CollectionIndex? { nil }
 
@@ -30,7 +30,7 @@ extension Unidoc.EditionStateDirectQuery:Mongo.PipelineQuery
         {
             $0[Unidoc.PackageMetadata[.id]] = self.package
         }
-        pipeline[stage: .replaceWith] = .init(Unidoc.EditionState.CodingKey.self)
+        pipeline[stage: .replaceWith] = .init(Unidoc.RefState.CodingKey.self)
         {
             $0[.package] = Mongo.Pipeline.ROOT
         }
@@ -39,8 +39,8 @@ extension Unidoc.EditionStateDirectQuery:Mongo.PipelineQuery
         {
         case .match(let predicate):
             pipeline.loadTags(matching: predicate,
-                from: Unidoc.EditionState[.package],
-                into: Unidoc.EditionState[.version])
+                from: Unidoc.RefState[.package],
+                into: Unidoc.RefState[.version])
 
         case .exact(let id):
             let id:Unidoc.Edition = .init(package: self.package, version: id)
@@ -66,15 +66,15 @@ extension Unidoc.EditionStateDirectQuery:Mongo.PipelineQuery
                         graph: Unidoc.VersionState[.graph])
                 }
 
-                $0[.as] = Unidoc.EditionState[.version]
+                $0[.as] = Unidoc.RefState[.version]
             }
         }
 
         //  Unbox single-element array.
-        pipeline[stage: .unwind] = Unidoc.EditionState[.version]
+        pipeline[stage: .unwind] = Unidoc.RefState[.version]
 
         pipeline.loadUser(
-            owning: Unidoc.EditionState[.package],
-            as: Unidoc.EditionState[.owner])
+            owning: Unidoc.RefState[.package],
+            as: Unidoc.RefState[.owner])
     }
 }
