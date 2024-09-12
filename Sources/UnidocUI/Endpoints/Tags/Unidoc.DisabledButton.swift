@@ -23,14 +23,9 @@ extension Unidoc.DisabledButton:HTML.OutputStreamable
     {
         form[.button]
         {
-            if  case nil = self.view.global
-            {
-                $0.title = "You are not logged in!"
-            }
-            else
-            {
-                $0.title = "You are not an editor of this package!"
-            }
+            $0.title = self.view.authenticated
+                ? "You are not an editor of this package!"
+                : "You are not logged in!"
 
             $0.class = self.area ? "area" : "text"
             $0.disabled = true

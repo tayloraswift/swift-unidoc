@@ -202,7 +202,7 @@ extension Unidoc.RefsPage
                 $0.class = "area"
                 $0.type = "submit"
 
-                if  case nil = self.view.global
+                if !self.view.authenticated
                 {
                     $0.disabled = true
                     $0.title = "You are not logged in!"
@@ -232,7 +232,7 @@ extension Unidoc.RefsPage
 
         section[.h2] = Heading.settings
 
-        if  case nil = self.view.global
+        if !self.view.authenticated
         {
             section[.p] { $0.class = "note" } = "You are not logged in!"
         }
@@ -281,7 +281,7 @@ extension Unidoc.RefsPage
             {
                 $0 += self.package.hidden ? "yes" : "no"
 
-                if  case .administratrix? = self.view.global
+                if  self.view.admin
                 {
                     //  If package is hidden, we can unhide it without confirmation.
                     let confirm:Bool = !self.package.hidden
@@ -374,7 +374,7 @@ extension Unidoc.RefsPage
         }
 
 
-        if case nil = self.view.global
+        if !self.view.authenticated
         {
             section[.form]
             {
@@ -469,7 +469,7 @@ extension Unidoc.RefsPage
                 $0.class = "area"
                 $0.type = "submit"
 
-                if  case nil = self.view.global
+                if !self.view.authenticated
                 {
                     $0.disabled = true
                     $0.title = "You are not logged in!"
@@ -520,7 +520,7 @@ extension Unidoc.RefsPage
             }
         }
 
-        guard case .administratrix? = self.view.global
+        guard self.view.admin
         else
         {
             return
