@@ -107,7 +107,7 @@ extension Unidoc.CompleteBuildsTable:HTML.OutputStreamable
                         }
 
                         //  You need to be logged in to view build logs.
-                        guard case _? = self.view.global
+                        guard self.view.authenticated
                         else
                         {
                             return

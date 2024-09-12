@@ -50,7 +50,7 @@ extension Unidoc.BuildFormTool
             return .init(form: form, area: area, disabled: .alreadySubmitted)
         }
 
-        guard case _? = view.global
+        guard view.authenticated
         else
         {
             return .init(form: form, area: area, disabled: .unauthenticated)
@@ -77,7 +77,7 @@ extension Unidoc.BuildFormTool
             return .init(form: form, area: area, disabled: .alreadyStarted)
         }
 
-        guard case _? = view.global
+        guard view.authenticated
         else
         {
             return .init(form: form, area: area, disabled: .unauthenticated)
