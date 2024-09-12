@@ -126,7 +126,7 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
                 $0.class = "area"
                 $0.type = "submit"
 
-                if  case nil = self.view.global
+                if !self.view.authenticated
                 {
                     $0.disabled = true
                     $0.title = "You are not logged in!"

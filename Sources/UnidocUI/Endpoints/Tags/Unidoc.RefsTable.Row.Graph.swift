@@ -91,7 +91,8 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
             } = "(\(size >> 10) kb)"
         }
 
-        guard self.view.editor
+        //  You need to be logged-in to see the menu.
+        guard self.view.authenticated
         else
         {
             return
@@ -102,70 +103,89 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
             $0[.button] = "•••"
             $0[.ul]
             {
-                $0[.li]
+                if  self.view.editor
                 {
-                    $0[.form]
+                    $0[.li]
                     {
-                        $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                        $0.action = "\(Unidoc.Post[.build, confirm: true])"
-                        $0.method = "post"
-                    } = Unidoc.BuildFormTool.init(
-                        form: .init(symbol: self.symbol, action: .submit),
-                        area: .init(text: nil, type: .inline))
+                        $0[.form]
+                        {
+                            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                            $0.action = "\(Unidoc.Post[.build, confirm: true])"
+                            $0.method = "post"
+                        } = Unidoc.BuildFormTool.init(
+                            form: .init(symbol: self.symbol, action: .submit),
+                            area: .init(text: nil, type: .inline))
+                    }
                 }
 
                 guard
-                case .administratrix? = self.view.global,
                 case .some(let graph) = self.state
                 else
                 {
                     return
                 }
 
-                for (label, route):(String, Unidoc.LinkerRoute) in [
-                    ("Uplink", .uplink),
-                    ("Unlink", .unlink),
-                    ("Delete", .delete),
-                ]
+                let object:Unidoc.GraphPath = .init(edition: graph.id, type: .bson_zz)
+
+                //  For now, allow all logged-in users to obtain the download link.
+                //  This only makes sense in production.
+                if  self.view.enforced
                 {
                     $0[.li]
                     {
-                        var action:URI = Unidoc.ServerRoot.link / "\(route)"
-
-                        switch route
+                        $0[.a]
                         {
-                        //  Uplink does not require confirmation.
-                        case .uplink:   break
-                        case .unlink:   action["y"] = "false"
-                        case .delete:   action["y"] = "false"
-                        }
-
-                        $0[.form]
-                        {
-                            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                            $0.action = "\(action)"
-                            $0.method = "post"
-                        } = Unidoc.LinkerTool.init(
-                            form: .init(edition: graph.id,
-                                back: "\(Unidoc.RefsEndpoint[self.symbol.package])"),
-                            name: label)
+                            $0.target = "_blank"
+                            $0.rel = .external
+                            $0.href = "https://static.swiftinit.org\(object)"
+                        } = "Download"
                     }
                 }
 
-                $0[.li]
+                if  self.view.admin
                 {
-                    $0[.a]
+                    $0[.li]
                     {
-                        let path:Unidoc.GraphPath = .init(edition: graph.id,
-                            type: .bson_zz)
+                        $0[.a]
+                        {
+                            $0.target = "_blank"
+                            $0.rel = .external
+                            $0.href = """
+                            https://s3.console.aws.amazon.com/s3/object/symbolgraphs\
+                            ?region=us-east-1&bucketType=general&prefix=\(object.prefix)
+                            """
+                        } = "Inspect object"
+                    }
 
-                        $0.target = "_blank"
-                        $0.rel = .external
-                        $0.href = """
-                        https://s3.console.aws.amazon.com/s3/object/symbolgraphs\
-                        ?region=us-east-1&bucketType=general&prefix=\(path.prefix)
-                        """
-                    } = "Inspect object"
+                    for (label, route):(String, Unidoc.LinkerRoute) in [
+                        ("Uplink", .uplink),
+                        ("Unlink", .unlink),
+                        ("Delete", .delete),
+                    ]
+                    {
+                        $0[.li]
+                        {
+                            var action:URI = Unidoc.ServerRoot.link / "\(route)"
+
+                            switch route
+                            {
+                            //  Uplink does not require confirmation.
+                            case .uplink:   break
+                            case .unlink:   action["y"] = "false"
+                            case .delete:   action["y"] = "false"
+                            }
+
+                            $0[.form]
+                            {
+                                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                                $0.action = "\(action)"
+                                $0.method = "post"
+                            } = Unidoc.LinkerTool.init(
+                                form: .init(edition: graph.id,
+                                    back: "\(Unidoc.RefsEndpoint[self.symbol.package])"),
+                                name: label)
+                        }
+                    }
                 }
             }
         }
