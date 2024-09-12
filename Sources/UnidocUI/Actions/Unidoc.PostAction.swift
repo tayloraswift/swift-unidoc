@@ -14,9 +14,6 @@ extension Unidoc
         case telescope = "telescope"
 
         case uplinkAll = "uplink-all"
-        case uplink
-        case unlink
-        case delete
         case build
 
         case userConfig = "user-config"

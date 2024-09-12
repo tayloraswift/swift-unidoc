@@ -44,8 +44,8 @@ extension Unidoc.UserIndexOperation
         }
 
         let restAPI:GitHub.Client<GitHub.OAuth> = .rest(app: integration.oauth,
-            threads: server.context.threads,
-            niossl: server.context.niossl,
+            niossl: server.clientIdentity,
+            on: .singleton,
             as: integration.agent)
 
         let cookies:[(String, HTTP.CookieValue)]

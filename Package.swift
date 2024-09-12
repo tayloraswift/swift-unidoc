@@ -76,6 +76,7 @@ let package:Package = .init(
         .library(name: "UnidocClient", targets: ["UnidocClient"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
+        .library(name: "UnidocLinkerPlugin", targets: ["UnidocLinkerPlugin"]),
         .library(name: "UnidocQueries", targets: ["UnidocQueries"]),
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
         .library(name: "UnidocServer", targets: ["UnidocServer"]),
@@ -133,6 +134,7 @@ let package:Package = .init(
                 .target(name: "System_ArgumentParser"),
                 .target(name: "UnidocClient"),
                 .target(name: "UnidocServer"),
+                .target(name: "UnidocLinkerPlugin"),
             ]),
 
         .executableTarget(name: "unidoc-publish",
@@ -505,6 +507,11 @@ let package:Package = .init(
                 .target(name: "LinkResolution"),
                 .target(name: "MarkdownRendering"),
                 .target(name: "UnidocRecords"),
+            ]),
+
+        .target(name: "UnidocLinkerPlugin",
+            dependencies: [
+                .target(name: "UnidocServer"),
             ]),
 
         .target(name: "UnidocQueries",

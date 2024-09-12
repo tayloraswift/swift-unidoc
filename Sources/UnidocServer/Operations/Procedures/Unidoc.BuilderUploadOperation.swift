@@ -94,8 +94,8 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
 
             if  let bucket:AWS.S3.Bucket = server.bucket.graphs
             {
-                let s3:AWS.S3.Client = .init(threads: server.context.threads,
-                    niossl: server.context.niossl,
+                let s3:AWS.S3.Client = .init(threads: .singleton,
+                    niossl: server.clientIdentity,
                     bucket: bucket)
 
                 try await snapshot.moveSymbolGraph(to: s3)

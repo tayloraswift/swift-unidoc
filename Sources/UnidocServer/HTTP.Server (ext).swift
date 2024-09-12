@@ -12,11 +12,11 @@ extension HTTP.Server where Self:Unidoc.Server
         {
             (tasks:inout ThrowingTaskGroup<Void, any Error>) in
 
-            for plugin:any Unidoc.ServerPlugin in self.plugins.values
+            for handle:Unidoc.PluginHandle in self.plugins.values
             {
                 tasks.addTask
                 {
-                    try await plugin.run(in: self.context, with: self.db)
+                    try await self.run(plugin: handle.plugin, while: handle.active)
                 }
             }
             do
@@ -25,7 +25,7 @@ extension HTTP.Server where Self:Unidoc.Server
                 {
                     try await self.serve(from: ("::", self.options.port),
                         as: self.options.authority,
-                        on: self.context.threads,
+                        on: .singleton,
                         policy: self.policy)
                 }
                 tasks.addTask

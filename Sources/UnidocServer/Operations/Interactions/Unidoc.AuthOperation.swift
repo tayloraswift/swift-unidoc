@@ -42,8 +42,8 @@ extension Unidoc.AuthOperation:Unidoc.InteractiveOperation
         }
 
         let client:GitHub.Client<GitHub.OAuth> = .auth(app: integration.oauth,
-                threads: server.context.threads,
-                niossl: server.context.niossl,
+                niossl: server.clientIdentity,
+                on: .singleton,
                 as: integration.agent)
 
         let access:GitHub.OAuth.Credentials

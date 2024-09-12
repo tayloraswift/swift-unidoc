@@ -1,8 +1,11 @@
+import Atomics
 import GitHubAPI
 import HTTP
 import HTTPServer
 import ISO
 import MongoDB
+import NIOPosix
+import NIOSSL
 import PieCharts
 import UnidocRender
 
@@ -11,12 +14,12 @@ extension Unidoc
     public final
     class Server:Sendable
     {
-        public
-        let context:ServerPluginContext
-        public
-        let plugins:[String: any ServerPlugin]
+        let clientIdentity:NIOSSLContext
+        let plugins:[String: PluginHandle]
+
         @usableFromInline
         let options:ServerOptions
+
         public
         let db:Database
 
@@ -32,8 +35,8 @@ extension Unidoc
 
         public
         init(
-            plugins:[any ServerPlugin],
-            context:ServerPluginContext,
+            clientIdentity:NIOSSLContext,
+            plugins:[any Plugin],
             options:ServerOptions,
             builds:BuildCoordinator?,
             logger:(any ServerLogger)? = nil,
@@ -47,8 +50,11 @@ extension Unidoc
                 break
             }
 
-            self.plugins = plugins.reduce(into: [:]) { $0[$1.id] = $1 }
-            self.context = context
+            self.clientIdentity = clientIdentity
+            self.plugins = plugins.reduce(into: [:])
+            {
+                $0[type(of: $1).id] = .init(plugin: $1)
+            }
             self.options = options
             self.builds = builds
             self.policy = policy
@@ -137,6 +143,53 @@ extension Unidoc.Server
             await update.operation.serve(request: promise, with: payload, from: self)
         }
     }
+
+    func run<Plugin>(plugin:Plugin, while active:ManagedAtomic<Bool>) async throws
+        where Plugin:Unidoc.Plugin
+    {
+        while true
+        {
+            //  If we caught an error, it was probably because mongod is restarting.
+            //  We should wait a little while for it to come back online.
+            async
+            let cooldown:Void = Task.sleep(for: Plugin.cooldown)
+
+            epoch:
+            do
+            {
+                guard active.load(ordering: .relaxed)
+                else
+                {
+                    break epoch
+                }
+
+                let started:ContinuousClock.Instant = .now
+                let context:Unidoc.PluginContext<Plugin.Event> = .init(
+                    logger: self.logger,
+                    plugin: Plugin.id,
+                    client: self.clientIdentity,
+                    db: try await self.db.session())
+
+                guard
+                let period:Duration = try await plugin.run(in: context)
+                else
+                {
+                    break epoch
+                }
+
+                try await Task.sleep(until: started + period)
+            }
+            catch let error
+            {
+                self.logger?.log(event: Unidoc.PluginError.init(error: error, path: nil),
+                    //  This could be a while since `started` was set.
+                    date: .now(),
+                    from: Plugin.id)
+            }
+
+            try await cooldown
+        }
+    }
 }
 extension Unidoc.Server
 {
@@ -211,14 +264,14 @@ extension Unidoc.Server
             return await self.submit(update: procedural)
 
         case .sync(let response):
-            self.logger?.log(request: request.incoming, with: response, time: .zero)
+            self.logger?.log(response: response, time: .zero, for: request.incoming)
             return response
 
         case .syncHTML(let renderable):
             let response:HTTP.ServerResponse = renderable.response(
                 format: self.format(for: request.incoming))
 
-            self.logger?.log(request: request.incoming, with: response, time: .zero)
+            self.logger?.log(response: response, time: .zero, for: request.incoming)
             return response
 
         case .syncLoad(let request):
@@ -260,10 +313,11 @@ extension Unidoc.Server
     {
         try Task.checkCancellation()
 
+        let format:Unidoc.RenderFormat = self.format(for: request)
+
         do
         {
             let initiated:ContinuousClock.Instant = .now
-            let format:Unidoc.RenderFormat = self.format(for: request)
             let state:Unidoc.UserSessionState = .init(authorization: request.authorization,
                 request: request.uri,
                 format: format)
@@ -284,7 +338,7 @@ extension Unidoc.Server
             default:                                break
             }
 
-            self.logger?.log(request: request, with: response, time: .now - initiated)
+            self.logger?.log(response: response, time: .now - initiated, for: request)
             return response
         }
         catch let error as CancellationError
@@ -293,10 +347,11 @@ extension Unidoc.Server
         }
         catch let error
         {
-            self.logger?.log(request: request, with: error)
+            let error:Unidoc.PluginError = .init(error: error, path: "\(request.uri)")
+            self.logger?.log(event: error, date: format.time, from: nil)
 
             let page:Unidoc.ServerErrorPage = .init(error: error)
-            return .error(page.resource(format: self.format(for: request)))
+            return .error(page.resource(format: format))
         }
     }
 }
