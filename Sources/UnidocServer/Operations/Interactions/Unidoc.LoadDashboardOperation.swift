@@ -7,7 +7,6 @@ extension Unidoc
     enum LoadDashboardOperation
     {
         case logger
-        case plugin(String)
         case replicaSet
     }
 }
@@ -28,22 +27,6 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
             }
 
             return .ok(await logger.dashboard(from: server, as: format))
-
-        case .plugin(let id):
-            guard
-            let plugin:any Unidoc.ServerPlugin = server.plugins[id]
-            else
-            {
-                return .notFound("No such plugin")
-            }
-            guard
-            let page:any Unidoc.RenderablePage = plugin.page
-            else
-            {
-                return .notFound("This plugin has not been initialized yet")
-            }
-
-            return .ok(page.resource(format: format))
 
         case .replicaSet:
             let configuration:Mongo.ReplicaSetConfiguration = try await db.session.run(

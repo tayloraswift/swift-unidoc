@@ -10,14 +10,21 @@ extension Unidoc
     /// Queues one or more editions for uplinking. The uplinking process itself is asynchronous.
     struct LinkerOperation:Sendable
     {
-        let queue:Unidoc.DB.Snapshots.QueueAction
-        let from:String?
+        let queue:DB.Snapshots.QueueAction
+        let back:String?
 
-        init(queue:Unidoc.DB.Snapshots.QueueAction, from:String? = nil)
+        init(queue:DB.Snapshots.QueueAction, back:String? = nil)
         {
             self.queue = queue
-            self.from = from
+            self.back = back
         }
+    }
+}
+extension Unidoc.LinkerOperation
+{
+    init(action:Unidoc.LinkerAction, form:Unidoc.LinkerForm)
+    {
+        self.init(queue: .one(form.edition, action: action), back: form.back)
     }
 }
 extension Unidoc.LinkerOperation:Unidoc.AdministrativeOperation
@@ -27,6 +34,6 @@ extension Unidoc.LinkerOperation:Unidoc.AdministrativeOperation
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
         try await db.update(with: self.queue)
-        return .redirect(.seeOther(self.from ?? "/admin"))
+        return .redirect(.seeOther(self.back ?? "/admin"))
     }
 }

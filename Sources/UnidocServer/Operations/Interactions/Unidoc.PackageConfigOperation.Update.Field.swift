@@ -11,9 +11,9 @@ extension Unidoc.PackageConfigOperation.Update
 }
 extension Unidoc.PackageConfigOperation.Update.Field
 {
-    init?(from form:borrowing [String: String])
+    init?(parameters:borrowing [String: String])
     {
-        if  let triple:String = form["platform-preference"]
+        if  let triple:String = parameters["platform-preference"]
         {
             if  let triple:Triple = .init(triple)
             {
@@ -29,12 +29,12 @@ extension Unidoc.PackageConfigOperation.Update.Field
             }
         }
         else if
-            let prefix:String = form["\(Unidoc.PackageMediaSetting.media)"],
-            let gif:String = form["\(Unidoc.PackageMediaSetting.media_gif)"],
-            let jpg:String = form["\(Unidoc.PackageMediaSetting.media_jpg)"],
-            let png:String = form["\(Unidoc.PackageMediaSetting.media_png)"],
-            let svg:String = form["\(Unidoc.PackageMediaSetting.media_svg)"],
-            let webp:String = form["\(Unidoc.PackageMediaSetting.media_webp)"]
+            let prefix:String = parameters["\(Unidoc.PackageMediaSetting.media)"],
+            let gif:String = parameters["\(Unidoc.PackageMediaSetting.media_gif)"],
+            let jpg:String = parameters["\(Unidoc.PackageMediaSetting.media_jpg)"],
+            let png:String = parameters["\(Unidoc.PackageMediaSetting.media_png)"],
+            let svg:String = parameters["\(Unidoc.PackageMediaSetting.media_svg)"],
+            let webp:String = parameters["\(Unidoc.PackageMediaSetting.media_webp)"]
         {
             var media:Unidoc.PackageMedia = .init(prefix: prefix,
                 gif: gif.isEmpty ? nil : gif,

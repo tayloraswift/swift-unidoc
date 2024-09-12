@@ -11,32 +11,37 @@ extension Unidoc
     /// ``HTML.OutputStreamable``. You should not store `EventList`s for a long period of time,
     /// because they contain a current time that will become stale if not immediately rendered.
     @frozen public
-    struct EventList<Event> where Event:HTML.OutputStreamable
+    struct PluginMessageList<Items> where Items:RandomAccessCollection<PluginMessage>
     {
         @usableFromInline
-        let entries:Deque<EventBuffer<Event>.Entry>
+        let items:Items
         @usableFromInline
         let now:UnixAttosecond
 
-        @inlinable
-        init(entries:Deque<EventBuffer<Event>.Entry>, now:UnixAttosecond)
+        @inlinable public
+        init(items:Items, now:UnixAttosecond)
         {
-            self.entries = entries
+            self.items = items
             self.now = now
         }
     }
 }
-extension Unidoc.EventList:HTML.OutputStreamable
+extension Unidoc.PluginMessageList:HTML.OutputStreamable
 {
-    @inlinable public static
-    func += (ol:inout HTML.ContentEncoder, self:Self)
+    @inlinable public
+    static func += (ol:inout HTML.ContentEncoder, self:Self)
     {
-        for entry:Unidoc.EventBuffer<Event>.Entry in self.entries.reversed()
+        for message:Unidoc.PluginMessage in self.items
         {
             ol[.li]
             {
-                $0[.div, .p] = entry.time(now: self.now)
-                $0[.div] = entry.event
+                $0[.header]
+                {
+                    $0[.h3] { message.event.h3(&$0) }
+                    $0[.div] = message.header(now: self.now)
+                }
+
+                $0[.dl] { message.event.dl(&$0) }
             }
         }
     }
