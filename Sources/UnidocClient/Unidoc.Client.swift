@@ -279,33 +279,34 @@ extension Unidoc.Client<HTTP.Client2>
     }
 
     public
-    func buildAndUpload(local symbol:Symbol.Package,
+    func buildAndUpload(local name:String,
         search:FilePath.Directory?,
         type:SSGC.ProjectType,
         with toolchain:Unidoc.Toolchain) async throws
     {
-        let object:SymbolGraphObject<Void> = try await self.build(local: symbol,
+        let object:SymbolGraphObject<Void> = try await self.build(local: name,
             search: search,
             type: type,
             with: toolchain)
 
         try await self.connect { try await $0.upload(object) }
 
+        //  The final URL path component might have different casing than the directory name.
         print("""
             View the generated documentation at:
-            https://\(self.http.remote):\(self.port)/tags/\(symbol)
+            https://\(self.http.remote):\(self.port)/tags/\(object.metadata.package.id)
             """)
     }
 }
 extension Unidoc.Client<HTTP.Client1>
 {
     public
-    func buildAndUpload(local symbol:Symbol.Package,
+    func buildAndUpload(local name:String,
         search:FilePath.Directory?,
         type:SSGC.ProjectType,
         with toolchain:Unidoc.Toolchain) async throws
     {
-        let object:SymbolGraphObject<Void> = try await self.build(local: symbol,
+        let object:SymbolGraphObject<Void> = try await self.build(local: name,
             search: search,
             type: type,
             with: toolchain)
@@ -314,14 +315,15 @@ extension Unidoc.Client<HTTP.Client1>
 
         print("""
             View the generated documentation at:
-            http://\(self.http.remote):\(self.port)/tags/\(symbol)
+            http://\(self.http.remote):\(self.port)/tags/\(object.metadata.package.id)
             """)
     }
 }
 extension Unidoc.Client
 {
+    /// Name is case-sensitive, so it is not modeled as a ``Symbol.Package``.
     private
-    func build(local symbol:Symbol.Package,
+    func build(local name:String,
         search:FilePath.Directory?,
         type:SSGC.ProjectType,
         with toolchain:Unidoc.Toolchain) async throws -> SymbolGraphObject<Void>
@@ -332,7 +334,7 @@ extension Unidoc.Client
         var arguments:[String] = [
             "compile",
 
-            "--package-name", "\(symbol)",
+            "--package-name", "\(name)",
             "--project-type", "\(type)",
             "--workspace", "\(workspace.location)",
             "--output", "\(docs)",

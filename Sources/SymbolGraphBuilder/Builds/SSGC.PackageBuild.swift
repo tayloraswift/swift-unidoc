@@ -112,24 +112,29 @@ extension SSGC.PackageBuild
     ///     -   flags:
     ///         Additional flags to pass to the Swift compiler.
     public static
-    func local(
-        project projectName:Symbol.Package,
-        among projects:FilePath.Directory,
+    func local(project location:FilePath.Directory,
         using scratchName:FilePath.Component = ".build.ssgc",
         as type:SSGC.ProjectType = .package,
         flags:Flags = .init()) -> Self
     {
         /// The projects path could be absolute or relative. If it’s relative, we need to
         /// convert it to an absolute path.
-        let projects:FilePath.Directory = projects.absolute()
-        let project:FilePath.Directory = projects / "\(projectName)"
-        let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
-            location: project / scratchName)
+        let location:FilePath.Directory = location.absolute()
+        /// For a local project, the project name is the last component of the path, lowercased.
+        guard
+        let last:FilePath.Component = location.path.components.last
+        else
+        {
+            fatalError("Can’t build a Swift package at file system root!")
+        }
 
-        return .init(id: .unversioned(projectName),
+        let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
+            location: location / scratchName)
+
+        return .init(id: .unversioned(.init(last.string)),
             scratch: scratch,
             flags: flags,
-            root: project,
+            root: location,
             type: type)
     }
 

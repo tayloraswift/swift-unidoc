@@ -77,8 +77,7 @@ enum Main:TestMain, TestBattery
             tests.do
             {
                 let package:SSGC.PackageBuild = .local(
-                    project: "swift-snippets",
-                    among: "TestPackages")
+                    project: "TestPackages" / "swift-snippets")
 
                 try workspace.cache.create()
 
@@ -158,9 +157,8 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "Local",
             let docs:SymbolGraphObject<Void> = (tests.do
             {
-                try workspace.build(package: .local(
-                        project: "swift-test",
-                        among: "TestPackages"),
+                try workspace.build(
+                    package: .local(project: "TestPackages" / "swift-test"),
                     with: toolchain)
             })
         {
