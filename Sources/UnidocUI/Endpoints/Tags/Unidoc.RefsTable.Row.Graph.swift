@@ -1,6 +1,8 @@
 import HTML
 import Media
 import Symbols
+import UnidocRender
+import URI
 
 extension Unidoc.RefsTable.Row
 {
@@ -120,22 +122,33 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                     return
                 }
 
-                for (label, action, confirm):(String, Unidoc.PostAction, Bool) in [
-                    ("Uplink", .uplink, false),
-                    ("Unlink", .unlink, true),
-                    ("Delete", .delete, true)
+                for (label, route):(String, Unidoc.LinkerRoute) in [
+                    ("Uplink", .uplink),
+                    ("Unlink", .unlink),
+                    ("Delete", .delete),
                 ]
                 {
                     $0[.li]
                     {
+                        var action:URI = Unidoc.ServerRoot.link / "\(route)"
+
+                        switch route
+                        {
+                        //  Uplink does not require confirmation.
+                        case .uplink:   break
+                        case .unlink:   action["y"] = "false"
+                        case .delete:   action["y"] = "false"
+                        }
+
                         $0[.form]
                         {
                             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                            $0.action = "\(Unidoc.Post[action, confirm: confirm])"
+                            $0.action = "\(action)"
                             $0.method = "post"
-                        } = Tool.init(edition: graph.id,
-                            package: self.symbol.package,
-                            label: label)
+                        } = Unidoc.LinkerTool.init(
+                            form: .init(edition: graph.id,
+                                back: "\(Unidoc.RefsEndpoint[self.symbol.package])"),
+                            name: label)
                     }
                 }
 

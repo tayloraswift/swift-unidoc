@@ -1,3 +1,5 @@
+import URI
+
 extension Unidoc.PackageIndexOperation
 {
     enum Subject
@@ -6,12 +8,12 @@ extension Unidoc.PackageIndexOperation
         case ref(Unidoc.Package, ref:String)
     }
 }
-extension Unidoc.PackageIndexOperation.Subject
+extension Unidoc.PackageIndexOperation.Subject:URI.QueryDecodable
 {
-    init?(from form:borrowing [String: String])
+    init?(parameters:borrowing [String: String])
     {
-        if  let owner:String = form["owner"],
-            let repo:String = form["repo"]
+        if  let owner:String = parameters["owner"],
+            let repo:String = parameters["repo"]
         {
             guard Self.validate(owner), Self.validate(repo)
             else
@@ -19,14 +21,14 @@ extension Unidoc.PackageIndexOperation.Subject
                 return nil
             }
 
-            let githubInstallation:Int32? = form["installation"].flatMap(Int32.init(_:))
+            let githubInstallation:Int32? = parameters["installation"].flatMap(Int32.init(_:))
 
             self = .repo(owner: owner, name: repo, githubInstallation: githubInstallation)
         }
         else if
-            let package:String = form["package"],
+            let package:String = parameters["package"],
             let package:Unidoc.Package = .init(package),
-            let ref:String = form["ref"]
+            let ref:String = parameters["ref"]
         {
             guard Self.validate(ref)
             else

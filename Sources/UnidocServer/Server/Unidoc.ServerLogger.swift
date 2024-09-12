@@ -1,5 +1,7 @@
+import HTML
 import HTTP
 import UnidocRender
+import UnixTime
 
 extension Unidoc
 {
@@ -8,10 +10,12 @@ extension Unidoc
     {
         func dashboard(from server:Server, as format:Unidoc.RenderFormat) async -> HTTP.Resource
 
-        nonisolated
-        func log(request:IncomingRequest, with response:HTTP.ServerResponse, time:Duration)
+        func messages(from plugin:String) async -> [PluginMessage]
 
         nonisolated
-        func log(request:IncomingRequest, with error:any Error)
+        func log(response:HTTP.ServerResponse, time:Duration, for request:IncomingRequest)
+
+        nonisolated
+        func log(event:any PluginEvent, date:UnixAttosecond, from plugin:String?)
     }
 }

@@ -3,10 +3,10 @@ import UnidocUI
 import UnixCalendar
 import UnixTime
 
-extension Unidoc
+extension Unidoc.PluginMessage
 {
     @frozen @usableFromInline
-    struct EventTime
+    struct DateHeader
     {
         @usableFromInline
         let components:Timestamp.Components
@@ -21,18 +21,18 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.EventTime:HTML.OutputStreamable
+extension Unidoc.PluginMessage.DateHeader:HTML.OutputStreamable
 {
     @inlinable static
-    func += (html:inout HTML.ContentEncoder, self:Self)
+    func += (div:inout HTML.ContentEncoder, self:Self)
     {
-        html[.time]
+        div[.time]
         {
             $0.datetime = """
             \(self.components.date)T\(self.components.time)Z
             """
         } = "\(self.components.date) \(self.components.time)"
 
-        html[.span] { $0.class = "parenthetical" } = "\(self.dynamicAge) ago"
+        div[.span] { $0.class = "parenthetical" } = "\(self.dynamicAge) ago"
     }
 }

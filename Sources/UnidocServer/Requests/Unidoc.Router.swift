@@ -21,6 +21,8 @@ extension Unidoc
         private
         var stem:ArraySlice<String>
         private
+        let path:URI.Path
+        private
         let query:URI.Query
 
         private
@@ -30,6 +32,7 @@ extension Unidoc
             origin:IP.Origin,
             host:String?,
             stem:ArraySlice<String>,
+            path:URI.Path,
             query:URI.Query)
         {
             self.headers = headers
@@ -37,6 +40,7 @@ extension Unidoc
             self.origin = origin
             self.host = host
             self.stem = stem
+            self.path = path
             self.query = query
         }
     }
@@ -51,6 +55,7 @@ extension Unidoc.Router
             origin: request.origin.ip,
             host: request.host,
             stem: request.path,
+            path: request.uri.path,
             query: request.uri.query ?? [:])
     }
 }
@@ -238,6 +243,7 @@ extension Unidoc.Router
         case .help:         return self.blog(module: "Help")
         case .hist:         return self.docs()
         case .hook:         return nil // POST only
+        case .link:         return nil // POST only
         case .login:        return self.login()
         case .lunr:         return self.lunr()
         case .plugin:       return self.plugin()
@@ -324,7 +330,9 @@ extension Unidoc.Router
         {
         case .admin:    return nil
         case .form:     return self.form(form: form)
+        case .link:     return self.link(form: form)
         case .login:    return self.login(form: form)
+        case .plugin:   return self.plugin(form: form)
         case .really:   return self.really(form: form)
         case .ref:      return self.ref(form: form)
         default:        return nil
@@ -497,6 +505,44 @@ extension Unidoc.Router
     }
 
     private mutating
+    func link(form queryPayload:URI.Query) -> Unidoc.AnyOperation?
+    {
+        guard
+        let route:Unidoc.LinkerRoute = self.descend(),
+        let form:Unidoc.LinkerForm = .init(from: queryPayload)
+        else
+        {
+            return nil
+        }
+
+        for case ("y", "false") in self.query.parameters
+        {
+            let page:Unidoc.ReallyPage
+            let uri:URI = .init(path: self.path, query: queryPayload)
+
+            switch route
+            {
+            case .uplink:   return nil
+            case .unlink:   page = .unlink(uri)
+            case .delete:   page = .delete(uri)
+            }
+
+            return .syncHTML(page)
+        }
+
+        let action:Unidoc.LinkerAction
+
+        switch route
+        {
+        case .uplink:   action = .uplinkRefresh
+        case .unlink:   action = .unlink
+        case .delete:   action = .delete
+        }
+
+        return .unordered(Unidoc.LinkerOperation.init(action: action, form: form))
+    }
+
+    private mutating
     func form(form:URI.Query) -> Unidoc.AnyOperation?
     {
         guard
@@ -504,11 +550,6 @@ extension Unidoc.Router
         else
         {
             return nil
-        }
-
-        let form:[String: String] = form.parameters.reduce(into: [:])
-        {
-            $0[$1.key] = $1.value
         }
 
         switch action
@@ -523,6 +564,10 @@ extension Unidoc.Router
             }
 
         case .packageAlias:
+            let form:[String: String] = form.parameters.reduce(into: [:])
+            {
+                $0[$1.key] = $1.value
+            }
             if  let package:String = form["package"],
                 let package:Unidoc.Package = .init(package),
                 let alias:String = form["alias"]
@@ -533,6 +578,10 @@ extension Unidoc.Router
             }
 
         case .packageAlign:
+            let form:[String: String] = form.parameters.reduce(into: [:])
+            {
+                $0[$1.key] = $1.value
+            }
             if  let package:String = form["package"],
                 let package:Unidoc.Package = .init(package)
             {
@@ -543,9 +592,13 @@ extension Unidoc.Router
             }
 
         case .packageConfig:
+            let form:[String: String] = form.parameters.reduce(into: [:])
+            {
+                $0[$1.key] = $1.value
+            }
             if  let package:String = form["package"],
                 let package:Unidoc.Package = .init(package),
-                let update:Unidoc.PackageConfigOperation.Update = .init(from: form)
+                let update:Unidoc.PackageConfigOperation.Update = .init(parameters: form)
             {
                 let endpoint:Unidoc.PackageConfigOperation = .init(
                     account: self.authorization.account,
@@ -566,6 +619,10 @@ extension Unidoc.Router
             }
 
         case .packageRules:
+            let form:[String: String] = form.parameters.reduce(into: [:])
+            {
+                $0[$1.key] = $1.value
+            }
             if  let account:Unidoc.Account = self.authorization.account,
                 let package:String = form["package"],
                 let package:Unidoc.Package = .init(package),
@@ -578,6 +635,10 @@ extension Unidoc.Router
             }
 
         case .telescope:
+            let form:[String: String] = form.parameters.reduce(into: [:])
+            {
+                $0[$1.key] = $1.value
+            }
             if  let days:String = form["days"],
                 let days:Int64 = .init(days)
             {
@@ -586,42 +647,6 @@ extension Unidoc.Router
 
         case .uplinkAll:
             return .unordered(Unidoc.LinkerOperation.init(queue: .all))
-
-        case .uplink:
-            if  let package:String = form["package"],
-                let package:Unidoc.Package = .init(package),
-                let version:String = form["version"],
-                let version:Unidoc.Version = .init(version)
-            {
-                return .unordered(Unidoc.LinkerOperation.init(
-                    queue: .one(.init(package: package, version: version),
-                        action: .uplinkRefresh),
-                    from: form["from"]))
-            }
-
-        case .unlink:
-            if  let package:String = form["package"],
-                let package:Unidoc.Package = .init(package),
-                let version:String = form["version"],
-                let version:Unidoc.Version = .init(version)
-            {
-                return .unordered(Unidoc.LinkerOperation.init(
-                    queue: .one(.init(package: package, version: version),
-                        action: .unlink),
-                    from: form["from"]))
-            }
-
-        case .delete:
-            if  let package:String = form["package"],
-                let package:Unidoc.Package = .init(package),
-                let version:String = form["version"],
-                let version:Unidoc.Version = .init(version)
-            {
-                return .unordered(Unidoc.LinkerOperation.init(
-                    queue: .one(.init(package: package, version: version),
-                        action: .delete),
-                    from: form["from"]))
-            }
 
         case .userConfig:
             if  let account:Unidoc.Account = self.authorization.account,
@@ -851,15 +876,31 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func plugin() -> Unidoc.AnyOperation?
+    func plugin(form:URI.Query) -> Unidoc.AnyOperation?
     {
-        guard let next:String = self.descend()
+        guard
+        let id:String = self.descend(),
+        let form:Unidoc.PluginControlForm = .init(from: form)
         else
         {
             return nil
         }
 
-        return .unordered(Unidoc.LoadDashboardOperation.plugin(next))
+        return .unordered(Unidoc.PluginOperation.init(
+            plugin: id,
+            action: form.active ? .start : .pause))
+    }
+
+    private mutating
+    func plugin() -> Unidoc.AnyOperation?
+    {
+        guard let id:String = self.descend()
+        else
+        {
+            return nil
+        }
+
+        return .unordered(Unidoc.PluginOperation.init(plugin: id, action: .status))
     }
 
     private mutating
@@ -937,7 +978,7 @@ extension Unidoc.Router
         {
         case .build:
             guard
-            let form:Unidoc.BuildForm = .init(from: table)
+            let form:Unidoc.BuildForm = .init(from: form)
             else
             {
                 return nil
@@ -945,15 +986,9 @@ extension Unidoc.Router
 
             return .syncHTML(Unidoc.BuildRequestPage.init(form: form, action: uri))
 
-        case .unlink:
-            really = .unlink(uri)
-
-        case .delete:
-            really = .delete(uri)
-
         case .packageConfig:
             guard
-            let update:Unidoc.PackageConfigOperation.Update = .init(from: table)
+            let update:Unidoc.PackageConfigOperation.Update = .init(from: form)
             else
             {
                 return nil
@@ -963,7 +998,7 @@ extension Unidoc.Router
 
         case .userConfig:
             guard
-            let update:Unidoc.UserConfigOperation.Update = .init(from: table)
+            let update:Unidoc.UserConfigOperation.Update = .init(from: form)
             else
             {
                 return nil

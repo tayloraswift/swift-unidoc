@@ -18,6 +18,7 @@ extension Unidoc
         case help
         case hist
         case hook
+        case link
         case login
         case lunr
         case plugin
