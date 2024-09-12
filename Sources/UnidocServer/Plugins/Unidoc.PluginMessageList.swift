@@ -30,7 +30,7 @@ extension Unidoc.PluginMessageList:HTML.OutputStreamable
     @inlinable public
     static func += (ol:inout HTML.ContentEncoder, self:Self)
     {
-        for message:Unidoc.PluginMessage in self.items
+        for message:Unidoc.PluginMessage in self.items.reversed()
         {
             ol[.li]
             {
