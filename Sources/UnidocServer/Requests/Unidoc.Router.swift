@@ -21,6 +21,8 @@ extension Unidoc
         private
         var stem:ArraySlice<String>
         private
+        let path:URI.Path
+        private
         let query:URI.Query
 
         private
@@ -30,6 +32,7 @@ extension Unidoc
             origin:IP.Origin,
             host:String?,
             stem:ArraySlice<String>,
+            path:URI.Path,
             query:URI.Query)
         {
             self.headers = headers
@@ -37,6 +40,7 @@ extension Unidoc
             self.origin = origin
             self.host = host
             self.stem = stem
+            self.path = path
             self.query = query
         }
     }
@@ -51,6 +55,7 @@ extension Unidoc.Router
             origin: request.origin.ip,
             host: request.host,
             stem: request.path,
+            path: request.uri.path,
             query: request.uri.query ?? [:])
     }
 }
@@ -500,20 +505,20 @@ extension Unidoc.Router
     }
 
     private mutating
-    func link(form query:URI.Query) -> Unidoc.AnyOperation?
+    func link(form queryPayload:URI.Query) -> Unidoc.AnyOperation?
     {
         guard
         let route:Unidoc.LinkerRoute = self.descend(),
-        let form:Unidoc.LinkerForm = .init(from: query)
+        let form:Unidoc.LinkerForm = .init(from: queryPayload)
         else
         {
             return nil
         }
 
-        if  let path:URI.Path = form.next
+        for case ("y", "false") in self.query.parameters
         {
             let page:Unidoc.ReallyPage
-            let uri:URI = .init(path: path, query: query)
+            let uri:URI = .init(path: self.path, query: queryPayload)
 
             switch route
             {
@@ -524,19 +529,17 @@ extension Unidoc.Router
 
             return .syncHTML(page)
         }
-        else
+
+        let action:Unidoc.LinkerAction
+
+        switch route
         {
-            let action:Unidoc.LinkerAction
-
-            switch route
-            {
-            case .uplink:   action = .uplinkRefresh
-            case .unlink:   action = .unlink
-            case .delete:   action = .delete
-            }
-
-            return .unordered(Unidoc.LinkerOperation.init(action: action, form: form))
+        case .uplink:   action = .uplinkRefresh
+        case .unlink:   action = .unlink
+        case .delete:   action = .delete
         }
+
+        return .unordered(Unidoc.LinkerOperation.init(action: action, form: form))
     }
 
     private mutating

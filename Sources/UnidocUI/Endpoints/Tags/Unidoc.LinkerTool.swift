@@ -39,16 +39,6 @@ extension Unidoc.LinkerTool:HTML.OutputStreamable
             $0.value = self.form.back
         }
 
-        if  let next:URI.Path = self.form.next
-        {
-            form[.input]
-            {
-                $0.type = "hidden"
-                $0.name = Unidoc.LinkerForm.next
-                $0.value = "\(next)"
-            }
-        }
-
         form[.button] { $0.type = "submit"; $0.class = "text" } = self.name
     }
 }

@@ -130,15 +130,14 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                 {
                     $0[.li]
                     {
-                        let action:URI = Unidoc.ServerRoot.link / "\(route)"
-                        let next:URI.Path?
+                        var action:URI = Unidoc.ServerRoot.link / "\(route)"
 
                         switch route
                         {
                         //  Uplink does not require confirmation.
-                        case .uplink:   next = nil
-                        case .unlink:   next = action.path
-                        case .delete:   next = action.path
+                        case .uplink:   break
+                        case .unlink:   action["y"] = "false"
+                        case .delete:   action["y"] = "false"
                         }
 
                         $0[.form]
@@ -148,8 +147,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                             $0.method = "post"
                         } = Unidoc.LinkerTool.init(
                             form: .init(edition: graph.id,
-                                back: "\(Unidoc.RefsEndpoint[self.symbol.package])",
-                                next: next),
+                                back: "\(Unidoc.RefsEndpoint[self.symbol.package])"),
                             name: label)
                     }
                 }

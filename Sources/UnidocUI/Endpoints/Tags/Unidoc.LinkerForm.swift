@@ -9,15 +9,12 @@ extension Unidoc
         let edition:Edition
         public
         let back:String
-        public
-        let next:URI.Path?
 
         @inlinable public
-        init(edition:Edition, back:String, next:URI.Path? = nil)
+        init(edition:Edition, back:String)
         {
             self.edition = edition
             self.back = back
-            self.next = next
         }
     }
 }
@@ -26,7 +23,6 @@ extension Unidoc.LinkerForm
     static var package:String { "package" }
     static var version:String { "version" }
     static var back:String { "back" }
-    static var next:String { "next" }
 
     public
     init?(parameters:borrowing [String: String])
@@ -42,8 +38,6 @@ extension Unidoc.LinkerForm
             return nil
         }
 
-        self.init(edition: .init(package: package, version: version),
-            back: back,
-            next: parameters[Self.next].map(URI.Path.init(_:)) ?? nil)
+        self.init(edition: .init(package: package, version: version), back: back)
     }
 }
