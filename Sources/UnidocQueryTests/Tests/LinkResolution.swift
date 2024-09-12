@@ -2,6 +2,7 @@ import MongoDB
 import MongoTesting
 import SymbolGraphBuilder
 import SymbolGraphs
+import System
 @_spi(testable)
 import UnidocDB
 
@@ -16,9 +17,8 @@ struct LinkResolution:UnidocDatabaseTestBattery
         let workspace:SSGC.Workspace = try .create(at: ".testing")
         let toolchain:SSGC.Toolchain = try .detect(pretty: true)
 
-        let example:SymbolGraphObject<Void> = try workspace.build(package: .local(
-                project: "swift-test",
-                among: "TestPackages"),
+        let example:SymbolGraphObject<Void> = try workspace.build(
+            package: .local(project: "TestPackages" / "swift-test"),
             with: toolchain)
 
         example.roundtrip(for: tests, in: workspace.location)
