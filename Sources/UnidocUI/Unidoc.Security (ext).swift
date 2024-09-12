@@ -4,19 +4,18 @@ extension Unidoc.Security
     {
         if  case .ignored = self
         {
-            /// In development mode, everyone is an administratrix!
-            return .init(global: user.map { _ in .administratrix }, rights: .owner)
+            return .init(global: .developer, rights: .owner)
         }
 
         if  let user:Unidoc.User
         {
-            return .init(global: user.level, rights: .of(account: user.id,
+            return .init(global: .authenticated(user.level), rights: .of(account: user.id,
                 access: user.access,
                 rulers: package.rulers))
         }
         else
         {
-            return .init(global: nil, rights: .reader)
+            return .init(global: .guest, rights: .reader)
         }
     }
 }
