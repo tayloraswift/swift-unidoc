@@ -25,12 +25,12 @@ extension Unidoc.BuildForm
 extension Unidoc.BuildForm
 {
     public
-    init?(from parameters:borrowing [String: String])
+    init?(parameters:borrowing [String: String])
     {
         guard
-        let symbol:String = parameters["symbol"],
+        let symbol:String = parameters[Self.symbol],
         let symbol:Symbol.PackageAtRef = .init(symbol),
-        let action:String = parameters["action"],
+        let action:String = parameters[Self.action],
         let action:Action = .init(action)
         else
         {

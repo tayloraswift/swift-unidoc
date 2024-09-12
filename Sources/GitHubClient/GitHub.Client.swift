@@ -30,9 +30,8 @@ extension GitHub
 extension GitHub.Client<Void>
 {
     public static
-    func graphql(
-        threads:consuming MultiThreadedEventLoopGroup,
-        niossl:consuming NIOSSLContext,
+    func graphql(niossl:consuming NIOSSLContext,
+        on threads:consuming MultiThreadedEventLoopGroup,
         as agent:String) -> GitHub.Client<Void>
     {
         .init(http2: .init(threads: threads, niossl: niossl, remote: "api.github.com"),
@@ -44,8 +43,8 @@ extension GitHub.Client where Application:GitHubApplication
 {
     public static
     func rest(app:consuming Application,
-        threads:consuming MultiThreadedEventLoopGroup,
         niossl:consuming NIOSSLContext,
+        on threads:consuming MultiThreadedEventLoopGroup,
         as agent:String) -> GitHub.Client<Application>
     {
         .init(http2: .init(threads: threads, niossl: niossl, remote: "api.github.com"),
@@ -53,12 +52,12 @@ extension GitHub.Client where Application:GitHubApplication
             app: app)
     }
 
-    /// This is almost the same as ``rest(app:threads:niossl:as:)``, but it is bound to
+    /// This is almost the same as ``rest(app:niossl:on:as:)``, but it is bound to
     /// the `github.com` apex domain, which is used for initial authentication.
     public static
     func auth(app:consuming Application,
-        threads:consuming MultiThreadedEventLoopGroup,
         niossl:consuming NIOSSLContext,
+        on threads:consuming MultiThreadedEventLoopGroup,
         as agent:String) -> GitHub.Client<Application>
     {
         .init(http2: .init(threads: threads, niossl: niossl, remote: "github.com"),

@@ -1,5 +1,6 @@
 import Symbols
 import UnixTime
+import URI
 
 extension Unidoc.PackageConfigOperation
 {
@@ -11,27 +12,27 @@ extension Unidoc.PackageConfigOperation
         case reset(Field)
     }
 }
-extension Unidoc.PackageConfigOperation.Update
+extension Unidoc.PackageConfigOperation.Update:URI.QueryDecodable
 {
-    init?(from form:borrowing [String: String])
+    init?(parameters:borrowing [String: String])
     {
-        if  let hidden:String = form["hidden"],
+        if  let hidden:String = parameters["hidden"],
             let hidden:Bool = .init(hidden)
         {
             self = .hidden(hidden)
         }
         else if
-            let symbol:Symbol.Package = form["symbol"].map(Symbol.Package.init(_:))
+            let symbol:Symbol.Package = parameters["symbol"].map(Symbol.Package.init(_:))
         {
             self = .symbol(symbol)
         }
         else if
-            case "true"? = form["refresh"]
+            case "true"? = parameters["refresh"]
         {
             self = .expires(.zero)
         }
         else if
-            let field:Field = .init(from: form)
+            let field:Field = .init(parameters: parameters)
         {
             self = .reset(field)
         }

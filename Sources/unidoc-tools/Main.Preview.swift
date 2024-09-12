@@ -1,10 +1,12 @@
 import ArgumentParser
 import HTTPServer
 import MongoDB
+import NIOCore
 import NIOPosix
 import NIOSSL
 import System
 import System_ArgumentParser
+import UnidocLinkerPlugin
 import UnidocServer
 
 extension Main
@@ -91,12 +93,7 @@ extension Main.Preview:AsyncParsableCommand
 
     func run() async throws
     {
-        let threads:MultiThreadedEventLoopGroup = .init(numberOfThreads: 2)
-
-        defer
-        {
-            try? threads.syncShutdownGracefully()
-        }
+        NIOSingletons.groupLoopCountSuggestion = 2
 
         var development:Unidoc.ServerOptions.Development = .init(replicaSet: self.replicaSet)
         let authority:any HTTP.ServerAuthority
@@ -120,12 +117,9 @@ extension Main.Preview:AsyncParsableCommand
                 graphs: development.bucket),
             mode: .development(.init(source: "Assets"), development))
 
-        let context:Unidoc.ServerPluginContext = .init(threads: threads,
-            niossl: try self.clientSSL)
-
         let mongodb:Mongo.DriverBootstrap = MongoDB / [self.mongod] /?
         {
-            $0.executors = .shared(threads)
+            $0.executors = .shared(MultiThreadedEventLoopGroup.singleton)
             $0.appname = "Unidoc Preview"
 
             $0.connectionTimeout = .milliseconds(5_000)
@@ -145,10 +139,9 @@ extension Main.Preview:AsyncParsableCommand
                     $0.apiLimitPerReset = 10000
                 }
 
-                let linker:Unidoc.GraphLinkerPlugin = .init(bucket: nil)
-                let server:Unidoc.Server = .init(
+                let linker:Unidoc.GraphLinker = .init(bucket: nil)
+                let server:Unidoc.Server = .init(clientIdentity: try self.clientSSL,
                     plugins: [linker],
-                    context: context,
                     options: options,
                     builds: nil,
                     db: .init(sessions: pool, unidoc: "unidoc",  policy: policy))

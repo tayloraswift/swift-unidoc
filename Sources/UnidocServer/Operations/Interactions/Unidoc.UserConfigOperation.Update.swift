@@ -1,3 +1,5 @@
+import URI
+
 extension Unidoc.UserConfigOperation
 {
     enum Update
@@ -5,11 +7,11 @@ extension Unidoc.UserConfigOperation
         case generateKey(for:Unidoc.Account)
     }
 }
-extension Unidoc.UserConfigOperation.Update
+extension Unidoc.UserConfigOperation.Update:URI.QueryDecodable
 {
-    init?(from form:borrowing [String: String])
+    init?(parameters:borrowing [String: String])
     {
-        if  let account:String = form["generate-api-key"],
+        if  let account:String = parameters["generate-api-key"],
             let account:Unidoc.Account = .init(account)
         {
             self = .generateKey(for: account)
