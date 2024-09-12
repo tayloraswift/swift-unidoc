@@ -4,6 +4,7 @@ import SymbolGraphBuilder
 import SymbolGraphs
 import SymbolGraphTesting
 import Symbols
+import System
 import Unidoc
 @_spi(testable)
 import UnidocDB
@@ -20,9 +21,8 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         let workspace:SSGC.Workspace = try .create(at: ".testing")
         let toolchain:SSGC.Toolchain = try .detect(pretty: true)
 
-        let example:SymbolGraphObject<Void> = try workspace.build(package: .local(
-                project: "swift-malibu",
-                among: "TestPackages"),
+        let example:SymbolGraphObject<Void> = try workspace.build(
+            package: .local(project: "TestPackages" / "swift-malibu"),
             with: toolchain)
 
         example.roundtrip(for: tests, in: workspace.location)
