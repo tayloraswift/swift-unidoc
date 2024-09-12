@@ -52,7 +52,7 @@ extension GitHub.Client where Application:GitHubApplication
             app: app)
     }
 
-    /// This is almost the same as ``rest(app:threads:niossl:as:)``, but it is bound to
+    /// This is almost the same as ``rest(app:niossl:on:as:)``, but it is bound to
     /// the `github.com` apex domain, which is used for initial authentication.
     public static
     func auth(app:consuming Application,

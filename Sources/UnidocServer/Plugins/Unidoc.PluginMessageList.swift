@@ -4,12 +4,11 @@ import UnixTime
 
 extension Unidoc
 {
-    /// A formatting abstraction that renders an ``EventBuffer`` as a sequence of `li` elements
-    /// with relative timestamps.
+    /// A formatting abstraction that renders a list of ``PluginMessage`` as a sequence of `li`
+    /// elements with relative timestamps.
     ///
-    /// `EventList`’s only purpose is to render HTML. Therefore, it requires `Event` to be
-    /// ``HTML.OutputStreamable``. You should not store `EventList`s for a long period of time,
-    /// because they contain a current time that will become stale if not immediately rendered.
+    /// You should not store ``PluginMessageList``s for a long period of time, because they
+    /// contain a current time that will become stale if not immediately rendered.
     @frozen public
     struct PluginMessageList<Items> where Items:RandomAccessCollection<PluginMessage>
     {
