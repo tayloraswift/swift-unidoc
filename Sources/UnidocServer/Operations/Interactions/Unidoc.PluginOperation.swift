@@ -45,6 +45,6 @@ extension Unidoc.PluginOperation:Unidoc.AdministrativeOperation
             return .ok(statusPage.resource(format: format))
         }
 
-        return .redirect(.temporary("\(Unidoc.ServerRoot.plugin / self.plugin)"))
+        return .redirect(.seeOther("\(Unidoc.ServerRoot.plugin / self.plugin)"))
     }
 }
