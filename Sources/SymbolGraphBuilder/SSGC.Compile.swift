@@ -73,7 +73,7 @@ extension SSGC
                 The symbolic name of the project to build — \
                 this is not the name specified in the `Package.swift` manifest!
                 """)
-        var name:Symbol.Package
+        var project:String
 
         @Option(
             name: [.customLong("project-type"), .customShort("b")],
@@ -227,9 +227,38 @@ extension SSGC.Compile
 
         let object:SymbolGraphObject<Void>
 
-        if  self.name == .swift
+        if  let repo:String = self.repo,
+            let ref:String = self.ref
         {
-            object = try workspace.build(some: SSGC.StandardLibraryBuild.swift,
+            let symbol:Symbol.Package = .init(self.project)
+
+            defer
+            {
+                let repoClone:FilePath.Directory = workspace.checkouts / "\(symbol)"
+
+                if  self.removeClone
+                {
+                    try? repoClone.remove()
+                }
+            }
+
+            let build:SSGC.PackageBuild = try .remote(project: symbol,
+                from: repo,
+                at: ref,
+                as: self.type,
+                in: workspace)
+
+            defer
+            {
+                if  self.removeBuild
+                {
+                    try? build.scratch.location.remove()
+                }
+            }
+
+            try status?.send(.didCloneRepository)
+
+            object = try workspace.build(some: build,
                 toolchain: toolchain,
                 status: status,
                 logger: logger,
@@ -238,8 +267,7 @@ extension SSGC.Compile
         else if
             let search:FilePath.Directory = self.search
         {
-            let build:SSGC.PackageBuild = .local(project: self.name,
-                among: search,
+            let build:SSGC.PackageBuild = .local(project: search / self.project,
                 using: ".build.ssgc",
                 as: self.type)
 
@@ -257,37 +285,9 @@ extension SSGC.Compile
                 logger: logger,
                 clean: self.cleanArtifacts)
         }
-        else if
-            let repo:String = self.repo,
-            let ref:String = self.ref
+        else if self.project == "swift"
         {
-            defer
-            {
-                let repoClone:FilePath.Directory = workspace.checkouts / "\(self.name)"
-
-                if  self.removeClone
-                {
-                    try? repoClone.remove()
-                }
-            }
-
-            let build:SSGC.PackageBuild = try .remote(project: self.name,
-                from: repo,
-                at: ref,
-                as: self.type,
-                in: workspace)
-
-            defer
-            {
-                if  self.removeBuild
-                {
-                    try? build.scratch.location.remove()
-                }
-            }
-
-            try status?.send(.didCloneRepository)
-
-            object = try workspace.build(some: build,
+            object = try workspace.build(some: SSGC.StandardLibraryBuild.swift,
                 toolchain: toolchain,
                 status: status,
                 logger: logger,

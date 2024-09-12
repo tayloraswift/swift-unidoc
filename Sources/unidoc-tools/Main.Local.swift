@@ -2,7 +2,6 @@ import ArgumentParser
 import HTTP
 import NIOPosix
 import SymbolGraphCompiler
-import Symbols
 import System
 import UnidocClient
 
@@ -11,7 +10,7 @@ extension Main
     struct Local
     {
         @Argument
-        var project:Symbol.Package
+        var project:String
 
         @Option(
             name: [.customLong("host"), .customShort("h")],
