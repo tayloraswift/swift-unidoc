@@ -286,6 +286,15 @@ extension SSGC.PackageBuild
             json: artifacts / "\(self.id.package).package.json",
             leaf: true)
 
+        //  SwiftPM will climb up the directory tree until it finds a `Package.swift` file.
+        //  It is trying to be helpful, but it will cause problems so we need to diagnose if
+        //  this is happening.
+        switch FilePath.Directory.init(manifest.root.path)
+        {
+        case self.root: break
+        case let other: throw SSGC.PackagePathError.init(computed: self.root, manifest: other)
+        }
+
         print("""
             Resolving dependencies for '\(self.id.package)' \
             (swift-tools-version: \(manifest.format))
