@@ -11,7 +11,7 @@ extension FilePath
         else if
             let current:FilePath.Directory = .current()
         {
-            return current.path.appending(self.components)
+            return current.path.appending(self.components).lexicallyNormalized()
         }
         else
         {
