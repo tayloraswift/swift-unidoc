@@ -26,8 +26,9 @@ extension Unidoc.DB
 extension Unidoc.DB.PendingBuilds
 {
     public static
-    let indexEnqueued:Mongo.CollectionIndex = .init("Enqueued", unique: false)
+    let indexEnqueued:Mongo.CollectionIndex = .init("Enqueued/2", unique: false)
     {
+        $0[Unidoc.PendingBuild[.priority]] = (+)
         $0[Unidoc.PendingBuild[.enqueued]] = (+)
     }
         where:
@@ -84,6 +85,7 @@ extension Unidoc.DB.PendingBuilds
                     }
                     $0[.sort]
                     {
+                        $0[Unidoc.PendingBuild[.priority]] = (+)
                         $0[Unidoc.PendingBuild[.enqueued]] = (+)
                     }
                     $0[.hint] = Self.indexEnqueued.id
@@ -137,7 +139,8 @@ extension Unidoc.DB.PendingBuilds
     /// Adds a build to the queue, if it is not already queued, or returns the existing build.
     public
     func submitBuild(id:Unidoc.Edition,
-        name:Symbol.PackageAtRef) async throws -> Unidoc.PendingBuild
+        name:Symbol.PackageAtRef,
+        priority:Int32 = 0) async throws -> Unidoc.PendingBuild
     {
         let (pendingBuild, _):(Unidoc.PendingBuild, Bool) = try await self.modify(
             upserting: id,
@@ -147,6 +150,7 @@ extension Unidoc.DB.PendingBuilds
 
             $0[.setOnInsert] = Unidoc.PendingBuild.init(id: id,
                 run: now,
+                priority: priority,
                 enqueued: now,
                 launched: nil,
                 assignee: nil,
