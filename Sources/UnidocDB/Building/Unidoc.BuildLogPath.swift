@@ -31,8 +31,20 @@ extension Unidoc.BuildLogPath
         logs/\
         \(self.id.run.timestamp?.date.description ?? "0000-00-00")/\
         \(self.id.edition.package)/\
-        \(self.id.edition.version).\(self.type.name).log
+        \(self.filename)
         """
+    }
+
+    @inlinable
+    var filename:String
+    {
+        switch self.type
+        {
+        case .build:            "\(self.id.edition.version)-\(self.id.run.index).build.log"
+        case .documentation:    "\(self.id.edition.version)-\(self.id.run.index).docs.log"
+        case .ssgc:             "\(self.id.edition.version).build.log"
+        case .ssgcDiagnostics:  "\(self.id.edition.version).documentation.log"
+        }
     }
 }
 extension Unidoc.BuildLogPath:CustomStringConvertible
