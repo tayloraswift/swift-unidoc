@@ -1,5 +1,6 @@
 import BSON
 import MongoQL
+import Symbols
 import UnidocDB
 import UnidocRecords
 
@@ -31,6 +32,14 @@ extension Unidoc
             self.built = built
             self.owner = owner
         }
+    }
+}
+extension Unidoc.RefState
+{
+    @inlinable public
+    var symbol:Symbol.PackageAtRef
+    {
+        .init(package: self.package.symbol, ref: self.version.edition.name)
     }
 }
 extension Unidoc.RefState:Mongo.MasterCodingModel
