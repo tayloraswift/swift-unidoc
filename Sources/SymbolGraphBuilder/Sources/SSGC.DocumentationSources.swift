@@ -47,7 +47,8 @@ extension SSGC.DocumentationSources
             moduleIndexes = try moduleLayouts.map
             {
                 let id:Symbol.Module = $0.id
-                let constituents:[SSGC.ModuleLayout] = try self.constituents(of: $0)
+                let constituents:[SSGC.ModuleLayout] = try self.constituents(of: $0).filter(
+                    \.module.type.hasSymbols)
 
                 let symbols:
                 (
