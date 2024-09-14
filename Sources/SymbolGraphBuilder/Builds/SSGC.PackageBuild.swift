@@ -89,7 +89,10 @@ extension SSGC.PackageBuild
                 default:    continue
                 }
 
-                modulesToDump[constituent.id] = include
+                if  constituent.module.type.hasSymbols
+                {
+                    modulesToDump[constituent.id] = include
+                }
             }
         }
 
