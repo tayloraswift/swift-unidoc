@@ -16,6 +16,9 @@ extension Unidoc
         public
         let run:UnixMillisecond
 
+        /// Build priority. Lower values are higher priority.
+        public
+        let priority:Int32
         public
         let enqueued:UnixMillisecond?
         public
@@ -34,6 +37,7 @@ extension Unidoc
         @inlinable public
         init(id:Edition,
             run:UnixMillisecond,
+            priority:Int32,
             enqueued:UnixMillisecond?,
             launched:UnixMillisecond?,
             assignee:Account?,
@@ -42,6 +46,7 @@ extension Unidoc
         {
             self.id = id
             self.run = run
+            self.priority = priority
             self.enqueued = enqueued
             self.launched = launched
             self.assignee = assignee
@@ -57,6 +62,7 @@ extension Unidoc.PendingBuild:Mongo.MasterCodingModel
     {
         case id = "_id"
         case run = "T"
+        case priority = "P"
         case enqueued = "Q"
         case launched = "L"
         case assignee = "A"
@@ -73,6 +79,7 @@ extension Unidoc.PendingBuild:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.run] = self.run
+        bson[.priority] = self.priority
         bson[.enqueued] = self.enqueued
         bson[.launched] = self.launched
         bson[.assignee] = self.assignee
@@ -89,6 +96,7 @@ extension Unidoc.PendingBuild:BSONDocumentDecodable
     {
         self.init(id: try bson[.id].decode(),
             run: try bson[.run].decode(),
+            priority: try bson[.priority].decode(),
             enqueued: try bson[.enqueued]?.decode(),
             launched: try bson[.launched]?.decode(),
             assignee: try bson[.assignee]?.decode(),
