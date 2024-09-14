@@ -10,7 +10,7 @@ extension Unidoc
         init(plugin:any Plugin)
         {
             self.plugin = plugin
-            self.active = .init(true)
+            self.active = .init(plugin.enabledInitially)
         }
     }
 }
