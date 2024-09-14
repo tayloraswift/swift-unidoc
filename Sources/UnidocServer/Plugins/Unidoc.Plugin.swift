@@ -15,11 +15,16 @@ extension Unidoc
         static var title:String { get }
         static var id:String { get }
 
+        var enabledInitially:Bool { get }
+
         func run(in context:PluginContext<Event>) async throws -> Duration?
     }
 }
 extension Unidoc.Plugin
 {
+    @inlinable public
+    var enabledInitially:Bool { true }
+
     @inlinable public
     static var cooldown:Duration { .seconds(5) }
 }
