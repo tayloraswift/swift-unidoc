@@ -338,6 +338,7 @@ extension Unidoc.Client
             "--project-type", "\(type)",
             "--workspace", "\(workspace.location)",
             "--output", "\(docs)",
+            "--recover-from-apple-bugs",
         ]
         if  self.pretty
         {

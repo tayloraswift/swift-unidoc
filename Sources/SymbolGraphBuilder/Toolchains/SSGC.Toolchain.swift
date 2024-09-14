@@ -24,17 +24,21 @@ extension SSGC
         let paths:Paths
 
         private
+        let recoverFromAppleBugs:Bool
+        private
         let pretty:Bool
 
         public
         init(appleSDK:AppleSDK?,
             splash:Splash,
             paths:Paths,
+            recoverFromAppleBugs:Bool,
             pretty:Bool)
         {
             self.appleSDK = appleSDK
             self.splash = splash
             self.paths = paths
+            self.recoverFromAppleBugs = recoverFromAppleBugs
             self.pretty = pretty
         }
     }
@@ -44,6 +48,7 @@ extension SSGC.Toolchain
     public static
     func detect(appleSDK:SSGC.AppleSDK? = nil,
         paths:Paths = .init(swiftPM: nil, usr: nil),
+        recoverFromAppleBugs:Bool = true,
         pretty:Bool = false) throws -> Self
     {
         let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
@@ -58,6 +63,7 @@ extension SSGC.Toolchain
         return .init(appleSDK: appleSDK,
             splash: try .init(parsing: try readable.read(buffering: 1024)),
             paths: paths,
+            recoverFromAppleBugs: recoverFromAppleBugs,
             pretty: pretty)
     }
 }
@@ -303,25 +309,40 @@ extension SSGC.Toolchain
         {
             try extractor()
         }
-        catch SystemProcessError.exit(139, _)
-        {
-            print("""
-                Failed to dump symbols for module '\(id)' due to SIGSEGV \
-                from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
-                compiler; see https://github.com/apple/swift/issues/68767.
-                """)
-        }
-        catch SystemProcessError.exit(134, _)
-        {
-            print("""
-                Failed to dump symbols for module '\(id)' due to SIGABRT \
-                from 'swift symbolgraph-extract'. This is a known bug in the Apple Swift \
-                compiler; see https://github.com/swiftlang/swift/issues/75318.
-                """)
-        }
         catch SystemProcessError.exit(let code, let invocation)
         {
-            throw SSGC.PackageBuildError.swift_symbolgraph_extract(code, invocation)
+            guard self.recoverFromAppleBugs
+            else
+            {
+                throw SSGC.PackageBuildError.swift_symbolgraph_extract(code, invocation)
+            }
+
+            switch code
+            {
+            case 139:
+                print("""
+                    Failed to dump symbols for module '\(id)' due to SIGSEGV \
+                    from 'swift symbolgraph-extract'. \
+                    This is a known bug in the Apple Swift compiler; see \
+                    https://github.com/apple/swift/issues/68767.
+                    """)
+            case 134:
+                print("""
+                    Failed to dump symbols for module '\(id)' due to SIGABRT \
+                    from 'swift symbolgraph-extract'. \
+                    This is a known bug in the Apple Swift compiler; see \
+                        https://github.com/swiftlang/swift/issues/75318.
+                    """)
+
+            case let code:
+                print("""
+                    Failed to dump symbols for module '\(id)' due to exit code \(code) \
+                    from 'swift symbolgraph-extract'. \
+                    If the output above indicates 'swift symbolgraph-extract' exited \
+                    gracefully, this is most likely because the module.modulemap file declares \
+                    a different module name than we detected from the package manifest.
+                    """)
+            }
         }
     }
 }
