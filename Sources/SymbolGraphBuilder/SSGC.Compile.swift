@@ -117,6 +117,18 @@ extension SSGC
                 """)
         var removeClone:Bool = false
 
+        //  The great irony of this flag is that adding the flag itself causes
+        //  swift-argument-parser to crash with a bad pointer dereference. XD
+        /*
+        @Flag(
+            name: [.customLong("recover-from-apple-bugs")],
+            help: """
+                Recover from known bugs in the Apple Swift compiler - this may result in \
+                incomplete or broken documentation!
+                """)
+        var recoverFromAppleBugs:Bool = false
+        */
+
         @Flag(
             name: [.customLong("pretty"), .customShort("p")],
             help: """
@@ -223,6 +235,7 @@ extension SSGC.Compile
     {
         let toolchain:SSGC.Toolchain = try .detect(appleSDK: self.appleSDK,
             paths: .init(swiftPM: self.swiftCache, usr: self.swiftTools),
+            recoverFromAppleBugs: true, // self.recoverFromAppleBugs,
             pretty: self.pretty)
 
         let object:SymbolGraphObject<Void>
