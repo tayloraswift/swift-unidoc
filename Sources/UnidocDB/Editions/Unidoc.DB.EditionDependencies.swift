@@ -26,25 +26,25 @@ extension Unidoc.DB.EditionDependencies
     static let indexSourceChangedABI:Mongo.CollectionIndex = .init("SourceChangedABI",
         collation: SimpleCollation.spec)
     {
-        $0[Unidoc.EditionDependency[.id] / Unidoc.Edge<Unidoc.Edition>[.source]] = (+)
+        $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.source]] = (+)
     }
         where:
     {
-        $0[Unidoc.EditionDependency[.targetChanged]] = true
+        $0[Element[.targetChanged]] = true
     }
 
     public
     static let indexSource:Mongo.CollectionIndex = .init("Source",
         collation: SimpleCollation.spec)
     {
-        $0[Unidoc.EditionDependency[.id] / Unidoc.Edge<Unidoc.Edition>[.source]] = (+)
+        $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.source]] = (+)
     }
 
     public
     static let indexTarget:Mongo.CollectionIndex = .init("Target",
         collation: SimpleCollation.spec)
     {
-        $0[Unidoc.EditionDependency[.id] / Unidoc.Edge<Unidoc.Edition>[.target]] = (+)
+        $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.target]] = (+)
     }
 }
 extension Unidoc.DB.EditionDependencies:Mongo.CollectionModel
@@ -67,6 +67,18 @@ extension Unidoc.DB.EditionDependencies:Mongo.CollectionModel
 }
 extension Unidoc.DB.EditionDependencies
 {
+    public
+    func dirty(limit:Int) async throws -> [Unidoc.EditionDependency]
+    {
+        try await session.run(
+            command: Mongo.Find<Mongo.SingleBatch<Element>>.init(Self.name, limit: limit)
+            {
+                $0[.filter] { $0[Element[.targetChanged]] = true }
+                $0[.hint] = Self.indexSourceChangedABI.id
+            },
+            against: self.database)
+    }
+
     func create(dependent:Unidoc.Edition,
         from boundaries:[Unidoc.Mesh.Boundary]) async throws
     {
