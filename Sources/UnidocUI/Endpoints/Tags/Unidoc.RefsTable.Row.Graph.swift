@@ -161,6 +161,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                         ("Uplink", .uplink),
                         ("Unlink", .unlink),
                         ("Delete", .delete),
+                        ("Mark vintage", .vintage)
                     ]
                     {
                         $0[.li]
@@ -173,6 +174,8 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                             case .uplink:   break
                             case .unlink:   action["y"] = "false"
                             case .delete:   action["y"] = "false"
+                            //  Mark vintage does not require confirmation.
+                            case .vintage:  break
                             }
 
                             $0[.form]

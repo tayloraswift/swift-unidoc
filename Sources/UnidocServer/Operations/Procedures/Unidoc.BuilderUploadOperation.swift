@@ -86,11 +86,7 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
             case .failure:
                 //  Mark the snapshot as unbuildable, so that automated plugins don’t try to
                 //  build it again.
-                let _:Unidoc.Snapshot? = try await db.snapshots.modify(
-                    existing: complete.id.edition)
-                {
-                    $0[.set] { $0[Unidoc.Snapshot[.vintage]] = true }
-                }
+                try await db.snapshots.mark(id: complete.id.edition, vintage: true)
             }
 
         case .labeling:

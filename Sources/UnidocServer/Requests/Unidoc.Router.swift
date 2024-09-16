@@ -525,21 +525,25 @@ extension Unidoc.Router
             case .uplink:   return nil
             case .unlink:   page = .unlink(uri)
             case .delete:   page = .delete(uri)
+            case .vintage:  return nil
             }
 
             return .syncHTML(page)
         }
 
-        let action:Unidoc.LinkerAction
+        let update:Unidoc.LinkerOperation.Update
 
         switch route
         {
-        case .uplink:   action = .uplinkRefresh
-        case .unlink:   action = .unlink
-        case .delete:   action = .delete
+        case .uplink:   update = .action(.uplinkRefresh)
+        case .unlink:   update = .action(.unlink)
+        case .delete:   update = .action(.delete)
+        case .vintage:  update = .vintage(true)
         }
 
-        return .unordered(Unidoc.LinkerOperation.init(action: action, form: form))
+        return .unordered(Unidoc.LinkerOperation.init(update: update,
+            scope: form.edition,
+            back: form.back))
     }
 
     private mutating
@@ -646,7 +650,9 @@ extension Unidoc.Router
             }
 
         case .uplinkAll:
-            return .unordered(Unidoc.LinkerOperation.init(action: .uplinkRefresh, scope: nil))
+            return .unordered(Unidoc.LinkerOperation.init(
+                update: .action(.uplinkRefresh),
+                scope: nil))
 
         case .userConfig:
             if  let account:Unidoc.Account = self.authorization.account,
