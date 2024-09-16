@@ -6,6 +6,9 @@ extension Unidoc
         case uplink
         case unlink
         case delete
+        /// This is not really a linker action, but it is related closely enough to piggyback
+        /// on the same route.
+        case vintage
     }
 }
 extension Unidoc.LinkerRoute:CustomStringConvertible
