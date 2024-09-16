@@ -39,7 +39,25 @@ extension Unidoc
         public
         var size:Int64
 
-        @inlinable internal
+        /// Indicates if the symbol graph is no longer buildable from source. This flag prevents
+        /// the automated build system from repeatedly attempting to build the package.
+        ///
+        /// Possible reasons for this include:
+        ///
+        /// -   The package no longer compiles using the latest version of its dependencies,
+        ///     and its manifest does not constrain the dependencies to compatible versions.
+        ///
+        /// -   The package, or one of its dependencies, has been taken down from GitHub.
+        ///
+        /// -   The package only builds on a platform that is no longer supported by the hosting
+        ///     service.
+        ///
+        /// -   The package suffers from a Swift (or Unidoc) compiler bug that prevents it from
+        ///     being built.
+        public
+        var vintage:Bool
+
+        @inlinable
         init(id:Edition,
             metadata:SymbolGraphMetadata,
             inline:SymbolGraph?,
@@ -47,7 +65,8 @@ extension Unidoc
             swift:PatchVersion?,
             pins:[Edition?],
             type:GraphType,
-            size:Int64)
+            size:Int64,
+            vintage:Bool)
         {
             self.id = id
             self.metadata = metadata
@@ -57,6 +76,7 @@ extension Unidoc
             self.pins = pins
             self.type = type
             self.size = size
+            self.vintage = vintage
         }
     }
 }
@@ -87,7 +107,8 @@ extension Unidoc.Snapshot
             swift: swift,
             pins: [],
             type: .bson,
-            size: 0)
+            size: 0,
+            vintage: false)
     }
 }
 extension Unidoc.Snapshot
@@ -155,6 +176,7 @@ extension Unidoc.Snapshot
         case pins = "p"
         case type = "T"
         case size = "B"
+        case vintage = "V"
 
         @available(*, deprecated, renamed: "inline")
         @inlinable public static
@@ -179,6 +201,7 @@ extension Unidoc.Snapshot:BSONDocumentEncodable
         bson[.pins] = self.pins.isEmpty ? nil : self.pins
         bson[.type] = self.type
         bson[.size] = self.size
+        bson[.vintage] = self.vintage ? true : nil
     }
 }
 extension Unidoc.Snapshot:BSONDocumentDecodable
@@ -193,6 +216,7 @@ extension Unidoc.Snapshot:BSONDocumentDecodable
             swift: try bson[.swift]?.decode(),
             pins: try bson[.pins]?.decode() ?? [],
             type: try bson[.type]?.decode() ?? .bson,
-            size: try bson[.size]?.decode() ?? 0)
+            size: try bson[.size]?.decode() ?? 0,
+            vintage: try bson[.vintage]?.decode() ?? false)
     }
 }

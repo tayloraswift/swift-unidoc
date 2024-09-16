@@ -72,8 +72,9 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
 
             try await db.completeBuilds.upsert(complete)
 
-            if  case .success(let snapshot) = build.outcome
+            switch build.outcome
             {
+            case .success(let snapshot):
                 try await db.snapshots.upsert(snapshot)
 
                 /// A successful (labeled) build also sets the platform preference, since we now
@@ -81,6 +82,15 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
                 let _:Unidoc.PackageMetadata? = try await db.packages.reset(
                     platformPreference: snapshot.metadata.triple,
                     of: snapshot.id.package)
+
+            case .failure:
+                //  Mark the snapshot as unbuildable, so that automated plugins don’t try to
+                //  build it again.
+                let _:Unidoc.Snapshot? = try await db.snapshots.modify(
+                    existing: complete.id.edition)
+                {
+                    $0[.set] { $0[Unidoc.Snapshot[.vintage]] = true }
+                }
             }
 
         case .labeling:

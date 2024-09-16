@@ -40,9 +40,10 @@ extension Unidoc.DB.Snapshots
     }
 
     public static
-    let indexSymbolGraphABI:Mongo.CollectionIndex = .init("ABI",
+    let indexSymbolGraphABI:Mongo.CollectionIndex = .init("ABI/2",
         unique: false)
     {
+        $0[Unidoc.Snapshot[.vintage]] = (+)
         $0[Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]] = (+)
     }
 
@@ -207,6 +208,9 @@ extension Unidoc.DB.Snapshots
             {
                 $0[.filter]
                 {
+                    //  This needs to be ``BSON.Null`` and not just `{ $0[.exists] = false }`,
+                    //  otherwise it will not use the partial index.
+                    $0[Unidoc.Snapshot[.vintage]] = BSON.Null.init()
                     $0[Unidoc.Snapshot[.metadata] / SymbolGraphMetadata[.abi]]
                     {
                         $0[.lt] = version
