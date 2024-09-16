@@ -171,6 +171,107 @@ extension Unidoc.DB.Snapshots
 
 extension Unidoc.DB.Snapshots
 {
+    @discardableResult
+    public
+    func queueAll(for action:Unidoc.LinkerAction) async throws -> Int
+    {
+        try await self.updateMany
+        {
+            $0
+            {
+                $0[.multi] = true
+                $0[.q]
+                {
+                    $0[Unidoc.Snapshot[.action]] { $0[.exists] = false }
+                }
+                $0[.u]
+                {
+                    $0[.set]
+                    {
+                        $0[Unidoc.Snapshot[.action]] = action
+                    }
+                }
+            }
+        }
+    }
+
+    @discardableResult
+    public
+    func queue(id:Unidoc.Edition, for action:Unidoc.LinkerAction) async throws -> Bool?
+    {
+        try await self.update
+        {
+            $0
+            {
+                $0[.q]
+                {
+                    $0[Unidoc.Snapshot[.action]] { $0[.exists] = false }
+                    $0[Unidoc.Snapshot[.id]] = id
+                }
+                $0[.u]
+                {
+                    $0[.set]
+                    {
+                        $0[Unidoc.Snapshot[.action]] = action
+                    }
+                }
+            }
+        }
+    }
+
+    /// Clears the **queued action** for a single snapshot. Does not delete the snapshot!
+    @discardableResult
+    public
+    func clear(id:Unidoc.Edition) async throws -> Bool?
+    {
+        try await self.update
+        {
+            $0
+            {
+                $0[.q] { $0[Unidoc.Snapshot[.id]] = id }
+                $0[.u]
+                {
+                    $0[.unset]
+                    {
+                        $0[Unidoc.Snapshot[.action]] = ()
+                    }
+                }
+            }
+        }
+    }
+
+    @discardableResult
+    public
+    func mark(id:Unidoc.Edition, vintage:Bool) async throws -> Bool?
+    {
+        try await self.update
+        {
+            $0
+            {
+                $0[.q] { $0[Unidoc.Snapshot[.id]] = id }
+                $0[.u]
+                {
+                    if  vintage
+                    {
+                        $0[.set]
+                        {
+                            $0[Unidoc.Snapshot[.vintage]] = true
+                        }
+                    }
+                    else
+                    {
+                        $0[.unset]
+                        {
+                            $0[Unidoc.Snapshot[.vintage]] = ()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+extension Unidoc.DB.Snapshots
+{
     /// Returns a single batch of symbol graphs that are queued for linking.
     public
     func pending(_ limit:Int) async throws -> [QueuedOperation]

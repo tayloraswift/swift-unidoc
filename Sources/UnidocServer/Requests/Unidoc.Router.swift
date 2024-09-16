@@ -646,7 +646,7 @@ extension Unidoc.Router
             }
 
         case .uplinkAll:
-            return .unordered(Unidoc.LinkerOperation.init(queue: .all))
+            return .unordered(Unidoc.LinkerOperation.init(action: .uplinkRefresh, scope: nil))
 
         case .userConfig:
             if  let account:Unidoc.Account = self.authorization.account,
