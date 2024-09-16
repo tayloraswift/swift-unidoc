@@ -10,23 +10,16 @@ extension Unidoc
     /// Queues one or more editions for uplinking. The uplinking process itself is asynchronous.
     struct LinkerOperation:Sendable
     {
-        let action:LinkerAction
+        let update:Update
         let scope:Edition?
         let back:String?
 
-        init(action:Unidoc.LinkerAction, scope:Unidoc.Edition?, back:String? = nil)
+        init(update:Update, scope:Unidoc.Edition?, back:String? = nil)
         {
-            self.action = action
+            self.update = update
             self.scope = scope
             self.back = back
         }
-    }
-}
-extension Unidoc.LinkerOperation
-{
-    init(action:Unidoc.LinkerAction, form:Unidoc.LinkerForm)
-    {
-        self.init(action: action, scope: form.edition, back: form.back)
     }
 }
 extension Unidoc.LinkerOperation:Unidoc.AdministrativeOperation
@@ -35,13 +28,19 @@ extension Unidoc.LinkerOperation:Unidoc.AdministrativeOperation
         db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        if  let scope:Unidoc.Edition = self.scope
+        switch (self.scope, self.update)
         {
-            try await db.snapshots.queue(id: scope, for: self.action)
-        }
-        else
-        {
-            try await db.snapshots.queueAll(for: self.action)
+        case (nil, .action(let action)):
+            try await db.snapshots.queueAll(for: action)
+
+        case (let scope?, .action(let action)):
+            try await db.snapshots.queue(id: scope, for: action)
+
+        case (let scope?, .vintage(let vintage)):
+            try await db.snapshots.mark(id: scope, vintage: vintage)
+
+        default:
+            return nil
         }
 
         return .redirect(.seeOther(self.back ?? "/admin"))
