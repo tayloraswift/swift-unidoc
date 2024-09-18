@@ -11,11 +11,13 @@ jobs:
     macos:
         runs-on: macos-14
         name: macOS
-
-        env:
-            DEVELOPER_DIR: "/Applications/Xcode_15.3.app/Contents/Developer"
-
         steps:
+            -   name: Install Swift 6.0
+                uses: tayloraswift/swift-install-action@master
+                with:
+                    swift-prefix: "swift-6.0-release/xcode/swift-6.0-RELEASE"
+                    swift-id: "swift-6.0-RELEASE"
+
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
