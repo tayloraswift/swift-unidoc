@@ -311,7 +311,8 @@ extension SSGC.TypeChecker
             {
                 //  The member’s extension constraints don’t match the extension
                 //  object’s signature!
-                throw SSGC.ExtensionSignatureError.init(expected: group.signature,
+                throw SSGC.ExtensionSignatureError.member(
+                    expected: group.signature,
                     declared: member.conditions.sorted())
             }
 
@@ -379,10 +380,14 @@ extension SSGC.TypeChecker
 
             conformer = type
 
-            guard named.conditions == conditions
+            //  This assertion disabled due to Apple Swift bug:
+            //  https://github.com/swiftlang/swift/issues/76559
+            guard named.conditions == conditions || { true }()
             else
             {
-                throw SSGC.ExtensionSignatureError.init(expected: named.signature)
+                throw SSGC.ExtensionSignatureError.conformance(
+                    expected: named.signature,
+                    declared: conformance.conditions)
             }
         }
 
@@ -429,19 +434,19 @@ extension SSGC.TypeChecker
                 (\(target)) of '\(type.value.path)' because multiple conflicting \
                 conformances unify to a heterogeneous set of constraints
 
-                Declared constraints: \(lists)
-                Simplified constraints: \(reduced)
+                Declared constraints: \(lists.map(\.humanReadable))
+                Simplified constraints: \(reduced.humanReadable)
                 """)
         }
         catch SSGC.ConstraintReductionError.redundant(let reduced, from: let lists)
         {
             throw AssertionError.init(message: """
                 Failed to simplify constraints for conditional conformance \
-                (\(target)) of '\(type.value.path)' because at least one of the \
-                constraint lists had redundancies within itself
+                (\(target)) of '\(type.value.path)' due to multiple conflicting conditional
+                conformances parsed from Swift compiler output
 
-                Declared constraints: \(lists)
-                Simplified constraints: \(reduced)
+                Declared constraints: \(lists.map(\.humanReadable))
+                Simplified constraints: \(reduced.humanReadable)
                 """)
         }
     }
@@ -470,10 +475,30 @@ extension SSGC.TypeChecker
                     return
                 }
 
-                let canonical:Set<GenericConstraint<Symbol.Decl>> = try self.computeConformance(
-                    where: overlapping,
-                    to: target,
-                    of: type)
+                let canonical:Set<GenericConstraint<Symbol.Decl>>
+                do
+                {
+                    canonical = try self.computeConformance(where: overlapping,
+                        to: target,
+                        of: type)
+                }
+                catch let error
+                {
+                    switch target
+                    {
+                    case "ss9EscapableP":                               print(error)
+                    case "ss8CopyableP":                                print(error)
+                    case "s11CoreMetrics06_SwiftB16SendableProtocolP":  print(error)
+                    default:                                            throw error
+                    }
+
+                    print("""
+                        Note: recovering from error due to known Apple Swift bug
+                            https://github.com/swiftlang/swift/issues/76499
+
+                        """)
+                    return
+                }
 
                 //  Generate an implicit, internal extension for this conformance,
                 //  if one does not already exist.
