@@ -6,8 +6,15 @@ import UnidocRecords
 extension Unidoc
 {
     public
-    protocol VolumeQuery:Mongo.PipelineQuery<DB.Volumes> where Collation == VolumeCollation
+    protocol VolumeQuery:Mongo.PipelineQuery<DB.Volumes>
+        where CollectionOrigin == Unidoc.DB.Volumes, Collation == VolumeCollation
     {
+        //  https://forums.swift.org/t/recent-improvements-to-associated-type-inference/70265/14
+        override
+        associatedtype CollectionOrigin
+        override
+        associatedtype Collation
+
         associatedtype VertexPredicate:Unidoc.VertexPredicate
 
         var volume:VolumeSelector { get }
@@ -35,17 +42,6 @@ extension Unidoc
         func extend(pipeline:inout Mongo.PipelineEncoder)
     }
 }
-
-#if compiler(>=6.0)
-extension Unidoc.VolumeQuery
-{
-    public
-    typealias CollectionOrigin = Unidoc.DB.Volumes
-    public
-    typealias Collation = VolumeCollation
-}
-#endif
-
 extension Unidoc.VolumeQuery
 {
     @inlinable public static

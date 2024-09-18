@@ -61,17 +61,14 @@ extension Unidoc.VertexQuery<Unidoc.LookupAdjacent>
             unset: unset.map { Unidoc.AnyVertex[$0] })
     }
 }
-extension Unidoc.VertexQuery:Mongo.PipelineQuery
-{
-    public
-    typealias Iteration = Mongo.Single<Unidoc.VertexOutput>
-}
 extension Unidoc.VertexQuery:Unidoc.VolumeQuery
 {
     /// The compiler is capable of inferring this on its own, but this makes it easier to
     /// understand how this type witnesses ``Unidoc.VolumeQuery``.
     public
     typealias VertexPredicate = Unidoc.Shoot
+    public
+    typealias Iteration = Mongo.Single<Unidoc.VertexOutput>
 
     @inlinable public static
     var volumeOfLatest:Mongo.AnyKeyPath? { Unidoc.PrincipalOutput[.volumeOfLatest] }

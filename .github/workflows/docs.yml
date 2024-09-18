@@ -28,8 +28,6 @@ jobs:
             #   This installs an older version of Unidoc, not the one we are testing.
             -   name: Install Unidoc
                 uses: tayloraswift/swift-unidoc-action@master
-                with:
-                    unidoc-version: "master"
 
             -   name: Checkout repository
                 uses: actions/checkout@v3
@@ -51,8 +49,6 @@ jobs:
         steps:
             -   name: Install Unidoc
                 uses: tayloraswift/swift-unidoc-action@master
-                with:
-                    unidoc-version: "master"
 
             -   name: Checkout repository
                 uses: actions/checkout@v3

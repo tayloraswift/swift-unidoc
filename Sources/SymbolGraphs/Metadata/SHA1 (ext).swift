@@ -1,7 +1,7 @@
 import BSON
 import SHA1
 
-extension SHA1:BSONBinaryEncodable
+extension SHA1:@retroactive BSONBinaryEncodable
 {
     public
     func encode(to bson:inout BSON.BinaryEncoder)
@@ -9,7 +9,7 @@ extension SHA1:BSONBinaryEncodable
         bson += self
     }
 }
-extension SHA1:BSONBinaryDecodable
+extension SHA1:@retroactive BSONBinaryDecodable
 {
     @inlinable public
     init(bson:BSON.BinaryDecoder) throws

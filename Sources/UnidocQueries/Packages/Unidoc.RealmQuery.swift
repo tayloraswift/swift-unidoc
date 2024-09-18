@@ -24,13 +24,10 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.RealmQuery:Mongo.PipelineQuery
+extension Unidoc.RealmQuery:Unidoc.AliasingQuery
 {
     public
     typealias Iteration = Mongo.Single<Output>
-}
-extension Unidoc.RealmQuery:Unidoc.AliasingQuery
-{
     public
     typealias CollectionOrigin = Unidoc.DB.RealmAliases
     public
