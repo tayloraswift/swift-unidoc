@@ -16,16 +16,15 @@ jobs:
         env:
             UNIDOC_ENABLE_INDEXSTORE: "0"
         steps:
-            #   Important! We install an Ubuntu 22.04 Swift toolchain, and not the 24.04 one
-            #   because the 24.04 toolchain for some reason is built with assertions enabled,
-            #   which causes the Swift compiler to crash when building the package.
             -   name: Install Swift
                 uses: tayloraswift/swift-install-action@master
                 with:
-                    swift-prefix: "swift-5.10.1-release/ubuntu2204/swift-5.10.1-RELEASE"
-                    swift-id: "swift-5.10.1-RELEASE-ubuntu22.04"
+                    swift-prefix: "swift-6.0-release/ubuntu2404/swift-6.0-RELEASE"
+                    swift-id: "swift-6.0-RELEASE-ubuntu24.04"
 
             #   This installs an older version of Unidoc, not the one we are testing.
+            #   We use `--static-swift-stdlib` so it doesn’t matter if the Unidoc binary was
+            #   built with a different version of Swift.
             -   name: Install Unidoc
                 uses: tayloraswift/swift-unidoc-action@master
 
@@ -44,9 +43,14 @@ jobs:
         name: macOS
         env:
             UNIDOC_ENABLE_INDEXSTORE: "0"
-            DEVELOPER_DIR: "/Applications/Xcode_15.3.app/Contents/Developer"
 
         steps:
+            -   name: Install Swift 6.0
+                uses: tayloraswift/swift-install-action@master
+                with:
+                    swift-prefix: "swift-6.0-release/xcode/swift-6.0-RELEASE"
+                    swift-id: "swift-6.0-RELEASE"
+
             -   name: Install Unidoc
                 uses: tayloraswift/swift-unidoc-action@master
 
