@@ -4,10 +4,6 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Unidoc.RedirectQuery")
-public
-typealias ThinQuery = Unidoc.RedirectQuery
-
 extension Unidoc
 {
     @frozen public
