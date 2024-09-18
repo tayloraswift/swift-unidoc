@@ -343,7 +343,7 @@ enum Main:TestMain, TestBattery
                 try workspace.build(package: try .remote(
                         project: "swift-snapshot-testing",
                         from: "https://github.com/pointfreeco/swift-snapshot-testing.git",
-                        at: "1.17.0",
+                        at: "1.17.5",
                         in: workspace),
                     with: toolchain)
             })
