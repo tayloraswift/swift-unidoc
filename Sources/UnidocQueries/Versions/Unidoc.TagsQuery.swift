@@ -37,13 +37,10 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.TagsQuery:Mongo.PipelineQuery
+extension Unidoc.TagsQuery:Unidoc.AliasingQuery
 {
     public
     typealias Iteration = Mongo.Single<Output>
-}
-extension Unidoc.TagsQuery:Unidoc.AliasingQuery
-{
     public
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
     public

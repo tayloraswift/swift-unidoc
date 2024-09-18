@@ -17,12 +17,9 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.EditionMetadataSymbolicQuery:Mongo.PipelineQuery
-{
-    typealias Iteration = Mongo.Single<Unidoc.EditionOutput>
-}
 extension Unidoc.EditionMetadataSymbolicQuery:Unidoc.AliasingQuery
 {
+    typealias Iteration = Mongo.Single<Unidoc.EditionOutput>
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
     typealias CollectionTarget = Unidoc.DB.Packages
 

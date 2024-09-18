@@ -1,4 +1,5 @@
 import BSON
+import MongoDB
 import MongoQL
 import UnidocDB
 import UnidocRecords
@@ -19,12 +20,9 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.AliasResolutionQuery:Mongo.PipelineQuery
-{
-    typealias Iteration = Mongo.Single<Targets.Element>
-}
 extension Unidoc.AliasResolutionQuery:Unidoc.AliasingQuery
 {
+    typealias Iteration = Mongo.Single<Targets.Element>
     typealias CollectionOrigin = Aliases
     typealias CollectionTarget = Targets
 
