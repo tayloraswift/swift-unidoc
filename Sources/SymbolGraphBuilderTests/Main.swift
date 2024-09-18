@@ -369,7 +369,7 @@ enum Main:TestMain, TestBattery
                 try workspace.build(package: try .remote(
                         package: "indexstore-db",
                         from: "https://github.com/apple/indexstore-db.git",
-                        at: "swift-5.10-RELEASE",
+                        at: "swift-6.0-RELEASE",
                         in: workspace,
                         flags: .init(cxx: ["-I/usr/lib/swift", "-I/usr/lib/swift/Block"])),
                     with: toolchain)
