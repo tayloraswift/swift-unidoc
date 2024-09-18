@@ -4,36 +4,34 @@ import Symbols
 
 extension SSGC
 {
-    struct ExtensionSignatureError:Error
+    enum ExtensionSignatureError:Error
     {
-        let expected:ExtensionSignature
-        let declared:[GenericConstraint<Symbol.Decl>]?
-
-        init(expected:ExtensionSignature,
-            declared:[GenericConstraint<Symbol.Decl>]? = nil)
-        {
-            self.expected = expected
-            self.declared = declared
-        }
+        case conformance(expected:ExtensionSignature, declared:[GenericConstraint<Symbol.Decl>])
+        case member     (expected:ExtensionSignature, declared:[GenericConstraint<Symbol.Decl>])
     }
 }
 extension SSGC.ExtensionSignatureError:CustomStringConvertible
 {
     var description:String
     {
-        if  let _:[GenericConstraint<Symbol.Decl>] = self.declared
+        switch self
         {
+        case .conformance(expected: let expected, declared: let declared):
             """
-            Cannot declare an extension (of \(self.expected.extendee)) containing \
-            a symbol with different extension constraints than its extension block.
-            """
-        }
-        else
-        {
-            """
-            Cannot declare an extension (of \(self.expected.extendee)) containing \
+            Cannot declare an extension (of \(expected.extendee)) containing \
             a relationship with different extension constraints than its extension \
             block.
+
+            Extension block: \(expected.conditions.humanReadable)
+            Relationship: \(declared.humanReadable)
+            """
+        case .member(expected: let expected, declared: let declared):
+            """
+            Cannot declare an extension (of \(expected.extendee)) containing \
+            a symbol with different extension constraints than its extension block!
+
+            Extension block: \(expected.conditions.humanReadable)
+            Extension member: \(declared.humanReadable)
             """
         }
     }

@@ -268,7 +268,7 @@ enum Main:TestMain, TestBattery
                 try workspace.build(package: try .remote(
                         project: "swift-nio-ssl",
                         from: "https://github.com/apple/swift-nio-ssl.git",
-                        at: "2.24.0",
+                        at: "2.27.2",
                         in: workspace),
                     with: toolchain)
             })
