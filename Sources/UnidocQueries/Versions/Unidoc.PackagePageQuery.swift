@@ -31,16 +31,15 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackagePageQuery:Mongo.PipelineQuery
+extension Unidoc.PackagePageQuery
 {
-    public
-    typealias Iteration = Mongo.Single<Output>
-
     public
     typealias Output = Unidoc.PackagePageOutput<PageSegment.Item>
 }
 extension Unidoc.PackagePageQuery:Unidoc.AliasingQuery
 {
+    public
+    typealias Iteration = Mongo.Single<Output>
     public
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
     public

@@ -6,7 +6,7 @@ import UnixTime
 extension Unidoc
 {
     public
-    protocol ServerLogger:AnyActor
+    protocol ServerLogger:Actor
     {
         func dashboard(from server:Server, as format:Unidoc.RenderFormat) async -> HTTP.Resource
 

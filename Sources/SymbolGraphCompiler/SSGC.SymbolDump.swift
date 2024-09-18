@@ -104,7 +104,7 @@ extension SSGC.SymbolDump
                 }
                 //  Trim file path prefixes.
                 guard
-                let base:Symbol.FileBase = base
+                let base:Symbol.FileBase = copy base
                 else
                 {
                     $0.location = nil

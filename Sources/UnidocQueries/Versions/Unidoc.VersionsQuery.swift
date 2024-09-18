@@ -40,13 +40,10 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.VersionsQuery:Mongo.PipelineQuery
+extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
 {
     public
     typealias Iteration = Mongo.Single<Output>
-}
-extension Unidoc.VersionsQuery:Unidoc.AliasingQuery
-{
     public
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
     public
