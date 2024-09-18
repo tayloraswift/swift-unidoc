@@ -268,7 +268,7 @@ enum Main:TestMain, TestBattery
                 try workspace.build(package: try .remote(
                         project: "swift-nio-ssl",
                         from: "https://github.com/apple/swift-nio-ssl.git",
-                        at: "2.24.0",
+                        at: "2.27.2",
                         in: workspace),
                     with: toolchain)
             })
@@ -343,7 +343,7 @@ enum Main:TestMain, TestBattery
                 try workspace.build(package: try .remote(
                         project: "swift-snapshot-testing",
                         from: "https://github.com/pointfreeco/swift-snapshot-testing.git",
-                        at: "1.17.0",
+                        at: "1.17.5",
                         in: workspace),
                     with: toolchain)
             })
@@ -369,7 +369,7 @@ enum Main:TestMain, TestBattery
                 try workspace.build(package: try .remote(
                         package: "indexstore-db",
                         from: "https://github.com/apple/indexstore-db.git",
-                        at: "swift-5.10-RELEASE",
+                        at: "swift-6.0-RELEASE",
                         in: workspace,
                         flags: .init(cxx: ["-I/usr/lib/swift", "-I/usr/lib/swift/Block"])),
                     with: toolchain)

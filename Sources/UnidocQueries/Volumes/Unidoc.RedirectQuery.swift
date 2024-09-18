@@ -4,10 +4,6 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Unidoc.RedirectQuery")
-public
-typealias ThinQuery = Unidoc.RedirectQuery
-
 extension Unidoc
 {
     @frozen public
@@ -27,13 +23,10 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.RedirectQuery:Mongo.PipelineQuery
+extension Unidoc.RedirectQuery:Unidoc.VolumeQuery
 {
     public
     typealias Iteration = Mongo.Single<Unidoc.RedirectOutput>
-}
-extension Unidoc.RedirectQuery:Unidoc.VolumeQuery
-{
     /// The compiler is capable of inferring this on its own, but this makes it easier to
     /// understand how this type witnesses ``Unidoc.VolumeQuery``.
     public

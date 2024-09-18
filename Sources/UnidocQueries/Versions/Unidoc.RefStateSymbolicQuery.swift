@@ -17,12 +17,9 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.RefStateSymbolicQuery:Mongo.PipelineQuery
-{
-    typealias Iteration = Mongo.Single<Unidoc.RefState>
-}
 extension Unidoc.RefStateSymbolicQuery:Unidoc.AliasingQuery
 {
+    typealias Iteration = Mongo.Single<Unidoc.RefState>
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
     typealias CollectionTarget = Unidoc.DB.Packages
 

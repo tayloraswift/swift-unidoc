@@ -12,8 +12,10 @@ extension Unidoc
         where   CollectionOrigin.Element:Mongo.MasterCodingModel<AliasKey>,
                 Collation == SimpleCollation
     {
+        //  https://forums.swift.org/t/recent-improvements-to-associated-type-inference/70265/14
         override
-        associatedtype CollectionOrigin:Mongo.CollectionModel
+        associatedtype Collation
+
         associatedtype CollectionTarget:Mongo.CollectionModel
 
         /// The field to store the target document (a `CollectionTarget.Element`) in.
@@ -25,15 +27,6 @@ extension Unidoc
         func extend(pipeline:inout Mongo.PipelineEncoder)
     }
 }
-
-#if compiler(>=6.0)
-extension Unidoc.AliasingQuery
-{
-    public
-    typealias Collation = SimpleCollation
-}
-#endif
-
 extension Unidoc.AliasingQuery
 {
     @inlinable public

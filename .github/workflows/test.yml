@@ -10,13 +10,7 @@ on:
 jobs:
     server:
         runs-on: ubuntu-24.04
-        name: Amazon Linux 2023
-
-        strategy:
-            matrix:
-                image:
-                -   tayloraswift/5.10.0-amazonlinux2023:latest
-
+        name: Linux
         steps:
             -   name: Checkout repository
                 uses: actions/checkout@v3
@@ -39,7 +33,7 @@ jobs:
                         --user root \
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
-                        ${{ matrix.image }} \
+                        swift:6.0-noble \
                         /bin/bash .github/pipeline
 
     macos:
@@ -47,9 +41,14 @@ jobs:
         name: macOS
         env:
             UNIDOC_ENABLE_INDEXSTORE: "1"
-            DEVELOPER_DIR: "/Applications/Xcode_15.3.app/Contents/Developer"
 
         steps:
+            -   name: Install Swift 6.0
+                uses: tayloraswift/swift-install-action@master
+                with:
+                    swift-prefix: "swift-6.0-release/xcode/swift-6.0-RELEASE"
+                    swift-id: "swift-6.0-RELEASE"
+
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
