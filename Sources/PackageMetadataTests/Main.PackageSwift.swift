@@ -1,7 +1,7 @@
 import JSON
 import PackageGraphs
 import PackageMetadata
-import System
+import System_
 import Testing_
 
 extension Main

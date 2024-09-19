@@ -6,7 +6,7 @@ import MarkdownRendering
 import SymbolGraphBuilder
 import SymbolGraphs
 import SymbolGraphTesting
-import System
+import System_
 import Testing_
 
 @main

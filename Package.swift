@@ -63,7 +63,7 @@ let package:Package = .init(
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
         .library(name: "Symbols", targets: ["Symbols"]),
 
-        .library(name: "System", targets: ["System"]),
+        .library(name: "System_", targets: ["System_"]),
         .library(name: "System_ArgumentParser", targets: ["System_ArgumentParser"]),
 
         .library(name: "UA", targets: ["UA"]),
@@ -376,7 +376,7 @@ let package:Package = .init(
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphLinker"),
                 .target(name: "System_ArgumentParser"),
-                .target(name: "System"),
+                .target(name: "System_"),
             ]),
 
         .target(name: "SymbolGraphCompiler",
@@ -436,7 +436,7 @@ let package:Package = .init(
         .target(name: "SymbolGraphTesting",
             dependencies: [
                 .target(name: "SymbolGraphs"),
-                .target(name: "System"),
+                .target(name: "System_"),
 
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
@@ -475,7 +475,7 @@ let package:Package = .init(
         .target(name: "UnidocAssets_System",
             dependencies: [
                 .target(name: "Media"),
-                .target(name: "System"),
+                .target(name: "System_"),
                 .target(name: "UnidocAssets"),
             ]),
 
@@ -490,6 +490,7 @@ let package:Package = .init(
         .target(name: "UnidocDB",
             dependencies: [
                 .target(name: "_MongoDB"),
+                .target(name: "IP"),
                 .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
@@ -576,7 +577,7 @@ let package:Package = .init(
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
-        .target(name: "System",
+        .target(name: "System_",
             dependencies: [
                 .product(name: "SystemPackage", package: "swift-system"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
@@ -584,7 +585,7 @@ let package:Package = .init(
 
         .target(name: "System_ArgumentParser",
             dependencies: [
-                .target(name: "System"),
+                .target(name: "System_"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]),
 
@@ -635,7 +636,7 @@ let package:Package = .init(
         .executableTarget(name: "PackageMetadataTests",
             dependencies: [
                 .target(name: "PackageMetadata"),
-                .target(name: "System"),
+                .target(name: "System_"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
@@ -674,7 +675,7 @@ let package:Package = .init(
         .executableTarget(name: "SymbolGraphPartTests",
             dependencies: [
                 .target(name: "SymbolGraphParts"),
-                .target(name: "System"),
+                .target(name: "System_"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
@@ -692,7 +693,7 @@ let package:Package = .init(
 
         .executableTarget(name: "SystemTests",
             dependencies: [
-                .target(name: "System"),
+                .target(name: "System_"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ],
             exclude:
