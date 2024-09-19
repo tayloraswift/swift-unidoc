@@ -3,7 +3,7 @@ import PackageMetadata
 import SHA1
 import SymbolGraphs
 import Symbols
-import System
+import System_
 
 extension PackageNode
 {
