@@ -1,5 +1,5 @@
 import SymbolGraphParts
-import System
+import System_
 
 extension SSGC
 {

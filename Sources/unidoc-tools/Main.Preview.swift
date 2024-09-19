@@ -4,7 +4,7 @@ import MongoDB
 import NIOCore
 import NIOPosix
 import NIOSSL
-import System
+import System_
 import System_ArgumentParser
 import UnidocLinkerPlugin
 import UnidocServer

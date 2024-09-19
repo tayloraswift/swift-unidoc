@@ -2,7 +2,7 @@ import ArgumentParser
 import HTTP
 import NIOPosix
 import SymbolGraphCompiler
-import System
+import System_
 import UnidocClient
 
 extension Main

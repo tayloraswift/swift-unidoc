@@ -2,7 +2,7 @@ import BSON
 import SemanticVersions
 import SymbolGraphs
 import Symbols
-import System
+import System_
 import Testing_
 
 extension SymbolGraphObject<Void>

@@ -1,4 +1,4 @@
-import System
+import System_
 import struct SystemPackage.Errno
 
 extension SSGC

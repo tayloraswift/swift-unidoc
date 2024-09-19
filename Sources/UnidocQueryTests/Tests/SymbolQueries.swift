@@ -4,7 +4,7 @@ import SymbolGraphBuilder
 import SymbolGraphs
 import SymbolGraphTesting
 import Symbols
-import System
+import System_
 import Unidoc
 @_spi(testable)
 import UnidocDB
