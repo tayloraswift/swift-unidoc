@@ -12,7 +12,7 @@ import PackageGraphs
 import SymbolGraphLinker
 import SymbolGraphs
 import Symbols
-import System
+import System_
 
 extension SSGC
 {

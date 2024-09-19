@@ -2,7 +2,7 @@ import MarkdownABI
 import MarkdownPluginSwift
 import SymbolGraphs
 import Symbols
-import System
+import System_
 
 extension SSGC
 {

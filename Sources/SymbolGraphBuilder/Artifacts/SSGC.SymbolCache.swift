@@ -2,7 +2,7 @@ import SymbolGraphLinker
 import SymbolGraphParts
 import SymbolGraphs
 import Symbols
-import System
+import System_
 
 extension SSGC
 {

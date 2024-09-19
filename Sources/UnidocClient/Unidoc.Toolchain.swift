@@ -1,5 +1,5 @@
 import SymbolGraphBuilder
-import System
+import System_
 
 extension Unidoc
 {

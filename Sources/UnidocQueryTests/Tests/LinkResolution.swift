@@ -2,7 +2,7 @@ import MongoDB
 import MongoTesting
 import SymbolGraphBuilder
 import SymbolGraphs
-import System
+import System_
 @_spi(testable)
 import UnidocDB
 
