@@ -4,7 +4,7 @@ struct FNV24:Equatable, Hashable, Sendable
     public
     let value:UInt32
 
-    @inlinable internal
+    @inlinable
     init(value:UInt32)
     {
         self.value = value
@@ -24,6 +24,31 @@ extension FNV24:LosslessStringConvertible
     init?(_ description:String)
     {
         self.init(description[...])
+    }
+}
+extension FNV24:Comparable
+{
+    @inlinable public
+    static func < (a:FNV24, b:FNV24) -> Bool { a.value < b.value }
+}
+extension FNV24:RawRepresentable
+{
+    /// Because ``FNV24`` is a 24-bit value, it can also be represented as a signed 32-bit
+    /// integer, and the ``Int32`` representation will exhibit the same sorting behavior.
+    @inlinable public
+    var rawValue:Int32 { .init(self.value) }
+
+    @inlinable public
+    init?(rawValue:Int32)
+    {
+        if  0 ... 0x00_ff_ff_ff ~= rawValue
+        {
+            self.init(value: .init(rawValue))
+        }
+        else
+        {
+            return nil
+        }
     }
 }
 extension FNV24

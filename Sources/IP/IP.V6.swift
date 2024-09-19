@@ -3,20 +3,21 @@ extension IP
     /// A native SwiftNIO `IPv6Address` is reference counted and resilient, and we
     /// would rather pass around an inline value type.
     @frozen public
-    struct V6:Equatable, Hashable, Sendable
+    struct V6:Sendable
     {
-        /// The prefix address, in big-endian byte order.
+        /// The raw 128-bit address, in big-endian byte order. The byte at the lowest address is
+        /// the high byte of the first hextet.
+        ///
+        /// The logical value of the tuple elements varies depending on the platform byte order.
+        /// For example, printing the tuple elements will give different results on big-endian
+        /// and little-endian platforms.
         public
-        var prefix:UInt64
-        /// The subnet address, in big-endian byte order.
-        public
-        var subnet:UInt64
+        var storage:(UInt64, UInt64)
 
         @inlinable public
-        init(prefix:UInt64, subnet:UInt64)
+        init(storage:(UInt64, UInt64))
         {
-            self.prefix = prefix
-            self.subnet = subnet
+            self.storage = storage
         }
     }
 }
@@ -27,7 +28,7 @@ extension IP.V6
     @inlinable public
     init(storage:(UInt32, UInt32, UInt32, UInt32))
     {
-        self = withUnsafeBytes(of: storage) { .copy(from: $0) }
+        self = withUnsafeBytes(of: storage) { .copy(buffer: $0) }
     }
 
     /// Initializes an IPv6 address from a tuple of 16-bit words, with elements in big-endian
@@ -35,7 +36,7 @@ extension IP.V6
     @inlinable public
     init(storage:(UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16, UInt16))
     {
-        self = withUnsafeBytes(of: storage) { .copy(from: $0) }
+        self = withUnsafeBytes(of: storage) { .copy(buffer: $0) }
     }
 
     /// Initializes an IPv6 address from 16-bit components, each in platform byte order.
@@ -75,13 +76,13 @@ extension IP.V6
     var v4:IP.V4?
     {
         guard
-        self.prefix == 0
+        self.storage.0 == 0
         else
         {
             return nil
         }
 
-        return withUnsafeBytes(of: self.subnet)
+        return withUnsafeBytes(of: self.storage.1)
         {
             let subnet:(UInt32, UInt32) = $0.load(as: (UInt32, UInt32).self)
             if  subnet.0 == (0x0000_ffff as UInt32).bigEndian
@@ -97,34 +98,61 @@ extension IP.V6
 }
 extension IP.V6
 {
-    @inlinable public static
-    func copy(from bytes:some RandomAccessCollection<UInt8>) -> Self
+    @inlinable public
+    static func copy(from bytes:some RandomAccessCollection<UInt8>) -> Self?
     {
-        precondition(bytes.count == MemoryLayout<Self>.size)
+        bytes.count == MemoryLayout<(UInt64, UInt64)>.size ? .copy(buffer: bytes) : nil
+    }
+
+    @inlinable
+    static func copy(buffer:some RandomAccessCollection<UInt8>) -> Self
+    {
+        precondition(buffer.count == MemoryLayout<(UInt64, UInt64)>.size)
 
         return withUnsafeTemporaryAllocation(
-            byteCount: MemoryLayout<Self>.size,
-            alignment: MemoryLayout<Self>.alignment)
+            byteCount: MemoryLayout<(UInt64, UInt64)>.size,
+            alignment: MemoryLayout<(UInt64, UInt64)>.alignment)
         {
-            $0.copyBytes(from: bytes)
-            return $0.load(as: Self.self)
+            $0.copyBytes(from: buffer)
+            return .init(storage: $0.load(as: (UInt64, UInt64).self))
         }
     }
 }
 extension IP.V6
 {
-    @inlinable public static
-    var zero:Self { .init(prefix: 0, subnet: 0) }
+    @inlinable public
+    static var zero:Self { .init(storage: (0, 0)) }
 
-    @inlinable public static
-    var ones:Self { .init(prefix: ~0, subnet: ~0) }
+    @inlinable public
+    static var ones:Self { .init(storage: (~0, ~0)) }
 
-    /// The logical value of the address. The high byte of the first tuple element is the high
+    /// The **logical** prefix address, in platform byte order. The high bits are the high byte
+    /// of the first hextet.
+    @inlinable public
+    var _prefix:UInt64 { UInt64.init(bigEndian: self.storage.0) }
+    /// The **logical** subnet address, in platform byte order. The high bits are the high byte
+    /// of the fifth hextet.
+    @inlinable public
+    var _subnet:UInt64 { UInt64.init(bigEndian: self.storage.1) }
+
+    /// The logical value of the address. The high bits of the first tuple element are the high
     /// byte of the first hextet.
     @inlinable public
-    var value:(UInt64, UInt64)
+    var value:(UInt64, UInt64) { (self._prefix, self._subnet) }
+}
+extension IP.V6:Equatable
+{
+    @inlinable public
+    static func == (a:Self, b:Self) -> Bool { a.storage == b.storage }
+}
+extension IP.V6:Hashable
+{
+    @inlinable public
+    func hash(into hasher:inout Hasher)
     {
-        (UInt64.init(bigEndian: self.prefix), UInt64.init(bigEndian: self.subnet))
+        let value:(UInt64, UInt64) = self.value
+        value.0.hash(into: &hasher)
+        value.1.hash(into: &hasher)
     }
 }
 extension IP.V6:Comparable
@@ -140,7 +168,7 @@ extension IP.V6:IP.Address
     @inlinable public static
     func & (a:Self, b:Self) -> Self
     {
-        .init(prefix: a.prefix & b.prefix, subnet: a.subnet & b.subnet)
+        .init(storage: (a.storage.0 & b.storage.0, a.storage.1 & b.storage.1))
     }
 
     @inlinable public static
@@ -151,11 +179,11 @@ extension IP.V6:IP.Address
 
         if  bits <= 64
         {
-            mask = .init(prefix: (ones << (64 - bits)).bigEndian, subnet: 0)
+            mask = .init(storage: ((ones << (64 - bits)).bigEndian, 0))
         }
         else
         {
-            mask = .init(prefix: ones, subnet: (ones << (128 - bits)).bigEndian)
+            mask = .init(storage: (ones, (ones << (128 - bits)).bigEndian))
         }
 
         return self & mask
