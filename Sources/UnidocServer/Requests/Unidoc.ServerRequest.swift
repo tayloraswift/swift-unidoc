@@ -9,10 +9,10 @@ import URI
 
 extension Unidoc
 {
-    /// An `IncomingRequest` is a request that has not yet been routed to an operation through
+    /// A ``ServerRequest`` is a request that has not yet been routed to an operation through
     /// a `Router`.
     @frozen public
-    struct IncomingRequest:Sendable
+    struct ServerRequest:Sendable
     {
         public
         let headers:HTTP.Headers
@@ -20,7 +20,7 @@ extension Unidoc
         public
         let authorization:Authorization
         public
-        let origin:Origin
+        let origin:ClientOrigin
         public
         let host:String?
         public
@@ -30,7 +30,7 @@ extension Unidoc
         init(
             headers:HTTP.Headers,
             authorization:Authorization,
-            origin:Origin,
+            origin:ClientOrigin,
             host:String?,
             uri:URI)
         {
@@ -42,7 +42,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.IncomingRequest
+extension Unidoc.ServerRequest
 {
     /// Computes and returns the case-folded, normalized path from the ``uri``.
     var path:ArraySlice<String>
@@ -50,10 +50,10 @@ extension Unidoc.IncomingRequest
         self.uri.path.normalized(lowercase: true)[...]
     }
 }
-extension Unidoc.IncomingRequest
+extension Unidoc.ServerRequest
 {
     public
-    init(headers:HPACKHeaders, origin:IP.Origin, uri:URI)
+    init(headers:HPACKHeaders, origin:Unidoc.ClientOrigin, uri:URI)
     {
         let host:String? = headers[":authority"].last.map
         {
@@ -69,17 +69,18 @@ extension Unidoc.IncomingRequest
 
         self.init(headers: .http2(headers),
             authorization: .from(headers),
-            origin: .init(ip: origin) ?? .init(ip: origin, client: .from(headers)),
+            // origin: .init(ip: request.ip) ?? .init(ip: request.ip, client: .from(headers)),
+            origin: origin,
             host: host,
             uri: uri)
     }
 
     public
-    init(headers:HTTPHeaders, origin:IP.Origin, uri:URI)
+    init(headers:HTTPHeaders, origin:Unidoc.ClientOrigin, uri:URI)
     {
         self.init(headers: .http1_1(headers),
             authorization: .from(headers),
-            origin: .init(ip: origin) ?? .init(ip: origin, client: .from(headers)),
+            origin: origin,
             host: headers["host"].last,
             uri: uri)
     }

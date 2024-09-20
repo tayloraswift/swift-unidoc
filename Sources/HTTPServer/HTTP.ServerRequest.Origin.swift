@@ -1,20 +1,19 @@
 import IP
 
-extension IP
+extension HTTP.ServerRequest
 {
     @frozen public
     struct Origin:Equatable, Hashable, Sendable
     {
         public
-        let address:V6
+        let owner:IP.Owner
         public
-        let owner:Owner
+        let v6:IP.V6
 
-        public
-        init(address:V6, owner:Owner)
+        init(owner:IP.Owner, v6:IP.V6)
         {
-            self.address = address
             self.owner = owner
+            self.v6 = v6
         }
     }
 }

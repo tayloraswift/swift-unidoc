@@ -79,7 +79,7 @@ extension Unidoc.Server
     }
 
     private
-    func format(for request:Unidoc.IncomingRequest) -> Unidoc.RenderFormat
+    func format(for request:Unidoc.ServerRequest) -> Unidoc.RenderFormat
     {
         let username:String?
 
@@ -247,16 +247,47 @@ extension Unidoc.Server
     }
 
     public
-    func response(for request:Unidoc.IntegralRequest) async throws -> HTTP.ServerResponse
+    func get(request:Unidoc.ServerRequest) async throws -> HTTP.ServerResponse
     {
-        switch request.assignee
+        var router:Unidoc.Router = .init(routing: request)
+
+        if  let route:Unidoc.AnyOperation = router.get()
+        {
+            return try await self.response(running: route, for: request)
+        }
+        else
+        {
+            return .resource("Malformed request\n", status: 400)
+        }
+    }
+
+    public
+    func post(request:Unidoc.ServerRequest, body:[UInt8]) async throws -> HTTP.ServerResponse
+    {
+        var router:Unidoc.Router = .init(routing: request)
+
+        if  let operation:Unidoc.AnyOperation = router.post(body: body)
+        {
+            return try await self.response(running: operation, for: request)
+        }
+        else
+        {
+            return .resource("Malformed request\n", status: 400)
+        }
+    }
+
+    private
+    func response(running operation:Unidoc.AnyOperation,
+        for request:Unidoc.ServerRequest) async throws -> HTTP.ServerResponse
+    {
+        switch operation
         {
         case .unordered(let operation):
-            return try await self.respond(to: request.incoming, running: operation)
+            return try await self.respond(to: request, running: operation)
 
         case .update(let procedural):
             if  let failure:HTTP.ServerResponse = try await self.clearance(
-                    by: request.incoming.authorization)
+                    by: request.authorization)
             {
                 return failure
             }
@@ -264,14 +295,14 @@ extension Unidoc.Server
             return await self.submit(update: procedural)
 
         case .sync(let response):
-            self.logger?.log(response: response, time: .zero, for: request.incoming)
+            self.logger?.log(response: response, time: .zero, for: request)
             return response
 
         case .syncHTML(let renderable):
             let response:HTTP.ServerResponse = renderable.response(
-                format: self.format(for: request.incoming))
+                format: self.format(for: request))
 
-            self.logger?.log(response: response, time: .zero, for: request.incoming)
+            self.logger?.log(response: response, time: .zero, for: request)
             return response
 
         case .syncLoad(let request):
@@ -308,7 +339,7 @@ extension Unidoc.Server
     /// As this function participates in cooperative cancellation, it can throw, and the only
     /// error it can throw is a ``CancellationError``.
     private
-    func respond(to request:Unidoc.IncomingRequest,
+    func respond(to request:Unidoc.ServerRequest,
         running operation:any Unidoc.InteractiveOperation) async throws -> HTTP.ServerResponse
     {
         try Task.checkCancellation()
