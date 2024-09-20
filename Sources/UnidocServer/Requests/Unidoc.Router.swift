@@ -13,9 +13,9 @@ extension Unidoc
 {
     struct Router
     {
-        let headers:HTTP.Headers
         let authorization:Authorization
-        let origin:IP.Origin
+        let headers:HTTP.Headers
+        let origin:HTTP.ServerRequest.Origin
         let host:String?
 
         private
@@ -27,16 +27,16 @@ extension Unidoc
 
         private
         init(
-            headers:HTTP.Headers,
             authorization:Authorization,
-            origin:IP.Origin,
+            headers:HTTP.Headers,
+            origin:HTTP.ServerRequest.Origin,
             host:String?,
             stem:ArraySlice<String>,
             path:URI.Path,
             query:URI.Query)
         {
-            self.headers = headers
             self.authorization = authorization
+            self.headers = headers
             self.origin = origin
             self.host = host
             self.stem = stem
@@ -47,11 +47,10 @@ extension Unidoc
 }
 extension Unidoc.Router
 {
-    init(routing request:Unidoc.IncomingRequest)
+    init(routing request:Unidoc.ServerRequest)
     {
-        self.init(
+        self.init(authorization: request.authorization,
             headers: request.headers,
-            authorization: request.authorization,
             origin: request.origin.ip,
             host: request.host,
             stem: request.path,
@@ -811,7 +810,7 @@ extension Unidoc.Router
             do
             {
                 return .unordered(try Unidoc.WebhookOperation.init(json: json,
-                    from: self.origin,
+                    from: self.origin.owner,
                     with: self.headers))
             }
             catch let error

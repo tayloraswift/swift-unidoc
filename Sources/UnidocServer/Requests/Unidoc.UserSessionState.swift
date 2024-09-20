@@ -13,7 +13,6 @@ extension Unidoc
         public
         let format:RenderFormat
 
-        @inlinable public
         init(authorization:Authorization, request:URI, format:RenderFormat)
         {
             self.authorization = authorization

@@ -26,13 +26,13 @@ extension Unidoc
 }
 extension Unidoc.WebhookOperation
 {
-    init(json:JSON, from origin:IP.Origin, with headers:__shared HTTP.Headers) throws
+    init(json:JSON, from origin:IP.Owner, with headers:__shared HTTP.Headers) throws
     {
         //  Did this request actually come from GitHub? (Anyone can POST over HTTP/2.)
         //
         //  FIXME: there is a security hole during the (hopefully brief) interval between
         //  when the server restarts and the whitelists are initialized.
-        switch origin.owner
+        switch origin
         {
         case .github:   break
         case .unknown:  break

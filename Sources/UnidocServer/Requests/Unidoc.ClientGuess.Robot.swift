@@ -1,5 +1,3 @@
-import HTTP
-
 extension Unidoc.ClientGuess
 {
     @frozen public
@@ -54,74 +52,5 @@ extension Unidoc.ClientGuess
         case other
 
         case tool
-    }
-}
-extension Unidoc.ClientGuess.Robot
-{
-    static
-    func match(in string:String) -> Self?
-    {
-        if      string.contains("cloudfront")
-        {
-            return .cloudfront
-        }
-        if      string.contains("amazonbot")
-        {
-            return .amazonbot
-        }
-        else if string.contains("baidu")
-        {
-            return .baiduspider
-        }
-        else if string.contains("bing")
-        {
-            return .bingbot
-        }
-        else if string.contains("bytedance")
-        {
-            return .bytespider
-        }
-        else if string.contains("duckduck")
-        {
-            return .duckduckbot
-        }
-        else if string.contains("facebookexternalhit")
-        {
-            return .facebookexternalhit
-        }
-        else if string.contains("google")
-        {
-            return .googlebot
-        }
-        else if string.contains("naver")
-        {
-            return .naver
-        }
-        else if string.contains("quant")
-        {
-            return .quant
-        }
-        else if string.contains("petal")
-        {
-            return .petal
-        }
-        else if string.contains("seznam")
-        {
-            return .seznam
-        }
-        else if string.contains("yandex")
-        {
-            return .yandexbot
-        }
-        else if string.contains("bot")
-            ||  string.contains("crawler")
-            ||  string.contains("spider")
-        {
-            return .other
-        }
-        else
-        {
-            return nil
-        }
     }
 }
