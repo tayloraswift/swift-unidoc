@@ -44,6 +44,23 @@ extension Unidoc
 }
 extension Unidoc.ServerRequest
 {
+    func parameter(_ key:String) -> String?
+    {
+        guard
+        let query:URI.Query = self.uri.query
+        else
+        {
+            return nil
+        }
+
+        for case (key, let value) in query.parameters
+        {
+            return value
+        }
+
+        return nil
+    }
+
     /// Computes and returns the case-folded, normalized path from the ``uri``.
     var path:ArraySlice<String>
     {

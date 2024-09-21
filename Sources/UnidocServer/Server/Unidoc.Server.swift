@@ -3,6 +3,7 @@ import GitHubAPI
 import HTTP
 import HTTPServer
 import ISO
+import MD5
 import MongoDB
 import NIOPosix
 import NIOSSL
@@ -344,33 +345,51 @@ extension Unidoc.Server
     {
         try Task.checkCancellation()
 
+        let initiated:ContinuousClock.Instant = .now
+        let response:HTTP.ServerResponse
         let format:Unidoc.RenderFormat = self.format(for: request)
 
-        do
+        run: do
         {
-            let initiated:ContinuousClock.Instant = .now
-            let state:Unidoc.UserSessionState = .init(authorization: request.authorization,
-                request: request.uri,
-                format: format)
+            let context:Unidoc.ServerResponseContext = .init(request: request,
+                format: format,
+                server: self)
 
-            let response:HTTP.ServerResponse = try await operation.load(from: self, with: state)
-                ?? .notFound("not found\n")
-
-            switch operation
+            if  case "true"? = request.parameter("_explain"),
+                case let operation as any Unidoc.ExplainableOperation = operation
             {
-            //  Don’t log traffic from the builders.
-            case is Unidoc.BuilderLabelOperation:   return response
-            case is Unidoc.BuilderPollOperation:    return response
-            //  Don’t log these operations, as doing so would make it impossible for admins to
-            //  avoid leaving trails.
-            case is Unidoc.LoadDashboardOperation:  return response
-            case is Unidoc.LoginOperation:          return response
-            case is Unidoc.AuthOperation:           return response
-            default:                                break
+                let db:Unidoc.DB = try await self.db.session()
+                response = try await operation.explain(with: db)
+                break run
             }
 
-            self.logger?.log(response: response, time: .now - initiated, for: request)
-            return response
+            switch try await operation.load(with: context)
+            {
+            case .resource(var resource, status: let status)?:
+                //  It would only make sense to compute an etag if the content is at least twice
+                //  as large as the hash itself. Moreover, some queries are able to cache
+                //  responses at the database level, so this avoids having to parse the `etag`
+                //  header field twice.
+                if  let content:HTTP.Resource.Content = resource.content,
+                    content.body.size >= 32,
+                    status == 200 || status == 300
+                {
+                    let hash:MD5 = resource.hash ?? content.hash()
+                    resource.hash = hash
+                    if  case hash? = request.headers.etag
+                    {
+                        resource.content = nil
+                    }
+                }
+
+                response = .resource(resource, status: status)
+
+            case let unoptimized?:
+                response = unoptimized
+
+            case nil:
+                response = .notFound("not found\n")
+            }
         }
         catch let error as CancellationError
         {
@@ -384,5 +403,21 @@ extension Unidoc.Server
             let page:Unidoc.ServerErrorPage = .init(error: error)
             return .error(page.resource(format: format))
         }
+
+        switch operation
+        {
+        //  Don’t log traffic from the builders.
+        case is Unidoc.BuilderLabelOperation:   return response
+        case is Unidoc.BuilderPollOperation:    return response
+        //  Don’t log these operations, as doing so would make it impossible for admins to
+        //  avoid leaving trails.
+        case is Unidoc.LoadDashboardOperation:  return response
+        case is Unidoc.LoginOperation:          return response
+        case is Unidoc.AuthOperation:           return response
+        default:                                break
+        }
+
+        self.logger?.log(response: response, time: .now - initiated, for: request)
+        return response
     }
 }

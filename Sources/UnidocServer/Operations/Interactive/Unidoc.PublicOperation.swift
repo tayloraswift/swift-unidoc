@@ -7,16 +7,15 @@ extension Unidoc
     protocol PublicOperation:InteractiveOperation
     {
         consuming
-        func load(from server:borrowing Server,
+        func load(from server:Server,
             as format:RenderFormat) async throws -> HTTP.ServerResponse?
     }
 }
 extension Unidoc.PublicOperation
 {
     public consuming
-    func load(from server:Unidoc.Server,
-        with state:Unidoc.UserSessionState) async throws -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) async throws -> HTTP.ServerResponse?
     {
-        try await self.load(from: server, as: state.format)
+        try await self.load(from: context.server, as: context.format)
     }
 }
