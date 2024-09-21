@@ -53,7 +53,7 @@ extension HTTP
 extension HTTP.Server
 {
     /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
-    /// for ``get(request:headers:)``.
+    /// for ``get(request:headers:) [4VK5G]``.
     ///
     /// Servers that expect to handle a lot of HTTP/1.1 GET requests should override this with
     /// a more efficient implementation.
@@ -66,7 +66,7 @@ extension HTTP.Server
     }
 
     /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
-    /// for ``post(request:headers:body:)``.
+    /// for ``post(request:headers:body:) [541MX]``.
     ///
     /// Servers that expect to handle a lot of HTTP/1.1 POST requests should override this with
     /// a more efficient implementation.
