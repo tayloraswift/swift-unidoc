@@ -12,12 +12,6 @@ extension Unidoc
     /// Generates a sitemap index.
     struct LoadSitemapIndexOperation:Sendable
     {
-        let tag:MD5?
-
-        init(tag:MD5?)
-        {
-            self.tag = tag
-        }
     }
 }
 extension Unidoc.LoadSitemapIndexOperation:Unidoc.PublicOperation
@@ -59,12 +53,8 @@ extension Unidoc.LoadSitemapIndexOperation:Unidoc.PublicOperation
             }
         }
 
-        var resource:HTTP.Resource = .init(content: .init(
+        return .ok(.init(content: .init(
             body: .binary(index.utf8),
-            type: .application(.xml, charset: .utf8)))
-
-        resource.optimize(tag: self.tag)
-
-        return .ok(resource)
+            type: .application(.xml, charset: .utf8))))
     }
 }

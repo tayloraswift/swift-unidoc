@@ -5,7 +5,6 @@ extension Unidoc
 {
     struct PipelineParameters
     {
-        var explain:Bool
         var beta:Bool
         var hash:FNV24?
         var page:Int?
@@ -13,7 +12,6 @@ extension Unidoc
         private
         init()
         {
-            self.explain = false
             self.beta = false
             self.hash = nil
             self.page = nil
@@ -30,7 +28,6 @@ extension Unidoc.PipelineParameters
         {
             switch key
             {
-            case "explain": self.explain = value == "true"
             case "beta":    self.beta = value == "true"
             case "hash":    self.hash = .init(value)
             case "page":    self.page = .init(value)

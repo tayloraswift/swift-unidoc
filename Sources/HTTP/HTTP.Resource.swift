@@ -34,38 +34,3 @@ extension HTTP.Resource:ExpressibleByStringLiteral, ExpressibleByStringInterpola
             type: .text(.plain, charset: .utf8)))
     }
 }
-extension HTTP.Resource
-{
-    /// Computes and populates the resource ``hash`` if it has not already been computed, and
-    /// drops the payload if it matches the given `tag`.
-    public mutating
-    func optimize(tag:MD5?)
-    {
-        let hash:MD5
-        if  let precomputed:MD5 = self.hash
-        {
-            hash = precomputed
-        }
-        else if
-            let content:Content = self.content
-        {
-            switch content.body
-            {
-            case .binary(let buffer):   hash = .init(hashing: buffer)
-            case .buffer(let buffer):   hash = .init(hashing: buffer.readableBytesView)
-            case .string(let string):   hash = .init(hashing: string.utf8)
-            }
-
-            self.hash = hash
-        }
-        else
-        {
-            return
-        }
-
-        if  case hash? = tag
-        {
-            self.content = nil
-        }
-    }
-}
