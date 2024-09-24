@@ -47,7 +47,7 @@ extension LinkResolution.TestCase
         let output:Unidoc.VertexOutput = tests.expect(
             value: try await db.query(with: query)),
         let vertex:Unidoc.AnyVertex = tests.expect(
-            value: output.principal?.vertex)
+            value: output.principal.vertex)
         else
         {
             return

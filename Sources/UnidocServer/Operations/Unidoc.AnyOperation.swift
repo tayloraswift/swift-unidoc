@@ -35,6 +35,11 @@ extension Unidoc.AnyOperation
         .sync(.redirect(redirect, cookies: []))
     }
 
+    static func pipeline<Base>(_ endpoint:Base) -> Self where Base:Unidoc.VertexEndpoint
+    {
+        .unordered(Unidoc.VertexOperation<Base>.init(base: endpoint))
+    }
+
     static func pipeline<Base>(_ endpoint:Base) -> Self where
         Base:HTTP.ServerEndpoint<Unidoc.RenderFormat>,
         Base:Mongo.PipelineEndpoint,

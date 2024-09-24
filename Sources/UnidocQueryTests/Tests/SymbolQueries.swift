@@ -70,7 +70,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await db.query(with: query)),
                     let vertex:Unidoc.DeclVertex = tests.expect(
-                        value: output.principal?.vertex?.decl)
+                        value: output.principal.vertex?.decl)
                 {
                     tests.expect(vertex.stem.last ==? "Keys")
                 }
@@ -118,7 +118,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// We should be able to use a mangled decl identifier to obtain a redirect.
         if  let tests:TestGroup = tests / "Int" / "init" / "overload"
         {
-            let query:Unidoc.RedirectQuery<Symbol.Decl> = .init(
+            let query:Unidoc.SymbolicRedirectQuery<Symbol.Decl> = .init(
                 volume: .init(package: "swift", version: nil),
                 lookup: .init(.s, ascii: "Si10bitPatternSiSO_tcfc"))
 
@@ -160,7 +160,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 {
                     if  let output:Unidoc.VertexOutput = tests.expect(
                             value: try await db.query(with: query)),
-                        let _:Unidoc.AnyVertex = tests.expect(value: output.principal?.vertex)
+                        let _:Unidoc.AnyVertex = tests.expect(value: output.principal.vertex)
                     {
                     }
                 }
@@ -176,9 +176,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await db.query(with: query)),
                     let vertex:Unidoc.CultureVertex = tests.expect(
-                        value: output.principal?.vertex?.culture),
+                        value: output.principal.vertex?.culture),
                     let tree:Unidoc.TypeTree = tests.expect(
-                        value: output.principal?.tree)
+                        value: output.principal.tree)
                 {
                     tests.expect(vertex.id ==? tree.id)
                     tests.expect(tree.rows ..?
@@ -237,9 +237,9 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await db.query(with: query)),
                     let vertex:Unidoc.AnyVertex = tests.expect(
-                        value: output.principal?.vertex),
+                        value: output.principal.vertex),
                     let tree:Unidoc.TypeTree = tests.expect(
-                        value: output.principal?.tree),
+                        value: output.principal.tree),
                     let overview:Unidoc.Passage = tests.expect(
                         value: vertex.overview)
                 {
@@ -303,7 +303,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
                 if  let output:Unidoc.VertexOutput = tests.expect(
                         value: try await db.query(with: query)),
                     let _:Unidoc.AnyVertex = tests.expect(
-                        value: output.principal?.vertex)
+                        value: output.principal.vertex)
                 {
                 }
             }

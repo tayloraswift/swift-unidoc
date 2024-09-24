@@ -14,12 +14,11 @@ extension Unidoc
     {
     }
 }
-extension Unidoc.LoadSitemapIndexOperation:Unidoc.PublicOperation
+extension Unidoc.LoadSitemapIndexOperation:Unidoc.InteractiveOperation
 {
-    func load(from server:Unidoc.Server,
-        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) async throws -> HTTP.ServerResponse?
     {
-        let db:Unidoc.DB = try await server.db.session()
+        let db:Unidoc.DB = try await context.server.db.session()
         let index:XML.Sitemap = try await .index
         {
             (xml:inout XML.Sitemap.ContentEncoder) in

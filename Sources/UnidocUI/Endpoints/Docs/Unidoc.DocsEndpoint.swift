@@ -34,16 +34,16 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexLayer
     @inlinable public static
     var hist:Unidoc.ServerRoot { .hist }
 }
-extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
+extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint
 {
     public
     typealias VertexLayer = Self
 
     public
     func success(
-        vertex apex:consuming Unidoc.AnyVertex,
-        groups:consuming [Unidoc.AnyGroup],
-        tree:consuming Unidoc.TypeTree?,
+        vertex apex:Unidoc.AnyVertex,
+        groups:[Unidoc.AnyGroup],
+        tree:Unidoc.TypeTree?,
         with context:Unidoc.InternalPageContext,
         format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {

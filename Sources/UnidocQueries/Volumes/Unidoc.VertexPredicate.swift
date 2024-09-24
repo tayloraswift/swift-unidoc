@@ -6,9 +6,9 @@ extension Unidoc
     public
     protocol VertexPredicate:Equatable, Hashable, Sendable
     {
-        func extend(pipeline:inout Mongo.PipelineEncoder,
+        func lookup(_ lookup:inout Mongo.LookupEncoder,
             volume:Mongo.AnyKeyPath,
             output:Mongo.AnyKeyPath,
-            unset:[Mongo.AnyKeyPath])
+            fields:VertexProjection)
     }
 }

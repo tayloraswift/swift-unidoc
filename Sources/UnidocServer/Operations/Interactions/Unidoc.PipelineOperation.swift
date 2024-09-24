@@ -1,10 +1,5 @@
 import HTTP
-import MD5
-import Media
 import MongoDB
-import UnidocDB
-import UnidocRender
-import URI
 
 extension Unidoc
 {
@@ -29,13 +24,12 @@ extension Unidoc.PipelineOperation:Unidoc.ExplainableOperation
 {
     var query:Endpoint.Query { self.base.query }
 }
-extension Unidoc.PipelineOperation:Unidoc.PublicOperation
+extension Unidoc.PipelineOperation:Unidoc.InteractiveOperation
 {
     consuming
-    func load(from server:Unidoc.Server,
-        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) async throws -> HTTP.ServerResponse?
     {
-        try await self.base.pull(from: try await server.db.session())
-        return try self.base.response(as: format)
+        try await self.base.pull(from: try await context.server.db.session())
+        return try self.base.response(as: context.format)
     }
 }

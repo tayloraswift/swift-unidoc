@@ -66,6 +66,40 @@ extension Unidoc.ServerRequest
     {
         self.uri.path.normalized(lowercase: true)[...]
     }
+
+    var privilege:Unidoc.ClientPrivilege?
+    {
+        switch self.origin.ip.owner
+        {
+        case .googlebot:
+            return .majorSearchEngine(.googlebot, verified: true)
+
+        case .bingbot:
+            return .majorSearchEngine(.bingbot, verified: true)
+
+        default:
+            break
+        }
+
+        switch self.origin.guess
+        {
+        case .barbie(let locale)?:
+            if  case .web(_?, login: _) = self.authorization
+            {
+                return .barbie(locale, verified: true)
+            }
+            else
+            {
+                return .barbie(locale, verified: false)
+            }
+
+        case .robot(.yandexbot)?:
+            return .majorSearchEngine(.yandexbot, verified: false)
+
+        default:
+            return nil
+        }
+    }
 }
 extension Unidoc.ServerRequest
 {
