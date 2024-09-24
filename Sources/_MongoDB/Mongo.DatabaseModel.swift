@@ -33,10 +33,13 @@ extension Mongo.DatabaseModel
 extension Mongo.DatabaseModel
 {
     @inlinable public
-    func query<Query>(with query:Query) async throws -> Query.Iteration.Batch
+    func query<Query>(with query:Query,
+        on replica:Mongo.ReadPreference = .primary) async throws -> Query.Iteration.Batch
         where Query:Mongo.PipelineQuery, Query.Iteration.Stride == Never
     {
-        try await self.session.run(command: query.command(stride: nil), against: self.id)
+        try await self.session.run(command: query.command(stride: nil),
+            against: self.id,
+            on: replica)
     }
 
     @discardableResult
