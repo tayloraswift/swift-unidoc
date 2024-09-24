@@ -18,12 +18,12 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.LoginOperation:Unidoc.PublicOperation
+extension Unidoc.LoginOperation:Unidoc.InteractiveOperation
 {
-    func load(from server:Unidoc.Server, as format:Unidoc.RenderFormat) -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) -> HTTP.ServerResponse?
     {
         guard
-        let oauth:GitHub.OAuth = server.github?.oauth
+        let oauth:GitHub.OAuth = context.server.github?.oauth
         else
         {
             return nil
@@ -37,6 +37,6 @@ extension Unidoc.LoginOperation:Unidoc.PublicOperation
             flow: self.flow,
             from: self.path)
 
-        return .ok(page.resource(format: format))
+        return .ok(page.resource(format: context.format))
     }
 }

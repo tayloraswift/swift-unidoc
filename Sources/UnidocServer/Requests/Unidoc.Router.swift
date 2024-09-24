@@ -773,7 +773,7 @@ extension Unidoc.Router
         else
         {
             let shoot:Unidoc.Shoot = .init(path: self.stem, hash: parameters.hash)
-            return .pipeline(Unidoc.DocsEndpoint.init(query: .init(
+            return .unordered(Unidoc.DocsOperation.init(query: .init(
                 volume: volume,
                 vertex: shoot)))
         }
@@ -1172,20 +1172,22 @@ extension Unidoc.Router
 
         let parameters:LegacyParameters = .init(self.query)
 
-        let query:Unidoc.RedirectQuery<Unidoc.Shoot> = .legacy(head: next,
+        let query:Unidoc.SymbolicRedirectQuery<Unidoc.Shoot> = .legacy(head: next,
             rest: self.stem,
             from: parameters.from)
 
         //  Always pass empty parameters, as this endpoint always returns a redirect!
         if  let overload:Symbol.Decl = parameters.overload
         {
-            return .pipeline(Unidoc.RedirectEndpoint<Symbol.Decl>.init(query: .init(
-                volume: query.volume,
-                lookup: overload)))
+            return .unordered(
+                Unidoc.RedirectOperation<Unidoc.SymbolicRedirectQuery<Symbol.Decl>>.init(
+                    query: .init(volume: query.volume, lookup: overload)))
         }
         else
         {
-            return .pipeline(Unidoc.RedirectEndpoint<Unidoc.Shoot>.init(query: query))
+            return .unordered(
+                Unidoc.RedirectOperation<Unidoc.SymbolicRedirectQuery<Unidoc.Shoot>>.init(
+                    query: query))
         }
     }
 }

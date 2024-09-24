@@ -84,23 +84,21 @@ extension Unidoc.WebhookOperation
         self.init(event: event, hook: hook)
     }
 }
-extension Unidoc.WebhookOperation:Unidoc.PublicOperation
+extension Unidoc.WebhookOperation:Unidoc.InteractiveOperation
 {
-    __consuming
-    func load(from server:Unidoc.Server,
-        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) async throws -> HTTP.ServerResponse?
     {
         switch self.event
         {
         case .installation(let event):
             return try await self.handle(installation: event,
-                at: .init(truncating: format.time),
-                in: try await server.db.session())
+                at: .init(truncating: context.format.time),
+                in: try await context.server.db.session())
 
         case .create(let event):
             return try await self.handle(create: event,
-                at: .init(truncating: format.time),
-                in: try await server.db.session())
+                at: .init(truncating: context.format.time),
+                in: try await context.server.db.session())
 
         case .ignore(let type):
             return .ok("Ignored event type '\(type)'\n")

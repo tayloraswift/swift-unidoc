@@ -35,16 +35,16 @@ extension Unidoc.BlogEndpoint:Unidoc.VertexLayer
     @inlinable public static
     var hist:Unidoc.ServerRoot { .blog }
 }
-extension Unidoc.BlogEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
+extension Unidoc.BlogEndpoint:Unidoc.VertexEndpoint
 {
     public
     typealias VertexLayer = Self
 
     public
     func success(
-        vertex:consuming Unidoc.AnyVertex,
-        groups:consuming [Unidoc.AnyGroup],
-        tree:consuming Unidoc.TypeTree?,
+        vertex:Unidoc.AnyVertex,
+        groups:[Unidoc.AnyGroup],
+        tree:Unidoc.TypeTree?,
         with context:Unidoc.InternalBlogContext,
         format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {

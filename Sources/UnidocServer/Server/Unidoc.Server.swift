@@ -25,6 +25,10 @@ extension Unidoc
         let db:Database
 
         private
+        let metricQueue:AsyncStream<MetricPaint>.Continuation,
+            metrics:AsyncStream<MetricPaint>
+
+        private
         let updateQueue:AsyncStream<Update>.Continuation,
             updates:AsyncStream<Update>
 
@@ -62,6 +66,8 @@ extension Unidoc
             self.logger = logger
             self.db = db
 
+            (self.metrics, self.metricQueue) = AsyncStream<MetricPaint>.makeStream(
+                bufferingPolicy: .bufferingOldest(32))
             (self.updates, self.updateQueue) = AsyncStream<Update>.makeStream(
                 bufferingPolicy: .bufferingOldest(16))
         }
@@ -189,6 +195,26 @@ extension Unidoc.Server
             }
 
             try await cooldown
+        }
+    }
+}
+extension Unidoc.Server
+{
+    func paint(with paint:Unidoc.MetricPaint)
+    {
+        self.metricQueue.yield(paint)
+    }
+
+    func paint() async throws
+    {
+        for await paint:Unidoc.MetricPaint in self.metrics
+        {
+            /// It could be a potentially long time between events, so we acquire a fresh
+            /// session each time.
+            let db:Unidoc.DB = try await self.db.session()
+            try await db.searchbotGrid.count(searchbot: paint.searchbot,
+                on: .init(trunk: paint.volume.package, shoot: paint.shoot),
+                to: paint.volume)
         }
     }
 }

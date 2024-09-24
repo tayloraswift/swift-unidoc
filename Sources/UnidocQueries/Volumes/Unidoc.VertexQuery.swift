@@ -19,16 +19,16 @@ extension Unidoc
         let vertex:Shoot
         public
         let lookup:Context
-        public
-        let unset:[Mongo.AnyKeyPath]
+        @usableFromInline
+        let fields:VertexProjection
 
         @inlinable
-        init(volume:VolumeSelector, vertex:Shoot, lookup:Context, unset:[Mongo.AnyKeyPath] = [])
+        init(volume:VolumeSelector, vertex:Shoot, lookup:Context, fields:VertexProjection)
         {
             self.volume = volume
             self.vertex = vertex
             self.lookup = lookup
-            self.unset = unset
+            self.fields = fields
         }
     }
 }
@@ -37,7 +37,9 @@ extension Unidoc.VertexQuery<Unidoc.LookupLimited>
     @inlinable public
     init(volume:Unidoc.VolumeSelector, vertex:Unidoc.Shoot)
     {
-        self.init(volume: volume, vertex: vertex, lookup: .limited)
+        //  We use this for stats, so we need the census data!
+        //  TODO: define a more-efficient projection for stats.
+        self.init(volume: volume, vertex: vertex, lookup: .limited, fields: .all)
     }
 }
 extension Unidoc.VertexQuery<Unidoc.LookupAdjacent>
@@ -46,41 +48,82 @@ extension Unidoc.VertexQuery<Unidoc.LookupAdjacent>
     init(volume:Unidoc.VolumeSelector, vertex:Unidoc.Shoot, layer:Unidoc.GroupLayer? = nil)
     {
         let context:Context = .init(layer: layer)
-        let unset:[Unidoc.AnyVertex.CodingKey]
+        let fields:Unidoc.VertexProjection
 
         switch layer
         {
-        case nil:           unset = []
-        case .protocols?:   unset = [.constituents, .superforms, .overview, .details]
+        case nil:           fields = .all
+        case .protocols?:   fields = .limited
         }
 
-        self.init(
-            volume: volume,
-            vertex: vertex,
-            lookup: context,
-            unset: unset.map { Unidoc.AnyVertex[$0] })
+        self.init(volume: volume, vertex: vertex, lookup: context, fields: fields)
     }
 }
-extension Unidoc.VertexQuery:Unidoc.VolumeQuery
+extension Unidoc.VertexQuery:Mongo.PipelineQuery
 {
-    /// The compiler is capable of inferring this on its own, but this makes it easier to
-    /// understand how this type witnesses ``Unidoc.VolumeQuery``.
     public
-    typealias VertexPredicate = Unidoc.Shoot
+    typealias CollectionOrigin = Unidoc.DB.Volumes
+    public
+    typealias Collation = VolumeCollation
     public
     typealias Iteration = Mongo.Single<Unidoc.VertexOutput>
 
-    @inlinable public static
-    var volumeOfLatest:Mongo.AnyKeyPath? { Unidoc.PrincipalOutput[.volumeOfLatest] }
-    @inlinable public static
-    var volume:Mongo.AnyKeyPath { Unidoc.PrincipalOutput[.volume] }
-
-    @inlinable public static
-    var input:Mongo.AnyKeyPath { Unidoc.PrincipalOutput[.matches] }
+    public
+    var hint:Mongo.CollectionIndex?
+    {
+        self.volume.version == nil
+            ? Unidoc.DB.Volumes.indexSymbolicPatch
+            : Unidoc.DB.Volumes.indexSymbolic
+    }
 
     public
-    func extend(pipeline:inout Mongo.PipelineEncoder)
+    func build(pipeline:inout Mongo.PipelineEncoder)
     {
+        if  let version:Substring = self.volume.version
+        {
+            //  If a version string was provided, use that to filter between
+            //  multiple versions of the same package.
+            pipeline.volume(package: self.volume.package, version: version)
+
+            //  ``Unidoc.VolumeMetadata`` has many keys. to simplify the output schema
+            //  and allow re-use of the earlier pipeline stages, we demote
+            //  the zone fields to a subdocument.
+            pipeline[stage: .replaceWith, using: Unidoc.PrincipalOutput.CodingKey.self]
+            {
+                $0[.volume] = Mongo.Pipeline.ROOT
+            }
+
+            let volumeOfLatest:Mongo.AnyKeyPath = Unidoc.PrincipalOutput[.volumeOfLatest]
+
+            pipeline[stage: .lookup]
+            {
+                $0[.from] = Unidoc.DB.Volumes.name
+                $0[.pipeline] { $0.volume(package: self.volume.package) }
+                $0[.as] = volumeOfLatest
+            }
+
+            //  Unbox the single-element array.
+            pipeline[stage: .set] { $0[volumeOfLatest] { $0[.first] = volumeOfLatest } }
+        }
+        else
+        {
+            //  Match the latest volume, and duplicate the output into the `volume` and
+            //  `volumeOfLatest` fields. ``Unidoc.VolumeMetadata`` is complex but not that
+            //  large, and duplicating this makes the rest of the query a lot simpler.
+            pipeline.volume(package: self.volume.package)
+
+            pipeline[stage: .replaceWith, using: Unidoc.PrincipalOutput.CodingKey.self]
+            {
+                $0[.volume] = Mongo.Pipeline.ROOT
+                $0[.volumeOfLatest] = Mongo.Pipeline.ROOT
+            }
+        }
+
+        pipeline.lookup(vertex: self.vertex,
+            volume: Unidoc.PrincipalOutput[.volume],
+            output: Unidoc.PrincipalOutput[.matches],
+            fields: self.fields)
+
         //  Populate this field only if exactly one vertex matched.
         //  This allows us to skip looking up secondary/tertiary records if
         //  we are only going to generate a disambiguation page.
@@ -335,10 +378,13 @@ extension Unidoc.VertexQuery:Unidoc.VolumeQuery
             }
         }
 
-        //  Unbox single-element arrays.
+        //  Unwind the principal vertex, without which the pipeline would not yield a
+        //  meaningful result.
+        pipeline[stage: .unwind] = Unidoc.VertexOutput[.principal]
+
+        //  Unbox single-element optional array.
         pipeline[stage: .set, using: Unidoc.VertexOutput.CodingKey.self]
         {
-            $0[.principal] { $0[.first] = Unidoc.VertexOutput[.principal] }
             $0[.canonical] { $0[.first] = Unidoc.VertexOutput[.canonical] }
         }
     }

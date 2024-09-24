@@ -32,6 +32,10 @@ extension HTTP.Server where Self:Unidoc.Server
                 {
                     try await self.update()
                 }
+                tasks.addTask
+                {
+                    try await self.paint()
+                }
             }
 
             for try await _:Void in tasks
