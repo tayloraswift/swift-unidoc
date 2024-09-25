@@ -15,20 +15,22 @@ extension Symbol
         }
     }
 }
-
 extension Symbol.Package
 {
-    @inlinable public static
-    var swift:Self { .init(identifier: "swift") }
+    @inlinable public
+    static var swift:Self { .init(identifier: "swift") }
 
-    @inlinable public static
-    var swiftPM:Self { .init(identifier: "swift-package-manager") }
+    @inlinable public
+    static var swiftPM:Self { .init(identifier: "swift-package-manager") }
 
-    @inlinable public static
-    var swiftBook:Self { .init(identifier: "swift-book") }
+    @inlinable public
+    static var swiftBook:Self { .init(identifier: "swift-book") }
 
-    @inlinable public static
-    var indexstoreDB:Self { .init(identifier: "indexstore-db") }
+    @inlinable public
+    static var swiftTesting:Self { .init(identifier: "swift-testing") }
+
+    @inlinable public
+    static var indexstoreDB:Self { .init(identifier: "indexstore-db") }
 }
 extension Symbol.Package:Comparable
 {
