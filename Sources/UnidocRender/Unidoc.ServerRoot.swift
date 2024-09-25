@@ -3,7 +3,7 @@ import URI
 extension Unidoc
 {
     @frozen public
-    enum ServerRoot:String, Sendable
+    enum ServerRoot:String, URI.Path.ComponentConvertible
     {
         case account
         case admin

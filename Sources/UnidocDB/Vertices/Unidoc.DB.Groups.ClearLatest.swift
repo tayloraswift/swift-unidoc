@@ -40,7 +40,7 @@ extension Unidoc.DB.Groups.ClearLatest:Mongo.UpdateQuery
             }
             $0[.u]
             {
-                $0[.unset] { $0[Unidoc.AnyGroup[.realm]] = () }
+                $0[.unset] { $0[Unidoc.AnyGroup[.realm]] = true }
             }
         }
     }
