@@ -20,10 +20,9 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.RefStateOperation:Unidoc.PublicOperation
+extension Unidoc.RefStateOperation:Unidoc.InteractiveOperation
 {
-    func load(from server:Unidoc.Server,
-        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) async throws -> HTTP.ServerResponse?
     {
         let remaining:Int?
         let db:Unidoc.DB
@@ -37,7 +36,7 @@ extension Unidoc.RefStateOperation:Unidoc.PublicOperation
             return .unauthorized("Missing authorization header\n")
 
         case .api(let authorization):
-            db = try await server.db.session()
+            db = try await context.server.db.session()
             remaining = try await db.users.charge(
                 apiKey: authorization.apiKey,
                 user: authorization.id,

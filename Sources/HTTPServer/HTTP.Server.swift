@@ -23,7 +23,6 @@ extension HTTP
     protocol Server:Sendable
     {
         associatedtype StreamedRequest:HTTP.ServerStreamedRequest
-        associatedtype IntegralRequest:HTTP.ServerIntegralRequest
 
         /// Checks whether the server should allow the request to proceed with an upload.
         /// Returns nil if the server should accept the upload, or an error response to send
@@ -33,7 +32,51 @@ extension HTTP
         func response(for request:StreamedRequest,
             with body:__owned [UInt8]) async throws -> HTTP.ServerResponse
 
-        func response(for request:IntegralRequest) async throws -> HTTP.ServerResponse
+        func get(
+            request:ServerRequest,
+            headers:HPACKHeaders) async throws -> HTTP.ServerResponse
+        func get(
+            request:ServerRequest,
+            headers:HTTPHeaders) async throws -> HTTP.ServerResponse
+
+        func post(
+            request:ServerRequest,
+            headers:HPACKHeaders,
+            body:[UInt8]) async throws -> HTTP.ServerResponse
+
+        func post(
+            request:ServerRequest,
+            headers:HTTPHeaders,
+            body:[UInt8]) async throws -> HTTP.ServerResponse
+    }
+}
+extension HTTP.Server
+{
+    /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
+    /// for ``get(request:headers:) [4VK5G]``.
+    ///
+    /// Servers that expect to handle a lot of HTTP/1.1 GET requests should override this with
+    /// a more efficient implementation.
+    @inlinable public
+    func get(
+        request:HTTP.ServerRequest,
+        headers:HTTPHeaders) async throws -> HTTP.ServerResponse
+    {
+        try await self.get(request: request, headers: .init(httpHeaders: headers))
+    }
+
+    /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
+    /// for ``post(request:headers:body:) [541MX]``.
+    ///
+    /// Servers that expect to handle a lot of HTTP/1.1 POST requests should override this with
+    /// a more efficient implementation.
+    @inlinable public
+    func post(
+        request:HTTP.ServerRequest,
+        headers:HTTPHeaders,
+        body:[UInt8]) async throws -> HTTP.ServerResponse
+    {
+        try await self.post(request: request, headers: .init(httpHeaders: headers), body: body)
     }
 }
 
@@ -169,13 +212,13 @@ extension HTTP.Server
                             return
                         }
 
-                        let origin:IP.Origin = .init(address: address,
-                            owner: policylist[address])
+                        let ip:HTTP.ServerRequest.Origin = .init(owner: policylist[address],
+                            v6: address)
 
                         do
                         {
                             try await self.handle(connection: connection,
-                                origin: origin,
+                                ip: ip,
                                 as: Authority.self)
                         }
                         catch NIOSSLError.uncleanShutdown
@@ -206,14 +249,15 @@ extension HTTP.Server
                             return
                         }
 
-                        let origin:IP.Origin = .init(address: address,
-                            owner: policylist[address])
+                        let ip:HTTP.ServerRequest.Origin = .init(owner: policylist[address],
+                            v6: address)
+
 
                         do
                         {
                             try await self.handle(connection: channel,
                                 streams: streams.inbound,
-                                origin: origin,
+                                ip: ip,
                                 as: Authority.self)
                         }
                         catch let error
@@ -247,7 +291,7 @@ extension HTTP.Server
         connection:NIOAsyncChannel<
             HTTPPart<HTTPRequestHead, ByteBuffer>,
             HTTPPart<HTTPResponseHead, ByteBuffer>>,
-        origin:IP.Origin,
+        ip:HTTP.ServerRequest.Origin,
         as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
     {
         try await connection.executeThenClose
@@ -286,7 +330,7 @@ extension HTTP.Server
                     message = .init(
                         response: try await self.respond(to: part,
                             inbound: &parts,
-                            origin: origin,
+                            ip: ip,
                             as: Authority.self),
                         using: connection.channel.allocator)
                 }
@@ -320,11 +364,11 @@ extension HTTP.Server
     func respond<Authority>(to h1:HTTPRequestHead,
         inbound:inout AsyncThrowingChannel<
             HTTPPart<HTTPRequestHead, ByteBuffer>, any Error>.Iterator,
-        origin:IP.Origin,
+        ip:HTTP.ServerRequest.Origin,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:HTTP.ServerAuthority
     {
-        guard let path:URI = .init(h1.uri)
+        guard let uri:URI = .init(h1.uri)
         else
         {
             return .resource("Malformed URI\n", status: 400)
@@ -336,16 +380,7 @@ extension HTTP.Server
             fallthrough
 
         case .GET:
-            if  let request:IntegralRequest = .init(get: path,
-                    headers: h1.headers,
-                    origin: origin)
-            {
-                return try await self.response(for: request)
-            }
-            else
-            {
-                return .resource("Malformed request\n", status: 400)
-            }
+            return try await self.get(request: .init(uri: uri, ip: ip), headers: h1.headers)
 
         case .PUT:
             guard
@@ -357,7 +392,7 @@ extension HTTP.Server
             }
 
             guard
-            let request:StreamedRequest = .init(put: path, headers: h1.headers)
+            let request:StreamedRequest = .init(put: uri, headers: h1.headers)
             else
             {
                 return .resource("Malformed request\n", status: 400)
@@ -398,17 +433,10 @@ extension HTTP.Server
                 return .resource("Content length does not match payload\n", status: 400)
             }
 
-            if  let request:IntegralRequest = .init(post: path,
-                    headers: h1.headers,
-                    origin: origin,
-                    body: /* consume */ body) // https://github.com/apple/swift/issues/71605
-            {
-                return try await self.response(for: request)
-            }
-            else
-            {
-                return .resource("Malformed request\n", status: 400)
-            }
+            return try await self.post(
+                request: .init(uri: uri, ip: ip),
+                headers: h1.headers,
+                body: body)
 
         default:
             return .resource("Method requires HTTP/2\n", status: 505)
@@ -422,7 +450,7 @@ extension HTTP.Server
     func handle<Authority>(
         connection:any Channel,
         streams:NIOHTTP2AsyncSequence<HTTP.Stream>,
-        origin:IP.Origin,
+        ip:HTTP.ServerRequest.Origin,
         as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
     {
         //  I am not sure why the sequence of streams has no backpressure. Out of an abundance
@@ -472,7 +500,7 @@ extension HTTP.Server
 
                     let request:Task<HTTP.ServerResponse, any Error> = .init
                     {
-                        try await self.respond(to: inbound, origin: origin, as: Authority.self)
+                        try await self.respond(to: inbound, ip: ip, as: Authority.self)
                     }
                     stream.frames.channel.closeFuture.whenComplete
                     {
@@ -491,7 +519,7 @@ extension HTTP.Server
                     }
                     catch let error
                     {
-                        Log[.error] = "(application: \(origin.address)) \(error)"
+                        Log[.error] = "(application: \(ip.v6)) \(error)"
 
                         message = .init(
                             redacting: error,
@@ -524,7 +552,7 @@ extension HTTP.Server
                 else
                 {
                     Log[.warning] = """
-                    (HTTP/2: \(origin.address)) \
+                    (HTTP/2: \(ip.v6)) \
                     Connection timed out before peer initiated any streams.
                     """
                 }
@@ -540,7 +568,7 @@ extension HTTP.Server
 
     private
     func respond<Authority>(to h2:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
-        origin:IP.Origin,
+        ip:HTTP.ServerRequest.Origin,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:HTTP.ServerAuthority
     {
@@ -583,7 +611,7 @@ extension HTTP.Server
 
             case nil, nil?:
                 Log[.error] = """
-                (HTTP/2: \(origin.address)) Stream timed out before peer sent any headers.
+                (HTTP/2: \(ip.v6)) Stream timed out before peer sent any headers.
                 """
 
                 return .resource("Time limit exceeded", status: 408)
@@ -613,14 +641,7 @@ extension HTTP.Server
             fallthrough
 
         case "GET":
-            if  let request:IntegralRequest = .init(get: path, headers: headers, origin: origin)
-            {
-                return try await self.response(for: request)
-            }
-            else
-            {
-                return .resource("Malformed request", status: 400)
-            }
+            return try await self.get(request: .init(uri: path, ip: ip), headers: headers)
 
         case "PUT":
             guard
@@ -723,17 +744,10 @@ extension HTTP.Server
                 }
             }
 
-            if  let request:IntegralRequest = .init(post: path,
-                    headers: headers,
-                    origin: origin,
-                    body: /* consume */ body) // https://github.com/apple/swift/issues/71605
-            {
-                return try await self.response(for: request)
-            }
-            else
-            {
-                return .resource("Malformed request", status: 400)
-            }
+            return try await self.post(
+                request: .init(uri: path, ip: ip),
+                headers: headers,
+                body: body)
 
         case _:
             return .forbidden("Forbidden")

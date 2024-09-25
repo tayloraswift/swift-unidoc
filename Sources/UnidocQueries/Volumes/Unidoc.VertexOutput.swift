@@ -9,22 +9,22 @@ extension Unidoc
     struct VertexOutput:Sendable
     {
         public
-        let principal:PrincipalOutput?
+        let principal:PrincipalOutput
         public
-        let canonical:Unidoc.AnyVertex?
+        let canonical:AnyVertex?
         public
-        let vertices:[Unidoc.AnyVertex]
+        let vertices:[AnyVertex]
         public
-        let volumes:[Unidoc.VolumeMetadata]
+        let volumes:[VolumeMetadata]
         public
-        let packages:[Unidoc.PackageMetadata]
+        let packages:[PackageMetadata]
 
         @inlinable public
-        init(principal:PrincipalOutput?,
-            canonical:Unidoc.AnyVertex?,
-            vertices:[Unidoc.AnyVertex],
-            volumes:[Unidoc.VolumeMetadata],
-            packages:[Unidoc.PackageMetadata])
+        init(principal:PrincipalOutput,
+            canonical:AnyVertex?,
+            vertices:[AnyVertex],
+            volumes:[VolumeMetadata],
+            packages:[PackageMetadata])
         {
             self.principal = principal
             self.canonical = canonical
@@ -52,7 +52,7 @@ extension Unidoc.VertexOutput:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(
-            principal: try bson[.principal]?.decode(),
+            principal: try bson[.principal].decode(),
             canonical: try bson[.canonical]?.decode(),
             vertices: try bson[.vertices].decode(),
             volumes: try bson[.volumes].decode(),

@@ -79,8 +79,8 @@ extension Main.ParsingV6:TestBattery
         {
             tests.expect(value ==? again)
 
-            tests.expect(UInt64.init(bigEndian: value.prefix) ==? 0x0123_2345_3456_4567)
-            tests.expect(UInt64.init(bigEndian: value.subnet) ==? 0x5678_6789_789a_89ab)
+            tests.expect(value._prefix ==? 0x0123_2345_3456_4567)
+            tests.expect(value._subnet ==? 0x5678_6789_789a_89ab)
 
             tests.expect(value ==? .init(
                 0x0123,

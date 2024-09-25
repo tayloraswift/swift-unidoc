@@ -42,6 +42,12 @@ extension Unidoc
 extension Unidoc.DB
 {
     @inlinable public
+    var searchbotGrid:SearchbotGrid
+    {
+        .init(database: self.id, session: self.session)
+    }
+
+    @inlinable public
     var crawlingTickets:CrawlingTickets
     {
         .init(database: self.id, session: self.session)
@@ -178,6 +184,7 @@ extension Unidoc.DB:Mongo.DatabaseModel
     public
     func setup() async throws
     {
+        try await self.searchbotGrid.setup()
         try await self.crawlingTickets.setup()
         try await self.crawlingWindows.setup()
         try await self.repoFeed.setup()

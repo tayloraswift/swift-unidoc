@@ -17,7 +17,7 @@ extension Unidoc
         /// Obtains the response for this endpoint. The provided session is sequentially
         /// consistent with any authentication that took place before calling this witness.
         consuming
-        func load(from server:borrowing Server,
+        func load(from server:Server,
             db database:Unidoc.DB,
             as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     }
@@ -25,29 +25,28 @@ extension Unidoc
 extension Unidoc.RestrictedOperation
 {
     public consuming
-    func load(from server:Unidoc.Server,
-        with state:Unidoc.UserSessionState) async throws -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) async throws -> HTTP.ServerResponse?
     {
         let db:Unidoc.DB
 
-        switch server.db.policy.security
+        switch context.server.db.policy.security
         {
         case .ignored:
-            db = try await server.db.session()
+            db = try await context.server.db.session()
             //  Yes, we need to call this, even though we ignore the result.
             let _:Bool = self.admit(user: .init(level: .administratrix))
 
         case .enforced:
             let user:Unidoc.UserSession
 
-            switch state.authorization
+            switch context.request.authorization
             {
             case .invalid(let error):
                 return .unauthorized("\(error)\n")
 
             case .web(nil, _):
                 guard
-                let oauth:GitHub.OAuth = server.github?.oauth
+                let oauth:GitHub.OAuth = context.server.github?.oauth
                 else
                 {
                     return .error("""
@@ -57,8 +56,8 @@ extension Unidoc.RestrictedOperation
 
                 let login:Unidoc.LoginPage = .init(client: oauth.client,
                     flow: .sso,
-                    from: state.request)
-                return .ok(login.resource(format: state.format))
+                    from: context.request.uri)
+                return .ok(login.resource(format: context.format))
 
             case .web(let session?, _):
                 user = .web(session)
@@ -67,13 +66,13 @@ extension Unidoc.RestrictedOperation
                 user = .api(session)
             }
 
-            db = try await server.db.session()
+            db = try await context.server.db.session()
 
             guard
             let rights:Unidoc.UserRights = try await db.users.validate(user: user)
             else
             {
-                if  case .web = state.authorization
+                if  case .web = context.request.authorization
                 {
                     return .unauthorized("Expired session!\n")
                 }
@@ -99,6 +98,6 @@ extension Unidoc.RestrictedOperation
             }
         }
 
-        return try await self.load(from: server, db: db, as: state.format)
+        return try await self.load(from: context.server, db: db, as: context.format)
     }
 }

@@ -1,3 +1,4 @@
+import Fingerprinting
 import HTTP
 import NIOHPACK
 import NIOHTTP1
