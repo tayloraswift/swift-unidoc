@@ -1,11 +1,6 @@
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.Linker
-{
-    @available(*, deprecated)
-    typealias Extension = Unidoc.Extension
-}
 extension Unidoc
 {
     struct Extension:Identifiable

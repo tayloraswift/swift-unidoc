@@ -34,19 +34,3 @@ extension Unidoc.DB.RepoFeed:Mongo.CollectionModel
     @inlinable public
     var capacity:(bytes:Int, count:Int?) { (1 << 20, 16) }
 }
-extension Unidoc.DB.RepoFeed
-{
-    @available(*, deprecated, renamed: "find(last:)")
-    public
-    func last(_ count:Int) async throws -> [Activity]
-    {
-        try await self.find(last: count)
-    }
-
-    @available(*, deprecated, renamed: "insert(_:)")
-    public
-    func push(_ activity:Activity) async throws
-    {
-        try await self.insert(activity)
-    }
-}

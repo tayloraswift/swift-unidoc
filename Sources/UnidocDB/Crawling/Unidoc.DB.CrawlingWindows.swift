@@ -93,13 +93,4 @@ extension Unidoc.DB.CrawlingWindows
 
         return try await session.run(command: command, against: self.database)
     }
-
-    /// Updates the state of an existing crawling window.
-    @available(*, deprecated, renamed: "replace(_:)")
-    @discardableResult
-    public
-    func push(window:Unidoc.CrawlingWindow) async throws -> Bool?
-    {
-        try await self.replace(window)
-    }
 }

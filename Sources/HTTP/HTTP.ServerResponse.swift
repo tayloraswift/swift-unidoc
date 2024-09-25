@@ -1,9 +1,5 @@
 import Media
 
-@available(*, deprecated, renamed: "HTTP.ServerResponse")
-public
-typealias ServerResponse = HTTP.ServerResponse
-
 extension HTTP
 {
     @frozen public

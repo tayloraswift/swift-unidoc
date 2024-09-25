@@ -1,11 +1,5 @@
 extension Unidoc
 {
-    @available(*, deprecated, renamed: "Edition")
-    public
-    typealias Zone = Edition
-}
-extension Unidoc
-{
     @frozen public
     struct Edition:Equatable, Hashable, Sendable
     {

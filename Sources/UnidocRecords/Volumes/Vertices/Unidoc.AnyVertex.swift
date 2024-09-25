@@ -249,10 +249,6 @@ extension Unidoc.AnyVertex
         /// Extended FNV24 hash of the record’s symbol, appears in every vertex type except
         /// for ``FileVertex``. In ``LandingVertex``, it is always zero.
         case hash = "H"
-
-        @available(*, deprecated, renamed: "peers")
-        @inlinable public static
-        var `extension`:Self { .peers }
     }
 }
 extension Unidoc.AnyVertex:BSONDocumentEncodable

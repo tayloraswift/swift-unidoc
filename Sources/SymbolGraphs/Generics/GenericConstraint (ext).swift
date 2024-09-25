@@ -26,9 +26,6 @@ extension GenericConstraint
         case generic = "G"
         case nominal = "N"
         case spelling = "C"
-
-        @available(*, deprecated, renamed: "spelling")
-        static var complex:Self { .spelling }
     }
 }
 extension GenericConstraint:BSONDocumentEncodable, BSONEncodable

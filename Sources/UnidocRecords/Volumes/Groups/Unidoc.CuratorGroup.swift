@@ -2,10 +2,6 @@ import Unidoc
 
 extension Unidoc
 {
-    @available(*, deprecated, renamed: "CuratorGroup")
-    public
-    typealias PolygonalGroup = CuratorGroup
-
     /// A curator group is the simplest type of group there is. It has no culture, and if it
     /// lacks a ``scope``, then it can only be loaded by direct ``id`` reference.
     @frozen public

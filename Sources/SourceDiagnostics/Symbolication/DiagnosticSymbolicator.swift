@@ -35,13 +35,6 @@ extension DiagnosticSymbolicator
         }
     }
 
-    @available(*, deprecated, renamed: "subscript(_:)")
-    @inlinable public
-    func signature(of scalar:Address) -> String
-    {
-        self[scalar]
-    }
-
     @inlinable public
     func demangle(_ symbol:Symbol.Decl) -> String
     {

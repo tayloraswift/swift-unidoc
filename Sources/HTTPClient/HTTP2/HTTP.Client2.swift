@@ -4,10 +4,6 @@ import NIOHTTP2
 import NIOPosix
 import NIOSSL
 
-@available(*, deprecated, renamed: "HTTP.Client1")
-public
-typealias HTTP2Client = HTTP.Client2
-
 extension HTTP
 {
     /// An HTTP/2 client associated with a single ``remote`` host. Always uses HTTPS.

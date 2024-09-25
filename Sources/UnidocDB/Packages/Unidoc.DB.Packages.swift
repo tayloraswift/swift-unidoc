@@ -159,13 +159,6 @@ extension Unidoc.DB.Packages
 }
 extension Unidoc.DB.Packages
 {
-    @available(*, deprecated, renamed: "replace(_:)")
-    public
-    func update(metadata:Unidoc.PackageMetadata) async throws -> Bool?
-    {
-        try await self.replace(metadata)
-    }
-
     public
     func update(package:Unidoc.Package,
         repo:Unidoc.PackageRepo?) async throws -> Unidoc.PackageMetadata?
