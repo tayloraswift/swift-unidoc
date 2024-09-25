@@ -98,36 +98,40 @@ extension Unidoc.DB.Packages:Mongo.RecodableModel
 }
 extension Unidoc.DB.Packages
 {
-    private
-    func reset<Value>(field:Element.CodingKey,
-        of package:Element.ID,
-        to value:Value?) async throws -> Element? where Value:BSONEncodable
+    public
+    func set(media:Unidoc.PackageMedia?,
+        of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
         try await self.modify(existing: package, returning: .new)
         {
-            if  let value:Value
+            if  let media:Unidoc.PackageMedia
             {
-                $0[.set] { $0[Element[field]] = value }
+                $0[.set] { $0[Element[.media]] = media }
             }
             else
             {
-                $0[.unset] { $0[Element[field]] = () }
+                $0[.unset] { $0[Element[.media]] = true }
             }
         }
     }
 
     public
-    func reset(media:Unidoc.PackageMedia?,
+    func set(build:Unidoc.BuildTemplate,
         of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.reset(field: .media, of: package, to: media)
-    }
-
-    public
-    func reset(platformPreference triple:Triple?,
-        of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
-    {
-        try await self.reset(field: .platformPreference, of: package, to: triple)
+        try await self.modify(existing: package, returning: .new)
+        {
+            $0[.set]
+            {
+                $0[Element[.build_toolchain]] = build.toolchain
+                $0[Element[.build_platform]] = build.platform
+            }
+            $0[.unset]
+            {
+                $0[Element[.build_toolchain]] = build.toolchain == nil
+                $0[Element[.build_platform]] = build.platform == nil
+            }
+        }
     }
 }
 extension Unidoc.DB.Packages
@@ -171,7 +175,7 @@ extension Unidoc.DB.Packages
             }
             else
             {
-                $0[.unset] { $0[Element[.repo]] = () }
+                $0[.unset] { $0[Element[.repo]] = true }
             }
         }
     }
@@ -184,17 +188,11 @@ extension Unidoc.DB.Packages
         {
             if  hidden
             {
-                $0[.set]
-                {
-                    $0[Unidoc.PackageMetadata[.hidden]] = true
-                }
+                $0[.set] { $0[Unidoc.PackageMetadata[.hidden]] = true }
             }
             else
             {
-                $0[.unset]
-                {
-                    $0[Unidoc.PackageMetadata[.hidden]] = ()
-                }
+                $0[.unset] { $0[Unidoc.PackageMetadata[.hidden]] = true }
             }
         }
     }
@@ -227,7 +225,7 @@ extension Unidoc.DB.Packages
         {
             $0[.unset]
             {
-                $0[Unidoc.PackageMetadata[.repoWebhook]] = ()
+                $0[Unidoc.PackageMetadata[.repoWebhook]] = true
             }
         }
     }

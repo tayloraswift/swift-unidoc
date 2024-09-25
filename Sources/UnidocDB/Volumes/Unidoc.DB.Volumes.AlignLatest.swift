@@ -70,7 +70,7 @@ extension Unidoc.DB.Volumes.AlignLatest:Mongo.UpdateQuery
             }
             $0[.u]
             {
-                $0[.unset] { $0[Unidoc.VolumeMetadata[.latest]] = () }
+                $0[.unset] { $0[Unidoc.VolumeMetadata[.latest]] = true }
             }
         }
     }

@@ -58,17 +58,11 @@ extension Unidoc.DB.Volumes.AlignRealm:Mongo.UpdateQuery
             {
                 if  let realm:Unidoc.Realm = self.realm
                 {
-                    $0[.set]
-                    {
-                        $0[Unidoc.VolumeMetadata[.realm]] = realm
-                    }
+                    $0[.set] { $0[Unidoc.VolumeMetadata[.realm]] = realm }
                 }
                 else
                 {
-                    $0[.unset]
-                    {
-                        $0[Unidoc.VolumeMetadata[.realm]] = ()
-                    }
+                    $0[.unset] { $0[Unidoc.VolumeMetadata[.realm]] = true }
                 }
             }
         }

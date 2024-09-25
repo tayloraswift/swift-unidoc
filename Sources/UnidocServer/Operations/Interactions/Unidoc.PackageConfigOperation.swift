@@ -28,26 +28,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackageConfigOperation
-{
-    private
-    func reset(field:Update.Field,
-        from packages:Unidoc.DB.Packages) async throws -> Symbol.Package?
-    {
-        let metadata:Unidoc.PackageMetadata?
 
-        switch field
-        {
-        case .platformPreference(let triple):
-            metadata = try await packages.reset(platformPreference: triple, of: self.package)
-
-        case .media(let media):
-            metadata = try await packages.reset(media: media, of: self.package)
-        }
-
-        return metadata?.symbol
-    }
-}
 extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
 {
     /// Everyone can use this endpoint, as long as they are authenticated. The user’s
@@ -119,10 +100,6 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
 
             updated = previous == nil ? nil : symbol
             rebuildPackageList = previous.map { $0.symbol != symbol } ?? false
-
-        case .reset(let field):
-            updated = try await self.reset(field: field, from: db.packages)
-            rebuildPackageList = false
         }
 
         if  rebuildPackageList
