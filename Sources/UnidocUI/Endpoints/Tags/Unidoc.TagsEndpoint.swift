@@ -27,10 +27,6 @@ extension Unidoc
 }
 extension Unidoc.TagsEndpoint
 {
-    @available(*, deprecated, renamed: "Unidoc.RefsEndpoint.subscript(_:)")
-    @inlinable public static
-    subscript(package:Symbol.Package) -> URI { Unidoc.ServerRoot.tags / "\(package)" }
-
     @inlinable public static
     subscript(package:Symbol.Package, series:Unidoc.VersionSeries, page index:Int) -> URI
     {

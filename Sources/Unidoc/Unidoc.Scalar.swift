@@ -26,10 +26,6 @@ extension Unidoc.Scalar:Identifiable
 }
 extension Unidoc.Scalar
 {
-    @available(*, deprecated, renamed: "edition")
-    @inlinable public
-    var zone:Unidoc.Edition { self.edition }
-
     @inlinable public
     var edition:Unidoc.Edition { .init(package: self.package, version: self.version) }
 }

@@ -6,10 +6,6 @@ import MongoQL
 import UnidocDB
 import UnidocRecords
 
-@available(*, deprecated, renamed: "Unidoc.TextResourceQuery")
-public
-typealias SearchIndexQuery = Unidoc.TextResourceQuery
-
 extension Unidoc
 {
     /// A query that can avoid fetching the resource’s data if the hash matches.

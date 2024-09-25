@@ -177,14 +177,6 @@ extension Unidoc.Snapshot
         case type = "T"
         case size = "B"
         case vintage = "V"
-
-        @available(*, deprecated, renamed: "inline")
-        @inlinable public static
-        var graph:Self { .inline }
-
-        @available(*, deprecated, renamed: "action")
-        @inlinable public static
-        var link:Self { .action }
     }
 }
 extension Unidoc.Snapshot:BSONDocumentEncodable

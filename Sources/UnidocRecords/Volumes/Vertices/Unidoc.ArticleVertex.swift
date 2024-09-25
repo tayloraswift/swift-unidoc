@@ -19,10 +19,6 @@ extension Unidoc
         public
         var readme:Unidoc.Scalar?
 
-        @available(*, deprecated, renamed: "readme")
-        public
-        var file:Unidoc.Scalar? { self.readme }
-
         public
         var headline:Markdown.Bytecode
         public
