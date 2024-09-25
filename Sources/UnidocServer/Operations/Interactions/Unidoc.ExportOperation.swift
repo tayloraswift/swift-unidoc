@@ -53,10 +53,9 @@ extension Unidoc.ExportOperation
         }
     }
 }
-extension Unidoc.ExportOperation:Unidoc.PublicOperation
+extension Unidoc.ExportOperation:Unidoc.InteractiveOperation
 {
-    func load(from server:Unidoc.Server,
-        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) async throws -> HTTP.ServerResponse?
     {
         let remaining:Int?
         let db:Unidoc.DB
@@ -70,7 +69,7 @@ extension Unidoc.ExportOperation:Unidoc.PublicOperation
             return .unauthorized("Missing authorization header\n")
 
         case .api(let authorization):
-            db = try await server.db.session()
+            db = try await context.server.db.session()
             remaining = try await db.users.charge(
                 apiKey: authorization.apiKey,
                 user: authorization.id)
@@ -83,14 +82,20 @@ extension Unidoc.ExportOperation:Unidoc.PublicOperation
             return .resource("Inactive or nonexistent API key\n", status: 429)
         }
 
-        var endpoint:Unidoc.ExportEndpoint = .init(rateLimit: .init(remaining: remaining),
-            query: self.request)
-
-        try await endpoint.pull(from: db)
+        guard
+        let output:Unidoc.VertexOutput = try await db.query(with: self.request,
+            on: Unidoc.ExportEndpoint.replica)
+        else
+        {
+            return .notFound("Snapshot not found.\n")
+        }
 
         do
         {
-            return try endpoint.response(as: format)
+            let endpoint:Unidoc.ExportEndpoint = .init(rateLimit: .init(remaining: remaining),
+                query: self.request)
+
+            return try endpoint.response(from: output, as: context.format)
         }
         catch let error
         {

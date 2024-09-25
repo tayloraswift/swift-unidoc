@@ -11,24 +11,22 @@ import URI
 extension Unidoc
 {
     public
-    protocol VertexEndpoint:Mongo.SingleOutputEndpoint
+    protocol VertexEndpoint:Mongo.SingleOutputEndpoint, Sendable
         where Query.Iteration.BatchElement == Unidoc.VertexOutput
     {
         associatedtype VertexContext:Unidoc.VertexContext
         associatedtype VertexLayer:Unidoc.VertexLayer
 
-        func failure(format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
-
         func failure(
-            matches:consuming [Unidoc.AnyVertex],
-            tree:consuming Unidoc.TypeTree?,
+            matches:[Unidoc.AnyVertex],
+            tree:Unidoc.TypeTree?,
             with context:Unidoc.PeripheralPageContext,
             format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
 
         func success(
-            vertex:consuming Unidoc.AnyVertex,
-            groups:consuming [Unidoc.AnyGroup],
-            tree:consuming Unidoc.TypeTree?,
+            vertex:Unidoc.AnyVertex,
+            groups:[Unidoc.AnyGroup],
+            tree:Unidoc.TypeTree?,
             with context:VertexContext,
             format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     }
@@ -41,15 +39,9 @@ extension Unidoc.VertexEndpoint
     var replica:Mongo.ReadPreference { .nearest }
 
     public
-    func failure(format:Unidoc.RenderFormat) -> HTTP.ServerResponse
-    {
-        .notFound("Snapshot not found.\n")
-    }
-
-    public
     func failure(
-        matches:consuming [Unidoc.AnyVertex],
-        tree:consuming Unidoc.TypeTree?,
+        matches:[Unidoc.AnyVertex],
+        tree:Unidoc.TypeTree?,
         with context:Unidoc.PeripheralPageContext,
         format:Unidoc.RenderFormat) -> HTTP.ServerResponse
     {
@@ -68,53 +60,42 @@ extension Unidoc.VertexEndpoint
         }
     }
 }
-extension Unidoc.VertexEndpoint where Self:HTTP.ServerEndpoint
+extension Unidoc.VertexEndpoint
 {
-    public consuming
-    func response(as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
+    public
+    func response(
+        from output:Unidoc.VertexOutput,
+        as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
-        guard
-        let output:Unidoc.VertexOutput = self.value,
-        let principal:Unidoc.PrincipalOutput = output.principal
-        else
+        if  let vertex:Unidoc.AnyVertex = output.principal.vertex
         {
-            return try self.failure(format: format)
-        }
-
-        if  let vertex:Unidoc.AnyVertex = principal.vertex
-        {
-            let vertexContext:VertexContext = .init(canonical: .init(principal: principal,
+            let vertexContext:VertexContext = .init(canonical: .init(
+                    principal: output.principal,
                     vertex: output.canonical,
                     layer: VertexLayer.self),
-                principal: principal.volume,
+                principal: output.principal.volume,
                 secondary: output.volumes,
                 packages: output.packages,
                 vertices: .init(principal: vertex, secondary: output.vertices))
 
-            _ = consume output
-
-            let groups:[Unidoc.AnyGroup] = principal.groups
-            let tree:Unidoc.TypeTree? = principal.tree
-
             //  Note: noun tree won’t exist if the module contains no declarations.
             //  (For example, an `@_exported` shim.)
-            return try self.success(
-                vertex: consume vertex,
-                groups: consume groups,
-                tree: consume tree,
+            return try self.success(vertex: vertex,
+                groups: output.principal.groups,
+                tree: output.principal.tree,
                 with: vertexContext,
                 format: format)
         }
         else
         {
             let vertexContext:Unidoc.PeripheralPageContext = .init(canonical: nil,
-                principal: principal.volume,
+                principal: output.principal.volume,
                 secondary: output.volumes,
                 packages: output.packages,
-                vertices: .init(secondary: principal.matches))
+                vertices: .init(secondary: output.principal.matches))
 
-            return try self.failure(matches: principal.matches,
-                tree: principal.tree,
+            return try self.failure(matches: output.principal.matches,
+                tree: output.principal.tree,
                 with: vertexContext,
                 format: format)
         }

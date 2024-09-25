@@ -13,9 +13,9 @@ extension Unidoc
 {
     struct Router
     {
-        let headers:HTTP.Headers
         let authorization:Authorization
-        let origin:IP.Origin
+        let headers:HTTP.Headers
+        let origin:HTTP.ServerRequest.Origin
         let host:String?
 
         private
@@ -27,16 +27,16 @@ extension Unidoc
 
         private
         init(
-            headers:HTTP.Headers,
             authorization:Authorization,
-            origin:IP.Origin,
+            headers:HTTP.Headers,
+            origin:HTTP.ServerRequest.Origin,
             host:String?,
             stem:ArraySlice<String>,
             path:URI.Path,
             query:URI.Query)
         {
-            self.headers = headers
             self.authorization = authorization
+            self.headers = headers
             self.origin = origin
             self.host = host
             self.stem = stem
@@ -47,11 +47,10 @@ extension Unidoc
 }
 extension Unidoc.Router
 {
-    init(routing request:Unidoc.IncomingRequest)
+    init(routing request:Unidoc.ServerRequest)
     {
-        self.init(
+        self.init(authorization: request.authorization,
             headers: request.headers,
-            authorization: request.authorization,
             origin: request.origin.ip,
             host: request.host,
             stem: request.path,
@@ -81,16 +80,6 @@ extension Unidoc.Router
         }
 
         return contentType
-    }
-
-    private
-    var etag:MD5?
-    {
-        switch self.headers
-        {
-        case .http1_1(let headers): .init(header: headers["if-none-match"])
-        case .http2(let headers):   .init(header: headers["if-none-match"])
-        }
     }
 }
 extension Unidoc.Router
@@ -210,9 +199,7 @@ extension Unidoc.Router
         let root:String = self.descend()
         else
         {
-            return .explainable(Unidoc.HomeEndpoint.init(query: .init(limit: 16)),
-                    parameters: .init(self.query),
-                    etag: self.etag)
+            return .pipeline(Unidoc.HomeEndpoint.init(query: .init(limit: 16)))
         }
 
         guard
@@ -367,9 +354,7 @@ extension Unidoc.Router
                 return .sync(redirect: .temporary("\(Unidoc.ServerRoot.login)"))
             }
 
-            return .explainable(Unidoc.UserSettingsEndpoint.init(query: .current(session)),
-                parameters: .init(self.query),
-                etag: self.etag)
+            return .pipeline(Unidoc.UserSettingsEndpoint.init(query: .current(session)))
         }
     }
 }
@@ -712,7 +697,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .syncLoad(.init(asset, tag: self.etag))
+        return .syncLoad(.init(asset, tag: self.headers.etag))
     }
 }
 extension Unidoc.Router
@@ -760,11 +745,9 @@ extension Unidoc.Router
             return nil
         }
 
-        return .explainable(Unidoc.BlogEndpoint.init(query: .init(
-                volume: .init(package: "__swiftinit", version: nil),
-                vertex: .init(path: [module, article], hash: nil))),
-            parameters: .init(self.query),
-            etag: self.etag)
+        return .pipeline(Unidoc.BlogEndpoint.init(query: .init(
+            volume: .init(package: "__swiftinit", version: nil),
+            vertex: .init(path: [module, article], hash: nil))))
     }
 
     private mutating
@@ -784,19 +767,15 @@ extension Unidoc.Router
         if  case nil = volume.version,
             case ["all-symbols"] = self.stem
         {
-            return .explainable(Unidoc.SitemapEndpoint.init(query: .init(
-                    package: volume.package)),
-                parameters: parameters,
-                etag: self.etag)
+            return .pipeline(Unidoc.SitemapEndpoint.init(query: .init(
+                package: volume.package)))
         }
         else
         {
             let shoot:Unidoc.Shoot = .init(path: self.stem, hash: parameters.hash)
-            return .explainable(Unidoc.DocsEndpoint.init(query: .init(
-                    volume: volume,
-                    vertex: shoot)),
-                parameters: parameters,
-                etag: self.etag)
+            return .unordered(Unidoc.DocsOperation.init(query: .init(
+                volume: volume,
+                vertex: shoot)))
         }
     }
 }
@@ -811,7 +790,7 @@ extension Unidoc.Router
             do
             {
                 return .unordered(try Unidoc.WebhookOperation.init(json: json,
-                    from: self.origin,
+                    from: self.origin.owner,
                     with: self.headers))
             }
             catch let error
@@ -858,20 +837,15 @@ extension Unidoc.Router
             return nil
         }
 
-        let etag:MD5? = self.etag
-
         if  let id:Symbol.Volume = .init(next)
         {
-            return .explainable(Unidoc.LunrEndpoint.init(query: .init(tag: etag, id: id)),
-                parameters: .init(self.query),
-                etag: etag)
+            return .pipeline(Unidoc.LunrEndpoint.init(query: .init(tag: self.headers.etag,
+                id: id)))
         }
         else if next == "packages.json"
         {
-            return .explainable(Unidoc.TextEndpoint.init(query: .init(tag: etag,
-                    id: .packages_json)),
-                parameters: .init(self.query),
-                etag: etag)
+            return .pipeline(Unidoc.TextEndpoint.init(query: .init(tag: self.headers.etag,
+                id: .packages_json)))
         }
         else
         {
@@ -921,12 +895,10 @@ extension Unidoc.Router
 
         let parameters:Unidoc.PipelineParameters = .init(self.query)
 
-        return .explainable(Unidoc.PtclEndpoint.init(query: .init(
-                volume: volume,
-                vertex: .init(path: self.stem, hash: parameters.hash),
-                layer: .protocols)),
-            parameters: parameters,
-            etag: self.etag)
+        return .pipeline(Unidoc.PtclEndpoint.init(query: .init(
+            volume: volume,
+            vertex: .init(path: self.stem, hash: parameters.hash),
+            layer: .protocols)))
     }
 
     private mutating
@@ -939,10 +911,8 @@ extension Unidoc.Router
             return nil
         }
 
-        return .explainable(Unidoc.RealmEndpoint.init(query: .init(realm: realm,
-                user: self.authorization.account)),
-            parameters: .init(self.query),
-            etag: self.etag)
+        return .pipeline(Unidoc.RealmEndpoint.init(query: .init(realm: realm,
+            user: self.authorization.account)))
     }
 
     private mutating
@@ -1031,12 +1001,8 @@ extension Unidoc.Router
     private
     func robots() -> Unidoc.AnyOperation
     {
-        let etag:MD5? = self.etag
-        return .explainable(Unidoc.TextEndpoint.init(query: .init(
-                tag: etag,
-                id: .robots_txt)),
-            parameters: .init(self.query),
-            etag: etag)
+        .pipeline(Unidoc.TextEndpoint.init(query: .init(tag: self.headers.etag,
+            id: .robots_txt)))
     }
 
     private mutating
@@ -1048,18 +1014,14 @@ extension Unidoc.Router
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.query)
-
-        return .explainable(Unidoc.RulesEndpoint.init(query: .init(symbol: symbol,
-                as: self.authorization.account)),
-            parameters: parameters,
-            etag: self.etag)
+        return .pipeline(Unidoc.RulesEndpoint.init(query: .init(symbol: symbol,
+            as: self.authorization.account)))
     }
 
     private
     func sitemap() -> Unidoc.AnyOperation
     {
-        .unordered(Unidoc.LoadSitemapIndexOperation.init(tag: self.etag))
+        .unordered(Unidoc.LoadSitemapIndexOperation.init())
     }
 
     /// Deprecated route.
@@ -1087,12 +1049,9 @@ extension Unidoc.Router
         }
 
         let parameters:Unidoc.PipelineParameters = .init(self.query)
-
-        return .explainable(Unidoc.StatsEndpoint.init(query: .init(
+        return .pipeline(Unidoc.StatsEndpoint.init(query: .init(
                 volume: volume,
-                vertex: .init(path: self.stem, hash: parameters.hash))),
-            parameters: parameters,
-            etag: self.etag)
+                vertex: .init(path: self.stem, hash: parameters.hash))))
     }
 
     private mutating
@@ -1108,25 +1067,21 @@ extension Unidoc.Router
 
         if  let page:Int = parameters.page
         {
-            return .explainable(Unidoc.TagsEndpoint.init(query: .init(
-                    symbol: symbol,
-                    filter: parameters.beta ? .prerelease : .release,
-                    limit: 20,
-                    page: page,
-                    as: self.authorization.account)),
-                parameters: parameters,
-                etag: self.etag)
+            return .pipeline(Unidoc.TagsEndpoint.init(query: .init(
+                symbol: symbol,
+                filter: parameters.beta ? .prerelease : .release,
+                limit: 20,
+                page: page,
+                as: self.authorization.account)))
         }
         else
         {
-            return .explainable(Unidoc.RefsEndpoint.init(query: .init(
-                    symbol: symbol,
-                    limitTags: 12,
-                    limitBranches: 32,
-                    limitDependents: 16,
-                    as: self.authorization.account)),
-                parameters: parameters,
-                etag: self.etag)
+            return .pipeline(Unidoc.RefsEndpoint.init(query: .init(
+                symbol: symbol,
+                limitTags: 12,
+                limitBranches: 32,
+                limitDependents: 16,
+                as: self.authorization.account)))
         }
     }
 
@@ -1140,13 +1095,11 @@ extension Unidoc.Router
         }
 
         let parameters:Unidoc.PipelineParameters = .init(self.query)
-        return .explainable(Unidoc.ConsumersEndpoint.init(query: .init(
-                symbol: package,
-                limit: 20,
-                page: parameters.page ?? 0,
-                as: self.authorization.account)),
-            parameters: parameters,
-            etag: self.etag)
+        return .pipeline(Unidoc.ConsumersEndpoint.init(query: .init(
+            symbol: package,
+            limit: 20,
+            page: parameters.page ?? 0,
+            as: self.authorization.account)))
     }
 
     private mutating
@@ -1161,13 +1114,11 @@ extension Unidoc.Router
 
         let parameters:Unidoc.PipelineParameters = .init(self.query)
 
-        return .explainable(Unidoc.CompleteBuildsEndpoint.init(query: .init(
-                symbol: package,
-                limit: 20,
-                page: parameters.page ?? 0,
-                as: self.authorization.account)),
-            parameters: parameters,
-            etag: self.etag)
+        return .pipeline(Unidoc.CompleteBuildsEndpoint.init(query: .init(
+            symbol: package,
+            limit: 20,
+            page: parameters.page ?? 0,
+            as: self.authorization.account)))
     }
 
     private mutating
@@ -1182,13 +1133,13 @@ extension Unidoc.Router
         if  let year:Timestamp.Year = .init(next),
             let endpoint:Unidoc.PackagesCrawledEndpoint = .init(year: year)
         {
-            return .explainable(endpoint, parameters: .init(self.query), etag: self.etag)
+            return .pipeline(endpoint)
         }
         else if
             let date:Timestamp.Date = .init(next),
             let endpoint:Unidoc.PackagesCreatedEndpoint = .init(date: date)
         {
-            return .explainable(endpoint, parameters: .init(self.query), etag: self.etag)
+            return .pipeline(endpoint)
         }
         else
         {
@@ -1207,10 +1158,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .explainable(Unidoc.UserPropertyEndpoint.init(query: .init(
-                account: account)),
-            parameters: .init(self.query),
-            etag: self.etag)
+        return .pipeline(Unidoc.UserPropertyEndpoint.init(query: .init(account: account)))
     }
 
     private mutating
@@ -1224,24 +1172,22 @@ extension Unidoc.Router
 
         let parameters:LegacyParameters = .init(self.query)
 
-        let query:Unidoc.RedirectQuery<Unidoc.Shoot> = .legacy(head: next,
+        let query:Unidoc.SymbolicRedirectQuery<Unidoc.Shoot> = .legacy(head: next,
             rest: self.stem,
             from: parameters.from)
 
         //  Always pass empty parameters, as this endpoint always returns a redirect!
         if  let overload:Symbol.Decl = parameters.overload
         {
-            return .explainable(Unidoc.RedirectEndpoint<Symbol.Decl>.init(
-                    query: .init(volume: query.volume, lookup: overload)),
-                parameters: .none,
-                etag: self.etag)
+            return .unordered(
+                Unidoc.RedirectOperation<Unidoc.SymbolicRedirectQuery<Symbol.Decl>>.init(
+                    query: .init(volume: query.volume, lookup: overload)))
         }
         else
         {
-            return .explainable(Unidoc.RedirectEndpoint<Unidoc.Shoot>.init(
-                    query: query),
-                parameters: .none,
-                etag: self.etag)
+            return .unordered(
+                Unidoc.RedirectOperation<Unidoc.SymbolicRedirectQuery<Unidoc.Shoot>>.init(
+                    query: query))
         }
     }
 }

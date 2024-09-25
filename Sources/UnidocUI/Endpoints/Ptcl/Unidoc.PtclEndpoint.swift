@@ -35,16 +35,16 @@ extension Unidoc.PtclEndpoint:Unidoc.VertexLayer
     @inlinable public static
     var hist:Unidoc.ServerRoot { .ptcl }
 }
-extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
+extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint
 {
     public
     typealias VertexLayer = Self
 
     public
     func success(
-        vertex:consuming Unidoc.AnyVertex,
-        groups:consuming [Unidoc.AnyGroup],
-        tree:consuming Unidoc.TypeTree?,
+        vertex:Unidoc.AnyVertex,
+        groups:[Unidoc.AnyGroup],
+        tree:Unidoc.TypeTree?,
         with context:Unidoc.PeripheralPageContext,
         format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {

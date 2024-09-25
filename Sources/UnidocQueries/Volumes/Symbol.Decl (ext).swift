@@ -8,46 +8,43 @@ import UnidocRecords
 extension Symbol.Decl:Unidoc.VertexPredicate
 {
     public
-    func extend(pipeline:inout Mongo.PipelineEncoder,
+    func lookup(_ lookup:inout Mongo.LookupEncoder,
         volume:Mongo.AnyKeyPath,
         output:Mongo.AnyKeyPath,
-        unset:[Mongo.AnyKeyPath])
+        fields:Unidoc.VertexProjection)
     {
-        pipeline[stage: .lookup]
+        let min:Mongo.Variable<Unidoc.Scalar> = "min"
+        let max:Mongo.Variable<Unidoc.Scalar> = "max"
+
+        lookup[.from] = Unidoc.DB.Vertices.name
+        lookup[.let]
         {
-            let min:Mongo.Variable<Unidoc.Scalar> = "min"
-            let max:Mongo.Variable<Unidoc.Scalar> = "max"
-
-            $0[.from] = Unidoc.DB.Vertices.name
-            $0[.let]
+            $0[let: min] = volume / Unidoc.VolumeMetadata[.min]
+            $0[let: max] = volume / Unidoc.VolumeMetadata[.max]
+        }
+        lookup[.pipeline]
+        {
+            $0[stage: .match]
             {
-                $0[let: min] = volume / Unidoc.VolumeMetadata[.min]
-                $0[let: max] = volume / Unidoc.VolumeMetadata[.max]
-            }
-            $0[.pipeline]
-            {
-                $0[stage: .match]
+                $0[.expr]
                 {
-                    $0[.expr]
-                    {
-                        let hash:FNV24.Extended = .decl(self)
+                    let hash:FNV24.Extended = .decl(self)
 
-                        //  The first three of these clauses should be able to use
-                        //  a compound index.
-                        $0[.and]
-                        {
-                            $0.expr { $0[.eq] = (Unidoc.AnyVertex[.hash], hash) }
-                            $0.expr { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
-                            $0.expr { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
-                            $0.expr { $0[.eq] = (Unidoc.AnyVertex[.symbol], self) }
-                        }
+                    //  The first three of these clauses should be able to use
+                    //  a compound index.
+                    $0[.and]
+                    {
+                        $0.expr { $0[.eq] = (Unidoc.AnyVertex[.hash], hash) }
+                        $0.expr { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
+                        $0.expr { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
+                        $0.expr { $0[.eq] = (Unidoc.AnyVertex[.symbol], self) }
                     }
                 }
-
-                $0[stage: .limit] = 1
-                $0[stage: .unset] = unset
             }
-            $0[.as] = output
+
+            $0[stage: .limit] = 1
+            $0[stage: .unset] = fields.unset
         }
+        lookup[.as] = output
     }
 }

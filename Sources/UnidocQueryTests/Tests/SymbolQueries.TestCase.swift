@@ -61,7 +61,7 @@ extension SymbolQueries.TestCase
         {
             if  let output:Unidoc.VertexOutput = self.tests.expect(
                     value: try await db.query(with: self.query)),
-                let _:Unidoc.AnyVertex = self.tests.expect(value: output.principal?.vertex)
+                let _:Unidoc.AnyVertex = self.tests.expect(value: output.principal.vertex)
             {
                 let secondaries:[Unidoc.Scalar: Substring] = output.vertices.reduce(
                     into: [:])
@@ -69,7 +69,7 @@ extension SymbolQueries.TestCase
                     $0[$1.id] = $1.shoot?.stem.last
                 }
                 var counts:[Substring: Int] = [:]
-                for group:Unidoc.AnyGroup in output.principal?.groups ?? []
+                for group:Unidoc.AnyGroup in output.principal.groups
                 {
                     switch group
                     {

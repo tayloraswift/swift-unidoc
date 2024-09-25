@@ -1,6 +1,7 @@
 import BSON
 import MongoQL
 import SymbolGraphs
+import Symbols
 
 extension Mongo.PipelineEncoder
 {
@@ -204,6 +205,53 @@ extension Mongo.PipelineEncoder
         {
             $0[volume] { $0[.first] = volume }
             $0[graph] { $0[.first] = graph }
+        }
+    }
+}
+extension Mongo.PipelineEncoder
+{
+    mutating
+    func volume(package:Symbol.Package)
+    {
+        //  Look up the volume with the highest semantic version. Unstable and prerelease
+        //  versions are not eligible.
+        self[stage: .match]
+        {
+            $0[Unidoc.VolumeMetadata[.package]] = package
+            $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
+        }
+        //  We use the patch number instead of the latest-flag because
+        //  it is closer to the ground-truth, and the latest-flag doesn’t
+        //  have a unique (compound) index with the package name, since
+        //  it experiences rolling alignments.
+        self[stage: .sort, using: Unidoc.VolumeMetadata.CodingKey.self]
+        {
+            $0[.patch] = (-)
+        }
+
+        self[stage: .limit] = 1
+    }
+
+    mutating
+    func volume(package:Symbol.Package, version:Substring)
+    {
+        //  This index is unique, so we don’t need a sort or a limit.
+        self[stage: .match]
+        {
+            $0[Unidoc.VolumeMetadata[.package]] = package
+            $0[Unidoc.VolumeMetadata[.version]] = version
+        }
+    }
+
+    mutating
+    func lookup(vertex:some Unidoc.VertexPredicate,
+        volume:Mongo.AnyKeyPath,
+        output:Mongo.AnyKeyPath,
+        fields:Unidoc.VertexProjection)
+    {
+        self[stage: .lookup]
+        {
+            vertex.lookup(&$0, volume: volume, output: output, fields: fields)
         }
     }
 }

@@ -3,6 +3,7 @@ import GitHubAPI
 import HTTP
 import HTTPServer
 import ISO
+import MD5
 import MongoDB
 import NIOPosix
 import NIOSSL
@@ -22,6 +23,10 @@ extension Unidoc
 
         public
         let db:Database
+
+        private
+        let metricQueue:AsyncStream<MetricPaint>.Continuation,
+            metrics:AsyncStream<MetricPaint>
 
         private
         let updateQueue:AsyncStream<Update>.Continuation,
@@ -61,6 +66,8 @@ extension Unidoc
             self.logger = logger
             self.db = db
 
+            (self.metrics, self.metricQueue) = AsyncStream<MetricPaint>.makeStream(
+                bufferingPolicy: .bufferingOldest(32))
             (self.updates, self.updateQueue) = AsyncStream<Update>.makeStream(
                 bufferingPolicy: .bufferingOldest(16))
         }
@@ -79,7 +86,7 @@ extension Unidoc.Server
     }
 
     private
-    func format(for request:Unidoc.IncomingRequest) -> Unidoc.RenderFormat
+    func format(for request:Unidoc.ServerRequest) -> Unidoc.RenderFormat
     {
         let username:String?
 
@@ -193,6 +200,26 @@ extension Unidoc.Server
 }
 extension Unidoc.Server
 {
+    func paint(with paint:Unidoc.MetricPaint)
+    {
+        self.metricQueue.yield(paint)
+    }
+
+    func paint() async throws
+    {
+        for await paint:Unidoc.MetricPaint in self.metrics
+        {
+            /// It could be a potentially long time between events, so we acquire a fresh
+            /// session each time.
+            let db:Unidoc.DB = try await self.db.session()
+            try await db.searchbotGrid.count(searchbot: paint.searchbot,
+                on: .init(trunk: paint.volume.package, shoot: paint.shoot),
+                to: paint.volume)
+        }
+    }
+}
+extension Unidoc.Server
+{
     private
     func clearance(by authorization:Unidoc.Authorization) async throws -> HTTP.ServerResponse?
     {
@@ -247,16 +274,47 @@ extension Unidoc.Server
     }
 
     public
-    func response(for request:Unidoc.IntegralRequest) async throws -> HTTP.ServerResponse
+    func get(request:Unidoc.ServerRequest) async throws -> HTTP.ServerResponse
     {
-        switch request.assignee
+        var router:Unidoc.Router = .init(routing: request)
+
+        if  let route:Unidoc.AnyOperation = router.get()
+        {
+            return try await self.response(running: route, for: request)
+        }
+        else
+        {
+            return .resource("Malformed request\n", status: 400)
+        }
+    }
+
+    public
+    func post(request:Unidoc.ServerRequest, body:[UInt8]) async throws -> HTTP.ServerResponse
+    {
+        var router:Unidoc.Router = .init(routing: request)
+
+        if  let operation:Unidoc.AnyOperation = router.post(body: body)
+        {
+            return try await self.response(running: operation, for: request)
+        }
+        else
+        {
+            return .resource("Malformed request\n", status: 400)
+        }
+    }
+
+    private
+    func response(running operation:Unidoc.AnyOperation,
+        for request:Unidoc.ServerRequest) async throws -> HTTP.ServerResponse
+    {
+        switch operation
         {
         case .unordered(let operation):
-            return try await self.respond(to: request.incoming, running: operation)
+            return try await self.respond(to: request, running: operation)
 
         case .update(let procedural):
             if  let failure:HTTP.ServerResponse = try await self.clearance(
-                    by: request.incoming.authorization)
+                    by: request.authorization)
             {
                 return failure
             }
@@ -264,14 +322,14 @@ extension Unidoc.Server
             return await self.submit(update: procedural)
 
         case .sync(let response):
-            self.logger?.log(response: response, time: .zero, for: request.incoming)
+            self.logger?.log(response: response, time: .zero, for: request)
             return response
 
         case .syncHTML(let renderable):
             let response:HTTP.ServerResponse = renderable.response(
-                format: self.format(for: request.incoming))
+                format: self.format(for: request))
 
-            self.logger?.log(response: response, time: .zero, for: request.incoming)
+            self.logger?.log(response: response, time: .zero, for: request)
             return response
 
         case .syncLoad(let request):
@@ -308,38 +366,56 @@ extension Unidoc.Server
     /// As this function participates in cooperative cancellation, it can throw, and the only
     /// error it can throw is a ``CancellationError``.
     private
-    func respond(to request:Unidoc.IncomingRequest,
+    func respond(to request:Unidoc.ServerRequest,
         running operation:any Unidoc.InteractiveOperation) async throws -> HTTP.ServerResponse
     {
         try Task.checkCancellation()
 
+        let initiated:ContinuousClock.Instant = .now
+        let response:HTTP.ServerResponse
         let format:Unidoc.RenderFormat = self.format(for: request)
 
-        do
+        run: do
         {
-            let initiated:ContinuousClock.Instant = .now
-            let state:Unidoc.UserSessionState = .init(authorization: request.authorization,
-                request: request.uri,
-                format: format)
+            let context:Unidoc.ServerResponseContext = .init(request: request,
+                format: format,
+                server: self)
 
-            let response:HTTP.ServerResponse = try await operation.load(from: self, with: state)
-                ?? .notFound("not found\n")
-
-            switch operation
+            if  case "true"? = request.parameter("_explain"),
+                case let operation as any Unidoc.ExplainableOperation = operation
             {
-            //  Don’t log traffic from the builders.
-            case is Unidoc.BuilderLabelOperation:   return response
-            case is Unidoc.BuilderPollOperation:    return response
-            //  Don’t log these operations, as doing so would make it impossible for admins to
-            //  avoid leaving trails.
-            case is Unidoc.LoadDashboardOperation:  return response
-            case is Unidoc.LoginOperation:          return response
-            case is Unidoc.AuthOperation:           return response
-            default:                                break
+                let db:Unidoc.DB = try await self.db.session()
+                response = try await operation.explain(with: db)
+                break run
             }
 
-            self.logger?.log(response: response, time: .now - initiated, for: request)
-            return response
+            switch try await operation.load(with: context)
+            {
+            case .resource(var resource, status: let status)?:
+                //  It would only make sense to compute an etag if the content is at least twice
+                //  as large as the hash itself. Moreover, some queries are able to cache
+                //  responses at the database level, so this avoids having to parse the `etag`
+                //  header field twice.
+                if  let content:HTTP.Resource.Content = resource.content,
+                    content.body.size >= 32,
+                    status == 200 || status == 300
+                {
+                    let hash:MD5 = resource.hash ?? content.hash()
+                    resource.hash = hash
+                    if  case hash? = request.headers.etag
+                    {
+                        resource.content = nil
+                    }
+                }
+
+                response = .resource(resource, status: status)
+
+            case let unoptimized?:
+                response = unoptimized
+
+            case nil:
+                response = .notFound("not found\n")
+            }
         }
         catch let error as CancellationError
         {
@@ -353,5 +429,21 @@ extension Unidoc.Server
             let page:Unidoc.ServerErrorPage = .init(error: error)
             return .error(page.resource(format: format))
         }
+
+        switch operation
+        {
+        //  Don’t log traffic from the builders.
+        case is Unidoc.BuilderLabelOperation:   return response
+        case is Unidoc.BuilderPollOperation:    return response
+        //  Don’t log these operations, as doing so would make it impossible for admins to
+        //  avoid leaving trails.
+        case is Unidoc.LoadDashboardOperation:  return response
+        case is Unidoc.LoginOperation:          return response
+        case is Unidoc.AuthOperation:           return response
+        default:                                break
+        }
+
+        self.logger?.log(response: response, time: .now - initiated, for: request)
+        return response
     }
 }

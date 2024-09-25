@@ -13,7 +13,7 @@ extension Unidoc
         func messages(from plugin:String) async -> [PluginMessage]
 
         nonisolated
-        func log(response:HTTP.ServerResponse, time:Duration, for request:IncomingRequest)
+        func log(response:HTTP.ServerResponse, time:Duration, for request:ServerRequest)
 
         nonisolated
         func log(event:any PluginEvent, date:UnixAttosecond, from plugin:String?)

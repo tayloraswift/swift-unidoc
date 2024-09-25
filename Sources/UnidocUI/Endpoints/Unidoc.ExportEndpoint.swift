@@ -30,15 +30,15 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
+extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint
 {
     public
     typealias VertexLayer = Unidoc.DocsEndpoint
 
     public
     func failure(
-        matches:consuming [Unidoc.AnyVertex],
-        tree:consuming Unidoc.TypeTree?,
+        matches:[Unidoc.AnyVertex],
+        tree:Unidoc.TypeTree?,
         with context:Unidoc.PeripheralPageContext,
         format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
@@ -54,9 +54,9 @@ extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint, HTTP.ServerEndpoint
 
     public
     func success(
-        vertex apex:consuming Unidoc.AnyVertex,
-        groups:consuming [Unidoc.AnyGroup],
-        tree:consuming Unidoc.TypeTree?,
+        vertex apex:Unidoc.AnyVertex,
+        groups:[Unidoc.AnyGroup],
+        tree:Unidoc.TypeTree?,
         with context:Unidoc.ExternalBlogContext,
         format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {

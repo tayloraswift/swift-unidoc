@@ -25,24 +25,23 @@ extension Unidoc
 }
 extension Unidoc.AuthOperation:Unidoc.InteractiveOperation
 {
-    func load(from server:Unidoc.Server,
-        with state:Unidoc.UserSessionState) async throws -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) async throws -> HTTP.ServerResponse?
     {
-        guard case .web(_, login: self.state?) = state.authorization
+        guard case .web(_, login: self.state?) = context.request.authorization
         else
         {
             return .resource("Authentication failed: state mismatch", status: 400)
         }
 
         guard
-        let integration:any GitHub.Integration = server.github
+        let integration:any GitHub.Integration = context.server.github
         else
         {
             return nil
         }
 
         let client:GitHub.Client<GitHub.OAuth> = .auth(app: integration.oauth,
-                niossl: server.clientIdentity,
+                niossl: context.server.clientIdentity,
                 on: .singleton,
                 as: integration.agent)
 
@@ -62,6 +61,6 @@ extension Unidoc.AuthOperation:Unidoc.InteractiveOperation
 
         //  We must not reuse the same client, as this step must be performed against
         //  `api.github.com` and not `github.com`.
-        return try await operation.perform(on: server)
+        return try await operation.perform(on: context.server)
     }
 }

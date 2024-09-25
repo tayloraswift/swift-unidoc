@@ -26,10 +26,9 @@ extension Unidoc
 }
 extension Unidoc.UserIndexOperation:Unidoc.InteractiveOperation
 {
-    func load(from server:Unidoc.Server,
-        with _:Unidoc.UserSessionState) async throws -> HTTP.ServerResponse?
+    func load(with context:Unidoc.ServerResponseContext) async throws -> HTTP.ServerResponse?
     {
-        try await self.perform(on: server)
+        try await self.perform(on: context.server)
     }
 }
 extension Unidoc.UserIndexOperation

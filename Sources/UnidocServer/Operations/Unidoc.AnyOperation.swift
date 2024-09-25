@@ -22,8 +22,7 @@ extension Unidoc
 }
 extension Unidoc.AnyOperation
 {
-    static
-    func sync(error message:String, status:UInt = 400) -> Self
+    static func sync(error message:String, status:UInt = 400) -> Self
     {
         .sync(.resource(.init(content: .init(
                 body: .string(message),
@@ -31,24 +30,21 @@ extension Unidoc.AnyOperation
             status: 400))
     }
 
-    static
-    func sync(redirect:HTTP.Redirect) -> Self
+    static func sync(redirect:HTTP.Redirect) -> Self
     {
         .sync(.redirect(redirect, cookies: []))
     }
-}
-extension Unidoc.AnyOperation
-{
-    static
-    func explainable<Base>(_ endpoint:Base,
-        parameters:Unidoc.PipelineParameters,
-        etag:MD5?) -> Self
-        where   Base:HTTP.ServerEndpoint<Unidoc.RenderFormat>,
-                Base:Mongo.PipelineEndpoint,
-                Base:Sendable
+
+    static func pipeline<Base>(_ endpoint:Base) -> Self where Base:Unidoc.VertexEndpoint
     {
-        parameters.explain
-        ? .unordered(Unidoc.LoadExplainedOperation<Base.Query>.init(query: endpoint.query))
-        : .unordered(Unidoc.LoadOptimizedOperation<Base>.init(base: endpoint, etag: etag))
+        .unordered(Unidoc.VertexOperation<Base>.init(base: endpoint))
+    }
+
+    static func pipeline<Base>(_ endpoint:Base) -> Self where
+        Base:HTTP.ServerEndpoint<Unidoc.RenderFormat>,
+        Base:Mongo.PipelineEndpoint,
+        Base:Sendable
+    {
+        .unordered(Unidoc.PipelineOperation<Base>.init(base: endpoint))
     }
 }
