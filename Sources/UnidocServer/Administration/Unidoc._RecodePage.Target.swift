@@ -4,7 +4,7 @@ import URI
 
 extension Unidoc._RecodePage
 {
-    enum Target:String, CaseIterable
+    enum Target:String, CaseIterable, URI.Path.ComponentConvertible
     {
         case packageDependencies = "package-dependencies"
         case packages

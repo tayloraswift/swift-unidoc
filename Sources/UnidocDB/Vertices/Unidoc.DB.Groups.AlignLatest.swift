@@ -70,7 +70,7 @@ extension Unidoc.DB.Groups.AlignLatest:Mongo.UpdateQuery
             }
             $0[.u]
             {
-                $0[.unset] { $0[Unidoc.AnyGroup[.realm]] = () }
+                $0[.unset] { $0[Unidoc.AnyGroup[.realm]] = true }
             }
         }
     }
