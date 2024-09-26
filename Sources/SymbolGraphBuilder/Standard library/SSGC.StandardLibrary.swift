@@ -1,3 +1,4 @@
+import SemanticVersions
 import SymbolGraphs
 
 extension SSGC
@@ -18,20 +19,21 @@ extension SSGC
 }
 extension SSGC.StandardLibrary
 {
-    init(platform:SymbolGraphMetadata.Platform)
+    init(platform:SymbolGraphMetadata.Platform, version:MinorVersion)
     {
-        switch platform
+        switch (platform, version)
         {
-        case .macOS:    self = .macOS
-        case .linux:    self = .linux
-        default:        fatalError("Unsupported platform: \(platform)")
+        case (.linux, .v(6, 0)):    self = .linux_6_0
+        case (.linux, _):           self = .linux_5_10
+        case (.macOS, _):           self = .macOS_5_10
+        default:                    fatalError("Unsupported platform: \(platform)")
         }
     }
 }
 //  https://forums.swift.org/t/dependency-graph-of-the-standard-library-modules/59267
 extension SSGC.StandardLibrary
 {
-    static var macOS:Self
+    static var macOS_5_10:Self
     {
         .init(
             products: [
@@ -71,7 +73,7 @@ extension SSGC.StandardLibrary
             ])
     }
 
-    static var linux:Self
+    static var linux_5_10:Self
     {
         .init(
             products: [
@@ -128,6 +130,75 @@ extension SSGC.StandardLibrary
                 // 13:
                 .toolchain(module: "XCTest",
                     dependencies: 0),
+            ])
+    }
+
+    static var linux_6_0:Self
+    {
+        .init(
+            products: [
+                .init(name: "__stdlib__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(0 ... 8)),
+                .init(name: "__corelibs__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(0 ... 16)),
+            ],
+            modules: [
+                //  0:
+                .toolchain(module: "Swift"),
+                //  1:
+                .toolchain(module: "_Concurrency",
+                    dependencies: 0),
+                //  2:
+                .toolchain(module: "Distributed",
+                    dependencies: 0, 1),
+
+                //  3:
+                .toolchain(module: "_Differentiation",
+                    dependencies: 0),
+
+                //  4:
+                .toolchain(module: "_RegexParser",
+                    dependencies: 0),
+                //  5:
+                .toolchain(module: "_StringProcessing",
+                    dependencies: 0, 4),
+                //  6:
+                .toolchain(module: "RegexBuilder",
+                    dependencies: 0, 4, 5),
+                //  7:
+                .toolchain(module: "Synchronization",
+                    dependencies: 0),
+                //  8:
+                .toolchain(module: "Cxx",
+                    dependencies: 0),
+
+                //  9:
+                .toolchain(module: "Dispatch",
+                    dependencies: 0),
+                // 10:
+                .toolchain(module: "DispatchIntrospection",
+                    dependencies: 0),
+                // 11:
+                .toolchain(module: "FoundationEssentials",
+                    dependencies: 0, 4, 5, 9),
+                // 12:
+                .toolchain(module: "FoundationInternationalization",
+                    dependencies: 0, 4, 5, 9, 11),
+                // 13:
+                .toolchain(module: "Foundation",
+                    dependencies: 0, 4, 5, 9, 11, 12),
+                // 14:
+                .toolchain(module: "FoundationNetworking",
+                    dependencies: 0, 4, 5, 9, 11, 12, 13),
+                // 15:
+                .toolchain(module: "FoundationXML",
+                    dependencies: 0, 4, 5, 9, 11, 12, 13),
+
+                // 16:
+                .toolchain(module: "XCTest",
+                    dependencies: 0, 4, 5, 9, 11, 12, 13),
             ])
     }
 }
