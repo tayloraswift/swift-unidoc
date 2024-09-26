@@ -187,7 +187,7 @@ extension Unidoc.DB.PendingBuilds
                 {
                     $0[.unset]
                     {
-                        $0[Unidoc.PendingBuild[.enqueued]] = ()
+                        $0[Unidoc.PendingBuild[.enqueued]] = true
                     }
                     $0[.set]
                     {

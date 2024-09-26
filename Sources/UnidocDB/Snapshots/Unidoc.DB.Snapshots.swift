@@ -231,10 +231,7 @@ extension Unidoc.DB.Snapshots
                 $0[.q] { $0[Unidoc.Snapshot[.id]] = id }
                 $0[.u]
                 {
-                    $0[.unset]
-                    {
-                        $0[Unidoc.Snapshot[.action]] = ()
-                    }
+                    $0[.unset] { $0[Unidoc.Snapshot[.action]] = true }
                 }
             }
         }
@@ -253,17 +250,11 @@ extension Unidoc.DB.Snapshots
                 {
                     if  vintage
                     {
-                        $0[.set]
-                        {
-                            $0[Unidoc.Snapshot[.vintage]] = true
-                        }
+                        $0[.set] { $0[Unidoc.Snapshot[.vintage]] = true }
                     }
                     else
                     {
-                        $0[.unset]
-                        {
-                            $0[Unidoc.Snapshot[.vintage]] = ()
-                        }
+                        $0[.unset] { $0[Unidoc.Snapshot[.vintage]] = true }
                     }
                 }
             }
