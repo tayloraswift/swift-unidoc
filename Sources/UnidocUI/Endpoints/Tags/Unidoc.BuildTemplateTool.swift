@@ -39,8 +39,12 @@ extension Unidoc.BuildTemplateTool:HTML.OutputStreamable
                     else
                     {
                         current = nil
-                        $0[.option] { $0.selected = true ; $0.value = "" } = "Default"
                     }
+
+                    $0[.option]
+                    {
+                        $0.selected = self.form.platform == nil ; $0.value = ""
+                    } = "Default"
 
                     for option:String in [
                         "aarch64-unknown-linux-gnu",
@@ -77,8 +81,12 @@ extension Unidoc.BuildTemplateTool:HTML.OutputStreamable
                     else
                     {
                         current = nil
-                        $0[.option] { $0.selected = true ; $0.value = "" } = "Default"
                     }
+
+                    $0[.option]
+                    {
+                        $0.selected = self.form.toolchain == nil ; $0.value = ""
+                    } = "Default"
 
                     for option:String in [
                         "6.0.1",
