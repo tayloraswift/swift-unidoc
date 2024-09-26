@@ -134,6 +134,7 @@ extension SSGC.Linker
 
         for (offset, module):(Int, SSGC.ModuleIndex) in zip(self.contexts.indices, indexes)
         {
+            self.unfurl(reexported: module.reexports, by: offset)
             self.unfurl(extensions: module.extensions,
                 featuresBySymbol: module.features,
                 at: offset)
@@ -222,6 +223,21 @@ extension SSGC.Linker
         else
         {
             fatalError("cannot allocate empty declaration array")
+        }
+    }
+
+    private mutating
+    func unfurl(reexported:[Symbol.Decl], by offset:Int)
+    {
+        //  @_exported can duplicate a truly staggering number of declarations. To prevent this
+        //  from creating a lot of almost-empty declaration nodes, we only track modules that
+        //  re-export symbols from the same package.
+        for id:Symbol.Decl in reexported
+        {
+            if  let reexported:Int32 = self.tables.citizen(id)
+            {
+                self.tables.graph.decls.nodes[reexported].exporters.append(offset)
+            }
         }
     }
 
