@@ -216,8 +216,15 @@ extension SSGC.Toolchain
 {
     /// Dumps the symbols for the standard library. Due to upstream bugs in the Swift compiler,
     /// this methods disables extension block symbols by default.
-    func dump(standardLibrary:SSGC.StandardLibrary,
-        options:SymbolDumpOptions = .init(emitExtensionBlockSymbols: false),
+    func dump(
+        standardLibrary:SSGC.StandardLibrary,
+        options:SymbolDumpOptions = .init(allowedReexportedModules: [
+                "_Concurrency",
+                "_StringProcessing",
+                "FoundationEssentials",
+                "FoundationInternationalization",
+            ],
+            emitExtensionBlockSymbols: false),
         cache:FilePath.Directory) throws -> FilePath.Directory
     {
         let cached:FilePath.Directory = cache / "swift@\(self.splash.swift.version)"
@@ -270,6 +277,18 @@ extension SSGC.Toolchain
         if  options.skipInheritedDocs
         {
             arguments.append("-skip-inherited-docs")
+        }
+        if  self.splash.swift.version >= .v(6, 0, 0),
+            //  Temporary hack until we have the right stdlib definitions for macOS
+            self.splash.triple.os.starts(with: "linux"),
+            !options.allowedReexportedModules.isEmpty
+        {
+            let whitelist:String = options.allowedReexportedModules.lazy.map { "\($0)" }.joined(
+                separator: ",")
+
+            arguments.append("""
+                -experimental-allowed-reexported-modules=\(whitelist)
+                """)
         }
 
         #if os(macOS)

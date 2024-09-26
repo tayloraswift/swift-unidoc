@@ -16,18 +16,14 @@ extension SSGC
         var extensions:Extensions
 
         private
-        var resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>
-        private
-        var resolvableModules:[Symbol.Module]
+        var allModules:[Symbol.Module]
 
         public
         init(threshold:Symbol.ACL = .public)
         {
             self.declarations = .init(threshold: threshold)
             self.extensions = .init()
-
-            self.resolvableLinks = [:]
-            self.resolvableModules = []
+            self.allModules = []
         }
     }
 }
@@ -67,8 +63,7 @@ extension SSGC.TypeChecker
     private mutating
     func add(symbols culture:SSGC.SymbolCulture, from id:Symbol.Module) throws
     {
-        self.resolvableModules.append(id)
-        self.resolvableLinks.register(id)
+        self.allModules.append(id)
 
         /// We use this to look up protocols by name instead of symbol. This is needed in order
         /// to work around some bizarre lib/SymbolGraphGen bugs.
@@ -117,13 +112,9 @@ extension SSGC.TypeChecker
                         if  depth > 0
                         {
                             children[depth, default: []].append(decl)
-                        }
-                        else
-                        {
-                            //  We need to wait until the next pass for the nested declarations,
-                            //  because we do not know if their namespaces are correct yet.
-                            self.resolvableLinks[namespace, decl.value.path].append(
-                                .decl(decl.value))
+
+                            //  Note that in this branch, we do not yet know if the namespaces
+                            //  are correct yet.
                         }
 
                     case .vector:
@@ -225,8 +216,7 @@ extension SSGC.TypeChecker
 
                 decl.access = min(decl.access, scope.access)
                 decl.namespace = namespace
-
-                self.resolvableLinks[namespace, decl.value.path].append(.decl(decl.value))
+                decl.namespaces.insert(namespace)
             }
         }
 
@@ -486,17 +476,17 @@ extension SSGC.TypeChecker
                 {
                     switch target
                     {
-                    case "ss9EscapableP":                               print(error)
-                    case "ss8CopyableP":                                print(error)
-                    case "s11CoreMetrics06_SwiftB16SendableProtocolP":  print(error)
+                    case "ss9EscapableP":                               break // print(error)
+                    case "ss8CopyableP":                                break // print(error)
+                    case "s11CoreMetrics06_SwiftB16SendableProtocolP":  break // print(error)
                     default:                                            throw error
                     }
 
-                    print("""
-                        Note: recovering from error due to known Apple Swift bug
-                            https://github.com/swiftlang/swift/issues/76499
+                    // print("""
+                    //     Note: recovering from error due to known Apple Swift bug
+                    //         https://github.com/swiftlang/swift/issues/76499
 
-                        """)
+                    //     """)
                     return
                 }
 
@@ -620,6 +610,23 @@ extension SSGC.TypeChecker
     public consuming
     func load(in culture:Symbol.Module) throws -> SSGC.ModuleIndex
     {
+        var resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload> = self.allModules.reduce(
+            into: [:])
+        {
+            $0.register($1)
+        }
+
+        for decl:SSGC.DeclObject in self.declarations.all
+        {
+            /// The target may have been re-exported from multiple modules. Swift allows
+            /// re-exported declarations to be accessed under any of the re-exporting module
+            /// qualifiers, so we also need to add the declaration under all of its namespaces.
+            let target:UCF.CausalOverload = .decl(decl.value)
+            for namespace:Symbol.Module in decl.namespaces
+            {
+                resolvableLinks[namespace, decl.value.path].append(target)
+            }
+        }
         for `extension`:SSGC.ExtensionObject in self.extensions.all
         {
             //  We add the feature paths here and not in `insert(_:by:)` because those
@@ -631,8 +638,11 @@ extension SSGC.TypeChecker
                 let feature:SSGC.Decl = try self.declarations[feature].value
                 let last:String = feature.path.last
 
-                self.resolvableLinks[extendee.namespace, extendee.value.path, last].append(
-                    .feature(feature, self: extendee.id))
+                let target:UCF.CausalOverload = .feature(feature, self: extendee.id)
+                for namespace:Symbol.Module in extendee.namespaces
+                {
+                    resolvableLinks[namespace, extendee.value.path, last].append(target)
+                }
             }
         }
 
@@ -651,8 +661,8 @@ extension SSGC.TypeChecker
         }
 
         return .init(id: culture,
-            resolvableModules: self.resolvableModules,
-            resolvableLinks: self.resolvableLinks,
+            resolvableModules: self.allModules,
+            resolvableLinks: resolvableLinks,
             declarations: self.declarations.load(culture: culture),
             extensions: extensions,
             features: features)

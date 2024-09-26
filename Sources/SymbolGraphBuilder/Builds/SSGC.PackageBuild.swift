@@ -326,8 +326,7 @@ extension SSGC.PackageBuild
             throw SSGC.PackageBuildError.swift_build(code, invocation)
         }
 
-        let platform:SymbolGraphMetadata.Platform = try toolchain.platform()
-        var packages:SSGC.PackageGraph = .init(platform: platform)
+        var packages:SSGC.PackageGraph = .init(platform: try toolchain.platform())
 
         for pin:SPM.DependencyPin in pins
         {
@@ -341,13 +340,17 @@ extension SSGC.PackageBuild
             packages.attach(manifest, as: pin.identity)
         }
 
+        let standardLibrary:SSGC.StandardLibrary = .init(platform: packages.platform,
+            version: toolchain.splash.swift.version.minor)
+
         let modules:SSGC.ModuleGraph = try packages.join(dependencies: pins,
+            standardLibrary: standardLibrary,
             with: &manifest,
             as: self.id.package)
 
         //  Dump the standard library’s symbols, unless they’re already cached.
         let artifactsCached:FilePath.Directory = try toolchain.dump(
-            standardLibrary: .init(platform: platform),
+            standardLibrary: standardLibrary,
             cache: cache)
         for (module, include):(Symbol.Module, [FilePath.Directory]) in try self.modulesToDump(
             among: modules)

@@ -13,6 +13,7 @@ extension SSGC
     class DeclObject
     {
         let conditions:Set<GenericConstraint<Symbol.Decl>>
+        var namespaces:Set<Symbol.Module>
         var namespace:Symbol.Module
         let culture:Symbol.Module
         var access:Symbol.ACL
@@ -51,6 +52,7 @@ extension SSGC
             value:Decl)
         {
             self.conditions = conditions
+            self.namespaces = [namespace]
             self.namespace = namespace
             self.culture = culture
             self.access = access
