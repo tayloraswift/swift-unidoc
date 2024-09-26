@@ -92,7 +92,7 @@ extension Unidoc.Router
 
     mutating
     func descend<Component>(into:Component.Type = Component.self) -> Component?
-        where Component:RawRepresentable<String>
+        where Component:URI.Path.ComponentConvertible
     {
         guard
         let next:String = self.descend()
@@ -101,7 +101,7 @@ extension Unidoc.Router
             return nil
         }
 
-        return .init(rawValue: next)
+        return .init(next)
     }
 
     mutating
@@ -551,6 +551,24 @@ extension Unidoc.Router
                     account: account,
                     form: build))
             }
+
+        case .package:
+            guard
+            let package:Unidoc.Package = self.descend(),
+            let type:Unidoc.PackageMetadataSettings = self.descend(),
+            let update:Unidoc.PackageMetadataSettingsOperation.Update = .init(
+                type: type,
+                form: form)
+            else
+            {
+                return nil
+            }
+
+            return .unordered(Unidoc.PackageMetadataSettingsOperation.init(
+                account: self.authorization.account,
+                package: package,
+                update: update))
+
 
         case .packageAlias:
             let form:[String: String] = form.parameters.reduce(into: [:])
