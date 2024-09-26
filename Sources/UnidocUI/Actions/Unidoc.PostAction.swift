@@ -1,8 +1,12 @@
+import URI
+
 extension Unidoc
 {
     @frozen public
-    enum PostAction:String, Sendable
+    enum PostAction:String, URI.Path.ComponentConvertible
     {
+        case package
+
         case packageAlias = "package-alias"
         case packageAlign = "package-align"
         case packageConfig = "package-config"
@@ -19,12 +23,4 @@ extension Unidoc
         case userConfig = "user-config"
         case userSyncPermissions = "user-sync-permissions"
     }
-}
-extension Unidoc.PostAction:LosslessStringConvertible
-{
-    @inlinable public
-    var description:String { self.rawValue }
-
-    @inlinable public
-    init?(_ description:String) { self.init(rawValue: description) }
 }

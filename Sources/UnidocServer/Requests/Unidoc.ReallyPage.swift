@@ -84,9 +84,6 @@ extension Unidoc.ReallyPage
                 """,
                 button: "Rename package",
                 action: action)
-
-        case .reset:
-            return nil
         }
     }
 

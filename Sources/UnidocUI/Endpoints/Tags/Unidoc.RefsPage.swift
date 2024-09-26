@@ -103,11 +103,11 @@ extension Unidoc.RefsPage:Unidoc.ApplicationPage
                 $0[.form]
                 {
                     $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Unidoc.Post[.packageConfig])"
+                    $0.action = "\(Unidoc.Post[package: self.package.id, .media])"
                     $0.method = "post"
 
                     $0.class = "config"
-                } = Unidoc.PackageMediaSettings.init(package: self.package)
+                } = Unidoc.PackageMediaSettings.init(media: self.package.media)
             }
 
             self.section(tags: &$0, format: format, dormancy: dormancy)
@@ -432,55 +432,13 @@ extension Unidoc.RefsPage
         section[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-            $0.action = "\(Unidoc.Post[.packageConfig])"
+            $0.action = "\(Unidoc.Post[package: self.package.id, .build])"
             $0.method = "post"
 
             $0.class = "config"
-        }
-            content:
-        {
-            $0[.dl]
-            {
-                $0[.dt] = "Platform preference"
-                $0[.dd]
-                {
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
-                        $0.name = "package"
-                        $0.value = "\(self.package.id)"
-                    }
-                    $0[.input]
-                    {
-                        $0.type = "text"
-                        $0.name = "platform-preference"
-                        $0.required = true
-                        $0.readonly = !self.view.editor
-
-                        $0.placeholder = "aarch64-unknown-linux-gnu"
-                        $0.pattern = #"^[a-zA-Z0-9_\-\.]+$"#
-                        $0.value = self.package.platformPreference?.description
-                    }
-                }
-            }
-
-            $0[.button]
-            {
-                $0.class = "area"
-                $0.type = "submit"
-
-                if !self.view.authenticated
-                {
-                    $0.disabled = true
-                    $0.title = "You are not logged in!"
-                }
-                else if !self.view.editor
-                {
-                    $0.disabled = true
-                    $0.title = "You are not an editor for this package!"
-                }
-            } = "Update configuration"
-        }
+        } = Unidoc.BuildTemplateTool.init(
+            form: self.package.build,
+            view: self.view)
 
         section[.h3] = "Names and aliases"
 

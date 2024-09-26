@@ -10,6 +10,17 @@ extension Unidoc
 }
 extension Unidoc.Post
 {
+    static subscript(package id:Unidoc.Package, scope:Unidoc.PackageMetadataSettings) -> URI
+    {
+        var uri:URI = Unidoc.ServerRoot.form.uri
+
+        uri.path.append(Unidoc.PostAction.package)
+        uri.path.append(id)
+        uri.path.append(scope)
+
+        return uri
+    }
+
     @inlinable public
     static subscript(post:Unidoc.PostAction, confirm confirm:Bool = false) -> URI
     {
