@@ -52,7 +52,7 @@ extension Unidoc.DB.Packages.AlignRealm:Mongo.UpdateQuery
                 {
                     $0[.unset]
                     {
-                        $0[Unidoc.PackageMetadata[.realmAligning]] = ()
+                        $0[Unidoc.PackageMetadata[.realmAligning]] = true
                     }
                     $0[.set]
                     {

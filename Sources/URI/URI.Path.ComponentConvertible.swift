@@ -1,5 +1,3 @@
-import URI
-
 extension URI.Path
 {
     public
