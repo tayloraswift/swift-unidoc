@@ -30,6 +30,9 @@ extension Unidoc
         /// documentation locally.
         public
         var media:PackageMedia?
+        /// Default build settings for this package.
+        public
+        var build:BuildTemplate
         /// The current realm this package belongs to. A package can change realms, or lack one
         /// entirely.
         public
@@ -37,9 +40,6 @@ extension Unidoc
         /// Indicates if this package is currently undergoing realm alignment.
         public
         var realmAligning:Bool
-
-        public
-        var platformPreference:Triple?
 
         public
         var editors:[Account]
@@ -59,9 +59,9 @@ extension Unidoc
             symbol:Symbol.Package,
             hidden:Bool = false,
             media:PackageMedia? = nil,
+            build:BuildTemplate = .init(),
             realm:Unidoc.Realm? = nil,
             realmAligning:Bool = false,
-            platformPreference:Triple? = nil,
             editors:[Account] = [],
             repo:PackageRepo? = nil,
             repoWebhook:String? = nil)
@@ -70,9 +70,9 @@ extension Unidoc
             self.symbol = symbol
             self.hidden = hidden
             self.media = media
+            self.build = build
             self.realm = realm
             self.realmAligning = realmAligning
-            self.platformPreference = platformPreference
             self.editors = editors
             self.repo = repo
             self.repoWebhook = repoWebhook
@@ -100,14 +100,16 @@ extension Unidoc.PackageMetadata
         case media = "M"
         case realm = "r"
         case realmAligning = "A"
-        case platformPreference = "O"
+
+        case build_toolchain = "S"
+        case build_platform = "O"
+
         case editors = "u"
         case repo = "G"
         case repoWebhook = "W"
 
         @available(*, unavailable)
         case repoLegacy = "R"
-
         @available(*, unavailable)
         case crawled = "C"
         @available(*, unavailable)
@@ -122,10 +124,13 @@ extension Unidoc.PackageMetadata:BSONDocumentEncodable
         bson[.id] = self.id
         bson[.symbol] = self.symbol
         bson[.hidden] = self.hidden ? true : nil
+
         bson[.media] = self.media
+        bson[.build_toolchain] = self.build.toolchain
+        bson[.build_platform] = self.build.platform
+
         bson[.realm] = self.realm
         bson[.realmAligning] = self.realmAligning ? true : nil
-        bson[.platformPreference] = self.platformPreference
         bson[.editors] = self.editors.isEmpty ? nil : self.editors
         bson[.repo] = self.repo
         bson[.repoWebhook] = self.repoWebhook
@@ -140,9 +145,11 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
             symbol: try bson[.symbol].decode(),
             hidden: try bson[.hidden]?.decode() ?? false,
             media: try bson[.media]?.decode(),
+            build: .init(
+                toolchain: try bson[.build_toolchain]?.decode(),
+                platform: try bson[.build_platform]?.decode()),
             realm: try bson[.realm]?.decode(),
             realmAligning: try bson[.realmAligning]?.decode() ?? false,
-            platformPreference: try bson[.platformPreference]?.decode(),
             editors: try bson[.editors]?.decode() ?? [],
             repo: try bson[.repo]?.decode(),
             repoWebhook: try bson[.repoWebhook]?.decode())

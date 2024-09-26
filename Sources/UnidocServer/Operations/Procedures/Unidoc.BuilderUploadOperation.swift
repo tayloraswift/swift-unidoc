@@ -79,9 +79,14 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
 
                 /// A successful (labeled) build also sets the platform preference, since we now
                 /// know that the package can be built on that platform.
-                let _:Unidoc.PackageMetadata? = try await db.packages.reset(
-                    platformPreference: snapshot.metadata.triple,
-                    of: snapshot.id.package)
+                let _:Unidoc.PackageMetadata? = try await db.packages.modify(
+                    existing: snapshot.id.package)
+                {
+                    $0[.set]
+                    {
+                        $0[Unidoc.PackageMetadata[.build_platform]] = snapshot.metadata.triple
+                    }
+                }
 
             case .failure:
                 //  Mark the snapshot as unbuildable, so that automated plugins don’t try to

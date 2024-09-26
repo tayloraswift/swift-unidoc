@@ -9,7 +9,6 @@ extension Unidoc.PackageConfigOperation
         case hidden(Bool)
         case symbol(Symbol.Package)
         case expires(UnixMillisecond)
-        case reset(Field)
     }
 }
 extension Unidoc.PackageConfigOperation.Update:URI.QueryDecodable
@@ -30,11 +29,6 @@ extension Unidoc.PackageConfigOperation.Update:URI.QueryDecodable
             case "true"? = parameters["refresh"]
         {
             self = .expires(.zero)
-        }
-        else if
-            let field:Field = .init(parameters: parameters)
-        {
-            self = .reset(field)
         }
         else
         {

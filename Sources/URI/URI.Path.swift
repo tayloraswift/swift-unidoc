@@ -157,6 +157,12 @@ extension URI.Path
     }
 
     @inlinable public mutating
+    func append(_ component:some URI.Path.ComponentConvertible)
+    {
+        self.append(.push("\(component)"))
+    }
+
+    @inlinable public mutating
     func normalize()
     {
         self = self.normalized()

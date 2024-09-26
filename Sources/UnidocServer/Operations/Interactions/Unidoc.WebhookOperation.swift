@@ -124,7 +124,7 @@ extension Unidoc.WebhookOperation
         case .deleted:
             let modified:Unidoc.User? = try await db.users.modify(existing: user.id)
             {
-                $0[.unset] { $0[Unidoc.User[.githubInstallation]] = () }
+                $0[.unset] { $0[Unidoc.User[.githubInstallation]] = true }
             }
             return modified == nil
                 ? .notFound("No such user\n")
