@@ -11,12 +11,15 @@ extension SymbolGraph
         public
         var extensions:[Extension]
         public
+        var exporters:[Int]
+        public
         var decl:Decl?
 
         @inlinable public
-        init(extensions:[Extension] = [], decl:Decl? = nil)
+        init(extensions:[Extension] = [], exporters:[Int] = [], decl:Decl? = nil)
         {
             self.extensions = extensions
+            self.exporters = exporters
             self.decl = decl
         }
     }
@@ -47,6 +50,7 @@ extension SymbolGraph.DeclNode
     enum CodingKey:String, Sendable
     {
         case extensions = "E"
+        case exporters = "X"
         case decl = "V"
     }
 }
@@ -56,6 +60,7 @@ extension SymbolGraph.DeclNode:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.decl] = self.decl
+        bson[.exporters] = SymbolGraph.Buffer16.init(elidingEmpty: self.exporters)
         bson[.extensions] = self.extensions.isEmpty ? nil : self.extensions
     }
 }
@@ -66,6 +71,8 @@ extension SymbolGraph.DeclNode:BSONDocumentDecodable
     {
         self.init(
             extensions: try bson[.extensions]?.decode() ?? [],
+            exporters: try bson[.exporters]?.decode(
+                as: SymbolGraph.Buffer16.self, with: \.elements) ?? [],
             decl: try bson[.decl]?.decode())
     }
 }

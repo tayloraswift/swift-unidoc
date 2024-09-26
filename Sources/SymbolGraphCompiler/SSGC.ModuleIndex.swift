@@ -19,6 +19,8 @@ extension SSGC
         public
         let extensions:[SSGC.Extension]
         public
+        let reexports:[Symbol.Decl]
+        public
         let features:[Symbol.Decl: Feature]
 
         public
@@ -34,6 +36,7 @@ extension SSGC
             resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>,
             declarations:[(id:Symbol.Module, decls:[Decl])],
             extensions:[SSGC.Extension],
+            reexports:[Symbol.Decl],
             features:[Symbol.Decl: Feature],
             language:Phylum.Language? = nil,
             markdown:[any SSGC.ResourceFile] = [],
@@ -44,6 +47,7 @@ extension SSGC
             self.resolvableLinks = resolvableLinks
             self.declarations = declarations
             self.extensions = extensions
+            self.reexports = reexports
             self.features = features
             self.language = language
             self.markdown = markdown

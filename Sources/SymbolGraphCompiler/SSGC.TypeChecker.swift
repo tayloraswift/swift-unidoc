@@ -616,6 +616,7 @@ extension SSGC.TypeChecker
             $0.register($1)
         }
 
+        var reexported:[Symbol.Decl] = []
         for decl:SSGC.DeclObject in self.declarations.all
         {
             /// The target may have been re-exported from multiple modules. Swift allows
@@ -626,7 +627,13 @@ extension SSGC.TypeChecker
             {
                 resolvableLinks[namespace, decl.value.path].append(target)
             }
+
+            if  decl.culture != culture, decl.namespaces.contains(culture)
+            {
+                reexported.append(decl.id)
+            }
         }
+
         for `extension`:SSGC.ExtensionObject in self.extensions.all
         {
             //  We add the feature paths here and not in `insert(_:by:)` because those
@@ -665,6 +672,7 @@ extension SSGC.TypeChecker
             resolvableLinks: resolvableLinks,
             declarations: self.declarations.load(culture: culture),
             extensions: extensions,
+            reexports: reexported,
             features: features)
     }
 }
