@@ -218,13 +218,7 @@ extension SSGC.Toolchain
     /// this methods disables extension block symbols by default.
     func dump(
         standardLibrary:SSGC.StandardLibrary,
-        options:SymbolDumpOptions = .init(allowedReexportedModules: [
-                "_Concurrency",
-                "_StringProcessing",
-                "FoundationEssentials",
-                "FoundationInternationalization",
-            ],
-            emitExtensionBlockSymbols: false),
+        options:SymbolDumpOptions = .init(emitExtensionBlockSymbols: false),
         cache:FilePath.Directory) throws -> FilePath.Directory
     {
         let cached:FilePath.Directory = cache / "swift@\(self.splash.swift.version)"
@@ -234,9 +228,16 @@ extension SSGC.Toolchain
             let temporary:FilePath.Directory = cache / "swift"
             try temporary.create(clean: true)
 
+            var dumped:[Symbol.Module] = []
+
             for module:SymbolGraph.Module in standardLibrary.modules
             {
-                try self.dump(module: module.id, to: temporary, options: options)
+                try self.dump(module: module.id,
+                    to: temporary,
+                    options: options,
+                    allowedReexportedModules: dumped)
+
+                dumped.append(module.id)
             }
 
             try temporary.move(replacing: cached)
@@ -250,7 +251,8 @@ extension SSGC.Toolchain
     func dump(module id:Symbol.Module,
         to output:FilePath.Directory,
         options:SymbolDumpOptions,
-        include:[FilePath.Directory] = []) throws
+        include:[FilePath.Directory] = [],
+        allowedReexportedModules:[Symbol.Module] = []) throws
     {
         print("Dumping symbols for module '\(id)'")
 
@@ -278,12 +280,9 @@ extension SSGC.Toolchain
         {
             arguments.append("-skip-inherited-docs")
         }
-        if  self.splash.swift.version >= .v(6, 0, 0),
-            //  Temporary hack until we have the right stdlib definitions for macOS
-            self.splash.triple.os.starts(with: "linux"),
-            !options.allowedReexportedModules.isEmpty
+        if  self.splash.swift.version >= .v(6, 0, 0), !allowedReexportedModules.isEmpty
         {
-            let whitelist:String = options.allowedReexportedModules.lazy.map { "\($0)" }.joined(
+            let whitelist:String = allowedReexportedModules.lazy.map { "\($0)" }.joined(
                 separator: ",")
 
             arguments.append("""

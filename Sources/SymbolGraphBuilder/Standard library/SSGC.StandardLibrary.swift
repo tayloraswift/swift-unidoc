@@ -25,6 +25,7 @@ extension SSGC.StandardLibrary
         {
         case (.linux, .v(6, 0)):    self = .linux_6_0
         case (.linux, _):           self = .linux_5_10
+        case (.macOS, .v(6, 0)):    self = .macOS_6_0
         case (.macOS, _):           self = .macOS_5_10
         default:                    fatalError("Unsupported platform: \(platform)")
         }
@@ -132,6 +133,54 @@ extension SSGC.StandardLibrary
                     dependencies: 0),
             ])
     }
+}
+extension SSGC.StandardLibrary
+{
+    static var macOS_6_0:Self
+    {
+        .init(
+            products: [
+                .init(name: "__stdlib__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(0 ... 6)),
+                .init(name: "__corelibs__", type: .library(.automatic),
+                    dependencies: [],
+                    cultures: [Int].init(0 ... 9)),
+            ],
+            modules: [
+                //  0:
+                .toolchain(module: "Swift"),
+                //  1:
+                .toolchain(module: "_Concurrency",
+                    dependencies: 0),
+                //  2:
+                .toolchain(module: "Distributed",
+                    dependencies: 0, 1),
+
+                //  3:
+                .toolchain(module: "_StringProcessing",
+                    dependencies: 0),
+                //  4:
+                .toolchain(module: "RegexBuilder",
+                    dependencies: 0, 3),
+                //  5:
+                .toolchain(module: "Synchronization",
+                    dependencies: 0),
+                //  6:
+                .toolchain(module: "Cxx",
+                    dependencies: 0),
+
+                //  7:
+                .toolchain(module: "Dispatch",
+                    dependencies: 0),
+                //  8:
+                .toolchain(module: "DispatchIntrospection",
+                    dependencies: 0, 7),
+                //  9:
+                .toolchain(module: "Foundation",
+                    dependencies: 0, 7, 8),
+            ])
+    }
 
     static var linux_6_0:Self
     {
@@ -179,7 +228,7 @@ extension SSGC.StandardLibrary
                     dependencies: 0),
                 // 10:
                 .toolchain(module: "DispatchIntrospection",
-                    dependencies: 0),
+                    dependencies: 0, 9),
                 // 11:
                 .toolchain(module: "FoundationEssentials",
                     dependencies: 0, 4, 5, 9),
