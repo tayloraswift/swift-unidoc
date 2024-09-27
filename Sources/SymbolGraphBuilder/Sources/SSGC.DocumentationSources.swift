@@ -115,6 +115,7 @@ extension SSGC.DocumentationSources
                 {
                     $0 + $1.declarations.reduce(0) { $0 + $1.decls.count }
                 })
+                re-exports      : \(moduleIndexes.reduce(0) { $0 + $1.reexports.count })
                 extensions      : \(moduleIndexes.reduce(0) { $0 + $1.extensions.count })
                 """)
         }
@@ -169,7 +170,11 @@ extension SSGC.DocumentationSources
                 Linked documentation!
                     time loading sources    : \(profiler.loadingSources)
                     time linking            : \(profiler.linking)
-                symbols         : \(graph.decls.symbols.count)
+                symbols     : \(graph.decls.symbols.count)
+                redirects   : \(graph.decls.nodes.reduce(0)
+                {
+                    $0 + $1.exporters.count
+                })
                 """)
 
             return graph
