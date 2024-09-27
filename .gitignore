@@ -5,6 +5,7 @@
 .testing
 .unidoc
 .vscode
+.DS_Store
 
 unidoc/
 swiftpm/
