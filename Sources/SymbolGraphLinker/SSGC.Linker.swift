@@ -236,7 +236,7 @@ extension SSGC.Linker
         {
             if  let reexported:Int32 = self.tables.citizen(id)
             {
-                self.tables.graph.decls.nodes[reexported].exporters.append(offset)
+                self.tables.graph.cultures[offset].reexports.append(reexported)
             }
         }
     }
