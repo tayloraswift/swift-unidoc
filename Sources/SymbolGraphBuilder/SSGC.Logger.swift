@@ -50,7 +50,10 @@ extension SSGC.Logger:DiagnosticLogger
             }
 
         case .ignoreErrors:
-            break
+            if  messages.status >= .fatal
+            {
+                self.failed = true
+            }
 
         case .demoteErrors:
             messages.demoteErrors(to: .warning)

@@ -4,6 +4,7 @@ enum DiagnosticLevel:Equatable, Hashable, Comparable
     case note
     case warning
     case error
+    case fatal
 }
 extension DiagnosticLevel:CustomStringConvertible
 {
@@ -15,6 +16,7 @@ extension DiagnosticLevel:CustomStringConvertible
         case .note:     "note"
         case .warning:  "warning"
         case .error:    "error"
+        case .fatal:    "fatal"
         }
     }
 }
@@ -27,6 +29,7 @@ extension DiagnosticLevel
         case .note:     .rgb(150, 150, 150)
         case .warning:  .magenta
         case .error:    .red
+        case .fatal:    .red
         }
     }
 }
