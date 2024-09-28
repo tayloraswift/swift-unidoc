@@ -163,7 +163,7 @@ extension Unidoc.AnyVertex
         /// This field is cheap (64-bit integer plus 3 bytes of keying overhead) and
         /// allows us to reuse compound indices for zone-bound queries by performing
         /// an equality match instead of a range match.
-        case zone = "Z"
+        case volume = "Z"
 
         /// Appears in ``ForeignVertex`` only.
         case extendee = "j"
@@ -257,7 +257,7 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
         bson[.id] = self.id
-        bson[.zone] = self.id.edition
+        bson[.volume] = self.id.edition
 
         switch self
         {

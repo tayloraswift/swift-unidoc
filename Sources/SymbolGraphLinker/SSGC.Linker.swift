@@ -32,7 +32,7 @@ extension SSGC
         private
         var snippets:[String: Markdown.Snippet]
         private
-        var router:Router
+        var router:Router<FNV24?, Int32>
         private
         var tables:Tables
 
@@ -122,23 +122,12 @@ extension SSGC.Linker
                 as: module.language ?? .swift,
                 at: offset)
         }
+
         //  This needs to be done in two passes, because unfurling extensions can intern
         //  additional symbols, which would otherwise create holes in the address space.
-        for module:SSGC.ModuleIndex in indexes
-        {
-            for node:SSGC.Extension in module.extensions
-            {
-                self.tables.allocate(decl: node.extendee.id)
-            }
-        }
-
-        for (offset, module):(Int, SSGC.ModuleIndex) in zip(self.contexts.indices, indexes)
-        {
-            self.unfurl(reexported: module.reexports, by: offset)
-            self.unfurl(extensions: module.extensions,
-                featuresBySymbol: module.features,
-                at: offset)
-        }
+        self.allocateNodesFromExtensions(in: indexes)
+        self.unfurlFeaturesFromExtensions(in: indexes)
+        self.colorizeReexportedDeclarations(in: indexes)
 
         //  We attach snippets first, because they can be referenced by the markdown
         //  supplements. This works even if the snippet captions contain references to articles,
@@ -150,6 +139,52 @@ extension SSGC.Linker
         {
             try self.attach(markdown: module.markdown, at: offset)
         }
+    }
+
+    private mutating
+    func allocateNodesFromExtensions(in indexes:[SSGC.ModuleIndex])
+    {
+        for module:SSGC.ModuleIndex in indexes
+        {
+            for node:SSGC.Extension in module.extensions
+            {
+                self.tables.allocate(decl: node.extendee.id)
+            }
+        }
+    }
+
+    private mutating
+    func unfurlFeaturesFromExtensions(in indexes:[SSGC.ModuleIndex])
+    {
+        for (offset, module):(Int, SSGC.ModuleIndex) in zip(self.contexts.indices, indexes)
+        {
+            self.unfurl(extensions: module.extensions,
+                featuresBySymbol: module.features,
+                at: offset)
+        }
+    }
+
+    private mutating
+    func colorizeReexportedDeclarations(in indexes:[SSGC.ModuleIndex])
+    {
+        var redirect:SSGC.Router<FNV24, (Int32, Int)> = .init()
+        for (offset, module):(Int, SSGC.ModuleIndex) in zip(self.contexts.indices, indexes)
+        {
+            //  @_exported can duplicate a truly staggering number of declarations. To prevent
+            //  this from creating a lot of almost-empty declaration nodes, we only track
+            //  modules that re-export symbols from the same package.
+            for (id, feature):(Symbol.Decl, SSGC.ModuleIndex.Feature) in module.reexports
+            {
+                if  let i:Int32 = self.tables.citizen(id)
+                {
+                    let hash:FNV24 = .decl(id)
+                    redirect[module.id, feature.path, feature.phylum][hash, default: []]
+                        .append((i, offset))
+                }
+            }
+        }
+
+        self.tables.graph.colorize(reexports: redirect.paths, with: &self.tables.diagnostics)
     }
 }
 extension SSGC.Linker
@@ -226,21 +261,6 @@ extension SSGC.Linker
         }
     }
 
-    private mutating
-    func unfurl(reexported:[Symbol.Decl], by offset:Int)
-    {
-        //  @_exported can duplicate a truly staggering number of declarations. To prevent this
-        //  from creating a lot of almost-empty declaration nodes, we only track modules that
-        //  re-export symbols from the same package.
-        for id:Symbol.Decl in reexported
-        {
-            if  let reexported:Int32 = self.tables.citizen(id)
-            {
-                self.tables.graph.cultures[offset].reexports.append(reexported)
-            }
-        }
-    }
-
     /// This function also exposes any features manifested by the extensions for
     /// codelink resolution.
     ///
@@ -288,7 +308,7 @@ extension SSGC.Linker
                     hash: .decl(.init(id, self: $0.extendee.id)),
                     id: id)
 
-                self.tables.packageLinks[namespace, $0.extendee.path, feature.lastName]
+                self.tables.packageLinks[namespace, $0.extendee.path, feature.path.last]
                     .append(featureAlias)
             }
 

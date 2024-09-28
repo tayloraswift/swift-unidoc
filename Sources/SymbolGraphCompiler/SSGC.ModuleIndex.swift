@@ -19,7 +19,7 @@ extension SSGC
         public
         let extensions:[SSGC.Extension]
         public
-        let reexports:[Symbol.Decl]
+        let reexports:[Symbol.Decl: Feature]
         public
         let features:[Symbol.Decl: Feature]
 
@@ -36,7 +36,7 @@ extension SSGC
             resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>,
             declarations:[(id:Symbol.Module, decls:[Decl])],
             extensions:[SSGC.Extension],
-            reexports:[Symbol.Decl],
+            reexports:[Symbol.Decl: Feature],
             features:[Symbol.Decl: Feature],
             language:Phylum.Language? = nil,
             markdown:[any SSGC.ResourceFile] = [],
