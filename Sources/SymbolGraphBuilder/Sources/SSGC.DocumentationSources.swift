@@ -170,8 +170,11 @@ extension SSGC.DocumentationSources
                 Linked documentation!
                     time loading sources    : \(profiler.loadingSources)
                     time linking            : \(profiler.linking)
-                symbols     : \(graph.decls.symbols.count)
-                redirects   : \(graph.cultures.reduce(0) { $0 + $1.reexports.count })
+                symbols             : \(graph.decls.symbols.count)
+                redirects           : \
+                \(graph.cultures.reduce(0) { $0 + $1.reexports.unhashed.count })
+                redirects (hashed)  : \
+                \(graph.cultures.reduce(0) { $0 + $1.reexports.hashed.count })
                 """)
 
             return graph

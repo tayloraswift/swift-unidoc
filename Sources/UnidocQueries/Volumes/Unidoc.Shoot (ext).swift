@@ -9,16 +9,16 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
 {
     public
     func lookup(_ lookup:inout Mongo.LookupEncoder,
-        volume:Mongo.AnyKeyPath,
+        volume metadata:Mongo.AnyKeyPath,
         output:Mongo.AnyKeyPath,
         fields:Unidoc.VertexProjection)
     {
-        let zone:Mongo.Variable<Unidoc.Edition> = "zone"
+        let volume:Mongo.Variable<Unidoc.Edition> = "zone"
 
         lookup[.from] = Unidoc.DB.Vertices.name
         lookup[.let]
         {
-            $0[let: zone] = volume / Unidoc.VolumeMetadata[.id]
+            $0[let: volume] = metadata / Unidoc.VolumeMetadata[.id]
         }
         lookup[.pipeline]
         {
@@ -36,7 +36,7 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
                         //  But that would not be as index-friendly.
                         $0.expr
                         {
-                            $0[.eq] = (Unidoc.AnyVertex[.zone], zone)
+                            $0[.eq] = (Unidoc.AnyVertex[.volume], volume)
                         }
                         $0.expr
                         {

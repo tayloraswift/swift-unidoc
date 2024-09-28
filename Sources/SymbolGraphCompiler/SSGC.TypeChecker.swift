@@ -616,7 +616,7 @@ extension SSGC.TypeChecker
             $0.register($1)
         }
 
-        var reexported:[Symbol.Decl] = []
+        var reexported:[Symbol.Decl: SSGC.ModuleIndex.Feature] = [:]
         for decl:SSGC.DeclObject in self.declarations.all
         {
             /// The target may have been re-exported from multiple modules. Swift allows
@@ -630,7 +630,7 @@ extension SSGC.TypeChecker
 
             if  decl.culture != culture, decl.namespaces.contains(culture)
             {
-                reexported.append(decl.id)
+                reexported[decl.id] = .init(from: decl.value)
             }
         }
 

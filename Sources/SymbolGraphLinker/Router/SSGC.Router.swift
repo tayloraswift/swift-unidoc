@@ -9,10 +9,10 @@ extension SSGC
 {
     /// A type responsible for detecting URL path collisions between routes in the
     /// same symbol graph.
-    struct Router
+    struct Router<Hash, Vertex> where Hash:Hashable
     {
         private(set)
-        var paths:[Route: InlineDictionary<FNV24?, InlineArray<Int32>>]
+        var paths:[Route: InlineDictionary<Hash, InlineArray<Vertex>>]
 
         init()
         {
@@ -24,7 +24,7 @@ extension SSGC.Router
 {
     subscript(namespace:Symbol.Module,
         path:UnqualifiedPath,
-        phylum:Phylum.Decl) -> InlineDictionary<FNV24?, InlineArray<Int32>>
+        phylum:Phylum.Decl) -> InlineDictionary<Hash, InlineArray<Vertex>>
     {
         _read
         {
@@ -35,7 +35,7 @@ extension SSGC.Router
             yield &self.paths[.decl(namespace, path, phylum), default: [:]]
         }
     }
-    subscript(route:SSGC.Route) -> InlineDictionary<FNV24?, InlineArray<Int32>>
+    subscript(route:SSGC.Route) -> InlineDictionary<Hash, InlineArray<Vertex>>
     {
         _read
         {
