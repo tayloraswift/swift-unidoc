@@ -1190,7 +1190,7 @@ extension Unidoc.Router
 
         let parameters:LegacyParameters = .init(self.query)
 
-        let query:Unidoc.SymbolicRedirectQuery<Unidoc.Shoot> = .legacy(head: next,
+        let query:Unidoc.RedirectBySymbolicHintQuery<Unidoc.Shoot> = .legacy(head: next,
             rest: self.stem,
             from: parameters.from)
 
@@ -1198,13 +1198,13 @@ extension Unidoc.Router
         if  let overload:Symbol.Decl = parameters.overload
         {
             return .unordered(
-                Unidoc.RedirectOperation<Unidoc.SymbolicRedirectQuery<Symbol.Decl>>.init(
+                Unidoc.RedirectOperation<Unidoc.RedirectBySymbolicHintQuery<Symbol.Decl>>.init(
                     query: .init(volume: query.volume, lookup: overload)))
         }
         else
         {
             return .unordered(
-                Unidoc.RedirectOperation<Unidoc.SymbolicRedirectQuery<Unidoc.Shoot>>.init(
+                Unidoc.RedirectOperation<Unidoc.RedirectBySymbolicHintQuery<Unidoc.Shoot>>.init(
                     query: query))
         }
     }

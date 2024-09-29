@@ -50,10 +50,12 @@ extension Unidoc.Mesh
     var trees:[Unidoc.TypeTree] { self.interior.trees }
 
     @inlinable public
-    var volume:Symbol.Volume { self.metadata.symbol }
+    var redirects:[Unidoc.RedirectVertex] { self.interior.redirects }
 }
 extension Unidoc.Mesh
 {
+    @inlinable public
+    var volume:Symbol.Volume { self.metadata.symbol }
     @inlinable public
     var id:Unidoc.Edition { self.metadata.id }
 }
