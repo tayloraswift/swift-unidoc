@@ -1,3 +1,4 @@
+import FNV1
 import MongoDB
 import SHA1
 import Symbols
@@ -61,5 +62,39 @@ extension Unidoc.DB
 
             return pipeline.value
         }
+    }
+}
+extension Unidoc.DB
+{
+    public
+    func redirect(exported:Unidoc.Shoot,
+        from volume:Unidoc.Edition) async throws -> Unidoc.RedirectOutput?
+    {
+        try await self.query(with: Unidoc.RedirectByExportQuery.init(
+                volume: volume,
+                stem: exported.stem,
+                hash: exported.hash),
+            on: .nearest)
+    }
+
+    public
+    func redirect(visited shoot:Unidoc.Shoot,
+        in package:Unidoc.Package) async throws -> Unidoc.RedirectOutput?
+    {
+        guard
+        let visited:Unidoc.SearchbotCoverage = try await self.searchbotGrid.find(id: .init(
+            trunk: package,
+            shoot: shoot)),
+        let redirect:Unidoc.RedirectOutput = try await self.query(
+            with: Unidoc.RedirectByInternalHintQuery<Unidoc.Shoot>.init(
+                volume: visited.ok,
+                lookup: shoot),
+            on: .nearest)
+        else
+        {
+            return nil
+        }
+
+        return redirect
     }
 }

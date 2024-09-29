@@ -7,23 +7,23 @@ import UnidocRecords
 extension Unidoc
 {
     @frozen public
-    struct InternalRedirectQuery<Predicate>:Equatable, Hashable, Sendable
+    struct RedirectBySymbolicHintQuery<Predicate>:Equatable, Hashable, Sendable
         where Predicate:VertexPredicate
     {
         public
-        let volume:Edition
+        let volume:VolumeSelector
         public
         let vertex:Predicate
 
         @inlinable public
-        init(volume:Edition, lookup vertex:Predicate)
+        init(volume:VolumeSelector, lookup vertex:Predicate)
         {
             self.volume = volume
             self.vertex = vertex
         }
     }
 }
-extension Unidoc.InternalRedirectQuery:Mongo.PipelineQuery
+extension Unidoc.RedirectBySymbolicHintQuery:Mongo.PipelineQuery
 {
     public
     typealias CollectionOrigin = Unidoc.DB.Volumes
@@ -33,12 +33,25 @@ extension Unidoc.InternalRedirectQuery:Mongo.PipelineQuery
     typealias Iteration = Mongo.Single<Unidoc.RedirectOutput>
 
     @inlinable public
-    var hint:Mongo.CollectionIndex? { nil }
+    var hint:Mongo.CollectionIndex?
+    {
+        self.volume.version == nil
+            ? Unidoc.DB.Volumes.indexSymbolicPatch
+            : Unidoc.DB.Volumes.indexSymbolic
+    }
 
     public
     func build(pipeline:inout Mongo.PipelineEncoder)
     {
-        pipeline[stage: .match] { $0[Unidoc.VolumeMetadata[.id]] = self.volume }
+        if  let version:Substring = self.volume.version
+        {
+            pipeline.volume(package: self.volume.package, version: version)
+        }
+        else
+        {
+            pipeline.volume(package: self.volume.package)
+        }
+
         pipeline[stage: .replaceWith, using: Unidoc.RedirectOutput.CodingKey.self]
         {
             $0[.volume] = Mongo.Pipeline.ROOT

@@ -27,14 +27,14 @@ extension Unidoc.Stem
     func decl(
         _ namespace:Symbol.Module,
         _ path:UnqualifiedPath,
-        orientation:Phylum.Decl.Orientation) -> Self
+        _ phylum:Phylum.Decl) -> Self
     {
         var stem:Self = "\(namespace)"
         for component:String in path.prefix
         {
             stem.append(straight: component)
         }
-        switch orientation
+        switch phylum.orientation
         {
         case .straight: stem.append(straight: path.last)
         case .gay:      stem.append(gay: path.last)

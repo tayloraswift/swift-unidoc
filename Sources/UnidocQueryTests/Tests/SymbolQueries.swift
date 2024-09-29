@@ -118,7 +118,7 @@ struct SymbolQueries:UnidocDatabaseTestBattery
         /// We should be able to use a mangled decl identifier to obtain a redirect.
         if  let tests:TestGroup = tests / "Int" / "init" / "overload"
         {
-            let query:Unidoc.SymbolicRedirectQuery<Symbol.Decl> = .init(
+            let query:Unidoc.RedirectBySymbolicHintQuery<Symbol.Decl> = .init(
                 volume: .init(package: "swift", version: nil),
                 lookup: .init(.s, ascii: "Si10bitPatternSiSO_tcfc"))
 

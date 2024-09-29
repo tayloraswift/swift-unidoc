@@ -150,6 +150,12 @@ extension Unidoc.DB
     }
 
     @inlinable public
+    var redirects:Redirects
+    {
+        .init(database: self.id, session: self.session)
+    }
+
+    @inlinable public
     var vertices:Vertices
     {
         .init(database: self.id, session: self.session)
@@ -204,6 +210,7 @@ extension Unidoc.DB:Mongo.DatabaseModel
         try await self.packageDependencies.setup()
         try await self.editionDependencies.setup()
         try await self.volumes.setup()
+        try await self.redirects.setup()
         try await self.vertices.setup()
         try await self.groups.setup()
         try await self.search.setup()
@@ -575,9 +582,10 @@ extension Unidoc.DB
         try await self.editionDependencies.clear(dependent: volume.id)
         try await self.packageDependencies.clear(dependent: volume.id)
 
-        try await self.vertices.clear(range: volume.id)
-        try await self.groups.clear(range: volume.id)
-        try await self.trees.clear(range: volume.id)
+        try await self.redirects.deleteAll(in: volume.id)
+        try await self.vertices.deleteAll(in: volume.id)
+        try await self.groups.deleteAll(in: volume.id)
+        try await self.trees.deleteAll(in: volume.id)
 
         try await self.search.delete(id: volume.symbol)
         //  Delete this last, otherwise if one of the other steps fails, we won’t
@@ -661,6 +669,7 @@ extension Unidoc.DB
         try await self.search.insert(search)
         try await self.trees.insert(mesh.trees)
 
+        try await self.redirects.insert(mesh.redirects)
         try await self.vertices.insert(mesh.vertices)
         try await self.groups.insert(mesh.groups,
             realm: mesh.metadata.latest ? mesh.metadata.realm : nil)
