@@ -141,6 +141,19 @@ extension SSGC.Linker.Tables
 }
 extension SSGC.Linker.Tables
 {
+    func citizen(_ id:Symbol.Decl) -> Int32?
+    {
+        guard
+        let scalar:Int32 = self.decls[id],
+        self.graph.decls.contains(citizen: scalar)
+        else
+        {
+            return nil
+        }
+
+        return scalar
+    }
+
     /// Returns the scalar for the given declaration symbol, registering it in the symbol table
     /// if needed. You should never call ``allocate(decl:)`` or ``allocate(extension:)`` after
     /// calling this function.

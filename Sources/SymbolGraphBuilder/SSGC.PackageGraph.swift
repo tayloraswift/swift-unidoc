@@ -110,6 +110,7 @@ extension SSGC.PackageGraph
 
     consuming
     func join(dependencies pins:[SPM.DependencyPin],
+        standardLibrary:SSGC.StandardLibrary,
         with sinkManifest:inout SPM.Manifest,
         as id:Symbol.Package) throws -> SSGC.ModuleGraph
     {
@@ -143,8 +144,6 @@ extension SSGC.PackageGraph
         {
             print("\(i + 1). \(package)")
         }
-
-        let standardLibrary:SSGC.StandardLibrary = .init(platform: self.platform)
 
         return try .init(
             standardLibrary: standardLibrary.modules.map(SSGC.ModuleLayout.init(toolchain:)),

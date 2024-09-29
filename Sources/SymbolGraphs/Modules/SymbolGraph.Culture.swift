@@ -14,6 +14,10 @@ extension SymbolGraph
         /// The ranges must be contiguous and non-overlapping.
         public
         var namespaces:[SymbolGraph.Namespace]
+        /// Declarations this module re-exports, if any.
+        public
+        var reexports:Reexports
+
         /// This module’s standalone articles, if it has any.
         public
         var articles:ClosedRange<Int32>?
@@ -31,6 +35,7 @@ extension SymbolGraph
             self.module = module
 
             self.namespaces = []
+            self.reexports = .init()
             self.articles = nil
             self.headline = nil
             self.article = nil
@@ -69,6 +74,8 @@ extension SymbolGraph.Culture
         case module = "M"
 
         case namespaces = "N"
+        case reexports_unhashed = "W"
+        case reexports_hashed = "X"
         case articles_lower = "L"
         case articles_upper = "U"
         case headline = "H"
@@ -83,6 +90,10 @@ extension SymbolGraph.Culture:BSONDocumentEncodable
         bson[.module] = self.module
 
         bson[.namespaces] = self.namespaces.isEmpty ? nil : self.namespaces
+        bson[.reexports_unhashed] = SymbolGraph.Buffer24.init(
+            elidingEmpty: self.reexports.unhashed)
+        bson[.reexports_hashed] = SymbolGraph.Buffer24.init(
+            elidingEmpty: self.reexports.hashed)
         bson[.articles_lower] = self.articles?.lowerBound
         bson[.articles_upper] = self.articles?.upperBound
         bson[.headline] = self.headline
@@ -104,6 +115,10 @@ extension SymbolGraph.Culture:BSONDocumentDecodable
 
         //  TODO: validate well-formedness of scalar ranges.
         self.namespaces = try bson[.namespaces]?.decode() ?? []
+        self.reexports.unhashed = try bson[.reexports_unhashed]?.decode(
+            as: SymbolGraph.Buffer24.self, with: \.elements) ?? []
+        self.reexports.hashed = try bson[.reexports_hashed]?.decode(
+            as: SymbolGraph.Buffer24.self, with: \.elements) ?? []
         self.headline = try bson[.headline]?.decode()
         self.article = try bson[.article]?.decode()
     }

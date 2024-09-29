@@ -78,9 +78,9 @@ extension SymbolGraph.Extension:BSONDocumentEncodable
         bson[.namespace] = self.culture == self.namespace ? nil : self.namespace
         bson[.culture] = self.culture
 
-        bson[.conformances] = SymbolGraph.Buffer.init(elidingEmpty: self.conformances)
-        bson[.features] = SymbolGraph.Buffer.init(elidingEmpty: self.features)
-        bson[.nested] = SymbolGraph.Buffer.init(elidingEmpty: self.nested)
+        bson[.conformances] = SymbolGraph.Buffer24.init(elidingEmpty: self.conformances)
+        bson[.features] = SymbolGraph.Buffer24.init(elidingEmpty: self.features)
+        bson[.nested] = SymbolGraph.Buffer24.init(elidingEmpty: self.nested)
 
         bson[.article] = self.article
     }
@@ -95,11 +95,11 @@ extension SymbolGraph.Extension:BSONDocumentDecodable
             namespace: try bson[.namespace]?.decode() ?? culture,
             culture: culture,
             conformances: try bson[.conformances]?.decode(
-                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
+                as: SymbolGraph.Buffer24.self, with: \.elements) ?? [],
             features: try bson[.features]?.decode(
-                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
+                as: SymbolGraph.Buffer24.self, with: \.elements) ?? [],
             nested: try bson[.nested]?.decode(
-                as: SymbolGraph.Buffer.self, with: \.elements) ?? [],
+                as: SymbolGraph.Buffer24.self, with: \.elements) ?? [],
             article: try bson[.article]?.decode())
     }
 }

@@ -190,10 +190,10 @@ extension SymbolGraph.Decl:BSONDocumentEncodable
         /// Do *not* elide empty SPI arrays!
         bson[.signature_spis] = self.signature.spis
 
-        bson[.requirements] = SymbolGraph.Buffer.init(elidingEmpty: self.requirements)
-        bson[.inhabitants] = SymbolGraph.Buffer.init(elidingEmpty: self.inhabitants)
-        bson[.superforms] = SymbolGraph.Buffer.init(elidingEmpty: self.superforms)
-        bson[.features] = SymbolGraph.Buffer.init(elidingEmpty: self.features)
+        bson[.requirements] = SymbolGraph.Buffer24.init(elidingEmpty: self.requirements)
+        bson[.inhabitants] = SymbolGraph.Buffer24.init(elidingEmpty: self.inhabitants)
+        bson[.superforms] = SymbolGraph.Buffer24.init(elidingEmpty: self.superforms)
+        bson[.features] = SymbolGraph.Buffer24.init(elidingEmpty: self.features)
 
         bson[.renamed] = self.renamed
         bson[.origin] = self.origin
@@ -232,13 +232,13 @@ extension SymbolGraph.Decl:BSONDocumentDecodable
 
             location: try bson[.location]?.decode(),
             article: try bson[.article]?.decode(),
-            requirements: try bson[.requirements]?.decode(as: SymbolGraph.Buffer.self,
+            requirements: try bson[.requirements]?.decode(as: SymbolGraph.Buffer24.self,
                 with: \.elements) ?? [],
-            inhabitants: try bson[.inhabitants]?.decode(as: SymbolGraph.Buffer.self,
+            inhabitants: try bson[.inhabitants]?.decode(as: SymbolGraph.Buffer24.self,
                 with: \.elements) ?? [],
-            superforms: try bson[.superforms]?.decode(as: SymbolGraph.Buffer.self,
+            superforms: try bson[.superforms]?.decode(as: SymbolGraph.Buffer24.self,
                 with: \.elements) ?? [],
-            features: try bson[.features]?.decode(as: SymbolGraph.Buffer.self,
+            features: try bson[.features]?.decode(as: SymbolGraph.Buffer24.self,
                 with: \.elements) ?? [],
             renamed: try bson[.renamed]?.decode(),
             origin: try bson[.origin]?.decode())

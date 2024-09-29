@@ -14,7 +14,7 @@ extension SymbolGraph
         modules:consuming [SymbolGraph.Module],
         indexes:consuming [SSGC.ModuleIndex],
         snippets:[any SSGC.ResourceFile],
-        logger:any DiagnosticLogger) throws -> Self 
+        logger:any DiagnosticLogger) throws -> Self
     {
         var linker:SSGC.Linker = .init(plugins: plugins, modules: modules)
         try linker.attach(snippets: snippets, indexes: indexes, projectRoot: projectRoot)
@@ -27,10 +27,55 @@ extension SymbolGraph
             base: projectRoot)))
 
         return graph
-    } 
+    }
 }
 extension SymbolGraph
 {
+    mutating
+    func colorize(reexports:[SSGC.Route: InlineDictionary<FNV24, InlineArray<(Int32, Int)>>],
+        with diagnostics:inout Diagnostics<SSGC.Symbolicator>)
+    {
+        for (path, redirects):
+            (SSGC.Route, InlineDictionary<FNV24, InlineArray<(Int32, Int)>>) in reexports
+        {
+            switch redirects
+            {
+            case .one((_, .one((let i, let exporter)))):
+                self.cultures[exporter].reexports.unhashed.append(i)
+
+            case .one((let hash, .some(let collisions))):
+                diagnostics[nil] = SSGC.RouteCollisionError.init(
+                    participants: collisions.map(\.0),
+                    path: path,
+                    hash: hash)
+
+            case .some(let hashed):
+                for (hash, redirects):(FNV24, InlineArray<(Int32, Int)>) in hashed
+                {
+                    switch redirects
+                    {
+                    case .one((let i, let exporter)):
+                        self.cultures[exporter].reexports.hashed.append(i)
+
+                    case .some(let collisions):
+                        diagnostics[nil] = SSGC.RouteCollisionError.init(
+                            participants: collisions.map(\.0),
+                            path: path,
+                            hash: hash,
+                            redirect: true)
+                    }
+                }
+            }
+        }
+
+        for i:Int in self.cultures.indices
+        {
+            {
+                $0.reexports.unhashed.sort()
+                $0.reexports.hashed.sort()
+            } (&self.cultures[i])
+        }
+    }
     mutating
     func colorize(routes:[SSGC.Route: InlineDictionary<FNV24?, InlineArray<Int32>>],
         with diagnostics:inout Diagnostics<SSGC.Symbolicator>)
@@ -88,8 +133,7 @@ extension SymbolGraph
 
             for `extension`:SymbolGraph.Extension in self.decls.nodes[n].extensions
             {
-                for n:Int32 in `extension`.nested where
-                    self.decls.nodes.indices.contains(n)
+                for n:Int32 in `extension`.nested where self.decls.nodes.indices.contains(n)
                 {
                     self.decls.nodes[n].decl?.route.underscored = true
                 }
@@ -100,33 +144,24 @@ extension SymbolGraph
         {
             for (hash, addresses):(FNV24?, InlineArray<Int32>) in members
             {
-                if  let hash:FNV24
+                switch (hash, addresses)
                 {
-                    for stacked:Int32 in addresses
-                    {
-                        //  If `hash` is present, then we know the decl is a valid
-                        //  declaration node index.
-                        self.decls.nodes[stacked].decl?.route.hashed = true
-                    }
-                    guard
-                    case .some(let collisions) = addresses
-                    else
-                    {
-                        continue
-                    }
+                case (_?, .one(let stacked)):
+                    //  If `hash` is present, then we know the decl is a valid
+                    //  declaration node index.
+                    self.decls.nodes[stacked].decl?.route.hashed = true
 
-                    diagnostics[nil] = SSGC.RouteCollisionError.hash(hash, collisions)
-                }
-                else
-                {
-                    let collisions:[Int32] =
-                    switch addresses
-                    {
-                    case .one(let scalar):  [scalar]
-                    case .some(let scalars): scalars
-                    }
+                case (nil, .one(let participant)):
+                    diagnostics[nil] = SSGC.RouteCollisionError.init(
+                        participants: [participant],
+                        path: path,
+                        hash: nil)
 
-                    diagnostics[nil] = SSGC.RouteCollisionError.path(path, collisions)
+                case (let hash, .some(let participants)):
+                    diagnostics[nil] = SSGC.RouteCollisionError.init(
+                        participants: participants,
+                        path: path,
+                        hash: hash)
                 }
             }
         }

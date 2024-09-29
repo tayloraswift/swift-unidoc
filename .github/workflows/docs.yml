@@ -39,18 +39,12 @@ jobs:
                     --package-name swift-unidoc
 
     macos:
-        runs-on: macos-14
+        runs-on: macos-15
         name: macOS
         env:
             UNIDOC_ENABLE_INDEXSTORE: "0"
 
         steps:
-            -   name: Install Swift 6.0
-                uses: tayloraswift/swift-install-action@master
-                with:
-                    swift-prefix: "swift-6.0-release/xcode/swift-6.0-RELEASE"
-                    swift-id: "swift-6.0-RELEASE"
-
             -   name: Install Unidoc
                 uses: tayloraswift/swift-unidoc-action@master
 

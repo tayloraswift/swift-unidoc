@@ -17,17 +17,21 @@ extension Unidoc.Mesh
         var index:JSON
         public
         var trees:[Unidoc.TypeTree]
+        public
+        var redirects:[Unidoc.RedirectVertex]
 
         private
         init(vertices:Vertices,
             groups:Groups,
             index:JSON,
-            trees:[Unidoc.TypeTree])
+            trees:[Unidoc.TypeTree],
+            redirects:[Unidoc.RedirectVertex])
         {
             self.vertices = vertices
             self.groups = groups
             self.index = index
             self.trees = trees
+            self.redirects = redirects
         }
     }
 }
@@ -70,6 +74,7 @@ extension Unidoc.Mesh.Interior
         let products:[Unidoc.ProductVertex]
         let cultures:[Unidoc.CultureVertex]
 
+        let redirects:[Unidoc.RedirectVertex]
         let articles:[Unidoc.ArticleVertex]
         let decls:[Unidoc.DeclVertex]
         let groups:Unidoc.Mesh.Groups
@@ -82,6 +87,8 @@ extension Unidoc.Mesh.Interior
             conformances = tables.linkConformingTypes()
             products = tables.linkProducts()
             cultures = tables.linkCultures()
+
+            redirects = []
             articles = tables.articles
             decls = tables.decls
             groups = tables.groups
@@ -102,6 +109,7 @@ extension Unidoc.Mesh.Interior
             decls = tables.linkDecls()
             articles = tables.linkArticles()
             cultures = tables.linkCultures()
+            redirects = tables.linkRedirects()
 
             extensions = tables.extensions
             groups = tables.groups
@@ -112,6 +120,7 @@ extension Unidoc.Mesh.Interior
         self.init(around: landingVertex,
             conformances: conformances,
             extensions: extensions,
+            redirects: redirects,
             products: products,
             cultures: cultures,
             articles: articles,
@@ -124,6 +133,7 @@ extension Unidoc.Mesh.Interior
     init(around landing:consuming Unidoc.LandingVertex,
         conformances:consuming Unidoc.Linker.Table<Unidoc.Conformers>,
         extensions:consuming Unidoc.Linker.Table<Unidoc.Extension>,
+        redirects:consuming [Unidoc.RedirectVertex],
         products:consuming [Unidoc.ProductVertex],
         cultures:consuming [Unidoc.CultureVertex],
         articles:consuming [Unidoc.ArticleVertex],
@@ -278,6 +288,7 @@ extension Unidoc.Mesh.Interior
                 foreign: foreign),
             groups: groups,
             index: index,
-            trees: trees)
+            trees: trees,
+            redirects: redirects)
     }
 }

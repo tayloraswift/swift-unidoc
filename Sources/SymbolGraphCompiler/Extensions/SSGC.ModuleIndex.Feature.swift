@@ -1,3 +1,4 @@
+import LexicalPaths
 import Symbols
 
 extension SSGC.ModuleIndex
@@ -7,14 +8,14 @@ extension SSGC.ModuleIndex
     struct Feature
     {
         public
-        let lastName:String
-        public
         let phylum:Phylum.Decl
+        public
+        let path:UnqualifiedPath
 
-        init(lastName:String, phylum:Phylum.Decl)
+        init(phylum:Phylum.Decl, path:UnqualifiedPath)
         {
-            self.lastName = lastName
             self.phylum = phylum
+            self.path = path
         }
     }
 }
@@ -22,6 +23,6 @@ extension SSGC.ModuleIndex.Feature
 {
     init(from decl:borrowing SSGC.Decl)
     {
-        self.init(lastName: decl.path.last, phylum: decl.phylum)
+        self.init(phylum: decl.phylum, path: decl.path)
     }
 }

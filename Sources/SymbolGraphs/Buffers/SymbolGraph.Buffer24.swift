@@ -7,22 +7,22 @@ extension SymbolGraph
     ///
     /// Empirically, this type reduces symbol graph archive size by around
     /// 3 to 8 percent.
-    @frozen @usableFromInline internal
-    struct Buffer:Equatable, Sendable
+    @frozen @usableFromInline
+    struct Buffer24:Equatable, Sendable
     {
-        @usableFromInline internal
+        @usableFromInline
         var elements:[Int32]
 
-        @inlinable internal
+        @inlinable
         init(_ elements:[Int32])
         {
             self.elements = elements
         }
     }
 }
-extension SymbolGraph.Buffer
+extension SymbolGraph.Buffer24
 {
-    @inlinable internal
+    @inlinable
     init?(elidingEmpty elements:[Int32])
     {
         if  elements.isEmpty
@@ -36,7 +36,7 @@ extension SymbolGraph.Buffer
     }
 }
 
-extension SymbolGraph.Buffer:RandomAccessCollection
+extension SymbolGraph.Buffer24:RandomAccessCollection
 {
     @inlinable
     var startIndex:Int { self.elements.startIndex }
@@ -59,10 +59,10 @@ extension SymbolGraph.Buffer:RandomAccessCollection
         }
     }
 }
-extension SymbolGraph.Buffer:BSONArrayEncodable
+extension SymbolGraph.Buffer24:BSONArrayEncodable
 {
 }
-extension SymbolGraph.Buffer:BSONArrayDecodable
+extension SymbolGraph.Buffer24:BSONArrayDecodable
 {
     @usableFromInline
     typealias CodingElement = (UInt8, UInt8, UInt8)

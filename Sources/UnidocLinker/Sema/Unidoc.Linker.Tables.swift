@@ -518,7 +518,7 @@ extension Unidoc.Linker.Tables
                     route: decl.route),
                 signature: decl.signature.map { self.current.scalars.decls[$0] },
                 symbol: symbol,
-                stem: .decl(namespace.module, decl.path, orientation: decl.phylum.orientation),
+                stem: .decl(namespace.module, decl.path, decl.phylum),
                 _requirements: [],
                 superforms: self.context.sort(superforms, by: Unidoc.SemanticPriority.self),
                 namespace: namespace.id,

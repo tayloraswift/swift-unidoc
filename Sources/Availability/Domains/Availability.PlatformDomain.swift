@@ -5,6 +5,7 @@ extension Availability
     @frozen public
     enum PlatformDomain:String, CaseIterable, Equatable, Hashable, Sendable
     {
+        case bridgeOS
         case iOS
         case macOS
         case macCatalyst
@@ -37,6 +38,7 @@ extension Availability.PlatformDomain:CustomStringConvertible
     {
         switch self
         {
+        case .bridgeOS:                         "bridgeOS"
         case .iOS:                              "iOS"
         case .macOS:                            "macOS"
         case .macCatalyst:                      "Mac Catalyst"

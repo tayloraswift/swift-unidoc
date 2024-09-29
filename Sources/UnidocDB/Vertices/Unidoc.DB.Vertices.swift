@@ -33,7 +33,7 @@ extension Unidoc.DB.Vertices
         //  extraordinarily rare.
         //  See:
         //  forums.swift.org/t/how-does-docc-mitigate-fnv-1-hash-collisions/65673
-        $0[Unidoc.AnyVertex[.zone]] = (+)
+        $0[Unidoc.AnyVertex[.volume]] = (+)
         $0[Unidoc.AnyVertex[.stem]] = (+)
         $0[Unidoc.AnyVertex[.hash]] = (+)
     }
