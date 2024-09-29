@@ -153,6 +153,17 @@ enum Main:TestMain, TestBattery
 
         #endif
 
+        if  let tests:TestGroup = tests / "Reexportation",
+            let _:SymbolGraphObject<Void> = (tests.do
+            {
+                try workspace.build(
+                    package: .local(project: "TestPackages" / "swift-exportation"),
+                    with: toolchain,
+                    validation: .failOnErrors)
+            })
+        {
+        }
+
         group:
         if  let tests:TestGroup = tests / "Local",
             let docs:SymbolGraphObject<Void> = (tests.do

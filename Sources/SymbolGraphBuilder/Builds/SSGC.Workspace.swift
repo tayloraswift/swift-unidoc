@@ -54,17 +54,25 @@ extension SSGC.Workspace
     public
     func build(package build:SSGC.PackageBuild,
         with swift:SSGC.Toolchain,
+        validation:SSGC.ValidationBehavior = .ignoreErrors,
         clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, status: nil, clean: clean)
+        try self.build(some: build, toolchain: swift, 
+            status: nil, 
+            logger: .init(validation: validation, file: nil),
+            clean: clean)
     }
 
     public
     func build(special build:SSGC.StandardLibraryBuild,
         with swift:SSGC.Toolchain,
+        validation:SSGC.ValidationBehavior = .ignoreErrors,
         clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, status: nil, clean: clean)
+        try self.build(some: build, toolchain: swift, 
+            status: nil, 
+            logger: .init(validation: validation, file: nil),
+            clean: clean)
     }
 }
 extension SSGC.Workspace

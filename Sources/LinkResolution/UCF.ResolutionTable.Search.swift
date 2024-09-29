@@ -1,4 +1,5 @@
 import InlineArray
+import Symbols
 import UCF
 
 extension UCF.ResolutionTable
@@ -9,15 +10,15 @@ extension UCF.ResolutionTable
         let predicate:UCF.Selector.Suffix?
 
         private
-        var selected:InlineArray<Overload>
+        var selected:[Symbol.Decl: Overload]
         private
-        var rejected:[Overload]
+        var rejected:[Symbol.Decl: Overload]
 
         init(matching predicate:UCF.Selector.Suffix?)
         {
             self.predicate = predicate
-            self.selected = []
-            self.rejected = []
+            self.selected = [:]
+            self.rejected = [:]
         }
     }
 }
@@ -26,43 +27,62 @@ extension UCF.ResolutionTable.Search
     mutating
     func add(_ candidates:InlineArray<Overload>)
     {
+        //  Because of the way `@_exported` paths are represented in the search tree, it is 
+        //  possible to encounter the same overload multiple times, due to namespace inference
         if  let predicate:UCF.Selector.Suffix = self.predicate
         {
             for overload:Overload in candidates
             {
-                predicate ~= overload ?
-                self.selected.append(overload) :
-                self.rejected.append(overload)
+                guard predicate ~= overload
+                else
+                {
+                    self.rejected[overload.id] = overload
+                    continue
+                }
+
+                self.selected[overload.id] = overload
             }
         }
         else
         {
             for overload:Overload in candidates
             {
-                self.selected.append(overload)
+                self.selected[overload.id] = overload
             }
         }
     }
 
     func any() -> UCF.Resolution<Overload>?
     {
-        switch self.selected
+        guard 
+        let overload:Overload = self.selected.values.first
+        else
         {
-        case .one(let overload):
-            .overload(overload)
+            return nil 
+        }
 
-        case .some(let overloads):
-            overloads.isEmpty ? nil : .ambiguous(overloads, rejected: self.rejected)
+        if  self.selected.count == 1
+        {
+            return .overload(overload)
+        }
+        else
+        {
+            return .ambiguous(self.selected.values.sorted { $0.id < $1.id }, 
+                rejected: self.rejected.values.sorted { $0.id < $1.id })
         }
     }
 
     consuming
     func get() -> UCF.Resolution<Overload>
     {
-        switch self.selected
+        if  let overload:Overload = self.selected.values.first, self.selected.count == 1
         {
-        case .one(let overload):    .overload(overload)
-        case .some(let overloads):  .ambiguous(overloads, rejected: self.rejected)
+            return .overload(overload)
+        }
+        else
+        {
+            return .ambiguous(self.selected.values.sorted { $0.id < $1.id }, 
+                rejected: self.rejected.values.sorted { $0.id < $1.id })
         }
     }
 }
