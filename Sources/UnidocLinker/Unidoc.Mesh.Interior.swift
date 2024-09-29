@@ -88,7 +88,7 @@ extension Unidoc.Mesh.Interior
             products = tables.linkProducts()
             cultures = tables.linkCultures()
 
-            redirects = tables.redirects
+            redirects = []
             articles = tables.articles
             decls = tables.decls
             groups = tables.groups
@@ -109,9 +109,9 @@ extension Unidoc.Mesh.Interior
             decls = tables.linkDecls()
             articles = tables.linkArticles()
             cultures = tables.linkCultures()
+            redirects = tables.linkRedirects()
 
             extensions = tables.extensions
-            redirects = []
             groups = tables.groups
 
             linker = tables.linker

@@ -28,9 +28,9 @@ extension Unidoc.DB.Redirects
         collation: VolumeCollation.spec,
         unique: true)
     {
-        $0[Element[.id] / Unidoc.Redirect[.volume]] = (+)
-        $0[Element[.stem]] = (+)
-        $0[Element[.hash]] = (+)
+        $0[Element[.id] / Unidoc.RedirectSource[.volume]] = (+)
+        $0[Element[.id] / Unidoc.RedirectSource[.stem]] = (+)
+        $0[Element[.id] / Unidoc.RedirectSource[.hash]] = (+)
     }
 }
 extension Unidoc.DB.Redirects:Mongo.CollectionModel
@@ -54,7 +54,7 @@ extension Unidoc.DB.Redirects
     {
         try await self.deleteAll
         {
-            $0[Element[.id] / Unidoc.Redirect[.volume]] = volume
+            $0[Element[.id] / Unidoc.RedirectSource[.volume]] = volume
         }
     }
 }

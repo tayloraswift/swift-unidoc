@@ -36,7 +36,6 @@ extension Unidoc.Linker
 
         private(set)
         var extensions:Unidoc.Linker.Table<Unidoc.Extension>
-        var redirects:[Unidoc.RedirectVertex]
         var articles:[Unidoc.ArticleVertex]
         var decls:[Unidoc.DeclVertex]
 
@@ -60,7 +59,6 @@ extension Unidoc.Linker
             self.next = .init(base: self.context.current.id)
 
             self.extensions = extensions
-            self.redirects = []
             self.articles = []
             self.decls = []
 
@@ -390,10 +388,6 @@ extension Unidoc.Linker.Tables
             {
                 self.link(articles: articles, under: namespace)
             }
-
-            //  Create redirects
-            self.redirect(decls: culture.reexports.unhashed, hashed: false, from: namespace)
-            self.redirect(decls: culture.reexports.hashed, hashed: true, from: namespace)
         }
 
         return self.modules.map
@@ -553,33 +547,5 @@ extension Unidoc.Linker.Tables
         }
 
         return miscellaneous
-    }
-
-    private mutating
-    func redirect(decls:[Int32],
-        hashed:Bool,
-        from namespace:SymbolGraph.NamespaceContext<Void>)
-    {
-        for local:Int32 in decls
-        {
-            let symbol:Symbol.Decl = self.current.decls.symbols[local]
-
-            guard
-            let id:Unidoc.Scalar = self.current.scalars.decls[local],
-            let decl:SymbolGraph.Decl = self.context[decl: id]
-            else
-            {
-                continue
-            }
-
-            let redirect:Unidoc.RedirectVertex = .init(id: .init(
-                    volume: self.current.id,
-                    target: id),
-                stem: .decl(namespace.module, decl.path, decl.phylum),
-                hash: .decl(symbol),
-                hashed: hashed)
-
-            self.redirects.append(redirect)
-        }
     }
 }
