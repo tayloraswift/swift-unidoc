@@ -87,16 +87,16 @@ extension Unidoc.DocsOperation:Unidoc.InteractiveOperation
                 break coverage
             }
 
-            let trail:Unidoc.SearchbotTrail = .init(
-                trunk: output.principal.volume.id.package,
-                shoot: self.query.vertex)
+            if  let redirect:Unidoc.RedirectOutput = try await db.redirect(
+                    exported: self.query.vertex,
+                    from: output.principal.volume.id)
+            {
+                return redirect.response(as: context.format)
+            }
 
-            if  let tile:Unidoc.SearchbotCoverage = try await db.searchbotGrid.find(id: trail),
-                let redirect:Unidoc.RedirectOutput = try await db.query(
-                    with: Unidoc.InternalRedirectQuery<Unidoc.Shoot>(
-                        volume: tile.ok,
-                        lookup: self.query.vertex),
-                    on: .nearest)
+            if  let redirect:Unidoc.RedirectOutput = try await db.redirect(
+                    visited: self.query.vertex,
+                    in: output.principal.volume.id.package)
             {
                 return redirect.response(as: context.format)
             }

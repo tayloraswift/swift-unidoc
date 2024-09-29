@@ -24,6 +24,13 @@ extension SSGC
 }
 extension SSGC.Declarations
 {
+    var all:LazyFilterSequence<Dictionary<Symbol.Decl, SSGC.DeclObject>.Values>
+    {
+        self.decls.values.lazy.filter { $0.access >= self.threshold }
+    }
+}
+extension SSGC.Declarations
+{
     /// Returns the declaration object, or nil if it has already been indexed, or does not meet
     /// the minimum visibility threshold.
     mutating
@@ -41,9 +48,14 @@ extension SSGC.Declarations
 
         let decl:SSGC.DeclObject? =
         {
-            guard case nil = $0
-            else
+            if  let reexported:SSGC.DeclObject = $0
             {
+                //  We have already indexed this declaration!
+                if  reexported.namespace != namespace
+                {
+                    reexported.namespaces.insert(namespace)
+                }
+
                 return nil
             }
 

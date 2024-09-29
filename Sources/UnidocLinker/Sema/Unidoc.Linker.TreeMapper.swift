@@ -151,7 +151,7 @@ extension Unidoc.Linker.TreeMapper
                 phylum: decl.phylum,
                 kinks: decl.kinks,
                 route: decl.route),
-            stem: .decl(namespace, decl.path, orientation: decl.phylum.orientation),
+            stem: .decl(namespace, decl.path, decl.phylum),
             hash: .decl(symbol))
     }
 }

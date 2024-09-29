@@ -24,7 +24,8 @@ extension SSGC.StandardLibraryBuild:SSGC.DocumentationBuild
         with toolchain:SSGC.Toolchain,
         clean _:Bool) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
-        let standardLibrary:SSGC.StandardLibrary = .init(platform: try toolchain.platform())
+        let standardLibrary:SSGC.StandardLibrary = .init(platform: try toolchain.platform(),
+            version: toolchain.splash.swift.version.minor)
 
         let artifacts:FilePath.Directory = try toolchain.dump(standardLibrary: standardLibrary,
             cache: cache)

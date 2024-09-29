@@ -3,10 +3,20 @@ import SourceDiagnostics
 
 extension SSGC
 {
-    enum RouteCollisionError:Equatable, Error
+    struct RouteCollisionError:Equatable, Error
     {
-        case hash(FNV24, [Int32])
-        case path(Route, [Int32])
+        let participants:[Int32]
+        let path:Route
+        let hash:FNV24?
+        let redirect:Bool
+
+        init(participants:[Int32], path:Route, hash:FNV24?, redirect:Bool = false)
+        {
+            self.participants = participants
+            self.path = path
+            self.hash = hash
+            self.redirect = redirect
+        }
     }
 }
 extension SSGC.RouteCollisionError:Diagnostic
@@ -15,27 +25,33 @@ extension SSGC.RouteCollisionError:Diagnostic
 
     func emit(summary output:inout DiagnosticOutput<Symbolicator>)
     {
-        switch self
+        if  let hash:FNV24 = self.hash
         {
-        case .hash(let hash, _):
-            output[.error] = "hash collision on [\(hash)]"
-        case .path(.main(let path), _):
-            output[.error] = "path collision on '\(path)'"
+            output[.fatal] = """
+            \(self.participants.count)-way hash collision on '\(self.path)'[\(hash)]
+            """
+        }
+        else
+        {
+            output[.fatal] = """
+            \(self.participants.count)-way path collision on '\(self.path)'
+            """
         }
     }
 
     func emit(details output:inout DiagnosticOutput<Symbolicator>)
     {
-        switch self
+        if  self.redirect
         {
-        case .hash(_, let collisions), .path(_, let collisions):
-            for colliding:Int32 in collisions
-            {
-                output[.note] = """
-                symbol (\(output.symbolicator[colliding])) \
-                does not have a unique URL
-                """
-            }
+            output[.note] = """
+            collision occurs on @_exported redirect layer
+            """
+        }
+        for participant:Int32 in self.participants
+        {
+            output[.note] = """
+            vertex (\(output.symbolicator[participant])) does not have a unique URL
+            """
         }
     }
 }

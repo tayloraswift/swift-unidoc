@@ -216,7 +216,8 @@ extension SSGC.Toolchain
 {
     /// Dumps the symbols for the standard library. Due to upstream bugs in the Swift compiler,
     /// this methods disables extension block symbols by default.
-    func dump(standardLibrary:SSGC.StandardLibrary,
+    func dump(
+        standardLibrary:SSGC.StandardLibrary,
         options:SymbolDumpOptions = .init(emitExtensionBlockSymbols: false),
         cache:FilePath.Directory) throws -> FilePath.Directory
     {
@@ -227,9 +228,16 @@ extension SSGC.Toolchain
             let temporary:FilePath.Directory = cache / "swift"
             try temporary.create(clean: true)
 
+            var dumped:[Symbol.Module] = []
+
             for module:SymbolGraph.Module in standardLibrary.modules
             {
-                try self.dump(module: module.id, to: temporary, options: options)
+                try self.dump(module: module.id,
+                    to: temporary,
+                    options: options,
+                    allowedReexportedModules: dumped)
+
+                dumped.append(module.id)
             }
 
             try temporary.move(replacing: cached)
@@ -243,7 +251,8 @@ extension SSGC.Toolchain
     func dump(module id:Symbol.Module,
         to output:FilePath.Directory,
         options:SymbolDumpOptions,
-        include:[FilePath.Directory] = []) throws
+        include:[FilePath.Directory] = [],
+        allowedReexportedModules:[Symbol.Module] = []) throws
     {
         print("Dumping symbols for module '\(id)'")
 
@@ -270,6 +279,15 @@ extension SSGC.Toolchain
         if  options.skipInheritedDocs
         {
             arguments.append("-skip-inherited-docs")
+        }
+        if  self.splash.swift.version >= .v(6, 0, 0), !allowedReexportedModules.isEmpty
+        {
+            let whitelist:String = allowedReexportedModules.lazy.map { "\($0)" }.joined(
+                separator: ",")
+
+            arguments.append("""
+                -experimental-allowed-reexported-modules=\(whitelist)
+                """)
         }
 
         #if os(macOS)

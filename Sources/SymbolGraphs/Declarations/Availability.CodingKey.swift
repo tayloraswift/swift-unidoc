@@ -27,6 +27,7 @@ extension Availability.CodingKey:RawRepresentable
         {
         case "s":   self.init(.agnostic(.swift))
         case "p":   self.init(.agnostic(.swiftPM))
+        case "b":   self.init(.platform(.bridgeOS))
         case "i":   self.init(.platform(.iOS))
         case "m":   self.init(.platform(.macOS))
         case "c":   self.init(.platform(.macCatalyst))
@@ -51,6 +52,7 @@ extension Availability.CodingKey:RawRepresentable
         {
         case .agnostic(.swift):                             "s"
         case .agnostic(.swiftPM):                           "p"
+        case .platform(.bridgeOS):                          "b"
         case .platform(.iOS):                               "i"
         case .platform(.macOS):                             "m"
         case .platform(.macCatalyst):                       "c"
