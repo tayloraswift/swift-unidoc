@@ -379,6 +379,52 @@ extension Unidoc.LinkerTables
             return vertex
         }
     }
+
+    func linkRedirects() -> [Unidoc.RedirectVertex]
+    {
+        self.modules.reduce(into: [])
+        {
+            for (decls, hashed):([Int32], Bool) in [
+                ($1.culture.reexports.unhashed, false),
+                ($1.culture.reexports.hashed, true),
+            ]
+            {
+                for target:Int32 in decls
+                {
+                    if  let vertex:Unidoc.RedirectVertex = self.linkRedirect(
+                        target: target,
+                        hashed: hashed,
+                        from: $1.symbol)
+                    {
+                        $0.append(vertex)
+                    }
+                }
+            }
+        }
+    }
+
+    private
+    func linkRedirect(
+        target local:Int32,
+        hashed:Bool,
+        from namespace:Symbol.Module) -> Unidoc.RedirectVertex?
+    {
+        let symbol:Symbol.Decl = self.current.decls.symbols[local]
+
+        guard
+        let id:Unidoc.Scalar = self.current.scalars.decls[local],
+        let decl:SymbolGraph.Decl = self.linker[decl: id]
+        else
+        {
+            return nil
+        }
+
+        return .init(id: .init(volume: self.current.id,
+                stem: .decl(namespace, decl.path, decl.phylum),
+                hash: .decl(symbol)),
+            target: id,
+            hashed: hashed)
+    }
 }
 extension Unidoc.LinkerTables
 {

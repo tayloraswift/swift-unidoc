@@ -33,9 +33,9 @@ extension Unidoc.RedirectByExportQuery:Mongo.PipelineQuery
     {
         pipeline[stage: .match]
         {
-            $0[CollectionOrigin.Element[.id] / Unidoc.Redirect[.volume]] = self.volume
-            $0[CollectionOrigin.Element[.stem]] = self.stem
-            $0[CollectionOrigin.Element[.hash]] = self.hash
+            $0[CollectionOrigin.Element[.id] / Unidoc.RedirectSource[.volume]] = self.volume
+            $0[CollectionOrigin.Element[.id] / Unidoc.RedirectSource[.stem]] = self.stem
+            $0[CollectionOrigin.Element[.id] / Unidoc.RedirectSource[.hash]] = self.hash
         }
 
         pipeline[stage: .limit] = 1
@@ -62,7 +62,7 @@ extension Unidoc.RedirectByExportQuery:Mongo.PipelineQuery
         pipeline[stage: .lookup]
         {
             $0[.from] = Unidoc.DB.Vertices.name
-            $0[.localField] = CollectionOrigin.Element[.id] / Unidoc.Redirect[.target]
+            $0[.localField] = CollectionOrigin.Element[.target]
             $0[.foreignField] = Unidoc.AnyVertex[.id]
             $0[.as] = Iteration.BatchElement[.matches]
         }
