@@ -10,19 +10,25 @@ extension UCF.Selector
         public
         var fold:Int
         public
-        var hasEmptyTrailingParentheses:Bool
+        var seal:Seal?
 
         @inlinable public
-        init(components:[String] = [], fold:Int = 0, hasEmptyTrailingParentheses:Bool = false)
+        init(components:[String] = [], fold:Int = 0, seal:Seal? = nil)
         {
             self.components = components
             self.fold = fold
-            self.hasEmptyTrailingParentheses = hasEmptyTrailingParentheses
+            self.seal = seal
         }
     }
 }
 extension UCF.Selector.Path
 {
+    @inlinable public
+    var hasTrailingParentheses:Bool
+    {
+        self.seal != nil
+    }
+
     @inlinable public
     var visible:ArraySlice<String>
     {
@@ -117,10 +123,11 @@ extension UCF.Selector.Path
             case k?:
                 //  Special case: ignore empty trailing parentheses
                 self.components.append(String.init(string[i ..< j]))
-                self.hasEmptyTrailingParentheses = true
+                self.seal = .trailingParentheses
                 return string.index(after: k)
 
             case let k?:
+                self.seal = .trailingArguments
                 j = string.index(after: k)
             }
         }

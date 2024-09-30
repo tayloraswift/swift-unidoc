@@ -21,6 +21,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
                 tests.expect(link.path.visible ..? ["Unicode", "Scalar", "value"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "SlashDot",
@@ -29,6 +30,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
                 tests.expect(link.path.visible ..? ["Scalar", "value"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "DotSlash",
@@ -37,6 +39,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
                 tests.expect(link.path.visible ..? ["value"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "SlashSlash",
@@ -45,6 +48,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Unicode", "Scalar", "value"])
                 tests.expect(link.path.visible ..? ["value"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "SingleCharacter",
@@ -53,6 +57,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["x"])
                 tests.expect(link.path.visible ..? ["x"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
 
@@ -62,6 +67,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "..(_:_:)"])
                 tests.expect(link.path.visible ..? ["Real", "..(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "2",
@@ -70,6 +76,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "..(_:_:)"])
                 tests.expect(link.path.visible ..? ["..(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "3",
@@ -78,6 +85,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "...(_:_:)"])
                 tests.expect(link.path.visible ..? ["Real", "...(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "4",
@@ -86,6 +94,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "...(_:_:)"])
                 tests.expect(link.path.visible ..? ["...(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "5",
@@ -94,6 +103,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "/(_:_:)"])
                 tests.expect(link.path.visible ..? ["Real", "/(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "6",
@@ -102,6 +112,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "/(_:_:)"])
                 tests.expect(link.path.visible ..? ["/(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "7",
@@ -110,6 +121,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "./.(_:_:)"])
                 tests.expect(link.path.visible ..? ["Real", "./.(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Real" / "8",
@@ -118,6 +130,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "./.(_:_:)"])
                 tests.expect(link.path.visible ..? ["./.(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "EmptyTrailingParentheses",
@@ -126,7 +139,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "init"])
                 tests.expect(link.path.visible ..? ["Real", "init"])
-                tests.expect(true: link.path.hasEmptyTrailingParentheses)
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "EmptyTrailingComponent",
@@ -135,6 +148,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "init"])
                 tests.expect(link.path.visible ..? ["Real", "init"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "DivisionOperator",
@@ -143,6 +157,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["/(_:_:)"])
                 tests.expect(link.path.visible ..? ["/(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "CustomOperator",
@@ -151,6 +166,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["/-/(_:_:)"])
                 tests.expect(link.path.visible ..? ["/-/(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "ClosedRangeOperator",
@@ -159,6 +175,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["...(_:_:)"])
                 tests.expect(link.path.visible ..? ["...(_:_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
         }
@@ -169,6 +186,7 @@ extension Main.ParseCodelink:TestBattery
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Fake"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(link.suffix ==? .filter(.enum))
             }
             if  let tests:TestGroup = tests / "Fake" / "UncannyHash",
@@ -178,6 +196,7 @@ extension Main.ParseCodelink:TestBattery
 
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Fake"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(link.suffix ==? .hash(hash))
             }
             if  let tests:TestGroup = tests / "Fake" / "ClassVar",
@@ -185,6 +204,7 @@ extension Main.ParseCodelink:TestBattery
             {
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Fake", "max"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(link.suffix ==? .filter(.class_var))
             }
         }
@@ -196,6 +216,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "Color"])
                 tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Filter",
@@ -204,6 +225,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "Color"])
                 tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(link.suffix ==? .filter(.enum))
             }
             if  let tests:TestGroup = tests / "FilterInterior",
@@ -212,6 +234,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "Color"])
                 tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "FilterLegacy",
@@ -220,6 +243,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "Color"])
                 tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(link.suffix ==? .legacy(.class, nil))
             }
             if  let tests:TestGroup = tests / "FilterAndHash",
@@ -230,6 +254,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "Color"])
                 tests.expect(link.path.visible ..? ["Color"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(link.suffix ==? .legacy(.struct, hash))
             }
             if  let tests:TestGroup = tests / "Hash",
@@ -240,6 +265,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "update(_:)"])
                 tests.expect(link.path.visible ..? ["update(_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(link.suffix ==? .hash(hash))
             }
             if  let tests:TestGroup = tests / "Hash" / "Minus",
@@ -250,6 +276,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "-(_:)"])
                 tests.expect(link.path.visible ..? ["-(_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(link.suffix ==? .hash(hash))
             }
             if  let tests:TestGroup = tests / "Hash" / "Slinging" / "Slasher",
@@ -260,6 +287,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Sloth", "/(_:)"])
                 tests.expect(link.path.visible ..? ["/(_:)"])
+                tests.expect(true: link.path.hasTrailingParentheses)
                 tests.expect(link.suffix ==? .hash(hash))
             }
         }
@@ -271,6 +299,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .qualified)
                 tests.expect(link.path.components ..? ["Swift"])
                 tests.expect(link.path.visible ..? ["Swift"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Hidden",
@@ -279,6 +308,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .qualified)
                 tests.expect(link.path.components ..? ["Swift", "Int"])
                 tests.expect(link.path.visible ..? ["Int"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "Visible",
@@ -287,6 +317,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .qualified)
                 tests.expect(link.path.components ..? ["Swift", "Int"])
                 tests.expect(link.path.visible ..? ["Swift", "Int"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "EmptyTrailingComponent",
@@ -295,6 +326,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .qualified)
                 tests.expect(link.path.components ..? ["Swift", "Int"])
                 tests.expect(link.path.visible ..? ["Swift", "Int"])
+                tests.expect(false: link.path.hasTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
         }

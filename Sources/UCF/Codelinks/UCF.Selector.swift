@@ -45,7 +45,7 @@ extension UCF.Selector:CustomStringConvertible
             string += component
         }
 
-        if  self.path.hasEmptyTrailingParentheses
+        if  case .trailingParentheses? = self.path.seal
         {
             string += "()"
         }
