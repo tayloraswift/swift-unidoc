@@ -5,8 +5,7 @@ extension UCF.Selector
 {
     var predicate:UCF.Predicate 
     {
-        .init(suffix: self.suffix, 
-            hasEmptyTrailingParentheses: self.path.hasEmptyTrailingParentheses)
+        .init(suffix: self.suffix, seal: self.path.seal)
     }
 }
 //  TODO: this does not belong in this module

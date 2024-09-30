@@ -17,7 +17,30 @@ extension UCF.ResolvableOverload
 {
     static func ~= (predicate:UCF.Predicate, self:Self) -> Bool
     {
-        if  predicate.hasEmptyTrailingParentheses
+        if  case nil = predicate.seal
+        {
+            //  Macros are currently the only kind of declaration that *must* be spelled with 
+            //  trailing parentheses.
+            switch self.phylum
+            {
+            case .actor:                    break
+            case .associatedtype:           break
+            case .case:                     break
+            case .class:                    break
+            case .deinitializer:            break
+            case .enum:                     break
+            case .func:                     break
+            case .initializer:              break
+            case .macro:                    return false
+            case .operator:                 break
+            case .protocol:                 break
+            case .struct:                   break
+            case .subscript:                break
+            case .typealias:                break
+            case .var:                      break
+            }
+        }
+        else 
         {
             switch self.phylum
             {

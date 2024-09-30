@@ -5,12 +5,12 @@ extension UCF
     struct Predicate
     {
         let suffix:Selector.Suffix?
-        let hasEmptyTrailingParentheses:Bool
+        let seal:Selector.Seal?
 
-        init(suffix:Selector.Suffix?, hasEmptyTrailingParentheses:Bool)
+        init(suffix:Selector.Suffix?, seal:Selector.Seal?)
         {
             self.suffix = suffix
-            self.hasEmptyTrailingParentheses = hasEmptyTrailingParentheses
+            self.seal = seal
         }
     }
 }
