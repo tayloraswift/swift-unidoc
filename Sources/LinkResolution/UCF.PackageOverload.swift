@@ -16,6 +16,8 @@ extension UCF
         public
         let hash:FNV24
 
+        public
+        let documented:Bool
         /// Used for display purposes. This is not necessarily the symbol from which the
         /// ``hash`` was computed.
         public
@@ -26,12 +28,14 @@ extension UCF
             decl:Int32,
             heir:Int32?,
             hash:FNV24,
+            documented:Bool,
             id:Symbol.Decl)
         {
             self.phylum = phylum
             self.decl = decl
             self.heir = heir
             self.hash = hash
+            self.documented = documented
             self.id = id
         }
     }

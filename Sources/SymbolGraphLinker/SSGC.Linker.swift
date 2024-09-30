@@ -215,7 +215,7 @@ extension SSGC.Linker
                 declarations,
                 destinations)
             {
-                for (i, decl) in zip(destination.range, namespace.decls)
+                for (i, decl):(Int32, SSGC.Decl) in zip(destination.range, namespace.decls)
                 {
                     let hash:FNV24 = .decl(decl.id)
                     //  Make the decl visible to codelink resolution.
@@ -224,6 +224,7 @@ extension SSGC.Linker
                         decl: i,
                         heir: nil,
                         hash: hash,
+                        documented: decl.comment != nil,
                         id: decl.id))
                     //  Assign the decl a URI, and record the decl’s hash
                     //  so we will know if it has a hash collision.
@@ -306,6 +307,7 @@ extension SSGC.Linker
                     decl: f,
                     heir: extendee,
                     hash: .decl(.init(id, self: $0.extendee.id)),
+                    documented: feature.documented,
                     id: id)
 
                 self.tables.packageLinks[namespace, $0.extendee.path, feature.path.last]

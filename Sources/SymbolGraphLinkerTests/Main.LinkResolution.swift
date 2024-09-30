@@ -32,6 +32,7 @@ extension Main.LinkResolution:TestBattery
                 decl: 0,
                 heir: nil,
                 hash: .init(hashing: "x"),
+                documented: true,
                 id: "x"))
 
             tables.packageLinks["ThisModule", .init(["A"], "c")].append(.init(
@@ -39,6 +40,7 @@ extension Main.LinkResolution:TestBattery
                 decl: 1,
                 heir: nil,
                 hash: .init(hashing: "y"),
+                documented: true,
                 id: "y"))
 
             if  let tests:TestGroup = tests / "Unscoped"
@@ -92,6 +94,7 @@ extension Main.LinkResolution:TestBattery
                 decl: 0,
                 heir: nil,
                 hash: .init(hashing: "x"),
+                documented: true,
                 id: "x"))
 
             tables.packageLinks["OtherModule", .init(["A"], "c")].append(.init(
@@ -99,6 +102,7 @@ extension Main.LinkResolution:TestBattery
                 decl: 1,
                 heir: nil,
                 hash: .init(hashing: "y"),
+                documented: true,
                 id: "y"))
 
             if  let tests:TestGroup = tests / "Unscoped"

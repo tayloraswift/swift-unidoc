@@ -16,16 +16,21 @@ extension UCF
         public
         let hash:FNV24
 
+        public
+        let documented:Bool
+
         @inlinable public
         init(phylum:Phylum.Decl,
             decl:Symbol.Decl,
             heir:Symbol.Decl?,
-            hash:FNV24)
+            hash:FNV24,
+            documented:Bool)
         {
             self.phylum = phylum
             self.decl = decl
             self.heir = heir
             self.hash = hash
+            self.documented = documented
         }
     }
 }

@@ -9,6 +9,8 @@ extension UCF
     {
         var phylum:Phylum.Decl { get }
         var hash:FNV24 { get }
+
+        var documented:Bool { get }
     }
 }
 extension UCF.ResolvableOverload
