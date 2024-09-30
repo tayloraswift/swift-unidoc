@@ -144,13 +144,11 @@ extension SSGC.OutlineResolver
         else
         {
             return nil
-        }
+        } 
 
-        switch self.scopes.causalURLs.resolve(
-            qualified: translatable.path,
-            matching: translatable.suffix)
-        {
-        case .module(let module):
+        switch self.scopes.causalURLs.resolve(qualified: translatable)
+        { 
+        case .module(let module): 
             //  Unidoc linker doesn’t currently support `symbol` outlines that are not
             //  declarations, so for now we just synthesize a normal vertex outline.
             let text:SymbolGraph.OutlineText = .init(path: "\(module)", fragment: nil)

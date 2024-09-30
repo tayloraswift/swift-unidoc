@@ -126,6 +126,7 @@ extension Main.ParseCodelink:TestBattery
                 tests.expect(link.base ==? .relative)
                 tests.expect(link.path.components ..? ["Real", "init"])
                 tests.expect(link.path.visible ..? ["Real", "init"])
+                tests.expect(true: link.path.hasEmptyTrailingParentheses)
                 tests.expect(nil: link.suffix)
             }
             if  let tests:TestGroup = tests / "EmptyTrailingComponent",
