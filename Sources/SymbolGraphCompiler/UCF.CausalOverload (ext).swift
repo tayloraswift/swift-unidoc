@@ -9,7 +9,8 @@ extension UCF.CausalOverload
         .init(phylum: decl.phylum,
             decl: decl.id,
             heir: heir,
-            hash: .decl(.init(decl.id, self: heir)))
+            hash: .decl(.init(decl.id, self: heir)),
+            documented: decl.comment != nil)
     }
     static
     func decl(_ decl:SSGC.Decl) -> Self
@@ -17,6 +18,7 @@ extension UCF.CausalOverload
         .init(phylum: decl.phylum,
             decl: decl.id,
             heir: nil,
-            hash: .decl(decl.id))
+            hash: .decl(decl.id),
+            documented: decl.comment != nil)
     }
 }

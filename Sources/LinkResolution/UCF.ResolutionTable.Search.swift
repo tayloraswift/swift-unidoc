@@ -67,8 +67,7 @@ extension UCF.ResolutionTable.Search
         }
         else
         {
-            return .ambiguous(self.selected.values.sorted { $0.id < $1.id }, 
-                rejected: self.rejected.values.sorted { $0.id < $1.id })
+            return .choose(among: self.selected, rejected: self.rejected)
         }
     }
 
@@ -81,8 +80,7 @@ extension UCF.ResolutionTable.Search
         }
         else
         {
-            return .ambiguous(self.selected.values.sorted { $0.id < $1.id }, 
-                rejected: self.rejected.values.sorted { $0.id < $1.id })
+            return .choose(among: self.selected, rejected: self.rejected)
         }
     }
 }
