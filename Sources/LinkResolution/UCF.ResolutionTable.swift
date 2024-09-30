@@ -99,17 +99,16 @@ extension UCF.ResolutionTable
 extension UCF.ResolutionTable
 {
     public
-    func resolve(qualified path:UCF.Selector.Path,
-        matching suffix:UCF.Selector.Suffix?) -> UCF.Resolution<Overload>
+    func resolve(qualified:UCF.Selector) -> UCF.Resolution<Overload>
     {
-        var search:Search = .init(matching: suffix)
-        return self.resolve(qualified: path, with: &search)
+        var search:Search = .init(matching: qualified.predicate)
+        return self.resolve(qualified: qualified.path, with: &search)
     }
 
     func resolve(_ selector:UCF.Selector,
         in scope:UCF.ResolutionScope) -> UCF.Resolution<Overload>
     {
-        var search:Search = .init(matching: selector.suffix)
+        var search:Search = .init(matching: selector.predicate)
 
         if  case .relative = selector.base
         {

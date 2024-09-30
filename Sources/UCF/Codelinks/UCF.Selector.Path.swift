@@ -9,12 +9,15 @@ extension UCF.Selector
         /// The index of the first visible component in this path.
         public
         var fold:Int
+        public
+        var hasEmptyTrailingParentheses:Bool
 
         @inlinable public
-        init(components:[String] = [], fold:Int = 0)
+        init(components:[String] = [], fold:Int = 0, hasEmptyTrailingParentheses:Bool = false)
         {
             self.components = components
             self.fold = fold
+            self.hasEmptyTrailingParentheses = hasEmptyTrailingParentheses
         }
     }
 }
@@ -114,6 +117,7 @@ extension UCF.Selector.Path
             case k?:
                 //  Special case: ignore empty trailing parentheses
                 self.components.append(String.init(string[i ..< j]))
+                self.hasEmptyTrailingParentheses = true
                 return string.index(after: k)
 
             case let k?:

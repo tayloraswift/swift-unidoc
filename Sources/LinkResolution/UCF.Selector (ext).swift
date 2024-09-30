@@ -1,6 +1,14 @@
 import FNV1
 import UCF
 
+extension UCF.Selector
+{
+    var predicate:UCF.Predicate 
+    {
+        .init(suffix: self.suffix, 
+            hasEmptyTrailingParentheses: self.path.hasEmptyTrailingParentheses)
+    }
+}
 //  TODO: this does not belong in this module
 extension UCF.Selector
 {
