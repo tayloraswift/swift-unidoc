@@ -90,18 +90,24 @@ You should be able to view the symbol graph and its documentation at [`http://lo
 
 ## 5. Generating documentation for SwiftPM packages
 
-Now, let’s generate documentation for [swift-collections](https://github.com/apple/swift-collections), a popular SwiftPM package. Download the library’s source code to a sibling directory.
+Now, let’s generate documentation for [swift-collections](https://github.com/apple/swift-collections), a popular SwiftPM package. Download the library’s source code using Git.
 
 ```bash
-cd ..
 git clone https://github.com/apple/swift-collections
-cd -
 ```
 
-Generating documentation for a package is similar to generating documentation for the standard library, except you need to specify a search path to a directory containing the project. Because you downloaded the `swift-collections` repository to a sibling directory, you can use `..` for the search path.
+To generate documentation for a package, you need to tell Unidoc where to find the project. Because you downloaded the `swift-collections` repository to a child directory, you can use `-i swift-collections` for the project path.
 
 ```bash
-unidoc local swift-collections -I ..
+unidoc local -i swift-collections
+```
+
+The default value for the project path is the current working directory (`.`), so alternatively, you could navigate to the `swift-collections` directory and run `unidoc local` without any arguments.
+
+```bash
+cd swift-collections
+unidoc local
+cd -
 ```
 
 You should be able to view the symbol graph and its documentation at [`http://localhost:8080/tags/swift-collections`](http://localhost:8080/tags/swift-collections).
@@ -110,13 +116,11 @@ You should be able to view the symbol graph and its documentation at [`http://lo
 >   The `swift-collections` documentation.
 }
 
-Finally, let’s generate documentation for a package that depends on `swift-collections`. Download the source code for [swift-async-algorithms](https://github.com/apple/swift-async-algorithms) to another sibling directory.
+Finally, let’s generate documentation for a package that depends on `swift-collections`. Download the source code for [swift-async-algorithms](https://github.com/apple/swift-async-algorithms) to a sibling directory of `swift-collections`.
 
 ```bash
-cd ..
 git clone https://github.com/apple/swift-async-algorithms
-cd -
-unidoc local swift-async-algorithms -I ..
+unidoc local -i swift-async-algorithms
 ```
 
 

@@ -102,8 +102,9 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.3")),
 
-        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(
-            from: "1.5.0")),
+        // .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(
+        //     from: "1.5.0")),
+        .package(url: "https://github.com/apple/swift-argument-parser", branch: "main"),
         .package(url: "https://github.com/apple/swift-atomics", .upToNextMinor(
             from: "1.2.0")),
         .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(
