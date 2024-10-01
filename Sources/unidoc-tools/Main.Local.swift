@@ -10,7 +10,14 @@ extension Main
     struct Local
     {
         @Argument
-        var project:String
+        var project:String?
+
+        @Option(
+            name: [.customLong("project-path"), .customShort("i")],
+            help: "The path to the project to build",
+            completion: .directory)
+        var projectPath:FilePath.Directory = "."
+
 
         @Option(
             name: [.customLong("host"), .customShort("h")],
@@ -35,7 +42,7 @@ extension Main
 
         @Option(
             name: [.customLong("input"), .customShort("I")],
-            help: "The path to a directory containing the project to build",
+            help: "DEPRECATED: The path to a directory containing the project to build",
             completion: .directory)
         var input:FilePath.Directory?
 
@@ -78,8 +85,8 @@ extension Main.Local:AsyncParsableCommand
 
         print("Connecting to \(self.host):\(self.port)...")
 
-        try await unidoc.buildAndUpload(local: self.project,
-            search: self.input,
+        try await unidoc.buildAndUpload(local: self.projectPath,
+            name: self.project,
             type: self.book ? .book : .package,
             with: toolchain)
     }
