@@ -11,7 +11,23 @@ You need to have [Docker](https://www.docker.com/) installed on your development
 It is theoretically possible to run Unidoc without Docker, but Docker makes it much easier to do so, because you will not need to (directly) manage a local [MongoDB](https://mongodb.com) deployment.
 
 
-## Setting up a local database
+## Installing Unidoc
+
+The examples in this tutorial assume you are building Unidoc from source. However, you can also download [pre-built binaries](/Quickstart) for a select set of platforms.
+
+
+## Setting up a local database automatically 
+
+Unidoc can set up a `mongod` instance for you automatically through the `unidoc init` command. This tool takes a directory path as an argument, which it uses to persist the state of the database. In the example below, we will create the documentation database in a directory named `unidoc` in your home directory.
+
+@Code(file: init-server.sh, title: init-server.sh)
+
+
+## Setting up a local database manually
+
+>   Note:
+>   The steps in this section are provided for educational purposes, to help you understand how Unidoc works. If you have set up the database automatically, you can skip this section.
+
 
 A Unidoc server is a server that talks to a second server, a MongoDB server. Therefore, before you can start a Unidoc server, you need to set up and launch a local [MongoDB](https://github.com/tayloraswift/swift-mongodb) deployment.
 
@@ -49,7 +65,7 @@ This file:
 The `unidoc-test` network is helpful for testing, but for the purposes of this tutorial, you will mostly be accessing the `mongod` process through `localhost:27017`.
 
 
-## Initializing the database
+### Initializing the database
 
 The mongod instance will create a `.mongod` directory at the root of the cloned repository. This directory contains the state of the deployment, and like all database deployments, it can outlive the mongod process. This means you can kill (or crash) the mongod instance but it will not lose data unless you clear or delete its data directory.
 
@@ -62,22 +78,11 @@ docker exec -t unidoc-mongod-container /bin/mongosh --file /unidoc-rs-init.js
 This only needs to be done **once** per deployment lifecycle. (For example, after clearing the `.mongod` data directory.)
 
 
-### Connecting to the database
+## Connecting to the database
 
-Once you have a `unidoc-mongod-container` running in the background, you can start a documentation server. There are many ways to run a documentation server, but if you are developing in a Docker container, the easiest way is compile Unidoc and run the server as a normal process.
+Once you have a `unidoc-mongod-container` running in the background, you can start a documentation server by running `unidoc preview`.
 
 @Code(file: start-server.sh, title: start-server.sh)
-
-
-### Generating certificates
-
-#### Unidoc < 0.17.0
-
-If you are starting the server for the first time, you likely need to populate the `Assets/certificates/` directory with TLS certificates. See <doc:GeneratingCertificates> for instructions on how to do this.
-
-#### Unidoc ≥ 0.17.0
-
-You do not need to generate certificates, as Unidoc 0.17.0 can run locally in insecure mode.
 
 
 ## Populating a local documentation server
@@ -111,7 +116,7 @@ Uploading symbol graph...
 Successfully uploaded symbol graph!
 ```
 
-Because you built these docs “abnormally” (meaning: not from a GitHub repository), they won’t show up in the homepage, but you can view them by navigating directly to [`localhost:8080/docs/swift`](http://localhost:8080/docs/swift).
+You can view the docs by navigating to [`localhost:8080/docs/swift`](http://localhost:8080/docs/swift).
 
 >   Note:
     You may see a lot of compiler errors when building the standard library. This is expected, as the documentation for the standard library contains many errors.
@@ -119,18 +124,16 @@ Because you built these docs “abnormally” (meaning: not from a GitHub reposi
 
 ### Building documentation for a local project
 
-Building documentation for a local project is similar to building documentation for the standard library, except you need to provide a path to a directory containing the project.
+Building documentation for a local project is similar to building documentation for the standard library, except you need to provide a path to the project directory.
 
-Let’s try building documentation for [`swift-nio`](https://github.com/apple/swift-nio). First, we need to clone the repository.
+Let’s try building documentation for [`swift-nio`](https://github.com/apple/swift-nio). First, let’s clone the repository to a directory in `/swift`, which is a plausible place to store Git repositories in a devcontainer.
 
 ```bash
 cd /swift
 git clone https://github.com/apple/swift-nio
 ```
 
-**Where** you clone the repository is important, because you will need to tell Unidoc where to find the project. In this example, we cloned the repository inside a directory called `/swift`, which is a plausible place to store Git repositories in a devcontainer.
-
-Next, you can try building `swift-nio` with `unidoc local`, specifying the path to the search directory (`/swift`) with the `-I` option.
+Next, you can try building `swift-nio` with `unidoc local`, specifying the path to the project (`/swift/swift-nio`) with the `-i` option.
 
 @Code(file: load-swift-nio.sh, title: load-swift-nio.sh)
 
