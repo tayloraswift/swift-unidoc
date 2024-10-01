@@ -279,13 +279,13 @@ extension Unidoc.Client<HTTP.Client2>
     }
 
     public
-    func buildAndUpload(local name:String,
-        search:FilePath.Directory?,
+    func buildAndUpload(local:FilePath.Directory?,
+        name:String?,
         type:SSGC.ProjectType,
         with toolchain:Unidoc.Toolchain) async throws
     {
-        let object:SymbolGraphObject<Void> = try await self.build(local: name,
-            search: search,
+        let object:SymbolGraphObject<Void> = try await self.build(local: local,
+            name: name,
             type: type,
             with: toolchain)
 
@@ -301,13 +301,13 @@ extension Unidoc.Client<HTTP.Client2>
 extension Unidoc.Client<HTTP.Client1>
 {
     public
-    func buildAndUpload(local name:String,
-        search:FilePath.Directory?,
+    func buildAndUpload(local:FilePath.Directory?,
+        name:String?,
         type:SSGC.ProjectType,
         with toolchain:Unidoc.Toolchain) async throws
     {
-        let object:SymbolGraphObject<Void> = try await self.build(local: name,
-            search: search,
+        let object:SymbolGraphObject<Void> = try await self.build(local: local,
+            name: name,
             type: type,
             with: toolchain)
 
@@ -318,13 +318,13 @@ extension Unidoc.Client<HTTP.Client1>
             http://\(self.http.remote):\(self.port)/tags/\(object.metadata.package.id)
             """)
     }
-}
+} 
 extension Unidoc.Client
 {
     /// Name is case-sensitive, so it is not modeled as a ``Symbol.Package``.
     private
-    func build(local name:String,
-        search:FilePath.Directory?,
+    func build(local:FilePath.Directory?,
+        name:String?,
         type:SSGC.ProjectType,
         with toolchain:Unidoc.Toolchain) async throws -> SymbolGraphObject<Void>
     {
@@ -334,7 +334,6 @@ extension Unidoc.Client
         var arguments:[String] = [
             "compile",
 
-            "--package-name", "\(name)",
             "--project-type", "\(type)",
             "--workspace", "\(workspace.location)",
             "--output", "\(docs)",
@@ -354,10 +353,15 @@ extension Unidoc.Client
             arguments.append("--sdk")
             arguments.append("\(sdk)")
         }
-        if  let search:FilePath.Directory
+        if  let local:FilePath.Directory 
         {
-            arguments.append("--search-path")
-            arguments.append("\(search)")
+            arguments.append("--project-path")
+            arguments.append("\(local)")
+        }
+        if  let name:String
+        {
+            arguments.append("--package-name")
+            arguments.append("\(name)")
         }
 
         let ssgc:SystemProcess = try .init(command: self.executablePath, arguments: arguments)
