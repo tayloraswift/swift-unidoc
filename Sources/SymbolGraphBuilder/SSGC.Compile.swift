@@ -31,7 +31,9 @@ extension SSGC
 
         @Option(
             name: [.customLong("search-path"), .customShort("I")],
-            help: "Where to look for a SwiftPM package to build, if building locally",
+            help: """
+            DEPRECATED: Where to look for a SwiftPM package to build, if building locally
+            """,
             completion: .directory)
         var search:FilePath.Directory? = nil
 
@@ -68,12 +70,18 @@ extension SSGC
         var ci:ValidationBehavior? = nil
 
         @Option(
+            name: [.customLong("project-path"), .customShort("p")],
+            help: "Path to a local project to build",
+            completion: .directory)
+        var projectPath:FilePath.Directory?
+
+        @Option(
             name: [.customLong("package-name"), .customShort("n")],
             help: """
                 The symbolic name of the project to build — \
                 this is not the name specified in the `Package.swift` manifest!
                 """)
-        var project:String
+        var project:String?
 
         @Option(
             name: [.customLong("project-type"), .customShort("b")],
@@ -240,10 +248,11 @@ extension SSGC.Compile
 
         let object:SymbolGraphObject<Void>
 
-        if  let repo:String = self.repo,
+        if  let project:String = self.project,
+            let repo:String = self.repo,
             let ref:String = self.ref
         {
-            let symbol:Symbol.Package = .init(self.project)
+            let symbol:Symbol.Package = .init(project)
 
             defer
             {
@@ -277,10 +286,39 @@ extension SSGC.Compile
                 logger: logger,
                 clean: self.cleanArtifacts)
         }
-        else if
-            let search:FilePath.Directory = self.search
+        else if case "swift"? = self.project
         {
-            let build:SSGC.PackageBuild = .local(project: search / self.project,
+            object = try workspace.build(some: SSGC.StandardLibraryBuild.swift,
+                toolchain: toolchain,
+                status: status,
+                logger: logger,
+                clean: self.cleanArtifacts)
+        }
+        else
+        {
+            let computedPath:FilePath.Directory
+
+            if  let projectPath:FilePath.Directory = self.projectPath
+            {
+                computedPath = projectPath
+            }
+            else if  
+                let search:FilePath.Directory = self.search, 
+                let name:String = self.project
+            {
+                print("""
+                    Warning: '--search-path' is deprecated, use '--project-path' with the 
+                    full path to the project root instead
+                    """)
+
+                computedPath = search / name
+            }
+            else
+            {
+                throw SSGC.ProjectPathRequiredError.init()
+            }
+
+            let build:SSGC.PackageBuild = .local(project: computedPath,
                 using: ".build.ssgc",
                 as: self.type)
 
@@ -297,18 +335,6 @@ extension SSGC.Compile
                 status: status,
                 logger: logger,
                 clean: self.cleanArtifacts)
-        }
-        else if self.project == "swift"
-        {
-            object = try workspace.build(some: SSGC.StandardLibraryBuild.swift,
-                toolchain: toolchain,
-                status: status,
-                logger: logger,
-                clean: self.cleanArtifacts)
-        }
-        else
-        {
-            throw SSGC.SearchPathRequiredError.init()
         }
 
         let output:FilePath = self.output ?? workspace.location / "docs.bson"
