@@ -46,7 +46,7 @@ extension UCF.ResolvableOverload
             {
             case .actor:                    return false
             case .associatedtype:           return false
-            case .case:                     return false
+            case .case:                     break
             case .class:                    return false
             case .deinitializer:            return false
             case .enum:                     return false
