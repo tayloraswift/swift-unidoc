@@ -7,14 +7,14 @@ extension UCF.ResolutionTable
     struct Search
     {
         private
-        let predicate:UCF.Selector.Suffix?
+        let predicate:UCF.Predicate
 
         private
         var selected:[Symbol.Decl: Overload]
         private
         var rejected:[Symbol.Decl: Overload]
 
-        init(matching predicate:UCF.Selector.Suffix?)
+        init(matching predicate:UCF.Predicate)
         {
             self.predicate = predicate
             self.selected = [:]
@@ -29,26 +29,16 @@ extension UCF.ResolutionTable.Search
     {
         //  Because of the way `@_exported` paths are represented in the search tree, it is 
         //  possible to encounter the same overload multiple times, due to namespace inference
-        if  let predicate:UCF.Selector.Suffix = self.predicate
+        for overload:Overload in candidates
         {
-            for overload:Overload in candidates
+            guard self.predicate ~= overload
+            else
             {
-                guard predicate ~= overload
-                else
-                {
-                    self.rejected[overload.id] = overload
-                    continue
-                }
+                self.rejected[overload.id] = overload
+                continue
+            }
 
-                self.selected[overload.id] = overload
-            }
-        }
-        else
-        {
-            for overload:Overload in candidates
-            {
-                self.selected[overload.id] = overload
-            }
+            self.selected[overload.id] = overload
         }
     }
 

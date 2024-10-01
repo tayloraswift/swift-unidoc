@@ -45,6 +45,11 @@ extension UCF.Selector:CustomStringConvertible
             string += component
         }
 
+        if  case .trailingParentheses? = self.path.seal
+        {
+            string += "()"
+        }
+
         switch self.suffix
         {
         case nil:
@@ -281,8 +286,8 @@ extension UCF.Selector
 }
 extension UCF.Selector
 {
-    @inlinable public static
-    func equivalent(to doclink:Doclink) -> Self?
+    @inlinable public 
+    static func equivalent(to doclink:Doclink) -> Self?
     {
         if  doclink.absolute
         {
