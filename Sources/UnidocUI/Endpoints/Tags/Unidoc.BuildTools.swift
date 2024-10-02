@@ -38,6 +38,16 @@ extension Unidoc.BuildTools:HTML.OutputStreamable
             {
                 $0[.li]
                 {
+                    let icon:Unicode.Scalar 
+                    
+                    switch build.host.os
+                    {
+                    case .linux:        icon = "🐧"
+                    case .macosx15_0:   icon = "🍎"
+                    case .macosx14_0:   icon = "🍏"
+                    default:            icon = "?"
+                    }
+
                     if  let assignee:Unidoc.Account = build.assignee,
                         let stage:Unidoc.BuildStage = build.stage
                     {
@@ -46,6 +56,7 @@ extension Unidoc.BuildTools:HTML.OutputStreamable
                             $0.title = "This build has been assigned to a builder \(assignee)."
                         } = "Started"
 
+                        $0[.div] { $0.class = "os" ; $0.title = "\(build.host)" } = icon
                         $0[.div] { $0.class = "ref" } = build.name.ref
 
                         let tooltip:String
@@ -79,8 +90,8 @@ extension Unidoc.BuildTools:HTML.OutputStreamable
                             $0.title = "This build has not yet started."
                         } = "Queued"
 
+                        $0[.div] { $0.class = "os" ; $0.title = "\(build.host)" } = icon
                         $0[.div] { $0.class = "ref" } = build.name.ref
-
                         $0[.div]
                     }
 

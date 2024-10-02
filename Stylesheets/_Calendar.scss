@@ -42,13 +42,12 @@ section.details
         display: grid;
 
         grid-gap: 0.25rem;
+        grid-template-columns: repeat(7, 1fr);
 
         @media only screen and (min-width: 56rem)
         {
             grid-gap: 0.5rem;
         }
-
-        grid-template-columns: repeat(7, 1fr);
 
         li
         {

@@ -21,13 +21,13 @@ div.menu
         position: absolute;
         display: none;
 
-        @include backdrop-blur;
-
         list-style-type: none;
         margin: 0;
         padding: 0.5em 1em 0.75em 1em;
         box-shadow: 0 1rem 3rem var(--blur-shadow);
         border-radius: 0.5rem;
+
+        @include backdrop-blur;
 
         > li
         {
