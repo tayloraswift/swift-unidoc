@@ -139,6 +139,7 @@ extension Unidoc.DB.PendingBuilds
     /// Adds a build to the queue, if it is not already queued, or returns the existing build.
     public
     func submitBuild(id:Unidoc.Edition,
+        host:Symbol.Triple,
         name:Symbol.PackageAtRef,
         priority:Int32 = 0) async throws -> Unidoc.PendingBuild
     {
@@ -155,6 +156,7 @@ extension Unidoc.DB.PendingBuilds
                 launched: nil,
                 assignee: nil,
                 stage: nil,
+                host: host,
                 name: name)
         }
         return pendingBuild
