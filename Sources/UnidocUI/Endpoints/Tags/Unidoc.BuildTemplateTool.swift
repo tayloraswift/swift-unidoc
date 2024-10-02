@@ -31,16 +31,16 @@ extension Unidoc.BuildTemplateTool:HTML.OutputStreamable
                 {
                     if  let triple:Symbol.Triple = self.form.platform
                     {
-                        $0[.option] 
-                        { 
-                            $0.selected = true 
-                            $0.value = "\(triple)" 
+                        $0[.option]
+                        {
+                            $0.selected = true
+                            $0.value = "\(triple)"
                         } = "\(triple)"
                     }
 
                     $0[.option]
                     {
-                        $0.selected = self.form.platform == nil 
+                        $0.selected = self.form.platform == nil
                         $0.value = ""
                     } = "Default"
 
