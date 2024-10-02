@@ -26,6 +26,18 @@ extension Unidoc.DB
 extension Unidoc.DB.PendingBuilds
 {
     public static
+    let indexEnqueuedByHost:Mongo.CollectionIndex = .init("EnqueuedByHost", unique: false)
+    {
+        $0[Unidoc.PendingBuild[.host]] = (+)
+        $0[Unidoc.PendingBuild[.priority]] = (+)
+        $0[Unidoc.PendingBuild[.enqueued]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.PendingBuild[.enqueued]] { $0[.exists] = true }
+    }
+
+    public static
     let indexEnqueued:Mongo.CollectionIndex = .init("Enqueued/2", unique: false)
     {
         $0[Unidoc.PendingBuild[.priority]] = (+)
@@ -64,6 +76,7 @@ extension Unidoc.DB.PendingBuilds:Mongo.CollectionModel
     var indexes:[Mongo.CollectionIndex]
     {
         [
+            Self.indexEnqueuedByHost,
             Self.indexEnqueued,
             Self.indexLaunched,
             Self.indexPackage
@@ -73,7 +86,7 @@ extension Unidoc.DB.PendingBuilds:Mongo.CollectionModel
 extension Unidoc.DB.PendingBuilds
 {
     public
-    func selectBuild(await awaits:Bool) async throws -> Unidoc.PendingBuild?
+    func selectBuild(await awaits:Bool, host:Symbol.Triple) async throws -> Unidoc.PendingBuild?
     {
         //  Find a build, any build...
         if  let pendingBuild:Unidoc.PendingBuild = try await session.run(
@@ -81,6 +94,7 @@ extension Unidoc.DB.PendingBuilds
                 {
                     $0[.filter]
                     {
+                        $0[Unidoc.PendingBuild[.host]] = host
                         $0[Unidoc.PendingBuild[.enqueued]] { $0[.exists] = true }
                     }
                     $0[.sort]
@@ -88,7 +102,7 @@ extension Unidoc.DB.PendingBuilds
                         $0[Unidoc.PendingBuild[.priority]] = (+)
                         $0[Unidoc.PendingBuild[.enqueued]] = (+)
                     }
-                    $0[.hint] = Self.indexEnqueued.id
+                    $0[.hint] = Self.indexEnqueuedByHost.id
                 },
                 against: self.database)
         {
@@ -115,7 +129,25 @@ extension Unidoc.DB.PendingBuilds
                     //  the find query and when we open the change stream.
                     $0[.startAtOperationTime] = startTime
                 }
-                //  TODO: filter change events
+                //  We don’t have a more structured way to spell this yet.
+                $0[stage: .match]
+                {
+                    $0[.and]
+                    {
+                        $0
+                        {
+                            $0[.or]
+                            {
+                                $0 { $0["operationType"] = "insert" }
+                                $0 { $0["operationType"] = "replace" }
+                            }
+                        }
+                        $0
+                        {
+                            $0["fullDocument" / Element[.host]] = host
+                        }
+                    }
+                }
             },
             against: self.database)
         {

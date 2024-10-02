@@ -1,6 +1,7 @@
 import BSON
 import HTTPServer
 import MongoDB
+import Symbols
 
 extension Unidoc
 {
@@ -9,6 +10,8 @@ extension Unidoc
     {
         private nonisolated
         let eventQueue:AsyncStream<Event>.Continuation
+        private nonisolated
+        let channel:Symbol.Triple
 
         private
         var subscriptionCounter:UInt
@@ -18,9 +21,11 @@ extension Unidoc
         var notifications:Notification?
 
         private
-        init(eventQueue:AsyncStream<Event>.Continuation)
+        init(eventQueue:AsyncStream<Event>.Continuation, channel:Symbol.Triple)
         {
             self.eventQueue = eventQueue
+            self.channel = channel
+
             self.subscriptionCounter = 0
             self.subscriptions = [:]
             self.notifications = nil
@@ -32,6 +37,7 @@ extension Unidoc.BuildCoordinator
     public static
     func run<T>(registrar:any Unidoc.Registrar,
         watching db:Unidoc.Database,
+        channel:Symbol.Triple,
         with body:(Unidoc.BuildCoordinator) async throws -> T) async rethrows -> T
     {
         let events:AsyncStream<Event>
@@ -39,7 +45,7 @@ extension Unidoc.BuildCoordinator
 
         (events, eventQueue) = AsyncStream<Event>.makeStream()
 
-        let coordinator:Self = .init(eventQueue: eventQueue)
+        let coordinator:Self = .init(eventQueue: eventQueue, channel: channel)
 
         async
         let _:Void = coordinator.matchNotifications(from: db, to: events, registrar: registrar)
@@ -88,7 +94,9 @@ extension Unidoc.BuildCoordinator
         let db:Unidoc.DB = try await db.session()
 
         guard
-        let pending:Unidoc.PendingBuild = try await db.pendingBuilds.selectBuild(await: true)
+        let pending:Unidoc.PendingBuild = try await db.pendingBuilds.selectBuild(
+            await: true,
+            host: self.channel)
         else
         {
             throw Unidoc.BuildCoordinatorAssertionError.invalidChangeStreamElement
