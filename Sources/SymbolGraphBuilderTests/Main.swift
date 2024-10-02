@@ -26,7 +26,7 @@ enum Main:TestMain, TestBattery
             {
                 tests.expect(splash.swift ==? .init(version: .v(5, 8, 0),
                     nightly: .DEVELOPMENT_SNAPSHOT))
-                tests.expect(splash.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
+                tests.expect(splash.triple ==? .x86_64_unknown_linux_gnu)
             }
             if  let tests:TestGroup = tests / "Linux",
                 let splash:SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
@@ -36,7 +36,7 @@ enum Main:TestMain, TestBattery
                     """))
             {
                 tests.expect(splash.swift ==? .init(version: .v(5, 10, 0), nightly: nil))
-                tests.expect(splash.triple ==? .init("x86_64", "unknown", "linux", "gnu"))
+                tests.expect(splash.triple ==? .x86_64_unknown_linux_gnu)
             }
             if  let tests:TestGroup = tests / "Xcode",
                 let splash:SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
@@ -47,7 +47,7 @@ enum Main:TestMain, TestBattery
                     """))
             {
                 tests.expect(splash.swift ==? .init(version: .v(5, 10, 0), nightly: nil))
-                tests.expect(splash.triple ==? .init("arm64", "apple", "macosx14.0", nil))
+                tests.expect(splash.triple ==? .arm64_apple_macosx14_0)
             }
         }
 

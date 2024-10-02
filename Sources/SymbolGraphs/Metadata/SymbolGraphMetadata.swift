@@ -20,7 +20,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
     /// The swift target triple of the documentation artifacts this symbol graph was compiled
     /// from.
     public
-    var triple:Triple
+    var triple:Symbol.Triple
 
     /// The swift toolchain the relevant documentation was generated with, which is used to
     /// select a version of the standard library to link against.
@@ -61,7 +61,7 @@ struct SymbolGraphMetadata:Equatable, Sendable
     @inlinable public
     init(package:Package,
         commit:Commit?,
-        triple:Triple,
+        triple:Symbol.Triple,
         swift:SwiftVersion,
         tools:PatchVersion? = nil,
         manifests:[MinorVersion] = [],
@@ -92,7 +92,7 @@ extension SymbolGraphMetadata
     public static
     func swift(_ swift:SwiftVersion,
         commit:Commit?,
-        triple:Triple,
+        triple:Symbol.Triple,
         products:SymbolGraph.Table<SymbolGraph.ProductPlane, SymbolGraph.Product>) -> Self
     {
         let display:String
@@ -197,3 +197,4 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
         self.abi = try bson[.abi].decode()
     }
 }
+ 

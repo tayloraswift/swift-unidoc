@@ -1,4 +1,4 @@
-import SymbolGraphs
+import Symbols
 
 extension SSGC
 {
@@ -8,7 +8,7 @@ extension SSGC
         case malformedSwiftVersion
         case malformedSplash
         case malformedTriple
-        case unsupportedTriple(Triple)
+        case unsupportedTriple(Symbol.Triple)
     }
 }
 extension SSGC.ToolchainError:CustomStringConvertible

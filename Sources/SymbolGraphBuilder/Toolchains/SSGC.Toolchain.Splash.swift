@@ -1,5 +1,6 @@
 import SemanticVersions
 import SymbolGraphs
+import Symbols
 
 extension SSGC.Toolchain
 {
@@ -9,13 +10,13 @@ extension SSGC.Toolchain
         public
         let commit:SymbolGraphMetadata.Commit?
         public
-        let triple:Triple
+        let triple:Symbol.Triple
         public
         let swift:SwiftVersion
 
         private
         init(commit:SymbolGraphMetadata.Commit?,
-            triple:Triple,
+            triple:Symbol.Triple,
             swift:SwiftVersion)
         {
             self.commit = commit
@@ -44,7 +45,7 @@ extension SSGC.Toolchain.Splash
         guard
             triple.count == 2,
             triple[0] == "Target:",
-        let triple:Triple = .init(triple[1])
+        let triple:Symbol.Triple = .init(triple[1])
         else
         {
             throw SSGC.ToolchainError.malformedSplash

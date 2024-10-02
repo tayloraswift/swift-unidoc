@@ -2,6 +2,7 @@ import MongoDB
 import MongoTesting
 import SemanticVersions
 import SymbolGraphs
+import Symbols
 @_spi(testable)
 import UnidocDB
 
@@ -15,7 +16,7 @@ struct SymbolGraphs:MongoTestBattery
         let database:Unidoc.DB = .init(session: try await .init(from: pool), in: database)
         try await database.setup()
 
-        let triple:Triple = .init("x86_64-unknown-linux-gnu")!
+        let triple:Symbol.Triple = .x86_64_unknown_linux_gnu
         let empty:SymbolGraph = .init(modules: [])
 
         var docs:SymbolGraphObject<Void>
