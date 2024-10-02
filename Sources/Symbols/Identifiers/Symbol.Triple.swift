@@ -1,4 +1,4 @@
-extension Symbol 
+extension Symbol
 {
     /// A pathetic imitation of
     /// https://github.com/apple/swift-driver/blob/main/Sources/SwiftDriver/Utilities/Triple.swift
@@ -24,7 +24,7 @@ extension Symbol
         }
     }
 }
-extension Symbol.Triple 
+extension Symbol.Triple
 {
     @inlinable public
     static var arm64_apple_macosx14_0:Self
@@ -38,14 +38,14 @@ extension Symbol.Triple
         .init(architecture: "arm64", vendor: "apple", os: .macosx15_0)
     }
 
-    @inlinable public 
-    static var aarch64_unknown_linux_gnu:Self 
+    @inlinable public
+    static var aarch64_unknown_linux_gnu:Self
     {
         .init(architecture: "aarch64", vendor: "unknown", os: .linux, tail: "gnu")
     }
 
-    @inlinable public 
-    static var x86_64_unknown_linux_gnu:Self 
+    @inlinable public
+    static var x86_64_unknown_linux_gnu:Self
     {
         .init(architecture: .x86_64, vendor: "unknown", os: .linux, tail: "gnu")
     }
@@ -73,20 +73,20 @@ extension Symbol.Triple:LosslessStringConvertible
     {
         let start:(Never, String.Index, String.Index, String.Index)
 
-        guard 
+        guard
         let i:String.Index = string.firstIndex(of: "-")
-        else 
-        { 
-            return nil 
+        else
+        {
+            return nil
         }
 
         start.1 = string.index(after: i)
 
-        guard 
+        guard
         let j:String.Index = string[start.1...].firstIndex(of: "-")
-        else 
-        { 
-            return nil 
+        else
+        {
+            return nil
         }
 
         start.2 = string.index(after: j)
@@ -102,16 +102,16 @@ extension Symbol.Triple:LosslessStringConvertible
             start.3 = string.index(after: k)
             tail = .init(string[start.3...])
         }
-        else 
+        else
         {
             os = .init(string[start.2...])
             tail = nil
         }
 
         self.init(
-            architecture: .init(name: architecture), 
+            architecture: .init(name: architecture),
             vendor: .init(name: vendor),
-            os: .init(name: os), 
+            os: .init(name: os),
             tail: tail)
     }
 }
