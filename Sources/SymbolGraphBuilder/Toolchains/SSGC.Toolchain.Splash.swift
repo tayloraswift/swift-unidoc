@@ -1,6 +1,7 @@
 import SemanticVersions
 import SymbolGraphs
 import Symbols
+import System_
 
 extension SSGC.Toolchain
 {
@@ -95,5 +96,20 @@ extension SSGC.Toolchain.Splash
         }
 
         self.init(commit: commit, triple: triple, swift: id)
+    }
+
+    public
+    init(running command:String) throws
+    {
+        let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
+
+        defer
+        {
+            try? writable.close()
+            try? readable.close()
+        }
+
+        try SystemProcess.init(command: command, "--version", stdout: writable)()
+        try self.init(parsing: try readable.read(buffering: 1024))
     }
 }

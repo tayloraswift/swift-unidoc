@@ -51,17 +51,8 @@ extension SSGC.Toolchain
         recoverFromAppleBugs:Bool = true,
         pretty:Bool = false) throws -> Self
     {
-        let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
-
-        defer
-        {
-            try? writable.close()
-            try? readable.close()
-        }
-
-        try SystemProcess.init(command: paths.swiftCommand, "--version", stdout: writable)()
-        return .init(appleSDK: appleSDK,
-            splash: try .init(parsing: try readable.read(buffering: 1024)),
+        .init(appleSDK: appleSDK,
+            splash: try .init(running: paths.swiftCommand),
             paths: paths,
             recoverFromAppleBugs: recoverFromAppleBugs,
             pretty: pretty)
