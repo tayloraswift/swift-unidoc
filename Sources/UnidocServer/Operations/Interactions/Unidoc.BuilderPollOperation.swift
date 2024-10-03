@@ -1,17 +1,20 @@
 import HTTP
 import JSON
 import MongoQL
+import Symbols
 import UnidocDB
 
 extension Unidoc
 {
     struct BuilderPollOperation:Sendable
     {
-        let id:Unidoc.Account
+        let builder:Unidoc.Account
+        let channel:Symbol.Triple
 
-        init(id:Unidoc.Account)
+        init(builder:Unidoc.Account, channel:Symbol.Triple)
         {
-            self.id = id
+            self.builder = builder
+            self.channel = channel
         }
     }
 }
@@ -21,16 +24,16 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
         db:Unidoc.DB,
         as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
     {
-        guard
-        let coordinator:Unidoc.BuildCoordinator = server.builds
-        else
-        {
-            return .notFound("Server does not support builder polling\n")
-        }
-
         /// If the builder is recovering from a crash, kill any builds that had previously been
         /// assigned to it.
-        let _:Int = try await db.pendingBuilds.killBuilds(by: self.id)
+        let _:Int = try await db.pendingBuilds.killBuilds(by: self.builder)
+
+        guard
+        let coordinator:Unidoc.BuildCoordinator = server.coordinators[self.channel]
+        else
+        {
+            return .notFound("Server does not support build target '\(self.channel)'\n")
+        }
 
         let labels:Unidoc.BuildLabels? = try await withThrowingTaskGroup(
             of: Unidoc.BuildLabels?.self)
@@ -42,7 +45,7 @@ extension Unidoc.BuilderPollOperation:Unidoc.MachineOperation
             }
             $0.addTask
             {
-                try await coordinator.match(builder: self.id)
+                try await coordinator.match(builder: self.builder)
             }
 
             for try await labels:Unidoc.BuildLabels? in $0
