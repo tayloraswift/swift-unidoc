@@ -19,23 +19,21 @@ extension HTTP.Server where Self:Unidoc.Server
                     try await self.run(plugin: handle.plugin, while: handle.active)
                 }
             }
-            do
+
+            tasks.addTask
             {
-                tasks.addTask
-                {
-                    try await self.serve(from: ("::", self.options.port),
-                        as: self.options.authority,
-                        on: .singleton,
-                        policy: self.policy)
-                }
-                tasks.addTask
-                {
-                    try await self.update()
-                }
-                tasks.addTask
-                {
-                    try await self.paint()
-                }
+                try await self.serve(from: ("::", self.options.port),
+                    as: self.options.authority,
+                    on: .singleton,
+                    policy: self.policy)
+            }
+            tasks.addTask
+            {
+                try await self.update()
+            }
+            tasks.addTask
+            {
+                try await self.paint()
             }
 
             for try await _:Void in tasks
