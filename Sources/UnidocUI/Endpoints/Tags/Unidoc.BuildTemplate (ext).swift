@@ -1,5 +1,5 @@
 import SemanticVersions
-import SymbolGraphs
+import Symbols
 import UnidocRecords
 
 extension Unidoc.BuildTemplate
@@ -15,7 +15,7 @@ extension Unidoc.BuildTemplate
     init?(parameters:borrowing [String: String])
     {
         var toolchain:PatchVersion?
-        var platform:Triple?
+        var platform:Symbol.Triple?
 
         if  let value:String = parameters[Parameter.toolchain]
         {
@@ -31,7 +31,7 @@ extension Unidoc.BuildTemplate
 
         if  let value:String = parameters[Parameter.platform]
         {
-            if  let value:Triple = .init(value)
+            if  let value:Symbol.Triple = .init(value)
             {
                 platform = value
             }

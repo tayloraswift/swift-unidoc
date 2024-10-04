@@ -1,6 +1,6 @@
 import HTML
 import SemanticVersions
-import SymbolGraphs
+import Symbols
 import UnidocDB
 
 extension Unidoc
@@ -29,34 +29,32 @@ extension Unidoc.BuildTemplateTool:HTML.OutputStreamable
                 }
                     content:
                 {
-                    let current:String?
-
-                    if  let platform:Triple = self.form.platform
+                    if  let triple:Symbol.Triple = self.form.platform
                     {
-                        current = "\(platform)"
-                        $0[.option] { $0.selected = true ; $0.value = current } = current
-                    }
-                    else
-                    {
-                        current = nil
+                        $0[.option]
+                        {
+                            $0.selected = true
+                            $0.value = "\(triple)"
+                        } = "\(triple)"
                     }
 
                     $0[.option]
                     {
-                        $0.selected = self.form.platform == nil ; $0.value = ""
+                        $0.selected = self.form.platform == nil
+                        $0.value = ""
                     } = "Default"
 
-                    for option:String in [
-                        "aarch64-unknown-linux-gnu",
-                        "arm64-apple-macosx15.0",
+                    for option:Symbol.Triple in [
+                        .aarch64_unknown_linux_gnu,
+                        .arm64_apple_macosx15_0,
                     ]
                     {
-                        if  case option? = current
+                        if  case option? = self.form.platform
                         {
                             continue
                         }
 
-                        $0[.option] { $0.value = option } = option
+                        $0[.option] { $0.value = "\(option)" } = "\(option)"
                     }
                 }
             }

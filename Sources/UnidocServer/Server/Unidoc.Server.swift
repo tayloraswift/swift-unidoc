@@ -8,6 +8,7 @@ import MongoDB
 import NIOPosix
 import NIOSSL
 import PieCharts
+import Symbols
 import UnidocRender
 
 extension Unidoc
@@ -16,6 +17,8 @@ extension Unidoc
     class Server:Sendable
     {
         let clientIdentity:NIOSSLContext
+
+        let coordinators:[Symbol.Triple: BuildCoordinator]
         let plugins:[String: PluginHandle]
 
         @usableFromInline
@@ -32,18 +35,15 @@ extension Unidoc
         let updateQueue:AsyncStream<Update>.Continuation,
             updates:AsyncStream<Update>
 
-        let builds:BuildCoordinator?
-
         let policy:(any HTTP.ServerPolicy)?
         @usableFromInline
         let logger:(any ServerLogger)?
 
         public
-        init(
-            clientIdentity:NIOSSLContext,
+        init(clientIdentity:NIOSSLContext,
+            coordinators:[BuildCoordinator],
             plugins:[any Plugin],
             options:ServerOptions,
-            builds:BuildCoordinator?,
             logger:(any ServerLogger)? = nil,
             db:Database)
         {
@@ -56,12 +56,15 @@ extension Unidoc
             }
 
             self.clientIdentity = clientIdentity
+            self.coordinators = coordinators.reduce(into: [:])
+            {
+                $0[$1.id] = $1
+            }
             self.plugins = plugins.reduce(into: [:])
             {
                 $0[type(of: $1).id] = .init(plugin: $1)
             }
             self.options = options
-            self.builds = builds
             self.policy = policy
             self.logger = logger
             self.db = db

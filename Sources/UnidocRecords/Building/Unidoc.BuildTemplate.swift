@@ -1,5 +1,5 @@
 import SemanticVersions
-import SymbolGraphs
+import Symbols
 
 extension Unidoc
 {
@@ -9,7 +9,7 @@ extension Unidoc
         public
         var toolchain:PatchVersion?
         public
-        var platform:Triple?
+        var platform:Symbol.Triple?
 
         @inlinable public
         init()
@@ -17,7 +17,7 @@ extension Unidoc
         }
 
         @inlinable public
-        init(toolchain:PatchVersion?, platform:Triple?)
+        init(toolchain:PatchVersion?, platform:Symbol.Triple?)
         {
             self.toolchain = toolchain
             self.platform = platform

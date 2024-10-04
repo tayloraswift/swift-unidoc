@@ -51,17 +51,8 @@ extension SSGC.Toolchain
         recoverFromAppleBugs:Bool = true,
         pretty:Bool = false) throws -> Self
     {
-        let (readable, writable):(FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
-
-        defer
-        {
-            try? writable.close()
-            try? readable.close()
-        }
-
-        try SystemProcess.init(command: paths.swiftCommand, "--version", stdout: writable)()
-        return .init(appleSDK: appleSDK,
-            splash: try .init(parsing: try readable.read(buffering: 1024)),
+        .init(appleSDK: appleSDK,
+            splash: try .init(running: paths.swiftCommand),
             paths: paths,
             recoverFromAppleBugs: recoverFromAppleBugs,
             pretty: pretty)
@@ -80,27 +71,27 @@ extension SSGC.Toolchain
 
     func platform() throws -> SymbolGraphMetadata.Platform
     {
-        if      self.splash.triple.os.starts(with: "linux")
+        if      self.splash.triple.os.name.starts(with: "linux")
         {
             return .linux
         }
-        else if self.splash.triple.os.starts(with: "ios")
+        else if self.splash.triple.os.name.starts(with: "ios")
         {
             return .iOS
         }
-        else if self.splash.triple.os.starts(with: "macos")
+        else if self.splash.triple.os.name.starts(with: "macos")
         {
             return .macOS
         }
-        else if self.splash.triple.os.starts(with: "tvos")
+        else if self.splash.triple.os.name.starts(with: "tvos")
         {
             return .tvOS
         }
-        else if self.splash.triple.os.starts(with: "watchos")
+        else if self.splash.triple.os.name.starts(with: "watchos")
         {
             return .watchOS
         }
-        else if self.splash.triple.os.starts(with: "windows")
+        else if self.splash.triple.os.name.starts(with: "windows")
         {
             return .windows
         }

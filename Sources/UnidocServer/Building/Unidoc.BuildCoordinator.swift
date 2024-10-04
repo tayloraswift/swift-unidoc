@@ -1,14 +1,20 @@
 import BSON
 import HTTPServer
 import MongoDB
+import Symbols
 
 extension Unidoc
 {
     public final
     actor BuildCoordinator
     {
+        nonisolated
+        let id:Symbol.Triple
+
         private nonisolated
         let eventQueue:AsyncStream<Event>.Continuation
+        private nonisolated
+        let events:AsyncStream<Event>
 
         private
         var subscriptionCounter:UInt
@@ -18,9 +24,14 @@ extension Unidoc
         var notifications:Notification?
 
         private
-        init(eventQueue:AsyncStream<Event>.Continuation)
+        init(id:Symbol.Triple,
+            eventQueue:AsyncStream<Event>.Continuation,
+            events:AsyncStream<Event>)
         {
+            self.id = id
             self.eventQueue = eventQueue
+            self.events = events
+
             self.subscriptionCounter = 0
             self.subscriptions = [:]
             self.notifications = nil
@@ -29,24 +40,23 @@ extension Unidoc
 }
 extension Unidoc.BuildCoordinator
 {
-    public static
-    func run<T>(registrar:any Unidoc.Registrar,
-        watching db:Unidoc.Database,
-        with body:(Unidoc.BuildCoordinator) async throws -> T) async rethrows -> T
+    public
+    init(id:Symbol.Triple)
     {
-        let events:AsyncStream<Event>
         let eventQueue:AsyncStream<Event>.Continuation
+        let events:AsyncStream<Event>
 
         (events, eventQueue) = AsyncStream<Event>.makeStream()
 
-        let coordinator:Self = .init(eventQueue: eventQueue)
+        self.init(id: id, eventQueue: eventQueue, events: events)
+    }
 
+    public
+    func run(registrar:any Unidoc.Registrar, watching db:Unidoc.Database) async
+    {
         async
-        let _:Void = coordinator.matchNotifications(from: db, to: events, registrar: registrar)
-        async
-        let _:Void = coordinator.pullNotifications(from: db)
-
-        return try await body(coordinator)
+        let _:Void = self.pullNotifications(from: db)
+        await self.matchNotifications(from: db, registrar: registrar)
     }
 }
 
@@ -88,7 +98,9 @@ extension Unidoc.BuildCoordinator
         let db:Unidoc.DB = try await db.session()
 
         guard
-        let pending:Unidoc.PendingBuild = try await db.pendingBuilds.selectBuild(await: true)
+        let pending:Unidoc.PendingBuild = try await db.pendingBuilds.selectBuild(
+            await: true,
+            host: self.id)
         else
         {
             throw Unidoc.BuildCoordinatorAssertionError.invalidChangeStreamElement
@@ -114,11 +126,9 @@ extension Unidoc.BuildCoordinator
 extension Unidoc.BuildCoordinator
 {
     private
-    func matchNotifications(from db:Unidoc.Database,
-        to events:AsyncStream<Event>,
-        registrar:any Unidoc.Registrar) async
+    func matchNotifications(from db:Unidoc.Database, registrar:any Unidoc.Registrar) async
     {
-        for await event:Event in events
+        for await event:Event in self.events
         {
             switch event
             {

@@ -23,6 +23,7 @@ extension SSGC.Toolchain
 extension SSGC.Toolchain.Paths
 {
     /// Returns the path to the `swift` executable, or just the string `swift`.
+    public
     var swiftCommand:String
     {
         guard

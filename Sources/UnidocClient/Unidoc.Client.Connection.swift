@@ -32,13 +32,14 @@ extension Unidoc.Client
 extension Unidoc.Client<HTTP.Client2>.Connection
 {
     public
-    func labels() async throws -> Unidoc.BuildLabels?
+    func subscribe(to channel:Symbol.Triple) async throws -> Unidoc.BuildLabels?
     {
         do
         {
             //  Server should send a heartbeat every 30 minutes, so we wait for up to
             //  31 minutes.
-            return try await self.get(from: "/builder/poll", timeout: .seconds(31 * 60))
+            let timeout:Duration = .seconds(31 * 60)
+            return try await self.get(from: "/builder/poll/\(channel)", timeout: timeout)
         }
         catch is HTTP.NonError
         {
