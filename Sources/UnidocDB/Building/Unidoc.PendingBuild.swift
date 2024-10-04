@@ -1,5 +1,6 @@
 import BSON
 import MongoQL
+import SymbolGraphs
 import Symbols
 import UnidocAPI
 import UnidocRecords
@@ -29,6 +30,9 @@ extension Unidoc
         public
         var stage:BuildStage?
 
+        public 
+        let host:Symbol.Triple
+
         /// Used for display purposes only.
         public
         let name:Symbol.PackageAtRef
@@ -42,6 +46,7 @@ extension Unidoc
             launched:UnixMillisecond?,
             assignee:Account?,
             stage:BuildStage?,
+            host:Symbol.Triple,
             name:Symbol.PackageAtRef)
         {
             self.id = id
@@ -51,6 +56,7 @@ extension Unidoc
             self.launched = launched
             self.assignee = assignee
             self.stage = stage
+            self.host = host
             self.name = name
         }
     }
@@ -67,6 +73,7 @@ extension Unidoc.PendingBuild:Mongo.MasterCodingModel
         case launched = "L"
         case assignee = "A"
         case stage = "S"
+        case host = "H"
         case name = "N"
 
         case package = "p"
@@ -84,6 +91,7 @@ extension Unidoc.PendingBuild:BSONDocumentEncodable
         bson[.launched] = self.launched
         bson[.assignee] = self.assignee
         bson[.stage] = self.stage
+        bson[.host] = self.host
         bson[.name] = self.name
 
         bson[.package] = self.id.package
@@ -101,6 +109,8 @@ extension Unidoc.PendingBuild:BSONDocumentDecodable
             launched: try bson[.launched]?.decode(),
             assignee: try bson[.assignee]?.decode(),
             stage: try bson[.stage]?.decode(),
+            //  Single-use compatibility shim, remove after one deployment cycle!
+            host: try bson[.host]?.decode() ?? .x86_64_unknown_linux_gnu,
             name: try bson[.name].decode())
     }
 }

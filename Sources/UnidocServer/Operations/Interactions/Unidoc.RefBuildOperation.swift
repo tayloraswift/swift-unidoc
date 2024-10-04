@@ -60,7 +60,9 @@ extension Unidoc.RefBuildOperation:Unidoc.RestrictedOperation
         switch self.action
         {
         case .submit:
-            _ = try await db.pendingBuilds.submitBuild(id: edition.id, name: name)
+            _ = try await db.pendingBuilds.submitBuild(id: edition.id, 
+                host: outputs.package.build.platform ?? .aarch64_unknown_linux_gnu,
+                name: name)
 
         case .cancel:
             guard try await db.pendingBuilds.cancelBuild(id: edition.id)

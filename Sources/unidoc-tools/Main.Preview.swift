@@ -141,9 +141,9 @@ extension Main.Preview:AsyncParsableCommand
 
                 let linker:Unidoc.GraphLinker = .init(bucket: nil)
                 let server:Unidoc.Server = .init(clientIdentity: try self.clientSSL,
+                    coordinators: [],
                     plugins: [linker],
                     options: options,
-                    builds: nil,
                     db: .init(sessions: pool, unidoc: "unidoc",  policy: policy))
 
                 try await server.run()

@@ -105,34 +105,6 @@ extension Unidoc.Router
     }
 
     mutating
-    func descend(
-        into:Unidoc.VolumeSelector.Type = Unidoc.VolumeSelector.self) -> Unidoc.VolumeSelector?
-    {
-        guard
-        let next:String = self.descend()
-        else
-        {
-            return nil
-        }
-
-        return .init(next)
-    }
-
-    mutating
-    func descend(
-        into:Symbol.Package.Type = Symbol.Package.self) -> Symbol.Package?
-    {
-        guard
-        let next:String = self.descend()
-        else
-        {
-            return nil
-        }
-
-        return .init(next)
-    }
-
-    mutating
     func descendIntoRef() -> Symbol.PackageAtRef?
     {
         guard
@@ -476,13 +448,23 @@ extension Unidoc.Router
             return .unordered(Unidoc.BuilderLabelOperation.init(request: request))
 
         case "poll"?:
-            guard let account:Unidoc.Account = self.authorization.account
+            guard
+            let channel:Symbol.Triple = self.descend()
+            else
+            {
+                return nil
+            }
+
+            guard
+            let account:Unidoc.Account = self.authorization.account
             else
             {
                 return .sync(error: "Missing authorization header\n", status: 401)
             }
 
-            return .unordered(Unidoc.BuilderPollOperation.init(id: account))
+            return .unordered(Unidoc.BuilderPollOperation.init(
+                builder: account,
+                channel: channel))
 
         default:
             return nil
