@@ -99,20 +99,28 @@ extension SSGC.Linker.Tables
     /// the rest should only be added after completing a full pass over all the declarations and
     /// extensions.
     ///
-    /// This function doesn’t check for duplicates.
+    /// This function checks for duplicates.
     mutating
-    func allocate(decl:SSGC.Decl, language:Phylum.Language) -> Int32
+    func allocate(decl:SSGC.Decl, language:Phylum.Language) -> Int32?
     {
-        let vertex:SymbolGraph.Decl = .init(language: language,
-            phylum: decl.phylum,
-            kinks: decl.kinks,
-            path: decl.path)
+        {
+            guard case nil = $0
+            else
+            {
+                return nil
+            }
 
-        let scalar:Int32 = self.graph.decls.append(.init(decl: vertex),
-            id: decl.id)
+            let vertex:SymbolGraph.Decl = .init(language: language,
+                phylum: decl.phylum,
+                kinks: decl.kinks,
+                path: decl.path)
 
-        self.decls[decl.id] = scalar
-        return scalar
+            let scalar:Int32 = self.graph.decls.append(.init(decl: vertex),
+                id: decl.id)
+            $0 = scalar
+            return scalar
+
+        } (&self.decls[decl.id])
     }
 
     /// Indexes the declaration extended by the given extension and appends the (empty)

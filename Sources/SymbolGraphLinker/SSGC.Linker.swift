@@ -245,7 +245,17 @@ extension SSGC.Linker
         var scalars:(first:Int32, last:Int32)? = nil
         for decl:SSGC.Decl in decls
         {
+            guard
             let scalar:Int32 = self.tables.allocate(decl: decl, language: language)
+            else
+            {
+                self.tables.diagnostics[nil] = .warning("""
+                    Declaration '\(decl.path)' was synthesized by multiple modules in this
+                    package and only one copy will be kept
+                    """)
+                continue
+            }
+
             switch scalars
             {
             case  nil:              scalars = (scalar, scalar)
