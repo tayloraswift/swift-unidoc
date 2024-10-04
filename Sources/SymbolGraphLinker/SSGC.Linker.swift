@@ -266,7 +266,7 @@ extension SSGC.Linker
             else
             {
                 self.tables.diagnostics[nil] = .warning("""
-                    Declaration '\($0.path)' was synthesized by multiple modules in this
+                    Declaration '\($0.path)' was synthesized by multiple modules in this \
                     package and only one copy will be kept
                     """)
                 return false
