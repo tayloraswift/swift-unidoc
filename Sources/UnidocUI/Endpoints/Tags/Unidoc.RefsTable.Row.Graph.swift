@@ -161,6 +161,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                         ("Uplink", .uplink),
                         ("Unlink", .unlink),
                         ("Delete", .delete),
+                        ("Cancel action", .cancel),
                         ("Mark vintage", .vintage)
                     ]
                     {
@@ -170,6 +171,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
 
                             switch route
                             {
+                            case .cancel:   break
                             //  Uplink does not require confirmation.
                             case .uplink:   break
                             case .unlink:   action["y"] = "false"

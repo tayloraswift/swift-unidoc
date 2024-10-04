@@ -30,11 +30,17 @@ extension Unidoc.LinkerOperation:Unidoc.AdministrativeOperation
     {
         switch (self.scope, self.update)
         {
-        case (nil, .action(let action)):
+        case (nil, .action(nil)):
+            return nil
+
+        case (nil, .action(let action?)):
             try await db.snapshots.queueAll(for: action)
 
-        case (let scope?, .action(let action)):
+        case (let scope?, .action(let action?)):
             try await db.snapshots.queue(id: scope, for: action)
+
+        case (let scope?, .action(nil)):
+            try await db.snapshots.clear(id: scope)
 
         case (let scope?, .vintage(let vintage)):
             try await db.snapshots.mark(id: scope, vintage: vintage)

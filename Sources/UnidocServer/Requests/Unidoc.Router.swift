@@ -489,6 +489,7 @@ extension Unidoc.Router
 
             switch route
             {
+            case .cancel:   return nil
             case .uplink:   return nil
             case .unlink:   page = .unlink(uri)
             case .delete:   page = .delete(uri)
@@ -502,6 +503,7 @@ extension Unidoc.Router
 
         switch route
         {
+        case .cancel:   update = .action(nil)
         case .uplink:   update = .action(.uplinkRefresh)
         case .unlink:   update = .action(.unlink)
         case .delete:   update = .action(.delete)

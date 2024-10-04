@@ -5,6 +5,7 @@ extension Unidoc
     @frozen public
     enum LinkerRoute:String, URI.Path.ComponentConvertible
     {
+        case cancel
         case uplink
         case unlink
         case delete
