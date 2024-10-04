@@ -93,13 +93,12 @@ extension SSGC.Linker.Tables
         } (&self.articles[article])
     }
 
-    /// Indexes the given declaration and appends it to the symbol graph.
+    /// Indexes the given declaration and appends it to the symbol graph if and only if it has
+    /// not already been indexed. Returns nil if the declaration has already been indexed.
     ///
     /// This function only populates basic information (flags and path) about the declaration,
     /// the rest should only be added after completing a full pass over all the declarations and
     /// extensions.
-    ///
-    /// This function checks for duplicates.
     mutating
     func allocate(decl:SSGC.Decl, language:Phylum.Language) -> Int32?
     {
