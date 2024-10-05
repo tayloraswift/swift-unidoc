@@ -565,11 +565,14 @@ extension SSGC.TypeChecker
             let conditions:Set<GenericConstraint<Symbol.Decl>> = heir.conformances[conformance]
             else
             {
-                throw AssertionError.init(message: """
-                    Declaration '\(heir.value.path)' cannot inherit feature \
-                    '\(feature.value.path)' because it itself does not conform to \
-                    '\(feature.value.path.prefix.joined(separator: "."))' (\(conformance))
-                    """)
+                //  This is a bug in lib/SymbolGraphGen.
+                //  https://github.com/swiftlang/swift/issues/76877
+                return
+                //  throw AssertionError.init(message: """
+                //      Declaration '\(heir.value.path)' cannot inherit feature \
+                //      '\(feature.value.path)' because it itself does not conform to \
+                //      '\(feature.value.path.prefix.joined(separator: "."))' (\(conformance))
+                //      """)
             }
 
             self.extensions[extending: heir, where: conditions].add(
