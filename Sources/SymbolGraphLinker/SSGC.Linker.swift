@@ -200,26 +200,40 @@ extension SSGC.Linker
         as language:Phylum.Language,
         at offset:Int)
     {
-        let destinations:[SymbolGraph.Namespace] = declarations.map
+        let destinations:
+        [(
+            allocated:SymbolGraph.Namespace,
+            qualifier:Symbol.Module,
+            decls:[SSGC.Decl]
+        )] = declarations.reduce(into: [])
         {
-            .init(
-                range: self.allocate(decls: $0.decls, language: language),
-                index: self.tables.intern($0.id))
+            guard
+            let (range, decls):(ClosedRange<Int32>, [SSGC.Decl]) = self.allocate(
+                deduplicating: $1.decls,
+                language: language)
+            else
+            {
+                return
+            }
+
+            let allocated:SymbolGraph.Namespace = .init(
+                range: range,
+                index: self.tables.intern($1.id))
+
+            $0.append((allocated, $1.id, decls))
         }
         ;
         {
-            $0.reserveCapacity(destinations.reduce(0) { $0 + $1.range.count })
+            $0.reserveCapacity(destinations.reduce(0) { $0 + $1.allocated.range.count })
 
-            for (namespace, destination):
-                ((id:Symbol.Module, decls:[SSGC.Decl]), SymbolGraph.Namespace) in zip(
-                declarations,
-                destinations)
+            for (allocated, qualifier, decls):
+                (SymbolGraph.Namespace, Symbol.Module, [SSGC.Decl]) in destinations
             {
-                for (i, decl):(Int32, SSGC.Decl) in zip(destination.range, namespace.decls)
+                for (i, decl):(Int32, SSGC.Decl) in zip(allocated.range, decls)
                 {
                     let hash:FNV24 = .decl(decl.id)
                     //  Make the decl visible to codelink resolution.
-                    self.tables.packageLinks[namespace.id, decl.path].append(.init(
+                    self.tables.packageLinks[qualifier, decl.path].append(.init(
                         phylum: decl.phylum,
                         decl: i,
                         heir: nil,
@@ -228,37 +242,52 @@ extension SSGC.Linker
                         id: decl.id))
                     //  Assign the decl a URI, and record the decl’s hash
                     //  so we will know if it has a hash collision.
-                    self.router[namespace.id, decl.path, decl.phylum][hash, default: []]
+                    self.router[qualifier, decl.path, decl.phylum][hash, default: []]
                         .append(i)
 
-                    $0.append((decl, i, namespace.id))
+                    $0.append((decl, i, qualifier))
                 }
             }
         } (&self.contexts[offset].decls)
 
-        self.tables.graph.cultures[offset].namespaces = destinations
+        self.tables.graph.cultures[offset].namespaces = destinations.map(\.allocated)
     }
 
     private mutating
-    func allocate(decls:[SSGC.Decl], language:Phylum.Language) -> ClosedRange<Int32>
+    func allocate(
+        deduplicating decls:consuming [SSGC.Decl],
+        language:Phylum.Language) -> (ClosedRange<Int32>, [SSGC.Decl])?
     {
         var scalars:(first:Int32, last:Int32)? = nil
-        for decl:SSGC.Decl in decls
+        let kept:[SSGC.Decl] = decls.filter
         {
-            let scalar:Int32 = self.tables.allocate(decl: decl, language: language)
+            guard
+            let scalar:Int32 = self.tables.allocate(decl: $0, language: language)
+            else
+            {
+                self.tables.diagnostics[nil] = .warning("""
+                    Declaration '\($0.path)' was synthesized by multiple modules in this \
+                    package and only one copy will be kept
+                    """)
+                return false
+            }
+
             switch scalars
             {
             case  nil:              scalars = (scalar, scalar)
             case (let first, _)?:   scalars = (first,  scalar)
             }
+
+            return true
         }
+
         if  case (let first, let last)? = scalars
         {
-            return first ... last
+            return (first ... last, kept)
         }
         else
         {
-            fatalError("cannot allocate empty declaration array")
+            return nil
         }
     }
 
