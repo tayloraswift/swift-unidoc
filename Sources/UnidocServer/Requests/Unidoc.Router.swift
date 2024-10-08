@@ -504,7 +504,7 @@ extension Unidoc.Router
         switch route
         {
         case .cancel:   update = .action(nil)
-        case .uplink:   update = .action(.uplinkRefresh)
+        case .uplink:   update = .action(.uplink)
         case .unlink:   update = .action(.unlink)
         case .delete:   update = .action(.delete)
         case .vintage:  update = .vintage(true)
@@ -637,9 +637,7 @@ extension Unidoc.Router
             }
 
         case .uplinkAll:
-            return .unordered(Unidoc.LinkerOperation.init(
-                update: .action(.uplinkRefresh),
-                scope: nil))
+            return .unordered(Unidoc.LinkerOperation.init(update: .action(.uplink), scope: nil))
 
         case .userConfig:
             if  let account:Unidoc.Account = self.authorization.account,

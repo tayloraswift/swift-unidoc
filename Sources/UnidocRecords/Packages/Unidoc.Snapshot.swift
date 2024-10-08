@@ -85,8 +85,10 @@ extension Unidoc.Snapshot
     @inlinable public
     init(id:Unidoc.Edition,
         metadata:SymbolGraphMetadata,
-        inline:SymbolGraph,
-        action:Unidoc.LinkerAction?)
+        inline:SymbolGraph?,
+        action:Unidoc.LinkerAction?,
+        type:Unidoc.GraphType = .bson,
+        size:Int64 = 0)
     {
         //  Is this the standard library? If so, is it a release version?
         let swift:PatchVersion?
@@ -106,8 +108,8 @@ extension Unidoc.Snapshot
             action: action,
             swift: swift,
             pins: [],
-            type: .bson,
-            size: 0,
+            type: type,
+            size: size,
             vintage: false)
     }
 }
@@ -115,28 +117,6 @@ extension Unidoc.Snapshot
 {
     @inlinable public
     var path:Unidoc.GraphPath { .init(edition: self.id, type: self.type) }
-
-    /// Moves the inline symbol graph out of this snapshot document, encoding it to BSON and
-    /// recording its size.
-    ///
-    /// This method returns nil if this snapshot does not contain an inline symbol graph.
-    @inlinable public mutating
-    func move() -> ArraySlice<UInt8>?
-    {
-        guard
-        let inline:SymbolGraph = self.inline
-        else
-        {
-            return nil
-        }
-
-        let document:BSON.Document = .init(encoding: inline)
-
-        self.size = Int64.init(document.bytes.count)
-        self.inline = nil
-
-        return document.bytes
-    }
 
     /// Wraps and returns the inline symbol graph from this snapshot document if present,
     /// delegates to the provided symbol graph loader otherwise.

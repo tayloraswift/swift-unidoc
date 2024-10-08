@@ -5,8 +5,7 @@ import S3Client
 
 extension Unidoc.BuildArtifact
 {
-    mutating
-    func export(as id:Unidoc.BuildIdentifier,
+    func exportLogs(as id:Unidoc.BuildIdentifier,
         from server:Unidoc.Server) async throws -> [Unidoc.BuildLogType]
     {
         var logs:[Unidoc.BuildLogType] = []
@@ -47,22 +46,6 @@ extension Unidoc.BuildArtifact
                     print(String.init(decoding: try Gzip.extract(from: log.text.bytes),
                         as: Unicode.UTF8.self))
                 }
-            }
-        }
-
-        if  case .success(var snapshot) = self.outcome
-        {
-            defer
-            {
-                self.outcome = .success(snapshot)
-            }
-            if  let bucket:AWS.S3.Bucket = server.bucket.graphs
-            {
-                let s3:AWS.S3.Client = .init(threads: .singleton,
-                    niossl: server.clientIdentity,
-                    bucket: bucket)
-
-                try await snapshot.moveSymbolGraph(to: s3)
             }
         }
 
