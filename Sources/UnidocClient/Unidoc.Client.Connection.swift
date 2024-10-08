@@ -70,9 +70,9 @@ extension Unidoc.Client<HTTP.Client2>.Connection
 }
 extension Unidoc.Client<HTTP.Client1>.Connection
 {
-    func upload(_ unlabeled:SymbolGraphObject<Void>) async throws
+    func upload(_ artifact:Unidoc.BuildArtifact) async throws
     {
-        let bson:BSON.Document = .init(encoding: unlabeled)
+        let bson:BSON.Document = .init(encoding: artifact)
 
         print("Uploading local symbol graph...")
 
@@ -82,7 +82,7 @@ extension Unidoc.Client<HTTP.Client1>.Connection
             let body:ByteBuffer = self.http.buffer(bytes: bson.bytes)
 
             let request:HTTP.Client1.Request = .init(method: .PUT,
-                path: "/builder/\(Unidoc.BuildRoute.labeling)",
+                path: "/builder/\(Unidoc.BuildRoute.artifact)",
                 head: [
                     "content-type": "\(type)",
                     "content-length": "\(body.readableBytes)",
@@ -110,30 +110,6 @@ extension Unidoc.Client<HTTP.Client1>.Connection
 }
 extension Unidoc.Client<HTTP.Client2>.Connection
 {
-    func upload(_ unlabeled:SymbolGraphObject<Void>) async throws
-    {
-        let bson:BSON.Document = .init(encoding: unlabeled)
-
-        print("Uploading unlabeled symbol graph...")
-
-        do
-        {
-            let _:Never = try await self.put(bson: bson,
-                to: "/builder/\(Unidoc.BuildRoute.labeling)",
-                timeout: .seconds(60))
-        }
-        catch is HTTP.NonError
-        {
-            print("Successfully uploaded unlabeled symbol graph!")
-        }
-        catch let error
-        {
-            print("Error: failed to upload unlabeled symbol graph!")
-            print("Error: \(error)")
-            throw error
-        }
-    }
-
     func upload(_ artifact:Unidoc.BuildArtifact) async throws
     {
         let bson:BSON.Document = .init(encoding: artifact)
@@ -143,7 +119,7 @@ extension Unidoc.Client<HTTP.Client2>.Connection
         do
         {
             let _:Never = try await self.put(bson: bson,
-                to: "/builder/\(Unidoc.BuildRoute.labeled)",
+                to: "/builder/\(Unidoc.BuildRoute.artifact)",
                 timeout: .seconds(60))
         }
         catch is HTTP.NonError

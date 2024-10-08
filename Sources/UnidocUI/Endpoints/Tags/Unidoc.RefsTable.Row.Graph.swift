@@ -61,7 +61,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                 case nil:
                     $0.class = "graph"
 
-                case .uplinkInitial, .uplinkRefresh:
+                case .uplink:
                     $0.class = "graph uplinking"
                     $0.title = """
                     This symbol graph is currently queued for documentation generation.
