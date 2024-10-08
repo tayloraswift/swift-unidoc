@@ -402,11 +402,16 @@ extension Unidoc.DB
         linking docs:SymbolGraphObject<Void>)
         async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
     {
-        var snapshot:Unidoc.Snapshot
-        let realm:Unidoc.Realm?
+        let package:Unidoc.PackageMetadata
+        let edition:Unidoc.EditionMetadata
+
+        (package, edition) = try await self.label(docs: docs.metadata)
 
         //  Don’t queue for uplink, since we’re going to do that synchronously.
-        (snapshot, realm) = try await self.label(documentation: docs, action: nil)
+        var snapshot:Unidoc.Snapshot = .init(id: edition.id,
+            metadata: docs.metadata,
+            inline: docs.graph,
+            action: nil)
 
         enum NoLoader:Unidoc.GraphLoader
         {
@@ -419,7 +424,7 @@ extension Unidoc.DB
         let linked:Unidoc.Mesh = try await self.link(&snapshot,
             symbol: docs.metadata.package.id,
             loader: nil as NoLoader?,
-            realm: realm)
+            realm: package.realm)
         /// This is here to workaround a Swift compiler bug.
         let volume:Symbol.Volume = linked.volume
 
@@ -441,42 +446,43 @@ extension Unidoc.DB
     public
     func store(docs:consuming SymbolGraphObject<Void>) async throws -> Unidoc.UploadStatus
     {
-        let (snapshot, _):(Unidoc.Snapshot, Unidoc.Realm?) = try await self.label(
-            documentation: docs,
-            action: .uplinkInitial)
+        let (_, edition):(_, Unidoc.EditionMetadata) = try await self.label(docs: docs.metadata)
+
+        let snapshot:Unidoc.Snapshot = .init(id: edition.id,
+            metadata: docs.metadata,
+            inline: docs.graph,
+            action: .uplink)
 
         return try await self.snapshots.store(snapshot: snapshot)
     }
 
     public
-    func label(
-        documentation:consuming SymbolGraphObject<Void>,
-        action:Unidoc.LinkerAction?) async throws ->
-        (
-            snapshot:Unidoc.Snapshot,
-            realm:Unidoc.Realm?
-        )
+    func label(docs:SymbolGraphMetadata) async throws ->
+    (
+        package:Unidoc.PackageMetadata,
+        edition:Unidoc.EditionMetadata
+    )
     {
         let (package, _):(Unidoc.PackageMetadata, Bool) = try await self.index(
-            package: documentation.metadata.package.id,
+            package: docs.package.id,
             repo: nil)
 
         let edition:Unidoc.EditionMetadata
-        if  let commit:SymbolGraphMetadata.Commit = documentation.metadata.commit
+        if  let commit:SymbolGraphMetadata.Commit = docs.commit
         {
             (edition, _) = try await self.index(
                 package: package.id,
-                version: documentation.metadata.package.name.version(tag: commit.name),
+                version: docs.package.name.version(tag: commit.name),
                 name: commit.name,
                 sha1: commit.sha1)
         }
         else if
-            case .swift = documentation.metadata.package.name,
-            case nil = documentation.metadata.swift.nightly
+            case .swift = docs.package.name,
+            case nil = docs.swift.nightly
         {
             (edition, _) = try await self.index(
                 package: package.id,
-                version: .release(documentation.metadata.swift.version),
+                version: .release(docs.swift.version),
                 name: "__Xcode",
                 sha1: nil)
         }
@@ -495,12 +501,7 @@ extension Unidoc.DB
             try await self.editions.upsert(edition)
         }
 
-        let snapshot:Unidoc.Snapshot = .init(id: edition.id,
-            metadata: documentation.metadata,
-            inline: documentation.graph,
-            action: action)
-
-        return (snapshot, package.realm)
+        return (package, edition)
     }
 }
 extension Unidoc.DB

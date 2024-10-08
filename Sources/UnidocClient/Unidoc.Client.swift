@@ -130,7 +130,6 @@ extension Unidoc.Client<HTTP.Client2>
     @discardableResult public
     func buildAndUpload(
         labels:Unidoc.BuildLabels,
-        action:Unidoc.LinkerAction,
         remove:Bool = false,
         with toolchain:Unidoc.Toolchain,
         cache:FilePath? = nil) async throws -> Bool
@@ -248,10 +247,7 @@ extension Unidoc.Client<HTTP.Client2>
         {
             let object:SymbolGraphObject<Void> = try .init(buffer: try docs.read())
 
-            artifact.outcome = .success(.init(id: labels.coordinate,
-                metadata: object.metadata,
-                inline: object.graph,
-                action: action))
+            artifact.outcome = .success(.init(metadata: object.metadata, graph: object.graph))
         }
 
         //  Attach build logs.
@@ -289,7 +285,10 @@ extension Unidoc.Client<HTTP.Client2>
             type: type,
             with: toolchain)
 
-        try await self.connect { try await $0.upload(object) }
+        let artifact:Unidoc.BuildArtifact = .init(edition: nil,
+            outcome: .success(.init(metadata: object.metadata, graph: object.graph)))
+
+        try await self.connect { try await $0.upload(artifact) }
 
         //  The final URL path component might have different casing than the directory name.
         print("""
@@ -311,14 +310,17 @@ extension Unidoc.Client<HTTP.Client1>
             type: type,
             with: toolchain)
 
-        try await self.connect { try await $0.upload(object) }
+        let artifact:Unidoc.BuildArtifact = .init(edition: nil,
+            outcome: .success(.init(metadata: object.metadata, graph: object.graph)))
+
+        try await self.connect { try await $0.upload(artifact) }
 
         print("""
             View the generated documentation at:
             http://\(self.http.remote):\(self.port)/tags/\(object.metadata.package.id)
             """)
     }
-} 
+}
 extension Unidoc.Client
 {
     /// Name is case-sensitive, so it is not modeled as a ``Symbol.Package``.
@@ -353,7 +355,7 @@ extension Unidoc.Client
             arguments.append("--sdk")
             arguments.append("\(sdk)")
         }
-        if  let local:FilePath.Directory 
+        if  let local:FilePath.Directory
         {
             arguments.append("--project-path")
             arguments.append("\(local)")
