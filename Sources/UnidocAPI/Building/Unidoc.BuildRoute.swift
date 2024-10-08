@@ -3,12 +3,10 @@ extension Unidoc
     @frozen public
     enum BuildRoute:String, Sendable
     {
+        /// Route for uploading symbol graphs.
+        case artifact
         /// Route for uploading build status and logs.
         case report
-        /// Route for uploading labeled symbol graphs.
-        case labeled
-        /// Route for uploading unlabeled symbol graphs.
-        case labeling
     }
 }
 extension Unidoc.BuildRoute:CustomStringConvertible

@@ -5,8 +5,7 @@ extension Unidoc
     @frozen public
     enum LinkerAction:Int32, Equatable, Sendable
     {
-        case uplinkInitial = 0
-        case uplinkRefresh
+        case uplink = 1
         case unlink
         case delete
     }
@@ -18,10 +17,9 @@ extension Unidoc.LinkerAction:CustomStringConvertible
     {
         switch self
         {
-        case .uplinkInitial:    "UPLINK_INITIAL"
-        case .uplinkRefresh:    "UPLINK_REFRESH"
-        case .unlink:           "UNLINK"
-        case .delete:           "DELETE"
+        case .uplink:   "UPLINK"
+        case .unlink:   "UNLINK"
+        case .delete:   "DELETE"
         }
     }
 }
@@ -32,11 +30,10 @@ extension Unidoc.LinkerAction:LosslessStringConvertible
     {
         switch description
         {
-        case "UPLINK_INITIAL":  self = .uplinkInitial
-        case "UPLINK_REFRESH":  self = .uplinkRefresh
-        case "UNLINK":          self = .unlink
-        case "DELETE":          self = .delete
-        default:                return nil
+        case "UPLINK":  self = .uplink
+        case "UNLINK":  self = .unlink
+        case "DELETE":  self = .delete
+        default:        return nil
         }
     }
 }

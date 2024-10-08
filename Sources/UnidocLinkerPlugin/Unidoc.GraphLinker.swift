@@ -58,7 +58,7 @@ extension Unidoc.GraphLinker
         action:
         switch operation.action
         {
-        case .uplinkInitial, .uplinkRefresh:
+        case .uplink:
             guard
             let status:Unidoc.UplinkStatus = try await context.db.uplink(operation.edition,
                 from: graphs)

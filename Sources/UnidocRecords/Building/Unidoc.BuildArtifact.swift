@@ -7,9 +7,9 @@ extension Unidoc
     struct BuildArtifact:Sendable
     {
         public
-        let edition:Edition
+        let edition:Edition?
         public
-        var outcome:Result<Snapshot, BuildFailure>
+        var outcome:Result<BuildPayload, BuildFailure>
         public
         var seconds:Int64
         public
@@ -18,8 +18,8 @@ extension Unidoc
         var logsAreSecret:Bool
 
         @inlinable public
-        init(edition:Edition,
-            outcome:Result<Snapshot, BuildFailure>,
+        init(edition:Edition?,
+            outcome:Result<BuildPayload, BuildFailure>,
             seconds:Int64 = 0,
             logs:[BuildLog] = [],
             logsAreSecret:Bool = false)
@@ -80,11 +80,11 @@ extension Unidoc.BuildArtifact:BSONDocumentDecodable
     public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        let outcome:Result<Unidoc.Snapshot, Unidoc.BuildFailure>
+        let outcome:Result<Unidoc.BuildPayload, Unidoc.BuildFailure>
 
-        if  let snapshot:Unidoc.Snapshot = try bson[.payload]?.decode()
+        if  let payload:Unidoc.BuildPayload = try bson[.payload]?.decode()
         {
-            outcome = .success(snapshot)
+            outcome = .success(payload)
         }
         else
         {
@@ -92,7 +92,7 @@ extension Unidoc.BuildArtifact:BSONDocumentDecodable
         }
 
         self.init(
-            edition: try bson[.edition].decode(),
+            edition: try bson[.edition]?.decode(),
             outcome: outcome,
             seconds: try bson[.seconds].decode(),
             logs: try bson[.logs]?.decode() ?? [],
