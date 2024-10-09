@@ -70,52 +70,23 @@ extension Unidoc.Mesh.Interior
                 symbolsLinked: symbols.linked),
             packages: pins.compactMap(\.?.package))
 
-        let conformances:Unidoc.Linker.Table<Unidoc.Conformers>
-        let products:[Unidoc.ProductVertex]
-        let cultures:[Unidoc.CultureVertex]
+        var tables:Unidoc.LinkerTables = .init(linker: consume linker)
 
-        let redirects:[Unidoc.RedirectVertex]
-        let articles:[Unidoc.ArticleVertex]
-        let decls:[Unidoc.DeclVertex]
-        let groups:Unidoc.Mesh.Groups
-        let extensions:Unidoc.Linker.Table<Unidoc.Extension>
+        let conformances:Unidoc.Linker.Table<Unidoc.Conformers> = tables.linkConformingTypes()
+        let products:[Unidoc.ProductVertex] = tables.linkProducts()
 
-        if  metadata.abi < .v(0, 11, 0)
-        {
-            var tables:Unidoc.Linker.Tables = .init(context: consume linker)
+        tables.linkCurations()
+        tables.linkIntrinsics()
 
-            conformances = tables.linkConformingTypes()
-            products = tables.linkProducts()
-            cultures = tables.linkCultures()
+        let decls:[Unidoc.DeclVertex] = tables.linkDecls()
+        let articles:[Unidoc.ArticleVertex] = tables.linkArticles()
+        let cultures:[Unidoc.CultureVertex] = tables.linkCultures()
+        let redirects:[Unidoc.RedirectVertex] = tables.linkRedirects()
 
-            redirects = []
-            articles = tables.articles
-            decls = tables.decls
-            groups = tables.groups
-            extensions = tables.extensions
+        let extensions:Unidoc.Linker.Table<Unidoc.Extension> = tables.extensions
+        let groups:Unidoc.Mesh.Groups = tables.groups
 
-            linker = tables.context
-        }
-        else
-        {
-            var tables:Unidoc.LinkerTables = .init(linker: consume linker)
-
-            conformances = tables.linkConformingTypes()
-            products = tables.linkProducts()
-
-            tables.linkCurations()
-            tables.linkIntrinsics()
-
-            decls = tables.linkDecls()
-            articles = tables.linkArticles()
-            cultures = tables.linkCultures()
-            redirects = tables.linkRedirects()
-
-            extensions = tables.extensions
-            groups = tables.groups
-
-            linker = tables.linker
-        }
+        linker = (consume tables).linker
 
         self.init(around: landingVertex,
             conformances: conformances,
