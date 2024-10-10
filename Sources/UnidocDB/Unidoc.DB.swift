@@ -408,7 +408,7 @@ extension Unidoc.DB
         (package, edition) = try await self.label(docs: docs.metadata)
 
         //  Don’t queue for uplink, since we’re going to do that synchronously.
-        var snapshot:Unidoc.Snapshot = .init(id: edition.id,
+        let snapshot:Unidoc.Snapshot = .init(id: edition.id,
             metadata: docs.metadata,
             inline: docs.graph,
             action: nil)
@@ -421,7 +421,7 @@ extension Unidoc.DB
             }
         }
 
-        let linked:Unidoc.Mesh = try await self.link(&snapshot,
+        let linked:Unidoc.Mesh = try await self.link(snapshot,
             symbol: docs.metadata.package.id,
             loader: nil as NoLoader?,
             realm: package.realm)
@@ -429,7 +429,7 @@ extension Unidoc.DB
         let volume:Symbol.Volume = linked.volume
 
         let uploaded:Unidoc.UploadStatus = try await self.snapshots.store(
-            snapshot: /* consume */ snapshot) // https://github.com/apple/swift/issues/71605
+            snapshot: snapshot)
 
         let uplinked:Unidoc.UplinkStatus = .init(
             edition: uploaded.edition,
@@ -518,22 +518,12 @@ extension Unidoc.DB
             return nil
         }
 
-        /// We do **not** transition the snapshot link state here, since we would rather
-        /// update the field selectively, and do so **after** we have successfully filled the
-        /// volume.
-        var snapshot:Unidoc.Snapshot = stored
-
-        let linked:Unidoc.Mesh = try await self.link(&snapshot,
+        let linked:Unidoc.Mesh = try await self.link(stored,
             symbol: package.symbol,
             loader: loader,
             realm: package.realm)
         /// This is here to workaround a Swift compiler bug.
         let volume:Symbol.Volume = linked.volume
-
-        if  stored != snapshot
-        {
-            try await self.snapshots.replace(snapshot)
-        }
 
         return .init(edition: id,
             volume: volume,
@@ -741,21 +731,12 @@ extension Unidoc.DB
         return surfaceDelta
     }
 
-    /// Pins as many of the snapshot’s dependencies as possible. After this function returns,
-    /// the `snapshot` will contain a list of ``Snapshot/pins`` matching the length of the
-    /// ``SymbolGraphMetadata/dependencies`` list. The two arrays will share indices.
+    /// Pins as many of the snapshot’s dependencies as possible. The array returned matches the
+    /// length of the ``SymbolGraphMetadata/dependencies`` list. The two will share indices.
     private
-    func pin(_ snapshot:inout Unidoc.Snapshot) async throws
+    func pin(_ snapshot:Unidoc.Snapshot) async throws -> [Unidoc.EditionMetadata?]
     {
         print("pinning dependencies for \(snapshot.metadata.package.name)...")
-
-        //  Important: all snapshots start off with an empty pin list, so we might need to
-        //  extend the array to match the number of dependencies in the metadata.
-        let unallocated:Int = snapshot.metadata.dependencies.count - snapshot.pins.count
-        if  unallocated > 0
-        {
-            snapshot.pins += repeatElement(nil, count: unallocated)
-        }
 
         let local:Bool = snapshot.metadata.commit == nil
 
@@ -763,51 +744,33 @@ extension Unidoc.DB
         let query:Unidoc.PinDependenciesQuery = .init(for: snapshot, locally: local)
         else
         {
-            return
+            return .init(repeating: nil, count: snapshot.metadata.dependencies.count)
         }
 
-        var pins:[Symbol.Package: Unidoc.Edition] = [:]
+        var pins:[Symbol.Package: Unidoc.EditionMetadata] = [:]
 
-        for dependency:Symbol.PackageDependency<Unidoc.Edition> in try await self.query(
+        for dependency:Symbol.PackageDependency<Unidoc.EditionMetadata> in try await self.query(
             with: query)
         {
             pins[dependency.package] = dependency.version
         }
 
-        var all:[Unidoc.Edition] = []
-
-        for (pin, dependency):(Int, SymbolGraphMetadata.Dependency) in zip(
-            snapshot.pins.indices,
-            snapshot.metadata.dependencies)
+        return snapshot.metadata.dependencies.map
         {
-            if  let pinned:Unidoc.Edition = local
-                    ? pins[dependency.package.name]
-                    : pins[dependency.id]
-            {
-                snapshot.pins[pin] = pinned
-                all.append(pinned)
-            }
-            else if
-                let pinned:Unidoc.Edition = snapshot.pins[pin]
-            {
-                all.append(pinned)
-            }
-            else
-            {
-                print("failed to pin '\(dependency.id)' to '\(dependency.version)'")
-            }
+            local ? pins[$0.package.name] : pins[$0.id]
         }
     }
 
     private
-    func link(_ snapshot:inout Unidoc.Snapshot,
+    func link(_ snapshot:Unidoc.Snapshot,
         symbol package:Symbol.Package,
         loader:(some Unidoc.GraphLoader)?,
         realm:Unidoc.Realm?) async throws -> Unidoc.Mesh
     {
-        try await self.pin(&snapshot)
-
-        var linker:Unidoc.Linker = try await self.snapshots.load(for: snapshot, from: loader)
+        let pinned:[Unidoc.EditionMetadata?] = try await self.pin(snapshot)
+        var linker:Unidoc.Linker = try await self.snapshots.load(snapshot,
+            pins: pinned,
+            with: loader)
 
         let latestRelease:Unidoc.Edition?
         let thisRelease:PatchVersion?
@@ -885,7 +848,7 @@ extension Unidoc.DB
         }
 
         let mesh:Unidoc.Mesh = linker.link(primary: snapshot.metadata,
-            pins: snapshot.pins,
+            pins: pinned,
             latestRelease: latestRelease,
             thisRelease: thisRelease,
             //  We want the version component of the volume symbol to be stable,

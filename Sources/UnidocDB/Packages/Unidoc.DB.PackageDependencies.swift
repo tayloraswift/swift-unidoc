@@ -64,9 +64,16 @@ extension Unidoc.DB.PackageDependencies
     {
         let dependencies:[Unidoc.PackageDependency] = boundaries.reduce(into: [])
         {
-            if  let package:Unidoc.Package = $1.target.pin?.edition.package
+            //  There is a really weird hypothetical edge case here where we have a pin but
+            //  somehow no target ref name. This could happen, for example, if something linked
+            //  against a nightly build of the Swift standard library, whose symbol graph would
+            //  lack a ref name, which we currently would not bother to look up through any
+            //  other means. However, we have a lot of policies in place at the deployment
+            //  level to prevent this from happening, so this should never occur in production.
+            if  let package:Unidoc.Package = $1.target.pin?.edition.package,
+                let packageRef:String = $1.targetRef
             {
-                $0.append(.init(source: source, target: package))
+                $0.append(.init(source: source, target: package, targetRef: packageRef))
             }
         }
 

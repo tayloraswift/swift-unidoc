@@ -15,8 +15,6 @@ extension Unidoc
         public
         let swift:PatchVersion?
         public
-        let pins:[Edition?]?
-        public
         let type:GraphType?
         public
         let size:Int64?
@@ -25,14 +23,12 @@ extension Unidoc
         init(metadata:SymbolGraphMetadata?,
             action:LinkerAction?,
             swift:PatchVersion?,
-            pins:[Edition?]?,
             type:GraphType?,
             size:Int64?)
         {
             self.metadata = metadata
             self.action = action
             self.swift = swift
-            self.pins = pins
             self.type = type
             self.size = size
         }
@@ -46,7 +42,6 @@ extension Unidoc.SnapshotDelta:BSONDocumentDecodable
         self.init(metadata: try bson[.metadata]?.decode(),
             action: try bson[.action]?.decode(),
             swift: try bson[.swift]?.decode(),
-            pins: try bson[.pins]?.decode(),
             type: try bson[.type]?.decode(),
             size: try bson[.size]?.decode())
     }

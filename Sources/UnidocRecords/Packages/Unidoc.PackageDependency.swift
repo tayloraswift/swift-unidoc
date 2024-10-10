@@ -11,21 +11,30 @@ extension Unidoc
         /// The latest release version of the ``source`` package.
         public
         var dependent:Version
+        /// A name identifying the version of the ``target`` package pinned by the latest
+        /// release version of the ``source`` package.
+        ///
+        /// TODO: deoptionalize
+        public
+        var targetRef:String?
 
         @inlinable
-        init(id:Edge<Package>, dependent:Version)
+        init(id:Edge<Package>, dependent:Version, targetRef:String?)
         {
             self.id = id
             self.dependent = dependent
+            self.targetRef = targetRef
         }
     }
 }
 extension Unidoc.PackageDependency
 {
     @inlinable public
-    init(source:Unidoc.Edition, target:Unidoc.Package)
+    init(source:Unidoc.Edition, target:Unidoc.Package, targetRef:String)
     {
-        self.init(id: .init(source: source.package, target: target), dependent: source.version)
+        self.init(id: .init(source: source.package, target: target),
+            dependent: source.version,
+            targetRef: targetRef)
     }
 }
 extension Unidoc.PackageDependency
@@ -42,6 +51,7 @@ extension Unidoc.PackageDependency
     {
         case id = "_id"
         case source = "e"
+        case targetRef = "R"
     }
 }
 extension Unidoc.PackageDependency:BSONDocumentEncodable
@@ -51,6 +61,7 @@ extension Unidoc.PackageDependency:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.source] = self.source
+        bson[.targetRef] = self.targetRef
     }
 }
 extension Unidoc.PackageDependency:BSONDocumentDecodable
@@ -59,6 +70,8 @@ extension Unidoc.PackageDependency:BSONDocumentDecodable
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         let source:Unidoc.Edition = try bson[.source].decode()
-        self.init(id: try bson[.id].decode(), dependent: source.version)
+        self.init(id: try bson[.id].decode(),
+            dependent: source.version,
+            targetRef: try bson[.targetRef]?.decode())
     }
 }

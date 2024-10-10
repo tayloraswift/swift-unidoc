@@ -9,13 +9,13 @@ extension Unidoc.Snapshot
 {
     /// Exonyms are the names the package being linked uses to refer to its dependencies.
     /// Exonyms should never contain a scope qualifier.
-    func exonyms() -> [Unidoc.Edition: Symbol.Package]
+    func exonyms(pins:[Unidoc.EditionMetadata?]) -> [Unidoc.Edition: Symbol.Package]
     {
-        var exonyms:[Unidoc.Edition: Symbol.Package] = .init(minimumCapacity: self.pins.count)
+        var exonyms:[Unidoc.Edition: Symbol.Package] = .init(minimumCapacity: pins.count)
 
-        for case (let pin?, let dependency) in zip(self.pins, self.metadata.dependencies)
+        for case (let pin?, let dependency) in zip(pins, self.metadata.dependencies)
         {
-            exonyms[pin] = dependency.package.name
+            exonyms[pin.id] = dependency.package.name
         }
 
         return exonyms

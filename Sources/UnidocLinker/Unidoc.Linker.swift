@@ -102,7 +102,7 @@ extension Unidoc.Linker
 {
     public mutating
     func link(primary metadata:SymbolGraphMetadata,
-        pins pinnedDependencies:[Unidoc.Edition?],
+        pins pinnedDependencies:[Unidoc.EditionMetadata?],
         latestRelease:Unidoc.Edition?,
         thisRelease:PatchVersion?,
         as volume:Symbol.Volume,
@@ -110,7 +110,7 @@ extension Unidoc.Linker
     {
         let boundaries:[Unidoc.Mesh.Boundary] = self.boundaries(pinned: pinnedDependencies)
         let interior:Unidoc.Mesh.Interior = .init(primary: metadata,
-            pins: pinnedDependencies,
+            pinned: pinnedDependencies.compactMap(\.?.id.package),
             with: &self)
 
         let metadata:Unidoc.VolumeMetadata = .init(id: self.current.id,
@@ -231,7 +231,7 @@ extension Unidoc.Linker
 extension Unidoc.Linker
 {
     private
-    func boundaries(pinned:[Unidoc.Edition?]) -> [Unidoc.Mesh.Boundary]
+    func boundaries(pinned:[Unidoc.EditionMetadata?]) -> [Unidoc.Mesh.Boundary]
     {
         var boundaries:[Unidoc.Mesh.Boundary] = []
             boundaries.reserveCapacity(self.current.metadata.dependencies.count + 1)
@@ -240,41 +240,46 @@ extension Unidoc.Linker
             let swift:Graph = self[.swift]
         {
             boundaries.append(.init(
+                targetRef: swift.metadata.commit?.name,
                 targetABI: swift.scalars.hash,
                 target: .init(exonym: .swift,
                     requirement: nil,
                     resolution: nil,
                     pin: .linked(swift.id))))
         }
-        for (id, dependency):(Unidoc.Edition?, SymbolGraphMetadata.Dependency) in zip(pinned,
-            self.current.metadata.dependencies)
+        for (dependency, pin):(SymbolGraphMetadata.Dependency, Unidoc.EditionMetadata?) in zip(
+            self.current.metadata.dependencies,
+            pinned)
         {
+            let pinDepth:Unidoc.VolumeMetadata.DependencyPin?
             let pinABI:MD5?
-            let pin:Unidoc.VolumeMetadata.DependencyPin?
 
             if  let graph:Graph = self[dependency.package.name]
             {
+                pinDepth = .linked(graph.id)
                 pinABI = graph.scalars.hash
-                pin = .linked(graph.id)
             }
             else if
-                let id:Unidoc.Edition
+                let pin:Unidoc.EditionMetadata
             {
+                pinDepth = .pinned(pin.id)
                 pinABI = nil
-                pin = .pinned(id)
             }
             else
             {
+                pinDepth = nil
                 pinABI = nil
-                pin = nil
             }
 
             boundaries.append(.init(
+                //  We could also get this information from the symbol graph metadata, but that
+                //  is less likely to be present (for example, unbuilt snapshots)
+                targetRef: pin?.name,
                 targetABI: pinABI,
                 target: .init(exonym: dependency.package.name,
                     requirement: dependency.requirement,
                     resolution: dependency.version.release,
-                    pin: pin)))
+                    pin: pinDepth)))
         }
 
         return boundaries

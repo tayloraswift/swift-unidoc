@@ -63,7 +63,7 @@ table[data-type='dependencies']
 table[data-type='consumers']
 {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 2fr;
     border-collapse: collapse;
 
     > thead,

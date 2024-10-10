@@ -7,12 +7,15 @@ extension Unidoc.Mesh
     struct Boundary
     {
         public
+        let targetRef:String?
+        public
         let targetABI:MD5?
         public
         let target:Unidoc.VolumeMetadata.Dependency
 
-        init(targetABI:MD5?, target:Unidoc.VolumeMetadata.Dependency)
+        init(targetRef:String?, targetABI:MD5?, target:Unidoc.VolumeMetadata.Dependency)
         {
+            self.targetRef = targetRef
             self.targetABI = targetABI
             self.target = target
         }

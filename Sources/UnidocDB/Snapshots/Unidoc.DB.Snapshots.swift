@@ -89,10 +89,11 @@ extension Unidoc.DB.Snapshots
 }
 extension Unidoc.DB.Snapshots
 {
-    func load(for snapshot:Unidoc.Snapshot,
-        from loader:(some Unidoc.GraphLoader)?) async throws -> Unidoc.Linker
+    func load(_ snapshot:Unidoc.Snapshot,
+        pins:[Unidoc.EditionMetadata?],
+        with loader:(some Unidoc.GraphLoader)?) async throws -> Unidoc.Linker
     {
-        let exonyms:[Unidoc.Edition: Symbol.Package] = snapshot.exonyms()
+        let exonyms:[Unidoc.Edition: Symbol.Package] = snapshot.exonyms(pins: pins)
         var objects:[SymbolGraphObject<Unidoc.Edition>] = []
             objects.reserveCapacity(1 + exonyms.count)
 
