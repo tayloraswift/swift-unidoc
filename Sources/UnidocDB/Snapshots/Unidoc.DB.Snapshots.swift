@@ -97,7 +97,8 @@ extension Unidoc.DB.Snapshots
             objects.reserveCapacity(1 + exonyms.count)
 
         if  snapshot.metadata.package.name != .swift,
-            let swift:Unidoc.Snapshot = try await self.loadStandardLibrary()
+            let swift:Unidoc.Snapshot = try await self.loadStandardLibrary(
+                hint: snapshot.metadata.swift.version)
         {
             objects.append(try await swift.load(with: loader))
         }
@@ -131,15 +132,20 @@ extension Unidoc.DB.Snapshots
 extension Unidoc.DB.Snapshots
 {
     private
-    func loadStandardLibrary() async throws -> Unidoc.Snapshot?
+    func loadStandardLibrary(hint:PatchVersion) async throws -> Unidoc.Snapshot?
     {
         try await session.run(
-            command: Mongo.Find<Mongo.Single<Unidoc.Snapshot>>.init(Self.name,
-                limit: 1)
+            command: Mongo.Find<Mongo.Single<Unidoc.Snapshot>>.init(Self.name, limit: 1)
             {
                 $0[.filter]
                 {
+                    /// Hopefully this is a good enough heuristic for standard library ABI
+                    /// compatibility, which doesn’t actually formally exist on Linux.
+                    let highest:PatchVersion = .v(hint.components.major, .max, .max)
+
                     $0[Unidoc.Snapshot[.swift]] { $0[.exists] = true }
+                    $0[Unidoc.Snapshot[.swift]] { $0[.lte] = highest }
+                    $0[Unidoc.Snapshot[.swift]] { $0[.gte] = hint }
                 }
                 $0[.sort]
                 {
