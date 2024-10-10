@@ -39,8 +39,8 @@ extension Unidoc.ConsumersTable:HTML.OutputStreamable
             $0[.tr]
             {
                 $0[.th] = "Package"
-                $0[.th] = "Release"
                 $0[.th] = "Docs"
+                $0[.th] = "Dependency"
             }
         }
 
@@ -58,8 +58,6 @@ extension Unidoc.ConsumersTable:HTML.OutputStreamable
                         } = "\(row.package.symbol)"
                     }
 
-                    $0[.td] { $0.class = "ref" } = row.edition.name
-
                     $0[.td, { $0.class = "version" }]
                     {
                         guard
@@ -74,6 +72,12 @@ extension Unidoc.ConsumersTable:HTML.OutputStreamable
                             $0.href = "\(Unidoc.DocsEndpoint[volume])"
                         } = volume.symbol.version
                     }
+
+                    $0[.td]
+                    {
+                        $0.class = "ref"
+                        $0.title = row.packageRef.map { "\(row.edition.name) → \($0)" }
+                    } = row.packageRef ?? "?"
                 }
             }
         }

@@ -2,7 +2,6 @@ import MongoQL
 import SemanticVersions
 import SymbolGraphs
 import Symbols
-import Unidoc
 import UnidocRecords
 
 extension Unidoc
@@ -28,7 +27,7 @@ extension Unidoc.PinDependenciesQuery
         /// To link against versioned documentation, a snapshot must itself be versioned!
         let localOverride:PatchVersion? = local ? .max : nil
 
-        for case (nil, let dependency) in zip(snapshot.pins, snapshot.metadata.dependencies)
+        for dependency:SymbolGraphMetadata.Dependency in snapshot.metadata.dependencies
         {
             if  let localOverride:PatchVersion
             {
@@ -52,7 +51,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
     typealias Collation = SimpleCollation
-    typealias Iteration = Mongo.SingleBatch<Symbol.PackageDependency<Unidoc.Edition>>
+    typealias Iteration = Mongo.SingleBatch<Symbol.PackageDependency<Unidoc.EditionMetadata>>
 
     var hint:Mongo.CollectionIndex? { nil }
 
@@ -70,7 +69,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
         //  We are only interested in the coordinate value stored in the alias documents.
         pipeline[stage: .replaceWith] = .init
         {
-            $0[Symbol.PackageDependency<Unidoc.Edition>[.package]] = Unidoc.PackageAlias[.id]
+            $0[Iteration.BatchElement[.package]] = Unidoc.PackageAlias[.id]
             $0[coordinate] = Unidoc.PackageAlias[.coordinate]
         }
 
@@ -79,7 +78,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
         pipeline[stage: .lookup]
         {
             $0[.foreignField] = Symbol.PackageDependency<PatchVersion>[.package]
-            $0[.localField] = Symbol.PackageDependency<Unidoc.Edition>[.package]
+            $0[.localField] = Iteration.BatchElement[.package]
             $0[.pipeline] { $0[stage: .documents] = self.patches }
             $0[.as] = patch
         }
@@ -90,8 +89,6 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
         {
             $0[patch] = patch / Symbol.PackageDependency<PatchVersion>[.version]
         }
-
-        let edition:Mongo.AnyKeyPath = "_edition"
 
         //  Lookup release editions using the package coordinate and patch version.
         pipeline[stage: .lookup]
@@ -126,17 +123,11 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
                     }
                 }
             }
-            $0[.as] = edition
+            $0[.as] = Iteration.BatchElement[.version]
         }
-
-        pipeline[stage: .unwind] = edition
-
-        pipeline[stage: .set, using: Symbol.PackageDependency<Unidoc.Edition>.CodingKey.self]
-        {
-            $0[.version] = edition / Unidoc.EditionMetadata[.id]
-        }
-
         //  Lint temporary variables.
-        pipeline[stage: .unset] = [coordinate, patch, edition]
+        pipeline[stage: .unset] = [coordinate, patch]
+        //  Unwind single-element array.
+        pipeline[stage: .unwind] = Iteration.BatchElement[.version]
     }
 }
