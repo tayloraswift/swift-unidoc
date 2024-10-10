@@ -758,7 +758,6 @@ extension Unidoc.DB
         }
 
         let local:Bool = snapshot.metadata.commit == nil
-            && snapshot.metadata.package.name != "__swiftinit"
 
         guard
         let query:Unidoc.PinDependenciesQuery = .init(for: snapshot, locally: local)
