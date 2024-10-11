@@ -38,7 +38,7 @@ extension Unidoc.Mesh
 extension Unidoc.Mesh.Interior
 {
     init(primary metadata:SymbolGraphMetadata,
-        pins:[Unidoc.Edition?],
+        pinned:[Unidoc.Package],
         with linker:inout Unidoc.Linker)
     {
         let current:Unidoc.Edition = linker.current.id
@@ -68,7 +68,7 @@ extension Unidoc.Mesh.Interior
                 commit: metadata.commit?.sha1,
                 symbolsLinkable: symbols.linkable,
                 symbolsLinked: symbols.linked),
-            packages: pins.compactMap(\.?.package))
+            packages: pinned)
 
         var tables:Unidoc.LinkerTables = .init(linker: consume linker)
 

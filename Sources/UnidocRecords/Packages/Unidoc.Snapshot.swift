@@ -26,9 +26,10 @@ extension Unidoc
         /// latest version of the standard library without querying git tags.
         public
         var swift:PatchVersion?
-        /// Any dependencies that have been pinned for this snapshot.
-        public
-        var pins:[Edition?]
+
+        /// DEPRECATED!
+        @available(*, unavailable)
+        var pins:[Edition?] { [] }
 
         /// Indicates the format (compressed or not) of the symbol graph. This is currently only
         /// meaningful for symbol graphs stored in Amazon S3.
@@ -63,7 +64,6 @@ extension Unidoc
             inline:SymbolGraph?,
             action:LinkerAction?,
             swift:PatchVersion?,
-            pins:[Edition?],
             type:GraphType,
             size:Int64,
             vintage:Bool)
@@ -73,7 +73,6 @@ extension Unidoc
             self.inline = inline
             self.action = action
             self.swift = swift
-            self.pins = pins
             self.type = type
             self.size = size
             self.vintage = vintage
@@ -107,7 +106,6 @@ extension Unidoc.Snapshot
             inline: inline,
             action: action,
             swift: swift,
-            pins: [],
             type: type,
             size: size,
             vintage: false)
@@ -153,7 +151,10 @@ extension Unidoc.Snapshot
         case action = "U"
 
         case swift = "S"
+
+        @available(*, unavailable)
         case pins = "p"
+
         case type = "T"
         case size = "B"
         case vintage = "V"
@@ -170,7 +171,6 @@ extension Unidoc.Snapshot:BSONDocumentEncodable
         bson[.action] = self.action
 
         bson[.swift] = self.swift
-        bson[.pins] = self.pins.isEmpty ? nil : self.pins
         bson[.type] = self.type
         bson[.size] = self.size
         bson[.vintage] = self.vintage ? true : nil
@@ -186,7 +186,6 @@ extension Unidoc.Snapshot:BSONDocumentDecodable
             inline: try bson[.inline]?.decode(),
             action: try bson[.action]?.decode(),
             swift: try bson[.swift]?.decode(),
-            pins: try bson[.pins]?.decode() ?? [],
             type: try bson[.type]?.decode() ?? .bson,
             size: try bson[.size]?.decode() ?? 0,
             vintage: try bson[.vintage]?.decode() ?? false)

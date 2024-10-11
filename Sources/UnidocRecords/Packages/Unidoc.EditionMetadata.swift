@@ -1,10 +1,7 @@
 import BSON
-import MongoQL
 import SemanticVersions
 import SHA1
 import SymbolGraphs
-import Unidoc
-import UnidocRecords
 
 extension Unidoc
 {
@@ -63,9 +60,9 @@ extension Unidoc.EditionMetadata
     @inlinable public
     var version:Unidoc.Version { self.id.version }
 }
-extension Unidoc.EditionMetadata:Mongo.MasterCodingModel
+extension Unidoc.EditionMetadata
 {
-    public
+    @frozen public
     enum CodingKey:String, Sendable
     {
         case id = "_id"
@@ -101,7 +98,7 @@ extension Unidoc.EditionMetadata:BSONDocumentEncodable
 }
 extension Unidoc.EditionMetadata:BSONDocumentDecodable
 {
-    @inlinable public
+    public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
         self.init(id: try bson[.id].decode(),
