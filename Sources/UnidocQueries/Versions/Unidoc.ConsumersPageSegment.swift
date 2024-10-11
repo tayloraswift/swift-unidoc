@@ -30,11 +30,11 @@ extension Unidoc
                     $0[stage: .skip] = skip == 0 ? nil : skip
                     $0[stage: .limit] = limit
 
-                    $0[stage: .replaceWith] = .init
+                    $0[stage: .replaceWith, using: PackageDependent.CodingKey.self]
                     {
-                        $0[PackageDependent[.package]] = PackageDependency[.id]
-                            / Edge<Package>[.source]
-                        $0[PackageDependent[.edition]] = PackageDependency[.source]
+                        $0[.packageRef] = PackageDependency[.targetRef]
+                        $0[.package] = PackageDependency[.id] / Edge<Package>[.source]
+                        $0[.edition] = PackageDependency[.source]
                     }
 
                     //  Look up volume metadata, if it exists.
