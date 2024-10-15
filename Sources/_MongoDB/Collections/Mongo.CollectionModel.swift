@@ -254,50 +254,43 @@ extension Mongo.CollectionModel
     /// by `_id`, and starting after the specified identifier if non-nil.
     ///
     /// This is useful for implementing application-level cursors when starting a native mongod
-    /// cursor on every application run is not desirable.
+    /// cursor on every application run is not desirable. One example of when this could be
+    /// useful is when you want to be able to pause iteration for a long period of time — a
+    /// native MongoDB cursor would expire after some period of inactivity.
     ///
     /// You should **always** call this in a loop with a cooldown, to avoid spinning when the
     /// collection is empty.
+    ///
+    /// -   Parameters:
+    ///     -   limit:
+    ///         The maximum number of documents to return.
+    ///
+    ///     -   cursor:
+    ///         The identifier of the last document returned by a previous call to this
+    ///         function, which will be updated to the identifier of the last document returned
+    ///         by this call.
+    ///
+    ///         If no documents are returned, the cursor will be set to nil, even if it was
+    ///         initially non-nil.
     @inlinable public
-    func pull(_ limit:Int,
-        after cursor:inout Element.ID?) async throws -> [Element]
+    func pull(_ limit:Int, after cursor:inout Element.ID?) async throws -> [Element]
     {
         let elements:[Element] = try await session.run(
             command: Mongo.Find<Mongo.SingleBatch<Element>>.init(Self.name, limit: limit)
             {
                 $0[.filter]
                 {
-                    $0["_id"]
+                    if  let cursor:Element.ID
                     {
-                        if  let cursor:Element.ID
-                        {
-                            $0[.gt] = cursor
-                        }
-                        else
-                        {
-                            $0[.gte] = BSON.Min.init()
-                        }
+                        $0["_id"] { $0[.gt] = cursor }
                     }
                 }
-                $0[.sort, using: Mongo.AnyKeyPath.self]
-                {
-                    $0["_id"] = (+)
-                }
-                $0[.hint, using: Mongo.AnyKeyPath.self]
-                {
-                    $0["_id"] = (+)
-                }
+                $0[.sort, using: Mongo.AnyKeyPath.self] { $0["_id"] = (+) }
+                $0[.hint, using: Mongo.AnyKeyPath.self] { $0["_id"] = (+) }
             },
             against: self.database)
 
-        if  let last:Element = elements.last
-        {
-            cursor = last.id
-        }
-        else
-        {
-            cursor = nil
-        }
+        cursor = elements.last?.id
 
         return elements
     }
