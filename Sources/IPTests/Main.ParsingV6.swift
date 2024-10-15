@@ -12,6 +12,13 @@ extension Main.ParsingV6:TestBattery
     static
     func run(tests:TestGroup)
     {
+        if  let tests:TestGroup = tests / "Localhost",
+            let value:IP.V6 = tests.expect(
+                value: .init("::1"))
+        {
+            tests.expect(value ==? .localhost)
+        }
+
         if  let tests:TestGroup = tests / "Zero",
             let value:IP.V6 = tests.expect(
                 value: .init("::"))
