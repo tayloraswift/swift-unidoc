@@ -18,6 +18,9 @@ extension IP
 }
 extension IP.V4
 {
+    @inlinable public
+    static var localhost:Self { .init(storage: (0x7F_00_00_01 as UInt32).bigEndian) }
+
     /// The logical value of the address. The high byte is the first octet.
     @inlinable public
     var value:UInt32 { UInt32.init(bigEndian: self.storage) }

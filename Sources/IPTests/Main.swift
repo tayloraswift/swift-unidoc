@@ -9,5 +9,6 @@ enum Main:TestMain
         Mapping.self,
         MaskingV6.self,
         ParsingV6.self,
+        ParsingV4.self,
     ]
 }

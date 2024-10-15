@@ -126,6 +126,9 @@ extension IP.V6
     @inlinable public
     static var ones:Self { .init(storage: (~0, ~0)) }
 
+    @inlinable public
+    static var localhost:Self { .init(storage: (0, (1 as UInt64).bigEndian)) }
+
     /// The **logical** prefix address, in platform byte order. The high bits are the high byte
     /// of the first hextet.
     @inlinable public
