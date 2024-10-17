@@ -2,6 +2,7 @@ import _AsyncChannel
 import Atomics
 import HTTP
 import IP
+import IP_NIOCore
 import NIOCore
 import NIOHPACK
 import NIOHTTP1

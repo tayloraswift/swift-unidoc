@@ -5,39 +5,17 @@ extension IP
     @frozen public
     struct Policylist:Sendable
     {
-        /// IPv4 CIDR blocks, sorted by mask length.
         public
-        let v4:[(UInt8, [IP.V4: IP.Owner])]
-        /// IPv6 CIDR blocks, sorted by mask length.
+        let v4:Map<V4, Owner>
         public
-        let v6:[(UInt8, [IP.V6: IP.Owner])]
+        let v6:Map<V6, Owner>
 
-        @inlinable internal
-        init(
-            v4:[(UInt8, [IP.V4: IP.Owner])],
-            v6:[(UInt8, [IP.V6: IP.Owner])])
+        @inlinable public
+        init(v4:Map<V4, Owner> = [:], v6:Map<V6, Owner> = [:])
         {
             self.v4 = v4
             self.v6 = v6
         }
-    }
-}
-extension IP.Policylist
-{
-    @inlinable public
-    init()
-    {
-        self.init(v4: [], v6: [])
-    }
-
-    @inlinable public
-    init(
-        v4:borrowing IP.BlockTable<IP.V4, IP.Owner>,
-        v6:borrowing IP.BlockTable<IP.V6, IP.Owner>)
-    {
-        self.init(
-            v4: v4.blocks.sorted { $0.key < $1.key },
-            v6: v6.blocks.sorted { $0.key < $1.key })
     }
 }
 extension IP.Policylist
@@ -51,27 +29,19 @@ extension IP.Policylist
             return .unknown
         }
 
-        if  let ip:IP.V4 = ip.v4
+        if  let ip:IP.V4 = ip.v4,
+            let owner:IP.Owner = self.v4[ip]
         {
-            for (length, table):(UInt8, [IP.V4: IP.Owner]) in self.v4
-            {
-                if  let owner:IP.Owner = table[ip / length]
-                {
-                    return owner
-                }
-            }
+            return owner
+        }
+        else if
+            let owner:IP.Owner = self.v6[ip]
+        {
+            return owner
         }
         else
         {
-            for (length, table):(UInt8, [IP.V6: IP.Owner]) in self.v6
-            {
-                if  let owner:IP.Owner = table[ip / length]
-                {
-                    return owner
-                }
-            }
+            return .known
         }
-
-        return .known
     }
 }
