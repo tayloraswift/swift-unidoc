@@ -25,7 +25,6 @@ let package:Package = .init(
         .library(name: "HTTPClient", targets: ["HTTPClient"]),
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
-        .library(name: "IP", targets: ["IP"]),
         .library(name: "InlineArray", targets: ["InlineArray"]),
 
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
@@ -91,8 +90,10 @@ let package:Package = .init(
             from: "0.4.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.6.0")),
+        .package(url: "https://github.com/tayloraswift/swift-ip", .upToNextMinor(
+            from: "0.1.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.23.3")),
+            from: "0.23.3"),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
             from: "0.1.5")),
 
@@ -207,12 +208,12 @@ let package:Package = .init(
         .target(name: "HTTPServer",
             dependencies: [
                 .target(name: "_AsyncChannel"),
-
                 .target(name: "HTTP"),
-                .target(name: "IP"),
                 .target(name: "UA"),
                 .target(name: "URI"),
 
+                .product(name: "IP", package: "swift-ip"),
+                .product(name: "IP_NIOCore", package: "swift-ip"),
                 .product(name: "HTML", package: "swift-dom"),
                 .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
@@ -220,8 +221,6 @@ let package:Package = .init(
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
-
-        .target(name: "IP"),
 
         .target(name: "InlineArray"),
 
@@ -491,10 +490,10 @@ let package:Package = .init(
         .target(name: "UnidocDB",
             dependencies: [
                 .target(name: "_MongoDB"),
-                .target(name: "IP"),
                 .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
+                .product(name: "IP", package: "swift-ip"),
                 .product(name: "UnixCalendar", package: "swift-unixtime"),
             ]),
 
@@ -605,12 +604,6 @@ let package:Package = .init(
         .executableTarget(name: "FNV1Tests",
             dependencies: [
                 .target(name: "FNV1"),
-                .product(name: "Testing_", package: "swift-grammar"),
-            ]),
-
-        .executableTarget(name: "IPTests",
-            dependencies: [
-                .target(name: "IP"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 

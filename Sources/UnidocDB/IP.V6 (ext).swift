@@ -1,7 +1,7 @@
 import BSON
 import IP
 
-extension IP.V6:BSONBinaryEncodable
+extension IP.V6:@retroactive BSONBinaryEncodable
 {
     @inlinable public
     func encode(to bson:inout BSON.BinaryEncoder)
@@ -9,7 +9,7 @@ extension IP.V6:BSONBinaryEncodable
         withUnsafeBytes(of: self) { bson += $0 }
     }
 }
-extension IP.V6:BSONBinaryDecodable
+extension IP.V6:@retroactive BSONBinaryDecodable
 {
     @inlinable public
     init(bson:BSON.BinaryDecoder) throws
