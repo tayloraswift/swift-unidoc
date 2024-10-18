@@ -1,5 +1,5 @@
 {
-  "originHash" : "a0df78b9e191e720f7568437afff6ac0d7caa1d73d0fc7ae1c38735d5cea3f20",
+  "originHash" : "dc1730a5f256d43d8fd0c53d6aa90c4092dcffff451705fcabaadb271c3db81b",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -71,6 +71,15 @@
       "state" : {
         "revision" : "4d70a941b7039358f2ec8565f6c3b53c05f6c6ef",
         "version" : "0.6.3"
+      }
+    },
+    {
+      "identity" : "swift-ip",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tayloraswift/swift-ip",
+      "state" : {
+        "revision" : "4e462199f5caafe61a9c69cc4abd067ff2c22366",
+        "version" : "0.1.2"
       }
     },
     {
