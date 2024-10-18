@@ -42,6 +42,12 @@ extension Unidoc
 extension Unidoc.DB
 {
     @inlinable public
+    var searchbotCoverage:SearchbotCoverage
+    {
+        .init(database: self.id, session: self.session)
+    }
+
+    @inlinable public
     var searchbotGrid:SearchbotGrid
     {
         .init(database: self.id, session: self.session)

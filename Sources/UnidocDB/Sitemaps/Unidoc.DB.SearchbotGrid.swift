@@ -32,7 +32,7 @@ extension Unidoc.DB.SearchbotGrid
 extension Unidoc.DB.SearchbotGrid:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidoc.SearchbotCoverage
+    typealias Element = Unidoc.SearchbotCell
 
     @inlinable public static
     var name:Mongo.Collection { "SearchbotGrid" }

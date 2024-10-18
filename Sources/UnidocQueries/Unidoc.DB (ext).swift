@@ -82,7 +82,7 @@ extension Unidoc.DB
         in package:Unidoc.Package) async throws -> Unidoc.RedirectOutput?
     {
         guard
-        let visited:Unidoc.SearchbotCoverage = try await self.searchbotGrid.find(id: .init(
+        let visited:Unidoc.SearchbotCell = try await self.searchbotGrid.find(id: .init(
             trunk: package,
             shoot: shoot)),
         let redirect:Unidoc.RedirectOutput = try await self.query(
