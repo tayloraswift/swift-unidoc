@@ -136,9 +136,13 @@ extension Unidoc.Server
                 """)
         }
 
-        //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
+        //  Create the machine users, if they doesn’t exist. Don’t store the cookie, since we
         //  want to be able to change it without restarting the server.
-        let _:Unidoc.UserSecrets = try await db.users.update(user: .init(machine: 0))
+        for number:Int in 0 ..< self.options.builders
+        {
+            let id:UInt32 = .init(number)
+            let _:Unidoc.UserSecrets = try await db.users.update(user: .init(machine: id))
+        }
     }
 
     func update() async throws
