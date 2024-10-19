@@ -2,12 +2,12 @@
 
 import class IndexStoreDB.IndexStoreDB
 import class IndexStoreDB.IndexStoreLibrary
-import MarkdownPluginSwift
 import MarkdownPluginSwift_IndexStoreDB
 
 #endif
 
 import MarkdownABI
+import MarkdownPluginSwift
 import PackageGraphs
 import SymbolGraphLinker
 import SymbolGraphs
