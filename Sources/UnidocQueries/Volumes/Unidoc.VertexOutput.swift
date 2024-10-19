@@ -9,28 +9,61 @@ extension Unidoc
     struct VertexOutput:Sendable
     {
         public
-        let principal:PrincipalOutput
+        let matches:[AnyVertex]
+
         public
-        let canonical:AnyVertex?
+        let principalVolume:VolumeMetadata
         public
-        let vertices:[AnyVertex]
+        let principalVertex:AnyVertex?
         public
-        let volumes:[VolumeMetadata]
+        let principalGroups:[AnyGroup]
+
         public
-        let packages:[PackageMetadata]
+        let canonicalVolume:VolumeMetadata?
+        public
+        let canonicalVertex:AnyVertex?
+
+        public
+        let adjacentPackages:[PackageMetadata]
+        public
+        let adjacentVertices:[AnyVertex]
+        public
+        let adjacentVolumes:[VolumeMetadata]
+
+
+        public
+        let coverage:SearchbotCell?
+        public
+        let tree:TypeTree?
 
         @inlinable public
-        init(principal:PrincipalOutput,
-            canonical:AnyVertex?,
-            vertices:[AnyVertex],
-            volumes:[VolumeMetadata],
-            packages:[PackageMetadata])
+        init(matches:[AnyVertex],
+            principalVolume:VolumeMetadata,
+            principalVertex:AnyVertex?,
+            principalGroups:[AnyGroup],
+            canonicalVolume:VolumeMetadata?,
+            canonicalVertex:AnyVertex?,
+            adjacentPackages:[PackageMetadata],
+            adjacentVertices:[AnyVertex],
+            adjacentVolumes:[VolumeMetadata],
+            coverage:SearchbotCell?,
+            tree:TypeTree?)
         {
-            self.principal = principal
-            self.canonical = canonical
-            self.vertices = vertices
-            self.volumes = volumes
-            self.packages = packages
+            self.matches = matches
+
+            self.principalVolume = principalVolume
+            self.principalVertex = principalVertex
+            self.principalGroups = principalGroups
+
+            self.canonicalVolume = canonicalVolume
+            self.canonicalVertex = canonicalVertex
+
+            self.adjacentPackages = adjacentPackages
+            self.adjacentVertices = adjacentVertices
+            self.adjacentVolumes = adjacentVolumes
+
+            self.coverage = coverage
+            self.tree = tree
         }
     }
 }
@@ -39,11 +72,21 @@ extension Unidoc.VertexOutput:Mongo.MasterCodingModel
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case principal
-        case canonical
-        case vertices
-        case volumes
-        case packages
+        case matches
+
+        case principalVolume
+        case principalVertex
+        case principalGroups
+
+        case canonicalVolume
+        case canonicalVertex
+
+        case adjacentPackages
+        case adjacentVertices
+        case adjacentVolumes
+
+        case coverage
+        case tree
     }
 }
 extension Unidoc.VertexOutput:BSONDocumentDecodable
@@ -51,11 +94,16 @@ extension Unidoc.VertexOutput:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(
-            principal: try bson[.principal].decode(),
-            canonical: try bson[.canonical]?.decode(),
-            vertices: try bson[.vertices].decode(),
-            volumes: try bson[.volumes].decode(),
-            packages: try bson[.packages].decode())
+        self.init(matches: try bson[.matches].decode(),
+            principalVolume: try bson[.principalVolume].decode(),
+            principalVertex: try bson[.principalVertex]?.decode(),
+            principalGroups: try bson[.principalGroups]?.decode() ?? [],
+            canonicalVolume: try bson[.canonicalVolume]?.decode(),
+            canonicalVertex: try bson[.canonicalVertex]?.decode(),
+            adjacentPackages: try bson[.adjacentPackages].decode(),
+            adjacentVertices: try bson[.adjacentVertices].decode(),
+            adjacentVolumes: try bson[.adjacentVolumes].decode(),
+            coverage: try bson[.coverage]?.decode(),
+            tree: try bson[.tree]?.decode())
     }
 }

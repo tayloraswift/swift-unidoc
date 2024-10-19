@@ -46,12 +46,11 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.query(with: query)),
-                    let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
+                        value: try await db.query(with: query))
                 {
-                    tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
-                    tests.expect(output.volume.patch ==? .v(0, 2, 0))
-                    tests.expect(value: output.vertex?.landing)
+                    tests.expect(output.canonicalVolume?.patch ==? .v(0, 2, 0))
+                    tests.expect(output.principalVolume.patch ==? .v(0, 2, 0))
+                    tests.expect(value: output.principalVertex?.landing)
                 }
             }
         }
@@ -63,12 +62,11 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.query(with: query)),
-                    let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
+                        value: try await db.query(with: query))
                 {
-                    tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
-                    tests.expect(output.volume.patch ==? .v(0, 2, 0))
-                    tests.expect(value: output.vertex?.landing)
+                    tests.expect(output.canonicalVolume?.patch ==? .v(0, 2, 0))
+                    tests.expect(output.principalVolume.patch ==? .v(0, 2, 0))
+                    tests.expect(value: output.principalVertex?.landing)
                 }
             }
         }
@@ -80,12 +78,11 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.query(with: query)),
-                    let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
+                        value: try await db.query(with: query))
                 {
-                    tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
-                    tests.expect(output.volume.patch ==? .v(0, 1, 0))
-                    tests.expect(value: output.vertex?.landing)
+                    tests.expect(output.canonicalVolume?.patch ==? .v(0, 2, 0))
+                    tests.expect(output.principalVolume.patch ==? .v(0, 1, 0))
+                    tests.expect(value: output.principalVertex?.landing)
                 }
             }
         }
@@ -97,13 +94,12 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             await tests.do
             {
                 if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.query(with: query)),
-                    let output:Unidoc.PrincipalOutput = tests.expect(value: output.principal)
+                        value: try await db.query(with: query))
                 {
-                    tests.expect(output.volumeOfLatest?.patch ==? .v(0, 2, 0))
-                    tests.expect(nil: output.volume.patch)
-                    tests.expect(output.volume.refname ==? "1.0.0-beta.1")
-                    tests.expect(value: output.vertex?.landing)
+                    tests.expect(output.canonicalVolume?.patch ==? .v(0, 2, 0))
+                    tests.expect(nil: output.principalVolume.patch)
+                    tests.expect(output.principalVolume.refname ==? "1.0.0-beta.1")
+                    tests.expect(value: output.principalVertex?.landing)
                 }
             }
         }
