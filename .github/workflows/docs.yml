@@ -19,8 +19,8 @@ jobs:
             -   name: Install Swift
                 uses: tayloraswift/swift-install-action@master
                 with:
-                    swift-prefix: "swift-6.0-release/ubuntu2404/swift-6.0-RELEASE"
-                    swift-id: "swift-6.0-RELEASE-ubuntu24.04"
+                    swift-prefix: "swift-6.0.1-release/ubuntu2404/swift-6.0.1-RELEASE"
+                    swift-id: "swift-6.0.1-RELEASE-ubuntu24.04"
 
             #   This installs an older version of Unidoc, not the one we are testing.
             #   We use `--static-swift-stdlib` so it doesn’t matter if the Unidoc binary was

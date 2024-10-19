@@ -1,11 +1,11 @@
-// swift-tools-version:5.10
+// swift-tools-version:6.0
 import class Foundation.ProcessInfo
 import PackageDescription
 import CompilerPluginSupport
 
 let package:Package = .init(
     name: "Swift Unidoc",
-    platforms: [.macOS(.v14)],
+    platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .visionOS(.v2), .watchOS(.v11)],
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
         .executable(name: "unidoc", targets: ["unidoc-tools"]),
@@ -121,7 +121,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
-            from: "1.3.0")),
+            from: "1.4.0")),
         .package(url: "https://github.com/apple/swift-syntax",
             from: "510.0.2"),
     ],
@@ -180,9 +180,8 @@ let package:Package = .init(
 
         .target(name: "GitHubAPI",
             dependencies: [
+                .target(name: "SHA1_JSON"),
                 .product(name: "UnixTime", package: "swift-unixtime"),
-                .product(name: "JSON", package: "swift-json"),
-                .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "HTTP",
@@ -316,9 +315,9 @@ let package:Package = .init(
 
         .target(name: "PackageMetadata",
             dependencies: [
+                .target(name: "SHA1_JSON"),
                 .target(name: "PackageGraphs"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
-                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "S3",
@@ -342,6 +341,12 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "Availability"),
                 .target(name: "MarkdownABI")
+            ]),
+
+        .target(name: "SHA1_JSON",
+            dependencies: [
+                .product(name: "JSON", package: "swift-json"),
+                .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "Sitemaps",
@@ -460,11 +465,10 @@ let package:Package = .init(
         .target(name: "UnidocAPI",
             dependencies: [
                 .target(name: "SemanticVersions"),
+                .target(name: "SHA1_JSON"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
                 .target(name: "URI"),
-                .product(name: "JSON", package: "swift-json"),
-                .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "UnidocAssets",
@@ -768,12 +772,7 @@ for target:PackageDescription.Target in package.targets
     {
         var settings:[PackageDescription.SwiftSetting] = $0 ?? []
 
-        settings.append(.enableUpcomingFeature("BareSlashRegexLiterals"))
-        settings.append(.enableUpcomingFeature("ConciseMagicFile"))
-        settings.append(.enableUpcomingFeature("DeprecateApplicationMain"))
         settings.append(.enableUpcomingFeature("ExistentialAny"))
-        settings.append(.enableUpcomingFeature("GlobalConcurrency"))
-        settings.append(.enableUpcomingFeature("IsolatedDefaultValues"))
         settings.append(.enableExperimentalFeature("StrictConcurrency"))
 
         settings.append(.define("DEBUG", .when(configuration: .debug)))
