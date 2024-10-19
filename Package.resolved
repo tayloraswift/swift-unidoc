@@ -1,5 +1,5 @@
 {
-  "originHash" : "e74c95e87dfcf846bd383dc0eb7b66ac505965f61ae06c2a43ecf89d5be2ba69",
+  "originHash" : "12e6ba9cc30a834503bf014357e890b22abdca83950fe66da72c9992d95bd260",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-system",
       "state" : {
-        "revision" : "d2ba781702a1d8285419c15ee62fd734a9437ff5",
-        "version" : "1.3.2"
+        "revision" : "c8a44d836fe7913603e246acab7c528c2e780168",
+        "version" : "1.4.0"
       }
     },
     {
