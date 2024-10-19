@@ -67,36 +67,38 @@ extension Unidoc.VertexEndpoint
         from output:Unidoc.VertexOutput,
         as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
-        if  let vertex:Unidoc.AnyVertex = output.principal.vertex
+        if  let principalVertex:Unidoc.AnyVertex = output.principalVertex
         {
-            let vertexContext:VertexContext = .init(canonical: .init(
-                    principal: output.principal,
-                    vertex: output.canonical,
+            let genericContext:VertexContext = .init(canonical: .init(
+                    principalVolume: output.principalVolume,
+                    principalVertex: output.principalVertex,
+                    canonicalVolume: output.canonicalVolume,
+                    canonicalVertex: output.canonicalVertex,
                     layer: VertexLayer.self),
-                principal: output.principal.volume,
-                secondary: output.volumes,
-                packages: output.packages,
-                vertices: .init(principal: vertex, secondary: output.vertices))
+                principal: output.principalVolume,
+                secondary: output.adjacentVolumes,
+                packages: output.adjacentPackages,
+                vertices: .init(principal: principalVertex, secondary: output.adjacentVertices))
 
             //  Note: noun tree won’t exist if the module contains no declarations.
             //  (For example, an `@_exported` shim.)
-            return try self.success(vertex: vertex,
-                groups: output.principal.groups,
-                tree: output.principal.tree,
-                with: vertexContext,
+            return try self.success(vertex: principalVertex,
+                groups: output.principalGroups,
+                tree: output.tree,
+                with: genericContext,
                 format: format)
         }
         else
         {
-            let vertexContext:Unidoc.PeripheralPageContext = .init(canonical: nil,
-                principal: output.principal.volume,
-                secondary: output.volumes,
-                packages: output.packages,
-                vertices: .init(secondary: output.principal.matches))
+            let peripheral:Unidoc.PeripheralPageContext = .init(canonical: nil,
+                principal: output.principalVolume,
+                secondary: output.adjacentVolumes,
+                packages: output.adjacentPackages,
+                vertices: .init(secondary: output.matches))
 
-            return try self.failure(matches: output.principal.matches,
-                tree: output.principal.tree,
-                with: vertexContext,
+            return try self.failure(matches: output.matches,
+                tree: output.tree,
+                with: peripheral,
                 format: format)
         }
     }

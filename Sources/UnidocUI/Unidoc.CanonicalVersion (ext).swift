@@ -5,28 +5,30 @@ import URI
 
 extension Unidoc.CanonicalVersion
 {
-    init?(principal:Unidoc.PrincipalOutput,
-        vertex:__shared Unidoc.AnyVertex?,
+    init?(principalVolume:__shared Unidoc.VolumeMetadata,
+        principalVertex:__shared Unidoc.AnyVertex?,
+        canonicalVolume:__shared Unidoc.VolumeMetadata?,
+        canonicalVertex:__shared Unidoc.AnyVertex?,
         layer:(some Unidoc.VertexLayer).Type)
     {
         guard
-        let volumeOfLatest:Unidoc.VolumeMetadata = principal.volumeOfLatest,
-        let patchOfLatest:PatchVersion = volumeOfLatest.patch
+        let canonicalVolume:Unidoc.VolumeMetadata,
+        let canonicalPatch:PatchVersion = canonicalVolume.patch
         else
         {
             return nil
         }
 
         //  This can happen if you visit the latest stable release explicitly in the URL bar.
-        if  principal.volume.id == volumeOfLatest.id
+        if  principalVolume.id == canonicalVolume.id
         {
             return nil
         }
 
         let relationship:Relationship
-        if  let origin:PatchVersion = principal.volume.patch
+        if  let origin:PatchVersion = principalVolume.patch
         {
-            relationship = origin < patchOfLatest ? .later : .earlier
+            relationship = origin < canonicalPatch ? .later : .earlier
         }
         else
         {
@@ -35,27 +37,27 @@ extension Unidoc.CanonicalVersion
 
         let target:Target
 
-        if  let vertex:Unidoc.AnyVertex
+        if  let canonicalVertex:Unidoc.AnyVertex
         {
-            switch vertex
+            switch canonicalVertex
             {
-            case .article(let vertex):
-                target = .article(layer[volumeOfLatest, vertex.route])
+            case .article(let canonical):
+                target = .article(layer[canonicalVolume, canonical.route])
 
-            case .culture(let vertex):
-                target = .culture(layer[volumeOfLatest, vertex.route])
+            case .culture(let canonical):
+                target = .culture(layer[canonicalVolume, canonical.route])
 
-            case .decl(let vertex):
-                target = .decl(layer[volumeOfLatest, vertex.route])
+            case .decl(let canonical):
+                target = .decl(layer[canonicalVolume, canonical.route])
 
             case .file:
                 return nil
 
-            case .product(let vertex):
-                target = .product(layer[volumeOfLatest, vertex.route])
+            case .product(let canonical):
+                target = .product(layer[canonicalVolume, canonical.route])
 
-            case .foreign(let vertex):
-                target = .foreign(layer[volumeOfLatest, vertex.route])
+            case .foreign(let canonical):
+                target = .foreign(layer[canonicalVolume, canonical.route])
 
             case .landing:
                 target = .landing
@@ -63,7 +65,7 @@ extension Unidoc.CanonicalVersion
         }
         else
         {
-            switch principal.vertex
+            switch principalVertex
             {
             case .article?:     target = .article(nil)
             case .culture?:     target = .culture(nil)
@@ -76,8 +78,8 @@ extension Unidoc.CanonicalVersion
         }
 
         self.init(relationship: relationship,
-            package: volumeOfLatest.title,
-            volume: Unidoc.DocsEndpoint[volumeOfLatest], // this does *not* use `layer`!
+            package: canonicalVolume.title,
+            volume: Unidoc.DocsEndpoint[canonicalVolume], // this does *not* use `layer`!
             target: target)
     }
 }

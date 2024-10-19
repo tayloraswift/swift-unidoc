@@ -31,7 +31,7 @@ extension Unidoc.DocsOperation:Unidoc.InteractiveOperation
         }
 
         coverage:
-        if  let apex:Unidoc.AnyVertex = output.principal.vertex
+        if  let apex:Unidoc.AnyVertex = output.principalVertex
         {
             //  This response is probably going to be a 200 OK, so count it as such.
             guard
@@ -46,9 +46,9 @@ extension Unidoc.DocsOperation:Unidoc.InteractiveOperation
             //  Historical docs do not receive page-granularity statistics.
             let latest:Unidoc.Edition
 
-            if  output.principal.volume.latest
+            if  output.principalVolume.latest
             {
-                latest = output.principal.volume.id
+                latest = output.principalVolume.id
             }
             else
             {
@@ -89,14 +89,14 @@ extension Unidoc.DocsOperation:Unidoc.InteractiveOperation
 
             if  let redirect:Unidoc.RedirectOutput = try await db.redirect(
                     exported: self.query.vertex,
-                    from: output.principal.volume.id)
+                    from: output.principalVolume.id)
             {
                 return redirect.response(as: context.format)
             }
 
             if  let redirect:Unidoc.RedirectOutput = try await db.redirect(
                     visited: self.query.vertex,
-                    in: output.principal.volume.id.package)
+                    in: output.principalVolume.id.package)
             {
                 return redirect.response(as: context.format)
             }
