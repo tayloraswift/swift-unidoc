@@ -54,7 +54,7 @@ extension Unidoc.RedirectByExportQuery:Mongo.PipelineQuery
             $0[.from] = Unidoc.DB.Volumes.name
             $0[.localField] = CollectionOrigin.Element[.volume]
             $0[.foreignField] = Unidoc.VolumeMetadata[.id]
-            $0[.as] = Iteration.BatchElement[.volume]
+            $0[.as] = Output[.volume]
         }
 
         pipeline[stage: .unwind] = Unidoc.RedirectOutput[.volume]
@@ -64,7 +64,7 @@ extension Unidoc.RedirectByExportQuery:Mongo.PipelineQuery
             $0[.from] = Unidoc.DB.Vertices.name
             $0[.localField] = CollectionOrigin.Element[.target]
             $0[.foreignField] = Unidoc.AnyVertex[.id]
-            $0[.as] = Iteration.BatchElement[.matches]
+            $0[.as] = Output[.matches]
         }
     }
 }
