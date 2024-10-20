@@ -35,16 +35,16 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
         }
         pipeline[stage: .replaceWith] = .init
         {
-            $0[Iteration.BatchElement[.id]] = Aliases.Element[.coordinate]
+            $0[Output[.id]] = Aliases.Element[.coordinate]
         }
         pipeline[stage: .lookup]
         {
             $0[.from] = Targets.name
-            $0[.localField] = Iteration.BatchElement[.id]
+            $0[.localField] = Output[.id]
             $0[.foreignField] = "_id"
             //  Do not unwind this lookup, because it is possible for alias registration
             //  to succeed while package registration fails, and we need to know that.
-            $0[.as] = Iteration.BatchElement[.document]
+            $0[.as] = Output[.document]
         }
         pipeline[stage: .unionWith] = .init
         {
@@ -60,7 +60,7 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
 
                 $0[stage: .replaceWith] = .init
                 {
-                    $0[Iteration.BatchElement[.id]] = .expr
+                    $0[Output[.id]] = .expr
                     {
                         $0[.add] = (Aliases.Element[.coordinate], 1)
                     }
@@ -68,7 +68,7 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
             }
         }
         //  Prefer existing registrations, if any.
-        pipeline[stage: .sort, using: Iteration.BatchElement.CodingKey.self]
+        pipeline[stage: .sort, using: Output.CodingKey.self]
         {
             $0[.id] = (+)
         }

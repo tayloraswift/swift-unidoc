@@ -1,7 +1,7 @@
 #if canImport(Glibc)
-import Glibc
+@preconcurrency import Glibc
 #elseif canImport(Darwin)
-import Darwin
+@preconcurrency import Darwin
 #endif
 
 @frozen public

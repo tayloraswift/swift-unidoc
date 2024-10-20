@@ -47,13 +47,13 @@ extension LinkResolution.TestCase
         let output:Unidoc.VertexOutput = tests.expect(
             value: try await db.query(with: query)),
         let vertex:Unidoc.AnyVertex = tests.expect(
-            value: output.principal.vertex)
+            value: output.principalVertex)
         else
         {
             return
         }
 
-        let loadable:[Unidoc.Scalar: String] = output.vertices.reduce(into: [:])
+        let loadable:[Unidoc.Scalar: String] = output.adjacentVertices.reduce(into: [:])
         {
             guard
             let shoot:Unidoc.Shoot = $1.shoot

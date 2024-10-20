@@ -10,6 +10,8 @@ extension Unidoc
         public
         let authority:any HTTP.ServerAuthority
         public
+        var builders:Int
+        public
         var github:(any GitHub.Integration)?
         public
         var mirror:Bool
@@ -20,12 +22,14 @@ extension Unidoc
 
         @inlinable public
         init(authority:any HTTP.ServerAuthority,
+            builders:Int = 0,
             github:(any GitHub.Integration)? = nil,
             mirror:Bool = false,
             bucket:Buckets,
             mode:Mode = .production)
         {
             self.authority = authority
+            self.builders = builders
             self.github = github
             self.mirror = mirror
             self.bucket = bucket

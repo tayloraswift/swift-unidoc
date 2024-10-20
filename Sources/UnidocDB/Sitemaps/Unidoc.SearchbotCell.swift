@@ -6,7 +6,7 @@ import UnidocRecords
 extension Unidoc
 {
     @frozen public
-    struct SearchbotCoverage:Identifiable, Sendable
+    struct SearchbotCell:Identifiable, Sendable
     {
         public
         let id:SearchbotTrail
@@ -37,7 +37,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.SearchbotCoverage:Mongo.MasterCodingModel
+extension Unidoc.SearchbotCell:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -49,7 +49,7 @@ extension Unidoc.SearchbotCoverage:Mongo.MasterCodingModel
         case yandexbot = "Y"
     }
 }
-extension Unidoc.SearchbotCoverage:BSONDocumentEncodable
+extension Unidoc.SearchbotCell:BSONDocumentEncodable
 {
     public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -61,7 +61,7 @@ extension Unidoc.SearchbotCoverage:BSONDocumentEncodable
         bson[.yandexbot] = self.yandexbot != 0 ? self.yandexbot : nil
     }
 }
-extension Unidoc.SearchbotCoverage:BSONDocumentDecodable
+extension Unidoc.SearchbotCell:BSONDocumentDecodable
 {
     public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

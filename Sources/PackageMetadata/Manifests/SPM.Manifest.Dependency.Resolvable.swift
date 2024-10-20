@@ -2,6 +2,7 @@ import JSON
 import PackageGraphs
 import SemanticVersions
 import SHA1
+import SHA1_JSON
 import Symbols
 
 extension SPM.Manifest.Dependency
