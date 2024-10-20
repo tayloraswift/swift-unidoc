@@ -43,7 +43,6 @@ extension Mongo.CollectionModel where Capacity == (bytes:Int, count:Int?)
         try await self.setupIndexes()
     }
 
-    private
     func setupCapacity() async throws
     {
         let capacity:(bytes:Int, count:Int?) = self.capacity
