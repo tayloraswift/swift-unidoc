@@ -34,25 +34,13 @@ extension Unidoc.Shoot:Unidoc.VertexPredicate
                     {
                         //  We could also use a range operator to filter on `_id`.
                         //  But that would not be as index-friendly.
-                        $0.expr
-                        {
-                            $0[.eq] = (Unidoc.AnyVertex[.volume], volume)
-                        }
-                        $0.expr
-                        {
-                            $0[.eq] = (Unidoc.AnyVertex[.stem], self.stem)
-                        }
+                        $0 { $0[.eq] = (Unidoc.AnyVertex[.volume], volume) }
+                        $0 { $0[.eq] = (Unidoc.AnyVertex[.stem], self.stem) }
 
                         if  let hashrange:FNV24 = self.hash
                         {
-                            $0.expr
-                            {
-                                $0[.gte] = (Unidoc.AnyVertex[.hash], hashrange.min)
-                            }
-                            $0.expr
-                            {
-                                $0[.lte] = (Unidoc.AnyVertex[.hash], hashrange.max)
-                            }
+                            $0 { $0[.gte] = (Unidoc.AnyVertex[.hash], hashrange.min) }
+                            $0 { $0[.lte] = (Unidoc.AnyVertex[.hash], hashrange.max) }
                         }
                     }
                 }

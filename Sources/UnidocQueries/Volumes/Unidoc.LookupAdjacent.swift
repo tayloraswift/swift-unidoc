@@ -34,8 +34,11 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
             {
                 $0[.concatArrays]
                 {
-                    $0 { $0.append(volume / Unidoc.VolumeMetadata[.cell]) }
-                    $0.expr
+                    $0
+                    {
+                        $0[+] = volume / Unidoc.VolumeMetadata[.cell]
+                    }
+                    $0
                     {
                         $0[.coalesce] = (vertex / Unidoc.AnyVertex[.packages], [] as [Never])
                     }
@@ -152,7 +155,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                     upstream: .init(in: volume / Unidoc.VolumeMetadata[.dependencies]),
                     groups: .init(in: groups))
 
-                $0[.setUnion] = .init { $0 += adjacent }
+                $0[.setUnion] { $0 += adjacent }
             }
             $0[output.scalars]
             {
@@ -160,7 +163,7 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                     groups: .init(in: groups),
                     vertex: vertex)
 
-                $0[.setUnion] = .init  { $0 += adjacent }
+                $0[.setUnion] { $0 += adjacent }
             }
         }
     }

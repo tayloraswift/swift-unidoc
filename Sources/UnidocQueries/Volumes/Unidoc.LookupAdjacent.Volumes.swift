@@ -20,11 +20,10 @@ extension Unidoc.LookupAdjacent
 }
 extension Unidoc.LookupAdjacent.Volumes
 {
-    static
-    func += (list:inout BSON.ListEncoder, self:Self)
+    static func += (list:inout Mongo.SetListEncoder, self:Self)
     {
-        list.expr { $0[.map] = self.upstream.map { $0[.linked] } }
-        list.expr
+        list { $0[.map] = self.upstream.map { $0[.linked] } }
+        list
         {
             $0[.reduce] = self.groups.flatMap
             {

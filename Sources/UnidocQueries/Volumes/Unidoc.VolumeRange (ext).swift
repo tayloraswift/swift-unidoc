@@ -28,8 +28,8 @@ extension Unidoc.VolumeRange:Unidoc.VertexPredicate
                 {
                     $0[.and]
                     {
-                        $0.expr { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
-                        $0.expr { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
+                        $0 { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
+                        $0 { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
                     }
                 }
             }
