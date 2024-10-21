@@ -430,11 +430,11 @@ extension Unidoc.Server
         }
         catch let error
         {
+            let errorPage:Unidoc.ServerErrorPage = .init(error: error)
             let error:Unidoc.PluginError = .init(error: error, path: "\(request.uri)")
             self.logger?.log(event: error, date: format.time, from: nil)
 
-            let page:Unidoc.ServerErrorPage = .init(error: error)
-            return .error(page.resource(format: format))
+            return .error(errorPage.resource(format: format))
         }
 
         switch operation
