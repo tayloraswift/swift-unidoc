@@ -23,6 +23,9 @@ extension Unidoc
 extension Unidoc.LookupAdjacent:Unidoc.LookupContext
 {
     public
+    static var lookupGridCell:Bool { true }
+
+    public
     func packages(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.AnyKeyPath,
         vertex:Mongo.AnyKeyPath,

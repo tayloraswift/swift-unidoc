@@ -15,6 +15,9 @@ extension Unidoc
 extension Unidoc.LookupLimited:Unidoc.LookupContext
 {
     public
+    static var lookupGridCell:Bool { false }
+
+    public
     func packages(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.AnyKeyPath,
         vertex:Mongo.AnyKeyPath,

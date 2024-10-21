@@ -6,6 +6,8 @@ extension Unidoc
     public
     protocol LookupContext
     {
+        static var lookupGridCell:Bool { get }
+
         func packages(_:inout Mongo.PipelineEncoder,
             volume:Mongo.AnyKeyPath,
             vertex:Mongo.AnyKeyPath,
