@@ -171,75 +171,7 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
             }
         }
 
-        pipeline[stage: .facet, using: FacetOne.CodingKey.self]
-        {
-            $0[.principalOnly]
-            {
-                //  Exit early if there is no principal vertex.
-                $0[stage: .unwind] = Output[.principalVertex]
-
-                self.lookup.packages(&$0,
-                    volume: Output[.principalVolume],
-                    vertex: Output[.principalVertex],
-                    output: Output[.adjacentPackages])
-
-                //  Gather all the extensions to the principal vertex.
-                self.lookup.groups(&$0,
-                    volume: Output[.principalVolume],
-                    vertex: Output[.principalVertex],
-                    output: Output[.principalGroups])
-
-                //  Extract (and de-duplicate) the scalars and volumes mentioned by the
-                //  extensions. The extensions have precomputed volume ids for MongoDB’s
-                //  convenience.
-                self.lookup.edges(&$0,
-                    volume: Output[.principalVolume],
-                    vertex: Output[.principalVertex],
-                    groups: Output[.principalGroups],
-                    output: (Output[.adjacentVertices], volumes: Output[.adjacentVolumes]))
-
-                $0[stage: .set, using: Output.CodingKey.self]
-                {
-                    $0[.tree]
-                    {
-                        //  ``Unidoc.CultureVertex`` doesn’t have a `culture`
-                        //  field, but we still want to get the type tree for
-                        //  its `_id`. The ``Database.Trees`` collection only
-                        //  contains type trees, so it’s okay if the `_id` is
-                        //  not a culture.
-                        $0[.coalesce] =
-                        (
-                            Output[.principalVertex] / Unidoc.AnyVertex[.culture],
-                            Output[.principalVertex] / Unidoc.AnyVertex[.id],
-                            BSON.Max.init()
-                        )
-                    }
-                }
-                $0[stage: .lookup]
-                {
-                    $0[.from] = Unidoc.DB.Trees.name
-                    $0[.localField] = Output[.tree]
-                    $0[.foreignField] = Unidoc.TypeTree[.id]
-                    $0[.as] = Output[.tree]
-                }
-                //  Unbox optional single-element array.
-                $0[stage: .set, using: Output.CodingKey.self]
-                {
-                    $0[.tree] { $0[.first] = Output[.tree] }
-                }
-            }
-
-            $0[.carryover]
-            {
-                $0[stage: .project, using: Output.CodingKey.self]
-                {
-                    $0[.matches] = true
-                    $0[.principalVolume] = Unidoc.VolumeMetadata.StoredFields.init()
-                    $0[.canonicalVolume] = Unidoc.VolumeMetadata.StoredFields.init()
-                }
-            }
-        }
-
+        pipeline[stage: .facet, using: FacetOne.CodingKey.self] { self.build(facet: &$0) }
         pipeline[stage: .replaceWith]
         {
             $0[.mergeObjects]
@@ -250,87 +182,184 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
             }
         }
 
-        pipeline[stage: .facet, using: FacetTwo.CodingKey.self]
+        pipeline[stage: .facet, using: FacetTwo.CodingKey.self] { self.build(facet: &$0) }
+        pipeline[stage: .unwind] = FacetTwo[.carryover]
+        pipeline[stage: .set, using: FacetTwo.CodingKey.self]
         {
-            //  These facets really do need to be written with two unwinds, a naïve `$in` lookup
-            //  causes a collection scan for some reason.
-            $0[.lookupPackages]
-            {
-                $0[stage: .unwind] = Output[.adjacentPackages]
-                $0[stage: .lookup]
-                {
-                    $0[.from] = Unidoc.DB.Packages.name
-                    $0[.localField] = Output[.adjacentPackages]
-                    $0[.foreignField] = Unidoc.PackageMetadata[.id]
-                    $0[.as] = Output[.adjacentPackages]
-                }
-                $0[stage: .unwind] = Output[.adjacentPackages]
-                $0[stage: .replaceWith] = Output[.adjacentPackages]
-            }
+            $0[.lookupCanonical] { $0[.first] = FacetTwo[.lookupCanonical] }
+            $0[.lookupGridCell] { $0[.first] = FacetTwo[.lookupGridCell] }
+        }
 
-            $0[.lookupVertices]
+        pipeline[stage: .replaceWith]
+        {
+            $0[.mergeObjects]
             {
-                $0[stage: .unwind] = Output[.adjacentVertices]
-                $0[stage: .match]
+                $0[+] = FacetTwo[.carryover]
+                $0(Output.CodingKey.self)
                 {
-                    $0[Output[.adjacentVertices]] { $0[.ne] = BSON.Null.init() }
+                    $0[.adjacentPackages] = FacetTwo[.lookupPackages]
+                    $0[.adjacentVertices] = FacetTwo[.lookupVertices]
+                    $0[.adjacentVolumes] = FacetTwo[.lookupVolumes]
+                    $0[.canonicalVertex] = FacetTwo[.lookupCanonical]
                 }
-                $0[stage: .lookup]
-                {
-                    $0[.from] = Unidoc.DB.Vertices.name
-                    $0[.localField] = Output[.adjacentVertices]
-                    $0[.foreignField] = Unidoc.AnyVertex[.id]
-                    $0[.pipeline]
-                    {
-                        //  We do not need to load all the markdown for adjacent vertices.
-                        $0[stage: .unset] =
-                        [
-                            Unidoc.AnyVertex[.constituents],
-                            Unidoc.AnyVertex[.superforms],
-                            Unidoc.AnyVertex[.details],
-                            Unidoc.AnyVertex[.census],
-                        ]
-                    }
-                    $0[.as] = Output[.adjacentVertices]
-                }
-                $0[stage: .unwind] = Output[.adjacentVertices]
-                $0[stage: .replaceWith] = Output[.adjacentVertices]
             }
+        }
+    }
 
-            $0[.lookupVolumes]
+    private
+    func build(facet:inout Mongo.FacetEncoder<FacetOne.CodingKey>)
+    {
+        facet[.principalOnly]
+        {
+            //  Exit early if there is no principal vertex.
+            $0[stage: .unwind] = Output[.principalVertex]
+
+            self.lookup.packages(&$0,
+                volume: Output[.principalVolume],
+                vertex: Output[.principalVertex],
+                output: Output[.adjacentPackages])
+
+            //  Gather all the extensions to the principal vertex.
+            self.lookup.groups(&$0,
+                volume: Output[.principalVolume],
+                vertex: Output[.principalVertex],
+                output: Output[.principalGroups])
+
+            //  Extract (and de-duplicate) the scalars and volumes mentioned by the
+            //  extensions. The extensions have precomputed volume ids for MongoDB’s
+            //  convenience.
+            self.lookup.edges(&$0,
+                volume: Output[.principalVolume],
+                vertex: Output[.principalVertex],
+                groups: Output[.principalGroups],
+                output: (Output[.adjacentVertices], volumes: Output[.adjacentVolumes]))
+
+            $0[stage: .set, using: Output.CodingKey.self]
             {
-                $0[stage: .unwind] = Output[.adjacentVolumes]
-                $0[stage: .match]
+                $0[.tree]
                 {
-                    $0[Output[.adjacentVolumes]] { $0[.ne] = BSON.Null.init() }
+                    //  ``Unidoc.CultureVertex`` doesn’t have a `culture`
+                    //  field, but we still want to get the type tree for
+                    //  its `_id`. The ``Database.Trees`` collection only
+                    //  contains type trees, so it’s okay if the `_id` is
+                    //  not a culture.
+                    $0[.coalesce] =
+                    (
+                        Output[.principalVertex] / Unidoc.AnyVertex[.culture],
+                        Output[.principalVertex] / Unidoc.AnyVertex[.id],
+                        BSON.Max.init()
+                    )
                 }
-                $0[stage: .match]
-                {
-                    $0[.expr]
-                    {
-                        $0[.ne] =
-                        (
-                            Output[.adjacentVolumes],
-                            Output[.principalVolume] / Unidoc.VolumeMetadata[.id]
-                        )
-                    }
-                }
-                $0[stage: .lookup]
-                {
-                    $0[.from] = Unidoc.DB.Volumes.name
-                    $0[.localField] = Output[.adjacentVolumes]
-                    $0[.foreignField] = Unidoc.VolumeMetadata[.id]
-                    $0[.pipeline]
-                    {
-                        $0[stage: .project] = Unidoc.VolumeMetadata.NameFields.init()
-                    }
-                    $0[.as] = Output[.adjacentVolumes]
-                }
-                $0[stage: .unwind] = Output[.adjacentVolumes]
-                $0[stage: .replaceWith] = Output[.adjacentVolumes]
             }
+            $0[stage: .lookup]
+            {
+                $0[.from] = Unidoc.DB.Trees.name
+                $0[.localField] = Output[.tree]
+                $0[.foreignField] = Unidoc.TypeTree[.id]
+                $0[.as] = Output[.tree]
+            }
+            //  Unbox optional single-element array.
+            $0[stage: .set, using: Output.CodingKey.self]
+            {
+                $0[.tree] { $0[.first] = Output[.tree] }
+            }
+        }
 
-            $0[.lookupGridCell]
+        facet[.carryover]
+        {
+            $0[stage: .project, using: Output.CodingKey.self]
+            {
+                $0[.matches] = true
+                $0[.principalVolume] = Unidoc.VolumeMetadata.StoredFields.init()
+                $0[.canonicalVolume] = Unidoc.VolumeMetadata.StoredFields.init()
+            }
+        }
+    }
+
+    private
+    func build(facet:inout Mongo.FacetEncoder<FacetTwo.CodingKey>)
+    {
+        //  These facets really do need to be written with two unwinds, a naïve `$in` lookup
+        //  causes a collection scan for some reason.
+        facet[.lookupPackages]
+        {
+            $0[stage: .unwind] = Output[.adjacentPackages]
+            $0[stage: .lookup]
+            {
+                $0[.from] = Unidoc.DB.Packages.name
+                $0[.localField] = Output[.adjacentPackages]
+                $0[.foreignField] = Unidoc.PackageMetadata[.id]
+                $0[.as] = Output[.adjacentPackages]
+            }
+            $0[stage: .unwind] = Output[.adjacentPackages]
+            $0[stage: .replaceWith] = Output[.adjacentPackages]
+        }
+
+        facet[.lookupVertices]
+        {
+            $0[stage: .unwind] = Output[.adjacentVertices]
+            $0[stage: .match]
+            {
+                $0[Output[.adjacentVertices]] { $0[.ne] = BSON.Null.init() }
+            }
+            $0[stage: .lookup]
+            {
+                $0[.from] = Unidoc.DB.Vertices.name
+                $0[.localField] = Output[.adjacentVertices]
+                $0[.foreignField] = Unidoc.AnyVertex[.id]
+                $0[.pipeline]
+                {
+                    //  We do not need to load all the markdown for adjacent vertices.
+                    $0[stage: .unset] =
+                    [
+                        Unidoc.AnyVertex[.constituents],
+                        Unidoc.AnyVertex[.superforms],
+                        Unidoc.AnyVertex[.details],
+                        Unidoc.AnyVertex[.census],
+                    ]
+                }
+                $0[.as] = Output[.adjacentVertices]
+            }
+            $0[stage: .unwind] = Output[.adjacentVertices]
+            $0[stage: .replaceWith] = Output[.adjacentVertices]
+        }
+
+        facet[.lookupVolumes]
+        {
+            $0[stage: .unwind] = Output[.adjacentVolumes]
+            $0[stage: .match]
+            {
+                $0[Output[.adjacentVolumes]] { $0[.ne] = BSON.Null.init() }
+            }
+            $0[stage: .match]
+            {
+                $0[.expr]
+                {
+                    $0[.ne] =
+                    (
+                        Output[.adjacentVolumes],
+                        Output[.principalVolume] / Unidoc.VolumeMetadata[.id]
+                    )
+                }
+            }
+            $0[stage: .lookup]
+            {
+                $0[.from] = Unidoc.DB.Volumes.name
+                $0[.localField] = Output[.adjacentVolumes]
+                $0[.foreignField] = Unidoc.VolumeMetadata[.id]
+                $0[.pipeline]
+                {
+                    $0[stage: .project] = Unidoc.VolumeMetadata.NameFields.init()
+                }
+                $0[.as] = Output[.adjacentVolumes]
+            }
+            $0[stage: .unwind] = Output[.adjacentVolumes]
+            $0[stage: .replaceWith] = Output[.adjacentVolumes]
+        }
+
+        if  Context.lookupGridCell
+        {
+            facet[.lookupGridCell]
             {
                 $0[stage: .unwind] = Output[.principalVertex]
                 $0[stage: .set, using: Output.CodingKey.self]
@@ -357,109 +386,87 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
                     $0[.as] = Output[.coverage]
                 }
             }
-            $0[.lookupCanonical]
+        }
+
+        facet[.lookupCanonical]
+        {
+            //  Exit early if there is no principal vertex, or no canonical volume.
+            //
+            //  We need to skip ahead if either field is null because otherwise
+            //  the lookups in the next stage will traverse *all* vertices with the same
+            //  hash, which has complexity that scales with the number of linked volumes.
+            $0[stage: .unwind] = Output[.principalVertex]
+            $0[stage: .unwind] = Output[.canonicalVolume]
+
+            //  Look up the vertex in the volume of the latest stable release of its home
+            //  package. The lookup correlates vertices by symbol.
+            $0[stage: .lookup]
             {
-                //  Exit early if there is no principal vertex, or no canonical volume.
-                //
-                //  We need to skip ahead if either field is null because otherwise
-                //  the lookups in the next stage will traverse *all* vertices with the same
-                //  hash, which has complexity that scales with the number of linked volumes.
-                $0[stage: .unwind] = Output[.principalVertex]
-                $0[stage: .unwind] = Output[.canonicalVolume]
+                let symbol:Mongo.Variable<Unidoc.Scalar> = "symbol"
+                let hash:Mongo.Variable<Unidoc.Scalar> = "hash"
 
-                //  Look up the vertex in the volume of the latest stable release of its home
-                //  package. The lookup correlates vertices by symbol.
-                $0[stage: .lookup]
+                let min:Mongo.Variable<Unidoc.Scalar> = "min"
+                let max:Mongo.Variable<Unidoc.Scalar> = "max"
+
+                $0[.from] = Unidoc.DB.Vertices.name
+                $0[.let]
                 {
-                    let symbol:Mongo.Variable<Unidoc.Scalar> = "symbol"
-                    let hash:Mongo.Variable<Unidoc.Scalar> = "hash"
-
-                    let min:Mongo.Variable<Unidoc.Scalar> = "min"
-                    let max:Mongo.Variable<Unidoc.Scalar> = "max"
-
-                    $0[.from] = Unidoc.DB.Vertices.name
-                    $0[.let]
+                    $0[let: symbol]
                     {
-                        $0[let: symbol]
-                        {
-                            $0[.coalesce] =
-                            (
-                                Output[.principalVertex] / Unidoc.AnyVertex[.symbol],
-                                BSON.Max.init()
-                            )
-                        }
-                        $0[let: hash]
-                        {
-                            $0[.coalesce] =
-                            (
-                                Output[.principalVertex] / Unidoc.AnyVertex[.hash],
-                                BSON.Max.init()
-                            )
-                        }
-
-                        $0[let: min] = Output[.canonicalVolume] / Unidoc.VolumeMetadata[.min]
-                        $0[let: max] = Output[.canonicalVolume] / Unidoc.VolumeMetadata[.max]
+                        $0[.coalesce] =
+                        (
+                            Output[.principalVertex] / Unidoc.AnyVertex[.symbol],
+                            BSON.Max.init()
+                        )
                     }
-                    $0[.pipeline]
+                    $0[let: hash]
                     {
-                        $0[stage: .match]
-                        {
-                            $0[.expr]
-                            {
-                                $0[.and]
-                                {
-                                    //  The first three of these clauses should be able to use
-                                    //  a compound index.
-                                    $0 { $0[.eq] = (Unidoc.AnyVertex[.hash], hash) }
-                                    $0 { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
-                                    $0 { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
+                        $0[.coalesce] =
+                        (
+                            Output[.principalVertex] / Unidoc.AnyVertex[.hash],
+                            BSON.Max.init()
+                        )
+                    }
 
-                                    $0 { $0[.eq] = (Unidoc.AnyVertex[.symbol], symbol) }
-                                }
+                    $0[let: min] = Output[.canonicalVolume] / Unidoc.VolumeMetadata[.min]
+                    $0[let: max] = Output[.canonicalVolume] / Unidoc.VolumeMetadata[.max]
+                }
+                $0[.pipeline]
+                {
+                    $0[stage: .match]
+                    {
+                        $0[.expr]
+                        {
+                            $0[.and]
+                            {
+                                //  The first three of these clauses should be able to use
+                                //  a compound index.
+                                $0 { $0[.eq] = (Unidoc.AnyVertex[.hash], hash) }
+                                $0 { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
+                                $0 { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
+
+                                $0 { $0[.eq] = (Unidoc.AnyVertex[.symbol], symbol) }
                             }
                         }
-
-                        $0[stage: .limit] = 1
-
-                        //  We do not need to load *any* markdown for this record.
-                        $0[stage: .unset] =
-                        [
-                            Unidoc.AnyVertex[.constituents],
-                            Unidoc.AnyVertex[.superforms],
-                            Unidoc.AnyVertex[.overview],
-                            Unidoc.AnyVertex[.details],
-                        ]
                     }
-                    $0[.as] = Output[.canonicalVertex]
+
+                    $0[stage: .limit] = 1
+
+                    //  We do not need to load *any* markdown for this record.
+                    $0[stage: .unset] =
+                    [
+                        Unidoc.AnyVertex[.constituents],
+                        Unidoc.AnyVertex[.superforms],
+                        Unidoc.AnyVertex[.overview],
+                        Unidoc.AnyVertex[.details],
+                    ]
                 }
-                $0[stage: .unwind] = Output[.canonicalVertex]
-                $0[stage: .replaceWith] = Output[.canonicalVertex]
+                $0[.as] = Output[.canonicalVertex]
             }
-
-            $0[.carryover]
+            $0[stage: .unwind] = Output[.canonicalVertex]
+            $0[stage: .replaceWith] = Output[.canonicalVertex]
         }
 
-        pipeline[stage: .unwind] = FacetTwo[.carryover]
-
-        pipeline[stage: .set, using: FacetTwo.CodingKey.self]
-        {
-            $0[.lookupCanonical] { $0[.first] = FacetTwo[.lookupCanonical] }
-            $0[.lookupGridCell] { $0[.first] = FacetTwo[.lookupGridCell] }
-        }
-
-        pipeline[stage: .replaceWith]
-        {
-            $0[.mergeObjects]
-            {
-                $0[+] = FacetTwo[.carryover]
-                $0(Output.CodingKey.self)
-                {
-                    $0[.adjacentPackages] = FacetTwo[.lookupPackages]
-                    $0[.adjacentVertices] = FacetTwo[.lookupVertices]
-                    $0[.adjacentVolumes] = FacetTwo[.lookupVolumes]
-                    $0[.canonicalVertex] = FacetTwo[.lookupCanonical]
-                }
-            }
-        }
+        facet[.carryover]
     }
 }
