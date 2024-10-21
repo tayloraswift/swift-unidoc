@@ -77,6 +77,8 @@ extension Unidoc.VertexQuery
         enum CodingKey:String
         {
             case lookupCanonical
+            case lookupGridCell
+
             case lookupPackages
             case lookupVertices
             case lookupVolumes
@@ -328,6 +330,33 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
                 $0[stage: .replaceWith] = Output[.adjacentVolumes]
             }
 
+            $0[.lookupGridCell]
+            {
+                $0[stage: .unwind] = Output[.principalVertex]
+                $0[stage: .set, using: Output.CodingKey.self]
+                {
+                    $0[.coverage, Unidoc.SearchbotTrail.CodingKey.self]
+                    {
+                        $0[.trunk] = Output[.principalVolume] / Unidoc.VolumeMetadata[.cell]
+                        $0[.stem] = Output[.principalVertex] / Unidoc.AnyVertex[.stem]
+                        $0[.hash]
+                        {
+                            $0[.divide] =
+                            (
+                                Output[.principalVertex] / Unidoc.AnyVertex[.hash],
+                                by: 256
+                            )
+                        }
+                    }
+                }
+                $0[stage: .lookup]
+                {
+                    $0[.from] = Unidoc.DB.SearchbotGrid.name
+                    $0[.localField] = Output[.coverage]
+                    $0[.foreignField] = Unidoc.SearchbotCell[.id]
+                    $0[.as] = Output[.coverage]
+                }
+            }
             $0[.lookupCanonical]
             {
                 //  Exit early if there is no principal vertex, or no canonical volume.
@@ -381,11 +410,11 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
                                 {
                                     //  The first three of these clauses should be able to use
                                     //  a compound index.
-                                    $0.expr { $0[.eq] = (Unidoc.AnyVertex[.hash], hash) }
-                                    $0.expr { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
-                                    $0.expr { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
+                                    $0 { $0[.eq] = (Unidoc.AnyVertex[.hash], hash) }
+                                    $0 { $0[.gte] = (Unidoc.AnyVertex[.id], min) }
+                                    $0 { $0[.lte] = (Unidoc.AnyVertex[.id], max) }
 
-                                    $0.expr { $0[.eq] = (Unidoc.AnyVertex[.symbol], symbol) }
+                                    $0 { $0[.eq] = (Unidoc.AnyVertex[.symbol], symbol) }
                                 }
                             }
                         }
@@ -415,13 +444,14 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
         pipeline[stage: .set, using: FacetTwo.CodingKey.self]
         {
             $0[.lookupCanonical] { $0[.first] = FacetTwo[.lookupCanonical] }
+            $0[.lookupGridCell] { $0[.first] = FacetTwo[.lookupGridCell] }
         }
 
         pipeline[stage: .replaceWith]
         {
             $0[.mergeObjects]
             {
-                $0.append(FacetTwo[.carryover])
+                $0[+] = FacetTwo[.carryover]
                 $0(Output.CodingKey.self)
                 {
                     $0[.adjacentPackages] = FacetTwo[.lookupPackages]
