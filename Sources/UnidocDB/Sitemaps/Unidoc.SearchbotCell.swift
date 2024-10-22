@@ -80,13 +80,13 @@ extension Unidoc.SearchbotCell:BSONDocumentDecodable
             id: try bson[.id].decode(),
             ok: try bson[.ok].decode(),
             bingbot: .init(
-                fetched: try bson[.bingbot_fetched].decode(),
-                fetches: try bson[.bingbot_fetches].decode()),
+                fetched: try bson[.bingbot_fetched]?.decode(),
+                fetches: try bson[.bingbot_fetches]?.decode()),
             googlebot: .init(
-                fetched: try bson[.googlebot_fetched].decode(),
-                fetches: try bson[.googlebot_fetches].decode()),
+                fetched: try bson[.googlebot_fetched]?.decode(),
+                fetches: try bson[.googlebot_fetches]?.decode()),
             yandexbot: .init(
-                fetched: try bson[.yandexbot_fetched].decode(),
-                fetches: try bson[.yandexbot_fetches].decode()))
+                fetched: try bson[.yandexbot_fetched]?.decode(),
+                fetches: try bson[.yandexbot_fetches]?.decode()))
     }
 }
