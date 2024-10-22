@@ -90,15 +90,15 @@ extension Unidoc.LookupAdjacent:Unidoc.LookupContext
                 }
                 $0[let: realm.scope]
                 {
-                    $0[.cond] =
-                    (
-                        if: extendee.null,
-                        then: .expr
+                    $0[.cond]
+                    {
+                        $0[.if] = extendee.null
+                        $0[.then]
                         {
                             $0[.coalesce] = (vertex / Unidoc.AnyVertex[.id], BSON.Max.init())
-                        },
-                        else: BSON.Max.init()
-                    )
+                        }
+                        $0[.else] = BSON.Max.init()
+                    }
                 }
 
                 $0[let: local.min] = volume / Unidoc.VolumeMetadata[.min]
