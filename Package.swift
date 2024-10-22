@@ -92,7 +92,7 @@ let package:Package = .init(
             from: "0.6.0")),
         .package(url: "https://github.com/tayloraswift/swift-ip", .upToNextMinor(
             from: "0.1.2")),
-        .package(url: "https://github.com/tayloraswift/swift-mongodb", branch: "master"),
+        .package(url: "https://github.com/tayloraswift/swift-mongodb", revision: "29e2a4b268c2ad42fd438a7060c7b1bf7204e97d"),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
             from: "0.1.5")),
 
