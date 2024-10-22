@@ -10,7 +10,7 @@ extension Unidoc.GroupLayer
     {
         .expr
         {
-            $0[.concatArrays] = .init
+            $0[.concatArrays]
             {
                 switch self
                 {
@@ -18,16 +18,10 @@ extension Unidoc.GroupLayer
                     let conditional:Mongo.List<Unidoc.ConformingType, Mongo.AnyKeyPath> = .init(
                         in: group[.conditional])
 
-                    $0.append([group[.culture]])
-                    $0.expr
-                    {
-                        $0[.coalesce] = (group[.unconditional], [] as [Never])
-                    }
-                    $0.expr
-                    {
-                        $0[.map] = conditional.map { $0[.id] }
-                    }
-                    $0.expr
+                    $0 { $0[+] = group[.culture] }
+                    $0 { $0[.coalesce] = (group[.unconditional], [] as [Never]) }
+                    $0 { $0[.map] = conditional.map { $0[.id] } }
+                    $0
                     {
                         $0[.reduce] = conditional.flatMap
                         {

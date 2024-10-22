@@ -146,7 +146,7 @@ extension Unidoc.AnyVertex
         case .file:                 nil
         case .product(let product): product.shoot
         case .foreign(let foreign): foreign.shoot
-        case .landing:              nil
+        case .landing(let landing): landing.shoot
         }
     }
 }

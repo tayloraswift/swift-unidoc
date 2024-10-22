@@ -1,11 +1,11 @@
-// swift-tools-version:5.10
+// swift-tools-version:6.0
 import class Foundation.ProcessInfo
 import PackageDescription
 import CompilerPluginSupport
 
 let package:Package = .init(
     name: "Swift Unidoc",
-    platforms: [.macOS(.v14)],
+    platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .visionOS(.v2), .watchOS(.v11)],
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
         .executable(name: "unidoc", targets: ["unidoc-tools"]),
@@ -25,7 +25,6 @@ let package:Package = .init(
         .library(name: "HTTPClient", targets: ["HTTPClient"]),
         .library(name: "HTTPServer", targets: ["HTTPServer"]),
 
-        .library(name: "IP", targets: ["IP"]),
         .library(name: "InlineArray", targets: ["InlineArray"]),
 
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
@@ -91,8 +90,10 @@ let package:Package = .init(
             from: "0.4.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.6.0")),
+        .package(url: "https://github.com/tayloraswift/swift-ip", .upToNextMinor(
+            from: "0.1.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.23.3")),
+            from: "0.25.1")),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
             from: "0.1.5")),
 
@@ -120,7 +121,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
-            from: "1.3.0")),
+            from: "1.4.0")),
         .package(url: "https://github.com/apple/swift-syntax",
             from: "510.0.2"),
     ],
@@ -179,9 +180,8 @@ let package:Package = .init(
 
         .target(name: "GitHubAPI",
             dependencies: [
+                .target(name: "SHA1_JSON"),
                 .product(name: "UnixTime", package: "swift-unixtime"),
-                .product(name: "JSON", package: "swift-json"),
-                .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "HTTP",
@@ -207,12 +207,12 @@ let package:Package = .init(
         .target(name: "HTTPServer",
             dependencies: [
                 .target(name: "_AsyncChannel"),
-
                 .target(name: "HTTP"),
-                .target(name: "IP"),
                 .target(name: "UA"),
                 .target(name: "URI"),
 
+                .product(name: "IP", package: "swift-ip"),
+                .product(name: "IP_NIOCore", package: "swift-ip"),
                 .product(name: "HTML", package: "swift-dom"),
                 .product(name: "Atomics", package: "swift-atomics"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
@@ -220,8 +220,6 @@ let package:Package = .init(
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
             ]),
-
-        .target(name: "IP"),
 
         .target(name: "InlineArray"),
 
@@ -317,9 +315,9 @@ let package:Package = .init(
 
         .target(name: "PackageMetadata",
             dependencies: [
+                .target(name: "SHA1_JSON"),
                 .target(name: "PackageGraphs"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
-                .product(name: "JSON", package: "swift-json"),
             ]),
 
         .target(name: "S3",
@@ -343,6 +341,12 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "Availability"),
                 .target(name: "MarkdownABI")
+            ]),
+
+        .target(name: "SHA1_JSON",
+            dependencies: [
+                .product(name: "JSON", package: "swift-json"),
+                .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "Sitemaps",
@@ -461,11 +465,10 @@ let package:Package = .init(
         .target(name: "UnidocAPI",
             dependencies: [
                 .target(name: "SemanticVersions"),
+                .target(name: "SHA1_JSON"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
                 .target(name: "URI"),
-                .product(name: "JSON", package: "swift-json"),
-                .product(name: "SHA1", package: "swift-hash"),
             ]),
 
         .target(name: "UnidocAssets",
@@ -491,10 +494,10 @@ let package:Package = .init(
         .target(name: "UnidocDB",
             dependencies: [
                 .target(name: "_MongoDB"),
-                .target(name: "IP"),
                 .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocLinker"),
                 .target(name: "UnidocRecords"),
+                .product(name: "IP", package: "swift-ip"),
                 .product(name: "UnixCalendar", package: "swift-unixtime"),
             ]),
 
@@ -605,12 +608,6 @@ let package:Package = .init(
         .executableTarget(name: "FNV1Tests",
             dependencies: [
                 .target(name: "FNV1"),
-                .product(name: "Testing_", package: "swift-grammar"),
-            ]),
-
-        .executableTarget(name: "IPTests",
-            dependencies: [
-                .target(name: "IP"),
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
@@ -775,12 +772,7 @@ for target:PackageDescription.Target in package.targets
     {
         var settings:[PackageDescription.SwiftSetting] = $0 ?? []
 
-        settings.append(.enableUpcomingFeature("BareSlashRegexLiterals"))
-        settings.append(.enableUpcomingFeature("ConciseMagicFile"))
-        settings.append(.enableUpcomingFeature("DeprecateApplicationMain"))
         settings.append(.enableUpcomingFeature("ExistentialAny"))
-        settings.append(.enableUpcomingFeature("GlobalConcurrency"))
-        settings.append(.enableUpcomingFeature("IsolatedDefaultValues"))
         settings.append(.enableExperimentalFeature("StrictConcurrency"))
 
         settings.append(.define("DEBUG", .when(configuration: .debug)))

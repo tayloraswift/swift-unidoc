@@ -31,11 +31,11 @@ extension Unidoc.NonblockingOperation
         {
             db = try await server.db.session()
             status = try await self.enqueue(payload: payload, on: server, db: db)
-            request.resume(returning: try status.response(as: server.format))
+            request.resume(returning: try status.response(as: server.format()))
         }
         catch let error
         {
-            request.resume(rendering: error, as: server.format)
+            request.resume(rendering: error, as: server.format())
             return
         }
 

@@ -54,24 +54,21 @@ extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
             {
                 if  let tag:MD5 = self.tag
                 {
-                    $0[.cond] =
-                    (
-                        if: .expr
+                    $0[.cond]
+                    {
+                        $0[.if] { $0[.eq] = (tag, Document[.hash]) }
+                        $0[.then]
                         {
-                            $0[.eq] = (tag, Document[.hash])
-                        },
-                        then: .expr
-                        {
-                            $0[.binarySize] = .expr
+                            $0[.binarySize]
                             {
                                 $0[.coalesce] = (Document[.gzip], Document[.utf8])
                             }
-                        },
-                        else: .expr
+                        }
+                        $0[.else]
                         {
                             $0[.coalesce] = (Document[.gzip], Document[.utf8])
                         }
-                    )
+                    }
                 }
                 else
                 {

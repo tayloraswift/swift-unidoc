@@ -33,7 +33,7 @@ jobs:
                         --user root \
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
-                        swift:6.0-noble \
+                        swift:6.0.1-noble \
                         /bin/bash .github/pipeline
 
     macos:

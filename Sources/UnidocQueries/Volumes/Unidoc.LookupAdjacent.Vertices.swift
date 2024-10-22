@@ -32,11 +32,10 @@ extension Unidoc.LookupAdjacent.Vertices
 }
 extension Unidoc.LookupAdjacent.Vertices
 {
-    static
-    func += (list:inout BSON.ListEncoder, self:Self)
+    static func += (list:inout Mongo.SetListEncoder, self:Self)
     {
         //  Extract scalars adjacent to the list of vertex groups.
-        list.expr
+        list
         {
             $0[.reduce] = self.groups.flatMap(self.predicate.adjacent(to:))
         }
@@ -44,15 +43,15 @@ extension Unidoc.LookupAdjacent.Vertices
         //  Extract scalars adjacent to the current vertex.
         list
         {
-            $0.append(self.vertex / Unidoc.AnyVertex[.culture])
-            $0.append(self.vertex / Unidoc.AnyVertex[.colony])
-            $0.append(self.vertex / Unidoc.AnyVertex[.extendee])
-            $0.append(self.vertex / Unidoc.AnyVertex[.renamed])
-            $0.append(self.vertex / Unidoc.AnyVertex[.readme])
-            $0.append(self.vertex / Unidoc.AnyVertex[.file])
+            $0[+] = self.vertex / Unidoc.AnyVertex[.culture]
+            $0[+] = self.vertex / Unidoc.AnyVertex[.colony]
+            $0[+] = self.vertex / Unidoc.AnyVertex[.extendee]
+            $0[+] = self.vertex / Unidoc.AnyVertex[.renamed]
+            $0[+] = self.vertex / Unidoc.AnyVertex[.readme]
+            $0[+] = self.vertex / Unidoc.AnyVertex[.file]
         }
 
-        list.expr
+        list
         {
             let constraints:Mongo.List<GenericConstraint<Unidoc.Scalar>, Mongo.AnyKeyPath> =
                 .init(in: self.vertex / Unidoc.AnyVertex[.signature_generics_constraints])
@@ -65,7 +64,7 @@ extension Unidoc.LookupAdjacent.Vertices
         {
             for array:Unidoc.AnyVertex.CodingKey in arrays
             {
-                list.expr
+                list
                 {
                     $0[.coalesce] = (self.vertex / Unidoc.AnyVertex[array], [] as [Never])
                 }
@@ -85,7 +84,7 @@ extension Unidoc.LookupAdjacent.Vertices
         //  Only needed for the default layer.
         for passage:Unidoc.AnyVertex.CodingKey in [.overview, .details]
         {
-            list.expr
+            list
             {
                 let outlines:Mongo.List<Unidoc.Outline, Mongo.AnyKeyPath> = .init(
                     in: self.vertex / Unidoc.AnyVertex[passage] / Unidoc.Passage[.outlines])

@@ -2,6 +2,7 @@ import BSON
 import MongoDB
 import MongoQL
 import UnidocRecords
+import UnixTime
 
 extension Unidoc.DB
 {
@@ -21,23 +22,43 @@ extension Unidoc.DB
         }
     }
 }
+extension Unidoc.DB.SearchbotGrid
+{
+    /// This is not the same as the `_id` index, as it uses a collation.
+    public static
+    let indexCollated:Mongo.CollectionIndex = .init("Collated",
+        collation: VolumeCollation.spec,
+        unique: false)
+    {
+        $0[Element[.id] / Element.ID[.trunk]] = (+)
+        $0[Element[.id] / Element.ID[.stem]] = (+)
+        $0[Element[.id] / Element.ID[.hash]] = (+)
+    }
+
+    public static
+    let indexPackage:Mongo.CollectionIndex = .init("Package", unique: false)
+    {
+        $0[Element[.id] / Element.ID[.trunk]] = (+)
+    }
+}
 extension Unidoc.DB.SearchbotGrid:Mongo.CollectionModel
 {
     public
-    typealias Element = Unidoc.SearchbotCoverage
+    typealias Element = Unidoc.SearchbotCell
 
     @inlinable public static
     var name:Mongo.Collection { "SearchbotGrid" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [] }
+    var indexes:[Mongo.CollectionIndex] { [/*Self.indexCollated,*/ Self.indexPackage] }
 }
 extension Unidoc.DB.SearchbotGrid
 {
     public
     func count(searchbot:Unidoc.Searchbot?,
         on trail:Unidoc.SearchbotTrail,
-        to docs:Unidoc.Edition) async throws
+        to docs:Unidoc.Edition,
+        at time:UnixAttosecond) async throws
     {
         _ = try await self.modify(upserting: trail)
         {
@@ -45,6 +66,18 @@ extension Unidoc.DB.SearchbotGrid
             {
                 $0[Element[.id]] = trail
                 $0[Element[.ok]] = docs
+
+                let timestamp:Element.CodingKey
+
+                switch searchbot
+                {
+                case nil:           return
+                case .bingbot?:     timestamp = .bingbot_fetched
+                case .googlebot?:   timestamp = .googlebot_fetched
+                case .yandexbot?:   timestamp = .yandexbot_fetched
+                }
+
+                $0[Element[timestamp]] = UnixMillisecond.init(truncating: time)
             }
             $0[.inc]
             {
@@ -53,12 +86,34 @@ extension Unidoc.DB.SearchbotGrid
                 switch searchbot
                 {
                 case nil:           return
-                case .bingbot?:     counter = .bingbot
-                case .googlebot?:   counter = .googlebot
-                case .yandexbot?:   counter = .yandexbot
+                case .bingbot?:     counter = .bingbot_fetches
+                case .googlebot?:   counter = .googlebot_fetches
+                case .yandexbot?:   counter = .yandexbot_fetches
                 }
 
                 $0[Element[counter]] = 1
+            }
+        }
+    }
+
+    public
+    func scroll(package:Unidoc.Package,
+        on replica:Mongo.ReadPreference = .nearest,
+        yield:([Element]) -> ()) async throws
+    {
+        try await session.run(
+            command: Mongo.Find<Mongo.Cursor<Element>>.init(Self.name,
+                stride: 1024)
+            {
+                $0[.filter] { $0[Element[.id] / Element.ID[.trunk]] = package }
+                $0[.hint] = Self.indexPackage.id
+            },
+            against: self.database,
+            on: replica)
+        {
+            for try await batch:[Element] in $0
+            {
+                yield(batch)
             }
         }
     }

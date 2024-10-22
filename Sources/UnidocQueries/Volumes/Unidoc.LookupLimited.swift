@@ -1,3 +1,4 @@
+import BSON
 import MongoQL
 import Unidoc
 import UnidocRecords
@@ -14,6 +15,9 @@ extension Unidoc
 extension Unidoc.LookupLimited:Unidoc.LookupContext
 {
     public
+    static var lookupGridCell:Bool { false }
+
+    public
     func packages(_ pipeline:inout Mongo.PipelineEncoder,
         volume:Mongo.AnyKeyPath,
         vertex:Mongo.AnyKeyPath,
@@ -21,7 +25,7 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
     {
         pipeline[stage: .set]
         {
-            $0[output] = .init { $0.append(volume / Unidoc.VolumeMetadata[.cell]) }
+            $0[output] { $0[+] = volume / Unidoc.VolumeMetadata[.cell] }
         }
     }
 
@@ -52,9 +56,9 @@ extension Unidoc.LookupLimited:Unidoc.LookupContext
 
             $0[output.volumes]
             {
-                $0[.setUnion] = .init
+                $0[.setUnion]
                 {
-                    $0.expr { $0[.map] = dependencies.map { $0[.linked] } }
+                    $0 { $0[.map] = dependencies.map { $0[.linked] } }
                 }
             }
             $0[output.scalars] = [] as [Never]
