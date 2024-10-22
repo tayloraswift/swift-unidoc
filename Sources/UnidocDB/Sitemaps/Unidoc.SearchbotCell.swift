@@ -2,6 +2,7 @@ import BSON
 import MongoQL
 import UnidocAPI
 import UnidocRecords
+import UnixTime
 
 extension Unidoc
 {
@@ -16,18 +17,18 @@ extension Unidoc
         let ok:Edition
 
         public
-        let bingbot:Int32
+        let bingbot:Crumb
         public
-        let googlebot:Int32
+        let googlebot:Crumb
         public
-        let yandexbot:Int32
+        let yandexbot:Crumb
 
         @inlinable public
         init(id:SearchbotTrail,
             ok:Edition,
-            bingbot:Int32,
-            googlebot:Int32,
-            yandexbot:Int32)
+            bingbot:Crumb,
+            googlebot:Crumb,
+            yandexbot:Crumb)
         {
             self.id = id
             self.ok = ok
@@ -44,9 +45,12 @@ extension Unidoc.SearchbotCell:Mongo.MasterCodingModel
     {
         case id = "_id"
         case ok = "V"
-        case bingbot = "M"
-        case googlebot = "G"
-        case yandexbot = "Y"
+        case bingbot_fetches = "M"
+        case bingbot_fetched = "MT"
+        case googlebot_fetches = "G"
+        case googlebot_fetched = "GT"
+        case yandexbot_fetches = "Y"
+        case yandexbot_fetched = "YT"
     }
 }
 extension Unidoc.SearchbotCell:BSONDocumentEncodable
@@ -56,9 +60,15 @@ extension Unidoc.SearchbotCell:BSONDocumentEncodable
     {
         bson[.id] = self.id
         bson[.ok] = self.ok
-        bson[.bingbot] = self.bingbot != 0 ? self.bingbot : nil
-        bson[.googlebot] = self.googlebot != 0 ? self.googlebot : nil
-        bson[.yandexbot] = self.yandexbot != 0 ? self.yandexbot : nil
+
+        bson[.bingbot_fetches] = self.bingbot.fetches
+        bson[.bingbot_fetched] = self.bingbot.fetched
+
+        bson[.googlebot_fetches] = self.googlebot.fetches
+        bson[.googlebot_fetched] = self.googlebot.fetched
+
+        bson[.yandexbot_fetches] = self.yandexbot.fetches
+        bson[.yandexbot_fetched] = self.yandexbot.fetched
     }
 }
 extension Unidoc.SearchbotCell:BSONDocumentDecodable
@@ -69,8 +79,14 @@ extension Unidoc.SearchbotCell:BSONDocumentDecodable
         self.init(
             id: try bson[.id].decode(),
             ok: try bson[.ok].decode(),
-            bingbot: try bson[.bingbot]?.decode() ?? 0,
-            googlebot: try bson[.googlebot]?.decode() ?? 0,
-            yandexbot: try bson[.yandexbot]?.decode() ?? 0)
+            bingbot: .init(
+                fetched: try bson[.bingbot_fetched].decode(),
+                fetches: try bson[.bingbot_fetches].decode()),
+            googlebot: .init(
+                fetched: try bson[.googlebot_fetched].decode(),
+                fetches: try bson[.googlebot_fetches].decode()),
+            yandexbot: .init(
+                fetched: try bson[.yandexbot_fetched].decode(),
+                fetches: try bson[.yandexbot_fetches].decode()))
     }
 }

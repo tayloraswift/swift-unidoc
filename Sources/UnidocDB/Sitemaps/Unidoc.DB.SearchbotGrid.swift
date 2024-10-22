@@ -2,6 +2,7 @@ import BSON
 import MongoDB
 import MongoQL
 import UnidocRecords
+import UnixTime
 
 extension Unidoc.DB
 {
@@ -45,7 +46,8 @@ extension Unidoc.DB.SearchbotGrid
     public
     func count(searchbot:Unidoc.Searchbot?,
         on trail:Unidoc.SearchbotTrail,
-        to docs:Unidoc.Edition) async throws
+        to docs:Unidoc.Edition,
+        at time:UnixAttosecond) async throws
     {
         _ = try await self.modify(upserting: trail)
         {
@@ -53,6 +55,18 @@ extension Unidoc.DB.SearchbotGrid
             {
                 $0[Element[.id]] = trail
                 $0[Element[.ok]] = docs
+
+                let timestamp:Element.CodingKey
+
+                switch searchbot
+                {
+                case nil:           return
+                case .bingbot?:     timestamp = .bingbot_fetched
+                case .googlebot?:   timestamp = .googlebot_fetched
+                case .yandexbot?:   timestamp = .yandexbot_fetched
+                }
+
+                $0[Element[timestamp]] = UnixMillisecond.init(truncating: time)
             }
             $0[.inc]
             {
@@ -61,9 +75,9 @@ extension Unidoc.DB.SearchbotGrid
                 switch searchbot
                 {
                 case nil:           return
-                case .bingbot?:     counter = .bingbot
-                case .googlebot?:   counter = .googlebot
-                case .yandexbot?:   counter = .yandexbot
+                case .bingbot?:     counter = .bingbot_fetches
+                case .googlebot?:   counter = .googlebot_fetches
+                case .yandexbot?:   counter = .yandexbot_fetches
                 }
 
                 $0[Element[counter]] = 1

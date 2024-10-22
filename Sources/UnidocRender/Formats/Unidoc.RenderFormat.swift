@@ -31,7 +31,7 @@ extension Unidoc
             locale:ISO.Locale,
             assets:Assets,
             server:ServerType,
-            time:UnixAttosecond = .now())
+            time:UnixAttosecond)
         {
             self.security = security
             self.username = username
