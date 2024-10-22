@@ -28,6 +28,11 @@ extension Mongo
 }
 extension Mongo.PipelineQuery
 {
+    public
+    typealias Output = Iteration.BatchElement
+}
+extension Mongo.PipelineQuery
+{
     /// TODO: this should not be public.
     @inlinable package
     func command(stride:Iteration.Stride?) -> Mongo.Aggregate<Iteration>

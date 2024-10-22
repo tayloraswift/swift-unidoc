@@ -1,5 +1,6 @@
 import JSON
 import SHA1
+import SHA1_JSON
 
 extension GitHub.Ref
 {

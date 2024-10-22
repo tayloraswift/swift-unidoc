@@ -11,15 +11,6 @@ extension Unidoc.ServerOptions
         /// Whether to enable CloudFront integration.
         public
         var cloudfront:Bool
-        /// Whether to run the telescope plugin. Only effective when not running in mirror mode.
-        public
-        var runTelescope:Bool
-        /// Whether to run the monitor plugin. Only effective when not running in mirror mode.
-        public
-        var runMonitor:Bool
-        /// Whether to run the policy plugin.
-        public
-        var runPolicy:Bool
 
         /// Whether to enforce account-level permissions.
         public
@@ -42,12 +33,7 @@ extension Unidoc.ServerOptions
         init(replicaSet:String = "unidoc-rs")
         {
             self.cloudfront = false
-
-            self.runTelescope = false
-            self.runMonitor = false
-            self.runPolicy = false
             self.security = .ignored
-
             self.replicaSet = replicaSet
             self.bucket = nil
             self.port = 8443

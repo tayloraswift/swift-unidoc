@@ -10,6 +10,7 @@ import NIOSSL
 import PieCharts
 import Symbols
 import UnidocRender
+import UnixTime
 
 extension Unidoc
 {
@@ -83,9 +84,10 @@ extension Unidoc.Server
     @inlinable public
     var bucket:Unidoc.Buckets { self.options.bucket }
 
-    var format:Unidoc.RenderFormat
+
+    func format() -> Unidoc.RenderFormat
     {
-        self.format(username: nil, locale: nil)
+        self.format(username: nil, locale: nil, time: .now())
     }
 
     private
@@ -102,18 +104,23 @@ extension Unidoc.Server
             username = nil
         }
 
-        return self.format(username: username, locale: request.origin.guess?.locale)
+        return self.format(username: username,
+            locale: request.origin.guess?.locale,
+            time: request.accepted)
     }
 
     private
-    func format(username:String?, locale:ISO.Locale?) -> Unidoc.RenderFormat
+    func format(username:String?,
+        locale:ISO.Locale?,
+        time:UnixAttosecond) -> Unidoc.RenderFormat
     {
         .init(
             security: self.db.policy.security,
             username: username,
             locale: locale ?? .init(language: .en),
             assets: self.options.cloudfront ? .cloudfront : .local,
-            server: self.options.mode.server)
+            server: self.options.mode.server,
+            time: time)
     }
 }
 extension Unidoc.Server
@@ -136,9 +143,13 @@ extension Unidoc.Server
                 """)
         }
 
-        //  Create the machine user, if it doesn’t exist. Don’t store the cookie, since we
+        //  Create the machine users, if they doesn’t exist. Don’t store the cookie, since we
         //  want to be able to change it without restarting the server.
-        let _:Unidoc.UserSecrets = try await db.users.update(user: .init(machine: 0))
+        for number:Int in 0 ..< self.options.builders
+        {
+            let id:UInt32 = .init(number)
+            let _:Unidoc.UserSecrets = try await db.users.update(user: .init(machine: id))
+        }
     }
 
     func update() async throws
@@ -216,8 +227,9 @@ extension Unidoc.Server
             /// session each time.
             let db:Unidoc.DB = try await self.db.session()
             try await db.searchbotGrid.count(searchbot: paint.searchbot,
-                on: .init(trunk: paint.volume.package, shoot: paint.shoot),
-                to: paint.volume)
+                on: paint.trail,
+                to: paint.volume,
+                at: paint.time)
         }
     }
 }
@@ -426,11 +438,11 @@ extension Unidoc.Server
         }
         catch let error
         {
+            let errorPage:Unidoc.ServerErrorPage = .init(error: error)
             let error:Unidoc.PluginError = .init(error: error, path: "\(request.uri)")
             self.logger?.log(event: error, date: format.time, from: nil)
 
-            let page:Unidoc.ServerErrorPage = .init(error: error)
-            return .error(page.resource(format: format))
+            return .error(errorPage.resource(format: format))
         }
 
         switch operation

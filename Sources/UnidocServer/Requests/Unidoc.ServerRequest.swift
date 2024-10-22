@@ -5,6 +5,7 @@ import NIOHPACK
 import NIOHTTP1
 import UA
 import UnidocRecords
+import UnixTime
 import URI
 
 extension Unidoc
@@ -20,6 +21,8 @@ extension Unidoc
         public
         let authorization:Authorization
         public
+        let accepted:UnixAttosecond
+        public
         let origin:ClientOrigin
         public
         let host:String?
@@ -30,12 +33,14 @@ extension Unidoc
         init(
             headers:HTTP.Headers,
             authorization:Authorization,
+            accepted:UnixAttosecond,
             origin:ClientOrigin,
             host:String?,
             uri:URI)
         {
             self.headers = headers
             self.authorization = authorization
+            self.accepted = accepted
             self.origin = origin
             self.host = host
             self.uri = uri
@@ -59,12 +64,6 @@ extension Unidoc.ServerRequest
         }
 
         return nil
-    }
-
-    /// Computes and returns the case-folded, normalized path from the ``uri``.
-    var path:ArraySlice<String>
-    {
-        self.uri.path.normalized(lowercase: true)[...]
     }
 
     var privilege:Unidoc.ClientPrivilege?
@@ -120,7 +119,7 @@ extension Unidoc.ServerRequest
 
         self.init(headers: .http2(headers),
             authorization: .from(headers),
-            // origin: .init(ip: request.ip) ?? .init(ip: request.ip, client: .from(headers)),
+            accepted: .now(),
             origin: origin,
             host: host,
             uri: uri)
@@ -131,6 +130,7 @@ extension Unidoc.ServerRequest
     {
         self.init(headers: .http1_1(headers),
             authorization: .from(headers),
+            accepted: .now(),
             origin: origin,
             host: headers["host"].last,
             uri: uri)

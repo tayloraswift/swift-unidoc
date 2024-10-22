@@ -1,7 +1,7 @@
 import BSON
 import MD5
 
-extension MD5:BSONBinaryEncodable
+extension MD5:@retroactive BSONBinaryEncodable
 {
     @inlinable public
     func encode(to bson:inout BSON.BinaryEncoder)
@@ -10,7 +10,7 @@ extension MD5:BSONBinaryEncodable
         bson += self
     }
 }
-extension MD5:BSONBinaryDecodable
+extension MD5:@retroactive BSONBinaryDecodable
 {
     @inlinable public
     init(bson:BSON.BinaryDecoder) throws

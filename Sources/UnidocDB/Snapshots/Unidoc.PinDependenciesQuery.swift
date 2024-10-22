@@ -69,7 +69,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
         //  We are only interested in the coordinate value stored in the alias documents.
         pipeline[stage: .replaceWith] = .init
         {
-            $0[Iteration.BatchElement[.package]] = Unidoc.PackageAlias[.id]
+            $0[Output[.package]] = Unidoc.PackageAlias[.id]
             $0[coordinate] = Unidoc.PackageAlias[.coordinate]
         }
 
@@ -78,7 +78,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
         pipeline[stage: .lookup]
         {
             $0[.foreignField] = Symbol.PackageDependency<PatchVersion>[.package]
-            $0[.localField] = Iteration.BatchElement[.package]
+            $0[.localField] = Output[.package]
             $0[.pipeline] { $0[stage: .documents] = self.patches }
             $0[.as] = patch
         }
@@ -123,11 +123,11 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
                     }
                 }
             }
-            $0[.as] = Iteration.BatchElement[.version]
+            $0[.as] = Output[.version]
         }
         //  Lint temporary variables.
         pipeline[stage: .unset] = [coordinate, patch]
         //  Unwind single-element array.
-        pipeline[stage: .unwind] = Iteration.BatchElement[.version]
+        pipeline[stage: .unwind] = Output[.version]
     }
 }
