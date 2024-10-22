@@ -23,15 +23,12 @@ extension Mongo.Variable<Unidoc.Outline>
     {
         .expr
         {
-            $0[.cond] =
-            (
-                if: .expr
-                {
-                    $0[.eq] = ("missing", .expr { $0[.type] = self[.scalar] })
-                },
-                then: .expr { $0[.coalesce] = (self[.scalars], [] as [Never]) },
-                else: [self[.scalar]]
-            )
+            $0[.cond]
+            {
+                $0[.if] { $0[.eq] = ("missing", .expr { $0[.type] = self[.scalar] }) }
+                $0[.then] { $0[.coalesce] = (self[.scalars], [] as [Never]) }
+                $0[.else] = [self[.scalar]]
+            }
         }
     }
 }

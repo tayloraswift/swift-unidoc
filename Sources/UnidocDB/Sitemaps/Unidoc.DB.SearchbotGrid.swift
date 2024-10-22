@@ -24,6 +24,17 @@ extension Unidoc.DB
 }
 extension Unidoc.DB.SearchbotGrid
 {
+    /// This is not the same as the `_id` index, as it uses a collation.
+    public static
+    let indexCollated:Mongo.CollectionIndex = .init("Collated",
+        collation: VolumeCollation.spec,
+        unique: false)
+    {
+        $0[Element[.id] / Element.ID[.trunk]] = (+)
+        $0[Element[.id] / Element.ID[.stem]] = (+)
+        $0[Element[.id] / Element.ID[.hash]] = (+)
+    }
+
     public static
     let indexPackage:Mongo.CollectionIndex = .init("Package", unique: false)
     {
@@ -39,7 +50,7 @@ extension Unidoc.DB.SearchbotGrid:Mongo.CollectionModel
     var name:Mongo.Collection { "SearchbotGrid" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [Self.indexPackage] }
+    var indexes:[Mongo.CollectionIndex] { [/*Self.indexCollated,*/ Self.indexPackage] }
 }
 extension Unidoc.DB.SearchbotGrid
 {

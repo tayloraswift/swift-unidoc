@@ -159,15 +159,15 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
         {
             $0[.principalVertex]
             {
-                $0[.cond] =
-                (
-                    if: .expr
+                $0[.cond]
+                {
+                    $0[.if]
                     {
                         $0[.eq] = (1, .expr { $0[.size] = Output[.matches] })
-                    },
-                    then: Output[.matches],
-                    else: BSON.Null.init()
-                )
+                    }
+                    $0[.then] = Output[.matches]
+                    $0[.else] = BSON.Null.init()
+                }
             }
         }
 
@@ -357,36 +357,97 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
             $0[stage: .replaceWith] = Output[.adjacentVolumes]
         }
 
+        //  This keeps turning into a collection scan for some reason.
+        #if false
         if  Context.lookupGridCell
         {
             facet[.lookupGridCell]
             {
                 $0[stage: .unwind] = Output[.principalVertex]
-                $0[stage: .set, using: Output.CodingKey.self]
-                {
-                    $0[.coverage, Unidoc.SearchbotTrail.CodingKey.self]
-                    {
-                        $0[.trunk] = Output[.principalVolume] / Unidoc.VolumeMetadata[.cell]
-                        $0[.stem] = Output[.principalVertex] / Unidoc.AnyVertex[.stem]
-                        $0[.hash]
-                        {
-                            $0[.divide] =
-                            (
-                                Output[.principalVertex] / Unidoc.AnyVertex[.hash],
-                                by: 256
-                            )
-                        }
-                    }
-                }
                 $0[stage: .lookup]
                 {
+                    let trunk:Mongo.Variable<Unidoc.Edition> = "trunk"
+                    let stem:Mongo.Variable<Unidoc.Stem> = "stem"
+                    let hash:Mongo.Variable<Int32?> = "hash"
+
                     $0[.from] = Unidoc.DB.SearchbotGrid.name
-                    $0[.localField] = Output[.coverage]
-                    $0[.foreignField] = Unidoc.SearchbotCell[.id]
+                    $0[.let]
+                    {
+                        $0[let: trunk] = Output[.principalVolume] / Unidoc.VolumeMetadata[.cell]
+                        $0[let: stem] = Output[.principalVertex] / Unidoc.AnyVertex[.stem]
+                        $0[let: hash]
+                        {
+                            $0[.cond]
+                            {
+                                $0[.if]
+                                {
+                                    $0[.eq] =
+                                    (
+                                        1,
+                                        .expr
+                                        {
+                                            $0[.bitAnd] =
+                                            (
+                                                Output[.principalVertex] / Unidoc.AnyVertex[.flags],
+                                                1
+                                            )
+                                        }
+                                    )
+                                }
+                                $0[.then]
+                                {
+                                    $0[.divide] =
+                                    (
+                                        Output[.principalVertex] / Unidoc.AnyVertex[.hash],
+                                        by: 256
+                                    )
+                                }
+                                $0[.else] = BSON.Null.init()
+                            }
+                        }
+                    }
+                    $0[.pipeline]
+                    {
+                        $0[stage: .match]
+                        {
+                            $0[.expr]
+                            {
+                                $0[.and]
+                                {
+                                    $0
+                                    {
+                                        $0[.eq] =
+                                        (
+                                            Unidoc.SearchbotCell[.id] / Unidoc.SearchbotCell.ID[.trunk],
+                                            trunk
+                                        )
+                                    }
+                                    $0
+                                    {
+                                        $0[.eq] =
+                                        (
+                                            Unidoc.SearchbotCell[.id] / Unidoc.SearchbotCell.ID[.stem],
+                                            stem
+                                        )
+                                    }
+                                    $0
+                                    {
+                                        $0[.eq] =
+                                        (
+                                            Unidoc.SearchbotCell[.id] / Unidoc.SearchbotCell.ID[.hash],
+                                            hash
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        $0[stage: .limit] = 1
+                    }
                     $0[.as] = Output[.coverage]
                 }
             }
         }
+        #endif
 
         facet[.lookupCanonical]
         {
