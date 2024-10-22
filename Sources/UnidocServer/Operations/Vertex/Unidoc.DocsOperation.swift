@@ -35,11 +35,13 @@ extension Unidoc.DocsOperation:Unidoc.InteractiveOperation
         {
             //  This response is probably going to be a 200 OK, so count it as such.
             guard
-            let privilege:Unidoc.ClientPrivilege = context.request.privilege
+            //  Check if this request is from someone we trust enough to count page-granularity
+            //  statistics for.
+            let privilege:Unidoc.ClientPrivilege = context.request.privilege,
+            //  Should always be inhabited, unless we somehow obtained a `FileVertex`???
+            let shoot:Unidoc.Shoot = apex.shoot
             else
             {
-                //  This request is not from someone we trust enough to count for
-                //  page-granularity statistics.
                 break coverage
             }
 
@@ -68,7 +70,8 @@ extension Unidoc.DocsOperation:Unidoc.InteractiveOperation
                 context.server.paint(with: .init(
                     searchbot: vendor,
                     volume: latest,
-                    shoot: apex.shoot))
+                    shoot: shoot,
+                    time: context.request.accepted))
 
             case .barbie(_, verified: _):
                 //  Ignore for now, until we have a good way to exclude hits from the

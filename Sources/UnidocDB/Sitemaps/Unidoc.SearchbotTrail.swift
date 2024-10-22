@@ -10,6 +10,7 @@ extension Unidoc
     {
         public
         let trunk:Package
+        /// TODO: deoptionalize this!
         public
         let shoot:Shoot?
 

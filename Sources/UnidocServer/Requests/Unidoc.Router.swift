@@ -11,37 +11,19 @@ import URI
 
 extension Unidoc
 {
+    @dynamicMemberLookup
     struct Router
     {
-        let authorization:Authorization
-        let headers:HTTP.Headers
-        let origin:HTTP.ServerRequest.Origin
-        let host:String?
+        let request:ServerRequest
 
         private
         var stem:ArraySlice<String>
-        private
-        let path:URI.Path
-        private
-        let query:URI.Query
 
         private
-        init(
-            authorization:Authorization,
-            headers:HTTP.Headers,
-            origin:HTTP.ServerRequest.Origin,
-            host:String?,
-            stem:ArraySlice<String>,
-            path:URI.Path,
-            query:URI.Query)
+        init(request:ServerRequest, stem:ArraySlice<String>)
         {
-            self.authorization = authorization
-            self.headers = headers
-            self.origin = origin
-            self.host = host
+            self.request = request
             self.stem = stem
-            self.path = path
-            self.query = query
         }
     }
 }
@@ -49,13 +31,14 @@ extension Unidoc.Router
 {
     init(routing request:Unidoc.ServerRequest)
     {
-        self.init(authorization: request.authorization,
-            headers: request.headers,
-            origin: request.origin.ip,
-            host: request.host,
-            stem: request.path,
-            path: request.uri.path,
-            query: request.uri.query ?? [:])
+        self.init(request: request,
+            stem: request.uri.path.normalized(lowercase: true)[...])
+    }
+
+    private
+    subscript<T>(dynamicMember keyPath:KeyPath<Unidoc.ServerRequest, T>) -> T
+    {
+        self.request[keyPath: keyPath]
     }
 }
 extension Unidoc.Router
@@ -144,21 +127,13 @@ extension Unidoc.Router
             return nil
         }
 
-        var path:URI.Path = root.path
-        for component:String in self.stem
-        {
-            path.append(component)
-        }
-
-        let uri:URI = .init(path: path, query: self.query)
-
         if  let subdomain:Unidoc.ServerRoot.Subdomain
         {
-            return "https://\(subdomain).swiftinit.org\(uri)"
+            return "https://\(subdomain).swiftinit.org\(self.request.uri)"
         }
         else
         {
-            return "https://swiftinit.org\(uri)"
+            return "https://swiftinit.org\(self.request.uri)"
         }
     }
 }
@@ -439,7 +414,9 @@ extension Unidoc.Router
         switch self.descend()
         {
         case nil:
-            guard let request:Unidoc.BuildRequest<Unidoc.Package> = .init(query: self.query)
+            guard
+            let request:URI.Query = self.uri.query,
+            let request:Unidoc.BuildRequest<Unidoc.Package> = .init(query: request)
             else
             {
                 return nil
@@ -482,10 +459,10 @@ extension Unidoc.Router
             return nil
         }
 
-        for case ("y", "false") in self.query.parameters
+        for case ("y", "false") in self.uri.query?.parameters ?? []
         {
             let page:Unidoc.ReallyPage
-            let uri:URI = .init(path: self.path, query: queryPayload)
+            let uri:URI = .init(path: self.uri.path, query: queryPayload)
 
             switch route
             {
@@ -705,7 +682,7 @@ extension Unidoc.Router
     private mutating
     func auth() -> Unidoc.AnyOperation?
     {
-        let parameters:AuthParameters = .init(self.query)
+        let parameters:AuthParameters = .init(self.uri.query ?? [:])
 
         switch self.descend()
         {
@@ -760,7 +737,7 @@ extension Unidoc.Router
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.query)
+        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
 
         //  Special sitemap route.
         //  The '-' in the name means it will never collide with a decl.
@@ -790,7 +767,7 @@ extension Unidoc.Router
             do
             {
                 return .unordered(try Unidoc.WebhookOperation.init(json: json,
-                    from: self.origin.owner,
+                    from: self.origin.ip.owner,
                     with: self.headers))
             }
             catch let error
@@ -893,7 +870,7 @@ extension Unidoc.Router
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.query)
+        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
 
         return .pipeline(Unidoc.PtclEndpoint.init(query: .init(
             volume: volume,
@@ -927,7 +904,7 @@ extension Unidoc.Router
 
         return .unordered(Unidoc.ExportOperation.init(authorization: self.authorization,
             request: .init(volume: volume, vertex: .init(path: self.stem)),
-            _query: self.query))
+            _query: self.uri.query ?? [:]))
     }
 }
 extension Unidoc.Router
@@ -1048,7 +1025,7 @@ extension Unidoc.Router
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.query)
+        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
         return .pipeline(Unidoc.StatsEndpoint.init(query: .init(
                 volume: volume,
                 vertex: .init(path: self.stem, hash: parameters.hash))))
@@ -1063,7 +1040,7 @@ extension Unidoc.Router
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.query)
+        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
 
         if  let page:Int = parameters.page
         {
@@ -1094,7 +1071,7 @@ extension Unidoc.Router
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.query)
+        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
         return .pipeline(Unidoc.ConsumersEndpoint.init(query: .init(
             symbol: package,
             limit: 20,
@@ -1112,7 +1089,7 @@ extension Unidoc.Router
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.query)
+        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
 
         return .pipeline(Unidoc.CompleteBuildsEndpoint.init(query: .init(
             symbol: package,
@@ -1170,7 +1147,7 @@ extension Unidoc.Router
             return nil
         }
 
-        let parameters:LegacyParameters = .init(self.query)
+        let parameters:LegacyParameters = .init(self.uri.query ?? [:])
 
         let query:Unidoc.RedirectBySymbolicHintQuery<Unidoc.Shoot> = .legacy(head: next,
             rest: self.stem,

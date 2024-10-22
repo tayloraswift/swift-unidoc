@@ -10,6 +10,7 @@ import NIOSSL
 import PieCharts
 import Symbols
 import UnidocRender
+import UnixTime
 
 extension Unidoc
 {
@@ -83,9 +84,10 @@ extension Unidoc.Server
     @inlinable public
     var bucket:Unidoc.Buckets { self.options.bucket }
 
-    var format:Unidoc.RenderFormat
+
+    func format() -> Unidoc.RenderFormat
     {
-        self.format(username: nil, locale: nil)
+        self.format(username: nil, locale: nil, time: .now())
     }
 
     private
@@ -102,18 +104,23 @@ extension Unidoc.Server
             username = nil
         }
 
-        return self.format(username: username, locale: request.origin.guess?.locale)
+        return self.format(username: username,
+            locale: request.origin.guess?.locale,
+            time: request.accepted)
     }
 
     private
-    func format(username:String?, locale:ISO.Locale?) -> Unidoc.RenderFormat
+    func format(username:String?,
+        locale:ISO.Locale?,
+        time:UnixAttosecond) -> Unidoc.RenderFormat
     {
         .init(
             security: self.db.policy.security,
             username: username,
             locale: locale ?? .init(language: .en),
             assets: self.options.cloudfront ? .cloudfront : .local,
-            server: self.options.mode.server)
+            server: self.options.mode.server,
+            time: time)
     }
 }
 extension Unidoc.Server
@@ -220,8 +227,9 @@ extension Unidoc.Server
             /// session each time.
             let db:Unidoc.DB = try await self.db.session()
             try await db.searchbotGrid.count(searchbot: paint.searchbot,
-                on: .init(trunk: paint.volume.package, shoot: paint.shoot),
-                to: paint.volume)
+                on: paint.trail,
+                to: paint.volume,
+                at: paint.time)
         }
     }
 }
