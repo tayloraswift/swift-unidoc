@@ -172,13 +172,21 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
         }
 
         pipeline[stage: .facet, using: FacetOne.CodingKey.self] { self.build(facet: &$0) }
+        //  We need this because `$facet` injects a document even if the pipeline didn’t match
+        //  a principal volume.
+        pipeline[stage: .unwind] = FacetTwo[.carryover]
+        pipeline[stage: .set, using: FacetOne.CodingKey.self]
+        {
+            $0[.principalOnly] { $0[.first] = FacetOne[.principalOnly] }
+        }
         pipeline[stage: .replaceWith]
         {
             $0[.mergeObjects]
             {
                 //  Carried-over fields come second, because we want to keep the cleaned-up
                 //  volume metadata documents instead of the raw ones.
-                $0[.concatArrays] = (FacetOne[.principalOnly], FacetOne[.carryover])
+                $0[+] = FacetOne[.principalOnly]
+                $0[+] = FacetTwo[.carryover]
             }
         }
 
