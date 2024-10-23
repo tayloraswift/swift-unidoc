@@ -437,6 +437,8 @@ extension Unidoc.RefsPage
 
             $0.class = "config"
         } = Unidoc.BuildTemplateTool.init(
+            availablePlatforms: format.availablePlatforms,
+            availableVersions: format.availableVersions,
             form: self.package.build,
             view: self.view)
 
