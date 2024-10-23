@@ -7,6 +7,8 @@ extension Unidoc
 {
     struct BuildTemplateTool
     {
+        let availablePlatforms:[Symbol.Triple]
+        let availableVersions:[String]
         let form:BuildTemplate
         let view:Permissions
     }
@@ -44,10 +46,7 @@ extension Unidoc.BuildTemplateTool:HTML.OutputStreamable
                         $0.value = ""
                     } = "Default"
 
-                    for option:Symbol.Triple in [
-                        .aarch64_unknown_linux_gnu,
-                        .arm64_apple_macosx15_0,
-                    ]
+                    for option:Symbol.Triple in self.availablePlatforms
                     {
                         if  case option? = self.form.platform
                         {
@@ -86,9 +85,7 @@ extension Unidoc.BuildTemplateTool:HTML.OutputStreamable
                         $0.selected = self.form.toolchain == nil ; $0.value = ""
                     } = "Default"
 
-                    for option:String in [
-                        "6.0.1",
-                    ]
+                    for option:String in self.availableVersions
                     {
                         if  case option? = current
                         {
