@@ -17,7 +17,7 @@ extension CommandLine
             {
                 guard
                 let string:UnsafeMutablePointer<CChar> = $0,
-                let string:String = .init(validatingUTF8: string)
+                let string:String = .init(validatingCString: string)
                 else
                 {
                     return nil
