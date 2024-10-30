@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+swift --version
+
+.build/release/ssgc -u /home/ubuntu/6.0.1/x86_64/usr \
+    -n swift \
+    -o TestPackages/swift.bson
+
+.build/release/ssgc -u /home/ubuntu/6.0.1/x86_64/usr \
+    -p TestPackages/swift-test \
+    -o TestPackages/swift-test.bson
+
+.build/release/ssgc -u /home/ubuntu/6.0.1/x86_64/usr \
+    -p TestPackages/swift-malibu \
+    -o TestPackages/swift-malibu.bson

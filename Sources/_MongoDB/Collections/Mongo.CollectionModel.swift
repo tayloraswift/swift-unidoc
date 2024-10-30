@@ -215,34 +215,25 @@ extension Mongo.CollectionModel where Element:BSONDocumentDecodable
     @inlinable public
     func find(id:Element.ID) async throws -> Element?
     {
-        try await self.find(by: "_id", of: id)
-    }
-}
-extension Mongo.CollectionModel
-{
-    @inlinable
-    func find<Decodable>(_:Decodable.Type = Decodable.self,
-        by index:Mongo.AnyKeyPath,
-        of key:__owned some BSONEncodable) async throws -> Decodable?
-        where   Decodable:BSONDocumentDecodable,
-                Decodable:Sendable
-    {
-        let response:[Decodable] = try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<Decodable>>.init(Self.name,
-                limit: 1)
+        try await self.find
+        {
+            $0[.filter]
             {
-                $0[.filter]
-                {
-                    $0[index] = key
-                }
-                $0[.hint]
-                {
-                    $0[index] = (+)
-                }
-            },
-            against: self.database)
+                $0["_id"] = id
+            }
+            $0[.hint, using: Mongo.AnyKeyPath.self]
+            {
+                $0["_id"] = (+)
+            }
+        }
+    }
 
-        return response.first
+    @inlinable public
+    func find(_ yield:(inout Mongo.Find<Mongo.Single<Element>>) -> ()) async throws -> Element?
+    {
+        try await session.run(
+            command: Mongo.Find<Mongo.Single<Element>>.init(Self.name, limit: 1, with: yield),
+            against: self.database)
     }
 }
 
@@ -455,7 +446,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
                 returning: phase)
             {
                 $0[.query] { $0["_id"] = id }
-                $0[.update] { encode(&$0) }
+                $0[.update, encode]
             },
             against: self.database)
         return (element, upserted != nil)
@@ -471,10 +462,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
                 returning: phase)
             {
                 $0[.query] { $0["_id"] = id }
-                $0[.update]
-                {
-                    encode(&$0)
-                }
+                $0[.update, encode]
             },
             against: self.database)
         return element
@@ -489,11 +477,8 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
             command: Mongo.FindAndModify<Mongo.Existing<Element>>.init(Self.name,
                 returning: phase)
             {
-                $0[.query] { predicate.encode(to: &$0) }
-                $0[.update]
-                {
-                    encode(&$0)
-                }
+                $0[.query, predicate.encode(to:)]
+                $0[.update, encode]
             },
             against: self.database)
         return element
@@ -501,7 +486,6 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
 
     @inlinable package
     func remove(id:Element.ID) async throws -> Element?
-
     {
         let (element, _):(Element?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Removing<Element>>.init(Self.name,
@@ -520,7 +504,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
             command: Mongo.FindAndModify<Mongo.Removing<Element>>.init(Self.name,
                 returning: .deleted)
             {
-                $0[.query] { predicate.encode(to: &$0) }
+                $0[.query, predicate.encode(to:)]
             },
             against: self.database)
         return element

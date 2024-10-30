@@ -26,3 +26,4 @@ node_modules/
 Package.swift.json
 
 Snippets/_Crashes/*
+TestPackages/*.bson

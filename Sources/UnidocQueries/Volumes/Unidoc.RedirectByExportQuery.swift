@@ -10,14 +10,12 @@ extension Unidoc
     struct RedirectByExportQuery:Sendable
     {
         let volume:Edition
-        let stem:Stem
-        let hash:FNV24?
+        let vertex:VertexPath
 
-        init(volume:Edition, stem:Stem, hash:FNV24?)
+        init(volume:Edition, vertex:VertexPath)
         {
             self.volume = volume
-            self.stem = stem
-            self.hash = hash
+            self.vertex = vertex
         }
     }
 }
@@ -34,8 +32,8 @@ extension Unidoc.RedirectByExportQuery:Mongo.PipelineQuery
         pipeline[stage: .match]
         {
             $0[CollectionOrigin.Element[.id] / Unidoc.RedirectSource[.volume]] = self.volume
-            $0[CollectionOrigin.Element[.id] / Unidoc.RedirectSource[.stem]] = self.stem
-            $0[CollectionOrigin.Element[.id] / Unidoc.RedirectSource[.hash]] = self.hash
+            $0[CollectionOrigin.Element[.id] / Unidoc.RedirectSource[.stem]] = self.vertex.stem
+            $0[CollectionOrigin.Element[.id] / Unidoc.RedirectSource[.hash]] = self.vertex.hash
         }
 
         pipeline[stage: .limit] = 1

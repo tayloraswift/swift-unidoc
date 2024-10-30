@@ -7,7 +7,7 @@ extension Unidoc
     {
         let searchbot:Searchbot?
         let volume:Edition
-        let shoot:Shoot
+        let vertex:VertexPath
         let time:UnixAttosecond
     }
 }
@@ -15,6 +15,6 @@ extension Unidoc.MetricPaint
 {
     var trail:Unidoc.SearchbotTrail
     {
-        .init(trunk: self.volume.package, shoot: self.shoot)
+        .init(volume: self.volume.package, vertex: self.vertex)
     }
 }

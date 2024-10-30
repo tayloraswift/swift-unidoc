@@ -9,16 +9,15 @@ extension Unidoc
     struct SearchbotTrail:Equatable, Hashable, Sendable
     {
         public
-        let trunk:Package
-        /// TODO: deoptionalize this!
+        let volume:Package
         public
-        let shoot:Shoot?
+        let vertex:VertexPath
 
         @inlinable public
-        init(trunk:Package, shoot:Shoot?)
+        init(volume:Package, vertex:VertexPath)
         {
-            self.trunk = trunk
-            self.shoot = shoot
+            self.volume = volume
+            self.vertex = vertex
         }
     }
 }
@@ -27,7 +26,7 @@ extension Unidoc.SearchbotTrail:Mongo.MasterCodingModel
     @frozen public
     enum CodingKey:String, Sendable
     {
-        case trunk = "P"
+        case volume = "P"
         case stem = "U"
         case hash = "H"
     }
@@ -37,9 +36,9 @@ extension Unidoc.SearchbotTrail:BSONDocumentEncodable
     @inlinable public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
     {
-        bson[.trunk] = self.trunk
-        bson[.stem] = self.shoot?.stem
-        bson[.hash] = self.shoot?.hash
+        bson[.volume] = self.volume
+        bson[.stem] = self.vertex.stem
+        bson[.hash] = self.vertex.hash
     }
 }
 extension Unidoc.SearchbotTrail:BSONDocumentDecodable
@@ -47,17 +46,10 @@ extension Unidoc.SearchbotTrail:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        let shoot:Unidoc.Shoot?
-
-        if  let stem:Unidoc.Stem = try bson[.stem]?.decode()
-        {
-            shoot = .init(stem: stem, hash: try bson[.hash]?.decode())
-        }
-        else
-        {
-            shoot = nil
-        }
-
-        self.init(trunk: try bson[.trunk].decode(), shoot: shoot)
+        self.init(
+            volume: try bson[.volume].decode(),
+            vertex: .init(
+                stem: try bson[.stem].decode(),
+                hash: try bson[.hash]?.decode()))
     }
 }

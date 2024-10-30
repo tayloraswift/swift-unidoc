@@ -1,25 +1,27 @@
 import MongoDB
-import MongoTesting
-import SymbolGraphBuilder
 import SymbolGraphs
 import SymbolGraphTesting
 import Symbols
+import System_
+import Testing
 import Unidoc
 @_spi(testable)
 import UnidocDB
 import UnidocQueries
 import UnidocRecords
 
-struct VolumeQueries:UnidocDatabaseTestBattery
+@Suite
+struct VolumeQueries:Unidoc.TestBattery
 {
-    typealias Configuration = Main.Configuration
-
-    static
-    func run(tests:TestGroup, db:Unidoc.DB) async throws
+    @Test
+    func volumeQueries() async throws
     {
-        let workspace:SSGC.Workspace = try .create(at: ".testing")
-        let swift:SSGC.Toolchain = try .detect()
+        try await self.run(in: "VolumeQueries")
+    }
 
+    func run(with db:Unidoc.DB) async throws
+    {
+        let directory:FilePath.Directory = "TestPackages"
         let package:Symbol.Package = "swift-version-controlled"
 
         for (i, tag):(Int32, String) in zip(0..., ["0.1.0", "0.2.0", "1.0.0-beta.1"])
@@ -27,81 +29,61 @@ struct VolumeQueries:UnidocDatabaseTestBattery
             let empty:SymbolGraphObject<Void> = .init(metadata: .init(
                     package: .init(name: package),
                     commit: .init(name: tag),
-                    triple: swift.splash.triple,
-                    swift: swift.splash.swift),
+                    triple: .aarch64_unknown_linux_gnu,
+                    swift: .init(version: .v(9999, 0, 0))),
                 graph: .init(modules: []))
 
-            empty.roundtrip(for: tests, in: workspace.location)
+            try empty.roundtrip(in: directory)
 
             let v:Unidoc.Version = .init(rawValue: i)
-            tests.expect(try await db.store(linking: empty).0 ==? .init(
+            #expect(try await db.store(linking: empty).0 == .init(
                 edition: .init(package: 0, version: v),
                 updated: false))
         }
 
-        /// We should be able to resolve version 0.2.0 with a symbolic patch query.
-        if  let tests:TestGroup = tests / "LatestRelease"
+        do
         {
+            /// We should be able to resolve version 0.2.0 with a symbolic patch query.
             let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init("\(package)", [])
-            await tests.do
-            {
-                if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.query(with: query))
-                {
-                    tests.expect(output.canonicalVolume?.patch ==? .v(0, 2, 0))
-                    tests.expect(output.principalVolume.patch ==? .v(0, 2, 0))
-                    tests.expect(value: output.principalVertex?.landing)
-                }
-            }
+            let output:Unidoc.VertexOutput = try #require(try await db.query(with: query))
+
+            #expect(output.canonicalVolume?.patch == .v(0, 2, 0))
+            #expect(output.principalVolume.patch == .v(0, 2, 0))
+            #expect(output.principalVertex?.landing != nil)
         }
-        /// We should be able to resolve version 0.2.0 with a symbolic volume query.
-        if  let tests:TestGroup = tests / "CurrentRelease"
+
+        do
         {
-            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
-                "\(package):0.2.0", [])
-            await tests.do
-            {
-                if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.query(with: query))
-                {
-                    tests.expect(output.canonicalVolume?.patch ==? .v(0, 2, 0))
-                    tests.expect(output.principalVolume.patch ==? .v(0, 2, 0))
-                    tests.expect(value: output.principalVertex?.landing)
-                }
-            }
+            /// We should be able to resolve version 0.2.0 with a symbolic volume query.
+            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init("\(package):0.2.0", [])
+            let output:Unidoc.VertexOutput = try #require(try await db.query(with: query))
+
+            #expect(output.canonicalVolume?.patch == .v(0, 2, 0))
+            #expect(output.principalVolume.patch == .v(0, 2, 0))
+            #expect(output.principalVertex?.landing != nil)
         }
-        /// We should be able to resolve version 0.1.0 with a symbolic volume query.
-        if  let tests:TestGroup = tests / "OlderRelease"
+
+        do
         {
-            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
-                "\(package):0.1.0", [])
-            await tests.do
-            {
-                if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.query(with: query))
-                {
-                    tests.expect(output.canonicalVolume?.patch ==? .v(0, 2, 0))
-                    tests.expect(output.principalVolume.patch ==? .v(0, 1, 0))
-                    tests.expect(value: output.principalVertex?.landing)
-                }
-            }
+            /// We should be able to resolve version 0.1.0 with a symbolic volume query.
+            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init("\(package):0.1.0", [])
+            let output:Unidoc.VertexOutput = try #require(try await db.query(with: query))
+
+            #expect(output.canonicalVolume?.patch == .v(0, 2, 0))
+            #expect(output.principalVolume.patch == .v(0, 1, 0))
+            #expect(output.principalVertex?.landing != nil)
         }
-        /// We should be able to resolve version 1.0.0 with a symbolic volume query.
-        if  let tests:TestGroup = tests / "Prerelease"
+
+        do
         {
-            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
-                "\(package):1.0.0", [])
-            await tests.do
-            {
-                if  let output:Unidoc.VertexOutput = tests.expect(
-                        value: try await db.query(with: query))
-                {
-                    tests.expect(output.canonicalVolume?.patch ==? .v(0, 2, 0))
-                    tests.expect(nil: output.principalVolume.patch)
-                    tests.expect(output.principalVolume.refname ==? "1.0.0-beta.1")
-                    tests.expect(value: output.principalVertex?.landing)
-                }
-            }
+            /// We should be able to resolve version 1.0.0 with a symbolic volume query.
+            let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init("\(package):1.0.0", [])
+            let output:Unidoc.VertexOutput = try #require(try await db.query(with: query))
+
+            #expect(output.canonicalVolume?.patch == .v(0, 2, 0))
+            #expect(output.principalVolume.patch == nil)
+            #expect(output.principalVolume.refname == "1.0.0-beta.1")
+            #expect(output.principalVertex?.landing != nil)
         }
     }
 }

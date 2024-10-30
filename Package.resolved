@@ -1,5 +1,5 @@
 {
-  "originHash" : "b6c4c07915d8ae229be548751533ae53399ec48cd5a3a7560c6b8ef77cf78a91",
+  "originHash" : "56b5370f78e3e0b80c7e8697db385ad573acc74e2625d6b28ba28d2cf28bf748",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "efabbbf87a699ebe10a7064aebb376f222df5f06",
-        "version" : "0.25.1"
+        "revision" : "ba239e2e346b4cbd2e014c629ce94d87f5987e5c",
+        "version" : "0.27.0"
       }
     },
     {

@@ -1,5 +1,5 @@
 import MongoDB
-import Testing_
+import Testing
 @_spi(testable)
 import UnidocDB
 
@@ -12,8 +12,8 @@ extension LinkResolution
 
         let internalLinks:KeyValuePairs<String, [String]>
         let externalLinks:KeyValuePairs<String, Bool>
-        let fragmentLinks:[String]
-        let brokenLinks:[String]
+        let fragmentLinks:Set<String>
+        let brokenLinks:Set<String>
         let outlines:Int?
 
         init(
@@ -21,8 +21,8 @@ extension LinkResolution
             path:[String],
             internalLinks:KeyValuePairs<String, [String]> = [:],
             externalLinks:KeyValuePairs<String, Bool> = [:],
-            fragmentLinks:[String] = [],
-            brokenLinks:[String] = [],
+            fragmentLinks:Set<String> = [],
+            brokenLinks:Set<String> = [],
             outlines:Int? = nil)
         {
             self.name = name
@@ -37,21 +37,14 @@ extension LinkResolution
 }
 extension LinkResolution.TestCase
 {
-    func run(tests:TestGroup, db:Unidoc.DB) async throws
+    func run(in db:Unidoc.DB) async throws
     {
         let query:Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
             volume: .init("swift-test"),
-            vertex: .init(path: self.path[...], hash: nil))
+            vertex: .init(casefolding: self.path[...], hash: nil))
 
-        guard
-        let output:Unidoc.VertexOutput = tests.expect(
-            value: try await db.query(with: query)),
-        let vertex:Unidoc.AnyVertex = tests.expect(
-            value: output.principalVertex)
-        else
-        {
-            return
-        }
+        let output:Unidoc.VertexOutput = try #require(try await db.query(with: query))
+        let vertex:Unidoc.AnyVertex = try #require(output.principalVertex)
 
         let loadable:[Unidoc.Scalar: String] = output.adjacentVertices.reduce(into: [:])
         {
@@ -71,10 +64,9 @@ extension LinkResolution.TestCase
             outlines += details.outlines
         }
 
-        if  let count:Int = self.outlines,
-            let tests:TestGroup = tests / "OutlineCount"
+        if  let count:Int = self.outlines
         {
-            tests.expect(outlines.count ==? count)
+            #expect(outlines.count == count)
         }
 
         var internalLinks:[String: [String]] = [:]
@@ -96,24 +88,14 @@ extension LinkResolution.TestCase
                 fragmentLinks.insert(display)
 
             case .bare(line: _, let id):
-                guard
-                let id:Unidoc.Scalar = tests.expect(value: id),
-                let full:String = tests.expect(value: loadable[id])
-                else
-                {
-                    continue
-                }
+                let id:Unidoc.Scalar = try #require(id)
+                let full:String = try #require(loadable[id])
 
                 internalLinks[full, default: []].append("__attribute")
 
             case .path(let display, let scalars):
-                guard
-                let id:Unidoc.Scalar = tests.expect(value: scalars.last),
-                let full:String = tests.expect(value: loadable[id])
-                else
-                {
-                    continue
-                }
+                let id:Unidoc.Scalar = try #require(scalars.last)
+                let full:String = try #require(loadable[id])
 
                 internalLinks[full, default: []].append("\(display)")
 
@@ -124,25 +106,14 @@ extension LinkResolution.TestCase
 
         for (target, expectation):(String, [String]) in self.internalLinks
         {
-            if  let test:TestGroup = tests / "InternalLinks" / target
-            {
-                test.expect(expectation ..? internalLinks[target] ?? [])
-            }
+            #expect(expectation == internalLinks[target])
         }
         for (target, expectation):(String, Bool) in self.externalLinks
         {
-            if  let test:TestGroup = tests / "ExternalLinks" / target
-            {
-                test.expect(expectation ==? externalLinks[target])
-            }
+            #expect(expectation == externalLinks[target])
         }
-        if  let test:TestGroup = tests / "FragmentLinks"
-        {
-            test.expect(self.fragmentLinks **? fragmentLinks)
-        }
-        if  let test:TestGroup = tests / "BrokenLinks"
-        {
-            test.expect(self.brokenLinks **? brokenLinks)
-        }
+
+        #expect(self.fragmentLinks == fragmentLinks)
+        #expect(self.brokenLinks == brokenLinks)
     }
 }

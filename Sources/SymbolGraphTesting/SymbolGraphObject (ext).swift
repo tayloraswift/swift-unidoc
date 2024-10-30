@@ -3,6 +3,7 @@ import SemanticVersions
 import SymbolGraphs
 import Symbols
 import System_
+import Testing
 import Testing_
 
 extension SymbolGraphObject<Void>
@@ -38,6 +39,17 @@ extension SymbolGraphObject<Void>
 }
 extension SymbolGraphObject<Void>
 {
+    public
+    func roundtrip(in directory:FilePath.Directory) throws
+    {
+        let file:FilePath = try self.save(in: directory)
+        let decoded:Self = try .init(buffer: try file.read())
+
+        #expect(decoded.metadata == self.metadata)
+        //  We don’t want to dump the entire symbol graph to the terminal!
+        #expect(decoded.graph == self.graph)
+    }
+
     public
     func roundtrip(for tests:TestGroup, in directory:FilePath.Directory)
     {
