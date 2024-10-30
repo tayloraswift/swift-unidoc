@@ -3,7 +3,7 @@ import Symbols
 import UnidocQueries
 import UnidocRecords
 
-extension Unidoc.RedirectBySymbolicHintQuery<Unidoc.Shoot>
+extension Unidoc.RedirectBySymbolicHintQuery<Unidoc.VertexPath>
 {
     static
     func legacy(
@@ -101,8 +101,6 @@ extension Unidoc.RedirectBySymbolicHintQuery<Unidoc.Shoot>
             volume: .init(
                 package: package,
                 version: version.map { "\(PatchVersion.init(padding: $0))" }),
-            lookup: .init(
-                path: stem,
-                hash: nil))
+            lookup: .init(casefolded: stem, hash: nil))
     }
 }

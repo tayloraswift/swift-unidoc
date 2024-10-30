@@ -34,7 +34,7 @@ jobs:
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
                         swift:6.0.1-noble \
-                        /bin/bash .github/pipeline
+                        /bin/bash Scripts/TestAll
 
     macos:
         runs-on: macos-15

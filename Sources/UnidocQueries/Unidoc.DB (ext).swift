@@ -67,28 +67,33 @@ extension Unidoc.DB
 extension Unidoc.DB
 {
     public
-    func redirect(exported:Unidoc.Shoot,
+    func redirect(exported vertex:Unidoc.VertexPath,
         from volume:Unidoc.Edition) async throws -> Unidoc.RedirectOutput?
     {
         try await self.query(with: Unidoc.RedirectByExportQuery.init(
                 volume: volume,
-                stem: exported.stem,
-                hash: exported.hash),
+                vertex: vertex),
             on: .nearest)
     }
 
     public
-    func redirect(visited shoot:Unidoc.Shoot,
+    func redirect(visited vertex:Unidoc.VertexPath,
         in package:Unidoc.Package) async throws -> Unidoc.RedirectOutput?
     {
         guard
-        let visited:Unidoc.SearchbotCell = try await self.searchbotGrid.find(id: .init(
-            trunk: package,
-            shoot: shoot)),
+        let visited:Unidoc.SearchbotCell = try await self.searchbotGrid.match(
+            volume: package,
+            vertex: vertex)
+        else
+        {
+            return nil
+        }
+
+        guard
         let redirect:Unidoc.RedirectOutput = try await self.query(
-            with: Unidoc.RedirectByInternalHintQuery<Unidoc.Shoot>.init(
+            with: Unidoc.RedirectByInternalHintQuery<Unidoc.VertexPath>.init(
                 volume: visited.ok,
-                lookup: shoot),
+                lookup: vertex),
             on: .nearest)
         else
         {

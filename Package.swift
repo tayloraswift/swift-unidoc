@@ -93,7 +93,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-ip", .upToNextMinor(
             from: "0.1.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.25.1")),
+            from: "0.27.0")),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
             from: "0.1.5")),
 
@@ -565,6 +565,12 @@ let package:Package = .init(
                 .target(name: "UnidocUI"),
             ]),
 
+        .target(name: "UnidocTesting",
+            dependencies: [
+                .target(name: "UnidocDB"),
+                .product(name: "MongoTesting", package: "swift-mongodb"),
+            ]),
+
         .target(name: "UnidocUI",
             dependencies: [
                 .target(name: "GitHubAPI"),
@@ -711,21 +717,19 @@ let package:Package = .init(
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "UnidocDBTests",
+        .testTarget(name: "UnidocDBTests",
             dependencies: [
-                .target(name: "UnidocDB"),
+                .target(name: "UnidocTesting"),
                 .target(name: "GitHubClient"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
-                .product(name: "MongoTesting", package: "swift-mongodb"),
             ]),
 
-        .executableTarget(name: "UnidocQueryTests",
+        .testTarget(name: "UnidocQueryTests",
             dependencies: [
                 .target(name: "UnidocQueries"),
-                .target(name: "SymbolGraphBuilder"),
+                .target(name: "UnidocTesting"),
                 .target(name: "SymbolGraphTesting"),
-                .product(name: "MongoTesting", package: "swift-mongodb"),
             ]),
 
         .executableTarget(name: "UnidocRecordsTests",

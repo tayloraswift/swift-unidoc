@@ -1,19 +1,23 @@
 import JSON
-import MD5
 import MongoDB
-import MongoTesting
-import SymbolGraphBuilder
+import SHA1
 import SymbolGraphs
+import Testing
 @_spi(testable)
 import UnidocDB
 import UnidocQueries
+import UnidocTesting
 
-struct PackageQueries:UnidocDatabaseTestBattery
+@Suite
+struct PackageQueries:Unidoc.TestBattery
 {
-    typealias Configuration = Main.Configuration
+    @Test
+    func packageQueries() async throws
+    {
+        try await self.run(in: "PackageQueries")
+    }
 
-    static
-    func run(tests:TestGroup, db:Unidoc.DB) async throws
+    func run(with db:Unidoc.DB) async throws
     {
         let empty:SymbolGraph = .init(modules: [])
         var docs:SymbolGraphObject<Void>
@@ -29,12 +33,11 @@ struct PackageQueries:UnidocDatabaseTestBattery
 
         do
         {
-            let toolchain:SSGC.Toolchain = try .detect()
             docs = .init(
                 metadata: .init(
                     package: .init(name: .swift),
                     commit: .init(name: "swift-5.8.1-RELEASE"),
-                    triple: toolchain.splash.triple,
+                    triple: .aarch64_unknown_linux_gnu,
                     swift: .init(version: .v(5, 8, 1)),
                     products: []),
                 graph: empty)
@@ -86,140 +89,88 @@ struct PackageQueries:UnidocDatabaseTestBattery
             status.red = try await db.store(docs: docs)
         }
 
-        if  let tests:TestGroup = tests / "AllPackages"
+        do
         {
             let query:Unidoc.TextResourceQuery<Unidoc.DB.Metadata> = .init(
                 tag: nil,
                 id: .packages_json)
 
-            await tests.do
-            {
-                if  let index:Unidoc.TextResourceOutput = tests.expect(
-                        value: try await db.query(with: query)),
-                    let _:MD5 = tests.expect(value: index.hash)
-                {
-                    switch index.text
-                    {
-                    case .inline(.utf8(let utf8)):
-                        let json:JSON = .init(utf8: utf8)
-                        tests.expect(try json.decode([String].self) **?
-                        [
-                            "swift",
-                            "swift-debut",
-                            "swift-fearless",
-                            "swift-red",
-                            "swift-speak-now",
-                        ])
+            let index:Unidoc.TextResourceOutput = try #require(try await db.query(with: query))
 
-                    default:
-                        tests.expect(value: nil as [UInt8]?)
-                    }
-                }
+            #expect(index.hash != nil)
+
+            switch index.text
+            {
+            case .inline(.utf8(let utf8)):
+                let json:JSON = .init(utf8: utf8)
+                #expect(try json.decode(Set<String>.self) == [
+                    "swift",
+                    "swift-debut",
+                    "swift-fearless",
+                    "swift-red",
+                    "swift-speak-now",
+                ])
+
+            default:
+                Issue.record()
             }
         }
 
-        if  let tests:TestGroup = tests / "Tags"
+        do
         {
-            if  let tests:TestGroup = tests / "Debut"
-            {
-                let query:Unidoc.VersionsQuery = .init(
-                    symbol: "swift-debut",
-                    limitTags: 2)
+            let query:Unidoc.VersionsQuery = .init(
+                symbol: "swift-debut",
+                limitTags: 2)
 
-                await tests.do
-                {
-                    guard
-                    let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await db.query(with: query))
-                    else
-                    {
-                        return
-                    }
+            let output:Unidoc.VersionsQuery.Output = try #require(try await db.query(
+                with: query))
 
-                    tests.expect(output.versions.count ==? 1)
-                    tests.expect(output.versions[0].edition.id ==? status.debut.edition)
-                    tests.expect(output.package.id ==? status.debut.package)
-                }
-            }
-            if  let tests:TestGroup = tests / "Fearless"
-            {
-                let query:Unidoc.VersionsQuery = .init(
-                    symbol: "swift-fearless",
-                    limitTags: 2)
-                await tests.do
-                {
-                    guard
-                    let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await db.query(with: query))
-                    else
-                    {
-                        return
-                    }
+            #expect(output.versions.count == 1)
+            #expect(output.versions[0].edition.id == status.debut.edition)
+            #expect(output.package.id == status.debut.package)
+        }
+        do
+        {
+            let query:Unidoc.VersionsQuery = .init(
+                symbol: "swift-fearless",
+                limitTags: 2)
 
-                    guard tests.expect(output.versions.count ==? 2)
-                    else
-                    {
-                        return
-                    }
+            let output:Unidoc.VersionsQuery.Output = try #require(try await db.query(
+                with: query))
 
-                    //  Reverse chronological order!
-                    tests.expect(output.versions[0].edition.id ==?
-                        status.fearless.1.edition)
-                    tests.expect(output.versions[1].edition.id ==?
-                        status.fearless.0.edition)
-                }
-            }
-            if  let tests:TestGroup = tests / "SpeakNow"
-            {
-                let query:Unidoc.VersionsQuery = .init(
-                    symbol: "swift-speak-now",
-                    limitTags: 2)
-                await tests.do
-                {
-                    guard
-                    let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await db.query(with: query))
-                    else
-                    {
-                        return
-                    }
+            #expect(output.versions.count == 2)
 
-                    guard tests.expect(output.versions.count ==? 2)
-                    else
-                    {
-                        return
-                    }
+            //  Reverse chronological order!
+            #expect(output.versions[0].edition.id ==
+                status.fearless.1.edition)
+            #expect(output.versions[1].edition.id ==
+                status.fearless.0.edition)
+        }
+        do
+        {
+            let query:Unidoc.VersionsQuery = .init(
+                symbol: "swift-speak-now",
+                limitTags: 2)
 
-                    tests.expect(output.versions[0].edition.id ==?
-                        status.speakNow.0.edition)
-                    tests.expect(output.versions[1].edition.id ==?
-                        status.speakNow.1.edition)
-                }
-            }
-            if  let tests:TestGroup = tests / "Red"
-            {
-                let query:Unidoc.VersionsQuery = .init(
-                    symbol: "swift-red",
-                    limitTags: 2)
-                await tests.do
-                {
-                    guard
-                    let output:Unidoc.VersionsQuery.Output = tests.expect(
-                        value: try await db.query(with: query))
-                    else
-                    {
-                        return
-                    }
+            let output:Unidoc.VersionsQuery.Output = try #require(try await db.query(
+                with: query))
 
-                    guard tests.expect(output.versions.count ==? 1)
-                    else
-                    {
-                        return
-                    }
+            #expect(output.versions.count == 2)
 
-                    tests.expect(output.versions[0].edition.id ==? status.red.edition)
-                }
-            }
+            #expect(output.versions[0].edition.id == status.speakNow.0.edition)
+            #expect(output.versions[1].edition.id == status.speakNow.1.edition)
+        }
+        do
+        {
+            let query:Unidoc.VersionsQuery = .init(
+                symbol: "swift-red",
+                limitTags: 2)
+
+            let output:Unidoc.VersionsQuery.Output = try #require(try await db.query(
+                with: query))
+
+            #expect(output.versions.count == 1)
+            #expect(output.versions[0].edition.id == status.red.edition)
         }
     }
 }
