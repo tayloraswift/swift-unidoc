@@ -25,7 +25,7 @@ extension Unidoc.DB.Vertices
 {
     public static
     let indexStem:Mongo.CollectionIndex = .init("Stem",
-        collation: VolumeCollation.spec,
+        collation: .casefolding,
         unique: true)
     {
         //  If a snapshot contains a hash collision, insertion will fail.
@@ -46,7 +46,7 @@ extension Unidoc.DB.Vertices
 
     public static
     let indexHash:Mongo.CollectionIndex = .init("Hash",
-        collation: VolumeCollation.spec,
+        collation: .casefolding,
         unique: true)
     {
         $0[Unidoc.AnyVertex[.hash]] = (+)

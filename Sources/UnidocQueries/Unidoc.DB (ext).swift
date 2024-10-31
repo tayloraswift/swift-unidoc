@@ -82,8 +82,8 @@ extension Unidoc.DB
     {
         guard
         let visited:Unidoc.SearchbotCell = try await self.searchbotGrid.match(
-            volume: package,
-            vertex: vertex)
+            vertex: vertex,
+            in: package)
         else
         {
             return nil

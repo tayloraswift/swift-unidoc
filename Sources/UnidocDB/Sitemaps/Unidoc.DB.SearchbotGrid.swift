@@ -30,7 +30,7 @@ extension Unidoc.DB.SearchbotGrid
     /// Not unique, due to case-folding.
     public
     static let indexCollated:Mongo.CollectionIndex = .init("Collated",
-        collation: VolumeCollation.spec,
+        collation: .casefolding,
         unique: false)
     {
         $0[Element[.id] / Element.ID[.volume]] = (+)
@@ -52,55 +52,40 @@ extension Unidoc.DB.SearchbotGrid:Mongo.CollectionModel
 extension Unidoc.DB.SearchbotGrid
 {
     public
-    func match(volume:Unidoc.Package, vertex:Unidoc.VertexPath) async throws -> Element?
+    func match(vertex:Unidoc.VertexPath, in package:Unidoc.Package) async throws -> Element?
     {
         try await self.find
         {
-            $0[.filter]
-            {
-                $0[Element[.id] / Element.ID[.volume]] = volume
-                $0[Element[.id] / Element.ID[.stem]] = vertex.stem
+            let id:Unidoc.SearchbotCell.ID = .init(volume: package, vertex: vertex)
 
-                if  let hash:FNV24 = vertex.hash
-                {
-                    $0[Element[.id] / Element.ID[.hash]] = hash
-                }
-                else
-                {
-                    //  Important to specify this, otherwise the query will match
-                    //  any vertex with the same stem.
-                    //
-                    //  Unlike ``DB.Redirects``, we care about this distinction, because
-                    //  the grid can contain cells from other versions, and we
-                    $0[Element[.id] / Element.ID[.hash]] = BSON.Null.init()
-                }
-            }
+            $0[.filter] = id.predicate
             $0[.hint] = Self.indexCollated.id
-            $0[.collation] = VolumeCollation.spec
+            $0[.collation] = .casefolding
         }
     }
 
     public
-    func count(searchbot:Unidoc.Searchbot?,
-        on trail:Unidoc.SearchbotTrail,
-        to docs:Unidoc.Edition,
+    func count(vertex:Unidoc.VertexPath,
+        in volume:Unidoc.Edition,
+        as client:Unidoc.Searchbot?,
         at time:UnixAttosecond) async throws
     {
-        _ = try await self.modify(upserting: trail)
+        let id:Unidoc.SearchbotCell.ID = .init(volume: volume.package, vertex: vertex)
+        _ = try await self.modify(upserting: id)
         {
             $0[.setOnInsert]
             {
                 //  This guards against accidentally changing the `_id` due to non-normalized
                 //  vertex path strings.
-                $0[Element[.id]] = trail
+                $0[Element[.id]] = id
             }
             $0[.set]
             {
-                $0[Element[.ok]] = docs
+                $0[Element[.ok]] = volume
 
                 let timestamp:Element.CodingKey
 
-                switch searchbot
+                switch client
                 {
                 case nil:           return
                 case .bingbot?:     timestamp = .bingbot_fetched
@@ -114,7 +99,7 @@ extension Unidoc.DB.SearchbotGrid
             {
                 let counter:Element.CodingKey
 
-                switch searchbot
+                switch client
                 {
                 case nil:           return
                 case .bingbot?:     counter = .bingbot_fetches
@@ -139,7 +124,7 @@ extension Unidoc.DB.SearchbotGrid
                 $0[.filter] { $0[Element[.id] / Element.ID[.volume]] = package }
                 //  Even though this doesn’t actually match on any strings, we still need to
                 //  specify the collation in order to use the collated index.
-                $0[.collation]  = VolumeCollation.spec
+                $0[.collation] = .casefolding
                 $0[.hint] = Self.indexCollated.id
             },
             against: self.database,

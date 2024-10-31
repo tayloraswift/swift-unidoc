@@ -23,11 +23,11 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
     public
     typealias CollectionOrigin = Unidoc.DB.CrawlingWindows
     public
-    typealias Collation = SimpleCollation
-    public
     typealias Iteration = Mongo.SingleBatch<Date>
 
-    public
+    @inlinable public
+    var collation:Mongo.Collation { .simple }
+    @inlinable public
     var hint:Mongo.CollectionIndex? { nil }
 
     public

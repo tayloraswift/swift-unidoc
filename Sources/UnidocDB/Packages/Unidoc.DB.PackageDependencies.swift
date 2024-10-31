@@ -24,7 +24,7 @@ extension Unidoc.DB.PackageDependencies
 {
     public static
     let indexSource:Mongo.CollectionIndex = .init("Source/2",
-        collation: SimpleCollation.spec)
+        collation: .simple)
     {
         $0[Unidoc.PackageDependency[.id] / Unidoc.Edge<Unidoc.Package>[.source]] = (+)
         $0[Unidoc.PackageDependency[.source]] = (+)
@@ -32,7 +32,7 @@ extension Unidoc.DB.PackageDependencies
 
     public static
     let indexTarget:Mongo.CollectionIndex = .init("Target",
-        collation: SimpleCollation.spec)
+        collation: .simple)
     {
         $0[Unidoc.PackageDependency[.id] / Unidoc.Edge<Unidoc.Package>[.target]] = (+)
     }

@@ -226,9 +226,9 @@ extension Unidoc.Server
             /// It could be a potentially long time between events, so we acquire a fresh
             /// session each time.
             let db:Unidoc.DB = try await self.db.session()
-            try await db.searchbotGrid.count(searchbot: paint.searchbot,
-                on: paint.trail,
-                to: paint.volume,
+            try await db.searchbotGrid.count(vertex: paint.vertex,
+                in: paint.volume,
+                as: paint.searchbot,
                 at: paint.time)
         }
     }

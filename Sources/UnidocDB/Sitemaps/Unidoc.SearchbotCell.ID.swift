@@ -3,25 +3,29 @@ import MongoQL
 import UnidocAPI
 import UnidocRecords
 
-extension Unidoc
+extension Unidoc.SearchbotCell
 {
     @frozen public
-    struct SearchbotTrail:Equatable, Hashable, Sendable
+    struct ID:Equatable, Hashable, Sendable
     {
         public
-        let volume:Package
+        let volume:Unidoc.Package
         public
-        let vertex:VertexPath
+        let vertex:Unidoc.VertexPath
 
         @inlinable public
-        init(volume:Package, vertex:VertexPath)
+        init(volume:Unidoc.Package, vertex:Unidoc.VertexPath)
         {
             self.volume = volume
             self.vertex = vertex
         }
     }
 }
-extension Unidoc.SearchbotTrail:Mongo.MasterCodingModel
+extension Unidoc.SearchbotCell.ID
+{
+    var predicate:Unidoc.SearchbotCell.Predicate { .init(id: self) }
+}
+extension Unidoc.SearchbotCell.ID:Mongo.MasterCodingModel
 {
     @frozen public
     enum CodingKey:String, Sendable
@@ -31,7 +35,7 @@ extension Unidoc.SearchbotTrail:Mongo.MasterCodingModel
         case hash = "H"
     }
 }
-extension Unidoc.SearchbotTrail:BSONDocumentEncodable
+extension Unidoc.SearchbotCell.ID:BSONDocumentEncodable
 {
     @inlinable public
     func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
@@ -41,7 +45,7 @@ extension Unidoc.SearchbotTrail:BSONDocumentEncodable
         bson[.hash] = self.vertex.hash
     }
 }
-extension Unidoc.SearchbotTrail:BSONDocumentDecodable
+extension Unidoc.SearchbotCell.ID:BSONDocumentDecodable
 {
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws

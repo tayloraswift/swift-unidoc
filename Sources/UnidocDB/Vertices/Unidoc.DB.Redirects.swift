@@ -25,7 +25,7 @@ extension Unidoc.DB.Redirects
 {
     public static
     let indexPaths:Mongo.CollectionIndex = .init("Paths",
-        collation: VolumeCollation.spec,
+        collation: .casefolding,
         unique: true)
     {
         $0[Element[.id] / Unidoc.RedirectSource[.volume]] = (+)

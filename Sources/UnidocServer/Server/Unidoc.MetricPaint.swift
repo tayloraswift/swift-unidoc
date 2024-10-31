@@ -11,10 +11,4 @@ extension Unidoc
         let time:UnixAttosecond
     }
 }
-extension Unidoc.MetricPaint
-{
-    var trail:Unidoc.SearchbotTrail
-    {
-        .init(volume: self.volume.package, vertex: self.vertex)
-    }
-}
+
