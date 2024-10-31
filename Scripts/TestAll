@@ -7,7 +7,8 @@ swift --version
 swift build -c release \
     --explicit-target-dependency-import-check=error \
     -Xcxx -I/usr/lib/swift \
-    -Xcxx -I/usr/lib/swift/Block
+    -Xcxx -I/usr/lib/swift/Block \
+    --build-tests
 
 Scripts/GenerateTestSymbolGraphs
 Scripts/GeneratePackageSymbolGraphs
@@ -15,7 +16,10 @@ Scripts/GeneratePackageSymbolGraphs
 swift test -c release \
     --explicit-target-dependency-import-check=error \
     -Xcxx -I/usr/lib/swift \
-    -Xcxx -I/usr/lib/swift/Block
+    -Xcxx -I/usr/lib/swift/Block \
+    --no-parallel \
+    --skip-build \
+    --disable-testable-imports
 
 for f in .build/release/*Tests; do
   $f
