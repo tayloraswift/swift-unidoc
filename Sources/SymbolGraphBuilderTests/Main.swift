@@ -5,7 +5,6 @@ import MarkdownRendering
 @_spi(testable)
 import SymbolGraphBuilder
 import SymbolGraphs
-import SymbolGraphTesting
 import System_
 import Testing_
 
@@ -67,7 +66,7 @@ enum Main:TestMain, TestBattery
                 try workspace.build(special: .swift, with: toolchain)
             })
         {
-            docs.roundtrip(for: tests, in: workspace.location)
+            docs.roundtrip(for: tests)
         }
 
         #if canImport(IndexStoreDB)
@@ -147,7 +146,7 @@ enum Main:TestMain, TestBattery
                 tests.expect(docs.graph.cultures.count >? 0)
                 tests.expect(docs.graph.decls.nodes.count >? 0)
 
-                docs.roundtrip(for: tests, in: workspace.location)
+                docs.roundtrip(for: tests)
             }
         }
 
@@ -240,7 +239,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.location)
+            docs.roundtrip(for: tests)
         }
 
         //  https://github.com/tayloraswift/swift-unidoc/issues/211
@@ -267,7 +266,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.location)
+            docs.roundtrip(for: tests)
         }
         #endif
 
@@ -293,7 +292,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.location)
+            docs.roundtrip(for: tests)
         }
 
         //  The swift-async-dns-resolver repo includes a git submodule, so we should be able
@@ -318,7 +317,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.location)
+            docs.roundtrip(for: tests)
         }
 
         //  SwiftSyntax is a morbidly obese package. If we can handle SwiftSyntax,
@@ -340,7 +339,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.location)
+            docs.roundtrip(for: tests)
         }
 
         //  The swift-snapshot-testing package at 1.17.0 has a dependency on SwiftSyntax with
@@ -366,7 +365,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.cultures.count >? 0)
             tests.expect(docs.graph.decls.nodes.count >? 0)
 
-            docs.roundtrip(for: tests, in: workspace.location)
+            docs.roundtrip(for: tests)
         }
         #endif
 
@@ -408,7 +407,7 @@ enum Main:TestMain, TestBattery
             tests.expect(docs.graph.articles.nodes.count >? 0)
             tests.expect(docs.graph.decls.nodes.count ==? 0)
 
-            docs.roundtrip(for: tests, in: workspace.location)
+            docs.roundtrip(for: tests)
         }
     }
 }

@@ -442,8 +442,6 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "SymbolGraphs"),
                 .target(name: "System_"),
-
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .target(name: "TopologicalSorting"),
@@ -659,7 +657,7 @@ let package:Package = .init(
         .executableTarget(name: "SymbolGraphBuilderTests",
             dependencies: [
                 .target(name: "SymbolGraphBuilder"),
-                .target(name: "SymbolGraphTesting"),
+                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "SymbolGraphCompilerTests",
