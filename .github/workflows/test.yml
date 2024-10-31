@@ -33,6 +33,7 @@ jobs:
                         --user root \
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
+                        -e SWIFT_INSTALLATION=/usr \
                         swift:6.0.1-noble \
                         /bin/bash Scripts/TestAll
 
