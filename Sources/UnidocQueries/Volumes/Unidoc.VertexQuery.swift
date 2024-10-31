@@ -91,11 +91,11 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
     public
     typealias CollectionOrigin = Unidoc.DB.Volumes
     public
-    typealias Collation = VolumeCollation
-    public
     typealias Iteration = Mongo.Single<Unidoc.VertexOutput>
 
-    public
+    @inlinable public
+    var collation:Mongo.Collation { .casefolding }
+    @inlinable public
     var hint:Mongo.CollectionIndex?
     {
         self.volume.version == nil

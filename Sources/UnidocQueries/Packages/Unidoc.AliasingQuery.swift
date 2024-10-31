@@ -9,13 +9,8 @@ extension Unidoc
 {
     public
     protocol AliasingQuery<CollectionOrigin, CollectionTarget>:Mongo.PipelineQuery
-        where   CollectionOrigin.Element:Mongo.MasterCodingModel<AliasKey>,
-                Collation == SimpleCollation
+        where CollectionOrigin.Element:Mongo.MasterCodingModel<AliasKey>
     {
-        //  https://forums.swift.org/t/recent-improvements-to-associated-type-inference/70265/14
-        override
-        associatedtype Collation
-
         associatedtype CollectionTarget:Mongo.CollectionModel
 
         /// The field to store the target document (a `CollectionTarget.Element`) in.
@@ -29,6 +24,8 @@ extension Unidoc
 }
 extension Unidoc.AliasingQuery
 {
+    @inlinable public
+    var collation:Mongo.Collation { .simple }
     @inlinable public
     var hint:Mongo.CollectionIndex? { nil }
 

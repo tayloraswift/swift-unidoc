@@ -24,7 +24,7 @@ extension Unidoc.DB.EditionDependencies
 {
     public
     static let indexSourceChangedABI:Mongo.CollectionIndex = .init("SourceChangedABI",
-        collation: SimpleCollation.spec)
+        collation: .simple)
     {
         $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.source]] = (+)
     }
@@ -35,14 +35,14 @@ extension Unidoc.DB.EditionDependencies
 
     public
     static let indexSource:Mongo.CollectionIndex = .init("Source",
-        collation: SimpleCollation.spec)
+        collation: .simple)
     {
         $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.source]] = (+)
     }
 
     public
     static let indexTarget:Mongo.CollectionIndex = .init("Target",
-        collation: SimpleCollation.spec)
+        collation: .simple)
     {
         $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.target]] = (+)
     }

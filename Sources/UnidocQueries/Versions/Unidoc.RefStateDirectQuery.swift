@@ -20,9 +20,9 @@ extension Unidoc
 extension Unidoc.RefStateDirectQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Unidoc.DB.Packages
-    typealias Collation = SimpleCollation
     typealias Iteration = Mongo.Single<Unidoc.RefState>
 
+    var collation:Mongo.Collation { .simple }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)

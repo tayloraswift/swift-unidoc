@@ -27,7 +27,7 @@ extension Unidoc.DB.Editions
 {
     public static
     let indexEditionName:Mongo.CollectionIndex = .init("EditionName",
-        collation: SimpleCollation.spec,
+        collation: .simple,
         unique: true)
     {
         $0[Unidoc.EditionMetadata[.package]] = (+)

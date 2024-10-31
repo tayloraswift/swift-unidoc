@@ -21,9 +21,9 @@ extension Unidoc
 extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Unidoc.DB.Editions
-    typealias Collation = SimpleCollation
     typealias Iteration = Mongo.Single<Unidoc.EditionPlacement>
 
+    var collation:Mongo.Collation { .simple }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)

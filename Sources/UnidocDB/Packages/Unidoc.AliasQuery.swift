@@ -30,9 +30,9 @@ extension Unidoc
 extension Unidoc.AliasQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Aliases
-    typealias Collation = SimpleCollation
     typealias Iteration = Mongo.Single<Never>
 
+    var collation:Mongo.Collation { .simple }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)

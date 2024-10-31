@@ -22,9 +22,9 @@ extension Unidoc
 extension Unidoc.RedirectByExportQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Unidoc.DB.Redirects
-    typealias Collation = VolumeCollation
     typealias Iteration = Mongo.Single<Unidoc.RedirectOutput>
 
+    var collation:Mongo.Collation { .casefolding }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)
