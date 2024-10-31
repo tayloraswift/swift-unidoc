@@ -9,16 +9,16 @@ extension Mongo
         public
         let id:String
 
-        @usableFromInline internal
+        public
         var collation:Collation?
-        @usableFromInline internal
+        @usableFromInline
         var unique:Bool
-        @usableFromInline internal
+        @usableFromInline
         var fields:SortDocument<Mongo.AnyKeyPath>
-        @usableFromInline internal
+        @usableFromInline
         var filter:PredicateDocument?
 
-        @inlinable internal
+        @inlinable
         init(id:String,
             collation:Collation?,
             unique:Bool,
