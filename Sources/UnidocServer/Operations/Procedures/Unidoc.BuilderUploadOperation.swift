@@ -95,8 +95,7 @@ extension Unidoc.BuilderUploadOperation:Unidoc.BlockingOperation
 
             /// A successful (labeled) build also sets the platform preference, since we now
             /// know that the package can be built on that platform.
-            let _:Unidoc.PackageMetadata? = try await db.packages.modify(
-                existing: id.package)
+            let _:Unidoc.PackageMetadata? = try await db.packages.modify(id: id.package)
             {
                 $0[.set]
                 {

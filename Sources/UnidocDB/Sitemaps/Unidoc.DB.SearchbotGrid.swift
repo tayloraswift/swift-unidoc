@@ -54,14 +54,8 @@ extension Unidoc.DB.SearchbotGrid
     public
     func match(vertex:Unidoc.VertexPath, in package:Unidoc.Package) async throws -> Element?
     {
-        try await self.find
-        {
-            let id:Unidoc.SearchbotCell.ID = .init(volume: package, vertex: vertex)
-
-            $0[.filter] = id.predicate
-            $0[.hint] = Self.indexCollated.id
-            $0[.collation] = .casefolding
-        }
+        let id:Unidoc.SearchbotCell.ID = .init(volume: package, vertex: vertex)
+        return try await self.find(by: Self.indexCollated, where: id.predicate(_:))
     }
 
     public
@@ -71,7 +65,7 @@ extension Unidoc.DB.SearchbotGrid
         at time:UnixAttosecond) async throws
     {
         let id:Unidoc.SearchbotCell.ID = .init(volume: volume.package, vertex: vertex)
-        _ = try await self.modify(upserting: id)
+        _ = try await self.upsert(by: Self.indexCollated, select: id.predicate(_:))
         {
             $0[.setOnInsert]
             {

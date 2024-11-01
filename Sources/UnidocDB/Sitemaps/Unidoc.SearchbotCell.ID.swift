@@ -1,4 +1,5 @@
 import BSON
+import FNV1
 import MongoQL
 import UnidocAPI
 import UnidocRecords
@@ -23,7 +24,25 @@ extension Unidoc.SearchbotCell
 }
 extension Unidoc.SearchbotCell.ID
 {
-    var predicate:Unidoc.SearchbotCell.Predicate { .init(id: self) }
+    func predicate(_ bson:inout Mongo.PredicateEncoder)
+    {
+        bson[Unidoc.SearchbotCell[.id] / Unidoc.SearchbotCell.ID[.volume]] = self.volume
+        bson[Unidoc.SearchbotCell[.id] / Unidoc.SearchbotCell.ID[.stem]] = self.vertex.stem
+
+        if  let hash:FNV24 = self.vertex.hash
+        {
+            bson[Unidoc.SearchbotCell[.id] / Unidoc.SearchbotCell.ID[.hash]] = hash
+        }
+        else
+        {
+            //  Important to specify this, otherwise the query will match
+            //  any vertex with the same stem.
+            //
+            //  Unlike ``DB.Redirects``, we care about this distinction, because
+            //  the grid can contain cells from other versions, and we
+            bson[Unidoc.SearchbotCell[.id] / Unidoc.SearchbotCell.ID[.hash]] = BSON.Null.init()
+        }
+    }
 }
 extension Unidoc.SearchbotCell.ID:Mongo.MasterCodingModel
 {

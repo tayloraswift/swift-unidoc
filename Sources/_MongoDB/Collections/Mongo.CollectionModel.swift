@@ -217,18 +217,33 @@ extension Mongo.CollectionModel where Element:BSONDocumentDecodable
     {
         try await self.find
         {
-            $0[.filter]
-            {
-                $0["_id"] = id
-            }
-            $0[.hint, using: Mongo.AnyKeyPath.self]
-            {
-                $0["_id"] = (+)
-            }
+            $0[.filter] { $0["_id"] = id }
+            $0[.hint] = "_id_"
         }
     }
 
     @inlinable public
+    func find(
+        collation:Mongo.Collation? = nil,
+        indexName:String? = nil,
+        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Element?
+    {
+        try await self.find
+        {
+            $0[.collation] = collation
+            $0[.filter, predicate]
+            $0[.hint] = indexName
+        }
+    }
+
+    @inlinable public
+    func find(by index:Mongo.CollectionIndex,
+        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Element?
+    {
+        try await self.find(collation: index.collation, indexName: index.id, where: predicate)
+    }
+
+    @inlinable
     func find(_ yield:(inout Mongo.Find<Mongo.Single<Element>>) -> ()) async throws -> Element?
     {
         try await session.run(
@@ -437,52 +452,108 @@ extension Mongo.CollectionModel where Element:Insertable
 extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEncodable
 {
     @inlinable package
-    func modify(upserting id:Element.ID,
+    func upsert(id:Element.ID,
         returning phase:Mongo.UpdatePhase = .new,
-        do encode:(inout Mongo.UpdateEncoder) -> ()) async throws -> (state:Element, new:Bool)
+        update:(inout Mongo.UpdateEncoder) -> ()) async throws -> (state:Element, new:Bool)
     {
         let (element, upserted):(Element, Element.ID?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Upserting<Element, Element.ID>>.init(Self.name,
                 returning: phase)
             {
                 $0[.query] { $0["_id"] = id }
-                $0[.update, encode]
+                $0[.update, update]
             },
             against: self.database)
         return (element, upserted != nil)
     }
 
     @inlinable package
-    func modify(existing id:Element.ID,
+    func upsert(
+        collation:Mongo.Collation? = nil,
+        indexName:String? = nil,
         returning phase:Mongo.UpdatePhase = .new,
-        do encode:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
+        select:(inout Mongo.PredicateEncoder) -> (),
+        update:(inout Mongo.UpdateEncoder) -> ()) async throws -> (state:Element, new:Bool)
+    {
+        let (element, upserted):(Element, Element.ID?) = try await session.run(
+            command: Mongo.FindAndModify<Mongo.Upserting<Element, Element.ID>>.init(Self.name,
+                returning: phase)
+            {
+                $0[.collation] = collation
+                $0[.hint] = indexName
+                $0[.query, select]
+                $0[.update, update]
+            },
+            against: self.database)
+        return (element, upserted != nil)
+    }
+
+    @inlinable package
+    func upsert(by index:Mongo.CollectionIndex,
+        returning phase:Mongo.UpdatePhase = .new,
+        select:(inout Mongo.PredicateEncoder) -> (),
+        update:(inout Mongo.UpdateEncoder) -> ()) async throws -> (state:Element, new:Bool)
+    {
+        try await self.upsert(
+            collation: index.collation,
+            indexName: index.id,
+            returning: phase,
+            select: select,
+            update: update)
+    }
+
+
+    @inlinable package
+    func modify(id:Element.ID,
+        returning phase:Mongo.UpdatePhase = .new,
+        update:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
     {
         let (element, _):(Element?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Existing<Element>>.init(Self.name,
                 returning: phase)
             {
                 $0[.query] { $0["_id"] = id }
-                $0[.update, encode]
+                $0[.update, update]
             },
             against: self.database)
         return element
     }
 
     @inlinable package
-    func modify(existing predicate:some Mongo.PredicateEncodable,
+    func modify(
+        collation:Mongo.Collation? = nil,
+        indexName:String? = nil,
         returning phase:Mongo.UpdatePhase = .new,
-        do encode:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
+        select:(inout Mongo.PredicateEncoder) -> (),
+        update:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
     {
         let (element, _):(Element?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Existing<Element>>.init(Self.name,
                 returning: phase)
             {
-                $0[.query, predicate.encode(to:)]
-                $0[.update, encode]
+                $0[.collation] = collation
+                $0[.hint] = indexName
+                $0[.query, select]
+                $0[.update, update]
             },
             against: self.database)
         return element
     }
+
+    @inlinable package
+    func modify(by index:Mongo.CollectionIndex,
+        returning phase:Mongo.UpdatePhase = .new,
+        select:(inout Mongo.PredicateEncoder) -> (),
+        update:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
+    {
+        try await self.modify(
+            collation: index.collation,
+            indexName: index.id,
+            returning: phase,
+            select: select,
+            update: update)
+    }
+
 
     @inlinable package
     func remove(id:Element.ID) async throws -> Element?
@@ -498,29 +569,31 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
     }
 
     @inlinable package
-    func remove(matching predicate:some Mongo.PredicateEncodable) async throws -> Element?
+    func remove(
+        collation:Mongo.Collation? = nil,
+        indexName:String? = nil,
+        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Element?
     {
         let (element, _):(Element?, Never?) = try await session.run(
             command: Mongo.FindAndModify<Mongo.Removing<Element>>.init(Self.name,
                 returning: .deleted)
             {
-                $0[.query, predicate.encode(to:)]
+                $0[.collation] = collation
+                $0[.hint] = indexName
+                $0[.query, predicate]
             },
             against: self.database)
         return element
     }
 
     @inlinable package
-    func remove(where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Element?
+    func remove(by index:Mongo.CollectionIndex,
+        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Element?
     {
-        let (element, _):(Element?, Never?) = try await session.run(
-            command: Mongo.FindAndModify<Mongo.Removing<Element>>.init(Self.name,
-                returning: .deleted)
-            {
-                $0[.query, predicate]
-            },
-            against: self.database)
-        return element
+        try await self.remove(
+            collation: index.collation,
+            indexName: index.id,
+            where: predicate)
     }
 }
 extension Mongo.CollectionModel
@@ -602,7 +675,10 @@ extension Mongo.CollectionModel
     }
 
     @inlinable public
-    func delete(where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Bool
+    func delete(
+        collation:Mongo.Collation? = nil,
+        indexName:String? = nil,
+        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Bool
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.One>.init(Self.name)
@@ -610,6 +686,9 @@ extension Mongo.CollectionModel
                 $0
                 {
                     $0[.limit] = .one
+
+                    $0[.collation] = collation
+                    $0[.hint] = indexName
                     $0[.q, predicate]
                 }
             },
@@ -620,7 +699,18 @@ extension Mongo.CollectionModel
     }
 
     @inlinable public
-    func deleteAll(where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
+    func delete(by index:Mongo.CollectionIndex,
+        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Bool
+    {
+        try await self.delete(collation: index.collation, indexName: index.id, where: predicate)
+    }
+
+
+    @inlinable public
+    func deleteAll(
+        collation:Mongo.Collation? = nil,
+        indexName:String? = nil,
+        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
     {
         let response:Mongo.DeleteResponse = try await session.run(
             command: Mongo.Delete<Mongo.Many>.init(Self.name)
@@ -628,6 +718,9 @@ extension Mongo.CollectionModel
                 $0
                 {
                     $0[.limit] = .unlimited
+
+                    $0[.collation] = collation
+                    $0[.hint] = indexName
                     $0[.q, predicate]
                 }
             },
@@ -635,5 +728,15 @@ extension Mongo.CollectionModel
 
         let deletions:Mongo.Deletions = try response.deletions()
         return deletions.deleted
+    }
+
+    @inlinable public
+    func deleteAll(by index:Mongo.CollectionIndex,
+        where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Int
+    {
+        try await self.deleteAll(
+            collation: index.collation,
+            indexName: index.id,
+            where: predicate)
     }
 }

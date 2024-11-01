@@ -287,9 +287,8 @@ extension Unidoc.DB
         if  let repo:Unidoc.PackageRepo,
             case .github(let origin) = repo.origin
         {
-            let predicate:Unidoc.PackageByGitHubID = .init(id: origin.id)
-            let modified:Unidoc.PackageMetadata? = try await self.packages.modify(
-                existing: predicate)
+            let modified:Unidoc.PackageMetadata? = try await self.packages.modifyByRegistrar(
+                github: origin.id)
             {
                 $0[.set]
                 {
@@ -335,8 +334,8 @@ extension Unidoc.DB
         case .old(let id, _):
             /// In very rare circumstances, the placement may be old but the package metadata
             /// may be new, if a previous indexing operation failed midway through.
-            let (package, new):(Unidoc.PackageMetadata, Bool) = try await self.packages.modify(
-                upserting: id)
+            let (package, new):(Unidoc.PackageMetadata, Bool) = try await self.packages.upsert(
+                id: id)
             {
                 $0[.setOnInsert]
                 {

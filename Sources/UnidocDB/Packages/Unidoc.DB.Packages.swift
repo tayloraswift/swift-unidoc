@@ -52,16 +52,11 @@ extension Unidoc.DB.Packages
     public static
     let indexRepoGitHub:Mongo.CollectionIndex = .init("RepoGitHub", unique: true)
     {
-        $0[ Unidoc.PackageMetadata[.repo] /
-            Unidoc.PackageRepo[.github] /
-            Unidoc.GitHubOrigin[.id]] = (+)
+        $0[Element[.repo] / Unidoc.PackageRepo[.github] / Unidoc.GitHubOrigin[.id]] = (+)
     }
         where:
     {
-        $0[ Unidoc.PackageMetadata[.repo] / Unidoc.PackageRepo[.github]]
-        {
-            $0[.exists] = true
-        }
+        $0[Element[.repo] / Unidoc.PackageRepo[.github]] { $0[.exists] = true }
     }
 
     public static
@@ -102,7 +97,7 @@ extension Unidoc.DB.Packages
     func set(media:Unidoc.PackageMedia?,
         of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package, returning: .new)
+        try await self.modify(id: package)
         {
             if  let media:Unidoc.PackageMedia
             {
@@ -119,7 +114,7 @@ extension Unidoc.DB.Packages
     func set(build:Unidoc.BuildTemplate,
         of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package, returning: .new)
+        try await self.modify(id: package)
         {
             $0[.set]
             {
@@ -140,7 +135,7 @@ extension Unidoc.DB.Packages
     func insert(editor:Unidoc.Account,
         into package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package)
+        try await self.modify(id: package)
         {
             $0[.addToSet]
             {
@@ -152,7 +147,7 @@ extension Unidoc.DB.Packages
     func revoke(editor:Unidoc.Account,
         from package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package)
+        try await self.modify(id: package)
         {
             $0[.pull]
             {
@@ -167,7 +162,7 @@ extension Unidoc.DB.Packages
     func update(package:Unidoc.Package,
         repo:Unidoc.PackageRepo?) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package)
+        try await self.modify(id: package)
         {
             if  let repo:Unidoc.PackageRepo
             {
@@ -184,7 +179,7 @@ extension Unidoc.DB.Packages
     func update(package:Unidoc.Package,
         hidden:Bool) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package)
+        try await self.modify(id: package)
         {
             if  hidden
             {
@@ -201,19 +196,16 @@ extension Unidoc.DB.Packages
     func updateWebhook(configurationURL:String,
         repo:Unidoc.PackageRepo) async throws -> Unidoc.PackageMetadata?
     {
-        let package:Unidoc.PackageByGitHubID
-
         switch repo.origin
         {
-        case .github(let origin):   package = .init(id: origin.id)
-        }
-
-        return try await self.modify(existing: package)
-        {
-            $0[.set]
+        case .github(let origin):
+            try await self.modifyByRegistrar(github: origin.id)
             {
-                $0[Element[.repo]] = repo
-                $0[Element[.repoWebhook]] = configurationURL
+                $0[.set]
+                {
+                    $0[Element[.repo]] = repo
+                    $0[Element[.repoWebhook]] = configurationURL
+                }
             }
         }
     }
@@ -221,12 +213,32 @@ extension Unidoc.DB.Packages
     public
     func detachWebhook(package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
-        try await self.modify(existing: package)
+        try await self.modify(id: package)
         {
             $0[.unset]
             {
                 $0[Unidoc.PackageMetadata[.repoWebhook]] = true
             }
+        }
+    }
+}
+extension Unidoc.DB.Packages
+{
+    func modifyByRegistrar(github id:Int32,
+        returning phase:Mongo.UpdatePhase = .new,
+        update:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
+    {
+        try await self.modify(by: Self.indexRepoGitHub)
+        {
+            $0[Element[.repo] / Unidoc.PackageRepo[.github] / Unidoc.GitHubOrigin[.id]] = id
+            $0[Element[.repo] / Unidoc.PackageRepo[.github]]
+            {
+                $0[.exists] = true
+            }
+        }
+            update:
+        {
+            update(&$0)
         }
     }
 }
