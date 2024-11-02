@@ -451,7 +451,7 @@ extension Mongo.CollectionModel where Element:Insertable
 
 extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEncodable
 {
-    @inlinable package
+    @inlinable public
     func upsert(id:Element.ID,
         returning phase:Mongo.UpdatePhase = .new,
         update:(inout Mongo.UpdateEncoder) -> ()) async throws -> (state:Element, new:Bool)
@@ -467,7 +467,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
         return (element, upserted != nil)
     }
 
-    @inlinable package
+    @inlinable public
     func upsert(
         collation:Mongo.Collation? = nil,
         indexName:String? = nil,
@@ -488,7 +488,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
         return (element, upserted != nil)
     }
 
-    @inlinable package
+    @inlinable public
     func upsert(by index:Mongo.CollectionIndex,
         returning phase:Mongo.UpdatePhase = .new,
         select:(inout Mongo.PredicateEncoder) -> (),
@@ -503,7 +503,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
     }
 
 
-    @inlinable package
+    @inlinable public
     func modify(id:Element.ID,
         returning phase:Mongo.UpdatePhase = .new,
         update:(inout Mongo.UpdateEncoder) -> ()) async throws -> Element?
@@ -519,7 +519,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
         return element
     }
 
-    @inlinable package
+    @inlinable public
     func modify(
         collation:Mongo.Collation? = nil,
         indexName:String? = nil,
@@ -540,7 +540,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
         return element
     }
 
-    @inlinable package
+    @inlinable public
     func modify(by index:Mongo.CollectionIndex,
         returning phase:Mongo.UpdatePhase = .new,
         select:(inout Mongo.PredicateEncoder) -> (),
@@ -555,7 +555,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
     }
 
 
-    @inlinable package
+    @inlinable public
     func remove(id:Element.ID) async throws -> Element?
     {
         let (element, _):(Element?, Never?) = try await session.run(
@@ -568,7 +568,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
         return element
     }
 
-    @inlinable package
+    @inlinable public
     func remove(
         collation:Mongo.Collation? = nil,
         indexName:String? = nil,
@@ -586,7 +586,7 @@ extension Mongo.CollectionModel where Element:BSONDecodable, Element.ID:BSONEnco
         return element
     }
 
-    @inlinable package
+    @inlinable public
     func remove(by index:Mongo.CollectionIndex,
         where predicate:(inout Mongo.PredicateEncoder) -> ()) async throws -> Element?
     {
@@ -633,7 +633,7 @@ extension Mongo.CollectionModel
     /// Sets the value of the specified field in the document with the specified identifier,
     /// returning true if the document was modified, false if the document was not modified,
     /// and nil if the document was not found.
-    @inlinable package
+    @inlinable public
     func update(
         do encode:(inout Mongo.UpdateListEncoder<Mongo.One>) throws -> ()) async throws -> Bool?
     {
@@ -648,7 +648,7 @@ extension Mongo.CollectionModel
         return updates.selected == 0 ? nil : updates.modified == 1
     }
 
-    @inlinable package
+    @inlinable public
     func updateMany(
         do encode:(inout Mongo.UpdateListEncoder<Mongo.Many>) throws -> ()) async throws -> Int
     {
