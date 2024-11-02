@@ -3,7 +3,6 @@ import SemanticVersions
 import SymbolGraphs
 import Symbols
 import Testing
-@_spi(testable)
 import UnidocDB
 import UnidocTesting
 
