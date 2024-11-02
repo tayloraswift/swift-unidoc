@@ -253,7 +253,7 @@ extension Mongo.CollectionModel where Element:BSONDocumentDecodable
 }
 
 extension Mongo.CollectionModel
-    where Element:BSONDecodable, Element.ID:BSONEncodable & Comparable
+    where Element:BSONDecodable, Element.ID:BSONEncodable
 {
     /// Queries the **primary** replica for up to `limit` documents in this collection, ordered
     /// by `_id`, and starting after the specified identifier if non-nil.
