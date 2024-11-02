@@ -1,7 +1,6 @@
 import MongoDB
 import Symbols
 import Testing
-@_spi(testable)
 import UnidocDB
 import UnidocRecords
 import UnidocTesting

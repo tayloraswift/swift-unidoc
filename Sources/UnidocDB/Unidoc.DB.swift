@@ -257,7 +257,9 @@ extension Unidoc.DB
     }
 
     /// Registers an **alias** of a package.
-    @_spi(testable)
+    ///
+    /// We currently only use this for testing purposes, as the web UI creates aliases directly
+    /// using package coordinates.
     public
     func alias(
         existing package:Symbol.Package,
@@ -400,67 +402,6 @@ extension Unidoc.DB
 }
 extension Unidoc.DB
 {
-    /// Indexes and stores a symbol graph in the database, linking it **synchronously**.
-    @_spi(testable)
-    public
-    func store(
-        linking docs:SymbolGraphObject<Void>)
-        async throws -> (Unidoc.UploadStatus, Unidoc.UplinkStatus)
-    {
-        let package:Unidoc.PackageMetadata
-        let edition:Unidoc.EditionMetadata
-
-        (package, edition) = try await self.label(docs: docs.metadata)
-
-        //  Don’t queue for uplink, since we’re going to do that synchronously.
-        let snapshot:Unidoc.Snapshot = .init(id: edition.id,
-            metadata: docs.metadata,
-            inline: docs.graph,
-            action: nil)
-
-        enum NoLoader:Unidoc.GraphLoader
-        {
-            func load(graph:Unidoc.GraphPath) async throws -> ArraySlice<UInt8>
-            {
-                fatalError("unreachable")
-            }
-        }
-
-        let linked:Unidoc.Mesh = try await self.link(snapshot,
-            symbol: docs.metadata.package.id,
-            loader: nil as NoLoader?,
-            realm: package.realm)
-        /// This is here to workaround a Swift compiler bug.
-        let volume:Symbol.Volume = linked.volume
-
-        let uploaded:Unidoc.UploadStatus = try await self.snapshots.store(
-            snapshot: snapshot)
-
-        let uplinked:Unidoc.UplinkStatus = .init(
-            edition: uploaded.edition,
-            volume: volume,
-            hiddenByPackage: true,
-            delta: try await self.fillVolume(from: consume linked, hidden: false))
-
-        return (uploaded, uplinked)
-    }
-
-    /// Indexes and stores a symbol graph in the database, queueing it for an **asynchronous**
-    /// uplink.
-    @_spi(testable)
-    public
-    func store(docs:consuming SymbolGraphObject<Void>) async throws -> Unidoc.UploadStatus
-    {
-        let (_, edition):(_, Unidoc.EditionMetadata) = try await self.label(docs: docs.metadata)
-
-        let snapshot:Unidoc.Snapshot = .init(id: edition.id,
-            metadata: docs.metadata,
-            inline: docs.graph,
-            action: .uplink)
-
-        return try await self.snapshots.store(snapshot: snapshot)
-    }
-
     public
     func label(docs:SymbolGraphMetadata) async throws ->
     (
@@ -511,7 +452,7 @@ extension Unidoc.DB
 }
 extension Unidoc.DB
 {
-    public
+    @inlinable public
     func uplink(_ id:Unidoc.Edition,
         loader:(some Unidoc.GraphLoader)?) async throws -> Unidoc.UplinkStatus?
     {
@@ -523,17 +464,23 @@ extension Unidoc.DB
             return nil
         }
 
-        let linked:Unidoc.Mesh = try await self.link(stored,
+        return try await self.uplink(snapshot: stored, package: package, loader: loader)
+    }
+
+    public
+    func uplink(snapshot:Unidoc.Snapshot,
+        package:Unidoc.PackageMetadata,
+        loader:(some Unidoc.GraphLoader)?) async throws -> Unidoc.UplinkStatus
+    {
+        let linked:Unidoc.Mesh = try await self.link(snapshot,
             symbol: package.symbol,
             loader: loader,
             realm: package.realm)
-        /// This is here to workaround a Swift compiler bug.
-        let volume:Symbol.Volume = linked.volume
 
-        return .init(edition: id,
-            volume: volume,
+        return .init(edition: snapshot.id,
+            volume: linked.volume,
             hiddenByPackage: package.hidden,
-            delta: try await self.fillVolume(from: consume linked, hidden: package.hidden))
+            delta: try await self.fillVolume(from: linked, hidden: package.hidden))
     }
 
     public
