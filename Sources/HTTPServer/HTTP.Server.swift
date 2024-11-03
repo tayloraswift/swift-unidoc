@@ -11,13 +11,6 @@ import NIOPosix
 import NIOSSL
 import URI
 
-extension NIOHTTP2Handler.AsyncStreamMultiplexer:@unchecked Sendable
-{
-}
-extension NIONegotiatedHTTPVersion:@unchecked Sendable
-{
-}
-
 extension HTTP
 {
     public
