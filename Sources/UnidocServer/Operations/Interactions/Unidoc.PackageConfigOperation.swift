@@ -92,7 +92,7 @@ extension Unidoc.PackageConfigOperation:Unidoc.RestrictedOperation
 
         case .symbol(let symbol):
             let previous:Unidoc.PackageMetadata? = try await db.packages.modify(
-                existing: self.package,
+                id: self.package,
                 returning: .old)
             {
                 $0[.set] { $0[Unidoc.PackageMetadata[.symbol]] = symbol }

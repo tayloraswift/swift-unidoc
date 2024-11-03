@@ -10,7 +10,7 @@ extension Unidoc
     struct SearchbotCell:Identifiable, Sendable
     {
         public
-        let id:SearchbotTrail
+        let id:ID
 
         /// The most-recent volume for which the associated page returned `200 OK`.
         public
@@ -24,7 +24,7 @@ extension Unidoc
         let yandexbot:Crumb
 
         @inlinable public
-        init(id:SearchbotTrail,
+        init(id:ID,
             ok:Edition,
             bingbot:Crumb,
             googlebot:Crumb,

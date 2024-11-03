@@ -16,14 +16,14 @@ extension Unidoc
         public
         let volume:VolumeSelector
         public
-        let vertex:Shoot
+        let vertex:VertexPath
         public
         let lookup:Context
         @usableFromInline
         let fields:VertexProjection
 
         @inlinable
-        init(volume:VolumeSelector, vertex:Shoot, lookup:Context, fields:VertexProjection)
+        init(volume:VolumeSelector, vertex:VertexPath, lookup:Context, fields:VertexProjection)
         {
             self.volume = volume
             self.vertex = vertex
@@ -35,7 +35,7 @@ extension Unidoc
 extension Unidoc.VertexQuery<Unidoc.LookupLimited>
 {
     @inlinable public
-    init(volume:Unidoc.VolumeSelector, vertex:Unidoc.Shoot)
+    init(volume:Unidoc.VolumeSelector, vertex:Unidoc.VertexPath)
     {
         //  We use this for stats, so we need the census data!
         //  TODO: define a more-efficient projection for stats.
@@ -45,7 +45,7 @@ extension Unidoc.VertexQuery<Unidoc.LookupLimited>
 extension Unidoc.VertexQuery<Unidoc.LookupAdjacent>
 {
     @inlinable public
-    init(volume:Unidoc.VolumeSelector, vertex:Unidoc.Shoot, layer:Unidoc.GroupLayer? = nil)
+    init(volume:Unidoc.VolumeSelector, vertex:Unidoc.VertexPath, layer:Unidoc.GroupLayer? = nil)
     {
         let context:Context = .init(layer: layer)
         let fields:Unidoc.VertexProjection
@@ -91,11 +91,11 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
     public
     typealias CollectionOrigin = Unidoc.DB.Volumes
     public
-    typealias Collation = VolumeCollation
-    public
     typealias Iteration = Mongo.Single<Unidoc.VertexOutput>
 
-    public
+    @inlinable public
+    var collation:Mongo.Collation { .casefolding }
+    @inlinable public
     var hint:Mongo.CollectionIndex?
     {
         self.volume.version == nil

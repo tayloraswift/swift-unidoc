@@ -122,7 +122,7 @@ extension Unidoc.WebhookOperation
             return .created("")
 
         case .deleted:
-            let modified:Unidoc.User? = try await db.users.modify(existing: user.id)
+            let modified:Unidoc.User? = try await db.users.modify(id: user.id)
             {
                 $0[.unset] { $0[Unidoc.User[.githubInstallation]] = true }
             }

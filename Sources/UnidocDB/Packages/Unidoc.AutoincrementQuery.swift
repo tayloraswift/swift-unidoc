@@ -22,9 +22,9 @@ extension Unidoc
 extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Aliases
-    typealias Collation = SimpleCollation
     typealias Iteration = Mongo.Single<Unidoc.Autoincrement<Targets.Element>>
 
+    var collation:Mongo.Collation { .simple }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)

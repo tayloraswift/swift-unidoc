@@ -175,9 +175,7 @@ extension Unidoc.DB.PendingBuilds
         name:Symbol.PackageAtRef,
         priority:Int32 = 0) async throws -> Unidoc.PendingBuild
     {
-        let (pendingBuild, _):(Unidoc.PendingBuild, Bool) = try await self.modify(
-            upserting: id,
-            returning: .new)
+        let (pendingBuild, _):(Unidoc.PendingBuild, Bool) = try await self.upsert(id: id)
         {
             let now:UnixMillisecond = .now()
 
@@ -241,7 +239,7 @@ extension Unidoc.DB.PendingBuilds
     func updateBuild(id:Unidoc.Edition,
         entered stage:Unidoc.BuildStage) async throws -> Unidoc.PendingBuild?
     {
-        try await self.modify(existing: id, returning: .new)
+        try await self.modify(id: id)
         {
             $0[.set] { $0[Unidoc.PendingBuild[.stage]] = stage }
         }

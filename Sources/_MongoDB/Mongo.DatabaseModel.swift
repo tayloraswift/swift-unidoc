@@ -107,4 +107,10 @@ extension Mongo.DatabaseModel
     {
         try await self.explain(command: update.command)
     }
+
+    @inlinable public
+    func explain(find:Mongo.Find<some Mongo.ReadEffect>) async throws -> String
+    {
+        try await self.explain(command: find)
+    }
 }

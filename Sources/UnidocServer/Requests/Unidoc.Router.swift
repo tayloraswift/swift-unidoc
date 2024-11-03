@@ -724,7 +724,7 @@ extension Unidoc.Router
 
         return .pipeline(Unidoc.BlogEndpoint.init(query: .init(
             volume: .init(package: "__swiftinit", version: nil),
-            vertex: .init(path: [module, article], hash: nil))))
+            vertex: .init(casefolded: [module, article], hash: nil))))
     }
 
     private mutating
@@ -749,10 +749,10 @@ extension Unidoc.Router
         }
         else
         {
-            let shoot:Unidoc.Shoot = .init(path: self.stem, hash: parameters.hash)
+            let vertex:Unidoc.VertexPath = .init(casefolded: self.stem, hash: parameters.hash)
             return .unordered(Unidoc.DocsOperation.init(query: .init(
                 volume: volume,
-                vertex: shoot)))
+                vertex: vertex)))
         }
     }
 }
@@ -874,7 +874,7 @@ extension Unidoc.Router
 
         return .pipeline(Unidoc.PtclEndpoint.init(query: .init(
             volume: volume,
-            vertex: .init(path: self.stem, hash: parameters.hash),
+            vertex: .init(casefolded: self.stem, hash: parameters.hash),
             layer: .protocols)))
     }
 
@@ -903,7 +903,7 @@ extension Unidoc.Router
         }
 
         return .unordered(Unidoc.ExportOperation.init(authorization: self.authorization,
-            request: .init(volume: volume, vertex: .init(path: self.stem)),
+            request: .init(volume: volume, vertex: .init(casefolded: self.stem)),
             _query: self.uri.query ?? [:]))
     }
 }
@@ -1028,7 +1028,7 @@ extension Unidoc.Router
         let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
         return .pipeline(Unidoc.StatsEndpoint.init(query: .init(
                 volume: volume,
-                vertex: .init(path: self.stem, hash: parameters.hash))))
+                vertex: .init(casefolded: self.stem, hash: parameters.hash))))
     }
 
     private mutating
@@ -1149,7 +1149,7 @@ extension Unidoc.Router
 
         let parameters:LegacyParameters = .init(self.uri.query ?? [:])
 
-        let query:Unidoc.RedirectBySymbolicHintQuery<Unidoc.Shoot> = .legacy(head: next,
+        let query:Unidoc.RedirectBySymbolicHintQuery<Unidoc.VertexPath> = .legacy(head: next,
             rest: self.stem,
             from: parameters.from)
 
@@ -1163,7 +1163,8 @@ extension Unidoc.Router
         else
         {
             return .unordered(
-                Unidoc.RedirectOperation<Unidoc.RedirectBySymbolicHintQuery<Unidoc.Shoot>>.init(
+                Unidoc.RedirectOperation<
+                Unidoc.RedirectBySymbolicHintQuery<Unidoc.VertexPath>>.init(
                     query: query))
         }
     }

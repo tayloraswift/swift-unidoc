@@ -46,7 +46,7 @@ extension Unidoc.DB.Volumes
 
     public static
     let indexSymbolicPatch:Mongo.CollectionIndex = .init("SymbolicPatch",
-        collation: VolumeCollation.spec,
+        collation: .casefolding,
         unique: true)
     {
         $0[Unidoc.VolumeMetadata[.package]] = (+)
@@ -59,7 +59,7 @@ extension Unidoc.DB.Volumes
 
     public static
     let indexSymbolic:Mongo.CollectionIndex = .init("Symbolic",
-        collation: VolumeCollation.spec,
+        collation: .casefolding,
         unique: true)
     {
         $0[Unidoc.VolumeMetadata[.package]] = (+)
@@ -108,7 +108,7 @@ extension Unidoc.DB.Volumes
             command: Mongo.Find<Mongo.Single<Unidoc.VolumeMetadata>>.init(Self.name,
                 limit: 1)
             {
-                $0[.collation] = VolumeCollation.spec
+                $0[.collation] = .casefolding
                 $0[.filter]
                 {
                     $0[Unidoc.VolumeMetadata[.package]] = symbol.package

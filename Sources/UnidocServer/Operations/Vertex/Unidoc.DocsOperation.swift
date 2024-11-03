@@ -33,25 +33,13 @@ extension Unidoc.DocsOperation:Unidoc.InteractiveOperation
         coverage:
         if  let apex:Unidoc.AnyVertex = output.principalVertex
         {
-            //  This response is probably going to be a 200 OK, so count it as such.
-            guard
-            //  Check if this request is from someone we trust enough to count page-granularity
-            //  statistics for.
-            let privilege:Unidoc.ClientPrivilege = context.request.privilege,
-            //  Should always be inhabited, unless we somehow obtained a `FileVertex`???
-            let shoot:Unidoc.Shoot = apex.shoot
-            else
-            {
-                break coverage
-            }
+            //  This response is going to be a 200 OK, so count it as such.
 
             //  Historical docs do not receive page-granularity statistics.
-            let latest:Unidoc.Edition
-
-            if  output.principalVolume.latest
-            {
-                latest = output.principalVolume.id
-            }
+            guard output.principalVolume.latest,
+            //  Check if this request is from someone we trust enough to count page-granularity
+            //  statistics for.
+            let privilege:Unidoc.ClientPrivilege = context.request.privilege
             else
             {
                 break coverage
@@ -69,8 +57,8 @@ extension Unidoc.DocsOperation:Unidoc.InteractiveOperation
             case .majorSearchEngine(let vendor, verified: _):
                 context.server.paint(with: .init(
                     searchbot: vendor,
-                    volume: latest,
-                    shoot: shoot,
+                    volume: output.principalVolume.id,
+                    vertex: self.query.vertex,
                     time: context.request.accepted))
 
             case .barbie(_, verified: _):

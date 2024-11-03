@@ -1,49 +1,40 @@
 import MongoDB
-import MongoTesting
-import SymbolGraphBuilder
+import SymbolGraphTesting
 import SymbolGraphs
 import System_
+import Testing
 @_spi(testable)
 import UnidocDB
+import UnidocTesting
 
-struct LinkResolution:UnidocDatabaseTestBattery
+@Suite
+struct LinkResolution:Unidoc.TestBattery
 {
-    typealias Configuration = Main.Configuration
-
-    static
-    func run(tests:TestGroup,
-        db:Unidoc.DB) async throws
+    @Test
+    func linkResolution() async throws
     {
-        let workspace:SSGC.Workspace = try .create(at: ".testing")
-        let toolchain:SSGC.Toolchain = try .detect(pretty: true)
+        try await self.run(in: "LinkResolution")
+    }
 
-        let example:SymbolGraphObject<Void> = try workspace.build(
-            package: .local(project: "TestPackages" / "swift-test"),
-            with: toolchain)
+    func run(with db:Unidoc.DB) async throws
+    {
+        let directory:FilePath.Directory = "TestPackages"
 
-        example.roundtrip(for: tests, in: workspace.location)
+        //  Use pre-built symbol graphs for speed.
+        let example:SymbolGraphObject<Void> = try .load(package: "swift-test", in: directory)
+        try example.roundtrip(in: directory)
 
-        let swift:SymbolGraphObject<Void>
-        do
-        {
-            //  Use the cached binary if available.
-            swift = try .load(swift: toolchain.splash.swift, in: workspace.location)
-        }
-        catch
-        {
-            swift = try workspace.build(special: .swift, with: toolchain)
-        }
+        let swift:SymbolGraphObject<Void> = try .load(package: .swift, in: directory)
 
-        tests.expect(try await db.store(linking: swift).0 ==? .init(
+        #expect(try await db.store(linking: swift).0 == .init(
             edition: .init(package: 0, version: 0),
             updated: false))
 
-        tests.expect(try await db.store(linking: example).0 ==? .init(
+        #expect(try await db.store(linking: example).0 == .init(
             edition: .init(package: 1, version: -1),
             updated: false))
 
-        let cases:[TestCase] =
-        [
+        let cases:[TestCase] = [
             .init(name: "Decl",
                 path: ["LinkAnchors", "LinkAnchors"],
                 internalLinks: [
@@ -104,19 +95,9 @@ struct LinkResolution:UnidocDatabaseTestBattery
                 outlines: 4),
         ]
 
-        for `case`:TestCase in cases
+        for test:TestCase in cases
         {
-            guard
-            let tests:TestGroup = tests / `case`.name
-            else
-            {
-                continue
-            }
-
-            await tests.do
-            {
-                try await `case`.run(tests: tests, db: db)
-            }
+            try await test.run(in: db)
         }
     }
 }
