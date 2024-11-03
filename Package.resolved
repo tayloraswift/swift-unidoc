@@ -1,13 +1,13 @@
 {
-  "originHash" : "56b5370f78e3e0b80c7e8697db385ad573acc74e2625d6b28ba28d2cf28bf748",
+  "originHash" : "5b662e886a1c844ac00c50de4de4484d2a2ab18317faa2db1b09e6903e5b8baf",
   "pins" : [
     {
       "identity" : "indexstore-db",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/tayloraswift/indexstore-db",
+      "location" : "https://github.com/swiftlang/indexstore-db",
       "state" : {
-        "branch" : "occurrences-in-file",
-        "revision" : "da980455bf2bbbffeffe1946dfc3665eb03c3bcd"
+        "branch" : "main",
+        "revision" : "fbbde36c6477283d2a49686aea5cc5b3cf47edc7"
       }
     },
     {
@@ -150,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-syntax",
       "state" : {
-        "revision" : "2bc86522d115234d1f588efe2bcb4ce4be8f8b82",
-        "version" : "510.0.3"
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     },
     {
