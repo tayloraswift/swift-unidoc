@@ -278,8 +278,10 @@ extension Unidoc.VertexQuery:Mongo.PipelineQuery
             $0[stage: .project, using: Output.CodingKey.self]
             {
                 $0[.matches] = true
-                $0[.principalVolume] = Unidoc.VolumeMetadata.StoredFields.init()
-                $0[.canonicalVolume] = Unidoc.VolumeMetadata.StoredFields.init()
+                //  Right now, we still need these in order to fully utilize the index
+                //  on the vertex collection.
+                $0[.principalVolume] = true // Unidoc.VolumeMetadata.StoredFields.init()
+                $0[.canonicalVolume] = true // Unidoc.VolumeMetadata.StoredFields.init()
             }
         }
     }
