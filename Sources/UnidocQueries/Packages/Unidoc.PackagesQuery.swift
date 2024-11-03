@@ -31,10 +31,10 @@ extension Unidoc.PackagesQuery:Mongo.PipelineQuery
     public
     typealias CollectionOrigin = Unidoc.DB.Packages
     public
-    typealias Collation = SimpleCollation
-    public
     typealias Iteration = Mongo.SingleBatch<Unidoc.EditionOutput>
 
+    @inlinable public
+    var collation:Mongo.Collation { .simple }
     @inlinable public
     var hint:Mongo.CollectionIndex? { self.package.hint }
 

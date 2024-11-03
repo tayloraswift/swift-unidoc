@@ -5,7 +5,7 @@ import UnidocAPI
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc.Shoot:Unidoc.VertexPredicate
+extension Unidoc.VertexPath:Unidoc.VertexPredicate
 {
     public
     func lookup(_ lookup:inout Mongo.LookupEncoder,

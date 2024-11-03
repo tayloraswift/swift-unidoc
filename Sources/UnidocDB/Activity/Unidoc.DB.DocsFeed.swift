@@ -34,7 +34,7 @@ extension Unidoc.DB.DocsFeed:Mongo.CollectionModel
     let indexes:[Mongo.CollectionIndex] =
     [
         .init("Volume",
-            collation: SimpleCollation.spec,
+            collation: .simple,
             unique: true)
         {
             $0[Activity<Unidoc.Edition>[.volume]] = (+)

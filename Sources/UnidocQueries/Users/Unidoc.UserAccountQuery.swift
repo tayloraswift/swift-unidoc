@@ -21,13 +21,11 @@ extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
 {
     public
     typealias CollectionOrigin = Unidoc.DB.Users
-
-    public
-    typealias Collation = SimpleCollation
-
     public
     typealias Iteration = Mongo.Single<Output>
 
+    @inlinable public
+    var collation:Mongo.Collation { .simple }
     @inlinable public
     var hint:Mongo.CollectionIndex? { nil }
 

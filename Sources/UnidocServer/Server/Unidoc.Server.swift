@@ -223,13 +223,23 @@ extension Unidoc.Server
     {
         for await paint:Unidoc.MetricPaint in self.metrics
         {
+            try Task.checkCancellation()
             /// It could be a potentially long time between events, so we acquire a fresh
             /// session each time.
-            let db:Unidoc.DB = try await self.db.session()
-            try await db.searchbotGrid.count(searchbot: paint.searchbot,
-                on: paint.trail,
-                to: paint.volume,
-                at: paint.time)
+            do
+            {
+                let db:Unidoc.DB = try await self.db.session()
+                try await db.searchbotGrid.count(vertex: paint.vertex,
+                    in: paint.volume,
+                    as: paint.searchbot,
+                    at: paint.time)
+            }
+            catch let error
+            {
+                self.logger?.log(event: Unidoc.PluginError.init(error: error, path: nil),
+                    date: .now(),
+                    from: nil)
+            }
         }
     }
 }

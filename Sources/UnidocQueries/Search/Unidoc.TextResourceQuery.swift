@@ -29,11 +29,10 @@ extension Unidoc
 extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
 {
     public
-    typealias Collation = VolumeCollation
-
-    public
     typealias Iteration = Mongo.Single<Unidoc.TextResourceOutput>
 
+    @inlinable public
+    var collation:Mongo.Collation { .casefolding }
     @inlinable public
     var hint:Mongo.CollectionIndex? { nil }
 

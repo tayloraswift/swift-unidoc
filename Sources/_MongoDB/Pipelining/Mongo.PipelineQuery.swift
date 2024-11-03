@@ -8,9 +8,6 @@ extension Mongo
     {
         /// The collection the pipeline draws its input documents from.
         associatedtype CollectionOrigin:CollectionModel
-        /// Specifies the collation to use for the query. This should match any collation
-        /// specified in the index ``hint``, if provided.
-        associatedtype Collation:CollationType
         /// Specifies the iteration mode for the pipeline’s expected output.
         ///
         /// For pipelines that return a single document, use ``Single``.
@@ -22,6 +19,9 @@ extension Mongo
         /// Constructs a pipeline by adding stages to the given encoder.
         func build(pipeline:inout PipelineEncoder)
 
+        /// Specifies the collation to use for the query. This should match any collation
+        /// specified in the index ``hint``, if provided.
+        var collation:Collation { get }
         /// The index to use.
         var hint:CollectionIndex? { get }
     }
@@ -41,7 +41,7 @@ extension Mongo.PipelineQuery
             stride: stride,
             pipeline: self.build(pipeline:))
         {
-            $0[.collation] = Collation.spec
+            $0[.collation] = self.collation
             $0[.hint] = self.hint?.id
         }
     }

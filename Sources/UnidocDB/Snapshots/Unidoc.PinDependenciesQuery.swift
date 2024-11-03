@@ -50,9 +50,9 @@ extension Unidoc.PinDependenciesQuery
 extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
 {
     typealias CollectionOrigin = Unidoc.DB.PackageAliases
-    typealias Collation = SimpleCollation
     typealias Iteration = Mongo.SingleBatch<Symbol.PackageDependency<Unidoc.EditionMetadata>>
 
+    var collation:Mongo.Collation { .simple }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)

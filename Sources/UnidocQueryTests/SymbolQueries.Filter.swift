@@ -1,4 +1,4 @@
-extension SymbolQueries.TestCase
+extension SymbolQueries
 {
     enum Filter:Hashable
     {

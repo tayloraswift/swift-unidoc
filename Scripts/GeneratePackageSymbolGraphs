@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+swift --version
+
+.build/release/ssgc -u $SWIFT_INSTALLATION \
+    -n swift \
+    -o TestPackages/swift.bson
+
+.build/release/ssgc -u $SWIFT_INSTALLATION \
+    -p TestPackages/swift-test \
+    -o TestPackages/swift-test.bson
+
+.build/release/ssgc -u $SWIFT_INSTALLATION \
+    -p TestPackages/swift-malibu \
+    -o TestPackages/swift-malibu.bson

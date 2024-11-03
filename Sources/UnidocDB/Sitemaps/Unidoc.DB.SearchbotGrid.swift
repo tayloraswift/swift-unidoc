@@ -1,3 +1,4 @@
+import FNV1
 import BSON
 import MongoDB
 import MongoQL
@@ -25,20 +26,16 @@ extension Unidoc.DB
 extension Unidoc.DB.SearchbotGrid
 {
     /// This is not the same as the `_id` index, as it uses a collation.
-    public static
-    let indexCollated:Mongo.CollectionIndex = .init("Collated",
-        collation: VolumeCollation.spec,
+    ///
+    /// Not unique, due to case-folding.
+    public
+    static let indexCollated:Mongo.CollectionIndex = .init("Collated",
+        collation: .casefolding,
         unique: false)
     {
-        $0[Element[.id] / Element.ID[.trunk]] = (+)
+        $0[Element[.id] / Element.ID[.volume]] = (+)
         $0[Element[.id] / Element.ID[.stem]] = (+)
         $0[Element[.id] / Element.ID[.hash]] = (+)
-    }
-
-    public static
-    let indexPackage:Mongo.CollectionIndex = .init("Package", unique: false)
-    {
-        $0[Element[.id] / Element.ID[.trunk]] = (+)
     }
 }
 extension Unidoc.DB.SearchbotGrid:Mongo.CollectionModel
@@ -47,29 +44,41 @@ extension Unidoc.DB.SearchbotGrid:Mongo.CollectionModel
     typealias Element = Unidoc.SearchbotCell
 
     @inlinable public static
-    var name:Mongo.Collection { "SearchbotGrid" }
+    var name:Mongo.Collection { "SearchbotGrid/2" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [/*Self.indexCollated,*/ Self.indexPackage] }
+    var indexes:[Mongo.CollectionIndex] { [Self.indexCollated] }
 }
 extension Unidoc.DB.SearchbotGrid
 {
     public
-    func count(searchbot:Unidoc.Searchbot?,
-        on trail:Unidoc.SearchbotTrail,
-        to docs:Unidoc.Edition,
+    func match(vertex:Unidoc.VertexPath, in package:Unidoc.Package) async throws -> Element?
+    {
+        let id:Unidoc.SearchbotCell.ID = .init(volume: package, vertex: vertex)
+        return try await self.find(by: Self.indexCollated, where: id.predicate(_:))
+    }
+
+    public
+    func count(vertex:Unidoc.VertexPath,
+        in volume:Unidoc.Edition,
+        as client:Unidoc.Searchbot?,
         at time:UnixAttosecond) async throws
     {
-        _ = try await self.modify(upserting: trail)
+        let id:Unidoc.SearchbotCell.ID = .init(volume: volume.package, vertex: vertex)
+        _ = try await self.upsert(by: Self.indexCollated, select: id.predicate(_:))
         {
+            //  This will always fail!
+            // $0[.setOnInsert]
+            // {
+            //     $0[Element[.id]] = id
+            // }
             $0[.set]
             {
-                $0[Element[.id]] = trail
-                $0[Element[.ok]] = docs
+                $0[Element[.ok]] = volume
 
                 let timestamp:Element.CodingKey
 
-                switch searchbot
+                switch client
                 {
                 case nil:           return
                 case .bingbot?:     timestamp = .bingbot_fetched
@@ -83,7 +92,7 @@ extension Unidoc.DB.SearchbotGrid
             {
                 let counter:Element.CodingKey
 
-                switch searchbot
+                switch client
                 {
                 case nil:           return
                 case .bingbot?:     counter = .bingbot_fetches
@@ -105,8 +114,11 @@ extension Unidoc.DB.SearchbotGrid
             command: Mongo.Find<Mongo.Cursor<Element>>.init(Self.name,
                 stride: 1024)
             {
-                $0[.filter] { $0[Element[.id] / Element.ID[.trunk]] = package }
-                $0[.hint] = Self.indexPackage.id
+                $0[.filter] { $0[Element[.id] / Element.ID[.volume]] = package }
+                //  Even though this doesn’t actually match on any strings, we still need to
+                //  specify the collation in order to use the collated index.
+                $0[.collation] = .casefolding
+                $0[.hint] = Self.indexCollated.id
             },
             against: self.database,
             on: replica)
