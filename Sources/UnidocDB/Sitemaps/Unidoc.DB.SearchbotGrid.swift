@@ -67,12 +67,11 @@ extension Unidoc.DB.SearchbotGrid
         let id:Unidoc.SearchbotCell.ID = .init(volume: volume.package, vertex: vertex)
         _ = try await self.upsert(by: Self.indexCollated, select: id.predicate(_:))
         {
-            $0[.setOnInsert]
-            {
-                //  This guards against accidentally changing the `_id` due to non-normalized
-                //  vertex path strings.
-                $0[Element[.id]] = id
-            }
+            //  This will always fail!
+            // $0[.setOnInsert]
+            // {
+            //     $0[Element[.id]] = id
+            // }
             $0[.set]
             {
                 $0[Element[.ok]] = volume
