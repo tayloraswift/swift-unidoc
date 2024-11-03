@@ -123,7 +123,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
             from: "1.4.0")),
         .package(url: "https://github.com/apple/swift-syntax",
-            from: "510.0.2"),
+            from: "600.0.1"),
     ],
     targets: [
         .executableTarget(name: "ssgc",
@@ -748,8 +748,8 @@ let package:Package = .init(
 switch ProcessInfo.processInfo.environment["UNIDOC_ENABLE_INDEXSTORE"]?.lowercased()
 {
 case "1"?, "true"?:
-    package.dependencies.append(.package(url: "https://github.com/tayloraswift/indexstore-db",
-        branch: "occurrences-in-file"))
+    package.dependencies.append(.package(url: "https://github.com/swiftlang/indexstore-db",
+        branch: "main"))
 
     package.targets.append(.target(name: "MarkdownPluginSwift_IndexStoreDB",
         dependencies: [
