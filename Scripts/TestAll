@@ -11,7 +11,6 @@ swift build -c release \
     --build-tests
 
 Scripts/GenerateTestSymbolGraphs
-Scripts/GeneratePackageSymbolGraphs
 
 swift test -c release \
     --explicit-target-dependency-import-check=error \
@@ -19,6 +18,7 @@ swift test -c release \
     -Xcxx -I/usr/lib/swift/Block \
     --no-parallel \
     --skip-build \
+    --skip SymbolGraphValidationTests \
     --disable-testable-imports
 
 for f in .build/release/*Tests; do

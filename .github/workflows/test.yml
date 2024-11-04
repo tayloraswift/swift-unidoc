@@ -8,9 +8,9 @@ on:
         branches: [ master ]
 
 jobs:
-    server:
+    linux-server:
         runs-on: ubuntu-24.04
-        name: Linux
+        name: Linux (server)
         steps:
             -   name: Checkout repository
                 uses: actions/checkout@v3
@@ -37,6 +37,36 @@ jobs:
                         swift:6.0.1-noble \
                         /bin/bash Scripts/TestAll
 
+    linux:
+        runs-on: macos-15
+        name: Linux
+        env:
+            UNIDOC_ENABLE_INDEXSTORE: "1"
+
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v3
+
+            -   name: Build release
+                run: |
+                    swift --version
+                    swift build -c release \
+                        --product ssgc \
+                        --explicit-target-dependency-import-check=error \
+                        -Xcxx -I/usr/lib/swift \
+                        -Xcxx -I/usr/lib/swift/Block
+                    mv .build/release/ssgc /usr/bin/ssgc
+
+            -   name: Build packages
+                run: Scripts/GeneratePackageSymbolGraphs
+
+            -   name: Validate packages
+                run: |
+                    swift test -c release \
+                        --filter SymbolGraphValidationTests \
+                        -Xcxx -I/usr/lib/swift \
+                        -Xcxx -I/usr/lib/swift/Block
+
     macos:
         runs-on: macos-15
         name: macOS
@@ -47,15 +77,18 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
-            -   name: Build debug
-                run: |
-                    swift --version
-                    swift build
-
             -   name: Build release
                 run: |
-                    swift build -c release
+                    swift --version
+                    swift build -c release \
+                        --product ssgc \
+                        --explicit-target-dependency-import-check=error
+                    mv .build/release/ssgc /usr/bin/ssgc
 
-            -   name: Test SymbolGraphBuilder
+            -   name: Build packages
+                run: Scripts/GeneratePackageSymbolGraphs
+
+            -   name: Validate packages
                 run: |
-                    swift run -c release SymbolGraphBuilderTests
+                    swift test -c release \
+                        --filter SymbolGraphValidationTests

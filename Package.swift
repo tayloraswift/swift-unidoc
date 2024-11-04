@@ -654,6 +654,12 @@ let package:Package = .init(
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
+        .testTarget(name: "SymbolGraphValidationTests",
+            dependencies: [
+                .target(name: "SymbolGraphTesting"),
+                .target(name: "System_"),
+            ]),
+
         .executableTarget(name: "SymbolGraphBuilderTests",
             dependencies: [
                 .target(name: "SymbolGraphBuilder"),

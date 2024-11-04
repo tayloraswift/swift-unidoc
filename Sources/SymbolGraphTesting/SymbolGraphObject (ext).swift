@@ -39,6 +39,16 @@ extension SymbolGraphObject<Void>
 extension SymbolGraphObject<Void>
 {
     public
+    func roundtrip() throws
+    {
+        let encoded:BSON.Document = .init(encoding: self)
+        let decoded:Self = try .init(buffer: encoded.bytes)
+
+        #expect(decoded.metadata == self.metadata)
+        #expect(decoded.graph == self.graph)
+    }
+
+    public
     func roundtrip(in directory:FilePath.Directory) throws
     {
         let file:FilePath = try self.save(in: directory)
