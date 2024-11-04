@@ -2,6 +2,7 @@
 
 set -e
 
+swift --version
 swift build \
     --package-path TestModules \
     -Xswiftc -emit-symbol-graph \
@@ -36,3 +37,15 @@ swift symbolgraph-extract \
     -include-spi-symbols \
     -pretty-print \
     -module-name Swift
+
+
+.build/release/ssgc -u $SWIFT_INSTALLATION \
+    -n swift \
+    -o TestPackages/swift.bson
+
+for PACKAGE in swift-test swift-malibu swift-snippets swift-exportation
+do
+    .build/release/ssgc -u $SWIFT_INSTALLATION \
+        -p TestPackages/$PACKAGE \
+        -o TestPackages/$PACKAGE.bson
+done
