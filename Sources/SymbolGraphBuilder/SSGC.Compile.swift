@@ -67,16 +67,19 @@ extension SSGC
 
         @Option(
             name: [.customLong("Xswiftc")],
+            parsing: .unconditional,
             help: "Extra flags to pass to the Swift compiler")
         var swiftc:[String] = []
 
         @Option(
             name: [.customLong("Xcxx")],
+            parsing: .unconditional,
             help: "Extra flags to pass to the C++ compiler")
         var cxx:[String] = []
 
         @Option(
             name: [.customLong("Xcc")],
+            parsing: .unconditional,
             help: "Extra flags to pass to the C compiler")
         var cc:[String] = []
 

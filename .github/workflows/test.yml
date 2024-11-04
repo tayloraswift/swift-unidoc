@@ -34,16 +34,22 @@ jobs:
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
                         -e SWIFT_INSTALLATION=/usr \
-                        swift:6.0.1-noble \
+                        swift:6.0.2-noble \
                         /bin/bash Scripts/TestAll
 
     linux:
-        runs-on: macos-15
+        runs-on: ubuntu-24.04
         name: Linux
         env:
             UNIDOC_ENABLE_INDEXSTORE: "1"
 
         steps:
+            -   name: Install Swift
+                uses: tayloraswift/swift-install-action@master
+                with:
+                    swift-prefix: "swift-6.0.2-release/ubuntu2404/swift-6.0.2-RELEASE"
+                    swift-id: "swift-6.0.2-RELEASE-ubuntu24.04"
+
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
@@ -74,6 +80,7 @@ jobs:
         name: macOS
         env:
             UNIDOC_ENABLE_INDEXSTORE: "1"
+            SWIFT_INSTALLATION: "/usr"
 
         steps:
             -   name: Checkout repository
