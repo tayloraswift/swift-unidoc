@@ -3,14 +3,45 @@ set -e
 
 swift --version
 
-.build/release/ssgc -u $SWIFT_INSTALLATION \
-    -n swift \
-    -o TestPackages/swift.bson
+ssgc -u $SWIFT_INSTALLATION \
+    -r https://github.com/apple/swift-atomics.git \
+    -t 1.2.0 \
+    -o TestPackages/swift-atomics.bson
 
-.build/release/ssgc -u $SWIFT_INSTALLATION \
-    -p TestPackages/swift-test \
-    -o TestPackages/swift-test.bson
+ssgc -u $SWIFT_INSTALLATION \
+    -r https://github.com/apple/swift-nio.git \
+    -t 2.75.0 \
+    -o TestPackages/swift-nio.bson
 
-.build/release/ssgc -u $SWIFT_INSTALLATION \
-    -p TestPackages/swift-malibu \
-    -o TestPackages/swift-malibu.bson
+ssgc -u $SWIFT_INSTALLATION \
+    -r https://github.com/apple/swift-nio-ssl.git \
+    -t 2.29.0 \
+    -o TestPackages/swift-nio-ssl.bson
+
+ssgc -u $SWIFT_INSTALLATION \
+    -r https://github.com/apple/swift-async-dns-resolver.git \
+    -t 0.1.2 \
+    -o TestPackages/swift-async-dns-resolver.bson
+
+ssgc -u $SWIFT_INSTALLATION \
+    -r https://github.com/apple/swift-syntax.git \
+    -t 600.0.1 \
+    -o TestPackages/swift-syntax.bson
+
+ssgc -u $SWIFT_INSTALLATION \
+    -r https://github.com/apple/swift-snapshot-testing.git \
+    -t 1.17.5 \
+    -o TestPackages/swift-snapshot-testing.bson
+
+# ssgc -u $SWIFT_INSTALLATION \
+#     -r https://github.com/apple/indexstore-db.git \
+#     -t swift-6.0-RELEASE \
+#     -o TestPackages/indexstore-db.bson \
+#     -Xcxx -I/usr/lib/swift \
+#     -Xcxx -I/usr/lib/swift/Block
+
+ssgc -u $SWIFT_INSTALLATION \
+    -r https://github.com/apple/swift-book.git \
+    -t swift-5.10-fcs \
+    -b book \
+    -o TestPackages/swift-snapshot-testing.bson
