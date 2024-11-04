@@ -72,8 +72,8 @@ jobs:
                 run: |
                     swift test -c release \
                         --filter SymbolGraphValidationTests \
-                        -Xcxx -I/usr/lib/swift \
-                        -Xcxx -I/usr/lib/swift/Block
+                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
+                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
 
     macos:
         runs-on: macos-15
