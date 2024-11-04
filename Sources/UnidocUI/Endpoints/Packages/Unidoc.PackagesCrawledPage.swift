@@ -74,9 +74,9 @@ extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
             }
         }
 
-        main[.section, { $0.class = "details" }]
+        main[.section, { $0.class = "calendar" }]
         {
-            $0[.ol, { $0.class = "calendar" }]
+            $0[.ol]
             {
                 let (start, leap):(Timestamp.Weekday, Bool) = self.year.vibe
 

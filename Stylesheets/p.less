@@ -21,3 +21,33 @@ p.note
 {
     .mixin.note();
 }
+
+p.chyron
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    color: var(--fg-semi);
+
+    > span.release
+    {
+        font-weight: bold;
+    }
+
+    > span:last-child
+    {
+        display: flex;
+        gap: 0.5em;
+
+        span.pushed::before
+        {
+            content: '▲ ';
+        }
+        span.stars::before
+        {
+            content: '★ ';
+            color: var(--fg-swift-type);
+        }
+    }
+}
