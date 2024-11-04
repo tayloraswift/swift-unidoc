@@ -55,7 +55,9 @@ jobs:
                         --explicit-target-dependency-import-check=error \
                         -Xcxx -I/usr/lib/swift \
                         -Xcxx -I/usr/lib/swift/Block
-                    mv .build/release/ssgc /usr/bin/ssgc
+                    mkdir $HOME/bin
+                    mv .build/release/ssgc $HOME/bin
+                    echo "$HOME/bin" >> $GITHUB_PATH
 
             -   name: Build packages
                 run: Scripts/GeneratePackageSymbolGraphs
@@ -83,7 +85,9 @@ jobs:
                     swift build -c release \
                         --product ssgc \
                         --explicit-target-dependency-import-check=error
-                    mv .build/release/ssgc /usr/bin/ssgc
+                    mkdir $HOME/bin
+                    mv .build/release/ssgc $HOME/bin
+                    echo "$HOME/bin" >> $GITHUB_PATH
 
             -   name: Build packages
                 run: Scripts/GeneratePackageSymbolGraphs
