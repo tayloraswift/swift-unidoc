@@ -6,16 +6,16 @@ export UNIDOC_ENABLE_INDEXSTORE=1
 swift --version
 swift build -c release \
     --explicit-target-dependency-import-check=error \
-    -Xcxx -I/usr/lib/swift \
-    -Xcxx -I/usr/lib/swift/Block \
+    -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
+    -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block \
     --build-tests
 
 Scripts/GenerateTestSymbolGraphs
 
 swift test -c release \
     --explicit-target-dependency-import-check=error \
-    -Xcxx -I/usr/lib/swift \
-    -Xcxx -I/usr/lib/swift/Block \
+    -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
+    -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block \
     --no-parallel \
     --skip-build \
     --skip SymbolGraphValidationTests \

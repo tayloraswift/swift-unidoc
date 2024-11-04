@@ -35,7 +35,7 @@ jobs:
                         -w /swift/swift-unidoc \
                         -e SWIFT_INSTALLATION=/usr \
                         swift:6.0.2-noble \
-                        /bin/bash Scripts/TestAll
+                        /bin/bash Scripts/Linux/TestAll
 
     linux:
         runs-on: ubuntu-24.04
@@ -66,7 +66,7 @@ jobs:
                     echo "$HOME/bin" >> $GITHUB_PATH
 
             -   name: Build packages
-                run: Scripts/GeneratePackageSymbolGraphs
+                run: Scripts/Linux/GeneratePackageSymbolGraphs
 
             -   name: Validate packages
                 run: |
@@ -80,7 +80,6 @@ jobs:
         name: macOS
         env:
             UNIDOC_ENABLE_INDEXSTORE: "1"
-            SWIFT_INSTALLATION: "/usr"
 
         steps:
             -   name: Checkout repository
@@ -97,7 +96,7 @@ jobs:
                     echo "$HOME/bin" >> $GITHUB_PATH
 
             -   name: Build packages
-                run: Scripts/GeneratePackageSymbolGraphs
+                run: Scripts/macOS/GeneratePackageSymbolGraphs
 
             -   name: Validate packages
                 run: |
