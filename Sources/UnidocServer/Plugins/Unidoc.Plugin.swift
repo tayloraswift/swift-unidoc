@@ -8,7 +8,7 @@ extension Unidoc
     public
     protocol Plugin<Event>:Sendable
     {
-        associatedtype Event:PluginEvent
+        associatedtype Event:ServerEvent
 
         /// Restart cooldown.
         static var cooldown:Duration { get }

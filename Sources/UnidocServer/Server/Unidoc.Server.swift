@@ -105,7 +105,7 @@ extension Unidoc.Server
         }
 
         return self.format(username: username,
-            locale: request.origin.guess?.locale,
+            locale: request.client.guess?.locale,
             time: request.accepted)
     }
 
@@ -202,10 +202,11 @@ extension Unidoc.Server
             }
             catch let error
             {
-                self.logger?.log(event: Unidoc.PluginError.init(error: error, path: nil),
+                self.logger?.log(
+                    event: Unidoc.ServerError.init(error: error),
+                    from: Plugin.id,
                     //  This could be a while since `started` was set.
-                    date: .now(),
-                    from: Plugin.id)
+                    date: .now())
             }
 
             try await cooldown
@@ -236,11 +237,43 @@ extension Unidoc.Server
             }
             catch let error
             {
-                self.logger?.log(event: Unidoc.PluginError.init(error: error, path: nil),
-                    date: .now(),
-                    from: nil)
+                self.logger?.log(
+                    event: Unidoc.ServerError.init(error: error),
+                    level: .error)
             }
         }
+    }
+}
+
+extension Unidoc.Server
+{
+    public
+    func log(event:HTTP.ServerEvent, ip origin:HTTP.ServerRequest.Origin?)
+    {
+        let error:any Error
+        let type:String
+
+        switch event
+        {
+        case .application(let value):
+            error = value
+            type = "Application error"
+
+        case .http1(let value):
+            error = value
+            type = "HTTP/1 error"
+
+        case .http2(let value):
+            error = value
+            type = "HTTP/2 error"
+
+        case .tcp(let value):
+            error = value
+            type = "TCP error"
+        }
+
+        let event:Unidoc.ServerError = .init(error: error, type: type, from: origin)
+        self.logger?.log(event: event, level: .debug, date: .now())
     }
 }
 extension Unidoc.Server
@@ -449,10 +482,23 @@ extension Unidoc.Server
         catch let error
         {
             let errorPage:Unidoc.ServerErrorPage = .init(error: error)
-            let error:Unidoc.PluginError = .init(error: error, path: "\(request.uri)")
-            self.logger?.log(event: error, date: format.time, from: nil)
+            let error:Unidoc.ServerError = .init(error: error,
+                from: request.client.origin,
+                path: "\(request.uri)")
+            self.logger?.log(event: error, level: .error, date: format.time)
 
-            return .error(errorPage.resource(format: format))
+            let html:HTTP.Resource = errorPage.resource(format: format)
+
+            if  case .production = self.options.mode
+            {
+                /// This will still look the same to humans, but it will not appear as if
+                /// the server is down to Googlebot.
+                return .unauthorized(html)
+            }
+            else
+            {
+                return .error(html)
+            }
         }
 
         switch operation

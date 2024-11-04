@@ -42,6 +42,8 @@ extension HTTP
             request:ServerRequest,
             headers:HTTPHeaders,
             body:[UInt8]) async throws -> HTTP.ServerResponse
+
+        func log(event:ServerEvent, ip origin:ServerRequest.Origin?)
     }
 }
 extension HTTP.Server
@@ -206,28 +208,28 @@ extension HTTP.Server
                             return
                         }
 
-                        let ip:HTTP.ServerRequest.Origin = .init(owner: policylist[address],
-                            v6: address)
+                        let origin:HTTP.ServerRequest.Origin = .init(owner: policylist[address],
+                            ip: address)
 
+                        handler:
                         do
                         {
                             try await self.handle(connection: connection,
-                                ip: ip,
+                                origin: origin,
                                 as: Authority.self)
                         }
                         catch NIOSSLError.uncleanShutdown
                         {
                         }
-                        catch let error as IOError
-                        {
-                            if  error.errnoCode != 104
-                            {
-                                Log[.error] = "(HTTP/1.1) \(error)"
-                            }
-                        }
                         catch let error
                         {
-                            Log[.error] = "(HTTP/1.1) \(error)"
+                            if  case let error as IOError = error, error.errnoCode == 104
+                            {
+                                //  Ignore connection reset by peer.
+                                break handler
+                            }
+
+                            self.log(event: .http1(error), ip: origin)
                         }
 
                         try await connection.channel.close()
@@ -243,20 +245,19 @@ extension HTTP.Server
                             return
                         }
 
-                        let ip:HTTP.ServerRequest.Origin = .init(owner: policylist[address],
-                            v6: address)
-
+                        let origin:HTTP.ServerRequest.Origin = .init(owner: policylist[address],
+                            ip: address)
 
                         do
                         {
                             try await self.handle(connection: channel,
                                 streams: streams.inbound,
-                                ip: ip,
+                                origin: origin,
                                 as: Authority.self)
                         }
                         catch let error
                         {
-                            Log[.error] = "(HTTP/2: \(address)) \(error)"
+                            self.log(event: .http2(error), ip: origin)
                         }
 
                         try await channel.close()
@@ -271,7 +272,7 @@ extension HTTP.Server
                 }
                 catch let error
                 {
-                    Log[.error] = "\(error)"
+                    self.log(event: .tcp(error), ip: nil)
                 }
             }
         }
@@ -285,7 +286,7 @@ extension HTTP.Server
         connection:NIOAsyncChannel<
             HTTPPart<HTTPRequestHead, ByteBuffer>,
             HTTPPart<HTTPResponseHead, ByteBuffer>>,
-        ip:HTTP.ServerRequest.Origin,
+        origin:HTTP.ServerRequest.Origin,
         as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
     {
         try await connection.executeThenClose
@@ -324,13 +325,13 @@ extension HTTP.Server
                     message = .init(
                         response: try await self.respond(to: part,
                             inbound: &parts,
-                            ip: ip,
+                            origin: origin,
                             as: Authority.self),
                         using: connection.channel.allocator)
                 }
                 catch let error
                 {
-                    Log[.error] = "(application) \(error)"
+                    self.log(event: .application(error), ip: origin)
 
                     message = .init(redacting: error,
                         using: connection.channel.allocator)
@@ -358,7 +359,7 @@ extension HTTP.Server
     func respond<Authority>(to h1:HTTPRequestHead,
         inbound:inout AsyncThrowingChannel<
             HTTPPart<HTTPRequestHead, ByteBuffer>, any Error>.Iterator,
-        ip:HTTP.ServerRequest.Origin,
+        origin:HTTP.ServerRequest.Origin,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:HTTP.ServerAuthority
     {
@@ -374,7 +375,9 @@ extension HTTP.Server
             fallthrough
 
         case .GET:
-            return try await self.get(request: .init(uri: uri, ip: ip), headers: h1.headers)
+            return try await self.get(
+                request: .init(origin: origin, uri: uri),
+                headers: h1.headers)
 
         case .PUT:
             guard
@@ -428,7 +431,7 @@ extension HTTP.Server
             }
 
             return try await self.post(
-                request: .init(uri: uri, ip: ip),
+                request: .init(origin: origin, uri: uri),
                 headers: h1.headers,
                 body: body)
 
@@ -444,7 +447,7 @@ extension HTTP.Server
     func handle<Authority>(
         connection:any Channel,
         streams:NIOHTTP2AsyncSequence<HTTP.Stream>,
-        ip:HTTP.ServerRequest.Origin,
+        origin:HTTP.ServerRequest.Origin,
         as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
     {
         //  I am not sure why the sequence of streams has no backpressure. Out of an abundance
@@ -494,7 +497,7 @@ extension HTTP.Server
 
                     let request:Task<HTTP.ServerResponse, any Error> = .init
                     {
-                        try await self.respond(to: inbound, ip: ip, as: Authority.self)
+                        try await self.respond(to: inbound, origin: origin, as: Authority.self)
                     }
                     stream.frames.channel.closeFuture.whenComplete
                     {
@@ -513,7 +516,7 @@ extension HTTP.Server
                     }
                     catch let error
                     {
-                        Log[.error] = "(application: \(ip.v6)) \(error)"
+                        self.log(event: .application(error), ip: origin)
 
                         message = .init(
                             redacting: error,
@@ -545,10 +548,7 @@ extension HTTP.Server
                 }
                 else
                 {
-                    Log[.warning] = """
-                    (HTTP/2: \(ip.v6)) \
-                    Connection timed out before peer initiated any streams.
-                    """
+                    self.log(event: .http2(HTTP.ActivityTimeoutError.connection), ip: origin)
                 }
 
                 //  There doesn’t seem to be any benefit from sticking around after sending
@@ -562,7 +562,7 @@ extension HTTP.Server
 
     private
     func respond<Authority>(to h2:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
-        ip:HTTP.ServerRequest.Origin,
+        origin:HTTP.ServerRequest.Origin,
         as _:Authority.Type) async throws -> HTTP.ServerResponse
         where Authority:HTTP.ServerAuthority
     {
@@ -604,10 +604,7 @@ extension HTTP.Server
                 continue waiting
 
             case nil, nil?:
-                Log[.error] = """
-                (HTTP/2: \(ip.v6)) Stream timed out before peer sent any headers.
-                """
-
+                self.log(event: .http2(HTTP.ActivityTimeoutError.stream), ip: origin)
                 return .resource("Time limit exceeded", status: 408)
             }
         }
@@ -635,7 +632,9 @@ extension HTTP.Server
             fallthrough
 
         case "GET":
-            return try await self.get(request: .init(uri: path, ip: ip), headers: headers)
+            return try await self.get(
+                request: .init(origin: origin, uri: path),
+                headers: headers)
 
         case "PUT":
             guard
@@ -739,7 +738,7 @@ extension HTTP.Server
             }
 
             return try await self.post(
-                request: .init(uri: path, ip: ip),
+                request: .init(origin: origin, uri: path),
                 headers: headers,
                 body: body)
 
