@@ -8,12 +8,12 @@ extension HTTP.ServerRequest
         public
         let owner:IP.Owner
         public
-        let v6:IP.V6
+        let ip:IP.V6
 
-        init(owner:IP.Owner, v6:IP.V6)
+        init(owner:IP.Owner, ip:IP.V6)
         {
             self.owner = owner
-            self.v6 = v6
+            self.ip = ip
         }
     }
 }

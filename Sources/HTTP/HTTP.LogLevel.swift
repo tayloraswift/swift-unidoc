@@ -1,10 +1,9 @@
-extension Log
+extension HTTP
 {
     @frozen public
-    enum Level
+    enum LogLevel:Comparable, Equatable
     {
         case debug
         case error
-        case warning
     }
 }

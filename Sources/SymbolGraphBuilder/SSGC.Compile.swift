@@ -64,6 +64,26 @@ extension SSGC
             help: "The Apple SDK to use")
         var appleSDK:AppleSDK? = nil
 
+
+        @Option(
+            name: [.customLong("Xswiftc")],
+            parsing: .unconditionalSingleValue,
+            help: "Extra flags to pass to the Swift compiler")
+        var swiftc:[String] = []
+
+        @Option(
+            name: [.customLong("Xcxx")],
+            parsing: .unconditionalSingleValue,
+            help: "Extra flags to pass to the C++ compiler")
+        var cxx:[String] = []
+
+        @Option(
+            name: [.customLong("Xcc")],
+            parsing: .unconditionalSingleValue,
+            help: "Extra flags to pass to the C compiler")
+        var cc:[String] = []
+
+
         @Option(
             name: [.customLong("ci")],
             help: "Run in CI mode under the specified validation level")
@@ -246,6 +266,7 @@ extension SSGC.Compile
             recoverFromAppleBugs: true, // self.recoverFromAppleBugs,
             pretty: self.pretty)
 
+        let flags:SSGC.PackageBuild.Flags = .init(swift: self.swiftc, cxx: self.cxx, c: self.cc)
         let object:SymbolGraphObject<Void>
 
         if  let project:String = self.project,
@@ -268,7 +289,8 @@ extension SSGC.Compile
                 from: repo,
                 at: ref,
                 as: self.type,
-                in: workspace)
+                in: workspace,
+                flags: flags)
 
             defer
             {
@@ -302,12 +324,12 @@ extension SSGC.Compile
             {
                 computedPath = projectPath
             }
-            else if  
-                let search:FilePath.Directory = self.search, 
+            else if
+                let search:FilePath.Directory = self.search,
                 let name:String = self.project
             {
                 print("""
-                    Warning: '--search-path' is deprecated, use '--project-path' with the 
+                    Warning: '--search-path' is deprecated, use '--project-path' with the
                     full path to the project root instead
                     """)
 
@@ -320,7 +342,8 @@ extension SSGC.Compile
 
             let build:SSGC.PackageBuild = .local(project: computedPath,
                 using: ".build.ssgc",
-                as: self.type)
+                as: self.type,
+                flags: flags)
 
             defer
             {

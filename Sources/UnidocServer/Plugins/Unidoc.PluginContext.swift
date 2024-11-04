@@ -7,7 +7,7 @@ import UnixTime
 extension Unidoc
 {
     @frozen public
-    struct PluginContext<Event> where Event:PluginEvent
+    struct PluginContext<Event> where Event:ServerEvent
     {
         @usableFromInline
         let shared:(any ServerLogger)?
@@ -38,6 +38,6 @@ extension Unidoc.PluginContext
     @inlinable public
     func log(event:Event, date:UnixAttosecond = .now())
     {
-        self.shared?.log(event: event, date: date, from: self.plugin)
+        self.shared?.log(event: event, from: self.plugin, date: date)
     }
 }

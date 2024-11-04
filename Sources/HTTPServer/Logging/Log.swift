@@ -4,11 +4,13 @@
 @preconcurrency import Darwin
 #endif
 
+import HTTP
+
 @frozen public
 enum Log
 {
     @inlinable public static
-    subscript<String>(level:Level) -> String?
+    subscript<String>(level:HTTP.LogLevel) -> String?
     {
         get
         {

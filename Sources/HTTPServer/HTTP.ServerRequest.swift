@@ -10,14 +10,14 @@ extension HTTP
     struct ServerRequest:Sendable
     {
         public
-        let uri:URI
+        let origin:Origin
         public
-        let ip:Origin
+        let uri:URI
 
-        init(uri:URI, ip:Origin)
+        init(origin:Origin, uri:URI)
         {
+            self.origin = origin
             self.uri = uri
-            self.ip = ip
         }
     }
 }
