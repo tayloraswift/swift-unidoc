@@ -7,14 +7,14 @@ extension Unidoc
     struct ClientOrigin:Sendable
     {
         public
-        let ip:HTTP.ServerRequest.Origin
+        let origin:HTTP.ServerRequest.Origin
         public
         let guess:Unidoc.ClientGuess?
 
         @inlinable public
-        init(ip:HTTP.ServerRequest.Origin, guess:Unidoc.ClientGuess? = nil)
+        init(origin:HTTP.ServerRequest.Origin, guess:Unidoc.ClientGuess? = nil)
         {
-            self.ip = ip
+            self.origin = origin
             self.guess = guess
         }
     }

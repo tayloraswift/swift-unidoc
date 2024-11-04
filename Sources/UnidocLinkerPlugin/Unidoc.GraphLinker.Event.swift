@@ -14,7 +14,7 @@ extension Unidoc.GraphLinker
         case failed(Unidoc.Edition, action:Unidoc.LinkerAction)
     }
 }
-extension Unidoc.GraphLinker.Event:Unidoc.PluginEvent
+extension Unidoc.GraphLinker.Event:Unidoc.ServerEvent
 {
     public
     func h3(_ h3:inout HTML.ContentEncoder)

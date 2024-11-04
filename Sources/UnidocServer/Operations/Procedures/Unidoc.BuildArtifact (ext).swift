@@ -40,7 +40,7 @@ extension Unidoc.BuildArtifact
             }
             else
             {
-                Log[.warning] = "No destination bucket configured for exporting build logs!"
+                Log[.debug] = "No destination bucket configured for exporting build logs!"
                 for log:Unidoc.BuildLog in self.logs
                 {
                     print(String.init(decoding: try Gzip.extract(from: log.text.bytes),

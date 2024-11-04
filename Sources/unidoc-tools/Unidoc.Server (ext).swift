@@ -11,7 +11,7 @@ extension Unidoc.Server:HTTP.Server
     {
         let request:Unidoc.ServerRequest = .init(
             headers: headers,
-            origin: .init(ip: request.ip),
+            client: .init(origin: request.origin),
             uri: request.uri)
         return try await self.get(request: request)
     }
@@ -24,7 +24,7 @@ extension Unidoc.Server:HTTP.Server
     {
         let request:Unidoc.ServerRequest = .init(
             headers: headers,
-            origin: .init(ip: request.ip),
+            client: .init(origin: request.origin),
             uri: request.uri)
         return try await self.post(request: request, body: body)
     }

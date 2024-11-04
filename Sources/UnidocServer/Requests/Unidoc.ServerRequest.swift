@@ -23,7 +23,7 @@ extension Unidoc
         public
         let accepted:UnixAttosecond
         public
-        let origin:ClientOrigin
+        let client:ClientOrigin
         public
         let host:String?
         public
@@ -34,14 +34,14 @@ extension Unidoc
             headers:HTTP.Headers,
             authorization:Authorization,
             accepted:UnixAttosecond,
-            origin:ClientOrigin,
+            client:ClientOrigin,
             host:String?,
             uri:URI)
         {
             self.headers = headers
             self.authorization = authorization
             self.accepted = accepted
-            self.origin = origin
+            self.client = client
             self.host = host
             self.uri = uri
         }
@@ -68,7 +68,7 @@ extension Unidoc.ServerRequest
 
     var privilege:Unidoc.ClientPrivilege?
     {
-        switch self.origin.ip.owner
+        switch self.client.origin.owner
         {
         case .googlebot:
             return .majorSearchEngine(.googlebot, verified: true)
@@ -80,7 +80,7 @@ extension Unidoc.ServerRequest
             break
         }
 
-        switch self.origin.guess
+        switch self.client.guess
         {
         case .barbie(let locale)?:
             if  case .web(_?, login: _) = self.authorization
@@ -103,7 +103,7 @@ extension Unidoc.ServerRequest
 extension Unidoc.ServerRequest
 {
     public
-    init(headers:HPACKHeaders, origin:Unidoc.ClientOrigin, uri:URI)
+    init(headers:HPACKHeaders, client:Unidoc.ClientOrigin, uri:URI)
     {
         let host:String? = headers[":authority"].last.map
         {
@@ -120,18 +120,18 @@ extension Unidoc.ServerRequest
         self.init(headers: .http2(headers),
             authorization: .from(headers),
             accepted: .now(),
-            origin: origin,
+            client: client,
             host: host,
             uri: uri)
     }
 
     public
-    init(headers:HTTPHeaders, origin:Unidoc.ClientOrigin, uri:URI)
+    init(headers:HTTPHeaders, client:Unidoc.ClientOrigin, uri:URI)
     {
         self.init(headers: .http1_1(headers),
             authorization: .from(headers),
             accepted: .now(),
-            origin: origin,
+            client: client,
             host: headers["host"].last,
             uri: uri)
     }

@@ -7,12 +7,12 @@ extension Unidoc
     struct PluginMessage:Sendable
     {
         @usableFromInline
-        let event:any PluginEvent
+        let event:any ServerEvent
         @usableFromInline
         let date:UnixAttosecond
 
         @inlinable public
-        init(event:any PluginEvent, date:UnixAttosecond)
+        init(event:any ServerEvent, date:UnixAttosecond)
         {
             self.event = event
             self.date = date
