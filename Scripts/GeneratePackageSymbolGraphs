@@ -28,19 +28,19 @@ ssgc -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-async-dns-resolver.bson
 
 ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/apple/swift-syntax.git \
+    -r https://github.com/swiftlang/swift-syntax.git \
     -t 600.0.1 \
     -n swift-syntax \
     -o TestPackages/swift-syntax.bson
 
 ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/apple/swift-snapshot-testing.git \
+    -r https://github.com/pointfreeco/swift-snapshot-testing.git \
     -t 1.17.5 \
     -n swift-snapshot-testing \
     -o TestPackages/swift-snapshot-testing.bson
 
 ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/apple/indexstore-db.git \
+    -r https://github.com/swiftlang/indexstore-db.git \
     -t swift-6.0-RELEASE \
     -n indexstore-db \
     -o TestPackages/indexstore-db.bson \
@@ -48,7 +48,7 @@ ssgc -u $SWIFT_INSTALLATION \
     --Xcxx -I/usr/lib/swift/Block
 
 ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/apple/swift-book.git \
+    -r https://github.com/swiftlang/swift-book.git \
     -t swift-5.10-fcs \
     -b book \
     -n swift-book \
