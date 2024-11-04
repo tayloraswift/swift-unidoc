@@ -1,0 +1,261 @@
+@import 'mixins/backdrop-blur';
+
+@import 'root.less';
+@import 'a.less';
+@import 'blockquote.less';
+@import 'button.less';
+@import 'code.less';
+@import 'div.columns.less';
+@import 'div.constraints.less';
+@import 'div.hstack.less';
+@import 'div.menu.less';
+@import 'div.more.less';
+@import 'div.sidebar.less';
+@import 'div.tooltips.less';
+@import 'dl.less';
+@import 'figure.less';
+@import 'form.less';
+@import 'header.visual.less';
+@import 'kbd.less';
+@import 'main.home.less';
+@import 'nav.cornice.less';
+@import 'nav.paginator.less';
+@import 'ol.less';
+@import 'ol.builds-pending.less';
+@import 'p.less';
+@import 'pre.less';
+@import 'section.less';
+@import 'section.availability.less';
+@import 'section.declaration.less';
+@import 'section.details.less';
+@import 'section.events.less';
+@import 'section.group.less';
+@import 'section.introduction.less';
+@import 'section.literature.less';
+@import 'section.metadata.less';
+@import 'span.less';
+@import 'table.less';
+@import 'ul.cards.less';
+@import 'ul.users.less';
+
+@import 'Calendar';
+@import 'Cards';
+@import 'Headings';
+@import 'Notices';
+@import 'Search';
+
+html
+{
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+}
+
+body
+{
+    min-height: 100vh;
+    margin: 0;
+
+    > header.app
+    {
+        position: fixed;
+        z-index: 1;
+        width: 100%;
+
+        pointer-events: none;
+
+        nav
+        {
+            width: 100%;
+            height: 1.5rem;
+            position: relative;
+
+            padding: 0.25rem 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-content: center;
+
+            overflow: hidden;
+            overflow-wrap: break-word;
+        }
+
+        > div.content::before
+        {
+            position: fixed;
+            left: 0;
+
+            display: block;
+            height: 2rem;
+            width: 100%;
+
+            content: '';
+
+            .mixin.backdrop-blur();
+        }
+
+        > div.content
+        {
+            pointer-events: auto;
+        }
+    }
+
+    > *
+    {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+    }
+
+    > *.app > *.content
+    {
+        //  max-width takes effect when `overflow` becomes `visible`
+        flex: 0 1 48rem;
+        overflow: hidden;
+        overflow-wrap: break-word;
+
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    > *.app > *.sidebar
+    {
+        display: none;
+    }
+
+    main
+    {
+        margin-top: 8rem;
+    }
+
+    @media only screen and (min-width: 56rem)
+    {
+        main
+        {
+            margin-top: 6rem;
+        }
+
+        > header.app > *.sidebar
+        {
+            pointer-events: none;
+        }
+        > *.app > *.sidebar
+        {
+            display: block;
+            flex: 0 1 16rem;
+            min-width: 12rem;
+            max-width: 16rem;
+        }
+
+        > *.app > *.content
+        {
+            min-width: 24rem;
+            padding-left: 4rem;
+            overflow: visible;
+        }
+    }
+}
+
+body main
+{
+    section.introduction,
+    section.parameters,
+    section.returns,
+    section.throws
+    {
+        > p,
+        > dl
+        {
+            max-width: 40rem;
+        }
+    }
+    section.details
+    {
+        p, figure
+        {
+            max-width: 40rem;
+        }
+        aside
+        {
+            max-width: 41rem
+        }
+    }
+    section.extension ul > li
+    {
+        > p
+        {
+            max-width: 40rem;
+        }
+    }
+
+    > *:last-child
+    {
+        padding-bottom: 5rem;
+    }
+}
+
+html
+{
+    font-size: 1.0rem;
+    background-color: var(--bg);
+}
+body
+{
+    color: var(--fg);
+    font-family: var(--typeface-body);
+
+    font-variant-numeric: oldstyle-nums;
+    text-size-adjust: none;
+    -webkit-text-size-adjust: none;
+}
+
+label.checkbox
+{
+    color: var(--fg-heavy);
+
+    line-height: 1em;
+
+    display: grid;
+    grid-template-columns: 1em auto;
+    gap: 0.3em;
+}
+
+input[type="checkbox"],
+input[type="radio"]
+{
+    // For iOS < 15 to remove gradient background
+    background-color: var(--bg);
+}
+
+input[type="checkbox"], input[type="radio"]
+{
+    appearance: none;
+    margin: 0;
+
+    font-size: inherit;
+    height: 1em;
+    width: 1em;
+
+    display: grid;
+    place-content: center;
+
+    transform: translateY(2px);
+    border: 2px solid var(--fg-semi);
+    border-radius: 0.1em;
+}
+input[type="checkbox"]::before, input[type="radio"]::before
+{
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    background-color: var(--bg);
+}
+input[type="checkbox"]:checked, input[type="radio"]:checked
+{
+    border-color: var(--fg-accent);
+    background-color: var(--fg-accent);
+}
+input[type="checkbox"]:checked::before, input[type="radio"]:checked::before
+{
+    transform-origin: bottom left;
+    clip-path: polygon(100% 13%, 39% 100%, 0 70%, 11% 53%, 37% 71%, 83% 0);
+}

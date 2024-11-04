@@ -1,0 +1,24 @@
+@import 'mixins/note';
+
+span.placeholder,
+span.parenthetical
+{
+    .mixin.note();
+}
+
+span.parenthetical::before
+{
+    content: '(';
+    font-style: normal;
+    margin-left: 0.4em;
+}
+span.parenthetical::after
+{
+    content: ')';
+    font-style: normal;
+}
+
+span.warn
+{
+    color: var(--fg-warn);
+}

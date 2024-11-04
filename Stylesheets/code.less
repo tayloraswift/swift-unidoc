@@ -1,0 +1,22 @@
+code
+{
+    font-family: var(--typeface-mono);
+    white-space: pre-wrap;
+    hyphens: none;
+}
+code.multiline
+{
+    span.xi::before
+    {
+        content: '\a';
+    }
+    span.xi::after
+    {
+        content: '    ';
+        display: inline-block;
+    }
+    wbr
+    {
+        display: block;
+    }
+}

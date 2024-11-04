@@ -1,5 +1,10 @@
 #!/bin/bash
 set -e
 
-cd $(dirname $(dirname $0))
-sass --style compressed --watch Stylesheets/:Assets/css/
+lessc --clean-css="--s1 --advanced --compatibility=ie8" \
+    Stylesheets/Admin.less Assets/css/Admin.css \
+    --source-map Assets/css/Admin.css.map
+
+lessc --clean-css="--s1 --advanced --compatibility=ie8" \
+    Stylesheets/Main.less Assets/css/Main.css \
+    --source-map Assets/css/Main.css.map

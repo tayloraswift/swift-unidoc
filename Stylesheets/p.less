@@ -1,0 +1,23 @@
+@import "mixins/inline-code";
+@import "mixins/inline-image";
+@import "mixins/note";
+
+p
+{
+    line-height: 1.8rem;
+    hyphens: auto;
+
+    code
+    {
+        .mixin.inline-code();
+    }
+    img
+    {
+        .mixin.inline-image();
+    }
+}
+
+p.note
+{
+    .mixin.note();
+}
