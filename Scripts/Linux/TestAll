@@ -10,7 +10,7 @@ swift build -c release \
     -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block \
     --build-tests
 
-Scripts/GenerateTestSymbolGraphs
+Scripts/Linux/GenerateTestSymbolGraphs
 
 swift test -c release \
     --explicit-target-dependency-import-check=error \
