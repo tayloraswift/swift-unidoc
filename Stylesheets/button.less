@@ -1,0 +1,57 @@
+button.area
+{
+    margin: 1.5rem 0;
+
+    .mixin.control-area();
+
+    width: 100%;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    color: var(--fg-accent);
+}
+button.area:hover,
+button.area:focus
+{
+    border-color: var(--fg-accent);
+    box-shadow: none;
+}
+button.area:active
+{
+    box-shadow: none;
+    transform: none;
+}
+button.area:disabled
+{
+    color: var(--fg-semi);
+    border-color: var(--fg-light);
+    cursor: not-allowed;
+}
+
+button.text,
+button.text:hover,
+button.text:focus,
+button.text:active
+{
+    display: inline-block;
+
+    background: none;
+    box-shadow: none;
+    transform: none;
+    padding: 0;
+    border-radius: 0;
+
+    font-family: var(--typeface-body);
+    font-size: inherit;
+    color: var(--fg-accent);
+    text-underline-offset: 0.35em;
+}
+button[disabled].text
+{
+    color: var(--fg-semi);
+    cursor: not-allowed;
+}
+button:not([disabled]).text:hover
+{
+    text-decoration: underline;
+}

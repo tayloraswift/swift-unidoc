@@ -1,0 +1,17 @@
+@import "mixins/inline-image";
+
+blockquote
+{
+    margin: 2rem 0;
+    font-style: italic;
+    color: var(--fg-heavy);
+
+    em
+    {
+        font-style: normal;
+    }
+    img
+    {
+        .mixin.inline-image();
+    }
+}

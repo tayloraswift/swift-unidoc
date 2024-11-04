@@ -1,0 +1,129 @@
+//  Collapsed groups
+section.group
+{
+    details
+    {
+        summary
+        {
+            cursor: pointer;
+
+            display: flex;
+            flex-flow: column nowrap;
+            align-items: center;
+
+            text-align: center;
+
+            p
+            {
+                margin: 0;
+            }
+
+            p.view,
+            p.hide
+            {
+                font-family: var(--typeface-headline);
+                font-weight: 700;
+                font-size: 125%;
+
+            }
+
+            p.hide
+            {
+                display: none;
+            }
+
+            p.reason
+            {
+                margin-top: 0.5rem;
+                font-style: italic;
+                color: var(--fg-semi);
+
+                span.count
+                {
+                    font-style: normal;
+                }
+            }
+        }
+
+        summary::marker
+        {
+            content: '';
+        }
+        summary::-webkit-details-marker
+        {
+            display: none;
+        }
+    }
+    details.impl
+    {
+        summary
+        {
+            p.view, p.hide
+            {
+                color: var(--fg-semi);
+                font-size: 1rem;
+            }
+        }
+    }
+    details.impl + details.impl
+    {
+        margin-top: 1em;
+        border-top: dashed 1px var(--fg-light);
+        padding-top: 1em;
+    }
+
+    details[open]
+    {
+        summary
+        {
+            p.view,
+            p.reason
+            {
+                display: none;
+            }
+
+            p.hide
+            {
+                display: block;
+            }
+        }
+    }
+}
+section.group
+{
+    > header > h2 > a[href^="#"]
+    {
+        color: inherit;
+    }
+
+    > header,
+    > h2
+    {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    > div.constraints + h3
+    {
+        margin-top: 1rem;
+        border-top: solid 1px var(--fg-swift-type);
+    }
+
+    > header + h3,
+    > h2 + h3
+    {
+        margin-top: 1rem;
+        border-top: solid 1px var(--fg-light);
+    }
+
+    > h3,
+    > details > h3
+    {
+        margin-top: 1rem;
+        border-top: dashed 1px var(--fg-semi);
+        padding-top: 0.75rem;
+
+        font-weight: 600;
+        color: var(--fg-semi);
+    }
+}
