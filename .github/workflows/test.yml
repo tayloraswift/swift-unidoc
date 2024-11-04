@@ -59,8 +59,8 @@ jobs:
                     swift build -c release \
                         --product ssgc \
                         --explicit-target-dependency-import-check=error \
-                        -Xcxx -I/usr/lib/swift \
-                        -Xcxx -I/usr/lib/swift/Block
+                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
+                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
                     mkdir $HOME/bin
                     mv .build/release/ssgc $HOME/bin
                     echo "$HOME/bin" >> $GITHUB_PATH
