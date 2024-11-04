@@ -133,19 +133,19 @@ struct Precompiled
         #endif
     }
 
-    // @Test
-    // func indexstore_db() throws
-    // {
-    //     let object:SymbolGraphObject<Void> = try .load(package: "indexstore-db",
-    //         in: self.directory)
+    @Test
+    func indexstore_db() throws
+    {
+        let object:SymbolGraphObject<Void> = try .load(package: "indexstore-db",
+            in: self.directory)
 
-    //     #expect(object.metadata.dependencies == [])
+        #expect(object.metadata.dependencies == [])
 
-    //     #expect(object.graph.cultures.count > 0)
-    //     #expect(object.graph.decls.nodes.count > 0)
+        #expect(object.graph.cultures.count > 0)
+        #expect(object.graph.decls.nodes.count > 0)
 
-    //     try object.roundtrip()
-    // }
+        try object.roundtrip()
+    }
 
     @Test
     func swift_book() throws

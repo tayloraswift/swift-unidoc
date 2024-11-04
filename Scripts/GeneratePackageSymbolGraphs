@@ -33,12 +33,12 @@ ssgc -u $SWIFT_INSTALLATION \
     -t 1.17.5 \
     -o TestPackages/swift-snapshot-testing.bson
 
-# ssgc -u $SWIFT_INSTALLATION \
-#     -r https://github.com/apple/indexstore-db.git \
-#     -t swift-6.0-RELEASE \
-#     -o TestPackages/indexstore-db.bson \
-#     -Xcxx -I/usr/lib/swift \
-#     -Xcxx -I/usr/lib/swift/Block
+ssgc -u $SWIFT_INSTALLATION \
+    -r https://github.com/apple/indexstore-db.git \
+    -t swift-6.0-RELEASE \
+    -o TestPackages/indexstore-db.bson \
+    -Xcxx -I/usr/lib/swift \
+    -Xcxx -I/usr/lib/swift/Block
 
 ssgc -u $SWIFT_INSTALLATION \
     -r https://github.com/apple/swift-book.git \
