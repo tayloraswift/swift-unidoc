@@ -44,8 +44,8 @@ ssgc -u $SWIFT_INSTALLATION \
     -t swift-6.0-RELEASE \
     -n indexstore-db \
     -o TestPackages/indexstore-db.bson \
-    -Xcxx -I/usr/lib/swift \
-    -Xcxx -I/usr/lib/swift/Block
+    --Xcxx -I/usr/lib/swift \
+    --Xcxx -I/usr/lib/swift/Block
 
 ssgc -u $SWIFT_INSTALLATION \
     -r https://github.com/apple/swift-book.git \
