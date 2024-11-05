@@ -4,7 +4,7 @@ extension Unidoc
 {
     struct PackageMediaSettings
     {
-        let media:PackageMedia?
+        let media:PackageMedia
     }
 }
 extension Unidoc.PackageMediaSettings:HTML.OutputStreamable
@@ -33,12 +33,12 @@ extension Unidoc.PackageMediaSettings:HTML.OutputStreamable
 
                         switch setting
                         {
-                        case .media:        $0.value = self.media?.prefix
-                        case .media_gif:    $0.value = self.media?.gif
-                        case .media_jpg:    $0.value = self.media?.jpg
-                        case .media_png:    $0.value = self.media?.png
-                        case .media_svg:    $0.value = self.media?.svg
-                        case .media_webp:   $0.value = self.media?.webp
+                        case .media:        $0.value = self.media.prefix
+                        case .media_gif:    $0.value = self.media.gif
+                        case .media_jpg:    $0.value = self.media.jpg
+                        case .media_png:    $0.value = self.media.png
+                        case .media_svg:    $0.value = self.media.svg
+                        case .media_webp:   $0.value = self.media.webp
                         }
                     }
                 }

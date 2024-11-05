@@ -29,7 +29,7 @@ extension Unidoc
         /// Overrides the default repo-based media origins. This is mostly used for previewing
         /// documentation locally.
         public
-        var media:PackageMedia?
+        var media:PackageMedia
         /// Default build settings for this package.
         public
         var build:BuildTemplate
@@ -58,7 +58,7 @@ extension Unidoc
         init(id:Unidoc.Package,
             symbol:Symbol.Package,
             hidden:Bool = false,
-            media:PackageMedia? = nil,
+            media:PackageMedia = .init(),
             build:BuildTemplate = .init(),
             realm:Unidoc.Realm? = nil,
             realmAligning:Bool = false,
@@ -125,7 +125,7 @@ extension Unidoc.PackageMetadata:BSONDocumentEncodable
         bson[.symbol] = self.symbol
         bson[.hidden] = self.hidden ? true : nil
 
-        bson[.media] = self.media
+        bson[.media] = self.media == .init() ? nil : self.media
         bson[.build_toolchain] = self.build.toolchain
         bson[.build_platform] = self.build.platform
 
@@ -144,7 +144,7 @@ extension Unidoc.PackageMetadata:BSONDocumentDecodable
         self.init(id: try bson[.id].decode(),
             symbol: try bson[.symbol].decode(),
             hidden: try bson[.hidden]?.decode() ?? false,
-            media: try bson[.media]?.decode(),
+            media: try bson[.media]?.decode() ?? .init(),
             build: .init(
                 toolchain: try bson[.build_toolchain]?.decode(),
                 platform: try bson[.build_platform]?.decode()),

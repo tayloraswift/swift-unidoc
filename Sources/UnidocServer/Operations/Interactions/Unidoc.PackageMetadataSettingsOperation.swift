@@ -9,7 +9,7 @@ extension Unidoc
         let update:Update
 
         private
-        var rights:Unidoc.UserRights
+        var rights:UserRights
 
         init(account:Account?, package:Package, update:Update)
         {

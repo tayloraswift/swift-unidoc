@@ -26,6 +26,13 @@ extension Unidoc.PackageMedia
         default:        return nil
         }
 
-        return "\(prefix ?? self.prefix)/\(file)"
+        guard
+        let prefix:String = prefix ?? self.prefix
+        else
+        {
+            return nil
+        }
+
+        return "\(prefix)/\(file)"
     }
 }

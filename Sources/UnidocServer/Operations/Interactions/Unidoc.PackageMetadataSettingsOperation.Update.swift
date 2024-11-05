@@ -5,7 +5,7 @@ extension Unidoc.PackageMetadataSettingsOperation
     enum Update
     {
         case build(Unidoc.BuildTemplate)
-        case media(Unidoc.PackageMedia?)
+        case media(Unidoc.PackageMedia)
     }
 }
 extension Unidoc.PackageMetadataSettingsOperation.Update
@@ -42,32 +42,13 @@ extension Unidoc.PackageMetadataSettingsOperation.Update
                 return nil
             }
 
-            var media:Unidoc.PackageMedia = .init(prefix: prefix,
+            self = .media(.init(
+                prefix: prefix.isEmpty ? nil : prefix,
                 gif: gif.isEmpty ? nil : gif,
                 jpg: jpg.isEmpty ? nil : jpg,
                 png: png.isEmpty ? nil : png,
                 svg: svg.isEmpty ? nil : svg,
-                webp: webp.isEmpty ? nil : webp)
-
-            //  If the default prefix is empty, replace it with the first non-empty path.
-            if  media.prefix.isEmpty,
-                let first:String = media.gif ??
-                    media.jpg ??
-                    media.png ??
-                    media.svg ??
-                    media.webp
-            {
-                media.prefix = first
-            }
-
-            if  media.prefix.isEmpty
-            {
-                self = .media(nil)
-            }
-            else
-            {
-                self = .media(media)
-            }
+                webp: webp.isEmpty ? nil : webp))
         }
     }
 }

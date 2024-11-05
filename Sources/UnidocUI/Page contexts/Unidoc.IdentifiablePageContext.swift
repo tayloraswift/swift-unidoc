@@ -23,7 +23,7 @@ extension Unidoc
         var cache:Cache
 
         public
-        let media:PackageMedia?
+        let media:PackageMedia
 
         /// This likely cannot be a `convenience` initializer due to
         /// <https://github.com/apple/swift/issues/73962>
@@ -36,7 +36,7 @@ extension Unidoc
         {
             let packages:PackageContext = .init(principal: principal.id.package,
                 metadata: packages)
-            let media:PackageMedia?
+            let media:PackageMedia
 
             if  let override:PackageMedia = packages.principal?.media
             {
@@ -57,7 +57,7 @@ extension Unidoc
             }
             else
             {
-                media = nil
+                media = .init()
             }
 
             self.canonical = canonical
