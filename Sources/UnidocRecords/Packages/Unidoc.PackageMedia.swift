@@ -8,7 +8,7 @@ extension Unidoc
     struct PackageMedia:Equatable, Sendable
     {
         public
-        var prefix:String
+        var prefix:String?
 
         public
         var gif:String?
@@ -22,7 +22,7 @@ extension Unidoc
         var webp:String?
 
         @inlinable public
-        init(prefix:String,
+        init(prefix:String? = nil,
             gif:String? = nil,
             jpg:String? = nil,
             png:String? = nil,
@@ -71,7 +71,7 @@ extension Unidoc.PackageMedia:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
-        self.init(prefix: try bson[.prefix].decode(),
+        self.init(prefix: try bson[.prefix]?.decode(),
             gif: try bson[.gif]?.decode(),
             jpg: try bson[.jpg]?.decode(),
             png: try bson[.png]?.decode(),

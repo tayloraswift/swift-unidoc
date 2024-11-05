@@ -22,7 +22,7 @@ extension Unidoc
 
         /// Returns the metadata document for the principal volume of the associated page.
         var volume:VolumeMetadata { get }
-        var media:PackageMedia? { get }
+        var media:PackageMedia { get }
         var repo:PackageRepo? { get }
 
         subscript(package id:Package) -> PackageMetadata? { get }
