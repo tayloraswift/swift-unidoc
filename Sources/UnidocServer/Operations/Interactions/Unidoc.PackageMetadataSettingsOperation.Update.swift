@@ -4,13 +4,14 @@ extension Unidoc.PackageMetadataSettingsOperation
 {
     enum Update
     {
-        case build(Unidoc.BuildTemplate)
+        case general(Unidoc.PackageSettings)
         case media(Unidoc.PackageMedia)
+        case build(Unidoc.BuildTemplate)
     }
 }
 extension Unidoc.PackageMetadataSettingsOperation.Update
 {
-    init?(type:Unidoc.PackageMetadataSettings, form:URI.Query)
+    init?(type:Unidoc.PackageMetadataSettings, form:URI.QueryEncodedForm)
     {
         let form:[String: String] = form.parameters.reduce(into: [:])
         {
@@ -19,6 +20,26 @@ extension Unidoc.PackageMetadataSettingsOperation.Update
 
         switch type
         {
+        case .general:
+            guard
+            let settings:Unidoc.PackageSettings = .init(parameters: form)
+            else
+            {
+                return nil
+            }
+
+            self = .general(settings)
+
+        case .media:
+            guard
+            let media:Unidoc.PackageMedia = .init(parameters: form)
+            else
+            {
+                return nil
+            }
+
+            self = .media(media)
+
         case .build:
             guard
             let template:Unidoc.BuildTemplate = .init(parameters: form)
@@ -28,27 +49,6 @@ extension Unidoc.PackageMetadataSettingsOperation.Update
             }
 
             self = .build(template)
-
-        case .media:
-            guard
-            let prefix:String = form["\(Unidoc.PackageMediaSetting.media)"],
-            let gif:String = form["\(Unidoc.PackageMediaSetting.media_gif)"],
-            let jpg:String = form["\(Unidoc.PackageMediaSetting.media_jpg)"],
-            let png:String = form["\(Unidoc.PackageMediaSetting.media_png)"],
-            let svg:String = form["\(Unidoc.PackageMediaSetting.media_svg)"],
-            let webp:String = form["\(Unidoc.PackageMediaSetting.media_webp)"]
-            else
-            {
-                return nil
-            }
-
-            self = .media(.init(
-                prefix: prefix.isEmpty ? nil : prefix,
-                gif: gif.isEmpty ? nil : gif,
-                jpg: jpg.isEmpty ? nil : jpg,
-                png: png.isEmpty ? nil : png,
-                svg: svg.isEmpty ? nil : svg,
-                webp: webp.isEmpty ? nil : webp))
         }
     }
 }

@@ -1,5 +1,32 @@
 import Symbols
+import UnidocRecords
 
+extension Unidoc.PackageMedia
+{
+    public
+    init?(parameters form:borrowing [String: String])
+    {
+        guard
+        let prefix:String = form["\(FormKey.media)"],
+        let gif:String = form["\(FormKey.media_gif)"],
+        let jpg:String = form["\(FormKey.media_jpg)"],
+        let png:String = form["\(FormKey.media_png)"],
+        let svg:String = form["\(FormKey.media_svg)"],
+        let webp:String = form["\(FormKey.media_webp)"]
+        else
+        {
+            return nil
+        }
+
+        self.init(
+            prefix: prefix.isEmpty ? nil : prefix,
+            gif: gif.isEmpty ? nil : gif,
+            jpg: jpg.isEmpty ? nil : jpg,
+            png: png.isEmpty ? nil : png,
+            svg: svg.isEmpty ? nil : svg,
+            webp: webp.isEmpty ? nil : webp)
+    }
+}
 extension Unidoc.PackageMedia
 {
     func link(media file:Symbol.File) -> String?

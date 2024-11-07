@@ -107,7 +107,7 @@ extension Unidoc.RefsPage:Unidoc.ApplicationPage
                     $0.method = "post"
 
                     $0.class = "config"
-                } = Unidoc.PackageMediaSettings.init(media: self.package.media)
+                } = Unidoc.PackageMediaTool.init(media: self.package.media)
             }
 
             self.section(tags: &$0, format: format, dormancy: dormancy)
@@ -369,48 +369,32 @@ extension Unidoc.RefsPage
                 let timeRemaining:DurationFormat = .init(.init(ticket.time) - format.time)
 
                 $0[.dt] = "Tags fetch in"
-                $0[.dd] = "\(timeRemaining)"
-            }
-        }
-
-
-        if !self.view.authenticated
-        {
-            section[.form]
-            {
-                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Unidoc.ServerRoot.login)"
-                $0.method = "post"
-            }
-                content:
-            {
-                $0[.input]
+                $0[.dd]
                 {
-                    $0.type = "hidden"
-                    $0.name = "from"
-                    $0.value = "\(self.location)"
-                }
+                    $0 += "\(timeRemaining)"
 
-                $0[.button] { $0.class = "area" ; $0.type = "submit" } = "Log in"
+                    $0[.form]
+                    {
+                        $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                        $0.action = "\(Unidoc.Post[.packageConfig, confirm: true])"
+                        $0.method = "post"
+                    } = ConfigButton.init(package: self.package.id,
+                        update: "refresh",
+                        value: "true",
+                        label: "refresh now",
+                        back: self.location,
+                        area: false)
+                }
             }
         }
-        else if self.view.editor
+
+        section[.form]
         {
-            section[.form]
-            {
-                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                $0.action = "\(Unidoc.Post[.packageConfig, confirm: true])"
-                $0.method = "post"
-            } = ConfigButton.init(package: self.package.id,
-                update: "refresh",
-                value: "true",
-                label: "Refresh tags",
-                back: self.location)
-        }
-        else
-        {
-            section[.form] = Unidoc.DisabledButton.init(label: "Refresh tags", view: self.view)
-        }
+            $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+            $0.action = "\(Unidoc.Post[package: self.package.id, .general])"
+            $0.method = "post"
+            $0.class = "config"
+        } = Unidoc.PackageSettingsTool.init(settings: self.package.settings, view: self.view)
 
         section[.h2] = Heading.builds
         section += self.buildTools
@@ -434,7 +418,6 @@ extension Unidoc.RefsPage
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
             $0.action = "\(Unidoc.Post[package: self.package.id, .build])"
             $0.method = "post"
-
             $0.class = "config"
         } = Unidoc.BuildTemplateTool.init(
             availablePlatforms: format.availablePlatforms,

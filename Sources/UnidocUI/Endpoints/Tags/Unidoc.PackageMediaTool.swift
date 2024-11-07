@@ -2,12 +2,12 @@ import HTML
 
 extension Unidoc
 {
-    struct PackageMediaSettings
+    struct PackageMediaTool
     {
         let media:PackageMedia
     }
 }
-extension Unidoc.PackageMediaSettings:HTML.OutputStreamable
+extension Unidoc.PackageMediaTool:HTML.OutputStreamable
 {
     static
     func += (form:inout HTML.ContentEncoder, self:Self)
@@ -18,20 +18,20 @@ extension Unidoc.PackageMediaSettings:HTML.OutputStreamable
         """
         form[.dl]
         {
-            for setting:Unidoc.PackageMediaSetting in Unidoc.PackageMediaSetting.allCases
+            for field:Unidoc.PackageMedia.FormKey in Unidoc.PackageMedia.FormKey.allCases
             {
-                $0[.dt, .code] = setting.pattern
+                $0[.dt, .code] = field.pattern
                 $0[.dd]
                 {
                     $0[.input]
                     {
                         $0.class = "full-width"
                         $0.type = "url"
-                        $0.name = "\(setting)"
+                        $0.name = "\(field)"
 
                         $0.placeholder = "https://raw.githubusercontent.com/owner/repo/master"
 
-                        switch setting
+                        switch field
                         {
                         case .media:        $0.value = self.media.prefix
                         case .media_gif:    $0.value = self.media.gif
