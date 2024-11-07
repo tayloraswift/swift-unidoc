@@ -21,7 +21,6 @@ extension Unidoc.PackageSettingsTool:HTML.OutputStreamable
                 $0[.select]
                 {
                     $0.name = "\(Unidoc.PackageSettings.FormKey.theme)"
-                    $0.required = true
                     $0.disabled = !self.view.editor
                 }
                     content:
