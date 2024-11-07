@@ -742,10 +742,9 @@ let package:Package = .init(
                 .product(name: "BSONTesting", package: "swift-mongodb"),
             ]),
 
-        .executableTarget(name: "URITests",
+        .testTarget(name: "URITests",
             dependencies: [
                 .target(name: "URI"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .target(name: "guides", path: "Guides"),
