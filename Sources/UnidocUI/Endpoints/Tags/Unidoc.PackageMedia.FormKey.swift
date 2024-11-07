@@ -1,7 +1,6 @@
-extension Unidoc
+extension Unidoc.PackageMedia
 {
-    @frozen public
-    enum PackageMediaSetting:String, CaseIterable, Sendable
+    enum FormKey:String, CaseIterable, Sendable
     {
         case media = "media-default"
         case media_gif = "media-gif"
@@ -11,17 +10,15 @@ extension Unidoc
         case media_webp = "media-webp"
     }
 }
-extension Unidoc.PackageMediaSetting:CustomStringConvertible
+extension Unidoc.PackageMedia.FormKey:CustomStringConvertible
 {
-    @inlinable public
     var description:String { self.rawValue }
 }
-extension Unidoc.PackageMediaSetting:LosslessStringConvertible
+extension Unidoc.PackageMedia.FormKey:LosslessStringConvertible
 {
-    @inlinable public
     init?(_ description:String) { self.init(rawValue: description) }
 }
-extension Unidoc.PackageMediaSetting
+extension Unidoc.PackageMedia.FormKey
 {
     var pattern:String
     {

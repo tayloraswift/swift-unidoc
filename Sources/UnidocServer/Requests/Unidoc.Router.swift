@@ -222,7 +222,7 @@ extension Unidoc.Router
 
         case .media(.application(.x_www_form_urlencoded, charset: _))?:
             guard
-            let form:URI.Query = try? .parse(parameters: body)
+            let form:URI.QueryEncodedForm = try? .parse(parameters: body[...])
             else
             {
                 return .sync(error: "Cannot parse URL-encoded form data\n")
@@ -258,7 +258,7 @@ extension Unidoc.Router
         }
     }
     private mutating
-    func post(root:Unidoc.ServerRoot, form:URI.Query) -> Unidoc.AnyOperation?
+    func post(root:Unidoc.ServerRoot, form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
     {
         switch root
         {
@@ -384,7 +384,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func ref(form _:URI.Query) -> Unidoc.AnyOperation?
+    func ref(form _:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
     {
         guard
         let account:Unidoc.Account = self.authorization.account,
@@ -449,11 +449,13 @@ extension Unidoc.Router
     }
 
     private mutating
-    func link(form queryPayload:URI.Query) -> Unidoc.AnyOperation?
+    func link(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
     {
+        let uri:URI = .init(path: self.uri.path, query: form.query)
+
         guard
         let route:Unidoc.LinkerRoute = self.descend(),
-        let form:Unidoc.LinkerForm = .init(from: queryPayload)
+        let form:Unidoc.LinkerForm = .init(from: form)
         else
         {
             return nil
@@ -462,7 +464,6 @@ extension Unidoc.Router
         for case ("y", "false") in self.uri.query?.parameters ?? []
         {
             let page:Unidoc.ReallyPage
-            let uri:URI = .init(path: self.uri.path, query: queryPayload)
 
             switch route
             {
@@ -493,7 +494,7 @@ extension Unidoc.Router
     }
 
     private mutating
-    func form(form:URI.Query) -> Unidoc.AnyOperation?
+    func form(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
     {
         guard
         let action:Unidoc.PostAction = self.descend()
@@ -790,7 +791,7 @@ extension Unidoc.Router
         .unordered(Unidoc.LoginOperation.init(flow: .sso))
     }
     private
-    func login(form:URI.Query) -> Unidoc.AnyOperation
+    func login(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation
     {
         if  let path:String = form.parameters.first?.value,
             let path:URI = .init(path)
@@ -833,7 +834,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func plugin(form:URI.Query) -> Unidoc.AnyOperation?
+    func plugin(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
     {
         guard
         let id:String = self.descend(),
@@ -910,7 +911,7 @@ extension Unidoc.Router
 extension Unidoc.Router
 {
     private mutating
-    func really(form:URI.Query) -> Unidoc.AnyOperation?
+    func really(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
     {
         guard
         let action:Unidoc.PostAction = self.descend()
@@ -919,7 +920,7 @@ extension Unidoc.Router
             return nil
         }
 
-        let uri:URI = .init(path: Unidoc.Post[action].path, query: form)
+        let uri:URI = .init(path: Unidoc.Post[action].path, query: form.query)
         var table:[String: String]
         {
             form.parameters.reduce(into: [:]) { $0[$1.key] = $1.value }

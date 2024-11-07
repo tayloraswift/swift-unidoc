@@ -9,7 +9,7 @@ extension URI
         public
         var parameters:[Parameter]
 
-        @inlinable internal
+        @inlinable
         init(_ parameters:[Parameter])
         {
             self.parameters = parameters
@@ -92,16 +92,6 @@ extension URI.Query:LosslessStringConvertible
         {
             return nil
         }
-    }
-}
-extension URI.Query
-{
-    /// Parses query parameters from UTF-8 text. This parser does not expect a leading
-    /// question mark (`?`).
-    public static
-    func parse(parameters:[UInt8]) throws -> Self
-    {
-        .init(try URI.QueryRule<Int>.Parameters.parse(parameters))
     }
 }
 extension URI.Query:Equatable

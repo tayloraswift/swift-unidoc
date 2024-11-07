@@ -45,11 +45,14 @@ extension Unidoc.PackageMetadataSettingsOperation:Unidoc.RestrictedOperation
 
         switch self.update
         {
-        case .build(let template):
-            metadata = try await db.packages.set(build: template, of: self.package)
+        case .general(let settings):
+            metadata = try await db.packages.set(settings: settings, of: self.package)
 
         case .media(let media):
             metadata = try await db.packages.set(media: media, of: self.package)
+
+        case .build(let template):
+            metadata = try await db.packages.set(build: template, of: self.package)
         }
 
         if  let metadata:Unidoc.PackageMetadata

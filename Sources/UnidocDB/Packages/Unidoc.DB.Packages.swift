@@ -94,6 +94,23 @@ extension Unidoc.DB.Packages:Mongo.RecodableModel
 extension Unidoc.DB.Packages
 {
     public
+    func set(settings:Unidoc.PackageSettings,
+        of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
+    {
+        try await self.modify(id: package)
+        {
+            if  settings == .init()
+            {
+                $0[.unset] { $0[Element[.settings]] = true }
+            }
+            else
+            {
+                $0[.set] { $0[Element[.settings]] = settings }
+            }
+        }
+    }
+
+    public
     func set(media:Unidoc.PackageMedia,
         of package:Unidoc.Package) async throws -> Unidoc.PackageMetadata?
     {
