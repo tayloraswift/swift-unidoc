@@ -20,6 +20,9 @@ extension Unidoc
         let assets:Assets
         public
         var server:ServerType
+        /// If set, a `data-theme` attribute will be added to the `<body>` element.
+        public
+        var theme:String?
 
         public
         let time:UnixAttosecond
@@ -31,6 +34,7 @@ extension Unidoc
             locale:ISO.Locale,
             assets:Assets,
             server:ServerType,
+            theme:String?,
             time:UnixAttosecond)
         {
             self.security = security
