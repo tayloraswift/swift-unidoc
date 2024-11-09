@@ -1,12 +1,12 @@
-.mixin.backdrop-blur
+.backdrop-blur(@color: var(--bg))
 {
-    background-color: var(--bg);
+    background-color: @color;
 
-    @supports (backdrop-filter: blur(10px) saturate(180%)) or
-        (-webkit-backdrop-filter: blur(10px) saturate(180%))
+    @supports (backdrop-filter: var(--blur-filter)) or
+        (-webkit-backdrop-filter: var(--blur-filter))
     {
-        background-color: var(--bg-translucent);
-        backdrop-filter: blur(10px) saturate(180%);
-        -webkit-backdrop-filter: blur(10px) saturate(180%);
+        background-color: color-mix(in srgb, @color var(--bg-translucent-alpha), transparent);
+        backdrop-filter: var(--blur-filter);
+        -webkit-backdrop-filter: var(--blur-filter);
     }
 }
