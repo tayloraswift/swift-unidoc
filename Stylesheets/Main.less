@@ -6,11 +6,15 @@
 @import 'blockquote';
 @import 'button';
 @import 'code';
+@import 'div/app';
 @import 'div/columns';
 @import 'div/constraints';
+@import 'div/home';
 @import 'div/hstack';
 @import 'div/menu';
 @import 'div/more';
+@import 'div/navigator';
+@import 'div/search';
 @import 'div/sidebar';
 @import 'div/tooltips';
 @import 'dl';
@@ -37,8 +41,6 @@
 @import 'ul';
 
 @import 'Headings';
-@import 'Home';
-@import 'Search';
 
 html
 {
@@ -50,105 +52,6 @@ body
 {
     min-height: 100vh;
     margin: 0;
-
-    > header.app
-    {
-        position: fixed;
-        z-index: 1;
-        width: 100%;
-
-        pointer-events: none;
-
-        nav
-        {
-            width: 100%;
-            height: 1.5rem;
-            position: relative;
-
-            padding: 0.25rem 0;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-content: center;
-
-            overflow: hidden;
-            overflow-wrap: break-word;
-        }
-
-        > div.content::before
-        {
-            position: fixed;
-            left: 0;
-
-            display: block;
-            height: 2rem;
-            width: 100%;
-
-            content: '';
-
-            .mixin.backdrop-blur();
-        }
-
-        > div.content
-        {
-            pointer-events: auto;
-        }
-    }
-
-    > *
-    {
-        display: flex;
-        flex-direction: row-reverse;
-        justify-content: center;
-    }
-
-    > *.app > *.content
-    {
-        //  max-width takes effect when `overflow` becomes `visible`
-        flex: 0 1 48rem;
-        overflow: hidden;
-        overflow-wrap: break-word;
-
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-
-    > *.app > *.sidebar
-    {
-        display: none;
-    }
-
-    main
-    {
-        margin-top: 8rem;
-    }
-
-    @media only screen and (min-width: 56rem)
-    {
-        main
-        {
-            margin-top: 6rem;
-        }
-
-        > header.app > *.sidebar
-        {
-            pointer-events: none;
-        }
-        > *.app > *.sidebar
-        {
-            display: block;
-            flex: 0 1 16rem;
-            min-width: 12rem;
-            max-width: 16rem;
-        }
-
-        > *.app > *.content
-        {
-            min-width: 24rem;
-            padding-left: 4rem;
-            overflow: visible;
-        }
-    }
 }
 
 body main
@@ -187,21 +90,6 @@ body main
     {
         padding-bottom: 5rem;
     }
-}
-
-html
-{
-    font-size: 1.0rem;
-    background-color: var(--bg);
-}
-body
-{
-    color: var(--fg);
-    font-family: var(--typeface-body);
-
-    font-variant-numeric: oldstyle-nums;
-    text-size-adjust: none;
-    -webkit-text-size-adjust: none;
 }
 
 label.checkbox

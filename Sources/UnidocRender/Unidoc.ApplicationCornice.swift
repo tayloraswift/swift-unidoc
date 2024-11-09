@@ -6,15 +6,15 @@ extension Unidoc
     struct ApplicationCornice
     {
         @usableFromInline
-        let username:String?
+        let sitename:String
         @usableFromInline
-        let official:Bool
+        let username:String?
 
         @inlinable
-        init(username:String?, official:Bool)
+        init(sitename:String, username:String?)
         {
+            self.sitename = sitename
             self.username = username
-            self.official = official
         }
     }
 }
@@ -25,7 +25,7 @@ extension Unidoc.ApplicationCornice:HTML.OutputStreamable
     {
         nav[.div]
         {
-            $0[.a] { $0.href = "/" } = self.official ? "swiftinit" : "preview"
+            $0[.a] { $0.href = "/" } = self.sitename
         }
         nav[.div]
         {

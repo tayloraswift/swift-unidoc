@@ -49,15 +49,18 @@ extension Unidoc
 extension Unidoc.RenderFormat
 {
     @inlinable public
+    var sitename:String
+    {
+        switch self.server
+        {
+        case .swiftinit_org:    "swiftinit"
+        case .localhost:        "preview"
+        }
+    }
+
+    @inlinable public
     var cornice:Unidoc.ApplicationCornice
     {
-        if  case .swiftinit_org = self.server
-        {
-            .init(username: self.username, official: true)
-        }
-        else
-        {
-            .init(username: self.username, official: false)
-        }
+        .init(sitename: self.sitename, username: self.username)
     }
 }

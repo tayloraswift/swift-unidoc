@@ -49,7 +49,7 @@ extension Unidoc.RenderablePage
         location:String?,
         format:Unidoc.RenderFormat)
     {
-        html[.html, { $0.lang = "en" }]
+        html[.html, { $0.lang = "en" ; $0[data: "theme"] = format.theme }]
         {
             $0[.head]
             {
@@ -125,7 +125,7 @@ extension Unidoc.RenderablePage
                 self.head(augmenting: &$0, format: format)
             }
 
-            $0[.body, { $0[data: "theme"] = format.theme }] { self.body(&$0, format: format) }
+            $0[.body] { self.body(&$0, format: format) }
         }
     }
 }
