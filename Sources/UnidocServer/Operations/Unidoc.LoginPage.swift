@@ -32,7 +32,7 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
     public
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.h1] = switch self.flow
             {
@@ -41,42 +41,39 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
             }
         }
 
-        main[.section, { $0.class = "details" }]
+        switch self.flow
         {
-            switch self.flow
+        case .sso:
+            main[.p] = """
+            Swiftinit uses GitHub SSO to verify your identity and grant you access to your \
+            packages and their documentation.
+            """
+
+            main[.p] = """
+            Authenticating with your GitHub account won’t add you to any mailing lists.
+            """
+
+        case .sync:
+            main[.p] = "Authenticate again with GitHub to verify your organizations."
+            main[.p, { $0.class = "note" }]
             {
-            case .sso:
-                $0[.p] = """
-                Swiftinit uses GitHub SSO to verify your identity and grant you access to your \
-                packages and their documentation.
-                """
-
-                $0[.p] = """
-                Authenticating with your GitHub account won’t add you to any mailing lists.
-                """
-
-            case .sync:
-                $0[.p] = "Authenticate again with GitHub to verify your organizations."
-                $0[.p, { $0.class = "note" }]
+                $0 += "Some of your organizations may have policies that "
+                $0[.a]
                 {
-                    $0 += "Some of your organizations may have policies that "
-                    $0[.a]
-                    {
-                        $0.target = "_blank"
-                        $0.href = """
-                        https://docs.github.com/en/organizations/\
-                        managing-oauth-access-to-your-organizations-data/\
-                        about-oauth-app-access-restrictions#about-oauth-app-access-restrictions
-                        """
-                    } = "restrict"
-                    $0 += " their visibility to third-party applications."
-                }
-
-                $0[.p] { $0.class = "note" } = """
-                If your organizations are not showing up, you may need additional approvals \
-                from the owners of each organization!
-                """
+                    $0.target = "_blank"
+                    $0.href = """
+                    https://docs.github.com/en/organizations/\
+                    managing-oauth-access-to-your-organizations-data/\
+                    about-oauth-app-access-restrictions#about-oauth-app-access-restrictions
+                    """
+                } = "restrict"
+                $0 += " their visibility to third-party applications."
             }
+
+            main[.p] { $0.class = "note" } = """
+            If your organizations are not showing up, you may need additional approvals \
+            from the owners of each organization!
+            """
         }
 
         main[.form]
@@ -111,7 +108,11 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
                 $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "read:org" }
             }
 
-            $0[.button] { $0.class = "area" ; $0.type = "submit" } = "Authenticate with GitHub"
+            $0[.button]
+            {
+                $0.class = "region"
+                $0.type = "submit"
+            } = "Authenticate with GitHub"
         }
     }
 }

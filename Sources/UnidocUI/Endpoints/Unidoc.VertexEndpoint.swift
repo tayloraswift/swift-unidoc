@@ -67,6 +67,15 @@ extension Unidoc.VertexEndpoint
         from output:Unidoc.VertexOutput,
         as format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
+        var format:Unidoc.RenderFormat = format
+        for package:Unidoc.PackageMetadata in output.adjacentPackages
+        {
+            if  package.id == output.principalVolume.id.package
+            {
+                format.theme = package.settings.theme
+            }
+        }
+
         if  let principalVertex:Unidoc.AnyVertex = output.principalVertex
         {
             let genericContext:VertexContext = .init(canonical: .init(

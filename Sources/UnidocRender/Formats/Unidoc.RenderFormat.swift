@@ -20,6 +20,9 @@ extension Unidoc
         let assets:Assets
         public
         var server:ServerType
+        /// If set, a `data-theme` attribute will be added to the `<body>` element.
+        public
+        var theme:String?
 
         public
         let time:UnixAttosecond
@@ -31,6 +34,7 @@ extension Unidoc
             locale:ISO.Locale,
             assets:Assets,
             server:ServerType,
+            theme:String?,
             time:UnixAttosecond)
         {
             self.security = security
@@ -45,15 +49,18 @@ extension Unidoc
 extension Unidoc.RenderFormat
 {
     @inlinable public
+    var sitename:String
+    {
+        switch self.server
+        {
+        case .swiftinit_org:    "swiftinit"
+        case .localhost:        "preview"
+        }
+    }
+
+    @inlinable public
     var cornice:Unidoc.ApplicationCornice
     {
-        if  case .swiftinit_org = self.server
-        {
-            .init(username: self.username, official: true)
-        }
-        else
-        {
-            .init(username: self.username, official: false)
-        }
+        .init(sitename: self.sitename, username: self.username)
     }
 }

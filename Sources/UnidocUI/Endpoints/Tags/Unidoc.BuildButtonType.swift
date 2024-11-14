@@ -2,7 +2,7 @@ extension Unidoc
 {
     enum BuildButtonType
     {
-        case zone
+        case region
         case inline
     }
 }

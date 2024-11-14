@@ -1,0 +1,44 @@
+*.region
+{
+    display: block;
+
+    width: 100%;
+    margin: 1.5rem 0;
+    padding: 0.5rem 0;
+    text-align: center;
+
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    border: 2px dashed var(--fg-accent-semi);
+
+    text-decoration: none;
+
+    font-family: var(--typeface-headline);
+    font-weight: 700;
+    font-size: 120%;
+    color: var(--fg-accent);
+
+    &:hover,
+    &:focus,
+    &.active
+    {
+        text-decoration: none;
+        box-shadow: none;
+        transform: none;
+    }
+
+    &:hover,
+    &:focus
+    {
+        cursor: pointer;
+        border-color: var(--fg-accent);
+    }
+
+    &:disabled
+    {
+        color: var(--fg-semi);
+        border-color: var(--fg-light);
+        cursor: not-allowed;
+    }
+}

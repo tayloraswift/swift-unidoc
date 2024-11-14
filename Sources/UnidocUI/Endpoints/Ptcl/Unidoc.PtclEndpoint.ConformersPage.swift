@@ -69,9 +69,6 @@ extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.PtclEndpoint[self.volume, self.vertex.route] }
 }
-extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.VertexPage
 {
     var context:Unidoc.PeripheralPageContext { self.halo.context }
@@ -81,7 +78,7 @@ extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.VertexPage
         let back:String = "\(Unidoc.DocsEndpoint[self.volume, self.vertex.route])"
         let name:Substring = self.stem.last
 
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -130,7 +127,6 @@ extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.VertexPage
         }
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical
-
-        main += self.halo
+        main[.footer] = self.halo
     }
 }

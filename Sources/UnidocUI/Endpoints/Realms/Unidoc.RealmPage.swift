@@ -31,21 +31,18 @@ extension Unidoc.RealmPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.h1] = "\(self.metadata.symbol) (realm)"
         }
 
-        main[.section, { $0.class = "details" }]
+        if  self.packages.isEmpty
         {
-            if  self.packages.isEmpty
-            {
-                $0[.p] = "This realm contains no packages."
-            }
-            else
-            {
-                $0 += self.packages
-            }
+            main[.p] = "This realm contains no packages."
+        }
+        else
+        {
+            main += self.packages
         }
     }
 }

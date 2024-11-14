@@ -63,16 +63,13 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.StatsEndpoint[self.volume, self.vertex.route] }
 }
-extension Unidoc.StatsEndpoint.ModulePage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
         let back:String = "\(Unidoc.DocsEndpoint[self.volume, self.vertex.route])"
 
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -85,11 +82,14 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
 
             $0[.h1] = "\(self.name) metrics"
 
-            $0[.p]
+            $0[.div, { $0.class = "docc" }]
             {
-                $0 += "Statistics and coverage details for the "
-                $0[.code] { $0[.a] { $0.href = back } = self.name }
-                $0 += " module."
+                $0[.p]
+                {
+                    $0 += "Statistics and coverage details for the "
+                    $0[.code] { $0[.a] { $0.href = back } = self.name }
+                    $0 += " module."
+                }
             }
         }
 

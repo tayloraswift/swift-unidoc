@@ -1,0 +1,66 @@
+#sidebar-interpage
+{
+    div.nountree
+    {
+        margin-left: 1rem;
+        margin-top: 10rem;
+
+        font-family: var(--typeface-mono);
+        font-size: 0.8125rem;
+
+        > a::first-letter
+        {
+            color: var(--fg-accent);
+        }
+
+        > a.text
+        {
+            font-family: var(--typeface-body);
+            font-style: italic;
+            font-size: 0.875rem;
+        }
+
+        > a.text + a:not(.text)
+        {
+            margin-top: 0.5rem;
+        }
+
+        > a.extension.local::first-letter
+        {
+            color: var(--color-secondary);
+        }
+
+        > a.extension.foreign::first-letter
+        {
+            color: var(--color-tertiary);
+        }
+
+        div.indent
+        {
+            padding-left: 1.0rem;
+        }
+
+        a, span
+        {
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: '...';
+            color: var(--fg-semi);
+
+        }
+        a:hover
+        {
+            text-decoration: none;
+            color: var(--fg-accent);
+        }
+        a.extension.local:hover
+        {
+            color: var(--color-secondary);
+        }
+        a.extension.foreign:hover
+        {
+            color: var(--color-tertiary);
+        }
+    }
+}

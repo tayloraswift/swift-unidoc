@@ -46,7 +46,7 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.nav, { $0.class = "breadcrumbs" }]
             {
@@ -65,7 +65,7 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
                 return
             }
 
-            $0[.p] { $0.class = "chyron" } = repo.chyron(now: format.time)
+            $0[.div] { $0.class = "chyron" } = repo.chyron(now: format.time)
         }
 
         main[.ul]
@@ -94,8 +94,6 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
             $0.action = "\(Unidoc.Post[.packageRules])"
             $0.method = "post"
-
-            $0.class = "config"
         }
             content:
         {
@@ -123,7 +121,7 @@ extension Unidoc.RulesPage:Unidoc.ApplicationPage
 
             $0[.button]
             {
-                $0.class = "area"
+                $0.class = "region"
                 $0.type = "submit"
 
                 if !self.view.authenticated

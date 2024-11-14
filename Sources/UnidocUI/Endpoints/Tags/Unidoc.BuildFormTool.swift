@@ -27,7 +27,7 @@ extension Unidoc.BuildFormTool
         label:String,
         view:Unidoc.Permissions) -> Self
     {
-        let area:Unidoc.BuildButton = .init(text: label, type: .zone)
+        let area:Unidoc.BuildButton = .init(text: label, type: .region)
 
         guard
         let buildable:String
@@ -124,7 +124,7 @@ extension Unidoc.BuildFormTool:HTML.OutputStreamable
             switch self.area.type
             {
             case .inline:   $0.class = "text"
-            case .zone:     $0.class = "area"
+            case .region:   $0.class = "region"
             }
 
             $0.type = "submit"

@@ -120,6 +120,7 @@ extension Unidoc.Server
             locale: locale ?? .init(language: .en),
             assets: self.options.cloudfront ? .cloudfront : .local,
             server: self.options.mode.server,
+            theme: nil,
             time: time)
     }
 }

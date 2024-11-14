@@ -24,8 +24,6 @@ extension Unidoc.RulesPage.EditorTools:HTML.OutputStreamable
                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
                 $0.action = "\(Unidoc.Post[.packageRules])"
                 $0.method = "post"
-
-                $0.class = "config"
             }
                 content:
             {

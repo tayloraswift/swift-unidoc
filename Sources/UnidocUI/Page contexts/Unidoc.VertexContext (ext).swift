@@ -133,6 +133,6 @@ extension Unidoc.VertexContext
             return nil
         }
 
-        return self.media?.link(media: file.symbol)
+        return self.media.link(media: file.symbol)
     }
 }

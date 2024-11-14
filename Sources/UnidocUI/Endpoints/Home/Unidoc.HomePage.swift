@@ -40,16 +40,16 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
 
     func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        //  This div centers the content.
-        body[.div]
+        //  The `div` centers the `main`
+        body[.div, { $0.id = "home" }]
         {
-            $0[.main, { $0.class = "home" }]
+            $0[.main]
             {
-                $0[.h1] = "swiftinit"
+                $0[.h1] = format.sitename
 
-                $0[.div, { $0.class = "search-tool" }]
+                $0[.div, { $0.class = "search" }]
                 {
-                    $0[.div, { $0.class = "searchbar-container" }]
+                    $0[.div]
                     {
                         $0[.div]
                         {
@@ -74,7 +74,7 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                             }
                         }
                     }
-                    $0[.div, { $0.class = "search-results-container" }]
+                    $0[.div]
                     {
                         $0[.ol] { $0.id = "search-results" }
                     }
