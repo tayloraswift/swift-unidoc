@@ -1,0 +1,66 @@
+pre
+{
+    margin: 2rem 0 2rem;
+    line-height: 1.5rem;
+
+    code
+    {
+        *.xv,    // identifier
+        *.xo,    // operator
+        *.extendee
+        {
+            color: var(--fg);
+        }
+        *.xb     // binding
+        {
+            color: var(--fg);
+        }
+        *.xa, // attribute
+        *.xr,    // directive
+        *.xk,    // keyword
+        *.xm     // magic
+        {
+            color: var(--fg-swift-keyword);
+        }
+        *.xj,    // interpolation anchor
+        *.xp     // pseudo
+        {
+            color: var(--fg-accent);
+        }
+        *.xn,    // numeric literal
+        *.xs     // string literal
+        {
+            color: var(--fg-swift-literal);
+        }
+        *.xy,  // actor
+        *.xz,  // class
+        *.xt   // type
+        {
+            color: var(--fg-swift-type);
+        }
+        *.xu     // typealias
+        {
+            color: var(--fg-accent);
+            font-style: italic;
+        }
+        *.xc,    // regular comment
+        *.xd     // documentation comment
+        {
+            color: var(--fg-swift-comment);
+            font-style: italic;
+        }
+
+        a
+        {
+            color: inherit;
+        }
+        a
+        {
+            text-decoration: underline dashed;
+        }
+        a:hover
+        {
+            text-decoration: underline;
+        }
+    }
+}

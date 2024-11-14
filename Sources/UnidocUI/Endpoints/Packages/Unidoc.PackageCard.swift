@@ -67,7 +67,7 @@ extension Unidoc.PackageCard:HTML.OutputStreamable
 
         li[.p] = self.metadata.package.repo?.origin.about
 
-        li[.p, { $0.class = "chyron" }]
+        li[.div, { $0.class = "chyron" }]
         {
             if  dead
             {

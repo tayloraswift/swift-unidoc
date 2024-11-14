@@ -1,0 +1,107 @@
+form
+{
+    label.checkbox
+    {
+        color: var(--fg-heavy);
+
+        line-height: 1em;
+
+        display: grid;
+        grid-template-columns: 1em auto;
+        gap: 0.3em;
+    }
+
+    button
+    {
+        display: inline-block;
+
+        background: none;
+        box-shadow: none;
+        transform: none;
+        padding: 0;
+        border-radius: 0;
+        border: none;
+
+        font-family: var(--typeface-body);
+        font-size: inherit;
+        color: var(--fg-accent);
+        text-underline-offset: 0.35em;
+
+        &:hover
+        {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    }
+
+    button:disabled
+    {
+        color: var(--fg-semi);
+        cursor: not-allowed;
+    }
+
+    select
+    {
+        padding-bottom: 0.2em;
+    }
+
+    select,
+    input[type='text'],
+    input[type='url']
+    {
+        outline: none;
+        background: var(--bg-codewell);
+
+        margin-bottom: 0.5em;
+        padding: 0.1rem 0.5rem;
+        border-radius: 0.25rem;
+        border: none;
+
+        color: var(--fg);
+        font-family: var(--typeface-body);
+        font-style: italic;
+        font-size: inherit;
+    }
+
+    input[type='url']
+    {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    select[disabled],
+    select[readonly],
+    input[type='text'][disabled],
+    input[type='text'][readonly],
+    input[type='url'][disabled],
+    input[type='url'][readonly]
+    {
+        background: none;
+        color: var(--fg-semi);
+    }
+    select:not([disabled]):not([readonly]):hover,
+    select:not([disabled]):not([readonly]):focus,
+    input[type='text']:not([disabled]):not([readonly]):hover,
+    input[type='text']:not([disabled]):not([readonly]):focus,
+    input[type='url']:not([disabled]):not([readonly]):hover,
+    input[type='url']:not([disabled]):not([readonly]):focus
+    {
+        background: var(--bg-codewell-gloss);
+    }
+    input[type='text']:invalid,
+    input[type='url']:invalid
+    {
+        color: var(--fg-accent);
+    }
+
+    input[type='text']::placeholder,
+    input[type='url']::placeholder
+    {
+        color: var(--fg-heavy);
+    }
+
+    fieldset
+    {
+        border: 2px var(--fg-light) solid;
+    }
+}

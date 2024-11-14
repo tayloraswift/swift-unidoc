@@ -56,9 +56,9 @@ extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.div, { $0.class = "calendar" }]
         {
-            $0[.nav, { $0.class = "calendar" }]
+            $0[.nav]
             {
                 $0[.a]
                 {
@@ -72,10 +72,7 @@ extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
                     $0.href = "\(Unidoc.PackagesCrawledEndpoint[self.year.successor])"
                 } = "▶"
             }
-        }
 
-        main[.section, { $0.class = "calendar" }]
-        {
             $0[.ol]
             {
                 let (start, leap):(Timestamp.Weekday, Bool) = self.year.vibe

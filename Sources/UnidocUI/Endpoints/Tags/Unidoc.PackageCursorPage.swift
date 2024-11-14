@@ -36,7 +36,7 @@ extension Unidoc.PackageCursorPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.h1] = "\(self.package.symbol)"
 
@@ -48,19 +48,18 @@ extension Unidoc.PackageCursorPage:Unidoc.ApplicationPage
             }
 
             $0[.p] = repo.origin.about
-            $0[.p] { $0.class = "chyron" } = repo.chyron(now: format.time)
+            $0[.div] { $0.class = "chyron" } = repo.chyron(now: format.time)
         }
 
-        main[.section, { $0.class = "details" }]
-        {
-            $0 += self.content
+        main[.div] { $0.class = "paginated" } = self.content
 
+        main[.footer]
+        {
             $0[.a]
             {
-                $0.class = "area"
+                $0.class = "region"
                 $0.href = "\(Unidoc.RefsEndpoint[self.package.symbol])"
             } = "Back to repo details"
         }
     }
 }
-

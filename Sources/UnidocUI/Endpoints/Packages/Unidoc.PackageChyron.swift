@@ -19,9 +19,9 @@ extension Unidoc
 extension Unidoc.PackageChyron:HTML.OutputStreamable
 {
     static
-    func += (p:inout HTML.ContentEncoder, self:Self)
+    func += (div:inout HTML.ContentEncoder, self:Self)
     {
-        p += self.source
-        p[.span] = self.social
+        div += self.source
+        div[.span] = self.social
     }
 }

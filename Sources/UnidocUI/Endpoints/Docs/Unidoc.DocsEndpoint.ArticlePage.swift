@@ -46,14 +46,11 @@ extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.ApicalPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -62,8 +59,7 @@ extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.ApicalPage
             }
 
             $0[.h1] = self.apex.headline.safe
-
-            $0 ?= self.cone.overview
+            $0[.div] { $0.class = "docc" } = self.cone.overview
 
             if  let file:Unidoc.Scalar = self.apex.readme
             {
@@ -73,8 +69,8 @@ extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.ApicalPage
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
-        main[.section, { $0.class = "details literature" }] = self.cone.details
+        main[.div] { $0.class = "docc" } = self.cone.details
 
-        main += self.cone.halo
+        main[.footer] = self.cone.halo
     }
 }

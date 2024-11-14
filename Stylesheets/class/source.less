@@ -1,0 +1,95 @@
+a
+{
+    color: var(--fg-accent);
+    text-decoration: none;
+    text-underline-offset: 0.35em;
+}
+a:hover, a:focus
+{
+    text-decoration: underline;
+}
+
+//  Style for links that are not clickable. These occur when documentation authors write
+//  markdown links with invalid URLs.
+a:not([href])
+{
+    color: var(--fg-semi);
+    text-decoration: none;
+}
+a:not([href])::after
+{
+    display: inline-block;
+    content: '';
+    height: 12px;
+    width: 12px;
+
+    margin-left: 0.5em;
+    margin-right: 0.25em;
+
+    background: var(--fg-accent);
+    mask-image: var(--broken-link-icon);
+    mask-size: 100% 100%;
+
+    -webkit-mask-image: var(--broken-link-icon);
+    -webkit-mask-size: 100% 100%;
+
+    background-color: var(--fg-semi)
+}
+
+//  This uses a 16px icon with a 2px stroke width, but on a retina display the 75% scale should
+//  still look sharp.
+a[rel~='external']::after
+{
+    display: inline-block;
+    content: '';
+    height: 12px;
+    width: 12px;
+
+    margin-left: 0.5em;
+    margin-right: 0.25em;
+
+    background: var(--fg-accent);
+    mask-image: var(--leaving-icon);
+    mask-size: 100% 100%;
+
+    -webkit-mask-image: var(--leaving-icon);
+    -webkit-mask-size: 100% 100%;
+}
+
+a.source.github::before
+{
+    display: inline-block;
+    content: '';
+    height: 1.125rem;
+    width: 1.125rem;
+
+    margin-right: 0.5em;
+
+    background: var(--fg-accent);
+    mask-image: var(--github-icon);
+    mask-size: 100% 100%;
+
+    -webkit-mask-image: var(--github-icon);
+    -webkit-mask-size: 100% 100%;
+}
+a.source
+{
+    display: flex;
+    align-items: center;
+
+    font-family: var(--typeface-mono);
+    font-size: 87.5%;
+    color: var(--fg-semi);
+    text-decoration-color: var(--fg-accent);
+
+    span.file
+    {
+        font-weight: 500;
+    }
+
+    span.file,
+    span.line
+    {
+        color: var(--fg-accent);
+    }
+}

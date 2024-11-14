@@ -45,7 +45,7 @@ extension Unidoc.PackageSettingsTool:HTML.OutputStreamable
 
         form[.button]
         {
-            $0.class = "area"
+            $0.class = "region"
             $0.type = "submit"
 
             if !self.view.authenticated

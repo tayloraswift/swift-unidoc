@@ -1,0 +1,54 @@
+// line numbers
+*.snippet
+{
+    overflow: scroll;
+    padding: 0.5rem 0 0.5rem 3rem;
+
+    background-color: var(--bg-codewell);
+    scrollbar-color: var(--fg-accent) transparent;
+    scrollbar-gutter: stable;
+
+    > code
+    {
+        counter-set: line 0;
+        white-space: pre;
+
+        span.newline
+        {
+            counter-increment: line;
+        }
+        span.newline:after
+        {
+            color: var(--fg-snippet-line-number);
+
+            position: relative;
+            display: inline-block;
+            content: counter(line);
+            width: 0;
+            right: 2rem;
+            direction: rtl;
+            word-wrap: normal;
+        }
+
+        //  diffs
+        ins
+        {
+            background-color: var(--bg-diff-insert);
+            text-decoration: inherit;
+        }
+        del
+        {
+            background-color: var(--bg-diff-delete);
+            text-decoration: inherit;
+        }
+        mark
+        {
+            background-color: var(--bg-diff-update);
+            text-decoration: inherit;
+        }
+    }
+    > code.language-swift
+    {
+        color: var(--fg-swift);
+    }
+}

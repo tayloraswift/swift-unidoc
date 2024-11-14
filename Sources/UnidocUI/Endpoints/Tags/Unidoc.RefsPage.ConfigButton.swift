@@ -58,7 +58,7 @@ extension Unidoc.RefsPage.ConfigButton:HTML.OutputStreamable
 
         form[.button]
         {
-            $0.class = self.area ? "area" : "text"
+            $0.class = self.area ? "region" : "text"
             $0.type = "submit"
         } = self.label
     }

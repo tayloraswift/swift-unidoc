@@ -52,9 +52,6 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
@@ -81,7 +78,7 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -109,7 +106,7 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                 $0[.h1] = self.name
             }
 
-            $0 ?= self.cone.overview
+            $0[.div] { $0.class = "docc" } = self.cone.overview
 
             if  let readme:Unidoc.Scalar = self.apex.readme
             {
@@ -122,9 +119,9 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
         switch self.apex.module.type
         {
         case .binary, .regular, .macro, .system:
-            main[.section, { $0.class = "declaration" }]
+            main[.pre, { $0.class = "declaration" }]
             {
-                $0[.pre, .code] = Unidoc.ImportSection.init(module: self.apex.module.id)
+                $0[.code] = Unidoc.ImportSection.init(module: self.apex.module.id)
             }
 
         case .executable, .plugin, .snippet, .test:
@@ -177,8 +174,8 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
             }
         }
 
-        main[.section, { $0.class = "details literature" }] = self.cone.details
+        main[.div] { $0.class = "docc" } = self.cone.details
 
-        main += self.cone.halo
+        main[.footer] = self.cone.halo
     }
 }

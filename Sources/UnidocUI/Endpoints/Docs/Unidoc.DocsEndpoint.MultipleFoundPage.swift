@@ -50,9 +50,6 @@ extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.DocsEndpoint[self.volume, .bare(self.identity)] }
 }
-extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.VertexPage
 {
     /// TODO: give this type a better sidebar
@@ -60,12 +57,12 @@ extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.VertexPage
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
-                $0[.span, { $0.class = "phylum" }] = "Disambiguation Page"
-                $0[.span, { $0.class = "domain" }] = self.context.volume | nil
+                $0[.span] { $0.class = "phylum" } = "Disambiguation Page"
+                $0[.span] { $0.class = "domain" } = self.context.volume | nil
             }
 
             var path:URI.Path = []
@@ -75,13 +72,16 @@ extension Unidoc.DocsEndpoint.MultipleFoundPage:Unidoc.VertexPage
 
             $0[.p] = "This path could refer to multiple entities."
         }
-        main[.section, { $0.class = "group choices" }]
+        main[.footer]
         {
-            $0[.ul, { $0.class = "cards" }]
+            $0[.section, { $0.class = "group choices" }]
             {
-                for match:Unidoc.Scalar in self.matches
+                $0[.ul, { $0.class = "cards" }]
                 {
-                    $0[.li] = self.context.card(match)
+                    for match:Unidoc.Scalar in self.matches
+                    {
+                        $0[.li] = self.context.card(match)
+                    }
                 }
             }
         }
