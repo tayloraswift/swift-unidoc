@@ -158,7 +158,7 @@ extension SSGC
         */
 
         @Flag(
-            name: [.customLong("pretty"), .customShort("p")],
+            name: [.customLong("pretty")],
             help: """
                 Tell lib/SymbolGraphGen to pretty-print the JSON output, if possible
                 """)
