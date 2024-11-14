@@ -146,7 +146,7 @@ if (tooltips !== null) {
         }
 
         //  Change the tooltip into a `<div>` with `class="tooltip"`.
-        const tooltip: HTMLSpanElement = document.createElement('div');
+        const tooltip: HTMLDivElement = document.createElement('div');
         tooltip.innerHTML = anchor.innerHTML;
 
         cards[id] = tooltip;
