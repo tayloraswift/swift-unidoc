@@ -51,7 +51,9 @@
 @import 'id/sidebar-interpage';
 @import 'id/sidebar-intrapage';
 
-:root
+//  Note that `:root` is considered a pseudo-class, and using it would override all
+//  element-specific styles!
+html
 {
     --typeface-ui: 'DM Sans', sans-serif;
     --typeface-headline: 'DM Sans', sans-serif;
@@ -125,6 +127,8 @@
     --fg-swift-literal: rgb(141, 61, 231);
     --fg-swift-type: rgb(255, 123, 0);
 
+    --fg-gold: rgb(255, 123, 0);
+
     @media (prefers-color-scheme: dark)
     {
         --color-accent-light: rgb(153, 0, 71);
@@ -175,6 +179,8 @@
         --fg-swift-keyword: rgb(255, 53, 97);
         --fg-swift-literal: rgb(195, 143, 255);
         --fg-swift-type: rgb(255, 161, 37);
+
+        --fg-gold: rgb(255, 161, 37);
     }
 
     h1, h2, h3, h4, h5, h6
@@ -204,7 +210,7 @@
         font-size: 90.625%;
     }
 }
-:root[data-theme='eden']
+html[data-theme='eden']
 {
     --typeface-headline: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
     --typeface-body: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
