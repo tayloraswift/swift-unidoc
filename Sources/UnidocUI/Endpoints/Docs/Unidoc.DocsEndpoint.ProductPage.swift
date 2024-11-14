@@ -33,9 +33,6 @@ extension Unidoc.DocsEndpoint.ProductPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
 {
     var sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint> { .product(volume: self.volume) }
@@ -50,7 +47,7 @@ extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -103,91 +100,88 @@ extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
             break
         }
 
-        main[.section, { $0.class = "details" }]
+        if  case .library(let type) = self.apex.type
         {
-            if  case .library(let type) = self.apex.type
-            {
-                $0[.h2] = "Product Information"
+            main[.h2] = "Product Information"
 
-                $0[.dl]
+            main[.dl]
+            {
+                $0[.dt] = "Linker mode"
+                $0[.dd] = switch type
                 {
-                    $0[.dt] = "Linker mode"
-                    $0[.dd] = switch type
-                    {
-                    case .automatic:    "automatic"
-                    case .dynamic:      "dynamic"
-                    case .static:       "static"
-                    }
+                case .automatic:    "automatic"
+                case .dynamic:      "dynamic"
+                case .static:       "static"
                 }
             }
+        }
 
-            $0[.h2] = AutomaticHeading.allProductConstituents
+        main[.h2] = AutomaticHeading.allProductConstituents
 
-            $0[.table, { $0[data: "type"] = "constituents" }]
+        main[.table, { $0[data: "type"] = "constituents" }]
+        {
+            $0[.thead]
             {
-                $0[.thead]
+                $0[.tr]
                 {
+                    $0[.th] = "Name"
+                    $0[.th] = "Dependency"
+                }
+            }
+            $0[.tbody]
+            {
+                for id:Unidoc.Scalar in self.apex.constituents
+                {
+                    guard
+                    let volume:Unidoc.VolumeMetadata = self.context[id.edition],
+                    let vertex:Unidoc.AnyVertex = self.context.vertices[id]?.vertex
+                    else
+                    {
+                        continue
+                    }
+
                     $0[.tr]
                     {
-                        $0[.th] = "Name"
-                        $0[.th] = "Dependency"
-                    }
-                }
-                $0[.tbody]
-                {
-                    for id:Unidoc.Scalar in self.apex.constituents
-                    {
-                        guard
-                        let volume:Unidoc.VolumeMetadata = self.context[id.edition],
-                        let vertex:Unidoc.AnyVertex = self.context.vertices[id]?.vertex
-                        else
+                        switch vertex
                         {
-                            continue
-                        }
-
-                        $0[.tr]
-                        {
-                            switch vertex
+                        case .culture(let vertex):
+                            $0[.td]
                             {
-                            case .culture(let vertex):
-                                $0[.td]
+                                $0[.a]
                                 {
-                                    $0[.a]
-                                    {
-                                        $0.href = "\(Unidoc.DocsEndpoint[volume, vertex.route])"
-                                    } = vertex.module.name
-                                }
-                                $0[.td]
-                                {
-                                    $0[.span] { $0.class = "placeholder" } = "none"
-                                }
-
-                            case .product(let vertex):
-                                $0[.td]
-                                {
-                                    $0[.a]
-                                    {
-                                        $0.href = "\(Unidoc.DocsEndpoint[volume, vertex.route])"
-                                    } = vertex.symbol
-                                }
-
-                                $0[.td]
-                                {
-                                    $0[.a]
-                                    {
-                                        $0.href = "\(Unidoc.DocsEndpoint[volume])"
-                                    } = "\(volume.symbol.package)"
-                                }
-
-                            default:
-                                return
+                                    $0.href = "\(Unidoc.DocsEndpoint[volume, vertex.route])"
+                                } = vertex.module.name
                             }
+                            $0[.td]
+                            {
+                                $0[.span] { $0.class = "placeholder" } = "none"
+                            }
+
+                        case .product(let vertex):
+                            $0[.td]
+                            {
+                                $0[.a]
+                                {
+                                    $0.href = "\(Unidoc.DocsEndpoint[volume, vertex.route])"
+                                } = vertex.symbol
+                            }
+
+                            $0[.td]
+                            {
+                                $0[.a]
+                                {
+                                    $0.href = "\(Unidoc.DocsEndpoint[volume])"
+                                } = "\(volume.symbol.package)"
+                            }
+
+                        default:
+                            return
                         }
                     }
                 }
             }
         }
 
-        main += self.cone.halo
+        main[.footer] = self.cone.halo
     }
 }

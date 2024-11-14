@@ -38,7 +38,7 @@ extension Unidoc.PluginStatusPage:Unidoc.AdministrativePage
 
             let label:String = self.active ? "Pause plugin" : "Start plugin"
 
-            $0[.button] { $0.class = "area" ; $0.type = "submit" } = label
+            $0[.button] { $0.class = "region" ; $0.type = "submit" } = label
         }
 
         main[.section, { $0.class = "events" }]

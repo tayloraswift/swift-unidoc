@@ -8,3 +8,5 @@ lessc --clean-css="--s1 --advanced --compatibility=ie8" \
 lessc --clean-css="--s1 --advanced --compatibility=ie8" \
     Stylesheets/Main.less Assets/css/Main.css \
     --source-map Assets/css/Main.css.map
+
+echo "Stylesheets compiled successfully!"

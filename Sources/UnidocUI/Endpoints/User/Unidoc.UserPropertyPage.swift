@@ -36,7 +36,7 @@ extension Unidoc.UserPropertyPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.h1] = self.title
 
@@ -45,6 +45,6 @@ extension Unidoc.UserPropertyPage:Unidoc.ApplicationPage
                 name: self.name,
                 packages: self.packages.count)
         }
-        main[.section] { $0.class = "details" } = self.packages
+        main += self.packages
     }
 }

@@ -1,0 +1,200 @@
+*.docc
+{
+    p, aside, blockquote, dl, figure
+    {
+        max-width: 40rem;
+    }
+    //  This duplicates the `p code` selector in `p.less`, and adds additional elements that
+    //  are allowed to contain inline code within a DocC article.
+    //
+    //  It also zeroes the line height to avoid disrupting the surrounding text.
+    p, aside, blockquote, dl, figure, table
+    {
+        code
+        {
+            background-color: var(--bg-codewell);
+            padding: var(--codewell-padding);
+            border-radius: var(--codewell-border-radius);
+
+            line-height: 0;
+        }
+    }
+
+    figure
+    {
+        margin: 2rem 0;
+    }
+
+    img
+    {
+        max-width: 100%;
+        max-height: 40rem;
+    }
+
+    section
+    pre
+    {
+        max-width: 100%;
+    }
+
+    pre
+    {
+        > code
+        {
+            padding: 0;
+            line-height: inherit;
+            border-radius: 0;
+        }
+    }
+
+    pre.title
+    {
+        //padding-left: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 0;
+
+        //background-color: var(--bg-codewell);
+        font-family: var(--typeface-mono);
+        font-weight: 700;
+        color: var(--fg-heavy);
+    }
+    pre.title + pre
+    {
+        margin-top: 0.5rem;
+    }
+    pre + a.source
+    {
+        margin-top: 0rem;
+        position: relative;
+        top: -1rem;
+    }
+
+    dl
+    {
+        padding-left: 0;
+        margin-bottom: 2rem;
+        display: block;
+
+        > dt[name],
+        > dt[id]
+        {
+            > a
+            {
+                color: inherit;
+            }
+        }
+        > dt
+        {
+            margin-top: 2rem;
+            font-weight: 700;
+
+            > a::before
+            {
+                display: inline-block;
+                content: '$';
+                min-width: 3rem;
+
+                font-family: var(--typeface-mono);
+                font-weight: normal;
+                color: var(--fg-snippet-line-number);
+            }
+        }
+
+        > dd
+        {
+            padding-left: 3rem;
+            margin-left: 0;
+        }
+    }
+
+    section.parameters dl
+    {
+        counter-set: parameter-index -1;
+
+        > dt
+        {
+            counter-increment: parameter-index;
+            font-family: var(--typeface-mono);
+
+            > a::before
+            {
+                content: '$' counter(parameter-index);
+            }
+        }
+    }
+
+    section.parameters,
+    section.returns
+    {
+        > h2
+        {
+            padding-left: 0;
+        }
+    }
+
+    section.returns
+    {
+        > *
+        {
+            padding-left: 3rem;
+            margin-left: 0;
+        }
+    }
+
+    blockquote
+    {
+        margin: 2rem 0;
+        font-style: italic;
+        color: var(--fg-heavy);
+
+        em
+        {
+            font-style: normal;
+        }
+    }
+
+    aside
+    {
+        position: relative;
+        margin: 2rem 0;
+
+        h3
+        {
+            margin: 0;
+            padding: 0.5rem 0;
+            font-size: inherit;
+
+            color: var(--fg-semi);
+            border-bottom: 2px solid var(--fg-semi);
+        }
+
+        border-bottom: 2px solid var(--fg-semi);
+    }
+    aside.important,
+    aside.warning
+    {
+        h3
+        {
+            color: var(--color-hot);
+            border-color: var(--color-hot);
+        }
+
+        border-color: var(--color-hot);
+    }
+
+    aside:last-child
+    {
+        border-bottom: none;
+    }
+
+    //  These appear in DocC tutorials.
+    ol.steps
+    {
+        padding-left: 0;
+    }
+
+    h2, h3
+    {
+        margin-top: 1.5em;
+    }
+}

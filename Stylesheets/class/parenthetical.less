@@ -1,0 +1,18 @@
+*.parenthetical
+{
+    color: var(--fg-semi);
+    font-style: italic;
+
+    &::before
+    {
+        content: '(';
+        font-style: normal;
+        margin-left: 0.4em;
+    }
+
+    &::after
+    {
+        content: ')';
+        font-style: normal;
+    }
+}

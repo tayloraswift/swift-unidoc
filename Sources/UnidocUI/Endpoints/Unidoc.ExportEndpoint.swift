@@ -82,7 +82,6 @@ extension Unidoc.ExportEndpoint:Unidoc.VertexEndpoint
             $0[.section, { $0.class = "introduction" }]
             {
                 $0[.h1] = article.headline.safe
-
             }
             $0[.section, { $0.class = "details literature" }]
             {

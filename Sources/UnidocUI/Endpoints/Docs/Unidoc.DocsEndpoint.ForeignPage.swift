@@ -41,9 +41,6 @@ extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
@@ -58,7 +55,7 @@ extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApicalPage
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -108,19 +105,16 @@ extension Unidoc.DocsEndpoint.ForeignPage:Unidoc.ApicalPage
             }
         }
 
-        main[.section, { $0.class = "declaration" }]
+        main[.pre, { $0.class = "declaration" }]
         {
-            $0[.pre]
+            $0[.code]
             {
-                $0[.code]
-                {
-                    $0[.span] { $0.highlight = .keyword } = "extension"
-                    $0 += " "
-                    $0[link: extendee?.target] { $0.class = "extendee" } = self.stem.last
-                }
+                $0[.span] { $0.highlight = .keyword } = "extension"
+                $0 += " "
+                $0[link: extendee?.target] { $0.class = "extendee" } = self.stem.last
             }
         }
 
-        main += self.cone.halo
+        main[.footer] = self.cone.halo
     }
 }

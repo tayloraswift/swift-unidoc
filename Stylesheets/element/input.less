@@ -1,0 +1,40 @@
+input[type="checkbox"],
+input[type="radio"]
+{
+    // For iOS < 15 to remove gradient background
+    background-color: var(--bg);
+}
+
+input[type="checkbox"], input[type="radio"]
+{
+    appearance: none;
+    margin: 0;
+
+    font-size: inherit;
+    height: 1em;
+    width: 1em;
+
+    display: grid;
+    place-content: center;
+
+    transform: translateY(2px);
+    border: 2px solid var(--fg-semi);
+    border-radius: 0.1em;
+}
+input[type="checkbox"]::before, input[type="radio"]::before
+{
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    background-color: var(--bg);
+}
+input[type="checkbox"]:checked, input[type="radio"]:checked
+{
+    border-color: var(--fg-accent);
+    background-color: var(--fg-accent);
+}
+input[type="checkbox"]:checked::before, input[type="radio"]:checked::before
+{
+    transform-origin: bottom left;
+    clip-path: polygon(100% 13%, 39% 100%, 0 70%, 11% 53%, 37% 71%, 83% 0);
+}

@@ -67,12 +67,11 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
         {
             $0[.main]
             {
-                $0[.section, { $0.class = "introduction" }]
+                $0[.header, { $0.class = "hero" }]
                 {
                     $0[.h1] = self.apex.headline.safe
-
                 }
-                $0[.section, { $0.class = "details literature" }]
+                $0[.div, { $0.class = "docc" }]
                 {
                     $0 ?= self.prose.overview(with: self.context)
                     $0 ?= self.prose.details(with: self.context)

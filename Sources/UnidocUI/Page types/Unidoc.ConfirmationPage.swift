@@ -37,43 +37,40 @@ extension Unidoc.ConfirmationPage
     public
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.h1] = self.title
         }
 
-        main[.section, { $0.class = "details" }]
+        main[.form]
         {
-            $0[.form]
+            $0.enctype = "\(MediaType.application(Self.encoding))"
+            $0.action = "\(self.action.path)"
+            $0.method = "post"
+        }
+            content:
+        {
+            self.form(&$0, format: format)
+
+            $0[.p]
             {
-                $0.enctype = "\(MediaType.application(Self.encoding))"
-                $0.action = "\(self.action.path)"
-                $0.method = "post"
+                $0[.button] { $0.class = "region" ; $0.type = "submit" } = self.button
             }
-                content:
+
+            guard
+            let query:URI.Query = self.action.query
+            else
             {
-                self.form(&$0, format: format)
+                return
+            }
 
-                $0[.p]
+            for (key, value):(String, String) in query.parameters
+            {
+                $0[.input]
                 {
-                    $0[.button] { $0.class = "area" ; $0.type = "submit" } = self.button
-                }
-
-                guard
-                let query:URI.Query = self.action.query
-                else
-                {
-                    return
-                }
-
-                for (key, value):(String, String) in query.parameters
-                {
-                    $0[.input]
-                    {
-                        $0.type = "hidden"
-                        $0.name = key
-                        $0.value = value
-                    }
+                    $0.type = "hidden"
+                    $0.name = key
+                    $0.value = value
                 }
             }
         }

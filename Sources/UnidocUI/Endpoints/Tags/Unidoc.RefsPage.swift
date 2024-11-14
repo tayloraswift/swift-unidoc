@@ -68,7 +68,7 @@ extension Unidoc.RefsPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.h1] = "\(self.package.symbol)"
 
@@ -80,7 +80,7 @@ extension Unidoc.RefsPage:Unidoc.ApplicationPage
             }
 
             $0[.p] = repo.origin.about
-            $0[.p] { $0.class = "chyron" } = repo.chyron(now: format.time)
+            $0[.div] { $0.class = "chyron" } = repo.chyron(now: format.time)
         }
 
         let dormancy:Duration? = self.package.repo?.dormant(by: format.time)
@@ -95,35 +95,20 @@ extension Unidoc.RefsPage:Unidoc.ApplicationPage
             }
         }
 
-        main[.section, { $0.class = "details" }]
+        if  case .localhost = format.server
         {
-            if  case .localhost = format.server
+            main[.h2] = "Local preview settings"
+            main[.form]
             {
-                $0[.h2] = "Local preview settings"
-                $0[.form]
-                {
-                    $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
-                    $0.action = "\(Unidoc.Post[package: self.package.id, .media])"
-                    $0.method = "post"
-
-                    $0.class = "config"
-                } = Unidoc.PackageMediaTool.init(media: self.package.media)
-            }
-
-            self.section(tags: &$0, format: format, dormancy: dormancy)
+                $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
+                $0.action = "\(Unidoc.Post[package: self.package.id, .media])"
+                $0.method = "post"
+            } = Unidoc.PackageMediaTool.init(media: self.package.media)
         }
-    }
-}
-extension Unidoc.RefsPage
-{
-    private
-    func section(tags section:inout HTML.ContentEncoder,
-        format:Unidoc.RenderFormat,
-        dormancy:Duration?)
-    {
+
         if  let repo:Unidoc.PackageRepo = self.package.repo
         {
-            section[.header, { $0.class = "visual" }]
+            main[.header, { $0.class = "visual" }]
             {
                 $0[.h2] = Heading.repo
                 $0[.div]
@@ -135,40 +120,38 @@ extension Unidoc.RefsPage
                 } = repo.private ?  "🗝️" : "🌐"
             }
 
-            section[.dl] = Unidoc.PackageRepoDescriptionList.init(repo: repo,
+            main[.dl] = Unidoc.PackageRepoDescriptionList.init(repo: repo,
                 mode: .expanded(format.locale))
         }
 
-        section[.a]
+        main[.a]
         {
-            $0.class = "area"
+            $0.class = "region"
             $0.href = "\(Unidoc.RulesEndpoint[self.package.symbol])"
         } = "Manage contributors"
 
-        section[.h2] = Heading.tags
-        section[.table] = self.versions.table
+        main[.h2] = Heading.tags
+        main[.table] = self.versions.table
         if  let more:URI = self.versions.next
         {
-            section[.a] { $0.class = "area" ; $0.href = "\(more)" } = "Browse more tags"
+            main[.a] { $0.class = "region" ; $0.href = "\(more)" } = "Browse more tags"
         }
 
         if !self.branches.isEmpty
         {
-            section[.h2] = Heading.branches
-            section[.table] = Unidoc.RefsTable.init(package: self.package.symbol,
+            main[.h2] = Heading.branches
+            main[.table] = Unidoc.RefsTable.init(package: self.package.symbol,
                 rows: self.branches,
                 view: self.view,
                 type: .branches)
         }
 
-        section[.h3] = Heading.importRefs
-        section[.form]
+        main[.h3] = Heading.importRefs
+        main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
             $0.action = "\(Unidoc.Post[.packageIndex])"
             $0.method = "post"
-
-            $0.class = "config"
         }
             content:
         {
@@ -199,7 +182,7 @@ extension Unidoc.RefsPage
 
             $0[.button]
             {
-                $0.class = "area"
+                $0.class = "region"
                 $0.type = "submit"
 
                 if !self.view.authenticated
@@ -215,30 +198,30 @@ extension Unidoc.RefsPage
             } = "Import ref"
         }
 
-        section[.h2] = Heading.consumers
+        main[.h2] = Heading.consumers
 
         if  self.consumers.table.rows.isEmpty
         {
-            section[.p] { $0.class = "note" } = "This package has no known consumers!"
+            main[.p] { $0.class = "note" } = "This package has no known consumers!"
         }
         else
         {
-            section[.table] = self.consumers.table
+            main[.table] = self.consumers.table
         }
         if  let more:URI = self.consumers.next
         {
-            section[.a] { $0.class = "area" ; $0.href = "\(more)" } = "Browse more consumers"
+            main[.a] { $0.class = "region" ; $0.href = "\(more)" } = "Browse more consumers"
         }
 
-        section[.h2] = Heading.settings
+        main[.h2] = Heading.settings
 
         if !self.view.authenticated
         {
-            section[.p] { $0.class = "note" } = "You are not logged in!"
+            main[.p] { $0.class = "note" } = "You are not logged in!"
         }
         else
         {
-            section[.p] { $0.class = "note" } = switch self.view.rights
+            main[.p] { $0.class = "note" } = switch self.view.rights
             {
             case .reader:   nil as String?
             case .editor:   "You are an editor of this package!"
@@ -246,7 +229,7 @@ extension Unidoc.RefsPage
             }
         }
 
-        section[.dl]
+        main[.dl]
         {
             $0[.dt] = "Package ID"
             $0[.dd] = "\(self.package.id)"
@@ -388,46 +371,44 @@ extension Unidoc.RefsPage
             }
         }
 
-        section[.form]
+        main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
             $0.action = "\(Unidoc.Post[package: self.package.id, .general])"
             $0.method = "post"
-            $0.class = "config"
         } = Unidoc.PackageSettingsTool.init(settings: self.package.settings, view: self.view)
 
-        section[.h2] = Heading.builds
-        section += self.buildTools
+        main[.h2] = Heading.builds
+        main += self.buildTools
 
         //  All logged-in users can see the build logs. The only reason they are not totally
         //  public is to prevent crawlers from making dynamic CloudFront requests, because the
         //  CDN firewall is less effective than our apex firewall.
         if !self.builds.table.rows.isEmpty
         {
-            section[.h3] = Heading.builtRecently
-            section[.table] = self.builds.table
+            main[.h3] = Heading.builtRecently
+            main[.table] = self.builds.table
         }
         if  let more:URI = self.builds.next
         {
-            section[.a] { $0.class = "area" ; $0.href = "\(more)" } = "View all builds"
+            main[.a] { $0.class = "region" ; $0.href = "\(more)" } = "View all builds"
         }
 
-        section[.h3] = Heading.buildConfiguration
-        section[.form]
+        main[.h3] = Heading.buildConfiguration
+        main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
             $0.action = "\(Unidoc.Post[package: self.package.id, .build])"
             $0.method = "post"
-            $0.class = "config"
         } = Unidoc.BuildTemplateTool.init(
             availablePlatforms: format.availablePlatforms,
             availableVersions: format.availableVersions,
             form: self.package.build,
             view: self.view)
 
-        section[.h3] = "Names and aliases"
+        main[.h3] = "Names and aliases"
 
-        section[.dl, { $0.class = "aliases" }]
+        main[.dl, { $0.class = "aliases" }]
         {
             for symbol:Symbol.Package in self.aliases
             {
@@ -469,9 +450,9 @@ extension Unidoc.RefsPage
             return
         }
 
-        section[.h2] = Heading.settingsAdmin
+        main[.h2] = Heading.settingsAdmin
 
-        section[.form]
+        main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
             $0.action = "\(Unidoc.Post[.packageAlign])"
@@ -518,7 +499,7 @@ extension Unidoc.RefsPage
             }
         }
 
-        section[.form]
+        main[.form]
         {
             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
             $0.action = "\(Unidoc.Post[.packageAlias])"

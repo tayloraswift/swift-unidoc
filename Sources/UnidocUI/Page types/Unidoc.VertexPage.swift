@@ -8,14 +8,15 @@ import URI
 extension Unidoc
 {
     public
-    protocol VertexPage:ApplicationPage
+    protocol VertexPage:RenderablePage
     {
         associatedtype Context:VertexContext
         associatedtype Sidebar:HTML.OutputStreamable
 
         var sidebar:Sidebar { get }
-
         var context:Context { get }
+
+        func main(_:inout HTML.ContentEncoder, format:RenderFormat)
     }
 }
 extension Unidoc.VertexPage where Self:Unidoc.StaticPage

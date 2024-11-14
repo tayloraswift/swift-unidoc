@@ -1,0 +1,17 @@
+*.note
+{
+    color: var(--fg-semi);
+    font-style: italic;
+
+    em
+    {
+        font-style: normal;
+    }
+
+    //  `*.note` overlaps with `aside.note`, which is actually somewhat convenient, but also
+    //  means we need to reset the heading styles here.
+    h1, h2, h3, h4, h5, h6
+    {
+        font-style: normal;
+    }
+}

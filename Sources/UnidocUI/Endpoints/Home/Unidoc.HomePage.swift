@@ -40,7 +40,8 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
 
     func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        body[.div, { $0.class = "home" }]
+        //  The `div` centers the `main`
+        body[.div, { $0.id = "home" }]
         {
             $0[.main]
             {

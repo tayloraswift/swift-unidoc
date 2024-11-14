@@ -27,7 +27,7 @@ extension Unidoc.DisabledButton:HTML.OutputStreamable
                 ? "You are not an editor of this package!"
                 : "You are not logged in!"
 
-            $0.class = self.area ? "area" : "text"
+            $0.class = self.area ? "region" : "text"
             $0.disabled = true
         } = self.label
     }
