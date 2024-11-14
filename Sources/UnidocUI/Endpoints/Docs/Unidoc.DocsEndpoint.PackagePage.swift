@@ -44,9 +44,6 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.DocsEndpoint[self.volume] }
 }
-extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 {
     var sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint> { .package(volume: self.context.volume) }
@@ -68,11 +65,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
     {
         let tags:URI = Unidoc.RefsEndpoint[self.tags]
 
-        main[.section]
-        {
-            $0.class = "introduction"
-        }
-            content:
+        main[.header, { $0.class = "hero" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -103,7 +96,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
             }
 
             $0[.p] = repo.origin.about
-            $0[.p]
+            $0[.div]
             {
                 $0.class = "chyron"
             } = repo.chyron(now: format.time, ref: self.volume.refname)
@@ -111,146 +104,143 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
-        main[.section, { $0.class = "details" }]
+        if  let repo:Unidoc.PackageRepo = self.context.repo
         {
-            if  let repo:Unidoc.PackageRepo = self.context.repo
-            {
-                $0[.h2] = Heading.repository
-                $0[.dl] = Unidoc.PackageRepoDescriptionList.init(repo: repo, mode: .abridged)
+            main[.h2] = Heading.repository
+            main[.dl] = Unidoc.PackageRepoDescriptionList.init(repo: repo, mode: .abridged)
 
-                $0[.a]
-                {
-                    $0.class = "area"
-                    $0.href = "\(tags)"
-                } = "Repo details and more versions"
+            main[.a]
+            {
+                $0.class = "region"
+                $0.href = "\(tags)"
+            } = "Repo details and more versions"
+        }
+
+        if !self.volume.dependencies.isEmpty
+        {
+            main[.h2] = Heading.dependencies
+            main[.table]
+            {
+                $0.class = "dependencies"
+            } = Unidoc.DependencyTable.init(
+                dependencies: self.volume.dependencies,
+                context: self.context)
+        }
+
+        main[.h2] = Heading.platforms
+
+        main[.dl]
+        {
+            //  $0[.dt] = "Supports Linux?"
+            //  $0[.dd] = "yes"
+
+            if  let version:PatchVersion = self.apex.snapshot.latestManifest
+            {
+                $0[.dt] = "Swift tools version"
+                $0[.dd] = "\(version)"
             }
+        }
 
-            if !self.volume.dependencies.isEmpty
+        if !self.apex.snapshot.extraManifests.isEmpty
+        {
+            main[.p, { $0.class = "note" }]
             {
-                $0[.h2] = Heading.dependencies
-                $0[.table]
+                $0 += "This package vends additional manifests targeting specific versions "
+                $0[.em] = """
+                (\(self.apex.snapshot.extraManifests.map
                 {
-                    $0.class = "dependencies"
-                } = Unidoc.DependencyTable.init(
-                    dependencies: self.volume.dependencies,
-                    context: self.context)
+                    "\($0)"
+                }.joined(separator: ", ")))
+                """
+                $0 += " of Swift!"
             }
-
-            $0[.h2] = Heading.platforms
-
-            $0[.dl]
+        }
+        if !self.apex.snapshot.requirements.isEmpty
+        {
+            main[.table, { $0[data: "type"] = "platforms" }]
             {
-                //  $0[.dt] = "Supports Linux?"
-                //  $0[.dd] = "yes"
-
-                if  let version:PatchVersion = self.apex.snapshot.latestManifest
+                $0[.thead]
                 {
-                    $0[.dt] = "Swift tools version"
-                    $0[.dd] = "\(version)"
-                }
-            }
-
-            if !self.apex.snapshot.extraManifests.isEmpty
-            {
-                $0[.p, { $0.class = "note" }]
-                {
-                    $0 += "This package vends additional manifests targeting specific versions "
-                    $0[.em] = """
-                    (\(self.apex.snapshot.extraManifests.map
+                    $0[.tr]
                     {
-                        "\($0)"
-                    }.joined(separator: ", ")))
-                    """
-                    $0 += " of Swift!"
+                        $0[.th] = "Platform"
+                        $0[.th] = "Minimum Version"
+                    }
                 }
-            }
-            if !self.apex.snapshot.requirements.isEmpty
-            {
-                $0[.table, { $0[data: "type"] = "platforms" }]
+                $0[.tbody]
                 {
-                    $0[.thead]
+                    for platform:SymbolGraphMetadata.PlatformRequirement in
+                        self.apex.snapshot.requirements
                     {
                         $0[.tr]
                         {
-                            $0[.th] = "Platform"
-                            $0[.th] = "Minimum Version"
+                            $0[.td] = "\(platform.id)"
+                            $0[.td] = "\(platform.min)"
                         }
-                    }
-                    $0[.tbody]
-                    {
-                        for platform:SymbolGraphMetadata.PlatformRequirement in
-                            self.apex.snapshot.requirements
-                        {
-                            $0[.tr]
-                            {
-                                $0[.td] = "\(platform.id)"
-                                $0[.td] = "\(platform.min)"
-                            }
-                        }
-                    }
-                }
-
-                $0[.p] { $0.class = "note" } = """
-                Platform requirements originate from the manifest targeting the latest version
-                of Swift!
-                """
-            }
-
-            $0[.h2] = Heading.linkage
-
-            $0[.dl]
-            {
-                $0[.dt] = "Symbol graph ABI"
-                $0[.dd] = "\(self.apex.snapshot.abi)"
-
-                if  let symbolsLinkable:Int = self.apex.snapshot.symbolsLinkable,
-                    let symbolsLinked:Int = self.apex.snapshot.symbolsLinked
-                {
-                    $0[.dt] = "Symbols linked"
-                    $0[.dd]
-                    {
-                        let percentage:Int = symbolsLinkable != 0
-                            ? symbolsLinked * 100 / symbolsLinkable
-                            : 100
-
-                        $0[.span] = "\(symbolsLinked) / \(symbolsLinkable)"
-                        $0 += " "
-                        $0[.span]
-                        {
-                            $0.class = percentage < 100
-                                ? "parenthetical warn"
-                                : "parenthetical"
-                        } = "\(percentage)%"
-                    }
-                }
-
-                if  let commit:SHA1 = self.apex.snapshot.commit
-                {
-                    $0[.dt] = "Git revision"
-                    $0[.dd]
-                    {
-                        let url:String?
-                        if  case .github(let origin)? = self.context.repo?.origin
-                        {
-                            url = "\(origin.https)/tree/\(commit)"
-                        }
-                        else
-                        {
-                            url = nil
-                        }
-
-                        $0[link: url] { $0.external(safe: false) } = "\(commit)"
                     }
                 }
             }
 
-            $0[.div] { $0.class = "more" } = Unidoc.StatsThumbnail.init(
-                target: Unidoc.StatsEndpoint[self.volume],
-                census: self.apex.snapshot.census,
-                domain: self.volume.title,
-                title: "Package stats and coverage details")
+            main[.p] { $0.class = "note" } = """
+            Platform requirements originate from the manifest targeting the latest version
+            of Swift!
+            """
         }
 
-        main += self.cone.halo
+        main[.h2] = Heading.linkage
+
+        main[.dl]
+        {
+            $0[.dt] = "Symbol graph ABI"
+            $0[.dd] = "\(self.apex.snapshot.abi)"
+
+            if  let symbolsLinkable:Int = self.apex.snapshot.symbolsLinkable,
+                let symbolsLinked:Int = self.apex.snapshot.symbolsLinked
+            {
+                $0[.dt] = "Symbols linked"
+                $0[.dd]
+                {
+                    let percentage:Int = symbolsLinkable != 0
+                        ? symbolsLinked * 100 / symbolsLinkable
+                        : 100
+
+                    $0[.span] = "\(symbolsLinked) / \(symbolsLinkable)"
+                    $0 += " "
+                    $0[.span]
+                    {
+                        $0.class = percentage < 100
+                            ? "parenthetical warn"
+                            : "parenthetical"
+                    } = "\(percentage)%"
+                }
+            }
+
+            if  let commit:SHA1 = self.apex.snapshot.commit
+            {
+                $0[.dt] = "Git revision"
+                $0[.dd]
+                {
+                    let url:String?
+                    if  case .github(let origin)? = self.context.repo?.origin
+                    {
+                        url = "\(origin.https)/tree/\(commit)"
+                    }
+                    else
+                    {
+                        url = nil
+                    }
+
+                    $0[link: url] { $0.external(safe: false) } = "\(commit)"
+                }
+            }
+        }
+
+        main[.div] { $0.class = "more" } = Unidoc.StatsThumbnail.init(
+            target: Unidoc.StatsEndpoint[self.volume],
+            census: self.apex.snapshot.census,
+            domain: self.volume.title,
+            title: "Package stats and coverage details")
+
+        main[.footer] = self.cone.halo
     }
 }

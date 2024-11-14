@@ -32,14 +32,14 @@ extension Unidoc.BuildTools:HTML.OutputStreamable
             }
         }
 
-        section[.ol, { $0.class = "builds-pending" }]
+        section[.ol, { $0.id = "builds-pending" }]
         {
             for build:Unidoc.PendingBuild in self.running
             {
                 $0[.li]
                 {
-                    let icon:Unicode.Scalar 
-                    
+                    let icon:Unicode.Scalar
+
                     switch build.host.os
                     {
                     case .linux:        icon = "🐧"

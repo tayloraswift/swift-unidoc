@@ -29,7 +29,7 @@ extension Unidoc.Paginated:HTML.OutputStreamable
     static
     func += (section:inout HTML.ContentEncoder, self:Self)
     {
-        section[.nav, { $0.class = "paginator" }]
+        section[.nav]
         {
             if  let uri:URI = self.prev
             {

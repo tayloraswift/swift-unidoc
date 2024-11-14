@@ -41,8 +41,7 @@ extension Unidoc.UserBanner:HTML.OutputStreamable
             }
         }
 
-
-        section[.p, { $0.class = "chyron" }]
+        section[.div, { $0.class = "chyron" }]
         {
             if  let profile:GitHub.User.Profile = self.user?.github
             {

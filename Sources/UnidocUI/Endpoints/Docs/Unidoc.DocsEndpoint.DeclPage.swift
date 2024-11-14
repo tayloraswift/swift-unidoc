@@ -56,9 +56,6 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.StaticPage
 {
     var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
 {
     var descriptionFallback:String
@@ -79,7 +76,7 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
 
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.div, { $0.class = "eyebrows" }]
             {
@@ -113,8 +110,7 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
                 scalars: self.apex.scope)
 
             $0[.h1] = self.stem.last
-
-            $0 ?= self.cone.overview
+            $0[.div] { $0.class = "docc" } = self.cone.overview
 
             if  let location:SourceLocation<Unidoc.Scalar> = self.apex.location
             {
@@ -197,20 +193,17 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
-        main[.section, { $0.class = "declaration" }]
+        main[.pre, { $0.class = "declaration" }]
         {
-            $0[.pre]
-            {
-                /// See note in `GroupList.Card.swift`.
-                let width:Int = "\(self.apex.signature.expanded.bytecode.safe)".count
+            /// See note in `GroupList.Card.swift`.
+            let width:Int = "\(self.apex.signature.expanded.bytecode.safe)".count
 
-                $0[.code]
-                {
-                    $0.class = width > 80 ? "multiline" : nil
-                } = Unidoc.CodeSection.init(self.context,
-                    bytecode: self.apex.signature.expanded.bytecode,
-                    scalars: self.apex.signature.expanded.scalars)
-            }
+            $0[.code]
+            {
+                $0.class = width > 80 ? "multiline" : nil
+            } = Unidoc.CodeSection.init(self.context,
+                bytecode: self.apex.signature.expanded.bytecode,
+                scalars: self.apex.signature.expanded.scalars)
         }
 
         main[.section, { $0.class = "metadata" }]
@@ -219,10 +212,10 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
             {
                 $0[.summary] = "Mangled symbol"
 
-                $0[.p, { $0.class = "symbol" }]
+                $0[.div, { $0.class = "symbol" }]
                 {
                     $0[.code] = self.apex.symbol.rawValue
-
+                    $0 += " "
                     $0[.span, { $0.class = "parenthetical" }]
                     {
                         $0[.a]
@@ -232,15 +225,12 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
                     }
                 }
 
-                $0[.p]
+                $0[.dl]
                 {
-                    $0[.code]
-                    {
-                        let hash:FNV24 = .init(truncating: .decl(self.apex.symbol))
-                        $0 += "FNV24: ["
-                        $0[.span] { $0.class = "fnv24" } = "\(hash)"
-                        $0 += "]"
-                    }
+                    let hash:FNV24 = .init(truncating: .decl(self.apex.symbol))
+
+                    $0[.dt] = "FNV24 hash"
+                    $0[.dd] { $0[.code] = "\(hash)" }
                 }
             }
 
@@ -254,20 +244,17 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
             }
         }
 
-        main[.section, { $0.class = "details literature" }]
+        if  case .protocol = self.apex.phylum
         {
-            if  case .protocol = self.apex.phylum
+            main[.a]
             {
-                $0[.a]
-                {
-                    $0.class = "area"
-                    $0.href = "\(Unidoc.PtclEndpoint[self.volume, self.apex.route])"
-                } = "Browse conforming types"
-            }
-
-            $0 ?= self.cone.details
+                $0.class = "region"
+                $0.href = "\(Unidoc.PtclEndpoint[self.volume, self.apex.route])"
+            } = "Browse conforming types"
         }
 
-        main += self.cone.halo
+        main[.div] { $0.class = "docc" } = self.cone.details
+
+        main[.footer] = self.cone.halo
     }
 }

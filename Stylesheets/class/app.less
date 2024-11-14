@@ -1,0 +1,52 @@
+div.app
+{
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+
+    > header,
+    > main
+    {
+        //  max-width takes effect when `overflow` becomes `visible`
+        flex: 0 1 48rem;
+        overflow: hidden;
+        overflow-wrap: break-word;
+
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    > main
+    {
+        margin-top: 8rem;
+    }
+
+    > div.sidebar
+    {
+        display: none;
+    }
+
+    @media only screen and (min-width: 56rem)
+    {
+        > header,
+        > main
+        {
+            min-width: 24rem;
+            padding-left: 4rem;
+            overflow: visible;
+        }
+
+        > main
+        {
+            margin-top: 6rem;
+        }
+
+        > div.sidebar
+        {
+            display: block;
+            flex: 0 1 16rem;
+            min-width: 12rem;
+            max-width: 16rem;
+        }
+    }
+}

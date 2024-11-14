@@ -1,0 +1,15 @@
+#mixin
+{
+    .translucent(@color: var(--bg))
+    {
+        background-color: @color;
+
+        @supports (backdrop-filter: var(--blur-filter)) or
+            (-webkit-backdrop-filter: var(--blur-filter))
+        {
+            background-color: color-mix(in srgb, @color var(--bg-translucent-alpha), transparent);
+            backdrop-filter: var(--blur-filter);
+            -webkit-backdrop-filter: var(--blur-filter);
+        }
+    }
+}

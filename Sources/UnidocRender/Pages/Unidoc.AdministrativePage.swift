@@ -24,16 +24,16 @@ extension Unidoc.AdministrativePage
     public
     func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        body[.header, { $0.class = "app" }]
+        body[.div, { $0.class = "app navigator" }]
         {
-            $0[.div, { $0.class = "content" }]
+            $0[.header]
             {
-                $0[.nav] { $0.class = "cornice" } = format.cornice
+                $0[.nav] = format.cornice
             }
         }
         body[.div, { $0.class = "app" }]
         {
-            $0[.main, { $0.class = "content" }] { self.main(&$0, format: format) }
+            $0[.main] { self.main(&$0, format: format) }
         }
     }
 }

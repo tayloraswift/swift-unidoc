@@ -33,9 +33,9 @@ extension Unidoc.PackagesCreatedPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.div, { $0.class = "calendar" }]
         {
-            $0[.nav, { $0.class = "calendar" }]
+            $0[.nav]
             {
                 let (before, after):(Timestamp.Date, Timestamp.Date) = self.date.adjacent
 
@@ -53,18 +53,15 @@ extension Unidoc.PackagesCreatedPage:Unidoc.ApplicationPage
             }
         }
 
-        main[.section, { $0.class = "details" }]
+        if  self.groups.isEmpty
         {
-            if  self.groups.isEmpty
-            {
-                $0[.p] = """
-                No Swift repositories were created on \(self.date.long(.init(language: .en))).
-                """
-            }
-            else
-            {
-                $0 += groups
-            }
+            main[.p] = """
+            No Swift repositories were created on \(self.date.long(.init(language: .en))).
+            """
+        }
+        else
+        {
+            main += groups
         }
     }
 }

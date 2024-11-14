@@ -1,0 +1,119 @@
+#sidebar-intrapage
+{
+    ol.table-of-contents
+    {
+        margin-top: 10rem;
+        position: sticky;
+        top: 3rem;
+        padding: 0 1rem 1rem 1rem;
+
+        list-style: none;
+
+        font-size: 0.875rem;
+
+        // account for `top` and the bottom `padding`
+        max-height: calc(100vh - 3rem - 1rem);
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        li
+        {
+            position: relative;
+            color: var(--fg-semi);
+
+            a
+            {
+                color: inherit;
+            }
+        }
+
+        li::before
+        {
+            position: absolute;
+            left: -0.8em;
+            color: var(--fg-light);
+        }
+        li.active::before
+        {
+            color: var(--fg-heavy);
+        }
+        li.active + li.active::before
+        {
+            color: var(--fg-light);
+        }
+
+        li.title
+        {
+            font-style: italic;
+            color: var(--fg);
+            padding-bottom: 0.4em;
+            margin-bottom: 0.6em;
+            border-bottom: 1px solid var(--fg-light);
+        }
+
+        li.active
+        {
+            color: var(--fg);
+        }
+        li.h2
+        {
+            margin-left: 0;
+        }
+        li.h3
+        {
+            margin-left: 1rem;
+        }
+        li.h4
+        {
+            margin-left: 2rem;
+        }
+
+        li.h2,
+        li.h3,
+        li.h4,
+        li.group
+        {
+            &::before
+            {
+                content: '•';
+            }
+
+            display: flex;
+            align-content: center;
+
+            line-height: 136%;
+
+            > a
+            {
+                > span
+                {
+                    font-weight: 700;
+                    font-style: italic;
+                }
+
+                > span,
+                > code
+                {
+                    display: block;
+                }
+
+                > code
+                {
+                    position: relative;
+                    top: var(--mono-to-body-delta);
+
+                    font-style: normal;
+                    font-size: 0.75rem;
+                    margin-bottom: 0.6em;
+
+                    overflow-wrap: anywhere;
+                }
+            }
+        }
+
+        li.group
+        {
+            margin-top: 0.5rem;
+        }
+    }
+}

@@ -21,9 +21,6 @@ extension Unidoc.DocsEndpoint.NotFoundPage:Unidoc.RenderablePage, Unidoc.Dynamic
 {
     var title:String { "Symbol not found · \(self.volume.title) documentation" }
 }
-extension Unidoc.DocsEndpoint.NotFoundPage:Unidoc.ApplicationPage
-{
-}
 extension Unidoc.DocsEndpoint.NotFoundPage:Unidoc.VertexPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)

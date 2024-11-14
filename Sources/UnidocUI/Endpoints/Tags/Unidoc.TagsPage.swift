@@ -44,7 +44,7 @@ extension Unidoc.TagsPage:Unidoc.ApplicationPage
 {
     func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        main[.section, { $0.class = "introduction" }]
+        main[.header, { $0.class = "hero" }]
         {
             $0[.h1] = "\(self.package.symbol)"
 
@@ -56,18 +56,16 @@ extension Unidoc.TagsPage:Unidoc.ApplicationPage
             }
 
             $0[.p] = repo.origin.about
-            $0[.p] { $0.class = "chyron" } = repo.chyron(now: format.time)
+            $0[.div] { $0.class = "chyron" } = repo.chyron(now: format.time)
         }
 
-        main[.section, { $0.class = "details" }]
+        main[.h2] = self.heading
+        main[.div] { $0.class = "paginated" } = self.page
+        main[.footer]
         {
-            $0[.h2] = self.heading
-
-            $0 += self.page
-
             $0[.a]
             {
-                $0.class = "area"
+                $0.class = "region"
                 $0.href = "\(Unidoc.RefsEndpoint[self.package.symbol])"
             } = "Back to repo details"
         }

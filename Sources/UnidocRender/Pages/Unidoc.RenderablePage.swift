@@ -23,7 +23,7 @@ extension Unidoc.RenderablePage
     var description:String? { nil }
 
     @inlinable public
-    func head(augmenting    _:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
+    func head(augmenting _:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
     }
 }
@@ -49,7 +49,7 @@ extension Unidoc.RenderablePage
         location:String?,
         format:Unidoc.RenderFormat)
     {
-        html[.html, { $0.lang = "en" }]
+        html[.html, { $0.lang = "en" ; $0[data: "theme"] = format.theme }]
         {
             $0[.head]
             {

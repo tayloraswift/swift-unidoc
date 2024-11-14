@@ -55,24 +55,23 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
     public
     func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        body[.header, { $0.class = "app" }]
+        body[.div, { $0.class = "app navigator" }]
         {
-            $0[.div, { $0.class = "content" }]
+            $0[.header]
             {
-                $0[.nav] { $0.class = "cornice" } = format.cornice
+                $0[.nav] = format.cornice
             }
         }
 
         body[.div, { $0.class = "app" }]
         {
-            $0[.main, { $0.class = "content" }]
+            $0[.main]
             {
-                $0[.section, { $0.class = "introduction" }]
+                $0[.header, { $0.class = "hero" }]
                 {
                     $0[.h1] = self.apex.headline.safe
-
                 }
-                $0[.section, { $0.class = "details literature" }]
+                $0[.div, { $0.class = "docc" }]
                 {
                     $0 ?= self.prose.overview(with: self.context)
                     $0 ?= self.prose.details(with: self.context)

@@ -1,0 +1,41 @@
+h1[id], h1[name],
+h2[id], h2[name],
+h3[id], h3[name],
+h4[id], h4[name],
+h5[id], h5[name],
+h6[id], h6[name]
+{
+    > a
+    {
+        position: relative;
+        color: inherit;
+
+
+        vertical-align: baseline;
+    }
+
+    @media only screen and (min-width: 56rem)
+    {
+        > a::before
+        {
+            position: relative;
+            vertical-align: baseline;
+            display: inline-block;
+            width: 0;
+            left: -1.6rem;
+
+            content: '$';
+
+            font-weight: 400;
+            font-size: 92.5%;
+
+            color: var(--fg-semi);
+            opacity: 0.5;
+        }
+
+        > a:hover::before
+        {
+            opacity: 1;
+        }
+    }
+}

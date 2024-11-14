@@ -8,14 +8,15 @@ import URI
 extension Unidoc
 {
     public
-    protocol VertexPage:ApplicationPage
+    protocol VertexPage:RenderablePage
     {
         associatedtype Context:VertexContext
         associatedtype Sidebar:HTML.OutputStreamable
 
         var sidebar:Sidebar { get }
-
         var context:Context { get }
+
+        func main(_:inout HTML.ContentEncoder, format:RenderFormat)
     }
 }
 extension Unidoc.VertexPage where Self:Unidoc.StaticPage
@@ -58,61 +59,64 @@ extension Unidoc.VertexPage
     public
     func body(_ body:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
     {
-        body[.header, { $0.class = "app" }]
+        body[.div, { $0.class = "app navigator" }]
         {
             $0[.div] { $0.class = "sidebar" }
-            $0[.div, { $0.class = "content" }]
+            $0[.header]
             {
-                $0[.nav] { $0.class = "cornice" } = format.cornice
-                $0[.div, { $0.class = "searchbar-container" }]
+                $0[.nav] = format.cornice
+                $0[.div, { $0.class = "search" }]
                 {
                     $0[.div]
                     {
-                        $0.class = "searchbar"
-                        $0.title = """
-                        Search for types in the current package, including types from
-                        dependencies, or for any package on Unidoc.
+                        $0[.div]
+                        {
+                            $0.class = "searchbar"
+                            $0.title = """
+                            Search for types in the current package, including types from
+                            dependencies, or for any package on Unidoc.
 
-                        Shortcut: /
-                        """
-                    }
-                        content:
-                    {
-                        $0[.form, { $0.id = "search" ; $0.role = "search" }]
+                            Shortcut: /
+                            """
+                        }
+                            content:
+                        {
+                            $0[.form, { $0.id = "search" ; $0.role = "search" }]
+                            {
+                                $0[.input]
+                                {
+                                    $0.id = "search-input"
+                                    $0.type = "search"
+                                    $0.placeholder = "search documentation"
+                                    $0.autocomplete = "off"
+                                }
+                            }
+                        }
+
+                        $0[.label]
+                        {
+                            $0.class = "checkbox"
+                            $0.title = """
+                            Search for packages only.
+
+                            Shortcut: ,
+                            """
+                        }
+                            content:
                         {
                             $0[.input]
                             {
-                                $0.id = "search-input"
-                                $0.type = "search"
-                                $0.placeholder = "search documentation"
-                                $0.autocomplete = "off"
+                                $0.id = "search-packages-only"
+                                $0.type = "checkbox"
                             }
+
+                            $0[.span] = "packages only"
                         }
                     }
-
-                    $0[.label]
+                    $0[.div]
                     {
-                        $0.class = "checkbox"
-                        $0.title = """
-                        Search for packages only.
-
-                        Shortcut: ,
-                        """
+                        $0[.ol] { $0.id = "search-results" }
                     }
-                        content:
-                    {
-                        $0[.input]
-                        {
-                            $0.id = "search-packages-only"
-                            $0.type = "checkbox"
-                        }
-
-                        $0[.span] = "packages only"
-                    }
-                }
-                $0[.div, { $0.class = "search-results-container" }]
-                {
-                    $0[.ol] { $0.id = "search-results" }
                 }
             }
             $0[.div] { $0.class = "sidebar" }
@@ -121,7 +125,7 @@ extension Unidoc.VertexPage
         body[.div, { $0.class = "app" }]
         {
             $0[.div] { $0.class = "sidebar" ; $0.id = "sidebar-intrapage" }
-            $0[.main, { $0.class = "content" }] { self.main(&$0, format: format) }
+            $0[.main] { self.main(&$0, format: format) }
             $0[.div] { $0.class = "sidebar" ; $0.id = "sidebar-interpage" } = self.sidebar
         }
 
