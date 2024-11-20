@@ -2,7 +2,7 @@ import NIOCore
 import NIOHPACK
 import NIOHTTP2
 
-extension ChannelHandlerContext:@unchecked Sendable
+extension ChannelHandlerContext:@retroactive @unchecked Sendable
 {
 }
 
