@@ -84,16 +84,18 @@ let package:Package = .init(
         .library(name: "URI", targets: ["URI"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/tayloraswift/swift-bson", .upToNextMinor(
+            from: "0.1.0")),
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
             from: "1.1.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
-            from: "0.6.0")),
+            from: "0.7.1")),
         .package(url: "https://github.com/tayloraswift/swift-ip", .upToNextMinor(
             from: "0.1.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.27.0")),
+            from: "0.28.0")),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
             from: "0.1.5")),
 
@@ -101,7 +103,7 @@ let package:Package = .init(
             from: "1.1.0")),
 
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-            from: "4.4.3")),
+            from: "4.4.8")),
 
         // .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(
         //     from: "1.5.0")),
@@ -430,7 +432,7 @@ let package:Package = .init(
                 .target(name: "Signatures"),
                 .target(name: "Symbols"),
 
-                .product(name: "BSON", package: "swift-mongodb"),
+                .product(name: "BSON", package: "swift-bson"),
                 .product(name: "SHA1", package: "swift-hash"),
             ],
             exclude:
@@ -736,10 +738,9 @@ let package:Package = .init(
                 .target(name: "SymbolGraphTesting"),
             ]),
 
-        .executableTarget(name: "UnidocRecordsTests",
+        .testTarget(name: "UnidocRecordsTests",
             dependencies: [
                 .target(name: "UnidocRecords"),
-                .product(name: "BSONTesting", package: "swift-mongodb"),
             ]),
 
         .testTarget(name: "URITests",
