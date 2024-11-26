@@ -26,17 +26,21 @@ extension Unidoc
 }
 extension Unidoc.WebhookOperation
 {
-    init(json:JSON, from origin:IP.Owner, with headers:__shared HTTP.Headers) throws
+    init(json:JSON,
+        from origin:__shared HTTP.ServerRequest.Origin,
+        with headers:__shared HTTP.Headers) throws
     {
         //  Did this request actually come from GitHub? (Anyone can POST over HTTP/2.)
         //
         //  FIXME: there is a security hole during the (hopefully brief) interval between
         //  when the server restarts and the whitelists are initialized.
-        switch origin
+        if !origin.unknown
         {
-        case .github:   break
-        case .unknown:  break
-        default:        throw Unidoc.WebhookError.unverifiedOrigin
+            guard case .github_actions? = origin.claimant
+            else
+            {
+                throw Unidoc.WebhookError.unverifiedOrigin
+            }
         }
 
         let hook:String?

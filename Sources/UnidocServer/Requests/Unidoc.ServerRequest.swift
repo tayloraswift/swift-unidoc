@@ -68,12 +68,12 @@ extension Unidoc.ServerRequest
 
     var privilege:Unidoc.ClientPrivilege?
     {
-        switch self.client.origin.owner
+        switch self.client.origin.claimant
         {
-        case .googlebot:
+        case .google_common?:
             return .majorSearchEngine(.googlebot, verified: true)
 
-        case .bingbot:
+        case .microsoft_bingbot?:
             return .majorSearchEngine(.bingbot, verified: true)
 
         default:
