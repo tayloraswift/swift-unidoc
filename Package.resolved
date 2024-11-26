@@ -1,5 +1,5 @@
 {
-  "originHash" : "25a11d9ac507fe1d15c78e6a8372e8cfade676d9180a0ac1ead35e313f29fdb7",
+  "originHash" : "cbf19db84d4d187e95fb39e55f21156b1be94f6cf301721848ad89b886dda41a",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-bson",
       "state" : {
-        "revision" : "717200e9505333dfc3d9045d6ddeb20981765285",
-        "version" : "0.1.0"
+        "revision" : "9b8ca19c1801a19ab9cf6614e699840553de7574",
+        "version" : "0.1.2"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-ip",
       "state" : {
-        "revision" : "4e462199f5caafe61a9c69cc4abd067ff2c22366",
-        "version" : "0.1.2"
+        "revision" : "947e04b19eaf0a30f13bd54a0a0d731c3e1de4a2",
+        "version" : "0.2.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-json",
       "state" : {
-        "revision" : "ffa0271c63109ca995b585e75b3dd82c1465d76d",
-        "version" : "1.1.0"
+        "revision" : "39e1388535aa0bb327880de5a69786396cc2bc9b",
+        "version" : "1.1.1"
       }
     },
     {

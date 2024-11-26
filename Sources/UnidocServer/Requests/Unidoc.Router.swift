@@ -768,7 +768,7 @@ extension Unidoc.Router
             do
             {
                 return .unordered(try Unidoc.WebhookOperation.init(json: json,
-                    from: self.client.origin.owner,
+                    from: self.client.origin,
                     with: self.headers))
             }
             catch let error

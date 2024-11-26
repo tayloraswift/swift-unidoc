@@ -193,14 +193,14 @@ extension HTTP.Server
             {
                 do
                 {
-                    let policylist:IP.Policylist = policy?.load() ?? .init()
+                    let mappings:IP.Mappings? = policy?.load()
 
                     switch try await $0.get()
                     {
                     case .http1_1(let connection):
                         guard
                         let address:SocketAddress = connection.channel.remoteAddress,
-                        let address:IP.V6 = .init(address)
+                        let ip:IP.V6 = .init(address)
                         else
                         {
                             // What to do here?
@@ -208,8 +208,7 @@ extension HTTP.Server
                             return
                         }
 
-                        let origin:HTTP.ServerRequest.Origin = .init(owner: policylist[address],
-                            ip: address)
+                        let origin:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: mappings)
 
                         handler:
                         do
@@ -237,7 +236,7 @@ extension HTTP.Server
                     case .http2((let channel, let streams)):
                         guard
                         let address:SocketAddress = channel.remoteAddress,
-                        let address:IP.V6 = .init(address)
+                        let ip:IP.V6 = .init(address)
                         else
                         {
                             // What to do here?
@@ -245,8 +244,7 @@ extension HTTP.Server
                             return
                         }
 
-                        let origin:HTTP.ServerRequest.Origin = .init(owner: policylist[address],
-                            ip: address)
+                        let origin:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: mappings)
 
                         do
                         {
