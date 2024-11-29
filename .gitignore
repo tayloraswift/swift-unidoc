@@ -7,23 +7,18 @@
 .vscode
 .DS_Store
 
-unidoc/
-swiftpm/
-build-aarch64.sh
+/*.tar.gz
+/unidoc
+/swiftpm
 
-Aarch64/
-Assets/certificates/*.pem
-Assets/secrets/
-Assets/icons/*.jpg
+/Aarch64
+/Assets/certificates/*.pem
+/Assets/secrets/
+/Assets/icons/*.jpg
 
-/crash*
-
-node_modules/
+/TestModules/*.json
+/TestPackages/*.bson
+/TypeScript/node_modules
 
 *.profdata
 *.profraw
-
-Package.swift.json
-
-Snippets/_Crashes/*
-TestPackages/*.bson

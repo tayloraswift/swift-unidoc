@@ -9,7 +9,6 @@ let package:Package = .init(
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
         .executable(name: "unidoc", targets: ["unidoc-tools"]),
-        .executable(name: "unidoc-publish", targets: ["unidoc-publish"]),
 
         .library(name: "guides", targets: ["guides"]),
 
@@ -140,13 +139,6 @@ let package:Package = .init(
                 .target(name: "UnidocClient"),
                 .target(name: "UnidocServer"),
                 .target(name: "UnidocLinkerPlugin"),
-            ]),
-
-        .executableTarget(name: "unidoc-publish",
-            dependencies: [
-                .target(name: "System_ArgumentParser"),
-                .target(name: "S3Client"),
-                .target(name: "UnidocAssets_System"),
             ]),
 
 
