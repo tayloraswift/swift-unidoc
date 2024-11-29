@@ -68,7 +68,7 @@ extension SymbolGraph.Buffer24:BSONArrayDecodable
     typealias CodingElement = (UInt8, UInt8, UInt8)
 
     @inlinable
-    init(from bson:borrowing BSON.BinaryArray<CodingElement>) throws
+    init(from bson:borrowing BSON.BinaryBuffer<CodingElement>) throws
     {
         self.init(bson.map
         {

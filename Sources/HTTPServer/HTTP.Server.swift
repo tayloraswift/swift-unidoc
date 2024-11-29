@@ -193,7 +193,7 @@ extension HTTP.Server
             {
                 do
                 {
-                    let mappings:IP.Mappings? = policy?.load()
+                    let firewall:IP.Firewall? = policy?.load()
 
                     switch try await $0.get()
                     {
@@ -208,7 +208,7 @@ extension HTTP.Server
                             return
                         }
 
-                        let origin:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: mappings)
+                        let origin:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: firewall)
 
                         handler:
                         do
@@ -244,7 +244,7 @@ extension HTTP.Server
                             return
                         }
 
-                        let origin:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: mappings)
+                        let origin:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: firewall)
 
                         do
                         {

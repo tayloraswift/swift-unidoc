@@ -11,7 +11,7 @@ extension HTTP.ServerRequest
         let ip:IP.V6
 
         public
-        let autonomousSystem:IP.AS.Metadata?
+        let autonomousSystem:IP.AS?
         public
         let claimant:IP.Claimant?
         public
@@ -21,7 +21,7 @@ extension HTTP.ServerRequest
         let unknown:Bool
 
         init(ip:IP.V6,
-            autonomousSystem:IP.AS.Metadata? = nil,
+            autonomousSystem:IP.AS? = nil,
             claimant:IP.Claimant? = nil,
             country:ISO.Country? = nil,
             unknown:Bool)
@@ -37,29 +37,21 @@ extension HTTP.ServerRequest
 }
 extension HTTP.ServerRequest.Origin
 {
-    static func lookup(ip:IP.V6, in mappings:IP.Mappings?) -> Self
+    static func lookup(ip:IP.V6, in firewall:IP.Firewall?) -> Self
     {
         guard
-        let mappings:IP.Mappings
+        let firewall:IP.Firewall
         else
         {
             return .init(ip: ip, unknown: true)
         }
 
-        let autonomousSystem:IP.AS.Metadata?
-        if  let asn:IP.ASN = mappings.autonomousSystems[v6: ip]
-        {
-            autonomousSystem = mappings.autonomousSystemMetadata[asn]
-        }
-        else
-        {
-            autonomousSystem = nil
-        }
+        let (system, claimant):(IP.AS?, IP.Claimant?) = firewall.lookup(v6: ip)
 
         return .init(ip: ip,
-            autonomousSystem: autonomousSystem,
-            claimant: mappings.claimants[v6: ip],
-            country: mappings.countries[v6: ip],
+            autonomousSystem: system,
+            claimant: claimant,
+            country: firewall.country[v6: ip],
             unknown: false)
     }
 }
