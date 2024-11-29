@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+# Note: ordering is significant as each `-C` is relative to the last.
+set -v
+tar -czf unidoc.tar.gz \
+    -C . \
+        Assets/css/Main.css \
+        Assets/css/Main.css.map \
+        Assets/js/Main.js \
+        Assets/js/Main.js.map \
+        Assets/woff2/*.woff2 \
+    -C .build/release \
+        unidoc
