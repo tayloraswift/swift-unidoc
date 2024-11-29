@@ -5,7 +5,6 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocAPI
-import UnidocLinker
 import UnidocRecords
 
 extension Unidoc.DB
@@ -78,51 +77,9 @@ extension Unidoc.DB.Snapshots:Mongo.CollectionModel
 }
 extension Unidoc.DB.Snapshots
 {
-    func load(_ snapshot:Unidoc.Snapshot,
-        pins:[Unidoc.EditionMetadata?],
-        with loader:(some Unidoc.GraphLoader)?) async throws -> Unidoc.Linker
-    {
-        let exonyms:[Unidoc.Edition: Symbol.Package] = snapshot.exonyms(pins: pins)
-        var objects:[SymbolGraphObject<Unidoc.Edition>] = []
-            objects.reserveCapacity(1 + exonyms.count)
-
-        if  snapshot.metadata.package.name != .swift,
-            let swift:Unidoc.Snapshot = try await self.loadStandardLibrary(
-                hint: snapshot.metadata.swift.version)
-        {
-            objects.append(try await swift.load(with: loader))
-        }
-
-        for other:Unidoc.Snapshot in try await self.load(exonyms.keys.sorted())
-        {
-            var object:SymbolGraphObject<Unidoc.Edition> = try await other.load(with: loader)
-            if  let exonym:Symbol.Package = exonyms[other.id]
-            {
-                object.metadata.package.name = exonym
-                object.metadata.package.scope = nil
-            }
-            objects.append(object)
-        }
-
-        let missing:[Unidoc.Edition: Symbol.Package] = objects.reduce(into: exonyms)
-        {
-            $0[$1.id] = nil
-        }
-        for missing:Symbol.Package in missing.values.sorted()
-        {
-            print("""
-                warning: could not load pinned dependency '\(missing)' for \
-                snapshot '\(snapshot.metadata.package.name)'
-                """)
-        }
-
-        return .init(linking: try await snapshot.load(with: loader), against: objects)
-    }
-}
-extension Unidoc.DB.Snapshots
-{
-    private
-    func loadStandardLibrary(hint:PatchVersion) async throws -> Unidoc.Snapshot?
+    /// Finds the standard library snapshot with the highest version that is (heuristically)
+    /// compatible with the given version hint.
+    func findStandardLibrary(hint:PatchVersion) async throws -> Unidoc.Snapshot?
     {
         try await session.run(
             command: Mongo.Find<Mongo.Single<Unidoc.Snapshot>>.init(Self.name, limit: 1)
@@ -145,8 +102,7 @@ extension Unidoc.DB.Snapshots
             against: self.database)
     }
 
-    private
-    func load(_ pins:[Unidoc.Edition]) async throws -> [Unidoc.Snapshot]
+    func findAll(of pins:[Unidoc.Edition]) async throws -> [Unidoc.Snapshot]
     {
         try await session.run(
             command: Mongo.Find<Mongo.Cursor<Unidoc.Snapshot>>.init(Self.name,

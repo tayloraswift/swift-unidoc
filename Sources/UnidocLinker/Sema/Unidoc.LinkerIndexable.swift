@@ -13,6 +13,6 @@ extension Unidoc
         var isEmpty:Bool { get }
 
         consuming
-        func assemble(signature:Signature, with linker:borrowing Linker) -> Assembled
+        func assemble(signature:Signature, with context:LinkerContext) -> Assembled
     }
 }

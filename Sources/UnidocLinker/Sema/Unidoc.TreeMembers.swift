@@ -1,7 +1,7 @@
 import Symbols
 import UnidocRecords
 
-extension Unidoc.Linker
+extension Unidoc
 {
     struct TreeMembers
     {
@@ -20,7 +20,7 @@ extension Unidoc.Linker
         }
     }
 }
-extension Unidoc.Linker.TreeMembers:ExpressibleByArrayLiteral
+extension Unidoc.TreeMembers:ExpressibleByArrayLiteral
 {
     init(arrayLiteral:Never...)
     {

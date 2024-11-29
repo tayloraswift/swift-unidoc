@@ -5,7 +5,7 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.Linker
+extension Unidoc
 {
     struct TreeMapper:~Copyable
     {
@@ -30,7 +30,7 @@ extension Unidoc.Linker
         }
     }
 }
-extension Unidoc.Linker.TreeMapper
+extension Unidoc.TreeMapper
 {
     mutating
     func add(_ vertex:Unidoc.ArticleVertex)
@@ -86,11 +86,11 @@ extension Unidoc.Linker.TreeMapper
         }
     }
 }
-extension Unidoc.Linker.TreeMapper
+extension Unidoc.TreeMapper
 {
     mutating
     func register(foreign:Unidoc.Scalar,
-        with context:borrowing Unidoc.Linker,
+        with context:borrowing Unidoc.LinkerContext,
         as index:Int) -> Unidoc.ForeignVertex?
     {
         if  case nil = self.local[foreign]
@@ -118,11 +118,11 @@ extension Unidoc.Linker.TreeMapper
 
     private static
     func create(foreign:Unidoc.Scalar,
-        with context:borrowing Unidoc.Linker,
+        with context:borrowing Unidoc.LinkerContext,
         as index:Int) -> Unidoc.ForeignVertex
     {
         guard
-        let snapshot:Unidoc.Linker.Graph = context[foreign.package]
+        let snapshot:Unidoc.LinkableGraph = context[foreign.package]
         else
         {
             fatalError("scalar \(foreign) is not from a package in this context!")
@@ -155,7 +155,7 @@ extension Unidoc.Linker.TreeMapper
             hash: .decl(symbol))
     }
 }
-extension Unidoc.Linker.TreeMapper
+extension Unidoc.TreeMapper
 {
     mutating
     func update(with group:Unidoc.ExtensionGroup)
@@ -173,7 +173,7 @@ extension Unidoc.Linker.TreeMapper
         }
     }
 }
-extension Unidoc.Linker.TreeMapper
+extension Unidoc.TreeMapper
 {
     consuming
     func build(cultures:[Unidoc.CultureVertex]) -> (trees:[Unidoc.TypeTree], index:JSON)
@@ -188,7 +188,7 @@ extension Unidoc.Linker.TreeMapper
 
         let json:JSON = .array
         {
-            for (id, members):(Unidoc.Scalar, Unidoc.Linker.TreeMembers) in self.trees.sorted(
+            for (id, members):(Unidoc.Scalar, Unidoc.TreeMembers) in self.trees.sorted(
                 by: { $0.key < $1.key })
             {
                 guard
