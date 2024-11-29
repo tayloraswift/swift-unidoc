@@ -147,8 +147,6 @@ let package:Package = .init(
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ]),
 
-        .target(name: "ArgumentParsing"),
-
         .target(name: "AvailabilityDomain"),
 
         .target(name: "Availability",
