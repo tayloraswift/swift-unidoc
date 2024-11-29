@@ -4,12 +4,11 @@ import MD5
 import MongoDB
 import SemanticVersions
 import SHA1
-import SourceDiagnostics
 import SymbolGraphs
 import Symbols
 import Unidoc
 import UnidocAPI
-import UnidocLinker
+import UnidocLinking
 import UnidocRecords_LZ77
 @_spi(testable)
 import UnidocRecords
@@ -452,28 +451,15 @@ extension Unidoc.DB
 }
 extension Unidoc.DB
 {
-    @inlinable public
-    func uplink(_ id:Unidoc.Edition,
-        loader:(some Unidoc.GraphLoader)?) async throws -> Unidoc.UplinkStatus?
-    {
-        guard
-        let package:Unidoc.PackageMetadata = try await self.packages.find(id: id.package),
-        let stored:Unidoc.Snapshot = try await self.snapshots.find(id: id)
-        else
-        {
-            return nil
-        }
-
-        return try await self.uplink(snapshot: stored, package: package, loader: loader)
-    }
-
     public
     func uplink(snapshot:Unidoc.Snapshot,
         package:Unidoc.PackageMetadata,
-        loader:(some Unidoc.GraphLoader)?) async throws -> Unidoc.UplinkStatus
+        linker:some Unidoc.GraphLinker,
+        loader:some Unidoc.GraphLoader) async throws -> Unidoc.UplinkStatus
     {
         let linked:Unidoc.Mesh = try await self.link(snapshot,
             symbol: package.symbol,
+            linker: linker,
             loader: loader,
             realm: package.realm)
 
@@ -716,14 +702,10 @@ extension Unidoc.DB
     private
     func link(_ snapshot:Unidoc.Snapshot,
         symbol package:Symbol.Package,
-        loader:(some Unidoc.GraphLoader)?,
+        linker:some Unidoc.GraphLinker,
+        loader:some Unidoc.GraphLoader,
         realm:Unidoc.Realm?) async throws -> Unidoc.Mesh
     {
-        let pinned:[Unidoc.EditionMetadata?] = try await self.pin(snapshot)
-        var linker:Unidoc.Linker = try await self.snapshots.load(snapshot,
-            pins: pinned,
-            with: loader)
-
         let latestRelease:Unidoc.Edition?
         let thisRelease:PatchVersion?
         let version:String
@@ -799,8 +781,13 @@ extension Unidoc.DB
             version = "__max"
         }
 
-        let mesh:Unidoc.Mesh = linker.link(primary: snapshot.metadata,
-            pins: pinned,
+        let dependencies:[Unidoc.EditionMetadata?] = try await self.pin(snapshot)
+        let mesh:Unidoc.Mesh = linker.link(
+            documentation: try await loader.load(snapshot),
+            dependencies: try await loader.load(dependencies: dependencies,
+                of: snapshot.metadata,
+                in: self.snapshots),
+            dependencyMetadata: dependencies,
             latestRelease: latestRelease,
             thisRelease: thisRelease,
             //  We want the version component of the volume symbol to be stable,
@@ -808,8 +795,6 @@ extension Unidoc.DB
             //  from a prerelease tag.
             as: .init(package: package, version: version),
             in: realm)
-
-        linker.status().emit(colors: .enabled)
 
         return mesh
     }

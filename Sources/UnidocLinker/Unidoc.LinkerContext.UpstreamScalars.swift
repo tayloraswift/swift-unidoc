@@ -1,7 +1,7 @@
 import Symbols
 import Unidoc
 
-extension Unidoc.Linker
+extension Unidoc.LinkerContext
 {
     /// A combined mapping of symbols to global scalars across all upstream dependencies.
     /// Within a build tree, we assume module names are unique, which implies that symbol

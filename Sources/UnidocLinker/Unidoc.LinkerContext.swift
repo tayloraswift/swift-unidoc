@@ -7,33 +7,32 @@ import SymbolGraphs
 import Symbols
 import UCF
 import Unidoc
+import UnidocLinking
 import UnidocRecords
 
 extension Unidoc
 {
-    /// A dynamic symbol graph linker.
-    @frozen public
-    struct Linker//:~Copyable https://github.com/apple/swift/issues/72136
+    struct LinkerContext//:~Copyable https://github.com/apple/swift/issues/72136
     {
-        var diagnostics:Diagnostics<Unidoc.Symbolicator>
+        var diagnostics:Diagnostics<Symbolicator>
 
         private
-        let byPackageName:[Symbol.Package: Graph]
+        let byPackageName:[Symbol.Package: LinkableGraph]
         private
-        let byPackage:[Package: Graph]
+        let byPackage:[Package: LinkableGraph]
 
-        let current:Graph
+        let current:LinkableGraph
 
         /// The set of all nodes in the current graph. These are the nodes being linked; all
         /// other nodes in this structure are merely used for context.
-        let nodes:Set<Unidoc.Scalar>
+        let nodes:Set<Scalar>
 
         private
         init(
-            byPackageName:[Symbol.Package: Graph],
-            byPackage:[Package: Graph],
-            current:Graph,
-            nodes:Set<Unidoc.Scalar>)
+            byPackageName:[Symbol.Package: LinkableGraph],
+            byPackage:[Package: LinkableGraph],
+            current:LinkableGraph,
+            nodes:Set<Scalar>)
         {
             self.byPackageName = byPackageName
             self.byPackage = byPackage
@@ -45,9 +44,8 @@ extension Unidoc
     }
 }
 
-extension Unidoc.Linker
+extension Unidoc.LinkerContext
 {
-    public
     init(
         linking primary:consuming SymbolGraphObject<Unidoc.Edition>,
         against others:borrowing [SymbolGraphObject<Unidoc.Edition>])
@@ -69,21 +67,21 @@ extension Unidoc.Linker
         }
 
         //  Build two indexes for fast lookup by package identifier and package number.
-        var byPackageName:[Symbol.Package: Graph] = .init(
+        var byPackageName:[Symbol.Package: Unidoc.LinkableGraph] = .init(
             minimumCapacity: others.count)
 
-        var byPackage:[Unidoc.Package: Graph] = .init(
+        var byPackage:[Unidoc.Package: Unidoc.LinkableGraph] = .init(
             minimumCapacity: others.count)
 
         for other:SymbolGraphObject<Unidoc.Edition> in copy others
         {
-            let other:Graph = .init(other, upstream: upstream)
+            let other:Unidoc.LinkableGraph = .init(other, upstream: upstream)
 
             byPackageName[other.metadata.package.name] = other
             byPackage[other.id.package] = other
         }
 
-        let current:Graph = .init(primary, upstream: upstream)
+        let current:Unidoc.LinkableGraph = .init(primary, upstream: upstream)
 
         self.init(
             byPackageName: byPackageName,
@@ -98,25 +96,24 @@ extension Unidoc.Linker
             })
     }
 }
-extension Unidoc.Linker
+extension Unidoc.LinkerContext
 {
-    public mutating
-    func link(primary metadata:SymbolGraphMetadata,
-        pins pinnedDependencies:[Unidoc.EditionMetadata?],
+    mutating
+    func link(pinnedDependencies:[Unidoc.EditionMetadata?],
         latestRelease:Unidoc.Edition?,
         thisRelease:PatchVersion?,
         as volume:Symbol.Volume,
         in realm:Unidoc.Realm?) -> Unidoc.Mesh
     {
         let boundaries:[Unidoc.Mesh.Boundary] = self.boundaries(pinned: pinnedDependencies)
-        let interior:Unidoc.Mesh.Interior = .init(primary: metadata,
+        let interior:Unidoc.MeshInterior = .init(primary: self.current.metadata,
             pinned: pinnedDependencies.compactMap(\.?.id.package),
             with: &self)
 
         let metadata:Unidoc.VolumeMetadata = .init(id: self.current.id,
             dependencies: boundaries.map(\.target),
-            display: metadata.display,
-            refname: metadata.commit?.name,
+            display: self.current.metadata.display,
+            refname: self.current.metadata.commit?.name,
             symbol: volume,
             latest: self.current.id == latestRelease,
             realm: realm,
@@ -142,10 +139,14 @@ extension Unidoc.Linker
             packageABI: self.current.scalars.hash,
             boundaries: boundaries,
             metadata: metadata,
-            interior: interior)
+            vertices: interior.vertices,
+            groups: interior.groups,
+            index: interior.index,
+            trees: interior.trees,
+            redirects: interior.redirects)
     }
 
-    public consuming
+    consuming
     func status() -> DiagnosticMessages
     {
         let diagnostics:Diagnostics<Unidoc.Symbolicator> = self.diagnostics
@@ -155,20 +156,20 @@ extension Unidoc.Linker
         return diagnostics.symbolicated(with: symbols)
     }
 }
-extension Unidoc.Linker
+extension Unidoc.LinkerContext
 {
     private
-    subscript(dynamic package:Symbol.Package) -> Graph?
+    subscript(dynamic package:Symbol.Package) -> Unidoc.LinkableGraph?
     {
         self.current.metadata.package.name == package ?
         nil : self.byPackageName[package]
     }
-    subscript(package:Symbol.Package) -> Graph?
+    subscript(package:Symbol.Package) -> Unidoc.LinkableGraph?
     {
         self.current.metadata.package.name == package ?
         self.current : self.byPackageName[package]
     }
-    subscript(package:Unidoc.Package) -> Graph?
+    subscript(package:Unidoc.Package) -> Unidoc.LinkableGraph?
     {
         self.current.id.package == package ?
         self.current : self.byPackage[package]
@@ -179,7 +180,7 @@ extension Unidoc.Linker
         self[id.package]?.decls[id.citizen]?.decl
     }
 }
-extension Unidoc.Linker
+extension Unidoc.LinkerContext
 {
     func expand(_ vector:(Unidoc.Scalar, Unidoc.Scalar), to length:Int) -> [Unidoc.Scalar]
     {
@@ -228,7 +229,7 @@ extension Unidoc.Linker
         return path.reversed()
     }
 }
-extension Unidoc.Linker
+extension Unidoc.LinkerContext
 {
     private
     func boundaries(pinned:[Unidoc.EditionMetadata?]) -> [Unidoc.Mesh.Boundary]
@@ -237,7 +238,7 @@ extension Unidoc.Linker
             boundaries.reserveCapacity(self.current.metadata.dependencies.count + 1)
 
         if  self.current.metadata.package.name != .swift,
-            let swift:Graph = self[.swift]
+            let swift:Unidoc.LinkableGraph = self[.swift]
         {
             boundaries.append(.init(
                 targetRef: swift.metadata.commit?.name,
@@ -254,7 +255,7 @@ extension Unidoc.Linker
             let pinDepth:Unidoc.VolumeMetadata.DependencyPin?
             let pinABI:MD5?
 
-            if  let graph:Graph = self[dependency.package.name]
+            if  let graph:Unidoc.LinkableGraph = self[dependency.package.name]
             {
                 pinDepth = .linked(graph.id)
                 pinABI = graph.scalars.hash
@@ -285,7 +286,7 @@ extension Unidoc.Linker
         return boundaries
     }
 }
-extension Unidoc.Linker
+extension Unidoc.LinkerContext
 {
     mutating
     func link(article:SymbolGraph.Article) -> (Unidoc.Passage?, Unidoc.Passage?)
@@ -363,7 +364,7 @@ extension Unidoc.Linker
         return .fallback("<unavailable>")
     }
 }
-extension Unidoc.Linker
+extension Unidoc.LinkerContext
 {
     func sort<Decl, Priority>(_ decls:consuming [Decl], by _:Priority.Type) -> [Decl]
         where Decl:Identifiable<Unidoc.Scalar>, Priority:Unidoc.SortPriority

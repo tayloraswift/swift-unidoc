@@ -139,7 +139,7 @@ extension Main.Preview:AsyncParsableCommand
                     $0.apiLimitPerReset = 10000
                 }
 
-                let linker:Unidoc.GraphLinker = .init(bucket: nil)
+                let linker:Unidoc.LinkerPlugin = .init(bucket: nil)
                 let server:Unidoc.Server = .init(clientIdentity: try self.clientSSL,
                     coordinators: [],
                     plugins: [linker],

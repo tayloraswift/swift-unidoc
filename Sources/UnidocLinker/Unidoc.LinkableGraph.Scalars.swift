@@ -3,7 +3,7 @@ import SymbolGraphs
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.Linker.Graph
+extension Unidoc.LinkableGraph
 {
     /// This structure provides the mappings for translating local scalars to unidoc scalars.
     /// It is optimized to perform many of these translations efficiently.
@@ -37,10 +37,10 @@ extension Unidoc.Linker.Graph
         }
     }
 }
-extension Unidoc.Linker.Graph.Scalars
+extension Unidoc.LinkableGraph.Scalars
 {
     init(_ object:borrowing SymbolGraphObject<Unidoc.Edition>,
-        upstream:borrowing Unidoc.Linker.UpstreamScalars)
+        upstream:borrowing Unidoc.LinkerContext.UpstreamScalars)
     {
         var signature:[UInt8] = []
         var salt:Int32 = 0

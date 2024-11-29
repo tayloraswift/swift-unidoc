@@ -3,7 +3,7 @@ import HTML
 import UnidocAPI
 import UnidocServer
 
-extension Unidoc.GraphLinker
+extension Unidoc.LinkerPlugin
 {
     @frozen public
     enum Event:Sendable
@@ -14,7 +14,7 @@ extension Unidoc.GraphLinker
         case failed(Unidoc.Edition, action:Unidoc.LinkerAction)
     }
 }
-extension Unidoc.GraphLinker.Event:Unidoc.ServerEvent
+extension Unidoc.LinkerPlugin.Event:Unidoc.ServerEvent
 {
     public
     func h3(_ h3:inout HTML.ContentEncoder)

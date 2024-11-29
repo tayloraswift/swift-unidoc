@@ -6,7 +6,7 @@ import UnidocServer
 extension Unidoc
 {
     @frozen public
-    struct GraphLinker
+    struct LinkerPlugin
     {
         @usableFromInline
         let bucket:AWS.S3.Bucket?
@@ -18,7 +18,7 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.GraphLinker:Unidoc.Plugin
+extension Unidoc.LinkerPlugin:Unidoc.Plugin
 {
     @inlinable public
     static var title:String { "Linker" }
@@ -46,7 +46,7 @@ extension Unidoc.GraphLinker:Unidoc.Plugin
         return nil
     }
 }
-extension Unidoc.GraphLinker
+extension Unidoc.LinkerPlugin
 {
     private
     func perform(operation:Unidoc.DB.Snapshots.QueuedOperation,
@@ -61,7 +61,7 @@ extension Unidoc.GraphLinker
         case .uplink:
             guard
             let status:Unidoc.UplinkStatus = try await context.db.uplink(operation.edition,
-                from: graphs)
+                s3: graphs)
             else
             {
                 event = nil

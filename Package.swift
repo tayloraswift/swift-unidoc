@@ -497,7 +497,7 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "_MongoDB"),
                 .target(name: "UnidocRecords_LZ77"),
-                .target(name: "UnidocLinker"),
+                .target(name: "UnidocLinking"),
                 .target(name: "UnidocRecords"),
                 .product(name: "IP", package: "swift-ip"),
                 .product(name: "UnixCalendar", package: "swift-unixtime"),
@@ -513,12 +513,18 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "LinkResolution"),
                 .target(name: "MarkdownRendering"),
-                .target(name: "UnidocRecords"),
+                .target(name: "UnidocLinking"),
             ]),
 
         .target(name: "UnidocLinkerPlugin",
             dependencies: [
+                .target(name: "UnidocLinker"),
                 .target(name: "UnidocServer"),
+            ]),
+
+        .target(name: "UnidocLinking",
+            dependencies: [
+                .target(name: "UnidocRecords"),
             ]),
 
         .target(name: "UnidocQueries",
@@ -570,6 +576,7 @@ let package:Package = .init(
         .target(name: "UnidocTesting",
             dependencies: [
                 .target(name: "UnidocDB"),
+                .target(name: "UnidocLinker"),
                 .product(name: "MongoTesting", package: "swift-mongodb"),
             ]),
 

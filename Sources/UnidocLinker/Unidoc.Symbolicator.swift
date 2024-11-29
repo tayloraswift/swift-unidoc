@@ -14,9 +14,9 @@ extension Unidoc
         let base:Symbol.FileBase?
 
         private
-        let context:Linker
+        let context:LinkerContext
 
-        init(context:consuming Linker, base:Symbol.FileBase?)
+        init(context:consuming LinkerContext, base:Symbol.FileBase?)
         {
             self.demangler = .init()
             self.base = base

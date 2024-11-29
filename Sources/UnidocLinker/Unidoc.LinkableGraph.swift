@@ -3,13 +3,13 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.Linker
+extension Unidoc
 {
     @dynamicMemberLookup
     @usableFromInline final
-    class Graph
+    class LinkableGraph
     {
-        let id:Unidoc.Edition
+        let id:Edition
         /// Maps declarations to module namespaces. For declarations nested inside types from
         /// upstream modules, this is the index of the module of the outermost type. If this is
         /// the case, then the index is only valid within this snapshot.
@@ -17,7 +17,7 @@ extension Unidoc.Linker
         let qualifiers:[Int32: Int]
         /// Maps nested declarations to scopes. Scopes might be non-local.
         private
-        let hierarchy:[Int32: Unidoc.Scalar]
+        let hierarchy:[Int32: Scalar]
 
         let scalars:Scalars
 
@@ -25,9 +25,9 @@ extension Unidoc.Linker
         let graph:SymbolGraph
 
         private
-        init(id:Unidoc.Edition,
+        init(id:Edition,
             qualifiers:[Int32: Int],
-            hierarchy:[Int32: Unidoc.Scalar],
+            hierarchy:[Int32: Scalar],
             scalars:Scalars,
             metadata:SymbolGraphMetadata,
             graph:SymbolGraph)
@@ -43,18 +43,18 @@ extension Unidoc.Linker
         }
     }
 }
-extension Unidoc.Linker.Graph
+extension Unidoc.LinkableGraph
 {
     subscript<T>(dynamicMember keyPath:KeyPath<SymbolGraph, T>) -> T
     {
         self.graph[keyPath: keyPath]
     }
 }
-extension Unidoc.Linker.Graph
+extension Unidoc.LinkableGraph
 {
     convenience
     init(_ object:SymbolGraphObject<Unidoc.Edition>,
-        upstream:borrowing Unidoc.Linker.UpstreamScalars)
+        upstream:borrowing Unidoc.LinkerContext.UpstreamScalars)
     {
         let scalars:Scalars = .init(object, upstream: upstream)
 
@@ -113,7 +113,7 @@ extension Unidoc.Linker.Graph
             graph: object.graph)
     }
 }
-extension Unidoc.Linker.Graph
+extension Unidoc.LinkableGraph
 {
     /// Returns the module namespace of the requested declaration, if the requested declaration
     /// is a citizen of this snapshot.
@@ -143,7 +143,7 @@ extension Unidoc.Linker.Graph
         (declaration - self.id).map(self.scope(of:)) ?? nil
     }
 }
-extension Unidoc.Linker.Graph
+extension Unidoc.LinkableGraph
 {
     private
     func namespace(of declaration:Int32) -> Symbol.Module?

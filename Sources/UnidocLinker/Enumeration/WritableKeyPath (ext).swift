@@ -9,7 +9,7 @@ extension WritableKeyPath<Unidoc.Stats.Coverage, Int>
     //  documentation for each declaration, which does not depend on other declarations.
     static
     func classify(_ decl:SymbolGraph.Decl,
-        _from snapshot:Unidoc.Linker.Graph,
+        _from snapshot:Unidoc.LinkableGraph,
         _at local:Int32) -> WritableKeyPath<Unidoc.Stats.Coverage, Int>
     {
         if  case _? = decl.article

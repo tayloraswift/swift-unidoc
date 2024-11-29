@@ -22,7 +22,7 @@ extension Unidoc.Census.Enumerators
     func count(
         citizen decl:SymbolGraph.Decl,
         culture:Int,
-        _from snapshot:Unidoc.Linker.Graph,
+        _from snapshot:Unidoc.LinkableGraph,
         _at local:Int32)
     {
         let interface:Unidoc.Census.Interface

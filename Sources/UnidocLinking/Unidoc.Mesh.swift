@@ -18,39 +18,40 @@ extension Unidoc
         public
         let metadata:VolumeMetadata
 
-        @usableFromInline
-        let interior:Interior
+        public
+        let vertices:Vertices
+        public
+        let groups:Groups
+        public
+        let index:JSON
+        public
+        let trees:[TypeTree]
+        public
+        let redirects:[RedirectVertex]
 
+        @inlinable public
         init(latestRelease:Edition?,
             packageABI:MD5,
             boundaries:[Boundary],
             metadata:VolumeMetadata,
-            interior:Interior)
+            vertices:Vertices,
+            groups:Groups,
+            index:JSON,
+            trees:[TypeTree],
+            redirects:[RedirectVertex])
         {
             self.latestRelease = latestRelease
             self.packageABI = packageABI
             self.boundaries = boundaries
             self.metadata = metadata
-            self.interior = interior
+
+            self.vertices = vertices
+            self.groups = groups
+            self.index = index
+            self.trees = trees
+            self.redirects = redirects
         }
     }
-}
-extension Unidoc.Mesh
-{
-    @inlinable public
-    var vertices:Vertices { self.interior.vertices }
-
-    @inlinable public
-    var groups:Groups { self.interior.groups }
-
-    @inlinable public
-    var index:JSON { self.interior.index }
-
-    @inlinable public
-    var trees:[Unidoc.TypeTree] { self.interior.trees }
-
-    @inlinable public
-    var redirects:[Unidoc.RedirectVertex] { self.interior.redirects }
 }
 extension Unidoc.Mesh
 {

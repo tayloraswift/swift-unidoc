@@ -13,6 +13,7 @@ extension Unidoc.Mesh
         public
         let target:Unidoc.VolumeMetadata.Dependency
 
+        @inlinable public
         init(targetRef:String?, targetABI:MD5?, target:Unidoc.VolumeMetadata.Dependency)
         {
             self.targetRef = targetRef
