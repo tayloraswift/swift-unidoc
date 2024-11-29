@@ -85,7 +85,7 @@ let package:Package = .init(
     ],
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-bson", .upToNextMinor(
-            from: "0.1.2")),
+            from: "0.3.1")),
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
             from: "1.1.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
@@ -93,7 +93,8 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.7.1")),
         .package(url: "https://github.com/tayloraswift/swift-ip", .upToNextMinor(
-            from: "0.2.0")),
+            from: "0.3.0")),
+
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
             from: "0.28.0")),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
