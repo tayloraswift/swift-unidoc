@@ -48,19 +48,19 @@ extension Unidoc.Extension:Unidoc.LinkerIndexable
 
     consuming
     func assemble(signature:Unidoc.ExtensionSignature,
-        with linker:borrowing Unidoc.Linker) -> Unidoc.ExtensionGroup
+        with context:Unidoc.LinkerContext) -> Unidoc.ExtensionGroup
     {
-        .init(id: self.id.in(linker.current.id),
+        .init(id: self.id.in(context.current.id),
             constraints: signature.conditions.constraints,
-            culture: linker.current.id + signature.culture,
+            culture: context.current.id + signature.culture,
             scope: signature.extendee,
-            conformances: linker.sort(self.conformances,
+            conformances: context.sort(self.conformances,
                 by: Unidoc.SemanticPriority.self),
-            features: linker.sort(self.features,
+            features: context.sort(self.features,
                 by: Unidoc.SemanticPriority.self),
-            nested: linker.sort(self.nested,
+            nested: context.sort(self.nested,
                 by: Unidoc.SemanticPriority.self),
-            subforms: linker.sort(self.subforms,
+            subforms: context.sort(self.subforms,
                 by: Unidoc.SemanticPriority.self),
             overview: self.overview,
             details: self.details)

@@ -1,6 +1,7 @@
 import SymbolGraphs
 import UnidocAPI
 import UnidocDB
+import UnidocLinker
 
 extension Unidoc.DB
 {
@@ -26,7 +27,8 @@ extension Unidoc.DB
 
         let uplinked:Unidoc.UplinkStatus = try await self.uplink(snapshot: snapshot,
             package: package,
-            loader: nil as Unidoc.NoLoader?)
+            linker: .dynamic,
+            loader: .inline)
 
         return (uploaded, uplinked)
     }

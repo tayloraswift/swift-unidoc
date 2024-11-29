@@ -6,9 +6,9 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.Linker
+extension Unidoc
 {
-    struct Table<Group> where Group:Unidoc.LinkerIndexable
+    struct LinkerTable<Group> where Group:LinkerIndexable
     {
         private
         var table:[Group.Signature: Group]
@@ -20,21 +20,21 @@ extension Unidoc.Linker
         }
     }
 }
-extension Unidoc.Linker.Table:ExpressibleByDictionaryLiteral
+extension Unidoc.LinkerTable:ExpressibleByDictionaryLiteral
 {
     init(dictionaryLiteral:(Group.Signature, Never)...)
     {
         self.init(table: [:])
     }
 }
-extension Unidoc.Linker.Table:Sequence
+extension Unidoc.LinkerTable:Sequence
 {
     func makeIterator() -> Dictionary<Group.Signature, Group>.Iterator
     {
         self.table.makeIterator()
     }
 }
-extension Unidoc.Linker.Table
+extension Unidoc.LinkerTable
 {
     consuming
     func load() -> [(key:Group.Signature, value:Group)]
@@ -47,7 +47,7 @@ extension Unidoc.Linker.Table
         return extensions
     }
 }
-extension Unidoc.Linker.Table
+extension Unidoc.LinkerTable
 {
     private
     var next:Unidoc.LinkerIndex<Group> { .init(ordinal: self.table.count) }
@@ -67,12 +67,12 @@ extension Unidoc.Linker.Table
     }
 }
 
-extension Unidoc.Linker.Table<Unidoc.Extension>
+extension Unidoc.LinkerTable<Unidoc.Extension>
 {
     mutating
     func add(extensions:[SymbolGraph.Extension],
         extending extendee:Unidoc.Scalar,
-        context:inout Unidoc.Linker)
+        context:inout Unidoc.LinkerContext)
     {
         for `extension`:SymbolGraph.Extension in extensions
         {

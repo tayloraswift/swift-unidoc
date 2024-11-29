@@ -11,7 +11,7 @@ extension Unidoc
     struct LinkerTables
     {
         private(set)
-        var linker:Linker
+        var linker:LinkerContext
 
         /// A table mapping vertices to topics or autogroups.
         private
@@ -23,12 +23,12 @@ extension Unidoc
         var next:Next
 
         private(set)
-        var extensions:Linker.Table<Extension>
+        var extensions:LinkerTable<Extension>
         private(set)
         var groups:Mesh.Groups
 
         private
-        init(linker:consuming Linker, next:Next)
+        init(linker:consuming LinkerContext, next:Next)
         {
             self.linker = linker
 
@@ -44,7 +44,7 @@ extension Unidoc
 }
 extension Unidoc.LinkerTables
 {
-    init(linker:consuming Unidoc.Linker)
+    init(linker:consuming Unidoc.LinkerContext)
     {
         let next:Next = .init(base: linker.current.id)
         self.init(linker: linker, next: next)
@@ -53,7 +53,7 @@ extension Unidoc.LinkerTables
 }
 extension Unidoc.LinkerTables
 {
-    var current:Unidoc.Linker.Graph { self.linker.current }
+    var current:Unidoc.LinkableGraph { self.linker.current }
 
     private
     var modules:ModuleView
@@ -95,9 +95,9 @@ extension Unidoc.LinkerTables
 extension Unidoc.LinkerTables
 {
     borrowing
-    func linkConformingTypes() -> Unidoc.Linker.Table<Unidoc.Conformers>
+    func linkConformingTypes() -> Unidoc.LinkerTable<Unidoc.Conformers>
     {
-        var conformingTypes:Unidoc.Linker.Table<Unidoc.Conformers> = [:]
+        var conformingTypes:Unidoc.LinkerTable<Unidoc.Conformers> = [:]
 
         for (id, `extension`):(Unidoc.ExtensionSignature, Unidoc.Extension) in self.extensions
         {
@@ -153,7 +153,7 @@ extension Unidoc.LinkerTables
 
             for product:Symbol.Product in product.dependencies.sorted()
             {
-                if  let package:Unidoc.Linker.Graph = self.linker[product.package],
+                if  let package:Unidoc.LinkableGraph = self.linker[product.package],
                     let q:Unidoc.Scalar = package.scalars.products[product.name]
                 {
                     constituents.append(q)

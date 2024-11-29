@@ -13,10 +13,10 @@ extension Unidoc
 extension Unidoc.SortPriority
 {
     static
-    func of(decl:Unidoc.Scalar, in linker:borrowing Unidoc.Linker) -> Self?
+    func of(decl:Unidoc.Scalar, in linker:borrowing Unidoc.LinkerContext) -> Self?
     {
         guard
-        let graph:Unidoc.Linker.Graph = linker[decl.package]
+        let graph:Unidoc.LinkableGraph = linker[decl.package]
         else
         {
             return nil
@@ -26,7 +26,7 @@ extension Unidoc.SortPriority
     }
 
     static
-    func of(decl:Unidoc.Scalar, in graph:Unidoc.Linker.Graph) -> Self?
+    func of(decl:Unidoc.Scalar, in graph:Unidoc.LinkableGraph) -> Self?
     {
         guard
         let local:Int32 = decl - graph.id,

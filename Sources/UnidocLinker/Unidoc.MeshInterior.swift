@@ -4,28 +4,22 @@ import Symbols
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.Mesh
+extension Unidoc
 {
-    @frozen @usableFromInline
-    struct Interior
+    struct MeshInterior
     {
-        public
-        var vertices:Vertices
-        public
-        var groups:Groups
-        public
+        var vertices:Mesh.Vertices
+        var groups:Mesh.Groups
         var index:JSON
-        public
-        var trees:[Unidoc.TypeTree]
-        public
-        var redirects:[Unidoc.RedirectVertex]
+        var trees:[TypeTree]
+        var redirects:[RedirectVertex]
 
         private
-        init(vertices:Vertices,
-            groups:Groups,
+        init(vertices:Mesh.Vertices,
+            groups:Mesh.Groups,
             index:JSON,
-            trees:[Unidoc.TypeTree],
-            redirects:[Unidoc.RedirectVertex])
+            trees:[TypeTree],
+            redirects:[RedirectVertex])
         {
             self.vertices = vertices
             self.groups = groups
@@ -35,11 +29,11 @@ extension Unidoc.Mesh
         }
     }
 }
-extension Unidoc.Mesh.Interior
+extension Unidoc.MeshInterior
 {
     init(primary metadata:SymbolGraphMetadata,
         pinned:[Unidoc.Package],
-        with linker:inout Unidoc.Linker)
+        with linker:inout Unidoc.LinkerContext)
     {
         let current:Unidoc.Edition = linker.current.id
         let symbols:(linkable:Int, linked:Int) = linker.current.scalars.decls.reduce(
@@ -72,7 +66,7 @@ extension Unidoc.Mesh.Interior
 
         var tables:Unidoc.LinkerTables = .init(linker: consume linker)
 
-        let conformances:Unidoc.Linker.Table<Unidoc.Conformers> = tables.linkConformingTypes()
+        let conformances:Unidoc.LinkerTable<Unidoc.Conformers> = tables.linkConformingTypes()
         let products:[Unidoc.ProductVertex] = tables.linkProducts()
 
         tables.linkCurations()
@@ -83,7 +77,7 @@ extension Unidoc.Mesh.Interior
         let cultures:[Unidoc.CultureVertex] = tables.linkCultures()
         let redirects:[Unidoc.RedirectVertex] = tables.linkRedirects()
 
-        let extensions:Unidoc.Linker.Table<Unidoc.Extension> = tables.extensions
+        let extensions:Unidoc.LinkerTable<Unidoc.Extension> = tables.extensions
         let groups:Unidoc.Mesh.Groups = tables.groups
 
         linker = (consume tables).linker
@@ -102,22 +96,22 @@ extension Unidoc.Mesh.Interior
 
     private
     init(around landing:consuming Unidoc.LandingVertex,
-        conformances:consuming Unidoc.Linker.Table<Unidoc.Conformers>,
-        extensions:consuming Unidoc.Linker.Table<Unidoc.Extension>,
+        conformances:consuming Unidoc.LinkerTable<Unidoc.Conformers>,
+        extensions:consuming Unidoc.LinkerTable<Unidoc.Extension>,
         redirects:consuming [Unidoc.RedirectVertex],
         products:consuming [Unidoc.ProductVertex],
         cultures:consuming [Unidoc.CultureVertex],
         articles:consuming [Unidoc.ArticleVertex],
         decls:consuming [Unidoc.DeclVertex],
         groups:consuming Unidoc.Mesh.Groups,
-        linker:borrowing Unidoc.Linker)
+        linker:borrowing Unidoc.LinkerContext)
     {
         var cultures:[Unidoc.CultureVertex] = cultures
 
         let articles:[Unidoc.ArticleVertex] = articles
         let decls:[Unidoc.DeclVertex] = decls
 
-        var mapper:Unidoc.Linker.TreeMapper = .init(zone: linker.current.id)
+        var mapper:Unidoc.TreeMapper = .init(zone: linker.current.id)
         for vertex:Unidoc.ArticleVertex in articles
         {
             mapper.add(vertex)

@@ -115,30 +115,6 @@ extension Unidoc.Snapshot
 {
     @inlinable public
     var path:Unidoc.GraphPath { .init(edition: self.id, type: self.type) }
-
-    /// Wraps and returns the inline symbol graph from this snapshot document if present,
-    /// delegates to the provided symbol graph loader otherwise.
-    public
-    func load<Loader>(with loader:Loader?) async throws -> SymbolGraphObject<Unidoc.Edition>
-        where Loader:Unidoc.GraphLoader
-    {
-        if  let inline:SymbolGraph = self.inline
-        {
-            return .init(metadata: self.metadata, graph: inline, id: self.id)
-        }
-        else if
-            let loader:Loader
-        {
-            let bytes:ArraySlice<UInt8> = try await loader.load(graph: self.path)
-            let graph:SymbolGraph = try .init(bson: BSON.Document.init(bytes: bytes))
-
-            return .init(metadata: self.metadata, graph: graph, id: self.id)
-        }
-        else
-        {
-            throw Unidoc.GraphLoaderError.unavailable(self.metadata.package.id)
-        }
-    }
 }
 extension Unidoc.Snapshot
 {
