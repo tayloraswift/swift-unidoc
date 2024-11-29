@@ -12,7 +12,6 @@ let package:Package = .init(
 
         .library(name: "guides", targets: ["guides"]),
 
-        .library(name: "ArgumentParsing", targets: ["ArgumentParsing"]),
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
         .library(name: "FNV1", targets: ["FNV1"]),
