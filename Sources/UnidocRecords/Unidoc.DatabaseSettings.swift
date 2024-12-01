@@ -1,10 +1,10 @@
 extension Unidoc
 {
     @frozen public
-    struct SecurityPolicy
+    struct DatabaseSettings
     {
         public
-        let security:Security
+        let access:AccessControl
 
         public
         var apiLimitInterval:Duration
@@ -12,21 +12,21 @@ extension Unidoc
         var apiLimitPerReset:Int
 
         @inlinable public
-        init(security:Security)
+        init(access:AccessControl)
         {
-            self.security = security
+            self.access = access
 
             self.apiLimitInterval = .seconds(15)
             self.apiLimitPerReset = 1
         }
     }
 }
-extension Unidoc.SecurityPolicy
+extension Unidoc.DatabaseSettings
 {
     @inlinable public
-    init(security:Unidoc.Security, configure:(inout Self) throws -> Void) rethrows
+    init(access:Unidoc.AccessControl, configure:(inout Self) throws -> Void) rethrows
     {
-        self.init(security: security)
+        self.init(access: access)
         try configure(&self)
     }
 }

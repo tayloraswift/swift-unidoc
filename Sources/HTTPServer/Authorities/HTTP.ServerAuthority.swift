@@ -1,5 +1,3 @@
-import HTML
-import HTTP
 import NIOCore
 import NIOHTTP1
 import NIOPosix
@@ -13,14 +11,8 @@ extension HTTP
     {
         associatedtype SecurityContext
 
-        static
-        var scheme:Scheme { get }
-        static
-        var domain:String { get }
-
+        var binding:Origin { get }
         var context:SecurityContext { get }
-
-        init(context:SecurityContext)
 
         static
         func redact(error:any Error) -> String
@@ -58,27 +50,7 @@ extension HTTP.ServerAuthority
 }
 extension HTTP.ServerAuthority
 {
-    /// Formats a URL from the given URI. The URI should begin with a slash.
-    static
-    func url(_ uri:String) -> String
-    {
-        switch self.scheme
-        {
-        case .http(port: 80):           "http://\(self.domain)\(uri)"
-        case .http(port: let port):     "http://\(self.domain):\(port)\(uri)"
-        case .https(port: 443):         "https://\(self.domain)\(uri)"
-        case .https(port: let port):    "https://\(self.domain):\(port)\(uri)"
-        }
-    }
-    static
-    func link(_ uri:String, rel:HTML.Attribute.Rel) -> String
-    {
-        "<\(Self.url(uri))>; rel=\"\(rel)\""
-    }
-}
-extension HTTP.ServerAuthority
-{
-    public static
+    public
     func redirect(
         from binding:(address:String, port:Int),
         on threads:MultiThreadedEventLoopGroup) async throws
@@ -101,7 +73,7 @@ extension HTTP.ServerAuthority
                     withErrorHandling: true)
 
                 try connection.pipeline.syncOperations.addHandler(
-                    HTTP.ServerRedirectorHandler<Self>.init())
+                    HTTP.ServerRedirectorHandler.init(binding: self.binding))
 
                 return connection
             }

@@ -8,18 +8,18 @@ extension Unidoc
     struct Database:Sendable
     {
         public
+        let settings:DatabaseSettings
+        public
         let sessions:Mongo.SessionPool
         public
         let unidoc:Mongo.Database
-        public
-        let policy:SecurityPolicy
 
         @inlinable public
-        init(sessions:Mongo.SessionPool, unidoc:Mongo.Database, policy:SecurityPolicy)
+        init(settings:DatabaseSettings, sessions:Mongo.SessionPool, unidoc:Mongo.Database)
         {
+            self.settings = settings
             self.sessions = sessions
             self.unidoc = unidoc
-            self.policy = policy
         }
     }
 }
@@ -29,6 +29,6 @@ extension Unidoc.Database
     func session() async throws -> Unidoc.DB
     {
         let session:Mongo.Session = try await .init(from: self.sessions)
-        return .init(session: session, in: self.unidoc, policy: self.policy)
+        return .init(session: session, in: self.unidoc, settings: self.settings)
     }
 }

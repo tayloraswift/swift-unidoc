@@ -25,16 +25,16 @@ extension Unidoc
         let id:Mongo.Database
 
         public
-        let policy:SecurityPolicy
+        let settings:DatabaseSettings
 
         @inlinable public
         init(session:Mongo.Session,
             in id:Mongo.Database,
-            policy:SecurityPolicy = .init(security: .enforced))
+            settings:DatabaseSettings = .init(access: .enforced))
         {
             self.session = session
             self.id = id
-            self.policy = policy
+            self.settings = settings
         }
     }
 }

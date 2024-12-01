@@ -12,7 +12,7 @@ extension Unidoc.DB
         require minimum:Unidoc.PackageRights = .editor) async throws -> HTTP.ServerResponse?
     {
         guard
-        case .enforced = self.policy.security,
+        case .enforced = self.settings.access,
         case .human = rights.level
         else
         {

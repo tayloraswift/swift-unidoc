@@ -50,7 +50,7 @@ extension Unidoc.RulesEndpoint:HTTP.ServerEndpoint
             editors: output.editors,
             members: output.members,
             owner: output.owner,
-            view: format.security.permissions(package: output.package, user: output.user))
+            view: format.access.permissions(package: output.package, user: output.user))
 
         return .ok(display.resource(format: format))
     }

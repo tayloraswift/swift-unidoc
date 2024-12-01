@@ -7,8 +7,7 @@ import NIOHTTP2
 
 extension HTTP
 {
-    struct ServerMessage<Authority, Headers>:Sendable
-        where Authority:ServerAuthority, Headers:HeaderFormat
+    struct ServerMessage<Headers>:Sendable where Headers:HeaderFormat
     {
         let status:UInt
 
@@ -16,53 +15,61 @@ extension HTTP
         var content:ByteBuffer?
 
         private
-        init(_ status:UInt, content:ByteBuffer? = nil)
+        init(_ status:UInt, binding:Origin, content:ByteBuffer? = nil)
         {
             self.status = status
 
-            self.headers = .init(authority: Authority.self, status: status)
+            self.headers = .init(origin: binding, status: status)
             self.content = content
         }
     }
 }
 extension HTTP.ServerMessage
 {
-    init(authority _:Authority.Type = Authority.self,
-        response:HTTP.ServerResponse,
+    init(
+        payload:HTTP.ServerResponse,
+        binding:HTTP.Origin,
         using allocator:__shared ByteBufferAllocator)
     {
-        switch response
+        switch payload
         {
         case .resource(let resource, status: let status):
-            self.init(status, copying: resource, using: allocator)
+            self.init(status, copying: resource, binding: binding, using: allocator)
 
         case .redirect(let redirect, cookies: let cookies):
-            self.init(redirect: redirect, cookies: cookies)
+            self.init(redirect: redirect, binding: binding, cookies: cookies)
         }
     }
 
-    init(redacting error:any Error, using allocator:__shared ByteBufferAllocator)
+    static func error(
+        message:String,
+        binding:HTTP.Origin,
+        using allocator:ByteBufferAllocator) -> Self
     {
         self.init(500,
             copying: .init(
                 headers: .init(),
                 content: .init(
-                    body: .string(Authority.redact(error: error)),
+                    body: .string(message),
                     type: .text(.plain, charset: .utf8))),
+            binding: binding,
             using: allocator)
     }
 }
 extension HTTP.ServerMessage
 {
     private
-    init(redirect:HTTP.Redirect, cookies:[(name:String, value:HTTP.CookieValue)])
+    init(
+        redirect:HTTP.Redirect,
+        binding:HTTP.Origin,
+        cookies:[(name:String, value:HTTP.CookieValue)])
     {
-        self.init(redirect.status)
+        self.init(redirect.status, binding: binding)
 
         switch redirect.target
         {
         case .domestic(let location):
-            self.headers.add(name: "location", value: Authority.url(location))
+            self.headers.add(name: "location", value: "\(binding)\(location)")
 
         case .external(let location):
             self.headers.add(name: "location", value: location)
@@ -80,6 +87,7 @@ extension HTTP.ServerMessage
     private
     init(_ status:UInt,
         copying resource:HTTP.Resource,
+        binding:HTTP.Origin,
         using allocator:__shared ByteBufferAllocator)
     {
         if  let content:HTTP.Resource.Content = resource.content
@@ -102,7 +110,7 @@ extension HTTP.ServerMessage
                 buffer = allocator.buffer(string: string)
             }
 
-            self.init(status, content: buffer)
+            self.init(status, binding: binding, content: buffer)
 
             self.headers.add(name: "content-length", value: "\(length)")
             self.headers.add(name: "content-type",   value: "\(content.type)")
@@ -114,12 +122,12 @@ extension HTTP.ServerMessage
         }
         else
         {
-            self.init(304)
+            self.init(304, binding: binding)
         }
 
         if  let canonical:String = resource.headers.canonical
         {
-            self.headers.add(name: "link", value: Authority.link(canonical, rel: .canonical))
+            self.headers.add(name: "link", value: binding.link(canonical, rel: .canonical))
         }
         if  let count:Int = resource.headers.rateLimit.remaining
         {

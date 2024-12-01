@@ -12,9 +12,7 @@ extension HTTP
             self.context = context
         }
 
-        @inlinable public static
-        var scheme:Scheme { .http(port: 8080) }
-        @inlinable public static
-        var domain:String { "localhost" }
+        @inlinable public
+        var binding:Origin { .init(scheme: .http, domain: "localhost:8080") }
     }
 }

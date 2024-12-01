@@ -1,71 +1,48 @@
 import GitHubAPI
 import HTTPServer
+import UnidocAssets
+import UnidocRecords
 
 extension Unidoc
 {
-    @dynamicMemberLookup
     @frozen public
     struct ServerOptions:Sendable
     {
+        public
+        var assetCache:Unidoc.Cache<Unidoc.Asset>?
         public
         let authority:any HTTP.ServerAuthority
         public
         var builders:Int
         public
-        var github:(any GitHub.Integration)?
-        public
-        var mirror:Bool
-        public
         var bucket:Buckets
         public
-        var mode:Mode
+        var github:(any GitHub.Integration)?
+
+        /// Whether to enforce account-level permissions.
+        public
+        var access:AccessControl
+        public
+        var preview:Bool
 
         @inlinable public
-        init(authority:any HTTP.ServerAuthority,
-            builders:Int = 0,
-            github:(any GitHub.Integration)? = nil,
-            mirror:Bool = false,
+        init(
+            assetCache:Unidoc.Cache<Unidoc.Asset>?,
+            authority:any HTTP.ServerAuthority,
+            builders:Int,
             bucket:Buckets,
-            mode:Mode = .production)
+            github:(any GitHub.Integration)?,
+            access:AccessControl,
+            preview:Bool)
         {
+            self.assetCache = assetCache
             self.authority = authority
             self.builders = builders
-            self.github = github
-            self.mirror = mirror
             self.bucket = bucket
-            self.mode = mode
-        }
-    }
-}
-extension Unidoc.ServerOptions
-{
-    @inlinable
-    var development:Development?
-    {
-        switch self.mode
-        {
-        case .development(_, let options):  options
-        case .production:                   nil
-        }
-    }
-}
-extension Unidoc.ServerOptions
-{
-    @inlinable public
-    subscript(dynamicMember keyPath:KeyPath<Development, Bool>) -> Bool
-    {
-        self.development?[keyPath: keyPath] ?? true
-    }
+            self.github = github
 
-    @inlinable public
-    var replicaSet:String
-    {
-        self.development?.replicaSet ?? "swiftinit-rs"
-    }
-
-    @inlinable
-    var port:Int
-    {
-        self.development?.port ?? 443
+            self.access = access
+            self.preview = preview
+        }
     }
 }

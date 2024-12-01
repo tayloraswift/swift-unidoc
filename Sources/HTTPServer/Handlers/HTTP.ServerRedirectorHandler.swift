@@ -5,10 +5,14 @@ import NIOHTTP1
 extension HTTP
 {
     final
-    class ServerRedirectorHandler<Authority> where Authority:ServerAuthority
+    class ServerRedirectorHandler
     {
-        init()
+        private
+        let binding:Origin
+
+        init(binding:Origin)
         {
+            self.binding = binding
         }
     }
 }
@@ -29,7 +33,7 @@ extension HTTP.ServerRedirectorHandler:ChannelInboundHandler
             return
         }
 
-        let url:String = Authority.url(request.uri)
+        let url:String = "\(self.binding)\(request.uri)"
         let head:HTTPResponseHead = .init(version: .http1_1,
             status: .permanentRedirect,
             headers: ["location": url])
