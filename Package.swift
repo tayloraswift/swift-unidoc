@@ -9,6 +9,7 @@ let package:Package = .init(
     products: [
         .executable(name: "ssgc", targets: ["ssgc"]),
         .executable(name: "unidoc", targets: ["unidoc-tools"]),
+        .executable(name: "unidoc-linkerd", targets: ["unidoc-linkerd"]),
 
         .library(name: "guides", targets: ["guides"]),
 
@@ -137,6 +138,16 @@ let package:Package = .init(
                 .target(name: "System_ArgumentParser"),
                 .target(name: "UnidocClient"),
                 .target(name: "UnidocServer"),
+                .target(name: "UnidocServerInsecure"),
+                .target(name: "UnidocLinkerPlugin"),
+            ]),
+
+        .executableTarget(name: "unidoc-linkerd",
+            dependencies: [
+                .target(name: "System_ArgumentParser"),
+                .target(name: "System_"),
+                .target(name: "UnidocServer"),
+                .target(name: "UnidocServerInsecure"),
                 .target(name: "UnidocLinkerPlugin"),
             ]),
 
@@ -560,6 +571,11 @@ let package:Package = .init(
                 .target(name: "UnidocQueries"),
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocUI"),
+            ]),
+
+        .target(name: "UnidocServerInsecure",
+            dependencies: [
+                .target(name: "UnidocServer"),
             ]),
 
         .target(name: "UnidocTesting",

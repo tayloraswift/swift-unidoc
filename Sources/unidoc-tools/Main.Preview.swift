@@ -8,6 +8,7 @@ import System_
 import System_ArgumentParser
 import UnidocLinkerPlugin
 import UnidocServer
+import UnidocServerInsecure
 
 extension Main
 {
@@ -18,6 +19,12 @@ extension Main
             help: "A path to the certificates directory",
             completion: .directory)
         var certificates:FilePath.Directory = "Assets/certificates"
+
+        @Option(
+            name: [.customLong("assets"), .customShort("a")],
+            help: "A path to the assets directory",
+            completion: .directory)
+        var assets:FilePath.Directory = "Assets"
 
         @Option(
             name: [.customLong("mongo"), .customShort("m")],
@@ -35,57 +42,13 @@ extension Main
         var port:Int?
 
         @Flag(
-            name: [.customLong("mirror"), .customShort("q")],
-            help: "Run in mirror mode, disabling the documentation linker process")
-        var mirror:Bool = false
-
-        @Flag(
             name: [.customLong("https"), .customShort("e")],
             help: "Use https instead of http")
         var https:Bool = false
 
-        init()
-        {
-        }
+        init() {}
     }
 }
-extension Main.Preview
-{
-    private
-    var serverSSL:NIOSSLContext
-    {
-        get throws
-        {
-            let privateKeyPath:FilePath = self.certificates / "privkey.pem"
-            let privateKey:NIOSSLPrivateKey = try .init(file: "\(privateKeyPath)", format: .pem)
-
-            let fullChainPath:FilePath = self.certificates / "fullchain.pem"
-            let fullChain:[NIOSSLCertificate] = try NIOSSLCertificate.fromPEMFile(
-                "\(fullChainPath)")
-
-            var configuration:TLSConfiguration = .makeServerConfiguration(
-                certificateChain: fullChain.map(NIOSSLCertificateSource.certificate(_:)),
-                privateKey: .privateKey(privateKey))
-
-                // configuration.applicationProtocols = ["h2", "http/1.1"]
-                configuration.applicationProtocols = ["h2"]
-
-            return try .init(configuration: configuration)
-        }
-    }
-
-    private
-    var clientSSL:NIOSSLContext
-    {
-        get throws
-        {
-            var configuration:TLSConfiguration = .makeClientConfiguration()
-                configuration.applicationProtocols = ["h2"]
-            return try .init(configuration: configuration)
-        }
-    }
-}
-
 extension Main.Preview:AsyncParsableCommand
 {
     public
@@ -95,27 +58,29 @@ extension Main.Preview:AsyncParsableCommand
     {
         NIOSingletons.groupLoopCountSuggestion = 2
 
-        var development:Unidoc.ServerOptions.Development = .init(replicaSet: self.replicaSet)
         let authority:any HTTP.ServerAuthority
+        let port:Int
 
         if  self.https
         {
-            authority = HTTP.LocalhostSecure.init(context: try self.serverSSL)
-            development.port = self.port ?? 8443
+            authority = HTTP.LocalhostSecure.init(
+                context: try .serverDefault(certificateDirectory: "\(self.certificates)"))
+            port = self.port ?? 8443
         }
         else
         {
             authority = HTTP.Localhost.init()
-            development.port = self.port ?? 8080
+            port = self.port ?? 8080
         }
 
-        let options:Unidoc.ServerOptions = .init(authority: authority,
+        let options:Unidoc.ServerOptions = .init(
+            assetCache: .init(source: self.assets.path),
+            authority: authority,
+            builders: 0,
+            bucket: .init(assets: nil, graphs: nil),
             github: nil,
-            mirror: self.mirror,
-            bucket: .init(
-                assets: development.bucket,
-                graphs: development.bucket),
-            mode: .development(.init(source: "Assets"), development))
+            access: .ignored,
+            preview: true)
 
         let mongodb:Mongo.DriverBootstrap = MongoDB / [self.mongod] /?
         {
@@ -125,7 +90,7 @@ extension Main.Preview:AsyncParsableCommand
             $0.connectionTimeout = .milliseconds(5_000)
             $0.monitorInterval = .milliseconds(3_000)
 
-            $0.topology = .replicated(set: options.replicaSet)
+            $0.topology = .replicated(set: self.replicaSet)
         }
 
         await mongodb.withSessionPool(logger: .init(level: .error))
@@ -133,20 +98,20 @@ extension Main.Preview:AsyncParsableCommand
             @Sendable (pool:Mongo.SessionPool) in
             do
             {
-                let policy:Unidoc.SecurityPolicy = .init(security: options.mode.security)
+                let settings:Unidoc.DatabaseSettings = .init(access: options.access)
                 {
                     $0.apiLimitInterval = .milliseconds(60_000)
                     $0.apiLimitPerReset = 10000
                 }
 
                 let linker:Unidoc.LinkerPlugin = .init(bucket: nil)
-                let server:Unidoc.Server = .init(clientIdentity: try self.clientSSL,
+                let server:Unidoc.Server = .init(clientIdentity: try .clientDefault,
                     coordinators: [],
                     plugins: [linker],
                     options: options,
-                    db: .init(sessions: pool, unidoc: "unidoc",  policy: policy))
+                    db: .init(settings: settings, sessions: pool, unidoc: "unidoc"))
 
-                try await server.run()
+                try await server.run(on: port)
             }
             catch let error
             {

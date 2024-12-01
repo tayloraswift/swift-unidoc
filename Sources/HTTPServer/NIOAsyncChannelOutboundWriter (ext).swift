@@ -6,8 +6,7 @@ import NIOHTTP2
 
 extension NIOAsyncChannelOutboundWriter<HTTPPart<HTTPResponseHead, ByteBuffer>>
 {
-    func send(
-        _ message:HTTP.ServerMessage<some HTTP.ServerAuthority, HTTPHeaders>) async throws
+    func send(_ message:HTTP.ServerMessage<HTTPHeaders>) async throws
     {
         let head:HTTPResponseHead = .init(version: .http1_1,
             status: .init(statusCode: Int.init(message.status)),
@@ -28,8 +27,7 @@ extension NIOAsyncChannelOutboundWriter<HTTPPart<HTTPResponseHead, ByteBuffer>>
 }
 extension NIOAsyncChannelOutboundWriter<HTTP2Frame.FramePayload>
 {
-    func send(
-        _ message:HTTP.ServerMessage<some HTTP.ServerAuthority, HPACKHeaders>) async throws
+    func send(_ message:HTTP.ServerMessage<HPACKHeaders>) async throws
     {
         if  let body:ByteBuffer = message.content
         {

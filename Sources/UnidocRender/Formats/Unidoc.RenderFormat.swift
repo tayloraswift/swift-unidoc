@@ -11,37 +11,43 @@ extension Unidoc
     struct RenderFormat
     {
         public
-        var security:Security
+        var access:AccessControl
+        public
+        var assets:Assets
+        public
+        var origin:HTTP.Origin
+        public
+        var preview:Bool
+
         public
         var username:String?
         public
         var locale:ISO.Locale
-        public
-        let assets:Assets
-        public
-        var server:ServerType
         /// If set, a `data-theme` attribute will be added to the `<body>` element.
         public
         var theme:String?
-
         public
-        let time:UnixAttosecond
+        var time:UnixAttosecond
 
         @inlinable public
         init(
-            security:Security,
+            access:AccessControl,
+            assets:Assets,
+            origin:HTTP.Origin,
+            preview:Bool,
             username:String?,
             locale:ISO.Locale,
-            assets:Assets,
-            server:ServerType,
             theme:String?,
             time:UnixAttosecond)
         {
-            self.security = security
+            self.access = access
+            self.assets = assets
+            self.origin = origin
+            self.preview = preview
+
             self.username = username
             self.locale = locale
-            self.assets = assets
-            self.server = server
+            self.theme = theme
             self.time = time
         }
     }
@@ -49,14 +55,7 @@ extension Unidoc
 extension Unidoc.RenderFormat
 {
     @inlinable public
-    var sitename:String
-    {
-        switch self.server
-        {
-        case .swiftinit_org:    "swiftinit"
-        case .localhost:        "preview"
-        }
-    }
+    var sitename:String { self.preview ? "preview" : "swiftinit" }
 
     @inlinable public
     var cornice:Unidoc.ApplicationCornice

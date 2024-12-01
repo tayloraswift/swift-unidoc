@@ -53,7 +53,7 @@ extension Unidoc.TagsEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let view:Unidoc.Permissions = format.security.permissions(package: output.package,
+        let view:Unidoc.Permissions = format.access.permissions(package: output.package,
             user: output.user)
 
         let table:Unidoc.Paginated<Unidoc.RefsTable> = .init(

@@ -117,7 +117,7 @@ extension Unidoc.WebhookOperation
         in db:Unidoc.DB) async throws -> HTTP.ServerResponse
     {
         let user:Unidoc.User = .init(githubInstallation: event.installation,
-            initialLimit: db.policy.apiLimitPerReset)
+            initialLimit: db.settings.apiLimitPerReset)
 
         switch event.action
         {

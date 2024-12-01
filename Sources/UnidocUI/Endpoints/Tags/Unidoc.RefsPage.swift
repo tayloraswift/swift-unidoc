@@ -95,7 +95,7 @@ extension Unidoc.RefsPage:Unidoc.ApplicationPage
             }
         }
 
-        if  case .localhost = format.server
+        if  format.preview
         {
             main[.h2] = "Local preview settings"
             main[.form]

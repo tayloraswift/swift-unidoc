@@ -55,7 +55,7 @@ extension Unidoc.UserIndexOperation
             let user:Unidoc.User = try await restAPI.connect
             {
                 let user:GitHub.User = try await $0.get(from: "/user", with: .token(self.token))
-                return .init(github: user, initialLimit: server.db.policy.apiLimitPerReset)
+                return .init(github: user, initialLimit: server.db.settings.apiLimitPerReset)
             }
 
             let db:Unidoc.DB = try await server.db.session()

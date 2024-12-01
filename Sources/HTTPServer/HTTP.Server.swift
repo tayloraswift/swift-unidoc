@@ -215,7 +215,7 @@ extension HTTP.Server
                         {
                             try await self.handle(connection: connection,
                                 origin: origin,
-                                as: Authority.self)
+                                as: authority)
                         }
                         catch NIOSSLError.uncleanShutdown
                         {
@@ -251,7 +251,7 @@ extension HTTP.Server
                             try await self.handle(connection: channel,
                                 streams: streams.inbound,
                                 origin: origin,
-                                as: Authority.self)
+                                as: authority)
                         }
                         catch let error
                         {
@@ -285,7 +285,7 @@ extension HTTP.Server
             HTTPPart<HTTPRequestHead, ByteBuffer>,
             HTTPPart<HTTPResponseHead, ByteBuffer>>,
         origin:HTTP.ServerRequest.Origin,
-        as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
+        as authority:Authority) async throws where Authority:HTTP.ServerAuthority
     {
         try await connection.executeThenClose
         {
@@ -317,21 +317,23 @@ extension HTTP.Server
                     continue
                 }
 
-                var message:HTTP.ServerMessage<Authority, HTTPHeaders>
+                var message:HTTP.ServerMessage<HTTPHeaders>
                 do
                 {
                     message = .init(
-                        response: try await self.respond(to: part,
+                        payload: try await self.respond(to: part,
                             inbound: &parts,
-                            origin: origin,
-                            as: Authority.self),
+                            origin: origin),
+                        binding: authority.binding,
                         using: connection.channel.allocator)
                 }
                 catch let error
                 {
                     self.log(event: .application(error), ip: origin)
 
-                    message = .init(redacting: error,
+                    message = .error(
+                        message: Authority.redact(error: error),
+                        binding: authority.binding,
                         using: connection.channel.allocator)
                 }
 
@@ -354,12 +356,10 @@ extension HTTP.Server
     }
 
     private
-    func respond<Authority>(to h1:HTTPRequestHead,
+    func respond(to h1:HTTPRequestHead,
         inbound:inout AsyncThrowingChannel<
             HTTPPart<HTTPRequestHead, ByteBuffer>, any Error>.Iterator,
-        origin:HTTP.ServerRequest.Origin,
-        as _:Authority.Type) async throws -> HTTP.ServerResponse
-        where Authority:HTTP.ServerAuthority
+        origin:HTTP.ServerRequest.Origin) async throws -> HTTP.ServerResponse
     {
         guard let uri:URI = .init(h1.uri)
         else
@@ -446,7 +446,7 @@ extension HTTP.Server
         connection:any Channel,
         streams:NIOHTTP2AsyncSequence<HTTP.Stream>,
         origin:HTTP.ServerRequest.Origin,
-        as _:Authority.Type) async throws where Authority:HTTP.ServerAuthority
+        as authority:Authority) async throws where Authority:HTTP.ServerAuthority
     {
         //  I am not sure why the sequence of streams has no backpressure. Out of an abundance
         //  of caution, there is a hard limit of 128 buffered streams. A sane peer should never
@@ -495,17 +495,19 @@ extension HTTP.Server
 
                     let request:Task<HTTP.ServerResponse, any Error> = .init
                     {
-                        try await self.respond(to: inbound, origin: origin, as: Authority.self)
+                        try await self.respond(to: inbound, origin: origin)
                     }
                     stream.frames.channel.closeFuture.whenComplete
                     {
                         _ in request.cancel()
                     }
 
-                    let message:HTTP.ServerMessage<Authority, HPACKHeaders>
+                    let message:HTTP.ServerMessage<HPACKHeaders>
                     do
                     {
-                        message = .init(response: try await request.value,
+                        message = .init(
+                            payload: try await request.value,
+                            binding: authority.binding,
                             using: stream.frames.channel.allocator)
                     }
                     catch is CancellationError
@@ -516,8 +518,9 @@ extension HTTP.Server
                     {
                         self.log(event: .application(error), ip: origin)
 
-                        message = .init(
-                            redacting: error,
+                        message = .error(
+                            message: Authority.redact(error: error),
+                            binding: authority.binding,
                             using: stream.frames.channel.allocator)
                     }
 
@@ -559,10 +562,8 @@ extension HTTP.Server
     }
 
     private
-    func respond<Authority>(to h2:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
-        origin:HTTP.ServerRequest.Origin,
-        as _:Authority.Type) async throws -> HTTP.ServerResponse
-        where Authority:HTTP.ServerAuthority
+    func respond(to h2:NIOAsyncChannelInboundStream<HTTP2Frame.FramePayload>,
+        origin:HTTP.ServerRequest.Origin) async throws -> HTTP.ServerResponse
     {
         /// We should use a channel and not just a stream, in order to preserve backpressure.
         let frames:AsyncThrowingChannel<HTTP2Frame.FramePayload?, any Error> = .init()

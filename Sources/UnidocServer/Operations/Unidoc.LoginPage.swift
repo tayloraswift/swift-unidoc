@@ -96,7 +96,7 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
             {
                 $0.type = "hidden"
                 $0.name = "redirect_uri"
-                $0.value = "\(format.server)/auth/github?from=\(self.from)&flow=\(self.flow)"
+                $0.value = "\(format.origin)/auth/github?from=\(self.from)&flow=\(self.flow)"
             }
 
             //  Note, for some reason, setting the `redirect_uri` to 127.0.0.1 does not work,

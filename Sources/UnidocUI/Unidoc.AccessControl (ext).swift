@@ -1,4 +1,4 @@
-extension Unidoc.Security
+extension Unidoc.AccessControl
 {
     func permissions(package:Unidoc.PackageMetadata, user:Unidoc.User?) -> Unidoc.Permissions
     {

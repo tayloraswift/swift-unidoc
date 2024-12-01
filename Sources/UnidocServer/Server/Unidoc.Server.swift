@@ -81,6 +81,7 @@ extension Unidoc.Server
 {
     @inlinable public
     var github:(any GitHub.Integration)? { self.options.github }
+
     @inlinable public
     var bucket:Unidoc.Buckets { self.options.bucket }
 
@@ -115,11 +116,12 @@ extension Unidoc.Server
         time:UnixAttosecond) -> Unidoc.RenderFormat
     {
         .init(
-            security: self.db.policy.security,
+            access: self.db.settings.access,
+            assets: self.options.assetCache == nil ? .cloudfront : .local,
+            origin: self.options.authority.binding,
+            preview: self.options.preview,
             username: username,
             locale: locale ?? .init(language: .en),
-            assets: self.options.cloudfront ? .cloudfront : .local,
-            server: self.options.mode.server,
             theme: nil,
             time: time)
     }
@@ -282,7 +284,7 @@ extension Unidoc.Server
     private
     func clearance(by authorization:Unidoc.Authorization) async throws -> HTTP.ServerResponse?
     {
-        guard case .production = self.options.mode
+        guard case .enforced = self.options.access
         else
         {
             return nil
@@ -392,14 +394,8 @@ extension Unidoc.Server
             return response
 
         case .syncLoad(let request):
-            guard case .development(let cache, _) = self.options.mode
-            else
-            {
-                //  In production mode, static assets are served by Cloudfront.
-                return .forbidden("")
-            }
-
-            return try await cache.serve(request)
+            //  In production mode, static assets are served by Cloudfront.
+            return try await self.options.assetCache?.serve(request) ?? .forbidden("")
         }
     }
 }
@@ -490,16 +486,9 @@ extension Unidoc.Server
 
             let html:HTTP.Resource = errorPage.resource(format: format)
 
-            if  case .production = self.options.mode
-            {
-                /// This will still look the same to humans, but it will not appear as if
-                /// the server is down to Googlebot.
-                return .unauthorized(html)
-            }
-            else
-            {
-                return .error(html)
-            }
+            /// This will still look the same to humans, but it will not appear as if
+            /// the server is down to Googlebot.
+            return self.options.preview ? .error(html) : .unauthorized(html)
         }
 
         switch operation
