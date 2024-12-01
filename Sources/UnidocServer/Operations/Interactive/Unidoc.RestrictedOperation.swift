@@ -29,7 +29,7 @@ extension Unidoc.RestrictedOperation
     {
         let db:Unidoc.DB
 
-        switch context.server.db.policy.security
+        switch context.server.db.settings.access
         {
         case .ignored:
             db = try await context.server.db.session()

@@ -2,7 +2,7 @@ extension HTTP
 {
     protocol HeaderFormat:Sendable
     {
-        init(authority:(some ServerAuthority).Type, status:UInt)
+        init(origin:Origin, status:UInt)
 
         mutating
         func add(name:String, value:String)

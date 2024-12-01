@@ -14,9 +14,7 @@ extension HTTP
             self.context = context
         }
 
-        @inlinable public static
-        var scheme:Scheme { .https(port: 8443) }
-        @inlinable public static
-        var domain:String { "localhost" }
+        @inlinable public
+        var binding:Origin { .init(scheme: .https, domain: "localhost:8443") }
     }
 }

@@ -5,7 +5,7 @@ import MongoDB
 extension HTTP.Server where Self:Unidoc.Server
 {
     public
-    func run() async throws
+    func run(on port:Int) async throws
     {
         try await self._setup()
         try await withThrowingTaskGroup(of: Void.self)
@@ -22,7 +22,7 @@ extension HTTP.Server where Self:Unidoc.Server
 
             tasks.addTask
             {
-                try await self.serve(from: ("::", self.options.port),
+                try await self.serve(from: ("::", port),
                     as: self.options.authority,
                     on: .singleton,
                     policy: self.policy)
