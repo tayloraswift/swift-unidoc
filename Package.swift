@@ -71,6 +71,7 @@ let package:Package = .init(
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
         .library(name: "UnidocAssets_System", targets: ["UnidocAssets_System"]),
+        .library(name: "UnidocCLI", targets: ["UnidocCLI"]),
         .library(name: "UnidocClient", targets: ["UnidocClient"]),
         .library(name: "UnidocDB", targets: ["UnidocDB"]),
         .library(name: "UnidocLinker", targets: ["UnidocLinker"]),
@@ -136,6 +137,7 @@ let package:Package = .init(
         .executableTarget(name: "unidoc-tools",
             dependencies: [
                 .target(name: "System_ArgumentParser"),
+                .target(name: "UnidocCLI"),
                 .target(name: "UnidocClient"),
                 .target(name: "UnidocServer"),
                 .target(name: "UnidocServerInsecure"),
@@ -146,6 +148,7 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "System_ArgumentParser"),
                 .target(name: "System_"),
+                .target(name: "UnidocCLI"),
                 .target(name: "UnidocServer"),
                 .target(name: "UnidocServerInsecure"),
                 .target(name: "UnidocLinkerPlugin"),
@@ -483,6 +486,12 @@ let package:Package = .init(
                 .target(name: "Media"),
                 .target(name: "System_"),
                 .target(name: "UnidocAssets"),
+            ]),
+
+        .target(name: "UnidocCLI",
+            dependencies: [
+                .target(name: "UnidocServer"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]),
 
         .target(name: "UnidocClient",

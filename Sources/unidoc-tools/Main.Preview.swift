@@ -6,6 +6,7 @@ import NIOPosix
 import NIOSSL
 import System_
 import System_ArgumentParser
+import UnidocCLI
 import UnidocLinkerPlugin
 import UnidocServer
 import UnidocServerInsecure
@@ -27,19 +28,12 @@ extension Main
         var assets:FilePath.Directory = "Assets"
 
         @Option(
-            name: [.customLong("mongod"), .customLong("mongo"), .customShort("m")],
-            help: "The name of a host running mongod to connect to, and optionally, the port")
-        var mongod:Mongo.Host = "localhost"
-
-        @Option(
-            name: [.customLong("replica-set"), .customShort("s")],
-            help: "The name of a replica set to connect to")
-        var replicaSet:String = "unidoc-rs"
-
-        @Option(
             name: [.customLong("port"), .customShort("p")],
             help: "The number of a port to bind the documentation server to")
         var port:Int?
+
+        @OptionGroup
+        var db:Unidoc.DatabaseOptions
 
         @Flag(
             name: [.customLong("https"), .customShort("e")],
@@ -85,7 +79,7 @@ extension Main.Preview:AsyncParsableCommand
             origin: origin,
             preview: true)
 
-        let mongodb:Mongo.DriverBootstrap = MongoDB / [self.mongod] /?
+        let mongodb:Mongo.DriverBootstrap = MongoDB / [self.db.mongod] /?
         {
             $0.executors = .shared(MultiThreadedEventLoopGroup.singleton)
             $0.appname = "Unidoc Preview"
@@ -93,7 +87,7 @@ extension Main.Preview:AsyncParsableCommand
             $0.connectionTimeout = .milliseconds(5_000)
             $0.monitorInterval = .milliseconds(3_000)
 
-            $0.topology = .replicated(set: self.replicaSet)
+            $0.topology = .replicated(set: self.db.rs)
         }
 
         await mongodb.withSessionPool(logger: .init(level: .error))
