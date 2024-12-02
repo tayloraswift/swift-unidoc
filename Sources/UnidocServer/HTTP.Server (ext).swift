@@ -1,11 +1,12 @@
 import HTTP
 import HTTPServer
 import MongoDB
+import NIOSSL
 
 extension HTTP.Server where Self:Unidoc.Server
 {
     public
-    func run(on port:Int) async throws
+    func run(on port:Int, with niossl:NIOSSLContext? = nil) async throws
     {
         try await self._setup()
         try await withThrowingTaskGroup(of: Void.self)
@@ -22,9 +23,10 @@ extension HTTP.Server where Self:Unidoc.Server
 
             tasks.addTask
             {
-                try await self.serve(from: ("::", port),
-                    as: self.options.authority,
-                    on: .singleton,
+                try await self.serve(origin: self.options.origin,
+                    host: "::",
+                    port: port,
+                    with: niossl,
                     policy: self.policy)
             }
             tasks.addTask

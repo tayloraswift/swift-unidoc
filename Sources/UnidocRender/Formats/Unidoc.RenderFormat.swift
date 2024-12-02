@@ -15,7 +15,7 @@ extension Unidoc
         public
         var assets:Assets
         public
-        var origin:HTTP.Origin
+        var origin:HTTP.ServerOrigin
         public
         var preview:Bool
 
@@ -33,7 +33,7 @@ extension Unidoc
         init(
             access:AccessControl,
             assets:Assets,
-            origin:HTTP.Origin,
+            origin:HTTP.ServerOrigin,
             preview:Bool,
             username:String?,
             locale:ISO.Locale,

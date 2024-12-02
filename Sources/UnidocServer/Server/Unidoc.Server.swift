@@ -118,7 +118,7 @@ extension Unidoc.Server
         .init(
             access: self.db.settings.access,
             assets: self.options.assetCache == nil ? .cloudfront : .local,
-            origin: self.options.authority.binding,
+            origin: self.options.origin,
             preview: self.options.preview,
             username: username,
             locale: locale ?? .init(language: .en),

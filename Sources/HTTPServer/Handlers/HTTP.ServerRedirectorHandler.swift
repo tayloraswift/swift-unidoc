@@ -8,11 +8,11 @@ extension HTTP
     class ServerRedirectorHandler
     {
         private
-        let binding:Origin
+        let target:ServerOrigin
 
-        init(binding:Origin)
+        init(target:ServerOrigin)
         {
-            self.binding = binding
+            self.target = target
         }
     }
 }
@@ -33,7 +33,7 @@ extension HTTP.ServerRedirectorHandler:ChannelInboundHandler
             return
         }
 
-        let url:String = "\(self.binding)\(request.uri)"
+        let url:String = "\(self.target)\(request.uri)"
         let head:HTTPResponseHead = .init(version: .http1_1,
             status: .permanentRedirect,
             headers: ["location": url])

@@ -2,8 +2,8 @@ import NIOHTTP1
 
 extension HTTPHeaders:HTTP.HeaderFormat
 {
-    init(origin:HTTP.Origin, status _:UInt)
+    init(origin:HTTP.ServerOrigin, status _:UInt)
     {
-        self = ["host": origin.domain]
+        self = ["host": origin.authority]
     }
 }

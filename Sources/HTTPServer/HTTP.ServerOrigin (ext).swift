@@ -1,58 +1,21 @@
+import HTML
+import HTTP
 import NIOCore
 import NIOHTTP1
 import NIOPosix
 import NIOSSL
-import TraceableErrors
 
-extension HTTP
+extension HTTP.ServerOrigin
 {
-    public
-    protocol ServerAuthority<SecurityContext>:Sendable
+    func link(_ uri:String, rel:HTML.Attribute.Rel) -> String
     {
-        associatedtype SecurityContext
-
-        var binding:Origin { get }
-        var context:SecurityContext { get }
-
-        static
-        func redact(error:any Error) -> String
+        "<\(self)\(uri)>; rel=\"\(rel)\""
     }
 }
-extension HTTP.ServerAuthority
-{
-    /// Dumps detailed information about the caught error. This information will be shown to
-    /// *anyone* accessing the server. In production, we strongly recommend overriding this
-    /// default implementation to avoid inadvertently exposing sensitive data via type
-    /// reflection.
-    public static
-    func redact(error:any Error) -> String
-    {
-        var notes:[String] = []
-        var next:any Error = error
-        while true
-        {
-            switch next
-            {
-            case let current as any TraceableError:
-                notes.append(contentsOf: current.notes)
-                next = current.underlying
-
-            case let last:
-                var description:String = last.headline(plaintext: true)
-                for note:String in notes.reversed()
-                {
-                    description += "\nNote: \(note)"
-                }
-                return description
-            }
-        }
-    }
-}
-extension HTTP.ServerAuthority
+extension HTTP.ServerOrigin
 {
     public
-    func redirect(
-        from binding:(address:String, port:Int),
+    func redirect(from binding:(address:String, port:Int),
         on threads:MultiThreadedEventLoopGroup) async throws
     {
         let bootstrap:ServerBootstrap = .init(group: threads)
@@ -73,7 +36,7 @@ extension HTTP.ServerAuthority
                     withErrorHandling: true)
 
                 try connection.pipeline.syncOperations.addHandler(
-                    HTTP.ServerRedirectorHandler.init(binding: self.binding))
+                    HTTP.ServerRedirectorHandler.init(target: self))
 
                 return connection
             }
