@@ -6,6 +6,7 @@ import NIOPosix
 import NIOSSL
 import System_
 import System_ArgumentParser
+import UnidocCLI
 import UnidocLinkerPlugin
 import UnidocServer
 import UnidocServerInsecure
@@ -19,16 +20,6 @@ struct Main
     var certificates:FilePath.Directory = "Assets/certificates"
 
     @Option(
-        name: [.customLong("mongod"), .customLong("mongo"), .customShort("m")],
-        help: "The name of a host running mongod to connect to, and optionally, the port")
-    var mongod:Mongo.Host = "localhost"
-
-    @Option(
-        name: [.customLong("replica-set"), .customShort("s")],
-        help: "The name of a replica set to connect to")
-    var replicaSet:String = "unidoc-rs"
-
-    @Option(
         name: [.customLong("host"), .customShort("h")],
         help: "The name of a host to bind the documentation server to")
     var host:String = "localhost"
@@ -38,19 +29,10 @@ struct Main
         help: "The number of a port to bind the documentation server to")
     var port:Int = 8443
 
-    @Option(
-        name: [.customLong("s3-assets")],
-        help: """
-            The name of an S3 bucket in the us-east-1 region
-            """)
-    var s3Assets:String?
-
-    @Option(
-        name: [.customLong("s3")],
-        help: """
-            The name of an S3 bucket in the us-east-1 region
-            """)
-    var s3Bucket:String
+    @OptionGroup
+    var db:Unidoc.DatabaseOptions
+    @OptionGroup
+    var s3:Unidoc.BucketOptions
 }
 
 @main
@@ -66,15 +48,13 @@ extension Main:AsyncParsableCommand
 
         let options:Unidoc.ServerOptions = .init(assetCache: nil,
             builders: 0,
-            bucket: .init(
-                assets: .init(region: .us_east_1, name: self.s3Assets ?? self.s3Bucket),
-                graphs: .init(region: .us_east_1, name: self.s3Bucket)),
+            bucket: self.s3.buckets,
             github: nil,
             access: .enforced,
             origin: .https(host: self.host, port: self.port),
             preview: true)
 
-        let mongodb:Mongo.DriverBootstrap = MongoDB / [self.mongod] /?
+        let mongodb:Mongo.DriverBootstrap = MongoDB / [self.db.mongod] /?
         {
             $0.executors = .shared(MultiThreadedEventLoopGroup.singleton)
             $0.appname = "unidoc-linkerd"
@@ -82,7 +62,7 @@ extension Main:AsyncParsableCommand
             $0.connectionTimeout = .milliseconds(5_000)
             $0.monitorInterval = .milliseconds(3_000)
 
-            $0.topology = .replicated(set: self.replicaSet)
+            $0.topology = .replicated(set: self.db.rs)
         }
 
         await mongodb.withSessionPool(logger: .init(level: .error))
@@ -92,7 +72,7 @@ extension Main:AsyncParsableCommand
             {
                 let settings:Unidoc.DatabaseSettings = .init(access: options.access)
 
-                let linker:Unidoc.LinkerPlugin = .init(bucket: nil)
+                let linker:Unidoc.LinkerPlugin = .init(bucket: options.bucket.graphs)
                 let server:Unidoc.Server = .init(clientIdentity: clientIdentity,
                     coordinators: [],
                     plugins: [linker],

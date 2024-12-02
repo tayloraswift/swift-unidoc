@@ -1,7 +1,7 @@
 extension HTTP
 {
     @frozen public
-    enum Scheme
+    enum Scheme:Equatable, Sendable
     {
         case http
         case https
