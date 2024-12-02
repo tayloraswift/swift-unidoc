@@ -27,7 +27,7 @@ extension Main
         var assets:FilePath.Directory = "Assets"
 
         @Option(
-            name: [.customLong("mongo"), .customShort("m")],
+            name: [.customLong("mongod"), .customLong("mongo"), .customShort("m")],
             help: "The name of a host running mongod to connect to, and optionally, the port")
         var mongod:Mongo.Host = "localhost"
 
@@ -58,28 +58,31 @@ extension Main.Preview:AsyncParsableCommand
     {
         NIOSingletons.groupLoopCountSuggestion = 2
 
-        let authority:any HTTP.ServerAuthority
+        let clientIdentity:NIOSSLContext = try .clientDefault
+        let serverIdentity:NIOSSLContext?
         let port:Int
+        let origin:HTTP.ServerOrigin
 
         if  self.https
         {
-            authority = HTTP.LocalhostSecure.init(
-                context: try .serverDefault(certificateDirectory: "\(self.certificates)"))
+            serverIdentity = try .serverDefault(certificateDirectory: "\(self.certificates)")
             port = self.port ?? 8443
+            origin = .https(host: "localhost", port: port)
         }
         else
         {
-            authority = HTTP.Localhost.init()
+            serverIdentity = nil
             port = self.port ?? 8080
+            origin = .http(host: "localhost", port: port)
         }
 
         let options:Unidoc.ServerOptions = .init(
             assetCache: .init(source: self.assets.path),
-            authority: authority,
             builders: 0,
             bucket: .init(assets: nil, graphs: nil),
             github: nil,
             access: .ignored,
+            origin: origin,
             preview: true)
 
         let mongodb:Mongo.DriverBootstrap = MongoDB / [self.mongod] /?
@@ -105,13 +108,13 @@ extension Main.Preview:AsyncParsableCommand
                 }
 
                 let linker:Unidoc.LinkerPlugin = .init(bucket: nil)
-                let server:Unidoc.Server = .init(clientIdentity: try .clientDefault,
+                let server:Unidoc.Server = .init(clientIdentity: clientIdentity,
                     coordinators: [],
                     plugins: [linker],
                     options: options,
                     db: .init(settings: settings, sessions: pool, unidoc: "unidoc"))
 
-                try await server.run(on: port)
+                try await server.run(on: port, with: serverIdentity)
             }
             catch let error
             {

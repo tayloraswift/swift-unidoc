@@ -2,7 +2,7 @@ import NIOHPACK
 
 extension HPACKHeaders:HTTP.HeaderFormat
 {
-    init(origin _:HTTP.Origin, status:UInt)
+    init(origin _:HTTP.ServerOrigin, status:UInt)
     {
         self = [":status": "\(status)"]
     }

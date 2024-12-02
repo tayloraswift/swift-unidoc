@@ -9,6 +9,7 @@ import NIOHTTP1
 import NIOHTTP2
 import NIOPosix
 import NIOSSL
+import TraceableErrors
 import URI
 
 extension HTTP
@@ -44,6 +45,8 @@ extension HTTP
             body:[UInt8]) async throws -> HTTP.ServerResponse
 
         func log(event:ServerEvent, ip origin:ServerRequest.Origin?)
+
+        func redact(error:any Error) -> String
     }
 }
 extension HTTP.Server
@@ -74,19 +77,46 @@ extension HTTP.Server
     {
         try await self.post(request: request, headers: .init(httpHeaders: headers), body: body)
     }
+
+    /// Dumps detailed information about the caught error. This information will be shown to
+    /// *anyone* accessing the server. In production, we strongly recommend overriding this
+    /// default implementation to avoid inadvertently exposing sensitive data via type
+    /// reflection.
+    public
+    func redact(error:any Error) -> String
+    {
+        var notes:[String] = []
+        var next:any Error = error
+        while true
+        {
+            switch next
+            {
+            case let current as any TraceableError:
+                notes.append(contentsOf: current.notes)
+                next = current.underlying
+
+            case let last:
+                var description:String = last.headline(plaintext: true)
+                for note:String in notes.reversed()
+                {
+                    description += "\nNote: \(note)"
+                }
+                return description
+            }
+        }
+    }
 }
 
 extension HTTP.Server
 {
     public
-    func serve<Authority>(
-        from binding:(address:String, port:Int),
-        as authority:Authority,
-        on threads:MultiThreadedEventLoopGroup,
+    func serve(origin server:HTTP.ServerOrigin,
+        host:String,
+        port:Int,
+        with context:NIOSSLContext? = nil,
         policy:(any HTTP.ServerPolicy)? = nil) async throws
-        where Authority:HTTP.ServerAuthority
     {
-        let bootstrap:ServerBootstrap = .init(group: threads)
+        let bootstrap:ServerBootstrap = .init(group: MultiThreadedEventLoopGroup.singleton)
             .serverChannelOption(ChannelOptions.backlog, value: 256)
             .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
@@ -99,11 +129,9 @@ extension HTTP.Server
                     HTTPPart<HTTPResponseHead, ByteBuffer>>,
                 (any Channel, NIOHTTP2Handler.AsyncStreamMultiplexer<HTTP.Stream>)>>, Never>
 
-        if  case let context as NIOSSLContext = authority.context
+        if  let context:NIOSSLContext
         {
-            listener = try await bootstrap.bind(
-                host: binding.address,
-                port: binding.port)
+            listener = try await bootstrap.bind(host: host, port: port)
             {
                 (channel:any Channel) in
 
@@ -157,9 +185,7 @@ extension HTTP.Server
         }
         else
         {
-            listener = try await bootstrap.bind(
-                host: binding.address,
-                port: binding.port)
+            listener = try await bootstrap.bind(host: host, port: port)
             {
                 (connection:any Channel) in
 
@@ -185,7 +211,7 @@ extension HTTP.Server
             }
         }
 
-        Log[.debug] = "bound to \(binding.address):\(binding.port)"
+        Log[.debug] = "bound to \(host):\(port)"
 
         try await listener.executeThenClose
         {
@@ -208,14 +234,14 @@ extension HTTP.Server
                             return
                         }
 
-                        let origin:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: firewall)
+                        let client:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: firewall)
 
                         handler:
                         do
                         {
                             try await self.handle(connection: connection,
-                                origin: origin,
-                                as: authority)
+                                client: client,
+                                server: server)
                         }
                         catch NIOSSLError.uncleanShutdown
                         {
@@ -228,7 +254,7 @@ extension HTTP.Server
                                 break handler
                             }
 
-                            self.log(event: .http1(error), ip: origin)
+                            self.log(event: .http1(error), ip: client)
                         }
 
                         try await connection.channel.close()
@@ -244,18 +270,18 @@ extension HTTP.Server
                             return
                         }
 
-                        let origin:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: firewall)
+                        let client:HTTP.ServerRequest.Origin = .lookup(ip: ip, in: firewall)
 
                         do
                         {
                             try await self.handle(connection: channel,
                                 streams: streams.inbound,
-                                origin: origin,
-                                as: authority)
+                                client: client,
+                                server: server)
                         }
                         catch let error
                         {
-                            self.log(event: .http2(error), ip: origin)
+                            self.log(event: .http2(error), ip: client)
                         }
 
                         try await channel.close()
@@ -280,12 +306,12 @@ extension HTTP.Server
 {
     /// Handles an HTTP/1.1 connection.
     private
-    func handle<Authority>(
+    func handle(
         connection:NIOAsyncChannel<
             HTTPPart<HTTPRequestHead, ByteBuffer>,
             HTTPPart<HTTPResponseHead, ByteBuffer>>,
-        origin:HTTP.ServerRequest.Origin,
-        as authority:Authority) async throws where Authority:HTTP.ServerAuthority
+        client:HTTP.ServerRequest.Origin,
+        server:HTTP.ServerOrigin) async throws
     {
         try await connection.executeThenClose
         {
@@ -320,20 +346,18 @@ extension HTTP.Server
                 var message:HTTP.ServerMessage<HTTPHeaders>
                 do
                 {
-                    message = .init(
-                        payload: try await self.respond(to: part,
+                    message = .init(origin: server,
+                        response: try await self.respond(to: part,
                             inbound: &parts,
-                            origin: origin),
-                        binding: authority.binding,
+                            origin: client),
                         using: connection.channel.allocator)
                 }
                 catch let error
                 {
-                    self.log(event: .application(error), ip: origin)
+                    self.log(event: .application(error), ip: client)
 
-                    message = .error(
-                        message: Authority.redact(error: error),
-                        binding: authority.binding,
+                    message = .error(origin: server,
+                        string: self.redact(error: error),
                         using: connection.channel.allocator)
                 }
 
@@ -442,11 +466,11 @@ extension HTTP.Server
 {
     /// Handles an HTTP/2 connection.
     private
-    func handle<Authority>(
+    func handle(
         connection:any Channel,
         streams:NIOHTTP2AsyncSequence<HTTP.Stream>,
-        origin:HTTP.ServerRequest.Origin,
-        as authority:Authority) async throws where Authority:HTTP.ServerAuthority
+        client:HTTP.ServerRequest.Origin,
+        server:HTTP.ServerOrigin) async throws
     {
         //  I am not sure why the sequence of streams has no backpressure. Out of an abundance
         //  of caution, there is a hard limit of 128 buffered streams. A sane peer should never
@@ -495,7 +519,7 @@ extension HTTP.Server
 
                     let request:Task<HTTP.ServerResponse, any Error> = .init
                     {
-                        try await self.respond(to: inbound, origin: origin)
+                        try await self.respond(to: inbound, origin: client)
                     }
                     stream.frames.channel.closeFuture.whenComplete
                     {
@@ -505,9 +529,8 @@ extension HTTP.Server
                     let message:HTTP.ServerMessage<HPACKHeaders>
                     do
                     {
-                        message = .init(
-                            payload: try await request.value,
-                            binding: authority.binding,
+                        message = .init(origin: server,
+                            response: try await request.value,
                             using: stream.frames.channel.allocator)
                     }
                     catch is CancellationError
@@ -516,11 +539,10 @@ extension HTTP.Server
                     }
                     catch let error
                     {
-                        self.log(event: .application(error), ip: origin)
+                        self.log(event: .application(error), ip: client)
 
-                        message = .error(
-                            message: Authority.redact(error: error),
-                            binding: authority.binding,
+                        message = .error(origin: server,
+                            string: self.redact(error: error),
                             using: stream.frames.channel.allocator)
                     }
 
@@ -549,7 +571,7 @@ extension HTTP.Server
                 }
                 else
                 {
-                    self.log(event: .http2(HTTP.ActivityTimeoutError.connection), ip: origin)
+                    self.log(event: .http2(HTTP.ActivityTimeoutError.connection), ip: client)
                 }
 
                 //  There doesn’t seem to be any benefit from sticking around after sending
