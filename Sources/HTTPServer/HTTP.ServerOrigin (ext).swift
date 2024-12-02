@@ -15,18 +15,17 @@ extension HTTP.ServerOrigin
 extension HTTP.ServerOrigin
 {
     public
-    func redirect(from binding:(address:String, port:Int),
-        on threads:MultiThreadedEventLoopGroup) async throws
+    func redirect(from host:String, port:Int) async throws
     {
-        let bootstrap:ServerBootstrap = .init(group: threads)
+        let bootstrap:ServerBootstrap = .init(group: MultiThreadedEventLoopGroup.singleton)
             .serverChannelOption(ChannelOptions.backlog, value: 256)
             .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 1)
 
         let listener:NIOAsyncChannel<any Channel, Never> = try await bootstrap.bind(
-            host: binding.address,
-            port: binding.port)
+            host: host,
+            port: port)
         {
             (connection:any Channel) in
 
@@ -42,7 +41,7 @@ extension HTTP.ServerOrigin
             }
         }
 
-        Log[.debug] = "bound to \(binding.address):\(binding.port)"
+        Log[.debug] = "bound to \(host):\(port)"
 
         try await listener.executeThenClose
         {
