@@ -30,10 +30,24 @@ extension Unidoc.ServerLogger
     {
         self.log(.init(event: event, type: .plugin(plugin), date: date))
     }
+
     @inlinable public nonisolated
-    func log(event:any Unidoc.ServerEvent, level:HTTP.LogLevel, date:UnixAttosecond = .now())
+    func log(event:any Unidoc.ServerEvent,
+        level:Unidoc.ServerLog.Level,
+        date:UnixAttosecond = .now())
     {
         self.log(.init(event: event, type: .global(level), date: date))
+    }
+
+    @inlinable public nonisolated
+    func log(error:any Error,
+        as level:Unidoc.ServerLog.Level = .error,
+        file:String = #fileID,
+        line:Int = #line)
+    {
+        self.log(
+            event: Unidoc.ServerError.init(error: error, file: file, line: line),
+            level: level)
     }
 }
 extension Unidoc.ServerLogger

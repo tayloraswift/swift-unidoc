@@ -15,7 +15,10 @@ extension HTTP.ServerOrigin
 extension HTTP.ServerOrigin
 {
     public
-    func redirect(from host:String, port:Int) async throws
+    func redirect(
+        from host:String,
+        port:Int,
+        onConnectionError handle:@Sendable @escaping (any Error) -> ()) async throws
     {
         let bootstrap:ServerBootstrap = .init(group: MultiThreadedEventLoopGroup.singleton)
             .serverChannelOption(ChannelOptions.backlog, value: 256)
@@ -41,8 +44,6 @@ extension HTTP.ServerOrigin
             }
         }
 
-        Log[.debug] = "bound to \(host):\(port)"
-
         try await listener.executeThenClose
         {
             try await $0.iterate(concurrently: 20)
@@ -63,7 +64,7 @@ extension HTTP.ServerOrigin
                 }
                 catch let error
                 {
-                    Log[.error] = "\(error)"
+                    handle(error)
                 }
             }
         }

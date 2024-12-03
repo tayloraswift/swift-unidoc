@@ -1,5 +1,4 @@
 import BSON
-import HTTPServer
 import MongoDB
 import Symbols
 
@@ -15,6 +14,8 @@ extension Unidoc
         let eventQueue:AsyncStream<Event>.Continuation
         private nonisolated
         let events:AsyncStream<Event>
+        private nonisolated
+        let logger:any ServerLogger
 
         private
         var subscriptionCounter:UInt
@@ -26,11 +27,13 @@ extension Unidoc
         private
         init(id:Symbol.Triple,
             eventQueue:AsyncStream<Event>.Continuation,
-            events:AsyncStream<Event>)
+            events:AsyncStream<Event>,
+            logger:any ServerLogger)
         {
             self.id = id
             self.eventQueue = eventQueue
             self.events = events
+            self.logger = logger
 
             self.subscriptionCounter = 0
             self.subscriptions = [:]
@@ -41,14 +44,14 @@ extension Unidoc
 extension Unidoc.BuildCoordinator
 {
     public
-    init(id:Symbol.Triple)
+    init(id:Symbol.Triple, logger:any Unidoc.ServerLogger)
     {
         let eventQueue:AsyncStream<Event>.Continuation
         let events:AsyncStream<Event>
 
         (events, eventQueue) = AsyncStream<Event>.makeStream()
 
-        self.init(id: id, eventQueue: eventQueue, events: events)
+        self.init(id: id, eventQueue: eventQueue, events: events, logger: logger)
     }
 
     public
@@ -78,7 +81,7 @@ extension Unidoc.BuildCoordinator
             }
             catch let error
             {
-                Log[.error] = "Failed to pull build metadata: \(error)"
+                self.logger.log(error: error)
             }
 
             do

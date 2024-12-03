@@ -240,9 +240,7 @@ extension Unidoc.Server
             }
             catch let error
             {
-                self.logger.log(
-                    event: Unidoc.ServerError.init(error: error),
-                    level: .error)
+                self.logger.log(error: error)
             }
         }
     }
