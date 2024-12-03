@@ -3,7 +3,7 @@ import HTTP
 extension Unidoc
 {
     @frozen public
-    enum ServerEventType:Sendable
+    enum ServerTriggeredEventType:Sendable
     {
         case global(ServerLog.Level)
         case plugin(String)

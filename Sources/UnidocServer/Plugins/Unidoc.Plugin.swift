@@ -6,10 +6,8 @@ import UnidocRender
 extension Unidoc
 {
     public
-    protocol Plugin<Event>:Sendable
+    protocol Plugin:Sendable
     {
-        associatedtype Event:ServerEvent
-
         /// Restart cooldown.
         static var cooldown:Duration { get }
         static var title:String { get }
@@ -17,7 +15,7 @@ extension Unidoc
 
         var enabledInitially:Bool { get }
 
-        func run(in context:PluginContext<Event>) async throws -> Duration?
+        func run(in context:PluginContext) async throws -> Duration?
     }
 }
 extension Unidoc.Plugin

@@ -1,3 +1,4 @@
+import MarkdownABI
 import NIOPosix
 import NIOSSL
 import UnidocDB
@@ -7,10 +8,10 @@ import UnixTime
 extension Unidoc
 {
     @frozen public
-    struct PluginContext<Event> where Event:ServerEvent
+    struct PluginContext
     {
         @usableFromInline
-        let shared:(any ServerLogger)?
+        let logger:any ServerLogger
         @usableFromInline
         let plugin:String
 
@@ -21,12 +22,12 @@ extension Unidoc
 
         @inlinable public
         init(
-            logger shared:(any ServerLogger)?,
+            logger:any ServerLogger,
             plugin:String,
             client:NIOSSLContext,
             db:DB)
         {
-            self.shared = shared
+            self.logger = logger
             self.plugin = plugin
             self.client = client
             self.db = db
@@ -36,8 +37,8 @@ extension Unidoc
 extension Unidoc.PluginContext
 {
     @inlinable public
-    func log(event:Event, date:UnixAttosecond = .now())
+    func log(at date:UnixAttosecond = .now(), encode:(inout Markdown.BinaryEncoder) -> ())
     {
-        self.shared?.log(event: event, from: self.plugin, date: date)
+        self.logger.log(as: .plugin(self.plugin), at: date, encode: encode)
     }
 }

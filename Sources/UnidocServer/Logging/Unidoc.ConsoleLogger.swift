@@ -13,13 +13,13 @@ extension Unidoc
     actor ConsoleLogger
     {
         private nonisolated
-        let events:AsyncStream<Observation>.Continuation
+        let events:AsyncStream<LoggableEvent>.Continuation
 
         private
         var logs:ServerLog
 
         public
-        init(events:AsyncStream<Observation>.Continuation)
+        init(events:AsyncStream<LoggableEvent>.Continuation)
         {
             self.events = events
             self.logs = .init(limit: 100)
@@ -38,29 +38,31 @@ extension Unidoc.ConsoleLogger
 extension Unidoc.ConsoleLogger:Unidoc.ServerLogger
 {
     public nonisolated
-    func log(_ observation:Unidoc.Observation.ServerTriggered)
+    func log(_ event:Unidoc.ServerTriggeredEvent)
     {
-        self.events.yield(.server(observation))
+        self.events.yield(.server(event))
     }
     public nonisolated
-    func log(_ observation:Unidoc.Observation.ClientTriggered)
+    func log(_ event:Unidoc.ClientTriggeredEvent)
     {
     }
 
     public
-    func handle(_ observation:Unidoc.Observation.ServerTriggered)
+    func handle(_ event:Unidoc.ServerTriggeredEvent)
     {
-        switch observation.type
+        switch event.type
         {
         case .global(let level):
-            Self.print("\(level): \(observation.event)")
+            //  This is a poor rendered description, as the `<dl>` contents will be rendered
+            //  with no separators or line breaks, but it’s the best we can do for now.
+            Self.print("\(level): \(event.message.bytecode.safe)")
 
         case .plugin:
-            self.logs.push(observation)
+            self.logs.push(event)
         }
     }
     public
-    func handle(_ observation:Unidoc.Observation.ClientTriggered)
+    func handle(_ event:Unidoc.ClientTriggeredEvent)
     {
     }
 

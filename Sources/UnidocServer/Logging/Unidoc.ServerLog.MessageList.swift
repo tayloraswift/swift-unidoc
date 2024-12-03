@@ -1,4 +1,5 @@
 import HTML
+import MarkdownRendering
 import UnixTime
 
 extension Unidoc.ServerLog
@@ -33,13 +34,8 @@ extension Unidoc.ServerLog.MessageList:HTML.OutputStreamable
         {
             ol[.li]
             {
-                $0[.header]
-                {
-                    $0[.h3] { message.event.h3(&$0) }
-                    $0[.div] = message.header(now: self.now)
-                }
-
-                $0[.dl] { message.event.dl(&$0) }
+                $0[.header] = message.header(now: self.now)
+                $0[.div] = message.bytecode.safe
             }
         }
     }

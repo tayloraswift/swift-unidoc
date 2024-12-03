@@ -188,7 +188,7 @@ extension Unidoc.Server
                 }
 
                 let started:ContinuousClock.Instant = .now
-                let context:Unidoc.PluginContext<Plugin.Event> = .init(
+                let context:Unidoc.PluginContext = .init(
                     logger: self.logger,
                     plugin: Plugin.id,
                     client: self.clientIdentity,
@@ -206,10 +206,9 @@ extension Unidoc.Server
             catch let error
             {
                 self.logger.log(
-                    event: Unidoc.ServerError.init(error: error),
-                    from: Plugin.id,
-                    //  This could be a while since `started` was set.
-                    date: .now())
+                    as: .plugin(Plugin.id),
+                    at: .now(), //  This could be a while since `started` was set.
+                    reflecting: error)
             }
 
             try await cooldown
@@ -252,29 +251,45 @@ extension Unidoc.Server
     func log(event:HTTP.ServerEvent, ip origin:HTTP.ServerRequest.Origin?)
     {
         let error:any Error
-        let type:String
+        let level:Unidoc.ServerLog.Level
+        let layer:String
 
         switch event
         {
-        case .application(let value):
-            error = value
-            type = "Application error"
+        case .application(let underlying):
+            error = underlying
+            level = .error
+            layer = "Application"
 
-        case .http1(let value):
-            error = value
-            type = "HTTP/1 error"
+        case .http1(let underlying):
+            error = underlying
+            level = .debug
+            layer = "HTTP/1"
 
-        case .http2(let value):
-            error = value
-            type = "HTTP/2 error"
+        case .http2(let underlying):
+            error = underlying
+            level = .debug
+            layer = "HTTP/2"
 
-        case .tcp(let value):
-            error = value
-            type = "TCP error"
+        case .tcp(let underlying):
+            error = underlying
+            level = .debug
+            layer = "TCP"
         }
 
-        let event:Unidoc.ServerError = .init(error: error, type: type, from: origin)
-        self.logger.log(event: event, level: .debug, date: .now())
+        self.logger.log(as: .global(level), at: .now())
+        {
+            $0[.dl]
+            {
+                $0[.dt] = "Error type"
+                $0[.dd] = "\(String.init(reflecting: Swift.type(of: error))) (\(layer))"
+
+                $0[.dt] = "Origin"
+                $0[.dd] = origin?.ip.description ?? "unknown"
+            }
+
+            $0[.pre] = String.init(reflecting: error)
+        }
     }
 }
 extension Unidoc.Server
@@ -482,12 +497,24 @@ extension Unidoc.Server
         }
         catch let error
         {
-            let errorPage:Unidoc.ServerErrorPage = .init(error: error)
-            let error:Unidoc.ServerError = .init(error: error,
-                from: request.client.origin,
-                path: "\(request.uri)")
-            self.logger.log(event: error, level: .error, date: format.time)
+            self.logger.log(as: .global(.error), at: format.time)
+            {
+                $0[.dl]
+                {
+                    $0[.dt] = "Error type"
+                    $0[.dd] = String.init(reflecting: Swift.type(of: error))
 
+                    $0[.dt] = "Request origin"
+                    $0[.dd] = "\(request.client.origin.ip)"
+
+                    $0[.dt] = "Request"
+                    $0[.dd] = "\(request.uri)"
+                }
+
+                $0[.pre] = String.init(reflecting: error)
+            }
+
+            let errorPage:Unidoc.ServerErrorPage = .init(error: error)
             let html:HTTP.Resource = errorPage.resource(format: format)
 
             /// This will still look the same to humans, but it will not appear as if

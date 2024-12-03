@@ -1,3 +1,4 @@
+import MarkdownABI
 import UnixCalendar
 import UnixTime
 
@@ -7,14 +8,14 @@ extension Unidoc.ServerLog
     struct Message:Sendable
     {
         @usableFromInline
-        let event:any Unidoc.ServerEvent
+        let bytecode:Markdown.Bytecode
         @usableFromInline
         let date:UnixAttosecond
 
         @inlinable public
-        init(event:any Unidoc.ServerEvent, date:UnixAttosecond)
+        init(bytecode:Markdown.Bytecode, date:UnixAttosecond)
         {
-            self.event = event
+            self.bytecode = bytecode
             self.date = date
         }
     }
