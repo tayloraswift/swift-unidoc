@@ -4,10 +4,10 @@ import UnixTime
 
 extension Unidoc.ServerLog
 {
-    /// A formatting abstraction that renders a list of ``PluginMessage`` as a sequence of `li`
+    /// A formatting abstraction that renders a list of ``Message``s as a sequence of `li`
     /// elements with relative timestamps.
     ///
-    /// You should not store ``PluginMessageList``s for a long period of time, because they
+    /// You should not store `MessageList`s for a long period of time, because they
     /// contain a current time that will become stale if not immediately rendered.
     @frozen public
     struct MessageList<Items> where Items:RandomAccessCollection<Message>
