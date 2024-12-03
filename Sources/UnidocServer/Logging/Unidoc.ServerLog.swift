@@ -31,26 +31,25 @@ extension Unidoc
 extension Unidoc.ServerLog
 {
     public mutating
-    func push(error:Unidoc.ServerError, date:UnixAttosecond)
+    func push(message:Message, to log:Unidoc.ServerLog.Level)
     {
-        self.error.push(event: error, date: date)
+        switch log
+        {
+        case .debug:    self.debug.push(message)
+        case .error:    self.error.push(message)
+        }
     }
 
     public mutating
-    func push(_ observation:Unidoc.Observation.ServerTriggered)
+    func push(_ event:Unidoc.ServerTriggeredEvent)
     {
-        switch observation.type
+        switch event.type
         {
-        case .global(.debug):
-            self.debug.push(event: observation.event, date: observation.date)
-
-        case .global(.error):
-            self.error.push(event: observation.event, date: observation.date)
+        case .global(let log):
+            self.push(message: event.message, to: log)
 
         case .plugin(let id):
-            self.plugin[id, default: .init(limit: self.limit)].push(
-                event: observation.event,
-                date: observation.date)
+            self.plugin[id, default: .init(limit: self.limit)].push(event.message)
         }
     }
 }

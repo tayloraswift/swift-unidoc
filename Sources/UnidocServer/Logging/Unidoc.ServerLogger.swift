@@ -1,4 +1,5 @@
-import HTTP
+import HTTPServer
+import MarkdownABI
 import UnidocRender
 import UnixCalendar
 import UnixTime
@@ -8,15 +9,15 @@ extension Unidoc
     public
     protocol ServerLogger:Actor
     {
-        init(events:AsyncStream<Observation>.Continuation)
+        init(events:AsyncStream<LoggableEvent>.Continuation)
 
         nonisolated
-        func log(_ observation:Observation.ClientTriggered)
+        func log(_ event:ClientTriggeredEvent)
         nonisolated
-        func log(_ observation:Observation.ServerTriggered)
+        func log(_ event:ServerTriggeredEvent)
 
-        func handle(_ observation:Observation.ClientTriggered)
-        func handle(_ observation:Observation.ServerTriggered)
+        func handle(_ event:ClientTriggeredEvent)
+        func handle(_ event:ServerTriggeredEvent)
 
         func dashboard(from server:Server, as format:Unidoc.RenderFormat) async -> HTTP.Resource
 
@@ -25,29 +26,63 @@ extension Unidoc
 }
 extension Unidoc.ServerLogger
 {
-    @inlinable public nonisolated
-    func log(event:any Unidoc.ServerEvent, from plugin:String, date:UnixAttosecond = .now())
+    @inlinable nonisolated
+    func log(
+        as type:Unidoc.ServerTriggeredEventType,
+        at date:UnixAttosecond,
+        encode:(inout Markdown.BinaryEncoder) -> ())
     {
-        self.log(.init(event: event, type: .plugin(plugin), date: date))
+        self.log(.init(message: .init(bytecode: .init(with: encode), date: date), type: type))
     }
 
-    @inlinable public nonisolated
-    func log(event:any Unidoc.ServerEvent,
-        level:Unidoc.ServerLog.Level,
-        date:UnixAttosecond = .now())
+    @inlinable nonisolated
+    func log(
+        as type:Unidoc.ServerTriggeredEventType,
+        at date:UnixAttosecond,
+        reflecting error:any Error)
     {
-        self.log(.init(event: event, type: .global(level), date: date))
+        self.log(as: type, at: date)
+        {
+            $0[.dl]
+            {
+                $0[.dt] = "Error type"
+                $0[.dd] = String.init(reflecting: Swift.type(of: error))
+            }
+
+            $0[.pre] = String.init(reflecting: error)
+        }
+    }
+}
+extension Unidoc.ServerLogger
+{
+    @inlinable public nonisolated
+    func log(
+        as level:Unidoc.ServerLog.Level,
+        at date:UnixAttosecond = .now(),
+        encode:(inout Markdown.BinaryEncoder) -> ())
+    {
+        self.log(as: .global(level), at: date, encode: encode)
     }
 
     @inlinable public nonisolated
     func log(error:any Error,
-        as level:Unidoc.ServerLog.Level = .error,
         file:String = #fileID,
-        line:Int = #line)
+        line:Int = #line,
+        at date:UnixAttosecond = .now())
     {
-        self.log(
-            event: Unidoc.ServerError.init(error: error, file: file, line: line),
-            level: level)
+        self.log(as: .global(.error), at: date)
+        {
+            $0[.dl]
+            {
+                $0[.dt] = "Error type"
+                $0[.dd] = String.init(reflecting: Swift.type(of: error))
+
+                $0[.dt] = "Caught at"
+                $0[.dd] = "\(file):\(line)"
+            }
+
+            $0[.pre] = String.init(reflecting: error)
+        }
     }
 }
 extension Unidoc.ServerLogger
@@ -55,10 +90,10 @@ extension Unidoc.ServerLogger
     @inlinable public
     static func run<T>(with body:(Self) async throws -> T) async -> T?
     {
-        let events:AsyncStream<Unidoc.Observation>.Continuation
-        let stream:AsyncStream<Unidoc.Observation>
+        let events:AsyncStream<Unidoc.LoggableEvent>.Continuation
+        let stream:AsyncStream<Unidoc.LoggableEvent>
 
-        (stream, events) = AsyncStream<Unidoc.Observation>.makeStream()
+        (stream, events) = AsyncStream<Unidoc.LoggableEvent>.makeStream()
 
         let loop:Self = .init(events: events)
 
@@ -79,14 +114,14 @@ extension Unidoc.ServerLogger
     }
 
     @inlinable
-    func listen(to stream:AsyncStream<Unidoc.Observation>) async
+    func listen(to stream:AsyncStream<Unidoc.LoggableEvent>) async
     {
-        for await observation:Unidoc.Observation in stream
+        for await event:Unidoc.LoggableEvent in stream
         {
-            switch observation
+            switch event
             {
-            case .client(let observation):  self.handle(observation)
-            case .server(let observation):  self.handle(observation)
+            case .client(let event):  self.handle(event)
+            case .server(let event):  self.handle(event)
             }
         }
     }

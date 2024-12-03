@@ -1,9 +1,9 @@
 import HTTP
 
-extension Unidoc.Observation
+extension Unidoc
 {
     @frozen public
-    struct ClientTriggered:Sendable
+    struct ClientTriggeredEvent:Sendable
     {
         public
         let duration:Duration
