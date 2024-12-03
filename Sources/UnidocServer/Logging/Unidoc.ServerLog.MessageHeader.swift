@@ -3,10 +3,10 @@ import UnidocUI
 import UnixCalendar
 import UnixTime
 
-extension Unidoc.PluginMessage
+extension Unidoc.ServerLog
 {
     @frozen @usableFromInline
-    struct DateHeader
+    struct MessageHeader
     {
         @usableFromInline
         let components:Timestamp.Components
@@ -21,7 +21,7 @@ extension Unidoc.PluginMessage
         }
     }
 }
-extension Unidoc.PluginMessage.DateHeader:HTML.OutputStreamable
+extension Unidoc.ServerLog.MessageHeader:HTML.OutputStreamable
 {
     @inlinable static
     func += (div:inout HTML.ContentEncoder, self:Self)

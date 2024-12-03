@@ -19,14 +19,7 @@ extension Unidoc.LoadDashboardOperation:Unidoc.AdministrativeOperation
         switch self
         {
         case .logger:
-            guard
-            let logger:any Unidoc.ServerLogger = server.logger
-            else
-            {
-                return .notFound("No logging enabled\n")
-            }
-
-            return .ok(await logger.dashboard(from: server, as: format))
+            return .ok(await server.logger.dashboard(from: server, as: format))
 
         case .replicaSet:
             let configuration:Mongo.ReplicaSetConfiguration = try await db.session.run(
