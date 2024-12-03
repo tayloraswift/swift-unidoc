@@ -1,5 +1,4 @@
 import HTTP
-import HTTPServer
 
 extension Unidoc.Server
 {
@@ -24,8 +23,6 @@ extension Unidoc.Server.Promise
 
     func resume(rendering error:any Error, as format:Unidoc.RenderFormat)
     {
-        Log[.error] = "\(error)"
-
         let page:Unidoc.ServerErrorPage = .init(error: error)
         self.resume(returning: .error(page.resource(format: format)))
     }
