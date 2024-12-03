@@ -1,4 +1,3 @@
-import HTTPServer
 import LZ77
 import S3
 import S3Client
@@ -40,7 +39,9 @@ extension Unidoc.BuildArtifact
             }
             else
             {
-                Log[.debug] = "No destination bucket configured for exporting build logs!"
+                //  We only reach this path in development, so we don’t need to flush stdout
+                print("No destination bucket configured for exporting build logs!")
+
                 for log:Unidoc.BuildLog in self.logs
                 {
                     print(String.init(decoding: try Gzip.extract(from: log.text.bytes),

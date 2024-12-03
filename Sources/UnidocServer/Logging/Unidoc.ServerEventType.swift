@@ -5,7 +5,7 @@ extension Unidoc
     @frozen public
     enum ServerEventType:Sendable
     {
-        case global(HTTP.LogLevel)
+        case global(ServerLog.Level)
         case plugin(String)
     }
 }

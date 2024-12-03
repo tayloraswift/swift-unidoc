@@ -27,6 +27,7 @@ extension Unidoc.BlockingOperation
         }
         catch let error
         {
+            server.logger.log(error: error)
             request.resume(rendering: error, as: server.format())
         }
     }

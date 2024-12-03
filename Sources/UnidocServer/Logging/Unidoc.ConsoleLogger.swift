@@ -1,3 +1,9 @@
+#if canImport(Glibc)
+@preconcurrency import Glibc
+#elseif canImport(Darwin)
+@preconcurrency import Darwin
+#endif
+
 import HTTP
 import UnidocRender
 
@@ -20,6 +26,15 @@ extension Unidoc
         }
     }
 }
+extension Unidoc.ConsoleLogger
+{
+    public
+    static func print(_ message:String)
+    {
+        Swift.print(message)
+        fflush(stdout)
+    }
+}
 extension Unidoc.ConsoleLogger:Unidoc.ServerLogger
 {
     public nonisolated
@@ -35,7 +50,14 @@ extension Unidoc.ConsoleLogger:Unidoc.ServerLogger
     public
     func handle(_ observation:Unidoc.Observation.ServerTriggered)
     {
-        self.logs.push(observation)
+        switch observation.type
+        {
+        case .global(let level):
+            Self.print("\(level): \(observation.event)")
+
+        case .plugin:
+            self.logs.push(observation)
+        }
     }
     public
     func handle(_ observation:Unidoc.Observation.ClientTriggered)

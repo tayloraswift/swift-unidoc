@@ -211,8 +211,6 @@ extension HTTP.Server
             }
         }
 
-        Log[.debug] = "bound to \(host):\(port)"
-
         try await listener.executeThenClose
         {
             try await $0.iterate(concurrently: 60)

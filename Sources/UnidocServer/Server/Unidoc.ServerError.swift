@@ -32,6 +32,17 @@ extension Unidoc
 }
 extension Unidoc.ServerError
 {
+    @inlinable public
+    init(error:__shared any Error,
+        file:String = #fileID,
+        line:Int = #line)
+    {
+        self.init(details: String.init(reflecting: error),
+            type: "\(file):\(line): \(String.init(reflecting: Swift.type(of: error)))",
+            from: nil,
+            path: nil)
+    }
+
     init(error:__shared any Error,
         type:String? = nil,
         from origin:HTTP.ServerRequest.Origin? = nil,
