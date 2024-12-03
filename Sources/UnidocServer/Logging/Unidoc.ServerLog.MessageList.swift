@@ -1,8 +1,7 @@
-import DequeModule
 import HTML
 import UnixTime
 
-extension Unidoc
+extension Unidoc.ServerLog
 {
     /// A formatting abstraction that renders a list of ``PluginMessage`` as a sequence of `li`
     /// elements with relative timestamps.
@@ -10,7 +9,7 @@ extension Unidoc
     /// You should not store ``PluginMessageList``s for a long period of time, because they
     /// contain a current time that will become stale if not immediately rendered.
     @frozen public
-    struct PluginMessageList<Items> where Items:RandomAccessCollection<PluginMessage>
+    struct MessageList<Items> where Items:RandomAccessCollection<Message>
     {
         @usableFromInline
         let items:Items
@@ -25,12 +24,12 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PluginMessageList:HTML.OutputStreamable
+extension Unidoc.ServerLog.MessageList:HTML.OutputStreamable
 {
     @inlinable public
     static func += (ol:inout HTML.ContentEncoder, self:Self)
     {
-        for message:Unidoc.PluginMessage in self.items.reversed()
+        for message:Unidoc.ServerLog.Message in self.items.reversed()
         {
             ol[.li]
             {

@@ -93,7 +93,8 @@ extension Main.Preview:AsyncParsableCommand
         await mongodb.withSessionPool(logger: .init(level: .error))
         {
             @Sendable (pool:Mongo.SessionPool) in
-            do
+
+            await Unidoc.ConsoleLogger.run
             {
                 let settings:Unidoc.DatabaseSettings = .init(access: options.access)
                 {
@@ -106,14 +107,10 @@ extension Main.Preview:AsyncParsableCommand
                     coordinators: [],
                     plugins: [linker],
                     options: options,
+                    logger: $0,
                     db: .init(settings: settings, sessions: pool, unidoc: "unidoc"))
 
                 try await server.run(on: port, with: serverIdentity)
-            }
-            catch let error
-            {
-                //  Temporary workaround for bypassing backtrace collection.
-                Log[.error] = "(top-level) \(error)"
             }
         }
     }

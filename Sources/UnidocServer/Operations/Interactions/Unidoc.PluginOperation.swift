@@ -38,7 +38,7 @@ extension Unidoc.PluginOperation:Unidoc.AdministrativeOperation
 
         case .status:
             let statusPage:Unidoc.PluginStatusPage = .init(
-                messages: await server.logger?.messages(from: self.plugin) ?? [],
+                messages: await server.logger[plugin: self.plugin],
                 plugin: type(of: handle.plugin),
                 active: handle.active.load(ordering: .relaxed))
 

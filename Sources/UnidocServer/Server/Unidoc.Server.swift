@@ -38,14 +38,14 @@ extension Unidoc
 
         let policy:(any HTTP.ServerPolicy)?
         @usableFromInline
-        let logger:(any ServerLogger)?
+        let logger:any ServerLogger
 
         public
         init(clientIdentity:NIOSSLContext,
             coordinators:[BuildCoordinator],
             plugins:[any Plugin],
             options:ServerOptions,
-            logger:(any ServerLogger)? = nil,
+            logger:any ServerLogger,
             db:Database)
         {
             var policy:(any HTTP.ServerPolicy)? = nil
@@ -205,7 +205,7 @@ extension Unidoc.Server
             }
             catch let error
             {
-                self.logger?.log(
+                self.logger.log(
                     event: Unidoc.ServerError.init(error: error),
                     from: Plugin.id,
                     //  This could be a while since `started` was set.
@@ -240,7 +240,7 @@ extension Unidoc.Server
             }
             catch let error
             {
-                self.logger?.log(
+                self.logger.log(
                     event: Unidoc.ServerError.init(error: error),
                     level: .error)
             }
@@ -276,7 +276,7 @@ extension Unidoc.Server
         }
 
         let event:Unidoc.ServerError = .init(error: error, type: type, from: origin)
-        self.logger?.log(event: event, level: .debug, date: .now())
+        self.logger.log(event: event, level: .debug, date: .now())
     }
 }
 extension Unidoc.Server
@@ -383,14 +383,20 @@ extension Unidoc.Server
             return await self.submit(update: procedural)
 
         case .sync(let response):
-            self.logger?.log(response: response, time: .zero, for: request)
+            self.logger.log(.init(duration: .zero,
+                response: response,
+                request: request))
+
             return response
 
         case .syncHTML(let renderable):
             let response:HTTP.ServerResponse = renderable.response(
                 format: self.format(for: request))
 
-            self.logger?.log(response: response, time: .zero, for: request)
+            self.logger.log(.init(duration: .zero,
+                response: response,
+                request: request))
+
             return response
 
         case .syncLoad(let request):
@@ -482,7 +488,7 @@ extension Unidoc.Server
             let error:Unidoc.ServerError = .init(error: error,
                 from: request.client.origin,
                 path: "\(request.uri)")
-            self.logger?.log(event: error, level: .error, date: format.time)
+            self.logger.log(event: error, level: .error, date: format.time)
 
             let html:HTTP.Resource = errorPage.resource(format: format)
 
@@ -504,7 +510,10 @@ extension Unidoc.Server
         default:                                break
         }
 
-        self.logger?.log(response: response, time: .now - initiated, for: request)
+        self.logger.log(.init(duration: .now - initiated,
+            response: response,
+            request: request))
+
         return response
     }
 }
