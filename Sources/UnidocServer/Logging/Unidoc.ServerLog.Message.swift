@@ -1,28 +1,28 @@
 import UnixCalendar
 import UnixTime
 
-extension Unidoc
+extension Unidoc.ServerLog
 {
     @frozen public
-    struct PluginMessage:Sendable
+    struct Message:Sendable
     {
         @usableFromInline
-        let event:any ServerEvent
+        let event:any Unidoc.ServerEvent
         @usableFromInline
         let date:UnixAttosecond
 
         @inlinable public
-        init(event:any ServerEvent, date:UnixAttosecond)
+        init(event:any Unidoc.ServerEvent, date:UnixAttosecond)
         {
             self.event = event
             self.date = date
         }
     }
 }
-extension Unidoc.PluginMessage
+extension Unidoc.ServerLog.Message
 {
     @inlinable
-    func header(now:UnixAttosecond) -> DateHeader?
+    func header(now:UnixAttosecond) -> Unidoc.ServerLog.MessageHeader?
     {
         self.date.timestamp.map
         {

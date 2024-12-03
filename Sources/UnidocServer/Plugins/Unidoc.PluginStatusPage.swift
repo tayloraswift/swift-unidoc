@@ -7,7 +7,7 @@ extension Unidoc
 {
     struct PluginStatusPage:Sendable
     {
-        let messages:[PluginMessage]
+        let messages:[ServerLog.Message]
         let plugin:any Plugin.Type
         let active:Bool
     }
@@ -47,7 +47,7 @@ extension Unidoc.PluginStatusPage:Unidoc.AdministrativePage
             $0[.ol]
             {
                 $0.class = "events"
-            } = Unidoc.PluginMessageList<[Unidoc.PluginMessage]>.init(
+            } = Unidoc.ServerLog.MessageList<[Unidoc.ServerLog.Message]>.init(
                 items: self.messages,
                 now: format.time)
         }
