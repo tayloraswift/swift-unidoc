@@ -37,13 +37,13 @@ extension Unidoc.ServerLog.MessageBuffer
     func copy() -> [Unidoc.ServerLog.Message] { [_].init(self.messages) }
 
     mutating
-    func push(event:any Unidoc.ServerEvent, date:UnixAttosecond)
+    func push(_ message:Unidoc.ServerLog.Message)
     {
         if  self.messages.count == self.limit
         {
             self.messages.removeFirst()
         }
 
-        self.messages.append(.init(event: event, date: date))
+        self.messages.append(message)
     }
 }

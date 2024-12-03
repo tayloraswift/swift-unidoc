@@ -26,7 +26,7 @@ extension Unidoc.LinkerPlugin:Unidoc.Plugin
     static var id:String { "linker" }
 
     public
-    func run(in context:Unidoc.PluginContext<Event>) async throws -> Duration?
+    func run(in context:Unidoc.PluginContext) async throws -> Duration?
     {
         let graphs:AWS.S3.Client? = self.bucket.map
         {
@@ -51,10 +51,8 @@ extension Unidoc.LinkerPlugin
     private
     func perform(operation:Unidoc.DB.Snapshots.QueuedOperation,
         with graphs:AWS.S3.Client?,
-        in context:Unidoc.PluginContext<Event>) async throws
+        in context:Unidoc.PluginContext) async throws
     {
-        let event:Event?
-
         action:
         switch operation.action
         {
@@ -64,7 +62,7 @@ extension Unidoc.LinkerPlugin
                 s3: graphs)
             else
             {
-                event = nil
+                context.log(failed: operation.action, id: operation.edition)
                 break
             }
 
@@ -75,12 +73,18 @@ extension Unidoc.LinkerPlugin
                         volume: status.edition))
             }
 
-            event = .uplinked(status)
+            context.log(uplinked: status)
 
         case .unlink:
-            let status:Unidoc.UnlinkStatus? = try await context.db.unlink(operation.edition)
+            guard
+            let status:Unidoc.UnlinkStatus = try await context.db.unlink(operation.edition)
+            else
+            {
+                context.log(failed: operation.action, id: operation.edition)
+                break
+            }
 
-            event = status.map(Event.unlinked(_:))
+            context.log(unlinked: status)
 
         case .delete:
             //  Okay if the volume has already been unlinked, which causes this to return nil.
@@ -89,11 +93,11 @@ extension Unidoc.LinkerPlugin
                 switch unlink
                 {
                 case .declined(let id):
-                    event = .unlinked(.declined(id))
+                    context.log(unlinked: .declined(id))
                     break action
 
                 case .unlinked(let id):
-                    context.log(event: .unlinked(.unlinked(id)))
+                    context.log(unlinked: .unlinked(id))
                 }
             }
 
@@ -108,7 +112,7 @@ extension Unidoc.LinkerPlugin
                 let graphs:AWS.S3.Client
                 else
                 {
-                    event = nil
+                    context.log(failed: operation.action, id: operation.edition)
                     break action
                 }
 
@@ -126,25 +130,16 @@ extension Unidoc.LinkerPlugin
                 deletedS3 = false
             }
 
-            if  try await context.db.snapshots.delete(id: operation.edition)
-            {
-                event = .deleted(.deleted(operation.edition, fromS3: deletedS3))
-            }
+            guard try await context.db.snapshots.delete(id: operation.edition)
             else
             {
-                event = nil
+                context.log(failed: operation.action, id: operation.edition)
+                break action
             }
+
+            context.log(deleted: .deleted(operation.edition, fromS3: deletedS3))
         }
 
         try await context.db.snapshots.clear(id: operation.edition)
-
-        if  let event:Event
-        {
-            context.log(event: event)
-        }
-        else
-        {
-            context.log(event: .failed(operation.edition, action: operation.action))
-        }
     }
 }
