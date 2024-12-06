@@ -120,7 +120,7 @@ jobs:
                         -v $PWD:/swift-unidoc \
                         -w /swift-unidoc \
                         -e UNIDOC_ENABLE_INDEXSTORE=1 \
-                        tayloraswift/swift-cross-aaarch64:master \
+                        tayloraswift/swift-cross-aarch64:master \
                         /home/ubuntu/x86_64/swift/usr/bin/swift build \
                             -c release --destination Scripts/aarch64-unknown-linux-gnu.json
 
