@@ -14,12 +14,6 @@ import UnidocServerInsecure
 struct Main
 {
     @Option(
-        name: [.customLong("certificates"), .customShort("c")],
-        help: "A path to the certificates directory",
-        completion: .directory)
-    var certificates:FilePath.Directory = "Assets/certificates"
-
-    @Option(
         name: [.customLong("host"), .customShort("h")],
         help: "The name of a host to bind the documentation server to")
     var host:String = "localhost"
@@ -27,7 +21,7 @@ struct Main
     @Option(
         name: [.customLong("port"), .customShort("p")],
         help: "The number of a port to bind the documentation server to")
-    var port:Int = 8443
+    var port:Int = 8080
 
     @OptionGroup
     var db:Unidoc.DatabaseOptions
@@ -43,8 +37,6 @@ extension Main:AsyncParsableCommand
         NIOSingletons.groupLoopCountSuggestion = 2
 
         let clientIdentity:NIOSSLContext = try .clientDefault
-        let serverIdentity:NIOSSLContext = try .serverDefault(
-            certificateDirectory: "\(self.certificates)")
 
         let options:Unidoc.ServerOptions = .init(assetCache: nil,
             builders: 0,
@@ -81,7 +73,7 @@ extension Main:AsyncParsableCommand
                     logger: $0,
                     db: .init(settings: settings, sessions: pool, unidoc: "unidoc"))
 
-                try await server.run(on: self.port, with: serverIdentity)
+                try await server.run(on: self.port)
             }
         }
     }
