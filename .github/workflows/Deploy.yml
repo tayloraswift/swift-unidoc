@@ -3,9 +3,6 @@ name: package
 on:
     workflow_dispatch:
     #   We build semver tags, and the master branch.
-    pull_request:
-        branches: [ master ]
-
     push:
         branches: [ master ]
         tags:
@@ -102,7 +99,7 @@ jobs:
 
     linux-aarch64:
         runs-on: ubuntu-24.04
-        name: Ubuntu 24.04
+        name: Ubuntu 24.04 (AArch64)
         steps:
             -   name: Setup AWS CLI
                 uses: aws-actions/configure-aws-credentials@v1
@@ -122,7 +119,9 @@ jobs:
                         -e UNIDOC_ENABLE_INDEXSTORE=1 \
                         tayloraswift/swift-cross-aarch64:master \
                         /home/ubuntu/x86_64/swift/usr/bin/swift build \
-                            -c release --destination Scripts/aarch64-unknown-linux-gnu.json
+                            -c release \
+                            --destination Scripts/aarch64-unknown-linux-gnu.json \
+                            --static-swift-stdlib
 
                     Scripts/Package
                     Scripts/PackageLinker
