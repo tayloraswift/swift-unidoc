@@ -120,8 +120,7 @@ jobs:
                         tayloraswift/swift-cross-aarch64:master \
                         /home/ubuntu/x86_64/swift/usr/bin/swift build \
                             -c release \
-                            --destination Scripts/aarch64-unknown-linux-gnu.json \
-                            --static-swift-stdlib
+                            --destination Scripts/aarch64-unknown-linux-gnu.json
 
                     Scripts/Package
                     Scripts/PackageLinker
