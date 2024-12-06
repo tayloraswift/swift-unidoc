@@ -3,6 +3,9 @@ name: package
 on:
     workflow_dispatch:
     #   We build semver tags, and the master branch.
+    pull_request:
+        branches: [ master ]
+
     push:
         branches: [ master ]
         tags:
