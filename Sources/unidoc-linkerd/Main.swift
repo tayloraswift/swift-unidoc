@@ -27,6 +27,11 @@ struct Main
     var db:Unidoc.DatabaseOptions
     @OptionGroup
     var s3:Unidoc.BucketOptions
+
+    @Flag(
+        name: [.customLong("assume-encrypted")],
+        help: "Assume that the connection is encrypted")
+    var assumeEncrypted:Bool = false
 }
 
 @main
@@ -73,7 +78,7 @@ extension Main:AsyncParsableCommand
                     logger: $0,
                     db: .init(settings: settings, sessions: pool, unidoc: "unidoc"))
 
-                try await server.run(on: self.port)
+                try await server.run(on: self.port, with: self.assumeEncrypted ? .proxy : nil)
             }
         }
     }
