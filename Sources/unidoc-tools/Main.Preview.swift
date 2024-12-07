@@ -110,7 +110,8 @@ extension Main.Preview:AsyncParsableCommand
                     logger: $0,
                     db: .init(settings: settings, sessions: pool, unidoc: "unidoc"))
 
-                try await server.run(on: port, with: serverIdentity)
+                try await server.run(on: port,
+                    with: serverIdentity.map(HTTP.ServerEncryptionLayer.local(_:)))
             }
         }
     }
