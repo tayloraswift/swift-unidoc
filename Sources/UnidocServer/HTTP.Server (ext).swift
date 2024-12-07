@@ -6,7 +6,7 @@ import NIOSSL
 extension HTTP.Server where Self:Unidoc.Server
 {
     public
-    func run(on port:Int, with niossl:NIOSSLContext? = nil) async throws
+    func run(on port:Int, with encryption:HTTP.ServerEncryptionLayer? = nil) async throws
     {
         try await self._setup()
         try await withThrowingTaskGroup(of: Void.self)
@@ -26,7 +26,7 @@ extension HTTP.Server where Self:Unidoc.Server
                 try await self.serve(origin: self.options.origin,
                     host: "::",
                     port: port,
-                    with: niossl,
+                    with: encryption,
                     policy: self.policy)
             }
             tasks.addTask

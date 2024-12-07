@@ -113,7 +113,7 @@ extension HTTP.Server
     func serve(origin server:HTTP.ServerOrigin,
         host:String,
         port:Int,
-        with context:NIOSSLContext? = nil,
+        with encryption:HTTP.ServerEncryptionLayer? = nil,
         policy:(any HTTP.ServerPolicy)? = nil) async throws
     {
         let bootstrap:ServerBootstrap = .init(group: MultiThreadedEventLoopGroup.singleton)
@@ -129,13 +129,25 @@ extension HTTP.Server
                     HTTPPart<HTTPResponseHead, ByteBuffer>>,
                 (any Channel, NIOHTTP2Handler.AsyncStreamMultiplexer<HTTP.Stream>)>>, Never>
 
-        if  let context:NIOSSLContext
+
+        if  let encryption:HTTP.ServerEncryptionLayer
         {
             listener = try await bootstrap.bind(host: host, port: port)
             {
                 (channel:any Channel) in
 
-                channel.pipeline.addHandler(NIOSSLServerHandler.init(context: context))
+                let encryptionHandlers:[any ChannelHandler]
+
+                switch encryption
+                {
+                case .local(let context):
+                    encryptionHandlers = [NIOSSLServerHandler.init(context: context)]
+
+                case .proxy:
+                    encryptionHandlers = []
+                }
+
+                return channel.pipeline.addHandlers(encryptionHandlers)
                     .flatMap
                 {
                     channel.configureAsyncHTTPServerPipeline
