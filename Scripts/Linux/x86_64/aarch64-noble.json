@@ -1,0 +1,19 @@
+{
+    "version": 1,
+    "target": "aarch64-unknown-linux-gnu",
+    "toolchain-bin-dir": "/home/ubuntu/x86_64/swift/usr/bin",
+    "sdk": "/usr/aarch64-linux-gnu",
+    "extra-cc-flags": [
+        "-fPIC"
+    ],
+    "extra-cpp-flags": [
+        "-I", "/usr/aarch64-linux-gnu/include/c++/13",
+        "-I", "/usr/aarch64-linux-gnu/include/c++/13/aarch64-linux-gnu/",
+
+        "-I", "/home/ubuntu/aarch64/swift/usr/lib/swift",
+        "-I", "/home/ubuntu/aarch64/swift/usr/lib/swift/Block"
+    ],
+    "extra-swiftc-flags": [
+        "-resource-dir", "/home/ubuntu/aarch64/swift/usr/lib/swift_static"
+    ]
+}

@@ -1,7 +1,0 @@
-#!/bin/bash
-set -e
-
-set -v
-tar -czf unidoc-linkerd.tar.gz \
-    -C .build/release \
-        unidoc-linkerd
