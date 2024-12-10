@@ -9,8 +9,6 @@ if [ -z "$SWIFTPM_SCRATCH" ]; then
     exit 1
 fi
 
-set -v
-
 while [[ $# -gt 0 ]]; do
     case $1 in
         unidoc )
