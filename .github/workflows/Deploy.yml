@@ -71,7 +71,7 @@ jobs:
 
             -   name: Build products
                 run: |
-                    Scripts/Build ${{ matrix.arch.id }} \
+                    Scripts/Linux/Build ${{ matrix.arch.id }} \
                         --os ${{ matrix.os.codename }}
                     Scripts/Package .build.${{ matrix.arch.id }}/release \
                         unidoc \
