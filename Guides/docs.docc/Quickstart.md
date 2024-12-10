@@ -27,13 +27,19 @@ Pre-built binaries are available for a limited set of platforms.
 | Platform | String |
 |----------|----------|
 | macOS    | `macOS-ARM64` |
-| Linux    | `Linux-X64` |
+| Ubuntu   | `Ubuntu-22.04-ARM64` |
+| Ubuntu   | `Ubuntu-22.04-X64` |
+| Ubuntu   | `Ubuntu-24.04-ARM64` |
+| Ubuntu   | `Ubuntu-24.04-X64` |
 
 
 You can download and install the binary under `/usr/local/bin` like this:
 
 @Code(file: unidoc-install.sh, title: unidoc-install.sh)
 
+>   Important:
+>   On Linux, the prebuilt binaries use [jemalloc](https://jemalloc.net/) instead of the default
+>   system allocator. You can install it on Ubuntu with `sudo apt install libjemalloc2`.
 
 ### Building Unidoc from source
 
