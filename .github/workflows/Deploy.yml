@@ -29,7 +29,7 @@ jobs:
                 run: |
                     swift --version
                     swift build -c release --product unidoc
-                    Scripts/Package .build/release unidoc
+                    Scripts/Package .build unidoc
 
             -   name: Upload products
                 env:
@@ -73,7 +73,7 @@ jobs:
                 run: |
                     Scripts/Linux/Build ${{ matrix.arch.id }} \
                         --os ${{ matrix.os.codename }}
-                    Scripts/Package .build.${{ matrix.arch.id }}/release \
+                    Scripts/Package .build.${{ matrix.arch.id }} \
                         unidoc \
                         unidoc-linkerd
 
