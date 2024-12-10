@@ -1,0 +1,53 @@
+#!/bin/bash
+set -e
+
+HOST_ARCH=$(uname -m)
+DEST_ARCH=aarch64
+DEST_OS=noble
+LIBC=gnu
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --os )
+        shift
+
+        case $1 in
+            jammy | noble )
+            DEST_OS=$1
+            shift
+            ;;
+
+            * )
+            echo "Unsupported OS '$1'"
+            exit 1
+            ;;
+        esac
+        ;;
+
+        x86_64 | aarch64)
+        DEST_ARCH=$1
+        shift
+        ;;
+
+        * )
+        echo "Unknown architecture '$1'"
+        exit 1
+        ;;
+    esac
+done
+
+DOCKER_IMAGE=unidoc:__${DEST_ARCH}_${DEST_OS}
+
+docker build -f Scripts/Linux/$HOST_ARCH/$DEST_ARCH-$DEST_OS.dockerfile -t $DOCKER_IMAGE .
+
+docker run --rm \
+    -e UNIDOC_ENABLE_INDEXSTORE=1 \
+    -v $PWD:/swift-unidoc \
+    -w /swift-unidoc \
+    $DOCKER_IMAGE /home/ubuntu/$HOST_ARCH/swift/usr/bin/swift build \
+        --configuration release \
+        --scratch-path .build.$DEST_ARCH \
+        --cache-path /swiftpm \
+        --destination Scripts/Linux/$HOST_ARCH/$DEST_ARCH-$DEST_OS.json \
+        --static-swift-stdlib \
+        -Xlinker -ljemalloc

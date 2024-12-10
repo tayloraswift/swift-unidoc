@@ -7,7 +7,6 @@
         "-fPIC"
     ],
     "extra-cpp-flags": [
-        "-lstdc++",
         "-I", "/usr/aarch64-linux-gnu/include/c++/12",
         "-I", "/usr/aarch64-linux-gnu/include/c++/12/aarch64-linux-gnu/",
 
@@ -15,6 +14,6 @@
         "-I", "/home/ubuntu/aarch64/swift/usr/lib/swift/Block"
     ],
     "extra-swiftc-flags": [
-        "-resource-dir", "/home/ubuntu/aarch64/swift/usr/lib/swift"
+        "-resource-dir", "/home/ubuntu/aarch64/swift/usr/lib/swift_static"
     ]
 }

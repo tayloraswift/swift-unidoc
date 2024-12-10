@@ -3,6 +3,8 @@ import SemanticVersions
 import SymbolGraphs
 import Symbols
 import System_
+
+#if canImport(Testing)
 import Testing
 
 extension SymbolGraphObject<Void>
@@ -59,3 +61,5 @@ extension SymbolGraphObject<Void>
         #expect(decoded.graph == self.graph)
     }
 }
+
+#endif

@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+if [ -z $UNIDOC_PLATFORM ]; then
+    echo "UNIDOC_PLATFORM environment variable not set"
+    exit 1
+fi
+
+if [ -z $UNIDOC_VERSION ]; then
+    echo "UNIDOC_VERSION environment variable not set"
+    exit 1
+fi
+
+while [[ $# -gt 0 ]]; do
+    aws s3 cp $1 \
+        s3://swiftinit/unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/$1 \
+        --content-encoding gzip \
+        --content-type application/gzip
+    shift
+done

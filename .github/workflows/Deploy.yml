@@ -29,77 +29,35 @@ jobs:
                 run: |
                     swift --version
                     swift build -c release --product unidoc
-                    Scripts/Package
+                    Scripts/Package .build/release unidoc
 
             -   name: Upload products
                 env:
                     UNIDOC_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
                     UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
 
-                run: |
-                    aws s3 cp unidoc.tar.gz \
-                        s3://swiftinit/unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc.tar.gz \
-                        --content-encoding gzip \
-                        --content-type application/gzip
+                run: Scripts/Deploy unidoc.tar.gz
 
     linux:
+        strategy:
+            matrix:
+                os:
+                    -   codename: jammy
+                        version: Ubuntu-22.04
+                        display: Ubuntu 22.04
+
+                    -   codename: noble
+                        version: Ubuntu-24.04
+                        display: Ubuntu 24.04
+                arch:
+                    -   id: aarch64
+                        name: ARM64
+
+                    -   id: x86_64
+                        name: X64
+
         runs-on: ubuntu-24.04
-        name: Ubuntu 24.04
-        steps:
-            -   name: Setup AWS CLI
-                uses: aws-actions/configure-aws-credentials@v1
-                with:
-                    aws-secret-access-key: ${{ secrets.AWS_S3_ACCESS_SECRET }}
-                    aws-access-key-id: ${{ vars.AWS_S3_ACCESS_KEY }}
-                    aws-region: us-east-1
-
-            -   name: Install Swift
-                uses: tayloraswift/swift-install-action@master
-                with:
-                    swift-prefix: "swift-6.0.2-release/ubuntu2404/swift-6.0.2-RELEASE"
-                    swift-id: "swift-6.0.2-RELEASE-ubuntu24.04"
-
-            -   name: Checkout repository
-                uses: actions/checkout@v3
-
-            #   For some reason, Swift cannot build both the products in one invocation.
-            #   We pass the same flags to both invocations to speed up the build.
-            -   name: Build products
-                env:
-                    UNIDOC_ENABLE_INDEXSTORE: "1"
-                run: |
-                    swift --version
-                    swift build -c release \
-                        --static-swift-stdlib \
-                        --product unidoc \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
-                    swift build -c release \
-                        --static-swift-stdlib \
-                        --product unidoc-linkerd \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
-                    Scripts/Package
-                    Scripts/PackageLinker
-
-            -   name: Upload products
-                env:
-                    UNIDOC_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
-                    UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
-
-                run: |
-                    aws s3 cp unidoc.tar.gz \
-                        s3://swiftinit/unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc.tar.gz \
-                        --content-encoding gzip \
-                        --content-type application/gzip
-                    aws s3 cp unidoc-linkerd.tar.gz \
-                        s3://swiftinit/unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc-linkerd.tar.gz \
-                        --content-encoding gzip \
-                        --content-type application/gzip
-
-    linux-aarch64:
-        runs-on: ubuntu-24.04
-        name: Ubuntu 24.04 (AArch64)
+        name: "${{ matrix.os.display }} (${{ matrix.arch.id }})"
         steps:
             -   name: Setup AWS CLI
                 uses: aws-actions/configure-aws-credentials@v1
@@ -113,30 +71,15 @@ jobs:
 
             -   name: Build products
                 run: |
-                    docker run -t --rm \
-                        -v $PWD:/swift-unidoc \
-                        -w /swift-unidoc \
-                        -e UNIDOC_ENABLE_INDEXSTORE=1 \
-                        tayloraswift/swift-cross-aarch64:6.0.2 \
-                        /home/ubuntu/x86_64/swift/usr/bin/swift build \
-                            -c release \
-                            --destination Scripts/aarch64-unknown-linux-gnu.json \
-                            --static-swift-stdlib
-
-                    Scripts/Package
-                    Scripts/PackageLinker
+                    Scripts/Build ${{ matrix.arch.id }} \
+                        --os ${{ matrix.os.codename }}
+                    Scripts/Package .build.${{ matrix.arch.id }}/release \
+                        unidoc \
+                        unidoc-linkerd
 
             -   name: Upload products
                 env:
-                    UNIDOC_PLATFORM: "${{ runner.os }}-ARM64"
+                    UNIDOC_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
                     UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
 
-                run: |
-                    aws s3 cp unidoc.tar.gz \
-                        s3://swiftinit/unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc.tar.gz \
-                        --content-encoding gzip \
-                        --content-type application/gzip
-                    aws s3 cp unidoc-linkerd.tar.gz \
-                        s3://swiftinit/unidoc/$UNIDOC_VERSION/$UNIDOC_PLATFORM/unidoc-linkerd.tar.gz \
-                        --content-encoding gzip \
-                        --content-type application/gzip
+                run: Scripts/Deploy unidoc.tar.gz unidoc-linkerd.tar.gz

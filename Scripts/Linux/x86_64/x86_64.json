@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "target": "x86_64-unknown-linux-gnu",
+    "toolchain-bin-dir": "/home/ubuntu/x86_64/swift/usr/bin",
+    "extra-cc-flags": [
+        "-fPIC"
+    ],
+    "extra-cpp-flags": [
+        "-I", "/home/ubuntu/x86_64/swift/usr/lib/swift",
+        "-I", "/home/ubuntu/x86_64/swift/usr/lib/swift/Block"
+    ],
+    "extra-swiftc-flags": [
+    ]
+}

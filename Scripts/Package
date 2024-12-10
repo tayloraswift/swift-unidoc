@@ -1,14 +1,42 @@
 #!/bin/bash
 set -e
 
-# Note: ordering is significant as each `-C` is relative to the last.
+SWIFTPM_SCRATCH=$1
+shift
+
+if [ -z "$SWIFTPM_SCRATCH" ]; then
+    echo "Usage: $0 <scratch-path> [ unidoc | unidoc-linkerd ]"
+    exit 1
+fi
+
 set -v
-tar -czf unidoc.tar.gz \
-    -C . \
-        Assets/css/Main.css \
-        Assets/css/Main.css.map \
-        Assets/js/Main.js \
-        Assets/js/Main.js.map \
-        Assets/woff2/*.woff2 \
-    -C .build/release \
-        unidoc
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        unidoc )
+        shift
+        # Note: ordering is significant as each `-C` is relative to the last.
+        tar -czf unidoc.tar.gz \
+            -C . \
+                Assets/css/Main.css \
+                Assets/css/Main.css.map \
+                Assets/js/Main.js \
+                Assets/js/Main.js.map \
+                Assets/woff2/*.woff2 \
+            -C $SWIFTPM_SCRATCH/release \
+                unidoc
+        ;;
+
+        unidoc-linkerd )
+        shift
+        tar -czf unidoc-linkerd.tar.gz \
+            -C $SWIFTPM_SCRATCH/release \
+                unidoc-linkerd
+        ;;
+
+        * )
+        echo "Unknown product: $1"
+        exit 1
+        ;;
+    esac
+done
