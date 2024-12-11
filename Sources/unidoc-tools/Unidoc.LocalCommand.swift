@@ -5,9 +5,9 @@ import SymbolGraphCompiler
 import System_
 import UnidocClient
 
-extension Main
+extension Unidoc
 {
-    struct Local
+    struct LocalCommand
     {
         @Argument
         var project:String?
@@ -58,7 +58,7 @@ extension Main
         var book:Bool = false
     }
 }
-extension Main.Local:AsyncParsableCommand
+extension Unidoc.LocalCommand:AsyncParsableCommand
 {
     static let configuration:CommandConfiguration = .init(commandName: "local")
 

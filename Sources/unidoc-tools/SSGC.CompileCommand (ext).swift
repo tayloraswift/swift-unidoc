@@ -1,7 +1,7 @@
 import ArgumentParser
 import SymbolGraphBuilder
 
-extension SSGC.Compile:AsyncParsableCommand
+extension SSGC.CompileCommand:AsyncParsableCommand
 {
     public
     static let configuration:CommandConfiguration = .init(commandName: "compile")

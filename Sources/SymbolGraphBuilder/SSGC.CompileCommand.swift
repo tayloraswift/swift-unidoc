@@ -8,7 +8,7 @@ import System_ArgumentParser
 extension SSGC
 {
     public
-    struct Compile:Decodable
+    struct CompileCommand:Decodable
     {
         @Option(
             name: [.customLong("workspace-name"), .customShort("w")],
@@ -170,7 +170,7 @@ extension SSGC
         }
     }
 }
-extension SSGC.Compile
+extension SSGC.CompileCommand
 {
     public
     func launch() throws
