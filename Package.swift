@@ -136,7 +136,6 @@ let package:Package = .init(
 
         .executableTarget(name: "unidoc-tools",
             dependencies: [
-                .target(name: "System_ArgumentParser"),
                 .target(name: "UnidocCLI"),
                 .target(name: "UnidocClient"),
                 .target(name: "UnidocServer"),
@@ -146,8 +145,6 @@ let package:Package = .init(
 
         .executableTarget(name: "unidoc-linkerd",
             dependencies: [
-                .target(name: "System_ArgumentParser"),
-                .target(name: "System_"),
                 .target(name: "UnidocCLI"),
                 .target(name: "UnidocServer"),
                 .target(name: "UnidocServerInsecure"),
@@ -478,6 +475,7 @@ let package:Package = .init(
 
         .target(name: "UnidocAssets",
             dependencies: [
+                .target(name: "SemanticVersions"),
                 .target(name: "Unidoc"),
             ]),
 
@@ -490,6 +488,7 @@ let package:Package = .init(
 
         .target(name: "UnidocCLI",
             dependencies: [
+                .target(name: "System_ArgumentParser"),
                 .target(name: "UnidocServer"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]),

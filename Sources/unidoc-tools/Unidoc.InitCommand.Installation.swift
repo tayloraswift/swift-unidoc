@@ -1,6 +1,6 @@
 import System_
 
-extension Main.Init
+extension Unidoc.InitCommand
 {
     struct Installation
     {
@@ -12,7 +12,7 @@ extension Main.Init
         let localhost:Bool
     }
 }
-extension Main.Init.Installation
+extension Unidoc.InitCommand.Installation
 {
     func create() throws
     {
@@ -39,7 +39,7 @@ extension Main.Init.Installation
     }
 }
 
-extension Main.Init.Installation
+extension Unidoc.InitCommand.Installation
 {
     private
     static func docker_compose_yml(container:String) -> String

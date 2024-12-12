@@ -1,3 +1,5 @@
+import SemanticVersions
+
 extension Unidoc
 {
     @frozen public
@@ -55,6 +57,36 @@ extension Unidoc.Asset
 extension Unidoc.Asset
 {
     @inlinable public
+    func path(prepending version:MajorVersion) -> String
+    {
+        self.versioned ? "/asset/\(version)/\(self)" : "/asset/\(self)"
+    }
+
+    @inlinable public
+    var libre:Bool
+    {
+        switch self
+        {
+        case .error404_jpg:     false
+        case .error4xx_jpg:     false
+        case .error500_jpg:     false
+        case .favicon_ico:      true
+        case .favicon_png:      true
+        case .github_jpg:       false
+        case .literata45_woff2: true
+        case .literata47_woff2: true
+        case .literata75_woff2: true
+        case .literata77_woff2: true
+        case .main_css:         true
+        case .main_css_map:     true
+        case .main_js:          true
+        case .main_js_map:      true
+        case .admin_css:        false
+        case .admin_css_map:    false
+        }
+    }
+
+    @inlinable
     var versioned:Bool
     {
         switch self
