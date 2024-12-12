@@ -2,11 +2,12 @@
 set -e
 
 SWIFTPM_SCRATCH=$1
-shift
 
-if [ -z "$SWIFTPM_SCRATCH" ]; then
+if [ -z $SWIFTPM_SCRATCH ]; then
     echo "Usage: $0 <scratch-path> [ unidoc | unidoc-linkerd ]"
     exit 1
+else
+    shift
 fi
 
 while [[ $# -gt 0 ]]; do
@@ -15,21 +16,14 @@ while [[ $# -gt 0 ]]; do
         shift
         # Note: ordering is significant as each `-C` is relative to the last.
         tar -czf unidoc.tar.gz \
-            -C . \
-                Assets/css/Main.css \
-                Assets/css/Main.css.map \
-                Assets/js/Main.js \
-                Assets/js/Main.js.map \
-                Assets/woff2/*.woff2 \
-            -C $SWIFTPM_SCRATCH/release \
-                unidoc
+            -C . $($SWIFTPM_SCRATCH/release/unidoc list-assets -p Assets/) \
+            -C $SWIFTPM_SCRATCH/release unidoc
         ;;
 
         unidoc-linkerd )
         shift
         tar -czf unidoc-linkerd.tar.gz \
-            -C $SWIFTPM_SCRATCH/release \
-                unidoc-linkerd
+            -C $SWIFTPM_SCRATCH/release unidoc-linkerd
         ;;
 
         * )

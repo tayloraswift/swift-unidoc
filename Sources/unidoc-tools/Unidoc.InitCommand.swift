@@ -1,9 +1,9 @@
 import ArgumentParser
 import System_
 
-extension Main
+extension Unidoc
 {
-    struct Init
+    struct InitCommand
     {
         @Argument
         var location:FilePath.Directory
@@ -22,7 +22,7 @@ extension Main
         var containerized:Bool = false
     }
 }
-extension Main.Init:AsyncParsableCommand
+extension Unidoc.InitCommand:AsyncParsableCommand
 {
     public
     static let configuration:CommandConfiguration = .init(commandName: "init")

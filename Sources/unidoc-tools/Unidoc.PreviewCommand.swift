@@ -11,9 +11,9 @@ import UnidocLinkerPlugin
 import UnidocServer
 import UnidocServerInsecure
 
-extension Main
+extension Unidoc
 {
-    struct Preview
+    struct PreviewCommand
     {
         @Option(
             name: [.customLong("certificates"), .customShort("c")],
@@ -33,7 +33,7 @@ extension Main
         var port:Int?
 
         @OptionGroup
-        var db:Unidoc.DatabaseOptions
+        var db:DatabaseOptions
 
         @Flag(
             name: [.customLong("https"), .customShort("e")],
@@ -43,7 +43,7 @@ extension Main
         init() {}
     }
 }
-extension Main.Preview:AsyncParsableCommand
+extension Unidoc.PreviewCommand:AsyncParsableCommand
 {
     public
     static let configuration:CommandConfiguration = .init(commandName: "preview")

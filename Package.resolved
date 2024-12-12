@@ -1,5 +1,5 @@
 {
-  "originHash" : "6f137240ae808d4e6c6a2caba3059924454501c3d80f4aa7ee045cf5db6e4d85",
+  "originHash" : "ff2f3c96db43681bc88d606f64e137cdee87ec9ca980e8ea43d209a4096bd3a4",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -7,7 +7,7 @@
       "location" : "https://github.com/swiftlang/indexstore-db",
       "state" : {
         "branch" : "main",
-        "revision" : "fbbde36c6477283d2a49686aea5cc5b3cf47edc7"
+        "revision" : "54212fce1aecb199070808bdb265e7f17e396015"
       }
     },
     {
