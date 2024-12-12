@@ -45,8 +45,8 @@ extension Unidoc
                 let path:FilePath = self.assets.appending(asset.source)
 
                 print(self.long ? """
-                    \(path) \
-                    \(asset.path(prepending: Unidoc.RenderFormat.Assets.version)) \
+                    \(path)\t\
+                    \(asset.path(prepending: Unidoc.RenderFormat.Assets.version))\t\
                     \(asset.type)
                     """ : """
                     \(path)
