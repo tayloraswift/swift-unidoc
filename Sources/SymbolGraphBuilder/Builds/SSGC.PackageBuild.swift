@@ -160,7 +160,7 @@ extension SSGC.PackageBuild
     public static
     func remote(project projectName:Symbol.Package,
         from repository:String,
-        at reference:String,
+        at refName:String,
         as type:SSGC.ProjectType = .package,
         in workspace:SSGC.Workspace,
         flags:Flags = .init(),
@@ -168,7 +168,7 @@ extension SSGC.PackageBuild
     {
         let checkout:SSGC.Checkout = try .checkout(project: projectName,
             from: repository,
-            at: reference,
+            at: refName,
             in: workspace,
             clean: clean)
 
@@ -178,13 +178,13 @@ extension SSGC.PackageBuild
         let scratch:SSGC.PackageBuildDirectory = .init(configuration: .debug,
             location: checkout.location / scratchName)
 
-        let version:AnyVersion = .init(reference)
+        let version:AnyVersion = .init(refName)
         let pin:SPM.DependencyPin = .init(identity: projectName,
             location: .remote(url: repository),
             revision: checkout.revision,
             version: version)
 
-        return .init(id: .versioned(pin, reference: reference),
+        return .init(id: .versioned(pin, ref: refName, date: checkout.date),
             scratch: scratch,
             flags: flags,
             root: checkout.location,
@@ -227,7 +227,7 @@ extension SSGC.PackageBuild
         case .unversioned(let package):
             print("Discovering sources for book '\(package)' (unversioned)")
 
-        case .versioned(let pin, _):
+        case .versioned(let pin, _, _):
             print("Discovering sources for book '\(pin.identity)' at \(pin.state)")
         }
 
@@ -280,7 +280,7 @@ extension SSGC.PackageBuild
         case .unversioned(let package):
             print("Dumping manifest for package '\(package)' (unversioned)")
 
-        case .versioned(let pin, _):
+        case .versioned(let pin, _, _):
             print("Dumping manifest for package '\(pin.identity)' at \(pin.state)")
         }
 

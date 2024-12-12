@@ -1,6 +1,7 @@
 import PackageMetadata
 import SymbolGraphs
 import Symbols
+import UnixTime
 
 extension SSGC.PackageBuild
 {
@@ -10,28 +11,28 @@ extension SSGC.PackageBuild
         /// An unversioned SwiftPM build.
         case unversioned(Symbol.Package)
         /// A versioned SwiftPM build.
-        case versioned(SPM.DependencyPin, reference:String?)
+        case versioned(SPM.DependencyPin, ref:String, date:UnixMillisecond)
     }
 }
 extension SSGC.PackageBuild.ID
 {
     var commit:SymbolGraphMetadata.Commit?
     {
-        guard case .versioned(let pin, let ref?) = self
+        guard case .versioned(let pin, ref: let name, date: let date) = self
         else
         {
             return nil
         }
 
-        return .init(name: ref, sha1: pin.revision)
+        return .init(name: name, sha1: pin.revision, date: date)
     }
 
     var package:Symbol.Package
     {
         switch self
         {
-        case    .unversioned(let id):   id
-        case    .versioned(let pin, _): pin.identity
+        case .unversioned(let id):      id
+        case .versioned(let pin, _, _): pin.identity
         }
     }
     var pin:SPM.DependencyPin?
@@ -39,7 +40,7 @@ extension SSGC.PackageBuild.ID
         switch self
         {
         case .unversioned:              nil
-        case .versioned(let pin, _):    pin
+        case .versioned(let pin, _, _): pin
         }
     }
 }

@@ -1,4 +1,5 @@
 import SHA1
+import UnixTime
 
 extension SymbolGraphMetadata
 {
@@ -11,8 +12,8 @@ extension SymbolGraphMetadata
         ///
         /// It’s possible for multiple commits to have the same ref name. This is typical for
         /// branches.
-        /// 
-        /// It’s also possible for a commit to have multiple ref names. The name stored here 
+        ///
+        /// It’s also possible for a commit to have multiple ref names. The name stored here
         /// is whatever SwiftPM used to check out the sources.
         public
         var name:String
@@ -20,12 +21,16 @@ extension SymbolGraphMetadata
         /// **must** point to a permanent tag.
         public
         var sha1:SHA1?
+        /// The date of the commit, if known.
+        public
+        var date:UnixMillisecond?
 
         @inlinable public
-        init(name:String, sha1:SHA1? = nil)
+        init(name:String, sha1:SHA1? = nil, date:UnixMillisecond? = nil)
         {
             self.name = name
             self.sha1 = sha1
+            self.date = date
         }
     }
 }
