@@ -117,6 +117,6 @@ extension SSGC.Checkout
             fatalError("Could not parse date from git output: \(unixSecondLine)")
         }
 
-        return .init(location: clone, revision: revision, date: .init(index: unixSecond))
+        return .init(location: clone, revision: revision, date: .init(index: 1000 * unixSecond))
     }
 }
