@@ -53,14 +53,14 @@ pre
         a
         {
             color: inherit;
-        }
-        a
-        {
-            text-decoration: underline dashed;
+
+            //  WebKit requires separate statements for dashed underline.
+            text-decoration: underline;
+            text-decoration-style: dashed;
         }
         a:hover
         {
-            text-decoration: underline;
+            text-decoration-style: solid;
         }
     }
 }

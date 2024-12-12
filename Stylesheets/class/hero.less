@@ -55,10 +55,14 @@
         font-weight: 500;
         font-size: 90.625%;
 
+        a
+        {
+            text-decoration: underline;
+        }
         a:not(:hover)
         {
             color: var(--fg-semi);
-            text-decoration: underline dashed;
+            text-decoration-style: dashed;
         }
 
         > *:first-child
