@@ -124,6 +124,7 @@ extension SymbolGraphMetadata
         case package_scope = "scope"
         case commit_hash = "revision"
         case commit_refname = "refname"
+        case commit_date
         case triple
         case swift_version = "toolchain"
         case swift_nightly = "toolchain_type"
@@ -156,6 +157,7 @@ extension SymbolGraphMetadata:BSONDocumentEncodable
         bson[.package_scope] = self.package.scope
         bson[.commit_hash] = self.commit?.sha1
         bson[.commit_refname] = self.commit?.name
+        bson[.commit_date] = self.commit?.date
         bson[.triple] = self.triple
         bson[.swift_version] = self.swift.version
         bson[.swift_nightly] = self.swift.nightly
@@ -180,7 +182,9 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
                 name: try bson[.package_name].decode()),
             commit: try bson[.commit_refname]?.decode(as: String.self)
             {
-                .init(name: $0, sha1: try bson[.commit_hash]?.decode())
+                .init(name: $0,
+                    sha1: try bson[.commit_hash]?.decode(),
+                    date: try bson[.commit_date]?.decode())
             },
             triple: try bson[.triple].decode(),
             swift: .init(
@@ -197,4 +201,3 @@ extension SymbolGraphMetadata:BSONDocumentDecodable
         self.abi = try bson[.abi].decode()
     }
 }
- 
