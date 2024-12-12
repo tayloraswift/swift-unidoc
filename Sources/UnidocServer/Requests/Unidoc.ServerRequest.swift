@@ -40,6 +40,7 @@ extension Unidoc
 }
 extension Unidoc.ServerRequest
 {
+    @inlinable public
     subscript<T>(dynamicMember keyPath:KeyPath<HTTP.ServerRequest, T>) -> T
     {
         self.metadata[keyPath: keyPath]
