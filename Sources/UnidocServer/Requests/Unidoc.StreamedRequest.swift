@@ -1,31 +1,25 @@
 import Multiparts
-import NIOHPACK
+import HTTP
 import URI
 
 extension Unidoc
 {
-    @frozen public
     struct StreamedRequest:Sendable
     {
-        public
-        let authorization:Authorization
-        public
         let endpoint:any ProceduralOperation
 
-        @inlinable public
-        init(authorization:Authorization, endpoint:any ProceduralOperation)
+        private
+        init(endpoint:any ProceduralOperation)
         {
-            self.authorization = authorization
             self.endpoint = endpoint
         }
     }
 }
 extension Unidoc.StreamedRequest
 {
-    public
-    init?(put uri:URI, headers:HPACKHeaders)
+    init?(from request:__shared HTTP.ServerRequest)
     {
-        var path:ArraySlice<String> = uri.path.normalized(lowercase: true)[...]
+        var path:ArraySlice<String> = request.uri.path.normalized(lowercase: true)[...]
 
         guard
         let root:String = path.popFirst(),
@@ -45,15 +39,12 @@ extension Unidoc.StreamedRequest
 
         //  Validate content type.
         guard
-        let type:String = headers["content-type"].first,
-        let type:ContentType = .init(type),
-        case .media(.application(.bson, charset: nil)) = type
+        case .media(.application(.bson, charset: nil))? = request.headers.contentType
         else
         {
             return nil
         }
 
-        self.init(authorization: .from(headers),
-            endpoint: Unidoc.BuilderUploadOperation.init(route: route))
+        self.init(endpoint: Unidoc.BuilderUploadOperation.init(route: route))
     }
 }

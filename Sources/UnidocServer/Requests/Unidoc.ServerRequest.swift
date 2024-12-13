@@ -12,43 +12,40 @@ extension Unidoc
 {
     /// A ``ServerRequest`` is a request that has not yet been routed to an operation through
     /// a `Router`.
+    @dynamicMemberLookup
     @frozen public
     struct ServerRequest:Sendable
     {
         public
-        let headers:HTTP.Headers
-
+        let metadata:HTTP.ServerRequest
         public
         let authorization:Authorization
         public
         let accepted:UnixAttosecond
         public
-        let client:ClientOrigin
-        public
-        let host:String?
-        public
-        let uri:URI
+        let client:ClientGuess?
 
         private
-        init(
-            headers:HTTP.Headers,
+        init(metadata:HTTP.ServerRequest,
             authorization:Authorization,
             accepted:UnixAttosecond,
-            client:ClientOrigin,
-            host:String?,
-            uri:URI)
+            client:ClientGuess?)
         {
-            self.headers = headers
+            self.metadata = metadata
             self.authorization = authorization
             self.accepted = accepted
             self.client = client
-            self.host = host
-            self.uri = uri
         }
     }
 }
 extension Unidoc.ServerRequest
 {
+    @inlinable public
+    subscript<T>(dynamicMember keyPath:KeyPath<HTTP.ServerRequest, T>) -> T
+    {
+        self.metadata[keyPath: keyPath]
+    }
+
     func parameter(_ key:String) -> String?
     {
         guard
@@ -68,7 +65,7 @@ extension Unidoc.ServerRequest
 
     var privilege:Unidoc.ClientPrivilege?
     {
-        switch self.client.origin.claimant
+        switch self.origin.claimant
         {
         case .google_common?:
             return .majorSearchEngine(.googlebot, verified: true)
@@ -80,7 +77,7 @@ extension Unidoc.ServerRequest
             break
         }
 
-        switch self.client.guess
+        switch self.client
         {
         case .barbie(let locale)?:
             if  case .web(_?, login: _) = self.authorization
@@ -103,36 +100,11 @@ extension Unidoc.ServerRequest
 extension Unidoc.ServerRequest
 {
     public
-    init(headers:HPACKHeaders, client:Unidoc.ClientOrigin, uri:URI)
+    init(metadata:HTTP.ServerRequest, client:Unidoc.ClientGuess?)
     {
-        let host:String? = headers[":authority"].last.map
-        {
-            if  let colon:String.Index = $0.lastIndex(of: ":")
-            {
-                return String.init($0[..<colon])
-            }
-            else
-            {
-                return $0
-            }
-        }
-
-        self.init(headers: .http2(headers),
-            authorization: .from(headers),
+        self.init(metadata: metadata,
+            authorization: metadata.headers.authorization,
             accepted: .now(),
-            client: client,
-            host: host,
-            uri: uri)
-    }
-
-    public
-    init(headers:HTTPHeaders, client:Unidoc.ClientOrigin, uri:URI)
-    {
-        self.init(headers: .http1_1(headers),
-            authorization: .from(headers),
-            accepted: .now(),
-            client: client,
-            host: headers["host"].last,
-            uri: uri)
+            client: client)
     }
 }

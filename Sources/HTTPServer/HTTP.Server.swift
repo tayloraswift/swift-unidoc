@@ -17,32 +17,11 @@ extension HTTP
     public
     protocol Server:Sendable
     {
-        associatedtype StreamedRequest:HTTP.ServerStreamedRequest
-
         /// Checks whether the server should allow the request to proceed with an upload.
         /// Returns nil if the server should accept the upload, or an error response to send
-        /// if the uploader lacks permissions.
-        func clearance(for request:StreamedRequest) async throws -> HTTP.ServerResponse?
-
-        func response(for request:StreamedRequest,
-            with body:__owned [UInt8]) async throws -> HTTP.ServerResponse
-
-        func get(
-            request:ServerRequest,
-            headers:HPACKHeaders) async throws -> HTTP.ServerResponse
-        func get(
-            request:ServerRequest,
-            headers:HTTPHeaders) async throws -> HTTP.ServerResponse
-
-        func post(
-            request:ServerRequest,
-            headers:HPACKHeaders,
-            body:[UInt8]) async throws -> HTTP.ServerResponse
-
-        func post(
-            request:ServerRequest,
-            headers:HTTPHeaders,
-            body:[UInt8]) async throws -> HTTP.ServerResponse
+        /// if the uploader lacks permissions. This is only called for `PUT` requests.
+        func reject(request:ServerRequest) async throws -> ServerResponse?
+        func accept(request:ServerRequest, method:ServerMethod) async throws -> ServerResponse
 
         func log(event:ServerEvent, ip origin:ServerRequest.Origin?)
 
@@ -51,33 +30,6 @@ extension HTTP
 }
 extension HTTP.Server
 {
-    /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
-    /// for ``get(request:headers:) [4VK5G]``.
-    ///
-    /// Servers that expect to handle a lot of HTTP/1.1 GET requests should override this with
-    /// a more efficient implementation.
-    @inlinable public
-    func get(
-        request:HTTP.ServerRequest,
-        headers:HTTPHeaders) async throws -> HTTP.ServerResponse
-    {
-        try await self.get(request: request, headers: .init(httpHeaders: headers))
-    }
-
-    /// Inefficiently converts the headers to equivalent HPACK headers, and calls the witness
-    /// for ``post(request:headers:body:) [541MX]``.
-    ///
-    /// Servers that expect to handle a lot of HTTP/1.1 POST requests should override this with
-    /// a more efficient implementation.
-    @inlinable public
-    func post(
-        request:HTTP.ServerRequest,
-        headers:HTTPHeaders,
-        body:[UInt8]) async throws -> HTTP.ServerResponse
-    {
-        try await self.post(request: request, headers: .init(httpHeaders: headers), body: body)
-    }
-
     /// Dumps detailed information about the caught error. This information will be shown to
     /// *anyone* accessing the server. In production, we strongly recommend overriding this
     /// default implementation to avoid inadvertently exposing sensitive data via type
@@ -401,45 +353,20 @@ extension HTTP.Server
             return .resource("Malformed URI\n", status: 400)
         }
 
+        let request:HTTP.ServerRequest = .init(headers: .http1_1(h1.headers),
+            origin: origin,
+            uri: uri)
+
         switch h1.method
         {
-        case .HEAD:
-            fallthrough
+        case .DELETE:
+            return try await self.accept(request: request, method: .delete)
 
         case .GET:
-            return try await self.get(
-                request: .init(origin: origin, uri: uri),
-                headers: h1.headers)
+            return try await self.accept(request: request, method: .get)
 
-        case .PUT:
-            guard
-            let length:String = h1.headers["content-length"].first,
-            let length:Int = .init(length)
-            else
-            {
-                return .resource("Content length required\n", status: 411)
-            }
-
-            guard
-            let request:StreamedRequest = .init(put: uri, headers: h1.headers)
-            else
-            {
-                return .resource("Malformed request\n", status: 400)
-            }
-
-            if  let failure:HTTP.ServerResponse = try await self.clearance(for: request)
-            {
-                return failure
-            }
-
-            guard
-            let body:[UInt8] = try await inbound.accumulateBuffers(length: length)
-            else
-            {
-                return .resource("Content length does not match payload\n", status: 413)
-            }
-
-            return try await self.response(for: request, with: body)
+        case .HEAD:
+            return try await self.accept(request: request, method: .head)
 
         case .POST:
             guard
@@ -462,10 +389,30 @@ extension HTTP.Server
                 return .resource("Content length does not match payload\n", status: 400)
             }
 
-            return try await self.post(
-                request: .init(origin: origin, uri: uri),
-                headers: h1.headers,
-                body: body)
+            return try await self.accept(request: request, method: .post(body))
+
+        case .PUT:
+            guard
+            let length:String = h1.headers["content-length"].first,
+            let length:Int = .init(length)
+            else
+            {
+                return .resource("Content length required\n", status: 411)
+            }
+
+            if  let failure:HTTP.ServerResponse = try await self.reject(request: request)
+            {
+                return failure
+            }
+
+            guard
+            let body:[UInt8] = try await inbound.accumulateBuffers(length: length)
+            else
+            {
+                return .resource("Content length does not match payload\n", status: 413)
+            }
+
+            return try await self.accept(request: request, method: .put(body))
 
         default:
             return .resource("Method requires HTTP/2\n", status: 505)
@@ -656,64 +603,20 @@ extension HTTP.Server
             return .resource("Malformed URI", status: 400)
         }
 
+        let request:HTTP.ServerRequest = .init(headers: .http2(headers),
+            origin: origin,
+            uri: path)
+
         switch method
         {
-        case "HEAD":
-            // return .resource("Method not allowed", status: 405)
-            fallthrough
+        case "DELETE":
+            return try await self.accept(request: request, method: .delete)
 
         case "GET":
-            return try await self.get(
-                request: .init(origin: origin, uri: path),
-                headers: headers)
+            return try await self.accept(request: request, method: .get)
 
-        case "PUT":
-            guard
-            let length:String = headers["content-length"].first,
-            let length:Int = .init(length)
-            else
-            {
-                return .resource("Content length required", status: 411)
-            }
-
-            guard
-            let request:StreamedRequest = .init(put: path, headers: headers)
-            else
-            {
-                return .resource("Malformed request", status: 400)
-            }
-
-            if  let failure:HTTP.ServerResponse = try await self.clearance(for: request)
-            {
-                return failure
-            }
-
-            var body:[UInt8] = []
-                body.reserveCapacity(length)
-
-            while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
-            {
-                //  We could care less about timeout events here, as we have already determined
-                //  the request originates from a trusted source.
-                guard case .data(let payload)? = payload
-                else
-                {
-                    continue
-                }
-
-                if  case .byteBuffer(let payload) = payload.data
-                {
-                    payload.withUnsafeReadableBytes { body += $0 }
-                }
-
-                //  Why can’t NIO do this for us?
-                if  payload.endStream
-                {
-                    break
-                }
-            }
-
-            return try await self.response(for: request, with: body)
+        case "HEAD":
+            return try await self.accept(request: request, method: .head)
 
         case "POST":
             guard
@@ -768,13 +671,51 @@ extension HTTP.Server
                 }
             }
 
-            return try await self.post(
-                request: .init(origin: origin, uri: path),
-                headers: headers,
-                body: body)
+            return try await self.accept(request: request, method: .post(body))
+
+        case "PUT":
+            guard
+            let length:String = headers["content-length"].first,
+            let length:Int = .init(length)
+            else
+            {
+                return .resource("Content length required", status: 411)
+            }
+
+            if  let failure:HTTP.ServerResponse = try await self.reject(request: request)
+            {
+                return failure
+            }
+
+            var body:[UInt8] = []
+                body.reserveCapacity(length)
+
+            while let payload:HTTP2Frame.FramePayload? = try await inbound.next()
+            {
+                //  We could care less about timeout events here, as we have already determined
+                //  the request originates from a trusted source.
+                guard case .data(let payload)? = payload
+                else
+                {
+                    continue
+                }
+
+                if  case .byteBuffer(let payload) = payload.data
+                {
+                    payload.withUnsafeReadableBytes { body += $0 }
+                }
+
+                //  Why can’t NIO do this for us?
+                if  payload.endStream
+                {
+                    break
+                }
+            }
+
+            return try await self.accept(request: request, method: .put(body))
 
         case _:
-            return .forbidden("Forbidden")
+            return .resource("Method not allowed\n", status: 405)
         }
     }
 }
