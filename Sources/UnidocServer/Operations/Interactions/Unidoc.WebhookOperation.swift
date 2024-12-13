@@ -34,7 +34,7 @@ extension Unidoc.WebhookOperation
         //  when the server restarts and the whitelists are initialized.
         if !request.origin.unknown
         {
-            guard case .github_actions? = request.origin.claimant
+            guard case .github_webhook? = request.origin.claimant
             else
             {
                 throw Unidoc.WebhookError.unverifiedOrigin
