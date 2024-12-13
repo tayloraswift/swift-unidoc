@@ -43,30 +43,6 @@ extension Unidoc.Router
 }
 extension Unidoc.Router
 {
-    private
-    var contentType:ContentType?
-    {
-        let contentType:String?
-
-        switch self.headers
-        {
-        case .http1_1(let headers): contentType = headers["content-type"].first
-        case .http2(let headers):   contentType = headers["content-type"].first
-        }
-
-        guard
-        let contentType:String,
-        let contentType:ContentType = .init(contentType)
-        else
-        {
-            return nil
-        }
-
-        return contentType
-    }
-}
-extension Unidoc.Router
-{
     mutating
     func descend() -> String?
     {
@@ -107,7 +83,7 @@ extension Unidoc.Router
     func redirect(root:Unidoc.ServerRoot) -> String?
     {
         let subdomain:Unidoc.ServerRoot.Subdomain?
-        switch self.host
+        switch self.headers.host
         {
         case "swiftinit.org"?:
             switch root.subdomain
@@ -215,7 +191,7 @@ extension Unidoc.Router
             return .sync(redirect: .permanent(external: redirect))
         }
 
-        switch self.contentType
+        switch self.headers.contentType
         {
         case .media(.application(.json, charset: _))?:
             return self.post(root: root, json: .init(utf8: body[...]))
@@ -767,9 +743,9 @@ extension Unidoc.Router
         case "github"?:
             do
             {
-                return .unordered(try Unidoc.WebhookOperation.init(json: json,
-                    from: self.client.origin,
-                    with: self.headers))
+                return .unordered(try Unidoc.WebhookOperation.init(
+                    json: json,
+                    from: self.request.metadata))
             }
             catch let error
             {

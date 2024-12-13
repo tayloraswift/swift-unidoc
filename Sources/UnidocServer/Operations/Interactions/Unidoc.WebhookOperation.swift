@@ -26,17 +26,15 @@ extension Unidoc
 }
 extension Unidoc.WebhookOperation
 {
-    init(json:JSON,
-        from origin:__shared HTTP.ServerRequest.Origin,
-        with headers:__shared HTTP.Headers) throws
+    init(json:JSON, from request:__shared HTTP.ServerRequest) throws
     {
         //  Did this request actually come from GitHub? (Anyone can POST over HTTP/2.)
         //
         //  FIXME: there is a security hole during the (hopefully brief) interval between
         //  when the server restarts and the whitelists are initialized.
-        if !origin.unknown
+        if !request.origin.unknown
         {
-            guard case .github_actions? = origin.claimant
+            guard case .github_actions? = request.origin.claimant
             else
             {
                 throw Unidoc.WebhookError.unverifiedOrigin
@@ -46,7 +44,7 @@ extension Unidoc.WebhookOperation
         let hook:String?
         let type:String?
 
-        switch headers
+        switch request.headers
         {
         case .http1_1(let headers):
             hook = headers["X-GitHub-Hook-ID"].first

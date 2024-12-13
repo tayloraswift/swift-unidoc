@@ -106,7 +106,7 @@ extension Unidoc.Server
         }
 
         return self.format(username: username,
-            locale: request.client.guess?.locale,
+            locale: request.client?.locale,
             time: request.accepted)
     }
 
@@ -335,16 +335,15 @@ extension Unidoc.Server
 extension Unidoc.Server
 {
     public
-    func clearance(for request:Unidoc.StreamedRequest) async throws -> HTTP.ServerResponse?
+    func reject(request:HTTP.ServerRequest) async throws -> HTTP.ServerResponse?
     {
-        try await self.clearance(by: request.authorization)
+        try await self.clearance(by: request.headers.authorization)
     }
 
     public
-    func response(for request:Unidoc.StreamedRequest,
-        with body:__owned [UInt8]) async -> HTTP.ServerResponse
+    func delete(request:Unidoc.ServerRequest) async throws -> HTTP.ServerResponse
     {
-        await self.submit(update: request.endpoint, with: body)
+        return .resource("Method not allowed\n", status: 405)
     }
 
     public
@@ -352,14 +351,14 @@ extension Unidoc.Server
     {
         var router:Unidoc.Router = .init(routing: request)
 
-        if  let route:Unidoc.AnyOperation = router.get()
-        {
-            return try await self.response(running: route, for: request)
-        }
+        guard
+        let route:Unidoc.AnyOperation = router.get()
         else
         {
             return .resource("Malformed request\n", status: 400)
         }
+
+        return try await self.response(running: route, for: request)
     }
 
     public
@@ -367,14 +366,27 @@ extension Unidoc.Server
     {
         var router:Unidoc.Router = .init(routing: request)
 
-        if  let operation:Unidoc.AnyOperation = router.post(body: body)
-        {
-            return try await self.response(running: operation, for: request)
-        }
+        guard
+        let operation:Unidoc.AnyOperation = router.post(body: body)
         else
         {
             return .resource("Malformed request\n", status: 400)
         }
+
+        return try await self.response(running: operation, for: request)
+    }
+
+    public
+    func put(request:HTTP.ServerRequest, body:[UInt8]) async -> HTTP.ServerResponse
+    {
+        guard
+        let request:Unidoc.StreamedRequest = .init(from: request)
+        else
+        {
+            return .resource("Malformed request\n", status: 400)
+        }
+
+        return await self.submit(update: request.endpoint, with: body)
     }
 
     private
@@ -422,7 +434,7 @@ extension Unidoc.Server
 {
     private
     func submit(update operation:any Unidoc.ProceduralOperation,
-        with body:__owned [UInt8] = []) async -> HTTP.ServerResponse
+        with body:[UInt8] = []) async -> HTTP.ServerResponse
     {
         await withCheckedContinuation
         {
@@ -505,7 +517,7 @@ extension Unidoc.Server
                     $0[.dd] = String.init(reflecting: Swift.type(of: error))
 
                     $0[.dt] = "Request origin"
-                    $0[.dd] = "\(request.client.origin.ip)"
+                    $0[.dd] = "\(request.origin.ip)"
 
                     $0[.dt] = "Request"
                     $0[.dd] = "\(request.uri)"
