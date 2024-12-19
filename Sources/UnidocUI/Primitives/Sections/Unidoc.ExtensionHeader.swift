@@ -1,9 +1,10 @@
 import HTML
+import Signatures
 import Symbols
 
 extension Unidoc
 {
-    struct ExtensionHeader:Identifiable
+    struct ExtensionHeader
     {
         private
         let heading:ExtensionHeading
@@ -12,20 +13,69 @@ extension Unidoc
         private
         let `where`:Unidoc.WhereClause?
 
-        let id:String
+        let name:String
 
+        private
         init(
             heading:ExtensionHeading,
             culture:Unidoc.LinkReference<Unidoc.CultureVertex>,
             where clause:Unidoc.WhereClause?,
-            id:String)
+            name:String)
         {
             self.heading = heading
             self.culture = culture
             self.where = clause
-            self.id = id
+            self.name = name
         }
     }
+}
+extension Unidoc.ExtensionHeader
+{
+    init(extension group:borrowing Unidoc.ExtensionGroup,
+        culture:Unidoc.LinkReference<Unidoc.CultureVertex>,
+        module:Symbol.Module,
+        bias:Unidoc.Bias,
+        with context:__shared Unidoc.InternalPageContext)
+    {
+        var first:Bool = true
+        var name:String = "\(module)"
+
+        for requirement:GenericConstraint<Unidoc.Scalar> in group.constraints
+        {
+            let requirement:Unidoc.WhereClause.Requirement = requirement | context
+
+            if  first
+            {
+                first = false
+                name += " where "
+            }
+            else
+            {
+                name += ", "
+            }
+
+            name += requirement.parameter
+
+            switch requirement.what
+            {
+            case .conformer:    name += ":"
+            case .subclass:     name += ":"
+            case .equal:        name += " == "
+            }
+
+            name += "\(requirement.whom.display)"
+        }
+
+        self.init(
+            heading: .init(culture: group.culture, bias: bias),
+            culture: culture,
+            where: group.constraints | context,
+            name: name)
+    }
+}
+extension Unidoc.ExtensionHeader:Identifiable
+{
+    var id:String { "se:\(self.name)" }
 }
 extension Unidoc.ExtensionHeader:HTML.OutputStreamableAnchor
 {

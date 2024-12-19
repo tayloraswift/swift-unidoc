@@ -13,13 +13,15 @@ extension Unidoc.DocsEndpoint
         let cone:Unidoc.Cone
         let apex:Unidoc.CultureVertex
 
-        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
-            cone:Unidoc.Cone,
-            apex:Unidoc.CultureVertex)
+        init(cone:Unidoc.Cone, apex:Unidoc.CultureVertex, tree:Unidoc.TypeTree?)
         {
-            self.sidebar = sidebar
-            self.apex = apex
             self.cone = cone
+            self.apex = apex
+
+            self.sidebar = .module(
+                volume: self.cone.context.volume,
+                origin: self.apex.module.id,
+                tree: tree)
         }
     }
 }

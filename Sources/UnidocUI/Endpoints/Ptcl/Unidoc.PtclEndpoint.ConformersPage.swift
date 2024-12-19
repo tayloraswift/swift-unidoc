@@ -28,17 +28,21 @@ extension Unidoc.PtclEndpoint
         private
         let stem:Unidoc.StemComponents
 
-        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
-            vertex:Unidoc.DeclVertex,
-            halo:Unidoc.ConformingTypes) throws
+        init(vertex:Unidoc.DeclVertex,
+            halo:Unidoc.ConformingTypes,
+            tree:Unidoc.TypeTree?) throws
         {
-            self.culture = try halo.context[culture: vertex.culture]
             self.colony = try vertex.colony.map { try halo.context[culture: $0] }
             self.stem = try .init(vertex.stem)
 
-            self.sidebar = sidebar
-            self.vertex = vertex
             self.halo = halo
+            self.vertex = vertex
+
+            self.culture = try self.halo.context[culture: self.vertex.culture]
+            self.sidebar = .module(
+                volume: self.halo.context.volume,
+                origin: self.culture.vertex.module.id,
+                tree: tree)
         }
     }
 }

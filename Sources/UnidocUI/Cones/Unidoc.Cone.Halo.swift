@@ -30,7 +30,7 @@ extension Unidoc.Cone
         var modules:[Unidoc.Scalar]
 
         private
-        var extensions:[Unidoc.ExtensionGroup]
+        var extensions:[[Unidoc.ExtensionGroup]]
 
         private(set)
         var peerConstraints:[GenericConstraint<Unidoc.Scalar>]
@@ -103,7 +103,7 @@ extension Unidoc.Cone.Halo
         container:Unidoc.Group? = nil,
         generics:Generics = .init([])) throws
     {
-        var extensions:[(Unidoc.ExtensionGroup, Partisanship, Generality)] = []
+        var extensions:[Unidoc.ExtendingModule: [Unidoc.ExtensionGroup]] = [:]
         for group:Unidoc.AnyGroup in groups
         {
             switch group
@@ -116,18 +116,20 @@ extension Unidoc.Cone.Halo
                     continue
                 }
 
-                let partisanship:Partisanship = self.context[secondary: group.id.edition]
-                    .map
+                let module:Unidoc.ExtendingModule
+
+                if  let volume:Unidoc.VolumeMetadata = self.context[secondary: group.id.edition]
                 {
-                    .third($0.symbol.package)
-                } ?? .first
+                    module = .init(partisanship: .third(volume.symbol.package),
+                        index: group.culture.id.citizen)
+                }
+                else
+                {
+                    module = .init(partisanship: .first,
+                        index: group.culture.id.citizen)
+                }
 
-                let genericness:Generality = group.constraints.isEmpty ?
-                    .unconstrained : generics.count(substituting: group.constraints) > 0 ?
-                    .constrained :
-                    .concretized
-
-                extensions.append((group, partisanship, genericness))
+                extensions[module, default: []].append(group)
 
             case .intrinsic(let group):
                 if  case group.id? = container
@@ -188,30 +190,40 @@ extension Unidoc.Cone.Halo
             }
         }
 
-        extensions.sort
-        {
-            //  Sort libraries by partisanship, first-party first, then third-party
-            //  by package identifier.
-            //  Then, break ties by extension culture. Module numbers are
-            //  lexicographically ordered according to the package’s internal dependency
-            //  graph, so the library with the lowest module number will always be the
-            //  current culture, if it is present.
-            //  Then, break ties by genericness. Generic extensions come first, concrete
-            //  extensions come last.
-            //  Finally, break ties by extension id. This is arbitrary, but we usually try
-            //  to assign id numbers such that the extensions with the fewest constraints
-            //  come first.
-            ($0.1, $0.0.culture.citizen, $0.2, $0.0.id) <
-            ($1.1, $1.0.culture.citizen, $1.2, $1.0.id)
-        }
-
         //  Prevent the currently-shown page from appearing in the “See Also” section.
         let apex:Unidoc.Scalar = self.context.id
 
         curated.insert(apex)
         self.curation.removeAll { $0 == apex }
 
-        self.extensions = extensions.map { $0.0.subtracting(curated) }
+        //  Sort libraries by partisanship, first-party first, then third-party
+        //  by package identifier.
+        //  Then, break ties by extension culture. Module numbers are
+        //  lexicographically ordered according to the package’s internal dependency
+        //  graph, so the library with the lowest module number will always be the
+        //  current culture, if it is present.
+        //  Then, break ties by genericness. Generic extensions come first, concrete
+        //  extensions come last.
+        //  Finally, break ties by extension id. This is arbitrary, but we usually try
+        //  to assign id numbers such that the extensions with the fewest constraints
+        //  come first.
+        let extendingModules:[Unidoc.ExtendingModule] = extensions.keys.sorted()
+
+        self.extensions = extendingModules.map
+        {
+            var groups:[(Unidoc.ExtensionGroup, Generality)] = extensions.removeValue(
+                forKey: $0)?.map
+            {
+                let genericness:Generality = $0.constraints.isEmpty ?
+                    .unconstrained : generics.count(substituting: $0.constraints) > 0 ?
+                    .constrained :
+                    .concretized
+                return ($0, genericness)
+            } ?? []
+
+            groups.sort { ($0.1, $0.0.id) < ($1.1, $1.0.id) }
+            return groups.map { $0.0.subtracting(curated) }
+        }
 
         self.uncategorized.removeAll(where: curated.contains(_:))
         self.requirements.removeAll(where: curated.contains(_:))
@@ -366,15 +378,59 @@ extension Unidoc.Cone.Halo:HTML.OutputStreamable
                 window: extensionsEmpty ? nil : 8 ... 12)
         }
 
-        for group:Unidoc.ExtensionGroup in self.extensions
+        for extensions:[Unidoc.ExtensionGroup] in self.extensions
         {
-            html[.section]
+            var culture:Unidoc.LinkReference<Unidoc.CultureVertex>?
+            var module:Symbol.Module?
+
+            for group:Unidoc.ExtensionGroup in extensions where !group.isEmpty
             {
-                $0.class = "group segregated extension"
-            } = Unidoc.ExtensionSection.init(group: group,
-                decl: decl,
-                bias: self.bias,
-                with: self.context)
+                culture = culture ?? self.context[culture: group.culture]
+
+                guard
+                let culture:Unidoc.LinkReference<Unidoc.CultureVertex>
+                else
+                {
+                    continue
+                }
+
+                //  We only set the section landmark for the first extension group from
+                //  a given culture.
+                let moduleLeader:Bool
+                let moduleSymbol:Symbol.Module
+
+                if  let module:Symbol.Module
+                {
+                    moduleLeader = false
+                    moduleSymbol = module
+                }
+                else
+                {
+                    moduleLeader = true
+                    moduleSymbol = culture.vertex.module.id
+                    module = moduleSymbol
+                }
+
+                html[.section]
+                {
+                    $0.class = "group segregated extension"
+                    $0.id = moduleLeader ? "sm:\(moduleSymbol)" : nil
+                }
+                    content:
+                {
+                    let header:Unidoc.ExtensionHeader = .init(extension: group,
+                        culture: culture,
+                        module: moduleSymbol,
+                        bias: self.bias,
+                        with: self.context)
+
+                    $0[.header] = header
+                    $0 += Unidoc.ExtensionBody.init(extension: group,
+                        decl: decl,
+                        name: header.name,
+                        with: self.context)
+                }
+            }
         }
     }
 }

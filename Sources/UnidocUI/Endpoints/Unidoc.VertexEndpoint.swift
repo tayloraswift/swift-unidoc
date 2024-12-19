@@ -54,7 +54,7 @@ extension Unidoc.VertexEndpoint
             //  We currently don’t have any actual means of obtaining a type tree in this
             //  situation, but in theory, we could.
             let display:Unidoc.DocsEndpoint.NotFoundPage = .init(context,
-                sidebar: .module(volume: context.volume, tree: tree))
+                sidebar: .module(volume: context.volume, origin: nil, tree: tree))
 
             return .notFound(display.resource(format: format))
         }

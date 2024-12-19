@@ -66,19 +66,11 @@ extension Unidoc.PtclEndpoint:Unidoc.VertexEndpoint
                 break
             }
 
-            let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint> = .module(
-                volume: context.volume,
-                tree: tree)
-
             let conformers:Unidoc.ConformingTypes = try .init(groups: groups,
                 bias: vertex.culture,
                 with: context)
 
-            let page:ConformersPage = try .init(
-                sidebar: sidebar,
-                vertex: vertex,
-                halo: conformers)
-
+            let page:ConformersPage = try .init(vertex: vertex, halo: conformers, tree: tree)
             return .ok(page.resource(format: format))
 
         case .file(let vertex):

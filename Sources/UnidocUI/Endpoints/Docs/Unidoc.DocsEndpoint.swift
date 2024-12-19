@@ -48,31 +48,21 @@ extension Unidoc.DocsEndpoint:Unidoc.VertexEndpoint
         format:Unidoc.RenderFormat) throws -> HTTP.ServerResponse
     {
         let resource:HTTP.Resource
-
         switch apex
         {
         case .article(let apex):
-            let sidebar:Unidoc.Sidebar<Self> = .module(
-                volume: context.volume,
-                tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:ArticlePage = try .init(sidebar: sidebar, cone: cone, apex: apex)
+            let page:ArticlePage = try .init(cone: cone, apex: apex, tree: tree)
             resource = page.resource(format: format)
 
         case .culture(let apex):
-            let sidebar:Unidoc.Sidebar<Self> = .module(
-                volume: context.volume,
-                tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:ModulePage = .init(sidebar: sidebar, cone: cone, apex: apex)
+            let page:ModulePage = .init(cone: cone, apex: apex, tree: tree)
             resource = page.resource(format: format)
 
         case .decl(let apex):
-            let sidebar:Unidoc.Sidebar<Self> = .module(
-                volume: context.volume,
-                tree: tree)
             let cone:Unidoc.Cone = try .init(context, groups: groups, apex: apex)
-            let page:DeclPage = try .init(sidebar: sidebar, cone: cone, apex: apex)
+            let page:DeclPage = try .init(cone: cone, apex: apex, tree: tree)
             resource = page.resource(format: format)
 
         case .file:
