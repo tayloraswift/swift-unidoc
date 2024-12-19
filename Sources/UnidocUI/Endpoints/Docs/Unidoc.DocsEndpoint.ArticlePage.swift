@@ -10,20 +10,23 @@ extension Unidoc.DocsEndpoint
     struct ArticlePage
     {
         let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>
+
         let cone:Unidoc.Cone
         let apex:Unidoc.ArticleVertex
 
         private
         let culture:Unidoc.LinkReference<Unidoc.CultureVertex>
 
-        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
-            cone:Unidoc.Cone,
-            apex:Unidoc.ArticleVertex) throws
+        init(cone:Unidoc.Cone, apex:Unidoc.ArticleVertex, tree:Unidoc.TypeTree?) throws
         {
-            self.sidebar = sidebar
-            self.apex = apex
             self.cone = cone
+            self.apex = apex
+
             self.culture = try self.cone.context[culture: self.apex.culture]
+            self.sidebar = .module(
+                volume: self.cone.context.volume,
+                origin: self.culture.vertex.module.id,
+                tree: tree)
         }
     }
 }

@@ -40,17 +40,11 @@ extension Unidoc.ExtensionBody
 }
 extension Unidoc.ExtensionBody
 {
-    init?(
-        group:borrowing Unidoc.ExtensionGroup,
+    init(extension group:borrowing Unidoc.ExtensionGroup,
         decl:Phylum.DeclFlags,
         name:String,
         with context:borrowing Unidoc.InternalPageContext)
     {
-        if  group.isEmpty
-        {
-            return nil
-        }
-
         var lists:Lists
 
         lists.conformances = .partition(group.conformances, with: context)
