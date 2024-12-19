@@ -1,22 +1,25 @@
 import HTML
+import Symbols
 import UnidocQueries
 import UnidocRecords
 import URI
 
 extension Unidoc
 {
-    @frozen public
     struct Sidebar<Root> where Root:Unidoc.VertexLayer
     {
         private
         let volume:Unidoc.VolumeMetadata
         private
+        let origin:Symbol.Module?
+        private
         let nouns:[Unidoc.Noun]
 
         private
-        init(volume:Unidoc.VolumeMetadata, nouns:[Unidoc.Noun])
+        init(volume:Unidoc.VolumeMetadata, origin:Symbol.Module?, nouns:[Unidoc.Noun])
         {
             self.volume = volume
+            self.origin = origin
             self.nouns = nouns
         }
     }
@@ -26,25 +29,26 @@ extension Unidoc.Sidebar
     static
     func package(volume:Unidoc.VolumeMetadata) -> Self
     {
-        .init(volume: volume, nouns: volume.cultures)
+        .init(volume: volume, origin: nil, nouns: volume.cultures)
     }
 
     static
     func product(volume:Unidoc.VolumeMetadata) -> Self
     {
-        .init(volume: volume, nouns: volume.products)
+        .init(volume: volume, origin: nil, nouns: volume.products)
     }
 
     static
-    func module(volume:Unidoc.VolumeMetadata, tree:Unidoc.TypeTree?) -> Self
+    func module(volume:Unidoc.VolumeMetadata,
+        origin:Symbol.Module?,
+        tree:Unidoc.TypeTree?) -> Self
     {
-        .init(volume: volume, nouns: tree?.rows ?? [])
+        .init(volume: volume, origin: origin, nouns: tree?.rows ?? [])
     }
 }
 extension Unidoc.Sidebar:HTML.OutputStreamable
 {
-    public static
-    func += (html:inout HTML.ContentEncoder, self:Self)
+    static func += (html:inout HTML.ContentEncoder, self:Self)
     {
         //  Unfortunately, this cannot be a proper `ul`, because `ul` cannot contain another
         //  `ul` as a direct child.
@@ -85,7 +89,14 @@ extension Unidoc.Sidebar:HTML.OutputStreamable
                 case .stem(let citizenship, _):
                     $0[.a]
                     {
-                        $0.href = "\(uri)"
+                        if  let origin:Symbol.Module = self.origin, citizenship != .culture
+                        {
+                            $0.href = "\(uri)#sm:\(origin)"
+                        }
+                        else
+                        {
+                            $0.href = "\(uri)"
+                        }
 
                         switch citizenship
                         {

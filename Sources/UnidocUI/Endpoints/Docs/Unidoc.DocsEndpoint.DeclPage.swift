@@ -25,17 +25,19 @@ extension Unidoc.DocsEndpoint
         private
         let stem:Unidoc.StemComponents
 
-        init(sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>,
-            cone:Unidoc.Cone,
-            apex:Unidoc.DeclVertex) throws
+        init(cone:Unidoc.Cone, apex:Unidoc.DeclVertex, tree:Unidoc.TypeTree?) throws
         {
-            self.culture = try cone.context[culture: apex.culture]
             self.colony = try apex.colony.map { try cone.context[culture: $0] }
             self.stem = try .init(apex.stem)
 
-            self.sidebar = sidebar
             self.cone = cone
             self.apex = apex
+
+            self.culture = try self.cone.context[culture: self.apex.culture]
+            self.sidebar = .module(
+                volume: self.cone.context.volume,
+                origin: self.culture.vertex.module.id,
+                tree: tree)
         }
     }
 }
