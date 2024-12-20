@@ -621,10 +621,9 @@ let package:Package = .init(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]),
 
-        .executableTarget(name: "UCFTests",
+        .testTarget(name: "UCFTests",
             dependencies: [
                 .target(name: "UCF"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "FingerprintingTests",
