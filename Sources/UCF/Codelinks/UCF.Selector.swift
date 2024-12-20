@@ -116,8 +116,10 @@ extension UCF.Selector:LosslessStringConvertible
 
         var path:Path = .init()
         //  Special case for bare operator references:
-        if  case j? = path.extend(parsing: string.unicodeScalars[i ..< j])
+        if  let sole:PathComponent = .parse(string.unicodeScalars[i ..< j]),
+            j == sole.range.upperBound
         {
+            path.append(sole)
             self.init(base: .relative, path: path)
         }
         else
@@ -134,15 +136,19 @@ extension UCF.Selector
         self.init(base: base)
 
         var i:String.Index = string.startIndex
-        while let j:String.Index = self.path.extend(parsing: string.unicodeScalars[i...])
+        while let next:PathComponent = .parse(string.unicodeScalars[i...])
         {
-            guard j < string.endIndex
+            self.path.append(next)
+
+            let j:String.Index = next.range.upperBound
+            if  j < string.endIndex
+            {
+                i = string.index(after: j)
+            }
             else
             {
                 return
             }
-
-            i = string.index(after: j)
 
             switch string[j]
             {
@@ -286,7 +292,7 @@ extension UCF.Selector
 }
 extension UCF.Selector
 {
-    @inlinable public 
+    @inlinable public
     static func equivalent(to doclink:Doclink) -> Self?
     {
         if  doclink.absolute

@@ -1,4 +1,4 @@
-extension UCF.Selector.Path
+extension UCF.Selector.PathComponent
 {
     struct IdentifierHead
     {
@@ -8,7 +8,7 @@ extension UCF.Selector.Path
         }
     }
 }
-extension UCF.Selector.Path.IdentifierHead
+extension UCF.Selector.PathComponent.IdentifierHead
 {
     init?(_ codepoint:Unicode.Scalar)
     {
