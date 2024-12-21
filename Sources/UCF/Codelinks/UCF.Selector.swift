@@ -66,6 +66,9 @@ extension UCF.Selector:CustomStringConvertible
 
         case .legacy(let filter, let hash?):
             return "\(string)-swift.\(filter.rawValue)-\(hash)"
+
+        case .pattern(let filter)?:
+            return "\(string)-\(filter)"
         }
     }
 }
@@ -193,6 +196,7 @@ extension UCF.Selector
                 }
 
             case "-":
+                //  Parse a legacy DocC disambiguation suffix.
                 if  let slash:String.Index = string[i...].firstIndex(of: "/")
                 {
                     //  This is an interior path component, so the disambiguator is
@@ -203,83 +207,15 @@ extension UCF.Selector
                     self.path.fold = self.path.components.endIndex
                     continue
                 }
-
-                //  Parse a legacy DocC disambiguation suffix.
-                var filter:UCF.LegacyFilter? = nil
-                var hash:FNV24? = nil
-
-                while i < string.endIndex
+                else if
+                    let suffix:Suffix = .parse(legacy: string[i...])
                 {
-                    if  let k:String.Index = string[i...].firstIndex(of: ".")
-                    {
-                        guard string[i ..< k] == "swift"
-                        else
-                        {
-                            return nil
-                        }
-
-                        let k:String.Index = string.index(after: k)
-                        if  let hyphen:String.Index = string[k...].firstIndex(of: "-")
-                        {
-                            filter = .init(rawValue: string[k ..< hyphen])
-                            i = string.index(after: hyphen)
-                        }
-                        else
-                        {
-                            filter = .init(rawValue: string[k...])
-                            break
-                        }
-
-                        if  case nil = filter
-                        {
-                            return nil
-                        }
-                    }
-                    else
-                    {
-                        if  let hyphen:String.Index = string[i...].firstIndex(of: "-")
-                        {
-                            hash = .init(string[i ..< hyphen])
-                            i = string.index(after: hyphen)
-                        }
-                        else
-                        {
-                            hash = .init(string[i...])
-                            break
-                        }
-
-                        if  case nil = hash
-                        {
-                            return nil
-                        }
-                    }
-                }
-
-                if  let filter:UCF.LegacyFilter
-                {
-                    if  case nil = hash,
-                        let filter:UCF.KeywordFilter = .init(legacy: filter)
-                    {
-                        self.suffix = .filter(filter)
-                        return
-                    }
-                    else
-                    {
-                        self.suffix = .legacy(filter, hash)
-                        return
-                    }
+                    self.suffix = suffix
+                    return
                 }
                 else
                 {
-                    if  let hash:FNV24
-                    {
-                        self.suffix = .hash(hash)
-                        return
-                    }
-                    else
-                    {
-                        return nil
-                    }
+                    return nil
                 }
 
             case _:
