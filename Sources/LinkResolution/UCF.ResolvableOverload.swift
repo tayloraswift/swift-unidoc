@@ -19,7 +19,7 @@ extension UCF.ResolvableOverload
     {
         if  case nil = predicate.seal
         {
-            //  Macros are currently the only kind of declaration that *must* be spelled with 
+            //  Macros are currently the only kind of declaration that *must* be spelled with
             //  trailing parentheses.
             switch self.phylum
             {
@@ -40,7 +40,7 @@ extension UCF.ResolvableOverload
             case .var:                      break
             }
         }
-        else 
+        else
         {
             switch self.phylum
             {
@@ -62,7 +62,7 @@ extension UCF.ResolvableOverload
             }
         }
 
-        guard 
+        guard
         let suffix:UCF.Selector.Suffix = predicate.suffix
         else
         {
@@ -75,6 +75,8 @@ extension UCF.ResolvableOverload
         case .legacy(_, let hash?):         return hash == self.hash
         case .hash(let hash):               return hash == self.hash
         case .filter(let filter):           return filter ~= self.phylum
+        //  TODO: unimplemented
+        case .pattern:                      return true
         }
     }
 }
