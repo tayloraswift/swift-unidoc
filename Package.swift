@@ -645,11 +645,10 @@ let package:Package = .init(
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "MarkdownPluginSwiftTests",
+        .testTarget(name: "MarkdownPluginSwiftTests",
             dependencies: [
                 .target(name: "MarkdownPluginSwift"),
                 .target(name: "MarkdownRendering"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "MarkdownRenderingTests",
