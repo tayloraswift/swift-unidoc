@@ -138,14 +138,14 @@ extension Unidoc.Client<HTTP.Client2>
         {
             //  Ensure the cache directory exists, solely for checking free space.
             try cache.directory.create()
-            //  If there is less than 2GB of free space on the current file system, and we
+            //  If there is less than 6GB of free space on the current file system, and we
             //  are using a manually-managed SwiftPM cache, we should clear it.
             let stats:FileSystemStats = try .containing(path: cache)
             let space:UInt = stats.blocksFreeForUnprivileged * stats.blockSize
 
             print("Free space available: \(space / 1_000_000) MB")
 
-            if  space < 2_000_000_000
+            if  space < 6_000_000_000
             {
                 try cache.directory.remove()
             }
