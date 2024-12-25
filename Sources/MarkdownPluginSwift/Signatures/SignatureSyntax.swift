@@ -87,7 +87,7 @@ extension SignatureSyntax
         var encoder:Encoder<AbridgedParameter> = .init()
         var parser:Parser = .init(utf8)
 
-        encoder += DeclSyntax.parse(from: &parser)
+        encoder.encode(decl: .parse(from: &parser))
 
         return .init(elements: encoder.move())
     }
@@ -97,7 +97,7 @@ extension SignatureSyntax
         var encoder:Encoder<ExpandedParameter> = .init()
         var parser:Parser = .init(utf8)
 
-        encoder += DeclSyntax.parse(from: &parser)
+        encoder.encode(decl: .parse(from: &parser))
 
         return .init(elements: encoder.move())
     }
