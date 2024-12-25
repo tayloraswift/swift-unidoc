@@ -36,7 +36,7 @@ extension SymbolGraph.Buffer24
     }
 }
 
-extension SymbolGraph.Buffer24:RandomAccessCollection
+extension SymbolGraph.Buffer24:BSONArrayEncodable, RandomAccessCollection
 {
     @inlinable
     var startIndex:Int { self.elements.startIndex }
@@ -45,37 +45,13 @@ extension SymbolGraph.Buffer24:RandomAccessCollection
     var endIndex:Int { self.elements.endIndex }
 
     @inlinable
-    subscript(position:Int) -> CodingElement
-    {
-        get
-        {
-            let scalar:Int32 = self.elements[position]
-            return
-                (
-                    UInt8.init(truncatingIfNeeded: scalar),
-                    UInt8.init(truncatingIfNeeded: scalar >> 8),
-                    UInt8.init(truncatingIfNeeded: scalar >> 16)
-                )
-        }
-    }
-}
-extension SymbolGraph.Buffer24:BSONArrayEncodable
-{
+    subscript(position:Int) -> Element { .init(int32: self.elements[position]) }
 }
 extension SymbolGraph.Buffer24:BSONArrayDecodable
 {
-    @usableFromInline
-    typealias CodingElement = (UInt8, UInt8, UInt8)
-
     @inlinable
-    init(from bson:borrowing BSON.BinaryBuffer<CodingElement>) throws
+    init(from bson:borrowing BSON.BinaryArray<Element>) throws
     {
-        self.init(bson.map
-        {
-            .decl
-                | Int32.init($0)
-                | Int32.init($1) << 8
-                | Int32.init($2) << 16
-        })
+        self.init(bson.map(\.int32))
     }
 }
