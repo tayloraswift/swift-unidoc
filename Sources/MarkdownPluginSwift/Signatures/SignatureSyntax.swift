@@ -16,20 +16,6 @@ struct SignatureSyntax
 }
 extension SignatureSyntax
 {
-    private
-    init<Format>(utf8:UnsafeBufferPointer<UInt8>, format:Format.Type)
-        where Format:SignatureParameterFormat
-    {
-        var encoder:Encoder<Format> = .init()
-        var parser:Parser = .init(utf8)
-
-        encoder += DeclSyntax.parse(from: &parser)
-
-        self.init(elements: encoder.move())
-    }
-}
-extension SignatureSyntax
-{
     @usableFromInline
     func split(on boundaries:[Int]) -> [Span]
     {
@@ -84,21 +70,21 @@ extension SignatureSyntax
     @usableFromInline static
     func abridged(_ utf8:UnsafeBufferPointer<UInt8>) -> Self
     {
-        var encoder:Encoder<AbridgedParameter> = .init()
+        var builder:Builder<AbridgedVisitor> = .init(visitor: .init())
         var parser:Parser = .init(utf8)
 
-        encoder.encode(decl: .parse(from: &parser))
+        builder.encode(decl: .parse(from: &parser))
 
-        return .init(elements: encoder.move())
+        return .init(elements: builder.encoder.move())
     }
     @usableFromInline static
     func expanded(_ utf8:UnsafeBufferPointer<UInt8>) -> Self
     {
-        var encoder:Encoder<ExpandedParameter> = .init()
+        var builder:Builder<ExpandedVisitor> = .init(visitor: .init())
         var parser:Parser = .init(utf8)
 
-        encoder.encode(decl: .parse(from: &parser))
+        builder.encode(decl: .parse(from: &parser))
 
-        return .init(elements: encoder.move())
+        return .init(elements: builder.encoder.move())
     }
 }

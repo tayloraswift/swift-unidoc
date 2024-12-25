@@ -7,16 +7,16 @@ extension SignatureSyntax
         private
         let syntax:FunctionParameterSyntax
 
-        init(syntax:FunctionParameterSyntax, func _:Bool)
+        init(syntax:FunctionParameterSyntax)
         {
             self.syntax = syntax
         }
     }
 }
-extension SignatureSyntax.ExpandedParameter:SignatureParameterFormat
+extension SignatureSyntax.ExpandedParameter:SignatureParameter
 {
     static
-    func += (signature:inout SignatureSyntax.Encoder<Self>, self:Self)
+    func += (signature:inout SignatureSyntax.Encoder, self:Self)
     {
         var named:Bool = false
         for region:Syntax in self.syntax.children(viewMode: .sourceAccurate)
