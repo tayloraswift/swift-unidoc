@@ -1,6 +1,6 @@
 import Signatures
 
-extension Signature.Expanded
+extension Signature.Landmarks
 {
     @frozen public
     struct InterestingKeywords
@@ -16,7 +16,7 @@ extension Signature.Expanded
         public
         var freestanding:Bool
 
-        @inlinable public
+        @inlinable
         init(actor:Bool = false,
             attached:Bool = false,
             `class`:Bool = false,

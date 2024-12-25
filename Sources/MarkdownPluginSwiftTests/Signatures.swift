@@ -77,6 +77,44 @@ struct Signatures
         <span class='xt'>Sendable</span>
         """)
     }
+
+    /// This test checks that the signature parser can correct the upstream bug in
+    /// lib/SymbolGraphGen: https://github.com/swiftlang/swift/issues/78343
+    @Test
+    static func ExpandedWithSelf()
+    {
+        let decl:String = """
+        func sum(with other: `Self`) -> Int
+        """
+
+        let expanded:Signature<Never>.Expanded = .init(decl)
+        #expect("\(expanded.bytecode.safe)" == """
+        func sum(with other: Self) -> Int
+        """)
+
+        let abridged:Signature<Never>.Abridged = .init(decl)
+        #expect("\(abridged.bytecode.safe)" == """
+        func sum(with: Self) -> Int
+        """)
+    }
+    @Test
+    static func ExpandedWithInoutSelf()
+    {
+        let decl:String = """
+        func sum(with other: inout `Self`) -> Int
+        """
+
+        let expanded:Signature<Never>.Expanded = .init(decl)
+        #expect("\(expanded.bytecode.safe)" == """
+        func sum(with other: inout Self) -> Int
+        """)
+
+        let abridged:Signature<Never>.Abridged = .init(decl)
+        #expect("\(abridged.bytecode.safe)" == """
+        func sum(with: inout Self) -> Int
+        """)
+    }
+
     @Test
     static func ExpandedWithResultBuilders()
     {
