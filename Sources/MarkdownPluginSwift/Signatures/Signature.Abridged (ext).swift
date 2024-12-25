@@ -58,14 +58,13 @@ extension Signature.Abridged
                     let text:String = .init(decoding: utf8[range], as: Unicode.UTF8.self)
                     switch  (color, text, depth)
                     {
-                    case    (.keyword, "subscript", .toplevel?),
-                            (.keyword, "deinit", .toplevel?),
-                            (.keyword, "init", .toplevel?),
-                            (.identifier, _, .toplevel?):
-                        $0[.identifier] = text
-
-                    case    (_, _, _):
-                        $0 += text
+                    case (.keyword, "subscript", .toplevel?):   $0[.identifier] = text
+                    case (.keyword, "deinit", .toplevel?):      $0[.identifier] = text
+                    case (.keyword, "init", .toplevel?):        $0[.identifier] = text
+                    case (.identifier, _, .toplevel?):          $0[.identifier] = text
+                    //  See note in `Signature.Expanded (ext).swift`
+                    case (.type, "`Self`", _):                  $0[.type] = "Self"
+                    case (_, _, _):                             $0 += text
                     }
                 }
             }

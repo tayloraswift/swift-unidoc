@@ -16,6 +16,7 @@
 /Assets/secrets/
 /Assets/icons/*.jpg
 
+/TestModules/SymbolGraphs/*.json
 /TestModules/*.json
 /TestPackages/*.bson
 /TypeScript/node_modules

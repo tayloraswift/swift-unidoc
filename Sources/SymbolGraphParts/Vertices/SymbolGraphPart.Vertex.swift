@@ -72,7 +72,7 @@ extension SymbolGraphPart.Vertex
         location:SourceLocation<Symbol.File>?,
         path:UnqualifiedPath)
     {
-        var keywords:Signature<Symbol.Decl>.Expanded.InterestingKeywords = .init()
+        var landmarks:Signature<Symbol.Decl>.Landmarks = .init()
         var phylum:Phylum = phylum
 
         let abridged:Signature<Symbol.Decl>.Abridged
@@ -86,16 +86,16 @@ extension SymbolGraphPart.Vertex
         else
         {
             abridged = .init(fragments)
-            expanded = .init(fragments, keywords: &keywords)
+            expanded = .init(fragments, landmarks: &landmarks)
         }
 
         //  Heuristic for inferring actor types
-        if  keywords.actor
+        if  landmarks.keywords.actor
         {
             phylum = .decl(.actor)
         }
         //  Heuristic for inferring class members
-        if  keywords.class
+        if  landmarks.keywords.class
         {
             switch phylum
             {
@@ -107,11 +107,11 @@ extension SymbolGraphPart.Vertex
         }
         if  case .decl(.macro(_)) = phylum
         {
-            if      keywords.attached
+            if      landmarks.keywords.attached
             {
                 phylum = .decl(.macro(.attached))
             }
-            else if keywords.freestanding
+            else if landmarks.keywords.freestanding
             {
                 phylum = .decl(.macro(.freestanding))
             }
@@ -142,7 +142,7 @@ extension SymbolGraphPart.Vertex
             acl: acl,
             phylum: phylum,
             //  Actors would also imply `final`, but we don’t want to flatten that here.
-            final: keywords.final,
+            final: landmarks.keywords.final,
             extension: `extension`,
             signature: signature,
             path: simplified,

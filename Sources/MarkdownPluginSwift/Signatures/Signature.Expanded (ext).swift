@@ -5,7 +5,7 @@ extension Signature.Expanded
 {
     @inlinable public
     init(_ fragments:__shared some Collection<Signature<Scalar>.Fragment>,
-        keywords:inout InterestingKeywords)
+        landmarks:inout Signature.Landmarks)
     {
         var utf8:[UInt8] = []
             utf8.reserveCapacity(fragments.reduce(0) { $0 + $1.spelling.utf8.count })
@@ -29,7 +29,7 @@ extension Signature.Expanded
         self.init(utf8: utf8,
             linkBoundaries: linkBoundaries,
             linkTargets: &linkTargets,
-            keywords: &keywords)
+            landmarks: &landmarks)
 
         if !linkTargets.isEmpty
         {
@@ -51,27 +51,27 @@ extension Signature.Expanded
     init(_ string:String,
         linkBoundaries:borrowing [Int] = [])
     {
-        var ignored:InterestingKeywords = .init()
-        self.init(string, linkBoundaries: linkBoundaries, keywords: &ignored)
+        var ignored:Signature.Landmarks = .init()
+        self.init(string, linkBoundaries: linkBoundaries, landmarks: &ignored)
     }
 
     @inlinable @_spi(testable) public
     init(_ string:String,
         linkBoundaries:borrowing [Int] = [],
-        keywords:inout InterestingKeywords)
+        landmarks:inout Signature.Landmarks)
     {
         var empty:[Int: Scalar] = [:]
         self.init(utf8: [UInt8].init(string.utf8),
             linkBoundaries: linkBoundaries,
             linkTargets: &empty,
-            keywords: &keywords)
+            landmarks: &landmarks)
     }
 
     @inlinable
     init(utf8:[UInt8],
         linkBoundaries:borrowing [Int],
         linkTargets:inout [Int: Scalar],
-        keywords:inout InterestingKeywords)
+        landmarks:inout Signature.Landmarks)
     {
         let signature:SignatureSyntax = utf8.withUnsafeBufferPointer { .expanded($0) }
         var references:[Scalar: Int] = [:]
@@ -97,8 +97,8 @@ extension Signature.Expanded
                     {
                         switch String.init(decoding: utf8[range], as: Unicode.UTF8.self)
                         {
-                        case "@attached":       keywords.attached = true
-                        case "@freestanding":   keywords.freestanding = true
+                        case "@attached":       landmarks.keywords.attached = true
+                        case "@freestanding":   landmarks.keywords.freestanding = true
                         default:                break
                         }
                     }
@@ -108,9 +108,9 @@ extension Signature.Expanded
                         //  other way to detect them besides inspecting token text!
                         switch String.init(decoding: utf8[range], as: Unicode.UTF8.self)
                         {
-                        case "actor":           keywords.actor = true
-                        case "class":           keywords.class = true
-                        case "final":           keywords.final = true
+                        case "actor":           landmarks.keywords.actor = true
+                        case "class":           landmarks.keywords.class = true
+                        case "final":           landmarks.keywords.final = true
                         default:                break
                         }
                     }
@@ -118,10 +118,11 @@ extension Signature.Expanded
                     fallthrough
 
                 case .text(let range, let color?, _):
+                    let referent:Scalar? = linkTargets.removeValue(forKey: range.lowerBound)
+
                     $0[color]
                     {
-                        if  let referent:Scalar = linkTargets.removeValue(
-                                forKey: range.lowerBound)
+                        if  let referent:Scalar
                         {
                             $0[.href] =
                             {
@@ -139,9 +140,34 @@ extension Signature.Expanded
                             } (&references[referent])
                         }
                     }
-                    content:
+                        content:
                     {
-                        $0 += utf8[range]
+                        //  This is an ugly, ugly hack to work around the upstream bug in
+                        //  lib/SymbolGraphGen described here:
+                        //  https://github.com/swiftlang/swift/issues/78343
+                        //
+                        //  This hack is still **correct** if the declaration shadows the `Self`
+                        //  type, because lib/SymbolGraphGen will emit such a token without the
+                        //  extraneous backticks.
+                        if  case .type = color,
+                            case [
+                                0x60, // '`'
+                                0x53, // 'S'
+                                0x65, // 'e'
+                                0x6C, // 'l'
+                                0x66, // 'f'
+                                0x60, // '`'
+                            ] = utf8[range]
+                        {
+                            let i:Int = utf8.index(after: range.lowerBound)
+                            let j:Int = utf8.index(before: range.upperBound)
+
+                            $0 += utf8[i ..< j]
+                        }
+                        else
+                        {
+                            $0 += utf8[range]
+                        }
                     }
                 }
             }
