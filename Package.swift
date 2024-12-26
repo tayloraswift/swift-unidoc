@@ -519,8 +519,8 @@ let package:Package = .init(
 
         .target(name: "UnidocLinker",
             dependencies: [
-                .target(name: "LinkResolution"),
                 .target(name: "MarkdownRendering"),
+                .target(name: "SourceDiagnostics"),
                 .target(name: "UnidocLinking"),
             ]),
 
