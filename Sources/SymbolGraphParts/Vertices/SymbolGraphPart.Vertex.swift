@@ -1,6 +1,7 @@
 import Availability
 import JSONDecoding
 import LexicalPaths
+import MarkdownPluginSwift
 import Signatures
 import Sources
 import Symbols
@@ -72,7 +73,7 @@ extension SymbolGraphPart.Vertex
         location:SourceLocation<Symbol.File>?,
         path:UnqualifiedPath)
     {
-        var landmarks:Signature<Symbol.Decl>.Landmarks = .init()
+        var landmarks:SignatureLandmarks = .init()
         var phylum:Phylum = phylum
 
         let abridged:Signature<Symbol.Decl>.Abridged
@@ -86,7 +87,11 @@ extension SymbolGraphPart.Vertex
         else
         {
             abridged = .init(fragments)
-            expanded = .init(fragments, landmarks: &landmarks)
+            expanded = .init(fragments,
+                sugarArray: .sSa,
+                sugarDictionary: .sSD,
+                sugarOptional: .sSq,
+                landmarks: &landmarks)
         }
 
         //  Heuristic for inferring actor types

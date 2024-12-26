@@ -5,7 +5,10 @@ extension Signature.Expanded
 {
     @inlinable public
     init(_ fragments:__shared some Collection<Signature<Scalar>.Fragment>,
-        landmarks:inout Signature.Landmarks)
+        sugarArray:Scalar,
+        sugarDictionary:Scalar,
+        sugarOptional:Scalar,
+        landmarks:inout SignatureLandmarks)
     {
         var utf8:[UInt8] = []
             utf8.reserveCapacity(fragments.reduce(0) { $0 + $1.spelling.utf8.count })
@@ -26,7 +29,19 @@ extension Signature.Expanded
             }
         }
 
+        let sugarMap:SignatureSyntax.SugarMap = linkTargets.reduce(into: .init())
+        {
+            switch $1.value
+            {
+            case sugarArray:        $0.arrays.insert($1.key)
+            case sugarDictionary:   $0.dictionaries.insert($1.key)
+            case sugarOptional:     $0.optionals.insert($1.key)
+            default:                break
+            }
+        }
+
         self.init(utf8: utf8,
+            sugarMap: sugarMap,
             linkBoundaries: linkBoundaries,
             linkTargets: &linkTargets,
             landmarks: &landmarks)
@@ -51,14 +66,14 @@ extension Signature.Expanded
     init(_ string:String,
         linkBoundaries:borrowing [Int] = [])
     {
-        var ignored:Signature.Landmarks = .init()
+        var ignored:SignatureLandmarks = .init()
         self.init(string, linkBoundaries: linkBoundaries, landmarks: &ignored)
     }
 
     @inlinable @_spi(testable) public
     init(_ string:String,
         linkBoundaries:borrowing [Int] = [],
-        landmarks:inout Signature.Landmarks)
+        landmarks:inout SignatureLandmarks)
     {
         var empty:[Int: Scalar] = [:]
         self.init(utf8: [UInt8].init(string.utf8),
@@ -69,11 +84,15 @@ extension Signature.Expanded
 
     @inlinable
     init(utf8:[UInt8],
+        sugarMap:SignatureSyntax.SugarMap = .init(),
         linkBoundaries:borrowing [Int],
         linkTargets:inout [Int: Scalar],
-        landmarks:inout Signature.Landmarks)
+        landmarks:inout SignatureLandmarks)
     {
-        let signature:SignatureSyntax = utf8.withUnsafeBufferPointer { .expanded($0) }
+        let signature:SignatureSyntax = utf8.withUnsafeBufferPointer
+        {
+            .expanded($0, sugaring: sugarMap, landmarks: &landmarks)
+        }
         var references:[Scalar: Int] = [:]
         var referents:[Scalar] = []
 

@@ -8,7 +8,7 @@ import MarkdownPluginSwift
 struct InterestingKeywords
 {
     private
-    var landmarks:Signature<Never>.Landmarks
+    var landmarks:SignatureLandmarks
 
     init()
     {
@@ -47,6 +47,8 @@ struct InterestingKeywords
 
         #expect("\(signature.bytecode.safe)" == decl)
         #expect(self.landmarks.keywords.class)
+        #expect(self.landmarks.inputs == ["Int"])
+        #expect(self.landmarks.output == ["Int"])
     }
     @Test mutating
     func ClassFunc()
@@ -58,6 +60,8 @@ struct InterestingKeywords
 
         #expect("\(signature.bytecode.safe)" == decl)
         #expect(self.landmarks.keywords.class)
+        #expect(self.landmarks.inputs == [])
+        #expect(self.landmarks.output == ["Int"])
     }
     @Test mutating
     func ClassVar()

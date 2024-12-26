@@ -1,6 +1,6 @@
 import Signatures
 
-extension Signature.Landmarks
+extension SignatureLandmarks
 {
     @frozen public
     struct InterestingKeywords
