@@ -3,15 +3,15 @@ extension UCF
     @frozen public
     enum PatternFilter:Equatable, Hashable, Sendable
     {
-        case fullSignature([Identifier], Output)
-        case inputs([Identifier])
+        case fullSignature([String?], Output)
+        case inputs([String?])
         case output(Output)
     }
 }
 extension UCF.PatternFilter
 {
     @inlinable public
-    var inputs:[Identifier]?
+    var inputs:[String?]?
     {
         switch self
         {
@@ -39,12 +39,12 @@ extension UCF.PatternFilter:CustomStringConvertible
     {
         var string:String = ""
 
-        if  let inputs:[UCF.PatternFilter.Identifier] = self.inputs
+        if  let inputs:[String?] = self.inputs
         {
             string.append("(")
 
             var first:Bool = true
-            for input:UCF.PatternFilter.Identifier in inputs
+            for input:String? in inputs
             {
                 if  first
                 {
@@ -55,7 +55,7 @@ extension UCF.PatternFilter:CustomStringConvertible
                     string.append(",")
                 }
 
-                string.append("\(input)")
+                string.append(input ?? "_")
             }
 
             string.append(")")
@@ -78,13 +78,13 @@ extension UCF.PatternFilter:CustomStringConvertible
         switch output
         {
         case .single(let output):
-            string.append("\(output)")
+            string.append(output ?? "_")
 
         case .tuple(let outputs):
             string.append("(")
 
             var first:Bool = true
-            for output:UCF.PatternFilter.Identifier in outputs
+            for output:String? in outputs
             {
                 if  first
                 {
@@ -95,7 +95,7 @@ extension UCF.PatternFilter:CustomStringConvertible
                     string.append(",")
                 }
 
-                string.append("\(output)")
+                string.append(output ?? "_")
             }
 
             string.append(")")
@@ -127,7 +127,7 @@ extension UCF.PatternFilter
                 return nil
             }
 
-            var inputs:[UCF.PatternFilter.Identifier] = []
+            var inputs:[String?] = []
             for input:Substring in string[i ..< j].split(separator: ",",
                 omittingEmptySubsequences: false)
             {
@@ -138,7 +138,7 @@ extension UCF.PatternFilter
                     return nil
                 }
 
-                inputs.append(input)
+                inputs.append(input.value)
             }
 
             let k:String.Index = string.index(after: j)

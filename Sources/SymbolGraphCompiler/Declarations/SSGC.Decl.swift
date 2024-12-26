@@ -1,9 +1,11 @@
 import Availability
+import LinkResolution
 import LexicalPaths
 import Signatures
 import Sources
 import SymbolGraphParts
 import Symbols
+import UCF
 
 extension SSGC
 {
@@ -16,6 +18,8 @@ extension SSGC
 
         public
         let signature:Signature<Symbol.Decl>
+        public
+        let autograph:UCF.Autograph?
         public
         let location:SourceLocation<Symbol.File>?
 
@@ -58,6 +62,7 @@ extension SSGC
 
         init(id:Symbol.Decl,
             signature:Signature<Symbol.Decl>,
+            autograph:UCF.Autograph?,
             location:SourceLocation<Symbol.File>?,
             phylum:Phylum.Decl,
             path:UnqualifiedPath,
@@ -67,6 +72,7 @@ extension SSGC
             self.id = id
 
             self.signature = signature
+            self.autograph = autograph
             self.location = location
             self.phylum = phylum
             self.path = path

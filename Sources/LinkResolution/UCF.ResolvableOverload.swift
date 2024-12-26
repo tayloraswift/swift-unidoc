@@ -7,6 +7,7 @@ extension UCF
     public
     protocol ResolvableOverload:Identifiable<Symbol.Decl>, Sendable
     {
+        var autograph:Autograph? { get }
         var phylum:Phylum.Decl { get }
         var hash:FNV24 { get }
 
@@ -71,12 +72,27 @@ extension UCF.ResolvableOverload
 
         switch suffix
         {
-        case .legacy(let filter, nil):      return filter ~= self.phylum
-        case .legacy(_, let hash?):         return hash == self.hash
-        case .hash(let hash):               return hash == self.hash
-        case .filter(let filter):           return filter ~= self.phylum
-        //  TODO: unimplemented
-        case .pattern:                      return true
+        case .legacy(let filter, nil):
+            return filter ~= self.phylum
+
+        case .legacy(_, let hash?):
+            return hash == self.hash
+
+        case .hash(let hash):
+            return hash == self.hash
+
+        case .filter(let filter):
+            return filter ~= self.phylum
+
+        case .pattern(let pattern):
+            if  let autograph:UCF.Autograph = self.autograph
+            {
+                return pattern ~= autograph
+            }
+            else
+            {
+                return false
+            }
         }
     }
 }

@@ -3,8 +3,8 @@ extension UCF.PatternFilter
     @frozen public
     enum Output:Equatable, Hashable, Sendable
     {
-        case single(Identifier)
-        case tuple([Identifier])
+        case single(String?)
+        case tuple([String?])
     }
 }
 extension UCF.PatternFilter.Output
@@ -23,7 +23,7 @@ extension UCF.PatternFilter.Output
                 return nil
             }
 
-            return .single(identifier)
+            return .single(identifier.value)
         }
 
         guard i < k
@@ -41,7 +41,7 @@ extension UCF.PatternFilter.Output
             return .tuple([])
         }
 
-        var outputs:[UCF.PatternFilter.Identifier] = []
+        var outputs:[String?] = []
         for output:Substring in string[j ..< k].split(separator: ",",
             omittingEmptySubsequences: false)
         {
@@ -52,7 +52,7 @@ extension UCF.PatternFilter.Output
                 return nil
             }
 
-            outputs.append(output)
+            outputs.append(output.value)
         }
 
         return outputs.count == 1 ? .single(outputs[0]) : .tuple(outputs)
