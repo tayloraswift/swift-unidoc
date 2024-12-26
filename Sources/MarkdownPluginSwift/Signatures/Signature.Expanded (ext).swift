@@ -5,8 +5,8 @@ extension Signature.Expanded
 {
     @inlinable public
     init(_ fragments:__shared some Collection<Signature<Scalar>.Fragment>,
-        sugarArray:Scalar,
         sugarDictionary:Scalar,
+        sugarArray:Scalar,
         sugarOptional:Scalar,
         landmarks:inout SignatureLandmarks)
     {

@@ -88,8 +88,8 @@ extension SymbolGraphPart.Vertex
         {
             abridged = .init(fragments)
             expanded = .init(fragments,
-                sugarArray: .sSa,
                 sugarDictionary: .sSD,
+                sugarArray: .sSa,
                 sugarOptional: .sSq,
                 landmarks: &landmarks)
         }

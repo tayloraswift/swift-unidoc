@@ -77,6 +77,12 @@ extension SignatureSyntax.Autographer
         else if
             let type:TupleTypeSyntax = type.as(TupleTypeSyntax.self)
         {
+            if  let only:TupleTypeElementSyntax = type.elements.first, type.elements.count == 1
+            {
+                self.encode(type: only.type)
+                return
+            }
+
             self.autograph.append("(")
 
             var first:Bool = true
@@ -162,5 +168,27 @@ extension SignatureSyntax.Autographer
         }
 
         self.autograph.append(name.text)
+
+        if  let generics:GenericArgumentListSyntax
+        {
+            self.autograph.append("<")
+
+            var first:Bool = true
+            for generic:GenericArgumentSyntax in generics
+            {
+                if  first
+                {
+                    first = false
+                }
+                else
+                {
+                    self.autograph.append(",")
+                }
+
+                self.encode(type: generic.argument)
+            }
+
+            self.autograph.append(">")
+        }
     }
 }
