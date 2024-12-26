@@ -1,11 +1,9 @@
-import LinkResolution
 import MD5
 import SemanticVersions
 import Signatures
 import SourceDiagnostics
 import SymbolGraphs
 import Symbols
-import UCF
 import Unidoc
 import UnidocLinking
 import UnidocRecords

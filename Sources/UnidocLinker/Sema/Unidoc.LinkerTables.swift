@@ -1,5 +1,4 @@
 import JSON
-import LinkResolution
 import SourceDiagnostics
 import SymbolGraphs
 import Symbols
