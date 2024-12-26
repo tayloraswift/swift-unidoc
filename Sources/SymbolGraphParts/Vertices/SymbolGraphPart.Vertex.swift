@@ -1,10 +1,12 @@
 import Availability
 import JSONDecoding
 import LexicalPaths
+import LinkResolution
 import MarkdownPluginSwift
 import Signatures
 import Sources
 import Symbols
+import UCF
 
 extension SymbolGraphPart
 {
@@ -25,6 +27,8 @@ extension SymbolGraphPart
         public
         let signature:Signature<Symbol.Decl>
         public
+        let autograph:UCF.Autograph?
+        public
         let path:UnqualifiedPath
 
         public
@@ -42,6 +46,7 @@ extension SymbolGraphPart
             final:Bool,
             extension:ExtensionContext,
             signature:Signature<Symbol.Decl>,
+            autograph:UCF.Autograph?,
             path:UnqualifiedPath,
             doccomment:Doccomment?,
             location:SourceLocation<Symbol.File>?)
@@ -52,6 +57,7 @@ extension SymbolGraphPart
             self.final = final
             self.extension = `extension`
             self.signature = signature
+            self.autograph = autograph
             self.path = path
             self.doccomment = doccomment
             self.location = location
@@ -128,6 +134,17 @@ extension SymbolGraphPart.Vertex
             generics: generics,
             spis: interfaces.map { _ in [] })
 
+        let autograph:UCF.Autograph?
+
+        if  case .decl(let decl) = phylum, decl.isDirectlyOverloadable
+        {
+            autograph = .init(inputs: landmarks.inputs, output: landmarks.output)
+        }
+        else
+        {
+            autograph = nil
+        }
+
         //  strip empty parentheses from last path component
         let simplified:UnqualifiedPath
         if  let index:String.Index = path.last.index(path.last.endIndex,
@@ -150,6 +167,7 @@ extension SymbolGraphPart.Vertex
             final: landmarks.keywords.final,
             extension: `extension`,
             signature: signature,
+            autograph: autograph,
             path: simplified,
             doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
             location: location)

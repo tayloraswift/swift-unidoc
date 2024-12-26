@@ -10,7 +10,8 @@ extension UCF.CausalOverload
             decl: decl.id,
             heir: heir,
             hash: .decl(.init(decl.id, self: heir)),
-            documented: decl.comment != nil)
+            documented: decl.comment != nil,
+            autograph: decl.autograph)
     }
     static
     func decl(_ decl:SSGC.Decl) -> Self
@@ -19,6 +20,7 @@ extension UCF.CausalOverload
             decl: decl.id,
             heir: nil,
             hash: .decl(decl.id),
-            documented: decl.comment != nil)
+            documented: decl.comment != nil,
+            autograph: decl.autograph)
     }
 }

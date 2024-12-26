@@ -45,30 +45,49 @@ extension Phylum.Decl
         }
     }
 
+    @inlinable public
+    var isDirectlyOverloadable:Bool
+    {
+        switch self
+        {
+        case .actor:            false
+        case .associatedtype:   false
+        case .case:             false
+        case .class:            false
+        case .deinitializer:    false
+        case .enum:             false
+        case .func:             true
+        case .initializer:      true
+        case .macro:            false
+        case .operator:         true
+        case .protocol:         false
+        case .struct:           false
+        case .subscript:        true
+        case .typealias:        false
+        case .var:              false
+        }
+    }
     /// Indicates if the declaration is typelike. This is not the same as ``orientation``!
     @inlinable public
     var isTypelike:Bool
     {
         switch self
         {
-        case    .actor,
-                .associatedtype,
-                .class,
-                .enum,
-                .macro,
-                .protocol,
-                .struct,
-                .typealias:
-            true
-
-        case    .case,
-                .deinitializer,
-                .func,
-                .initializer,
-                .operator,
-                .subscript,
-                .var:
-            false
+        case .actor:            true
+        case .associatedtype:   true
+        case .case:             false
+        case .class:            true
+        case .deinitializer:    false
+        case .enum:             true
+        case .func:             false
+        case .initializer:      false
+        case .macro:            true
+        case .operator:         false
+        case .protocol:         true
+        case .struct:           true
+        case .subscript:        false
+        case .typealias:        true
+        case .var:              false
         }
     }
 
@@ -78,17 +97,22 @@ extension Phylum.Decl
     {
         switch self
         {
-        case .case, .deinitializer, .func, .initializer, .operator, .subscript, .var:
-            .gay
-
-        case .macro(.freestanding):
-            .gay
-
-        case .macro(.attached):
-            .straight
-
-        case .actor, .associatedtype, .class, .enum, .protocol, .struct, .typealias:
-            .straight
+        case .actor:                .straight
+        case .associatedtype:       .straight
+        case .case:                 .gay
+        case .class:                .straight
+        case .deinitializer:        .gay
+        case .enum:                 .straight
+        case .func:                 .gay
+        case .initializer:          .gay
+        case .macro(.freestanding): .gay
+        case .macro(.attached):     .straight
+        case .operator:             .gay
+        case .protocol:             .straight
+        case .struct:               .straight
+        case .subscript:            .gay
+        case .typealias:            .straight
+        case .var:                  .gay
         }
     }
 }
