@@ -8,7 +8,6 @@ struct SignatureSyntax
     @usableFromInline
     let elements:[Span]
 
-    private
     init(elements:[Span])
     {
         self.elements = elements
@@ -78,12 +77,17 @@ extension SignatureSyntax
         return .init(elements: builder.encoder.move())
     }
     @usableFromInline static
-    func expanded(_ utf8:UnsafeBufferPointer<UInt8>) -> Self
+    func expanded(_ utf8:UnsafeBufferPointer<UInt8>,
+        sugaring sugarMap:SugarMap,
+        landmarks:inout SignatureLandmarks) -> Self
     {
-        var builder:Builder<ExpandedVisitor> = .init(visitor: .init())
+        var builder:Builder<ExpandedVisitor> = .init(visitor: .init(sugaring: sugarMap))
         var parser:Parser = .init(utf8)
 
         builder.encode(decl: .parse(from: &parser))
+
+        landmarks.inputs = builder.visitor.inputs
+        landmarks.output = builder.visitor.output
 
         return .init(elements: builder.encoder.move())
     }

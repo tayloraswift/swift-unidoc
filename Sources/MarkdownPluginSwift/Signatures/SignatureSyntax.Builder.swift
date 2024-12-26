@@ -103,11 +103,17 @@ extension SignatureSyntax.Builder<SignatureSyntax.ExpandedVisitor>
                     }
                 }
             }
+            //  Subscript inputs and outputs are “shallow”
             else if
                 let clause:FunctionParameterClauseSyntax =
                     region.as(FunctionParameterClauseSyntax.self)
             {
-                self.register(parameters: clause, type: .func)
+                self.register(parameters: clause, type: .subscript)
+            }
+            else if
+                let clause:ReturnClauseSyntax = region.as(ReturnClauseSyntax.self)
+            {
+                self.register(returns: clause)
             }
             else
             {
