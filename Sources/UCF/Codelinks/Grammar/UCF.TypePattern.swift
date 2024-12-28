@@ -87,12 +87,22 @@ extension UCF.TypePattern
 
                 input.format(source: source, into: &string)
             }
-            string.append("->")
+            string.append(")->")
             output.format(source: source, into: &string)
 
         case .nominal(let path):
+            var first:Bool = true
             for (component, generics):(Range<String.Index>, [UCF.TypePattern]) in path
             {
+                if  first
+                {
+                    first = false
+                }
+                else
+                {
+                    string.append(".")
+                }
+
                 string += source[component]
 
                 if  generics.isEmpty
