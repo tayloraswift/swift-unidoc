@@ -1,6 +1,7 @@
 import FNV1
 import LexicalPaths
 import MarkdownAST
+import Symbols
 import Testing
 
 @_spi(testable)
@@ -164,6 +165,7 @@ struct LinkResolution
             ])
         }
     }
+
     //  https://forums.swift.org/t/you-must-add-the-tutorials-prefix-to-the-path-really/70016/5
     @Test
     static func CrossModuleArticles()
@@ -192,6 +194,67 @@ struct LinkResolution
                 .vertex(2, text: "OtherTutorial"),
                 .vertex(1, text: "GettingStarted"),
                 .vertex(0, text: "GettingStarted"),
+            ])
+        }
+    }
+
+    @Test
+    static func SignatureDisambiguation()
+    {
+        var tables:SSGC.Linker.Tables = .init()
+
+        for (i, (name, (inputs, output))):(Int, (String, ([String], [String]))) in [
+            ("f(_:)", (["String"], [])),
+            ("f(_:)", (["Int"], [])),
+            ("f(_:)", (["String"], ["Int", "Int"])),
+            ("f(_:)", (["(Int,[Int?])"], ["String"])),
+        ].enumerated()
+        {
+            let id:Symbol.Decl = .init(.s, ascii: "\(i)")
+            tables.packageLinks["ThisModule", .init(["A"], name)].append(.init(
+                phylum: .func(.instance),
+                decl: Int32.init(i),
+                heir: nil,
+                hash: .init(hashing: "\(id)"),
+                documented: true,
+                autograph: .init(inputs: inputs, output: output),
+                id: id))
+        }
+
+        //  Scoped tests
+        tables.resolving(with: .init(origin: nil,
+            namespace: nil,
+            context: .init(id: "ThisModule"),
+            scope: ["A"]))
+        {
+            #expect(nil != $0.outline(
+                reference: .lexical(ucf: Self._string("f(_:)-((Int,[Int?]))->String"))))
+            #expect(nil != $0.outline(
+                reference: .lexical(ucf: Self._string("f(_:)-(String)->(Int,Int)"))))
+            #expect(nil != $0.outline(
+                reference: .lexical(ucf: Self._string("f(_:)-(Int)->()"))))
+            #expect(nil != $0.outline(
+                reference: .lexical(ucf: Self._string("f(_:)-(String)->()"))))
+
+            #expect(nil != $0.outline(
+                reference: .lexical(ucf: Self._string("A.f(_:)->_"))))
+            #expect(nil != $0.outline(
+                reference: .lexical(ucf: Self._string("A.f(_:)->(_,_)"))))
+            #expect(nil != $0.outline(
+                reference: .lexical(ucf: Self._string("A.f(_:)-(Int)"))))
+            #expect(nil != $0.outline(
+                reference: .lexical(ucf: Self._string("A.f(_:)-(String)->()"))))
+
+            #expect($0.outlines() == [
+                .vertex(3, text: "f(_:)"),
+                .vertex(2, text: "f(_:)"),
+                .vertex(1, text: "f(_:)"),
+                .vertex(0, text: "f(_:)"),
+
+                .vertex(3, text: "A f(_:)"),
+                .vertex(2, text: "A f(_:)"),
+                .vertex(1, text: "A f(_:)"),
+                .vertex(0, text: "A f(_:)"),
             ])
         }
     }
