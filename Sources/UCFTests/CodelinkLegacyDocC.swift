@@ -235,4 +235,115 @@ struct CodelinkLegacyDocC:ParsingSuite
         #expect(link.path.hasTrailingParentheses)
         #expect(link.suffix == .signature(.function([nil, "Int"], [nil, "Int"])))
     }
+
+    @Test
+    static func PatternComplexSignature1() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-(Int?)->Int?")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function(["Int?"], ["Int?"])))
+    }
+    @Test
+    static func PatternComplexSignature2() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-((Int?))->(Int?)")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function(["Int?"], ["Int?"])))
+    }
+    @Test
+    static func PatternComplexSignature3() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-([(Int?)].Type)->[Int?].Type")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function(["[Int?].Type"], ["[Int?].Type"])))
+    }
+    @Test
+    static func PatternComplexSignature4() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-([[T]:Set<T>],[T])->[[Int?]??:`A B`]")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function(
+            ["[[T]:Set<T>]", "[T]"],
+            ["[[Int?]??:`A B`]"])))
+    }
+    @Test
+    static func PatternComplexSignature5() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-(Foo<T,U>.Out.Type)")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function(["Foo<T,U>.Out.Type"])))
+    }
+    @Test
+    static func PatternComplexSignature6() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-(Foo<[T].Type,U<T>?>.Out.Type)")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function(["Foo<[T].Type,U<T>?>.Out.Type"])))
+    }
+    @Test
+    static func PatternComplexSignature7() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-(Foo<([(T)]).Type,(U<T>?)>.Out.Type)")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function(["Foo<[T].Type,U<T>?>.Out.Type"])))
+    }
+    @Test
+    static func PatternComplexSignature8() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-(((Foo<T>)))->((()))")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function(["Foo<T>"], [])))
+    }
+    @Test
+    static func PatternComplexSignature9() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)->(((Foo<T>)))->((()))")
+
+        dump(link.suffix!)
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.returns(["(Foo<T>)->()"])))
+    }
+    @Test
+    static func PatternComplexSignature10() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)->(((Foo<T>)))->((Int))")
+
+        dump(link.suffix!)
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.returns(["(Foo<T>)->Int"])))
+    }
+    @Test
+    static func PatternComplexSignature11() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-(((_)))->((_),_)")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function([nil], [nil, nil])))
+    }
+    @Test
+    static func PatternComplexSignature12() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-(((_)))->((),())")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function([nil], ["()", "()"])))
+    }
+    @Test
+    static func PatternComplexSignature13() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("f(_:)-(((_)))->(((((())),((())))))")
+
+        #expect(link.path.components == ["f(_:)"])
+        #expect(link.suffix == .signature(.function([nil], ["()", "()"])))
+    }
 }
