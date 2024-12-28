@@ -80,6 +80,7 @@ extension SSGC.Declarations
                 access: vertex.acl,
                 value: .init(id: symbol,
                     signature: vertex.signature,
+                    autograph: vertex.autograph,
                     location: vertex.location,
                     phylum: phylum,
                     path: vertex.path,

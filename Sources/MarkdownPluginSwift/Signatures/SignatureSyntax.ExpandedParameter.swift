@@ -7,42 +7,41 @@ extension SignatureSyntax
         private
         let syntax:FunctionParameterSyntax
 
-        init(syntax:FunctionParameterSyntax, func _:Bool)
+        init(syntax:FunctionParameterSyntax)
         {
             self.syntax = syntax
         }
     }
 }
-extension SignatureSyntax.ExpandedParameter:SignatureParameterFormat
+extension SignatureSyntax.ExpandedParameter:SignatureParameter
 {
     static
-    func += (signature:inout SignatureSyntax.Encoder<Self>, self:Self)
+    func += (signature:inout SignatureSyntax.Encoder, self:Self)
     {
         var named:Bool = false
         for region:Syntax in self.syntax.children(viewMode: .sourceAccurate)
         {
-            guard
-            let region:TokenSyntax = region.as(TokenSyntax.self)
+            if  let region:TokenSyntax = region.as(TokenSyntax.self)
+            {
+                switch region.tokenKind
+                {
+                case .identifier, .wildcard:
+                    if  named
+                    {
+                        signature[in: .binding] += region
+                    }
+                    else
+                    {
+                        signature[in: .identifier] += region
+                        named = true
+                    }
+
+                case _:
+                    signature += region
+                }
+            }
             else
             {
-                signature += region
-                continue
-            }
-
-            switch region.tokenKind
-            {
-            case .identifier, .wildcard:
-                if  named
-                {
-                    signature[in: .binding] += region
-                }
-                else
-                {
-                    signature[in: .identifier] += region
-                    named = true
-                }
-
-            case _:
                 signature += region
             }
         }

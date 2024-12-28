@@ -1,9 +1,12 @@
 import Availability
 import JSONDecoding
 import LexicalPaths
+import LinkResolution
+import MarkdownPluginSwift
 import Signatures
 import Sources
 import Symbols
+import UCF
 
 extension SymbolGraphPart
 {
@@ -24,6 +27,8 @@ extension SymbolGraphPart
         public
         let signature:Signature<Symbol.Decl>
         public
+        let autograph:UCF.Autograph?
+        public
         let path:UnqualifiedPath
 
         public
@@ -41,6 +46,7 @@ extension SymbolGraphPart
             final:Bool,
             extension:ExtensionContext,
             signature:Signature<Symbol.Decl>,
+            autograph:UCF.Autograph?,
             path:UnqualifiedPath,
             doccomment:Doccomment?,
             location:SourceLocation<Symbol.File>?)
@@ -51,6 +57,7 @@ extension SymbolGraphPart
             self.final = final
             self.extension = `extension`
             self.signature = signature
+            self.autograph = autograph
             self.path = path
             self.doccomment = doccomment
             self.location = location
@@ -72,7 +79,7 @@ extension SymbolGraphPart.Vertex
         location:SourceLocation<Symbol.File>?,
         path:UnqualifiedPath)
     {
-        var keywords:Signature<Symbol.Decl>.Expanded.InterestingKeywords = .init()
+        var landmarks:SignatureLandmarks = .init()
         var phylum:Phylum = phylum
 
         let abridged:Signature<Symbol.Decl>.Abridged
@@ -86,16 +93,20 @@ extension SymbolGraphPart.Vertex
         else
         {
             abridged = .init(fragments)
-            expanded = .init(fragments, keywords: &keywords)
+            expanded = .init(fragments,
+                sugarDictionary: .sSD,
+                sugarArray: .sSa,
+                sugarOptional: .sSq,
+                landmarks: &landmarks)
         }
 
         //  Heuristic for inferring actor types
-        if  keywords.actor
+        if  landmarks.keywords.actor
         {
             phylum = .decl(.actor)
         }
         //  Heuristic for inferring class members
-        if  keywords.class
+        if  landmarks.keywords.class
         {
             switch phylum
             {
@@ -107,11 +118,11 @@ extension SymbolGraphPart.Vertex
         }
         if  case .decl(.macro(_)) = phylum
         {
-            if      keywords.attached
+            if      landmarks.keywords.attached
             {
                 phylum = .decl(.macro(.attached))
             }
-            else if keywords.freestanding
+            else if landmarks.keywords.freestanding
             {
                 phylum = .decl(.macro(.freestanding))
             }
@@ -122,6 +133,17 @@ extension SymbolGraphPart.Vertex
             expanded: expanded,
             generics: generics,
             spis: interfaces.map { _ in [] })
+
+        let autograph:UCF.Autograph?
+
+        if  case .decl(let decl) = phylum, decl.isDirectlyOverloadable
+        {
+            autograph = .init(inputs: landmarks.inputs, output: landmarks.output)
+        }
+        else
+        {
+            autograph = nil
+        }
 
         //  strip empty parentheses from last path component
         let simplified:UnqualifiedPath
@@ -142,9 +164,10 @@ extension SymbolGraphPart.Vertex
             acl: acl,
             phylum: phylum,
             //  Actors would also imply `final`, but we don’t want to flatten that here.
-            final: keywords.final,
+            final: landmarks.keywords.final,
             extension: `extension`,
             signature: signature,
+            autograph: autograph,
             path: simplified,
             doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
             location: location)

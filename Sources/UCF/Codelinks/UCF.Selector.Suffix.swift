@@ -5,9 +5,9 @@ extension UCF.Selector
     @frozen public
     enum Suffix:Equatable, Hashable, Sendable
     {
-        case filter(UCF.KeywordFilter)
+        case signature(UCF.SignatureFilter)
+        case keywords(UCF.KeywordFilter)
         case legacy(UCF.LegacyFilter, FNV24?)
-        case pattern(UCF.PatternFilter)
         case hash(FNV24)
     }
 }
@@ -15,9 +15,9 @@ extension UCF.Selector.Suffix
 {
     static func parse(legacy string:Substring) -> Self?
     {
-        if  let pattern:UCF.PatternFilter = .parse(string)
+        if  let filter:UCF.SignatureFilter = try? .init(parsing: string)
         {
-            return .pattern(pattern)
+            return .signature(filter)
         }
 
         var i:String.Index = string.startIndex
@@ -77,7 +77,7 @@ extension UCF.Selector.Suffix
             if  case nil = hash,
                 let filter:UCF.KeywordFilter = .init(legacy: filter)
             {
-                return .filter(filter)
+                return .keywords(filter)
             }
             else
             {

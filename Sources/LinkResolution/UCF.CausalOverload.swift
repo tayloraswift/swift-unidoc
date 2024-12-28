@@ -18,19 +18,23 @@ extension UCF
 
         public
         let documented:Bool
+        public
+        let autograph:Autograph?
 
         @inlinable public
         init(phylum:Phylum.Decl,
             decl:Symbol.Decl,
             heir:Symbol.Decl?,
             hash:FNV24,
-            documented:Bool)
+            documented:Bool,
+            autograph:Autograph?)
         {
             self.phylum = phylum
             self.decl = decl
             self.heir = heir
             self.hash = hash
             self.documented = documented
+            self.autograph = autograph
         }
     }
 }

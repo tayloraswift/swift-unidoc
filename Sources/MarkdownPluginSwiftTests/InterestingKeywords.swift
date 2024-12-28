@@ -7,92 +7,97 @@ import MarkdownPluginSwift
 @Suite
 struct InterestingKeywords
 {
-    @Test
-    static func Actor()
+    private
+    var landmarks:SignatureLandmarks
+
+    init()
+    {
+        self.landmarks = .init()
+    }
+
+    @Test mutating
+    func Actor()
     {
         let decl:String = "actor MargotRobbie"
 
-        var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
-        let expanded:Signature<Never>.Expanded = .init(decl,
-            keywords: &keywords)
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
 
-        #expect("\(expanded.bytecode.safe)" == decl)
-        #expect(keywords.actor)
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.actor)
     }
-    @Test
-    static func Final()
+    @Test mutating
+    func Final()
     {
         let decl:String = "final class C"
 
-        var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
-        let expanded:Signature<Never>.Expanded = .init(decl,
-            keywords: &keywords)
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
 
-        #expect("\(expanded.bytecode.safe)" == decl)
-        #expect(keywords.final)
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.final)
     }
-    @Test
-    static func ClassSubscript()
+    @Test mutating
+    func ClassSubscript()
     {
         let decl:String = "class subscript(index: Int) -> Int"
 
-        var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
-        let expanded:Signature<Never>.Expanded = .init(decl,
-            keywords: &keywords)
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
 
-        #expect("\(expanded.bytecode.safe)" == decl)
-        #expect(keywords.class)
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.class)
+        #expect(self.landmarks.inputs == ["Int"])
+        #expect(self.landmarks.output == ["Int"])
     }
-    @Test
-    static func ClassFunc()
+    @Test mutating
+    func ClassFunc()
     {
         let decl:String = "class func x() -> Int"
 
-        var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
-        let expanded:Signature<Never>.Expanded = .init(decl,
-            keywords: &keywords)
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
 
-        #expect("\(expanded.bytecode.safe)" == decl)
-        #expect(keywords.class)
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.class)
+        #expect(self.landmarks.inputs == [])
+        #expect(self.landmarks.output == ["Int"])
     }
-    @Test
-    static func ClassVar()
+    @Test mutating
+    func ClassVar()
     {
         let decl:String = "class var x: Int { get }"
 
-        var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
-        let expanded:Signature<Never>.Expanded = .init(decl,
-            keywords: &keywords)
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
 
-        #expect("\(expanded.bytecode.safe)" == decl)
-        #expect(keywords.class)
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.class)
     }
-    @Test
-    static func FreestandingMacro()
+    @Test mutating
+    func FreestandingMacro()
     {
         let decl:String = """
         @freestanding(expression) macro line<T: ExpressibleByIntegerLiteral>() -> T
         """
 
-        var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
-        let expanded:Signature<Never>.Expanded = .init(decl,
-            keywords: &keywords)
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
 
-        #expect("\(expanded.bytecode.safe)" == decl)
-        #expect(keywords.freestanding)
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.freestanding)
     }
-    @Test
-    static func AttachedMacro()
+    @Test mutating
+    func AttachedMacro()
     {
         let decl:String = """
         @attached(member) @attached(conformance) public macro OptionSet<RawType>()
         """
 
-        var keywords:Signature<Never>.Expanded.InterestingKeywords = .init()
-        let expanded:Signature<Never>.Expanded = .init(decl,
-            keywords: &keywords)
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
 
-        #expect("\(expanded.bytecode.safe)" == decl)
-        #expect(keywords.attached)
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.attached)
     }
 }

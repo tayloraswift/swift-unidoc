@@ -15,6 +15,20 @@ extension Symbol
         }
     }
 }
+extension Symbol.Decl
+{
+    /// ``Array``.
+    @inlinable public
+    static var sSa:Self { .init(unchecked: "sSa") }
+
+    /// ``Dictionary``.
+    @inlinable public
+    static var sSD:Self { .init(unchecked: "sSD") }
+
+    /// ``Optional``.
+    @inlinable public
+    static var sSq:Self { .init(unchecked: "sSq") }
+}
 extension Symbol.Decl:RawRepresentable
 {
     @inlinable public
@@ -90,8 +104,8 @@ extension Symbol.Decl
 }
 extension Symbol.Decl:Equatable
 {
-    @inlinable public static
-    func == (lhs:Self, rhs:Self) -> Bool
+    @inlinable public
+    static func == (lhs:Self, rhs:Self) -> Bool
     {
         lhs.rawValue.utf8.elementsEqual(rhs.rawValue.utf8)
     }
@@ -109,8 +123,8 @@ extension Symbol.Decl:Hashable
 }
 extension Symbol.Decl:Comparable
 {
-    @inlinable public static
-    func < (lhs:Self, rhs:Self) -> Bool
+    @inlinable public
+    static func < (lhs:Self, rhs:Self) -> Bool
     {
         lhs.rawValue.utf8.lexicographicallyPrecedes(rhs.rawValue.utf8)
     }

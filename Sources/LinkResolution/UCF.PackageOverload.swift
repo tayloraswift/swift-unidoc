@@ -18,6 +18,8 @@ extension UCF
 
         public
         let documented:Bool
+        public
+        let autograph:Autograph?
         /// Used for display purposes. This is not necessarily the symbol from which the
         /// ``hash`` was computed.
         public
@@ -29,6 +31,7 @@ extension UCF
             heir:Int32?,
             hash:FNV24,
             documented:Bool,
+            autograph:Autograph?,
             id:Symbol.Decl)
         {
             self.phylum = phylum
@@ -36,6 +39,7 @@ extension UCF
             self.heir = heir
             self.hash = hash
             self.documented = documented
+            self.autograph = autograph
             self.id = id
         }
     }

@@ -14,7 +14,7 @@ struct CodelinkDisambiguators:ParsingSuite
         #expect(link.base == .relative)
         #expect(link.path.components == ["Fake"])
         #expect(!link.path.hasTrailingParentheses)
-        #expect(link.suffix == .filter(.enum))
+        #expect(link.suffix == .keywords(.enum))
     }
     @Test
     static func UncannyHash() throws
@@ -34,6 +34,6 @@ struct CodelinkDisambiguators:ParsingSuite
         #expect(link.base == .relative)
         #expect(link.path.components == ["Fake", "max"])
         #expect(!link.path.hasTrailingParentheses)
-        #expect(link.suffix == .filter(.class_var))
+        #expect(link.suffix == .keywords(.class_var))
     }
 }
