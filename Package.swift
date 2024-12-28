@@ -695,12 +695,10 @@ let package:Package = .init(
                 .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "SymbolGraphLinkerTests",
+        .testTarget(name: "SymbolGraphLinkerTests",
             dependencies: [
                 .target(name: "MarkdownRendering"),
                 .target(name: "SymbolGraphLinker"),
-                .product(name: "HTML", package: "swift-dom"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "SymbolGraphPartTests",
