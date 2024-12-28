@@ -81,13 +81,13 @@ extension UCF.ResolvableOverload
         case .hash(let hash):
             return hash == self.hash
 
-        case .filter(let filter):
+        case .keywords(let filter):
             return filter ~= self.phylum
 
-        case .pattern(let pattern):
+        case .signature(let filter):
             if  let autograph:UCF.Autograph = self.autograph
             {
-                return pattern ~= autograph
+                return filter ~= autograph
             }
             else
             {
