@@ -7,12 +7,12 @@ extension SignatureSyntax
         private
         let syntax:FunctionParameterSyntax
         private
-        let `func`:Bool
+        let type:SignatureParameterType
 
-        init(syntax:FunctionParameterSyntax, func:Bool)
+        init(syntax:FunctionParameterSyntax, type:SignatureParameterType)
         {
             self.syntax = syntax
-            self.func = `func`
+            self.type = type
         }
     }
 }
@@ -27,7 +27,7 @@ extension SignatureSyntax.AbridgedParameter
         }
         else if
             case nil = self.syntax.secondName,
-            case false = self.func
+            case .subscript = self.type
         {
             true
         }
@@ -37,10 +37,10 @@ extension SignatureSyntax.AbridgedParameter
         }
     }
 }
-extension SignatureSyntax.AbridgedParameter:SignatureParameterFormat
+extension SignatureSyntax.AbridgedParameter:SignatureParameter
 {
     static
-    func += (signature:inout SignatureSyntax.Encoder<Self>, self:Self)
+    func += (signature:inout SignatureSyntax.Encoder, self:Self)
     {
         if  self.unlabeled
         {

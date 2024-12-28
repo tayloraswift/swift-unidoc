@@ -415,6 +415,7 @@ let package:Package = .init(
         .target(name: "SymbolGraphParts",
             dependencies: [
                 .target(name: "LexicalPaths"),
+                .target(name: "LinkResolution"),
                 //  This is the point where the symbol graph compiler becomes infected with a
                 //  (non-macro) SwiftSyntax dependency.
                 //
@@ -519,8 +520,8 @@ let package:Package = .init(
 
         .target(name: "UnidocLinker",
             dependencies: [
-                .target(name: "LinkResolution"),
                 .target(name: "MarkdownRendering"),
+                .target(name: "SourceDiagnostics"),
                 .target(name: "UnidocLinking"),
             ]),
 
