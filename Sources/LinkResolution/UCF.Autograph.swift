@@ -20,9 +20,9 @@ extension UCF
 }
 extension UCF.Autograph
 {
-    static func ~= (predicate:UCF.PatternFilter, self:Self) -> Bool
+    static func ~= (filter:UCF.SignatureFilter, self:Self) -> Bool
     {
-        if  let inputs:[String?] = predicate.inputs
+        if  let inputs:[String?] = filter.inputs
         {
             guard self.inputs.count == inputs.count
             else
@@ -38,30 +38,14 @@ extension UCF.Autograph
             }
         }
 
-        switch predicate.output
+        if  let output:[String?] = filter.output
         {
-        case nil:
-            break
-
-        case .single(let output):
-            guard self.output.count == 1
+            guard self.output.count == output.count
             else
             {
                 return false
             }
-
-            if  let output:String, output != self.output[0]
-            {
-                return false
-            }
-
-        case .tuple(let outputs):
-            guard self.output.count == outputs.count
-            else
-            {
-                return false
-            }
-            for case (let required, let provided?) in zip(self.output, outputs)
+            for case (let required, let provided?) in zip(self.output, output)
             {
                 if  required != provided
                 {

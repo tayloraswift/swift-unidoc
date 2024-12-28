@@ -55,7 +55,7 @@ extension UCF.Selector:CustomStringConvertible
         case nil:
             return string
 
-        case .filter(let filter)?:
+        case .keywords(let filter)?:
             return "\(string) [\(filter)]"
 
         case .hash(let hash)?:
@@ -67,7 +67,7 @@ extension UCF.Selector:CustomStringConvertible
         case .legacy(let filter, let hash?):
             return "\(string)-swift.\(filter.rawValue)-\(hash)"
 
-        case .pattern(let filter)?:
+        case .signature(let filter)?:
             return "\(string)-\(filter)"
         }
     }
@@ -181,7 +181,7 @@ extension UCF.Selector
 
                 if  let filter:UCF.KeywordFilter = .init(string[i ..< bracket])
                 {
-                    self.suffix = .filter(filter)
+                    self.suffix = .keywords(filter)
                     return
                 }
                 else if

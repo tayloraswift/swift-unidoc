@@ -25,7 +25,7 @@ struct CodelinkLegacyDocC:ParsingSuite
         #expect(link.path.components == ["Sloth", "Color"])
         #expect(link.path.visible == ["Color"])
         #expect(!link.path.hasTrailingParentheses)
-        #expect(link.suffix == .filter(.enum))
+        #expect(link.suffix == .keywords(.enum))
     }
     @Test
     static func FilterInterior() throws
@@ -103,7 +103,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.inputs([nil])))
+        #expect(link.suffix == .signature(.function([nil])))
     }
 
     @Test
@@ -113,7 +113,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.inputs(["Int"])))
+        #expect(link.suffix == .signature(.function(["Int"])))
     }
 
     @Test
@@ -123,7 +123,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.inputs([nil, "String", nil])))
+        #expect(link.suffix == .signature(.function([nil, "String", nil])))
     }
 
     @Test
@@ -133,7 +133,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.output(.tuple([nil, nil]))))
+        #expect(link.suffix == .signature(.returns([nil, nil])))
     }
 
     @Test
@@ -143,7 +143,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.output(.tuple(["Double", nil]))))
+        #expect(link.suffix == .signature(.returns(["Double", nil])))
     }
 
     @Test
@@ -153,7 +153,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.output(.tuple(["Double", "Int"]))))
+        #expect(link.suffix == .signature(.returns(["Double", "Int"])))
     }
 
     @Test
@@ -163,7 +163,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.output(.tuple([nil, "Int"]))))
+        #expect(link.suffix == .signature(.returns([nil, "Int"])))
     }
 
     @Test
@@ -173,7 +173,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.output(.tuple([]))))
+        #expect(link.suffix == .signature(.returns([])))
     }
 
     @Test
@@ -183,7 +183,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.output(.single("Double"))))
+        #expect(link.suffix == .signature(.returns(["Double"])))
     }
 
     @Test
@@ -193,7 +193,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.output(.single(nil))))
+        #expect(link.suffix == .signature(.returns([nil])))
     }
 
     @Test
@@ -203,7 +203,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.output(.single(nil))))
+        #expect(link.suffix == .signature(.returns([nil])))
     }
 
     @Test
@@ -213,7 +213,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.output(.single("Double"))))
+        #expect(link.suffix == .signature(.returns(["Double"])))
     }
 
     @Test
@@ -223,7 +223,7 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.fullSignature([nil, "Int"], .single(nil))))
+        #expect(link.suffix == .signature(.function([nil, "Int"], [nil])))
     }
 
     @Test
@@ -233,6 +233,6 @@ struct CodelinkLegacyDocC:ParsingSuite
 
         #expect(link.path.components == ["Sloth", "update(_:)"])
         #expect(link.path.hasTrailingParentheses)
-        #expect(link.suffix == .pattern(.fullSignature([nil, "Int"], .tuple([nil, "Int"]))))
+        #expect(link.suffix == .signature(.function([nil, "Int"], [nil, "Int"])))
     }
 }
