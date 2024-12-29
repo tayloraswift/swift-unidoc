@@ -235,6 +235,7 @@ extension SSGC.Linker
                     //  Make the decl visible to codelink resolution.
                     self.tables.packageLinks[qualifier, decl.path].append(.init(
                         phylum: decl.phylum,
+                        kinks: decl.kinks,
                         decl: i,
                         heir: nil,
                         hash: hash,
@@ -334,6 +335,7 @@ extension SSGC.Linker
 
                 let featureAlias:UCF.PackageOverload = .init(
                     phylum: feature.phylum,
+                    kinks: feature.kinks,
                     decl: f,
                     heir: extendee,
                     hash: .decl(.init(id, self: $0.extendee.id)),

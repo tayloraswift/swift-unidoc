@@ -11,15 +11,15 @@ extension UCF
 }
 extension UCF.SignatureFilter
 {
-    init(parsing string:borrowing Substring) throws
+    init(parsed pattern:borrowing UCF.SignaturePattern, source:borrowing Substring)
     {
-        switch try UCF.SignaturePatternRule.parse(string.unicodeScalars)
+        switch pattern
         {
         case .function(let inputs, let output):
-            let inputs:[String?] = inputs.map { $0.provided?.formatted(source: string) }
+            let inputs:[String?] = inputs.map { $0.provided?.formatted(source: source) }
             let output:[String?]? = output?.splatted.map
             {
-                $0.provided?.formatted(source: string)
+                $0.provided?.formatted(source: source)
             }
 
             self = .function(inputs, output)
@@ -27,7 +27,7 @@ extension UCF.SignatureFilter
         case .returns(let output):
             let output:[String?] = output.splatted.map
             {
-                $0.provided?.formatted(source: string)
+                $0.provided?.formatted(source: source)
             }
 
             self = .returns(output)
@@ -59,7 +59,11 @@ extension UCF.SignatureFilter
 extension UCF.SignatureFilter:CustomStringConvertible
 {
     public
-    var description:String
+    var description:String { self.formatted(spaces: false) }
+}
+extension UCF.SignatureFilter
+{
+    func formatted(spaces:Bool) -> String
     {
         var string:String = ""
 
@@ -76,7 +80,7 @@ extension UCF.SignatureFilter:CustomStringConvertible
                 }
                 else
                 {
-                    string.append(",")
+                    string.append(spaces ? ", " : ",")
                 }
 
                 string.append(input ?? "_")
@@ -92,12 +96,14 @@ extension UCF.SignatureFilter:CustomStringConvertible
             return string
         }
 
-        if !string.isEmpty
+        if  spaces
         {
-            string.append("-")
+            string.append(string.isEmpty ? "-> " : " -> ")
         }
-
-        string.append(">")
+        else
+        {
+            string.append("->")
+        }
 
         if  output.count == 1
         {
@@ -116,7 +122,7 @@ extension UCF.SignatureFilter:CustomStringConvertible
                 }
                 else
                 {
-                    string.append(",")
+                    string.append(spaces ? ", " : ",")
                 }
 
                 string.append(element ?? "_")

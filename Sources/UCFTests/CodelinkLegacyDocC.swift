@@ -307,8 +307,6 @@ struct CodelinkLegacyDocC:ParsingSuite
     {
         let link:UCF.Selector = try Self.roundtrip("f(_:)->(((Foo<T>)))->((()))")
 
-        dump(link.suffix!)
-
         #expect(link.path.components == ["f(_:)"])
         #expect(link.suffix == .signature(.returns(["(Foo<T>)->()"])))
     }
@@ -316,8 +314,6 @@ struct CodelinkLegacyDocC:ParsingSuite
     static func PatternComplexSignature10() throws
     {
         let link:UCF.Selector = try Self.roundtrip("f(_:)->(((Foo<T>)))->((Int))")
-
-        dump(link.suffix!)
 
         #expect(link.path.components == ["f(_:)"])
         #expect(link.suffix == .signature(.returns(["(Foo<T>)->Int"])))

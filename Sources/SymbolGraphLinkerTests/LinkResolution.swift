@@ -26,6 +26,7 @@ struct LinkResolution
 
         tables.packageLinks["ThisModule", .init(["A"], "b")].append(.init(
             phylum: .func(.instance),
+            kinks: [],
             decl: 0,
             heir: nil,
             hash: .init(hashing: "x"),
@@ -35,6 +36,7 @@ struct LinkResolution
 
         tables.packageLinks["ThisModule", .init(["A"], "c")].append(.init(
             phylum: .func(.instance),
+            kinks: [],
             decl: 1,
             heir: nil,
             hash: .init(hashing: "y"),
@@ -87,6 +89,7 @@ struct LinkResolution
 
         tables.packageLinks["OtherModule", .init(["A"], "b")].append(.init(
             phylum: .func(.instance),
+            kinks: [],
             decl: 0,
             heir: nil,
             hash: .init(hashing: "x"),
@@ -96,6 +99,7 @@ struct LinkResolution
 
         tables.packageLinks["OtherModule", .init(["A"], "c")].append(.init(
             phylum: .func(.instance),
+            kinks: [],
             decl: 1,
             heir: nil,
             hash: .init(hashing: "y"),
@@ -213,6 +217,7 @@ struct LinkResolution
             let id:Symbol.Decl = .init(.s, ascii: "\(i)")
             tables.packageLinks["ThisModule", .init(["A"], name)].append(.init(
                 phylum: .func(.instance),
+                kinks: [],
                 decl: Int32.init(i),
                 heir: nil,
                 hash: .init(hashing: "\(id)"),

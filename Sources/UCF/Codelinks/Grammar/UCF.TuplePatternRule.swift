@@ -24,7 +24,9 @@ extension UCF
                 types.append(type)
 
                 while case ()? = input.parse(
-                    as: UnicodeEncoding<Location, Terminal>.Comma?.self)
+                    as: Pattern.Pad<
+                        UnicodeEncoding<Location, Terminal>.Comma,
+                        UnicodeEncoding<Location, Terminal>.Space>?.self)
                 {
                     types.append(try input.parse(as: TypePatternRule.self))
                 }

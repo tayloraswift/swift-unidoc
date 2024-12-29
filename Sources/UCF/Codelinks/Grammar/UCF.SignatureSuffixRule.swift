@@ -2,8 +2,8 @@ import Grammar
 
 extension UCF
 {
-    /// SignaturePattern ::= FunctionPattern | '->' ' ' * TypePattern
-    enum SignaturePatternRule:ParsingRule
+    /// SignatureSuffix ::= '-' FunctionPattern | '->' TypePattern
+    enum SignatureSuffixRule:ParsingRule
     {
         typealias Location = String.Index
         typealias Terminal = Unicode.Scalar
@@ -14,9 +14,9 @@ extension UCF
             Diagnostics.Source.Element == Terminal,
             Diagnostics.Source.Index == Location
         {
-            if  case ()? = input.parse(as: ArrowRule?.self)
+            try input.parse(as: UnicodeEncoding<Location, Terminal>.Hyphen.self)
+            if  case ()? = input.parse(as: UnicodeEncoding<Location, Terminal>.AngleRight?.self)
             {
-                input.parse(as: UnicodeEncoding<Location, Terminal>.Space.self, in: Void.self)
                 return .returns(try input.parse(as: TypePatternRule.self))
             }
             else

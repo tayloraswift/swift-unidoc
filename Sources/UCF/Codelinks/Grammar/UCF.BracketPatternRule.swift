@@ -21,7 +21,9 @@ extension UCF
             let first:TypePattern = try input.parse(as: TypePatternRule.self)
             let value:TypePattern?
 
-            if  case ()? = input.parse(as: UnicodeEncoding<Location, Terminal>.Colon?.self)
+            if  case ()? = input.parse(as: Pattern.Pad<
+                    UnicodeEncoding<Location, Terminal>.Colon,
+                    UnicodeEncoding<Location, Terminal>.Space>?.self)
             {
                 value = try input.parse(as: TypePatternRule.self)
             }
