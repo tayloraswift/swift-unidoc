@@ -10,6 +10,8 @@ extension UCF
         public
         let phylum:Phylum.Decl
         public
+        let kinks:Phylum.Decl.Kinks
+        public
         let decl:Symbol.Decl
         public
         let heir:Symbol.Decl?
@@ -23,6 +25,7 @@ extension UCF
 
         @inlinable public
         init(phylum:Phylum.Decl,
+            kinks:Phylum.Decl.Kinks,
             decl:Symbol.Decl,
             heir:Symbol.Decl?,
             hash:FNV24,
@@ -30,6 +33,7 @@ extension UCF
             autograph:Autograph?)
         {
             self.phylum = phylum
+            self.kinks = kinks
             self.decl = decl
             self.heir = heir
             self.hash = hash

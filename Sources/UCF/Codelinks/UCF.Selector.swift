@@ -55,8 +55,37 @@ extension UCF.Selector:CustomStringConvertible
         case nil:
             return string
 
-        case .keywords(let filter)?:
-            return "\(string) [\(filter)]"
+        case .unidoc(let filter)?:
+            if  let signature:UCF.SignatureFilter = filter.signature
+            {
+                string.append(" ")
+                string.append(signature.formatted(spaces: true))
+            }
+            if !filter.conditions.isEmpty
+            {
+                string.append(" [")
+                var first:Bool = true
+                for condition:UCF.ConditionFilter in filter.conditions
+                {
+                    if  first
+                    {
+                        first = false
+                    }
+                    else
+                    {
+                        string.append(", ")
+                    }
+
+                    string.append("\(condition.keywords)")
+
+                    if !condition.expected
+                    {
+                        string.append(": false")
+                    }
+                }
+                string.append("]")
+            }
+            return string
 
         case .hash(let hash)?:
             return "\(string) [\(hash)]"
@@ -66,9 +95,6 @@ extension UCF.Selector:CustomStringConvertible
 
         case .legacy(let filter, let hash?):
             return "\(string)-swift.\(filter.rawValue)-\(hash)"
-
-        case .signature(let filter)?:
-            return "\(string)-\(filter)"
         }
     }
 }
@@ -163,31 +189,10 @@ extension UCF.Selector
                 continue
 
             case " ":
-                guard
-                let bracket:String.Index = string[i...].firstIndex(of: "[")
-                else
+                //  The space is part of the disambiguator, so we must slice from `j`, not `i`
+                if  let suffix:Suffix = .parse(unidoc: string[j...])
                 {
-                    return nil
-                }
-
-                let i:String.Index = string.index(after: bracket)
-
-                guard
-                let bracket:String.Index = string[i...].firstIndex(of: "]")
-                else
-                {
-                    return nil
-                }
-
-                if  let filter:UCF.KeywordFilter = .init(string[i ..< bracket])
-                {
-                    self.suffix = .keywords(filter)
-                    return
-                }
-                else if
-                    let hash:FNV24 = .init(string[i ..< bracket])
-                {
-                    self.suffix = .hash(hash)
+                    self.suffix = suffix
                     return
                 }
                 else
@@ -207,8 +212,9 @@ extension UCF.Selector
                     self.path.fold = self.path.components.endIndex
                     continue
                 }
+                //  The hyphen is part of the disambiguator, so we must slice from `j`, not `i`
                 else if
-                    let suffix:Suffix = .parse(legacy: string[i...])
+                    let suffix:Suffix = .parse(legacy: string[j...])
                 {
                     self.suffix = suffix
                     return

@@ -3,8 +3,7 @@ import UCF
 
 extension UCF.LegacyFilter
 {
-    static
-    func ~= (self:Self, phylum:Phylum.Decl?) -> Bool
+    static func ~= (self:Self, phylum:Phylum.Decl?) -> Bool
     {
         guard
         let phylum:Phylum.Decl

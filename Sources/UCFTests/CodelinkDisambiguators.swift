@@ -36,4 +36,89 @@ struct CodelinkDisambiguators:ParsingSuite
         #expect(!link.path.hasTrailingParentheses)
         #expect(link.suffix == .keywords(.class_var))
     }
+    @Test
+    static func ClassVarRequirement() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("Fake.max [class var, requirement]")
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Fake", "max"])
+        #expect(!link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [
+                .init(keywords: .class_var, expected: true),
+                .init(keywords: .requirement, expected: true)
+            ],
+            signature: nil)))
+    }
+    @Test
+    static func ClassVarRequirementNegated() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("""
+            Fake.max [class var: false, requirement: false]
+            """)
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Fake", "max"])
+        #expect(!link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [
+                .init(keywords: .class_var, expected: false),
+                .init(keywords: .requirement, expected: false)
+            ],
+            signature: nil)))
+    }
+    @Test
+    static func Signature() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("""
+            Foo.bar(_:_:) (Int, _)
+            """)
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Foo", "bar(_:_:)"])
+        #expect(link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [],
+            signature: .function(["Int", nil]))))
+    }
+    @Test
+    static func SignatureFull() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("""
+            Foo.bar(_:_:) (_, Int) -> Set<String>
+            """)
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Foo", "bar(_:_:)"])
+        #expect(link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [],
+            signature: .function([nil, "Int"], ["Set<String>"]))))
+    }
+    @Test
+    static func SignatureReturns() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("""
+            Foo.bar(_:_:) -> Set<String>
+            """)
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Foo", "bar(_:_:)"])
+        #expect(link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [],
+            signature: .returns(["Set<String>"]))))
+    }
+    @Test
+    static func All() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("""
+            Foo.bar(_:_:) (_, Int) -> () [static func: false, requirement: true]
+            """)
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Foo", "bar(_:_:)"])
+        #expect(link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [
+                .init(keywords: .static_func, expected: false),
+                .init(keywords: .requirement, expected: true)
+            ],
+            signature: .function([nil, "Int"], []))))
+    }
 }
