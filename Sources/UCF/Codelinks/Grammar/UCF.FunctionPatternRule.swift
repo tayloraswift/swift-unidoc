@@ -18,7 +18,8 @@ extension UCF
         {
             let tuple:[TypePattern] = try input.parse(as: TuplePatternRule.self)
 
-            if  case ()? = input.parse(as: ArrowRule?.self)
+            if  case ()? = input.parse(
+                    as: Pattern.Pad<ArrowRule, UnicodeEncoding<Location, Terminal>.Space>?.self)
             {
                 return (tuple, try input.parse(as: TypePatternRule.self))
             }

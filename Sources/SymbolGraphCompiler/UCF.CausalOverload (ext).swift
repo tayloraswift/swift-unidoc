@@ -7,6 +7,7 @@ extension UCF.CausalOverload
     func feature(_ decl:SSGC.Decl, self heir:Symbol.Decl) -> Self
     {
         .init(phylum: decl.phylum,
+            kinks: decl.kinks,
             decl: decl.id,
             heir: heir,
             hash: .decl(.init(decl.id, self: heir)),
@@ -17,6 +18,7 @@ extension UCF.CausalOverload
     func decl(_ decl:SSGC.Decl) -> Self
     {
         .init(phylum: decl.phylum,
+            kinks: decl.kinks,
             decl: decl.id,
             heir: nil,
             hash: .decl(decl.id),

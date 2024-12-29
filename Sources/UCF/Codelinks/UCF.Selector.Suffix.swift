@@ -1,26 +1,66 @@
 import FNV1
+import Grammar
 
 extension UCF.Selector
 {
     @frozen public
     enum Suffix:Equatable, Hashable, Sendable
     {
-        case signature(UCF.SignatureFilter)
-        case keywords(UCF.KeywordFilter)
+        case unidoc(UCF.Disambiguator)
         case legacy(UCF.LegacyFilter, FNV24?)
         case hash(FNV24)
     }
 }
 extension UCF.Selector.Suffix
 {
-    static func parse(legacy string:Substring) -> Self?
+    /// The `string` must start with a space (` `)!
+    static func parse(unidoc string:Substring) -> Self?
     {
-        if  let filter:UCF.SignatureFilter = try? .init(parsing: string)
+        let (signature, clauses):(UCF.SignaturePattern?, [(String, String?)])
+        do
         {
-            return .signature(filter)
+            (signature, clauses) = try UCF.DisambiguatorRule.parse(string.unicodeScalars)
+        }
+        catch
+        {
+            //  TODO: Diagnose the error.
+            return nil
         }
 
-        var i:String.Index = string.startIndex
+        if  let disambiguator:UCF.Disambiguator = .init(
+                signature: signature,
+                clauses: clauses,
+                source: string)
+        {
+            return .unidoc(disambiguator)
+        }
+        else if
+            case nil = signature,
+            case (let hash, nil)? = clauses.first, clauses.count == 1,
+            let hash:FNV24 = .init(hash)
+        {
+            return .hash(hash)
+        }
+        else
+        {
+            return nil
+        }
+    }
+
+    /// The `string` must start with a hyphen (`-`)!
+    static func parse(legacy string:Substring) -> Self?
+    {
+        if  let pattern:UCF.SignaturePattern = try? UCF.SignatureSuffixRule.parse(
+                string.unicodeScalars)
+        {
+            return .unidoc(.init(conditions: [],
+                signature: .init(parsed: pattern, source: string)))
+        }
+
+        assert(string.startIndex < string.endIndex)
+
+        /// Skip the leading hyphen.
+        var i:String.Index = string.index(after: string.startIndex)
 
         var filter:UCF.LegacyFilter? = nil
         var hash:FNV24? = nil
@@ -75,9 +115,11 @@ extension UCF.Selector.Suffix
         if  let filter:UCF.LegacyFilter
         {
             if  case nil = hash,
-                let filter:UCF.KeywordFilter = .init(legacy: filter)
+                let keywords:UCF.ConditionFilter.Keywords = .init(legacy: filter)
             {
-                return .keywords(filter)
+                return .unidoc(.init(
+                    conditions: [.init(keywords: keywords, expected: true)],
+                    signature: nil))
             }
             else
             {

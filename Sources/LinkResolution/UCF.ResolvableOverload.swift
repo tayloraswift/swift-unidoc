@@ -9,6 +9,7 @@ extension UCF
     {
         var autograph:Autograph? { get }
         var phylum:Phylum.Decl { get }
+        var kinks:Phylum.Decl.Kinks { get }
         var hash:FNV24 { get }
 
         var documented:Bool { get }
@@ -72,6 +73,30 @@ extension UCF.ResolvableOverload
 
         switch suffix
         {
+        case .unidoc(let filter):
+            if  let signature:UCF.SignatureFilter = filter.signature
+            {
+                //  If a signature filter is present, the declaration must have an autograph.
+                guard
+                let autograph:UCF.Autograph = self.autograph, signature ~= autograph
+                else
+                {
+                    return false
+                }
+            }
+
+            let decl:(Phylum.Decl, Phylum.Decl.Kinks) = (self.phylum, self.kinks)
+            for condition:UCF.ConditionFilter in filter.conditions
+            {
+                guard condition ~= decl
+                else
+                {
+                    return false
+                }
+            }
+
+            return true
+
         case .legacy(let filter, nil):
             return filter ~= self.phylum
 
@@ -80,19 +105,6 @@ extension UCF.ResolvableOverload
 
         case .hash(let hash):
             return hash == self.hash
-
-        case .keywords(let filter):
-            return filter ~= self.phylum
-
-        case .signature(let filter):
-            if  let autograph:UCF.Autograph = self.autograph
-            {
-                return filter ~= autograph
-            }
-            else
-            {
-                return false
-            }
         }
     }
 }
