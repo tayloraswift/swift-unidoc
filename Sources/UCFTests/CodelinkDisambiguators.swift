@@ -106,6 +106,22 @@ struct CodelinkDisambiguators:ParsingSuite
             signature: .returns(["Set<String>"]))))
     }
     @Test
+    static func SignatureProtocolComposition() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("""
+            Foo.bar(_:_:) (StringProtocol & Error, [Sendable & RandomAccessCollection<UInt8>])
+            """)
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Foo", "bar(_:_:)"])
+        #expect(link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [],
+            signature: .function([
+                "StringProtocol&Error",
+                "[Sendable&RandomAccessCollection<UInt8>]"
+            ]))))
+    }
+    @Test
     static func All() throws
     {
         let link:UCF.Selector = try Self.roundtrip("""

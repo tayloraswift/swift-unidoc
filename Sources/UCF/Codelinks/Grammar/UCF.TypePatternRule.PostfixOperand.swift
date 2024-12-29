@@ -14,10 +14,12 @@ extension UCF.TypePatternRule
             Diagnostics.Source.Element == Terminal,
             Diagnostics.Source.Index == Location
         {
-            if  let path:[(Range<Location>, [UCF.TypePattern])] = input.parse(
+            if  let composition:[[(Range<Location>, [UCF.TypePattern])]] = input.parse(
                     as: UCF.NominalPatternRule?.self)
             {
-                if  let (range, generics):(Range<Location>, [UCF.TypePattern]) = path.first,
+                if  let path:[(Range<Location>, [UCF.TypePattern])] = composition.first,
+                    composition.count == 1,
+                    let (range, generics):(Range<Location>, [UCF.TypePattern]) = path.first,
                     generics.isEmpty,
                     path.count == 1,
                     input.source.index(after: range.lowerBound) == range.upperBound,
@@ -26,7 +28,7 @@ extension UCF.TypePatternRule
                     return .single(nil)
                 }
 
-                return .nominal(path)
+                return .nominal(composition)
             }
             else if
                 let (first, value):(UCF.TypePattern, UCF.TypePattern?) = input.parse(

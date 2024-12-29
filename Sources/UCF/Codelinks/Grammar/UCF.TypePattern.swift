@@ -90,9 +90,9 @@ extension UCF.TypePattern
             string.append(")->")
             output.format(source: source, into: &string)
 
-        case .nominal(let path):
+        case .nominal(let composition):
             var first:Bool = true
-            for (component, generics):(Range<String.Index>, [UCF.TypePattern]) in path
+            for path:[(Range<String.Index>, [UCF.TypePattern])] in composition
             {
                 if  first
                 {
@@ -100,19 +100,11 @@ extension UCF.TypePattern
                 }
                 else
                 {
-                    string.append(".")
+                    string.append("&")
                 }
 
-                string += source[component]
-
-                if  generics.isEmpty
-                {
-                    continue
-                }
-
-                string.append("<")
                 var first:Bool = true
-                for type:UCF.TypePattern in generics
+                for (component, generics):(Range<String.Index>, [UCF.TypePattern]) in path
                 {
                     if  first
                     {
@@ -120,12 +112,33 @@ extension UCF.TypePattern
                     }
                     else
                     {
-                        string.append(",")
+                        string.append(".")
                     }
 
-                    type.format(source: source, into: &string)
+                    string += source[component]
+
+                    if  generics.isEmpty
+                    {
+                        continue
+                    }
+
+                    string.append("<")
+                    var first:Bool = true
+                    for type:UCF.TypePattern in generics
+                    {
+                        if  first
+                        {
+                            first = false
+                        }
+                        else
+                        {
+                            string.append(",")
+                        }
+
+                        type.format(source: source, into: &string)
+                    }
+                    string.append(">")
                 }
-                string.append(">")
             }
 
         case .single(let type?):
