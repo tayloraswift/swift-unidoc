@@ -16,7 +16,9 @@ extension UCF.NominalPatternRule
         {
             try input.parse(as: UnicodeEncoding<Location, Terminal>.AngleLeft.self)
             let types:[UCF.TypePattern] = try input.parse(as: Pattern.Join<UCF.TypePatternRule,
-                UnicodeEncoding<Location, Terminal>.Comma,
+                Pattern.Pad<
+                    UnicodeEncoding<Location, Terminal>.Comma,
+                    UnicodeEncoding<Location, Terminal>.Space>,
                 [UCF.TypePattern]>.self)
             try input.parse(as: UnicodeEncoding<Location, Terminal>.AngleRight.self)
             return types
