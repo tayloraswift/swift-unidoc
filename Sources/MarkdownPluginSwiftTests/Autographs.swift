@@ -57,7 +57,7 @@ struct Autographs
         let decl:String = "subscript(a: some Equatable, b: [Float: Bool]!) -> (String)?"
         let _:Signature<Never>.Expanded = .init(decl, landmarks: &self.landmarks)
 
-        #expect(self.landmarks.inputs == ["_", "[Float:Bool]!"])
+        #expect(self.landmarks.inputs == ["Equatable", "[Float:Bool]!"])
         #expect(self.landmarks.output == ["String?"])
     }
 
@@ -83,6 +83,89 @@ struct Autographs
 
         #expect(self.landmarks.inputs == ["(Int,Int)->Int", "[Unicode.Scalar].Type"])
         #expect(self.landmarks.output == ["(Int)->(Int)->Int"])
+    }
+
+    @Test mutating
+    func SomeAndAnyTypes()
+    {
+        let decl:String = """
+        func f(
+            a: any Error,
+            b: some Error & CustomStringConvertible,
+            c: [some RandomAccessCollection<UInt8> & MutableCollection<UInt8>].Type)
+        """
+        let _:Signature<Never>.Expanded = .init(decl, landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == [
+                "Error",
+                "Error&CustomStringConvertible",
+                "[RandomAccessCollection<UInt8>&MutableCollection<UInt8>].Type"
+            ])
+        #expect(self.landmarks.output == [])
+    }
+
+    /// Note that as of Swift 6.0, it is currently illegal to include primary associated types
+    /// in an existential protocol composition type, although this is allowed for `some` types.
+    @Test mutating
+    func ProtocolCompositions()
+    {
+        let decl:String = """
+        func f(
+            a: any Error,
+            b: any Error & CustomStringConvertible,
+            c: any RandomAccessCollection & MutableCollection)
+        """
+        let _:Signature<Never>.Expanded = .init(decl, landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == [
+                "Error",
+                "Error&CustomStringConvertible",
+                "RandomAccessCollection&MutableCollection"
+            ])
+        #expect(self.landmarks.output == [])
+    }
+
+    @Test mutating
+    func Variadics()
+    {
+        let decl:String = """
+        func f(
+            a: String...,
+            b: [String]...,
+            c: Set<Int>...)
+        """
+        let _:Signature<Never>.Expanded = .init(decl, landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == [
+                "String...",
+                "[String]...",
+                "Set<Int>..."
+            ])
+        #expect(self.landmarks.output == [])
+    }
+
+    @Test mutating
+    func Packs()
+    {
+        let decl:String = """
+        func f<each T>(x: repeat [each T])
+        """
+        let _:Signature<Never>.Expanded = .init(decl, landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == ["[T]"])
+        #expect(self.landmarks.output == [])
+    }
+
+    @Test mutating
+    func Noncopyable()
+    {
+        let decl:String = """
+        func f(a: borrowing some ~Copyable)
+        """
+        let _:Signature<Never>.Expanded = .init(decl, landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == ["~Copyable"])
+        #expect(self.landmarks.output == [])
     }
 
     @Test mutating

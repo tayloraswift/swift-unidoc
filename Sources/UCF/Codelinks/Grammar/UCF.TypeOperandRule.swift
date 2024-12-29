@@ -1,25 +1,23 @@
 import Grammar
 
-extension UCF.TypePatternRule
+extension UCF
 {
-    /// PostfixOperand ::= NominalPattern | BracketPattern | FunctionPattern
-    enum PostfixOperand:ParsingRule
+    /// TypeOperand ::= NominalPattern | BracketPattern | FunctionPattern
+    enum TypeOperandRule:ParsingRule
     {
         typealias Location = String.Index
         typealias Terminal = Unicode.Scalar
 
         static func parse<Diagnostics>(
-            _ input:inout ParsingInput<Diagnostics>) throws -> UCF.TypeOperand where
+            _ input:inout ParsingInput<Diagnostics>) throws -> TypeOperand where
             Diagnostics:ParsingDiagnostics,
             Diagnostics.Source.Element == Terminal,
             Diagnostics.Source.Index == Location
         {
-            if  let composition:[[(Range<Location>, [UCF.TypePattern])]] = input.parse(
-                    as: UCF.NominalPatternRule?.self)
+            if  let path:[(Range<Location>, [TypePattern])] = input.parse(
+                    as: NominalPatternRule?.self)
             {
-                if  let path:[(Range<Location>, [UCF.TypePattern])] = composition.first,
-                    composition.count == 1,
-                    let (range, generics):(Range<Location>, [UCF.TypePattern]) = path.first,
+                if  let (range, generics):(Range<Location>, [TypePattern]) = path.first,
                     generics.isEmpty,
                     path.count == 1,
                     input.source.index(after: range.lowerBound) == range.upperBound,
@@ -28,19 +26,19 @@ extension UCF.TypePatternRule
                     return .single(nil)
                 }
 
-                return .nominal(composition)
+                return .nominal(path)
             }
             else if
-                let (first, value):(UCF.TypePattern, UCF.TypePattern?) = input.parse(
-                    as: UCF.BracketPatternRule?.self)
+                let (first, value):(TypePattern, TypePattern?) = input.parse(
+                    as: BracketPatternRule?.self)
             {
                 return .bracket(first, value)
             }
 
-            switch try input.parse(as: UCF.FunctionPatternRule.self)
+            switch try input.parse(as: FunctionPatternRule.self)
             {
             case (let tuple, nil):
-                if  let first:UCF.TypePattern = tuple.first, tuple.count == 1
+                if  let first:TypePattern = tuple.first, tuple.count == 1
                 {
                     return .single(first)
                 }

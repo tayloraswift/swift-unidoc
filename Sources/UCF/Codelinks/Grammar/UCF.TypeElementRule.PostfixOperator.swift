@@ -1,8 +1,8 @@
 import Grammar
 
-extension UCF.TypePatternRule
+extension UCF.TypeElementRule
 {
-    /// PostfixOperator ::= '?' | '!' | '.Type'
+    /// PostfixOperator ::= '?' | '!' | '.Type' | '...'
     enum PostfixOperator:ParsingRule
     {
         typealias Location = String.Index
@@ -18,15 +18,18 @@ extension UCF.TypePatternRule
             {
                 return codepoint
             }
+
+            try input.parse(as: UnicodeEncoding<Location, Terminal>.Period.self)
+
+            if  case ()? = input.parse(as: PostfixMetatype?.self)
+            {
+                return .metatype
+            }
             else
             {
                 try input.parse(as: UnicodeEncoding<Location, Terminal>.Period.self)
-                try input.parse(as: UnicodeEncoding<Location, Terminal>.UppercaseT.self)
-                try input.parse(as: UnicodeEncoding<Location, Terminal>.LowercaseY.self)
-                try input.parse(as: UnicodeEncoding<Location, Terminal>.LowercaseP.self)
-                try input.parse(as: UnicodeEncoding<Location, Terminal>.LowercaseE.self)
-
-                return .metatype
+                try input.parse(as: UnicodeEncoding<Location, Terminal>.Period.self)
+                return .ellipsis
             }
         }
     }

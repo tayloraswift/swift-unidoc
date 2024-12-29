@@ -21,11 +21,37 @@ extension SignatureSyntax
 extension SignatureSyntax.Autographer
 {
     mutating
+    func encode(parameter:FunctionParameterSyntax)
+    {
+        self.encode(type: parameter.type)
+
+        if  case _? = parameter.ellipsis
+        {
+            self.autograph.append("...")
+        }
+    }
+
+    mutating
     func encode(type:TypeSyntax)
     {
         if  let type:AttributedTypeSyntax = type.as(AttributedTypeSyntax.self)
         {
             self.encode(type: type.baseType)
+        }
+        else if
+            let type:SomeOrAnyTypeSyntax = type.as(SomeOrAnyTypeSyntax.self)
+        {
+            self.encode(type: type.constraint)
+        }
+        else if
+            let type:PackElementTypeSyntax = type.as(PackElementTypeSyntax.self)
+        {
+            self.encode(type: type.pack)
+        }
+        else if
+            let type:PackExpansionTypeSyntax = type.as(PackExpansionTypeSyntax.self)
+        {
+            self.encode(type: type.repetitionPattern)
         }
         else if
             let type:IdentifierTypeSyntax = type.as(IdentifierTypeSyntax.self)
@@ -75,6 +101,12 @@ extension SignatureSyntax.Autographer
             self.autograph.append(".Type")
         }
         else if
+            let suppressed:SuppressedTypeSyntax = type.as(SuppressedTypeSyntax.self)
+        {
+            self.autograph.append("~")
+            self.encode(type: suppressed.type)
+        }
+        else if
             let type:TupleTypeSyntax = type.as(TupleTypeSyntax.self)
         {
             if  let only:TupleTypeElementSyntax = type.elements.first, type.elements.count == 1
@@ -85,6 +117,8 @@ extension SignatureSyntax.Autographer
 
             self.autograph.append("(")
 
+            /// We don’t rely on the existence of the trailing comma in the syntax tree, because
+            /// Swift now allows trailing commas in many places, and we want to normalize them.
             var first:Bool = true
             for element:TupleTypeElementSyntax in type.elements
             {
@@ -123,6 +157,24 @@ extension SignatureSyntax.Autographer
 
             self.autograph.append(")->")
             self.encode(type: function.returnClause.type)
+        }
+        else if
+            let type:CompositionTypeSyntax = type.as(CompositionTypeSyntax.self)
+        {
+            var first:Bool = true
+            for element:CompositionTypeElementSyntax in type.elements
+            {
+                if  first
+                {
+                    first = false
+                }
+                else
+                {
+                    self.autograph.append("&")
+                }
+
+                self.encode(type: element.type)
+            }
         }
         else
         {
