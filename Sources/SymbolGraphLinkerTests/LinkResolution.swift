@@ -226,29 +226,28 @@ struct LinkResolution
                 id: id))
         }
 
-        //  Scoped tests
         tables.resolving(with: .init(origin: nil,
             namespace: nil,
             context: .init(id: "ThisModule"),
             scope: ["A"]))
         {
-            #expect(nil != $0.outline(
-                reference: .lexical(ucf: Self._string("f(_:)-((Int,[Int?]))->String"))))
-            #expect(nil != $0.outline(
-                reference: .lexical(ucf: Self._string("f(_:)-(String)->(Int,Int)"))))
-            #expect(nil != $0.outline(
-                reference: .lexical(ucf: Self._string("f(_:)-(Int)->()"))))
-            #expect(nil != $0.outline(
-                reference: .lexical(ucf: Self._string("f(_:)-(String)->()"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:)-((Int,[Int?]))->String"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:)-(String)->(Int,Int)"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:)-(Int)->()"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:)-(String)->()"))))
 
-            #expect(nil != $0.outline(
-                reference: .lexical(ucf: Self._string("A.f(_:)->_"))))
-            #expect(nil != $0.outline(
-                reference: .lexical(ucf: Self._string("A.f(_:)->(_,_)"))))
-            #expect(nil != $0.outline(
-                reference: .lexical(ucf: Self._string("A.f(_:)-(Int)"))))
-            #expect(nil != $0.outline(
-                reference: .lexical(ucf: Self._string("A.f(_:)-(String)->()"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("A.f(_:)->_"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("A.f(_:)->(_,_)"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("A.f(_:)-(Int)"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("A.f(_:)-(String)->()"))))
 
             #expect($0.outlines() == [
                 .vertex(3, text: "f(_:)"),
@@ -260,6 +259,71 @@ struct LinkResolution
                 .vertex(2, text: "A f(_:)"),
                 .vertex(1, text: "A f(_:)"),
                 .vertex(0, text: "A f(_:)"),
+            ])
+        }
+    }
+
+    @Test
+    static func RequirementDisambiguation()
+    {
+        var tables:SSGC.Linker.Tables = .init()
+
+        for (i, (name, (inputs, output), kinks)):
+            (Int, (String, ([String], [String]), Phylum.Decl.Kinks)) in [
+            ("f(_:)", (["String"], []), []),
+            ("f(_:)", (["String"], []), [.required]),
+            ("f(_:)", (["Int"], []), []),
+            ("f(_:)", (["Int"], []), [.required]),
+        ].enumerated()
+        {
+            let id:Symbol.Decl = .init(.s, ascii: "\(i)")
+            tables.packageLinks["ThisModule", .init(["A"], name)].append(.init(
+                phylum: .func(.instance),
+                kinks: kinks,
+                decl: Int32.init(i),
+                heir: nil,
+                hash: .init(hashing: "\(id)"),
+                documented: true,
+                autograph: .init(inputs: inputs, output: output),
+                id: id))
+        }
+
+        //  Scoped tests
+        tables.resolving(with: .init(origin: nil,
+            namespace: nil,
+            context: .init(id: "ThisModule"),
+            scope: ["A"]))
+        {
+            #expect(nil == $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (String) -> () [static func, requirement]"))))
+            #expect(nil == $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (String) -> () [static func, requirement: false]"))))
+
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (String) -> () [requirement]"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (String) -> () [requirement: false]"))))
+
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (Int) -> () [requirement, func]"))))
+            #expect(nil != $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (Int) -> () [requirement: false, func]"))))
+
+            #expect(nil == $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (String) -> () [func]"))))
+            #expect(nil == $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (String) -> () [func]"))))
+
+            #expect(nil == $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (Int) -> ()"))))
+            #expect(nil == $0.outline(reference: .lexical(
+                ucf: Self._string("f(_:) (Int) -> ()"))))
+
+            #expect($0.outlines() == [
+                .vertex(1, text: "f(_:)"),
+                .vertex(0, text: "f(_:)"),
+                .vertex(3, text: "f(_:)"),
+                .vertex(2, text: "f(_:)"),
             ])
         }
     }
