@@ -2,7 +2,7 @@ import Grammar
 
 extension UCF
 {
-    /// TypePattern ::= PostfixOperand PostfixOperator *
+    /// TypePattern ::= TypeElement ( '&' TypeElement ) *
     enum TypePatternRule:ParsingRule
     {
         typealias Location = String.Index
@@ -12,19 +12,13 @@ extension UCF
             _ input:inout ParsingInput<some ParsingDiagnostics<Source>>) throws -> TypePattern
             where Source:Collection<Terminal>, Source.Index == Location
         {
-            let operand:TypeOperand = try input.parse(as: PostfixOperand.self)
-            let operators:[TypeOperator] = input.parse(as: PostfixOperator.self, in: [_].self)
+            let elements:[TypeElement] = try input.parse(as: Pattern.Join<TypeElementRule,
+                Pattern.Pad<
+                    UnicodeEncoding<Location, Terminal>.Ampersand,
+                    UnicodeEncoding<Location, Terminal>.Space>,
+                [TypeElement]>.self)
 
-            if  operators.isEmpty,
-                case .single(let parenthesized?) = operand
-            {
-                //  If this is a bare parenthesized operand with no operators, unwrap it.
-                return parenthesized
-            }
-            else
-            {
-                return .init(operand: operand, suffix: operators)
-            }
+            return .init(composition: elements)
         }
     }
 }
