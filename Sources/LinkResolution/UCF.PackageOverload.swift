@@ -8,42 +8,34 @@ extension UCF
     struct PackageOverload:ResolvableOverload, Sendable
     {
         public
-        let phylum:Phylum.Decl
-        public
-        let kinks:Phylum.Decl.Kinks
+        let traits:DisambiguationTraits
         public
         let decl:Int32
         public
         let heir:Int32?
-        public
-        let hash:FNV24
 
         public
         let documented:Bool
         public
-        let autograph:Autograph?
+        let inherited:Bool
         /// Used for display purposes. This is not necessarily the symbol from which the
         /// ``hash`` was computed.
         public
         let id:Symbol.Decl
 
         @inlinable public
-        init(phylum:Phylum.Decl,
-            kinks:Phylum.Decl.Kinks,
+        init(traits:DisambiguationTraits,
             decl:Int32,
             heir:Int32?,
-            hash:FNV24,
             documented:Bool,
-            autograph:Autograph?,
+            inherited:Bool,
             id:Symbol.Decl)
         {
-            self.phylum = phylum
-            self.kinks = kinks
+            self.traits = traits
             self.decl = decl
             self.heir = heir
-            self.hash = hash
             self.documented = documented
-            self.autograph = autograph
+            self.inherited = inherited
             self.id = id
         }
     }

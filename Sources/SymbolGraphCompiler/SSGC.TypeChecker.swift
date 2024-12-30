@@ -619,7 +619,7 @@ extension SSGC.TypeChecker
             $0.register($1)
         }
 
-        var reexported:[Symbol.Decl: SSGC.ModuleIndex.Feature] = [:]
+        var reexported:[Symbol.Decl: SSGC.DeclAlias] = [:]
         for decl:SSGC.DeclObject in self.declarations.all
         {
             /// The target may have been re-exported from multiple modules. Swift allows
@@ -659,7 +659,7 @@ extension SSGC.TypeChecker
         let extensions:[SSGC.Extension] = try self.extensions.load(culture: culture,
             with: self.declarations)
 
-        let features:[Symbol.Decl: SSGC.ModuleIndex.Feature] = try extensions.reduce(into: [:])
+        let features:[Symbol.Decl: SSGC.DeclAlias] = try extensions.reduce(into: [:])
         {
             for feature:Symbol.Decl in $1.features
             {

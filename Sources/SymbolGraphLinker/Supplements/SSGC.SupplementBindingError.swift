@@ -51,7 +51,7 @@ extension SSGC.SupplementBindingError:Diagnostic
         case .ambiguousBinding(_, rejected: let rejected):
             for overload:any UCF.ResolvableOverload in rejected
             {
-                let suggested:UCF.Selector = self.selector.with(hash: overload.hash)
+                let suggested:UCF.Selector = self.selector.with(hash: overload.traits.hash)
 
                 output[.note] = """
                 did you mean '\(suggested)'? (\(output.symbolicator.demangle(overload.id)))

@@ -173,7 +173,7 @@ extension SSGC.Linker
             //  @_exported can duplicate a truly staggering number of declarations. To prevent
             //  this from creating a lot of almost-empty declaration nodes, we only track
             //  modules that re-export symbols from the same package.
-            for (id, feature):(Symbol.Decl, SSGC.ModuleIndex.Feature) in module.reexports
+            for (id, feature):(Symbol.Decl, SSGC.DeclAlias) in module.reexports
             {
                 if  let i:Int32 = self.tables.citizen(id)
                 {
@@ -231,20 +231,18 @@ extension SSGC.Linker
             {
                 for (i, decl):(Int32, SSGC.Decl) in zip(allocated.range, decls)
                 {
-                    let hash:FNV24 = .decl(decl.id)
+                    let traits:UCF.DisambiguationTraits = decl.traits
                     //  Make the decl visible to codelink resolution.
                     self.tables.packageLinks[qualifier, decl.path].append(.init(
-                        phylum: decl.phylum,
-                        kinks: decl.kinks,
+                        traits: traits,
                         decl: i,
                         heir: nil,
-                        hash: hash,
                         documented: decl.comment != nil,
-                        autograph: decl.autograph,
+                        inherited: false,
                         id: decl.id))
                     //  Assign the decl a URI, and record the decl’s hash
                     //  so we will know if it has a hash collision.
-                    self.router[qualifier, decl.path, decl.phylum][hash, default: []]
+                    self.router[qualifier, decl.path, decl.phylum][traits.hash, default: []]
                         .append(i)
 
                     $0.append((decl, i, qualifier))
@@ -305,7 +303,7 @@ extension SSGC.Linker
     /// call this method second, after calling ``allocate(decls:)``.
     private mutating
     func unfurl(extensions:[SSGC.Extension],
-        featuresBySymbol:[Symbol.Decl: SSGC.ModuleIndex.Feature],
+        featuresBySymbol:[Symbol.Decl: SSGC.DeclAlias],
         at offset:Int)
     {
         self.contexts[offset].extensions = extensions.map
@@ -327,20 +325,21 @@ extension SSGC.Linker
             for (f, id):(Int32, Symbol.Decl) in zip(features, $0.features)
             {
                 guard
-                let feature:SSGC.ModuleIndex.Feature = featuresBySymbol[id]
+                let feature:SSGC.DeclAlias = featuresBySymbol[id]
                 else
                 {
                     continue
                 }
 
-                let featureAlias:UCF.PackageOverload = .init(
-                    phylum: feature.phylum,
-                    kinks: feature.kinks,
+                let featureAlias:UCF.PackageOverload = .init(traits: .init(
+                        autograph: feature.autograph,
+                        phylum: feature.phylum,
+                        kinks: feature.kinks,
+                        hash: .decl(.init(id, self: $0.extendee.id))),
                     decl: f,
                     heir: extendee,
-                    hash: .decl(.init(id, self: $0.extendee.id)),
                     documented: feature.documented,
-                    autograph: feature.autograph,
+                    inherited: true,
                     id: id)
 
                 self.tables.packageLinks[namespace, $0.extendee.path, feature.path.last]

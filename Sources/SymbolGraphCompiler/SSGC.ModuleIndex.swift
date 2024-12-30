@@ -19,9 +19,9 @@ extension SSGC
         public
         let extensions:[SSGC.Extension]
         public
-        let reexports:[Symbol.Decl: Feature]
+        let reexports:[Symbol.Decl: DeclAlias]
         public
-        let features:[Symbol.Decl: Feature]
+        let features:[Symbol.Decl: DeclAlias]
 
         public
         var language:Phylum.Language?
@@ -36,8 +36,8 @@ extension SSGC
             resolvableLinks:UCF.ResolutionTable<UCF.CausalOverload>,
             declarations:[(id:Symbol.Module, decls:[Decl])],
             extensions:[SSGC.Extension],
-            reexports:[Symbol.Decl: Feature],
-            features:[Symbol.Decl: Feature],
+            reexports:[Symbol.Decl: DeclAlias],
+            features:[Symbol.Decl: DeclAlias],
             language:Phylum.Language? = nil,
             markdown:[any SSGC.ResourceFile] = [],
             resources:[any SSGC.ResourceFile] = [])

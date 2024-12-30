@@ -6,23 +6,19 @@ extension UCF.CausalOverload
     static
     func feature(_ decl:SSGC.Decl, self heir:Symbol.Decl) -> Self
     {
-        .init(phylum: decl.phylum,
-            kinks: decl.kinks,
+        .init(traits: decl.traits(self: heir),
             decl: decl.id,
             heir: heir,
-            hash: .decl(.init(decl.id, self: heir)),
             documented: decl.comment != nil,
-            autograph: decl.autograph)
+            inherited: true)
     }
     static
     func decl(_ decl:SSGC.Decl) -> Self
     {
-        .init(phylum: decl.phylum,
-            kinks: decl.kinks,
+        .init(traits: decl.traits,
             decl: decl.id,
             heir: nil,
-            hash: .decl(decl.id),
             documented: decl.comment != nil,
-            autograph: decl.autograph)
+            inherited: false)
     }
 }

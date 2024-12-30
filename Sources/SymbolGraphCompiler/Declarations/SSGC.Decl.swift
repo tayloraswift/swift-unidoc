@@ -87,3 +87,25 @@ extension SSGC
         }
     }
 }
+extension SSGC.Decl
+{
+    @inlinable public
+    var traits:UCF.DisambiguationTraits
+    {
+        .init(
+            autograph: self.autograph,
+            phylum: self.phylum,
+            kinks: self.kinks,
+            hash: .decl(self.id))
+    }
+
+    @inlinable public
+    func traits(self heir:Symbol.Decl) -> UCF.DisambiguationTraits
+    {
+        .init(
+            autograph: self.autograph,
+            phylum: self.phylum,
+            kinks: self.kinks,
+            hash: .decl(.init(self.id, self: heir)))
+    }
+}

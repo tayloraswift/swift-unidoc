@@ -3,7 +3,7 @@ import UCF
 extension UCF
 {
     @frozen public
-    struct Autograph:Equatable, Sendable
+    struct Autograph:Hashable, Equatable, Sendable
     {
         public
         let inputs:[String]
