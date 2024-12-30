@@ -8,37 +8,29 @@ extension UCF
     struct CausalOverload:ResolvableOverload, Sendable
     {
         public
-        let phylum:Phylum.Decl
-        public
-        let kinks:Phylum.Decl.Kinks
+        let traits:DisambiguationTraits
         public
         let decl:Symbol.Decl
         public
         let heir:Symbol.Decl?
-        public
-        let hash:FNV24
 
         public
         let documented:Bool
         public
-        let autograph:Autograph?
+        let inherited:Bool
 
         @inlinable public
-        init(phylum:Phylum.Decl,
-            kinks:Phylum.Decl.Kinks,
+        init(traits:DisambiguationTraits,
             decl:Symbol.Decl,
             heir:Symbol.Decl?,
-            hash:FNV24,
             documented:Bool,
-            autograph:Autograph?)
+            inherited:Bool)
         {
-            self.phylum = phylum
-            self.kinks = kinks
+            self.traits = traits
             self.decl = decl
             self.heir = heir
-            self.hash = hash
             self.documented = documented
-            self.autograph = autograph
+            self.inherited = inherited
         }
     }
 }

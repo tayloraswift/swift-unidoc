@@ -27,11 +27,11 @@ extension UCF.ResolutionTable.Search
     mutating
     func add(_ candidates:InlineArray<Overload>)
     {
-        //  Because of the way `@_exported` paths are represented in the search tree, it is 
+        //  Because of the way `@_exported` paths are represented in the search tree, it is
         //  possible to encounter the same overload multiple times, due to namespace inference
         for overload:Overload in candidates
         {
-            guard self.predicate ~= overload
+            guard self.predicate ~= overload.traits
             else
             {
                 self.rejected[overload.id] = overload
@@ -44,11 +44,11 @@ extension UCF.ResolutionTable.Search
 
     func any() -> UCF.Resolution<Overload>?
     {
-        guard 
+        guard
         let overload:Overload = self.selected.values.first
         else
         {
-            return nil 
+            return nil
         }
 
         if  self.selected.count == 1

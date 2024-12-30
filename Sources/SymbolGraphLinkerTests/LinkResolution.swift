@@ -24,24 +24,26 @@ struct LinkResolution
     {
         var tables:SSGC.Linker.Tables = .init()
 
-        tables.packageLinks["ThisModule", .init(["A"], "b")].append(.init(
-            phylum: .func(.instance),
-            kinks: [],
+        tables.packageLinks["ThisModule", .init(["A"], "b")].append(.init(traits: .init(
+                autograph: nil,
+                phylum: .func(.instance),
+                kinks: [],
+                hash: .init(hashing: "x")),
             decl: 0,
             heir: nil,
-            hash: .init(hashing: "x"),
             documented: true,
-            autograph: nil,
+            inherited: false,
             id: "x"))
 
-        tables.packageLinks["ThisModule", .init(["A"], "c")].append(.init(
-            phylum: .func(.instance),
-            kinks: [],
+        tables.packageLinks["ThisModule", .init(["A"], "c")].append(.init(traits: .init(
+                autograph: nil,
+                phylum: .func(.instance),
+                kinks: [],
+                hash: .init(hashing: "y")),
             decl: 1,
             heir: nil,
-            hash: .init(hashing: "y"),
             documented: true,
-            autograph: nil,
+            inherited: false,
             id: "y"))
 
         //  Unscoped tests
@@ -87,24 +89,26 @@ struct LinkResolution
     {
         var tables:SSGC.Linker.Tables = .init()
 
-        tables.packageLinks["OtherModule", .init(["A"], "b")].append(.init(
-            phylum: .func(.instance),
-            kinks: [],
+        tables.packageLinks["OtherModule", .init(["A"], "b")].append(.init(traits: .init(
+                autograph: nil,
+                phylum: .func(.instance),
+                kinks: [],
+                hash: .init(hashing: "x")),
             decl: 0,
             heir: nil,
-            hash: .init(hashing: "x"),
             documented: true,
-            autograph: nil,
+            inherited: false,
             id: "x"))
 
-        tables.packageLinks["OtherModule", .init(["A"], "c")].append(.init(
-            phylum: .func(.instance),
-            kinks: [],
+        tables.packageLinks["OtherModule", .init(["A"], "c")].append(.init(traits: .init(
+                autograph: nil,
+                phylum: .func(.instance),
+                kinks: [],
+                hash: .init(hashing: "y")),
             decl: 1,
             heir: nil,
-            hash: .init(hashing: "y"),
             documented: true,
-            autograph: nil,
+            inherited: false,
             id: "y"))
 
         //  Without registering modules, these symbols should be invisible to the resolver.
@@ -215,14 +219,15 @@ struct LinkResolution
         ].enumerated()
         {
             let id:Symbol.Decl = .init(.s, ascii: "\(i)")
-            tables.packageLinks["ThisModule", .init(["A"], name)].append(.init(
-                phylum: .func(.instance),
-                kinks: [],
+            tables.packageLinks["ThisModule", .init(["A"], name)].append(.init(traits: .init(
+                    autograph: .init(inputs: inputs, output: output),
+                    phylum: .func(.instance),
+                    kinks: [],
+                    hash: .init(hashing: "\(id)")),
                 decl: Int32.init(i),
                 heir: nil,
-                hash: .init(hashing: "\(id)"),
                 documented: true,
-                autograph: .init(inputs: inputs, output: output),
+                inherited: false,
                 id: id))
         }
 
@@ -277,14 +282,15 @@ struct LinkResolution
         ].enumerated()
         {
             let id:Symbol.Decl = .init(.s, ascii: "\(i)")
-            tables.packageLinks["ThisModule", .init(["A"], name)].append(.init(
-                phylum: .func(.instance),
-                kinks: kinks,
+            tables.packageLinks["ThisModule", .init(["A"], name)].append(.init(traits: .init(
+                    autograph: .init(inputs: inputs, output: output),
+                    phylum: .func(.instance),
+                    kinks: kinks,
+                    hash: .init(hashing: "\(id)")),
                 decl: Int32.init(i),
                 heir: nil,
-                hash: .init(hashing: "\(id)"),
                 documented: true,
-                autograph: .init(inputs: inputs, output: output),
+                inherited: false,
                 id: id))
         }
 
@@ -324,6 +330,80 @@ struct LinkResolution
                 .vertex(0, text: "f(_:)"),
                 .vertex(3, text: "f(_:)"),
                 .vertex(2, text: "f(_:)"),
+            ])
+        }
+    }
+    @Test
+    static func Preference()
+    {
+        var tables:SSGC.Linker.Tables = .init()
+
+        for (i, (name, (documented, inherited), kinks)):
+            (Int, (String, (Bool, Bool), Phylum.Decl.Kinks)) in [
+            ("f(_:)", (false, false), []),
+            ("f(_:)", (false, true), []),
+
+            ("g(_:)", (true, false), []),
+            ("g(_:)", (false, false), []),
+
+            //  We should always prefer a symbol that is not inherited, even if it lacks
+            //  documentation and the inherited symbol has it.
+            ("h(_:)", (true, true), []),
+            ("h(_:)", (false, true), []),
+            ("h(_:)", (false, false), []),
+
+            //  Inherited symbols with documentation should never cause a conflict.
+            ("i(_:)", (true, true), []),
+            ("i(_:)", (false, true), []),
+            ("i(_:)", (false, false), []),
+            ("i(_:)", (true, false), []),
+
+            ("w(_:)", (true, true), []),
+            ("w(_:)", (true, true), []),
+
+            ("x(_:)", (true, false), []),
+            ("x(_:)", (true, false), []),
+
+            ("y(_:)", (false, false), []),
+            ("y(_:)", (false, false), []),
+
+            ("z(_:)", (false, true), []),
+            ("z(_:)", (false, true), []),
+        ].enumerated()
+        {
+            let id:Symbol.Decl = .init(.s, ascii: "\(i)")
+            tables.packageLinks["ThisModule", .init(["A"], name)].append(.init(traits: .init(
+                    autograph: .init(inputs: ["Int"], output: []),
+                    phylum: .func(.instance),
+                    kinks: kinks,
+                    hash: .init(hashing: "\(id)")),
+                decl: Int32.init(i),
+                heir: nil,
+                documented: documented,
+                inherited: inherited,
+                id: id))
+        }
+
+        tables.resolving(with: .init(origin: nil,
+            namespace: nil,
+            context: .init(id: "ThisModule"),
+            scope: ["A"]))
+        {
+            #expect(nil != $0.outline(reference: .lexical(ucf: Self._string("f(_:)"))))
+            #expect(nil != $0.outline(reference: .lexical(ucf: Self._string("g(_:)"))))
+            #expect(nil != $0.outline(reference: .lexical(ucf: Self._string("h(_:)"))))
+            #expect(nil != $0.outline(reference: .lexical(ucf: Self._string("i(_:)"))))
+
+            #expect(nil == $0.outline(reference: .lexical(ucf: Self._string("w(_:)"))))
+            #expect(nil == $0.outline(reference: .lexical(ucf: Self._string("x(_:)"))))
+            #expect(nil == $0.outline(reference: .lexical(ucf: Self._string("y(_:)"))))
+            #expect(nil == $0.outline(reference: .lexical(ucf: Self._string("z(_:)"))))
+
+            #expect($0.outlines() == [
+                .vertex(0, text: "f(_:)"),
+                .vertex(2, text: "g(_:)"),
+                .vertex(6, text: "h(_:)"),
+                .vertex(10, text: "i(_:)"),
             ])
         }
     }
