@@ -44,7 +44,7 @@ extension UCF.ProjectWideResolver
                 return .overload(overload)
 
             case .ambiguous(let overloads, rejected: let rejections):
-                rejected = rejections.reduce(into: [:]) { $0[$1.hash] = $1 }
+                rejected = rejections.reduce(into: [:]) { $0[$1.traits.hash] = $1 }
 
                 guard overloads.isEmpty
                 else
@@ -69,7 +69,7 @@ extension UCF.ProjectWideResolver
         case .ambiguous(let overloads, rejected: let rejections):
             for overload:any UCF.ResolvableOverload in rejections
             {
-                rejected[overload.hash] = overload
+                rejected[overload.traits.hash] = overload
             }
 
             return .ambiguous(overloads, rejected: [_].init(rejected.values))

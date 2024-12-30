@@ -3,12 +3,14 @@ import LinkResolution
 import Symbols
 import UCF
 
-extension SSGC.ModuleIndex
+extension SSGC
 {
-    /// The bare minimum information needed to describe an inherited feature.
+    /// The bare minimum information needed to describe an aliased declaration.
     @frozen public
-    struct Feature
+    struct DeclAlias
     {
+        public
+        let autograph:UCF.Autograph?
         public
         let phylum:Phylum.Decl
         public
@@ -17,31 +19,30 @@ extension SSGC.ModuleIndex
         let path:UnqualifiedPath
         public
         let documented:Bool
-        public
-        let autograph:UCF.Autograph?
 
-        init(phylum:Phylum.Decl,
+        init(autograph:UCF.Autograph?,
+            phylum:Phylum.Decl,
             kinks:Phylum.Decl.Kinks,
             path:UnqualifiedPath,
-            documented:Bool,
-            autograph:UCF.Autograph?)
+            documented:Bool)
         {
+            self.autograph = autograph
             self.phylum = phylum
             self.kinks = kinks
             self.path = path
             self.documented = documented
-            self.autograph = autograph
         }
     }
 }
-extension SSGC.ModuleIndex.Feature
+extension SSGC.DeclAlias
 {
     init(from decl:borrowing SSGC.Decl)
     {
-        self.init(phylum: decl.phylum,
+        self.init(
+            autograph: decl.autograph,
+            phylum: decl.phylum,
             kinks: decl.kinks,
             path: decl.path,
-            documented: decl.comment != nil,
-            autograph: decl.autograph)
+            documented: decl.comment != nil)
     }
 }

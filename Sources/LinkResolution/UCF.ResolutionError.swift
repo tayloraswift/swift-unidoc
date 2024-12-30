@@ -39,12 +39,36 @@ extension UCF.ResolutionError:Diagnostic
     @inlinable public
     func emit(details output:inout DiagnosticOutput<Symbolicator>)
     {
+        let collisions:[UCF.Autograph: Int] = [self.overloads, self.rejected].joined().reduce(
+            into: [:])
+        {
+            if  let autograph:UCF.Autograph = $1.traits.autograph
+            {
+                $0[autograph, default: 0] += 1
+            }
+        }
+
         for overload:any UCF.ResolvableOverload in [self.overloads, self.rejected].joined()
         {
+            let traits:UCF.DisambiguationTraits = overload.traits
+            let suffix:UCF.Selector.Suffix
+
+            if  let autograph:UCF.Autograph = traits.autograph,
+                case 1? = collisions[autograph]
+            {
+                suffix = .unidoc(.init(
+                    conditions: [],
+                    signature: .function(autograph.inputs, autograph.output)))
+            }
+            else
+            {
+                suffix = .hash(traits.hash)
+            }
+
             let suggested:UCF.Selector = .init(
                 base: self.selector.base,
                 path: self.selector.path,
-                suffix: .hash(overload.hash))
+                suffix: suffix)
 
             output[.note] = """
             did you mean '\(suggested)'? (\(output.symbolicator.demangle(overload.id)))
