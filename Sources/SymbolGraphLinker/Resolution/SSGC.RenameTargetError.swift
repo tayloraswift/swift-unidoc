@@ -48,7 +48,7 @@ extension SSGC.RenameTargetError:Diagnostic
     {
         for overload:any UCF.ResolvableOverload in self.overloads
         {
-            let suggested:UCF.Selector = self.target.with(hash: overload.hash)
+            let suggested:UCF.Selector = self.target.with(hash: overload.traits.hash)
 
             output[.note] = """
             did you mean '\(suggested)'? (\(output.symbolicator.demangle(overload.id)))
