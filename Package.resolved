@@ -1,5 +1,5 @@
 {
-  "originHash" : "227b720fe7761e3c09a792709d3792a72620725f2a9cf4f56eafa2f1940a19ee",
+  "originHash" : "7906d8c63261106ddfeaabca7ed530e8f70fdde7337630edce09c974080ba0cb",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-bson",
       "state" : {
-        "revision" : "fcacac7758f8fd8754725d3e55603589a2b52695",
-        "version" : "0.5.0"
+        "revision" : "2cfde630e932b96e84a3ef24bc75abab3243b674",
+        "version" : "0.6.0"
       }
     },
     {
@@ -186,8 +186,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-unixtime",
       "state" : {
-        "revision" : "1805a9775dd0576ea6bcf05472176c09a395db4b",
-        "version" : "0.1.6"
+        "revision" : "0a939dd2b955bf5a0aa5ea2073ee21200e1575a3",
+        "version" : "0.2.0"
       }
     }
   ],

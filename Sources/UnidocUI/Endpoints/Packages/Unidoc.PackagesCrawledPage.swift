@@ -96,20 +96,20 @@ extension Unidoc.PackagesCrawledPage:Unidoc.ApplicationPage
                             let label:DateLabel
                             switch (format.locale.country, format.locale.language)
                             {
-                            case    (.as?, _),
-                                    (.ca?, .en),
-                                    (.fm?, _),
-                                    (.gu?, _),
-                                    (.ke?, .sw),
-                                    (.mh?, _),
-                                    (.mp?, _),
-                                    (.pa?, _),
-                                    (.ph?, _),
-                                    (.pr?, _),
-                                    (.to?, .ee),
-                                    (.us?, _),
-                                    (.um?, _),
-                                    (.vi?, _):
+                            case    (.AS?, _),
+                                    (.CA?, .en),
+                                    (.FM?, _),
+                                    (.GU?, _),
+                                    (.KE?, .sw),
+                                    (.MH?, _),
+                                    (.MP?, _),
+                                    (.PA?, _),
+                                    (.PH?, _),
+                                    (.PR?, _),
+                                    (.TO?, .ee),
+                                    (.US?, _),
+                                    (.UM?, _),
+                                    (.VI?, _):
                                 label = .md(month, day)
 
                             default:
