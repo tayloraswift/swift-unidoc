@@ -31,7 +31,7 @@ extension HTTP.AcceptLanguage.Iterator:IteratorProtocol
                 let i:String.Index = parameter.key.index(after: hyphen)
 
                 language = parameter.key[..<hyphen]
-                country = .init(parameter.key[i...].lowercased())
+                country = .init(parameter.key[i...])
             }
             else
             {
