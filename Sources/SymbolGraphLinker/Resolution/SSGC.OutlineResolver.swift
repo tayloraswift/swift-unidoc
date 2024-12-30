@@ -144,11 +144,11 @@ extension SSGC.OutlineResolver
         else
         {
             return nil
-        } 
+        }
 
         switch self.scopes.causalURLs.resolve(qualified: translatable)
-        { 
-        case .module(let module): 
+        {
+        case .module(let module):
             //  Unidoc linker doesn’t currently support `symbol` outlines that are not
             //  declarations, so for now we just synthesize a normal vertex outline.
             let text:SymbolGraph.OutlineText = .init(path: "\(module)", fragment: nil)
@@ -320,7 +320,7 @@ extension SSGC.OutlineResolver
 
             self.diagnostics[source] = SSGC.OutlineDiagnostic.annealedIncorrectHash(
                 in: codelink,
-                to: chosen.hash)
+                to: chosen.traits.hash)
         }
 
         let decl:Int32 = self.tables.intern(chosen.id)
