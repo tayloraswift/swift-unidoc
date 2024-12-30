@@ -5,6 +5,7 @@ extension UCF
         case exclamation
         case question
         case metatype
+        case ellipsis
     }
 }
 extension UCF.TypeOperator
@@ -16,6 +17,7 @@ extension UCF.TypeOperator
         case .exclamation:  "!"
         case .question:     "?"
         case .metatype:     ".Type"
+        case .ellipsis:     "..."
         }
     }
 }

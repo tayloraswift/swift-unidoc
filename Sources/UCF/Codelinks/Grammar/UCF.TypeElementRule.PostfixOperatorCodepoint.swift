@@ -1,6 +1,6 @@
 import Grammar
 
-extension UCF.TypePatternRule
+extension UCF.TypeElementRule
 {
     enum PostfixOperatorCodepoint:TerminalRule
     {

@@ -106,6 +106,48 @@ struct CodelinkDisambiguators:ParsingSuite
             signature: .returns(["Set<String>"]))))
     }
     @Test
+    static func SignatureProtocolComposition() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("""
+            Foo.bar(_:_:) (StringProtocol & Error, [Sendable & RandomAccessCollection<UInt8>])
+            """)
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Foo", "bar(_:_:)"])
+        #expect(link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [],
+            signature: .function([
+                "StringProtocol&Error",
+                "[Sendable&RandomAccessCollection<UInt8>]"
+            ]))))
+    }
+    @Test
+    static func SignatureVariadics() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("""
+            Foo.bar(_:_:) (String..., [Int: Set<T>]...)
+            """)
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Foo", "bar(_:_:)"])
+        #expect(link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [],
+            signature: .function(["String...", "[Int:Set<T>]..."]))))
+    }
+    @Test
+    static func SignatureNoncopyable() throws
+    {
+        let link:UCF.Selector = try Self.roundtrip("""
+            Foo.bar(_:_:) (~Copyable & Sendable, ~(Copyable) & (Sendable))
+            """)
+        #expect(link.base == .relative)
+        #expect(link.path.components == ["Foo", "bar(_:_:)"])
+        #expect(link.path.hasTrailingParentheses)
+        #expect(link.suffix == .unidoc(.init(
+            conditions: [],
+            signature: .function(["~Copyable&Sendable", "~Copyable&Sendable"]))))
+    }
+    @Test
     static func All() throws
     {
         let link:UCF.Selector = try Self.roundtrip("""

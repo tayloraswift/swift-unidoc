@@ -7,7 +7,6 @@ extension UCF
     {
         typealias Location = String.Index
         typealias Terminal = Unicode.Scalar
-
         typealias Construction = [(Range<Location>, [UCF.TypePattern])]
 
         static func parse<Diagnostics>(

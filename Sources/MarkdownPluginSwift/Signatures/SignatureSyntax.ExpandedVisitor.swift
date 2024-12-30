@@ -29,7 +29,7 @@ extension SignatureSyntax.ExpandedVisitor:SignatureVisitor
         type _:SignatureParameterType) -> SignatureSyntax.ExpandedParameter
     {
         var autographer:SignatureSyntax.Autographer = .init(sugaring: self.sugarMap)
-        autographer.encode(type: parameter.type)
+        autographer.encode(parameter: parameter)
         inputs.append(autographer.autograph)
         return .init(syntax: parameter)
     }
