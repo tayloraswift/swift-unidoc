@@ -19,7 +19,7 @@ extension UCF
         public
         let inherited:Bool
         /// Used for display purposes. This is not necessarily the symbol from which the
-        /// ``hash`` was computed.
+        /// ``DisambiguationTraits/hash`` was computed.
         public
         let id:Symbol.Decl
 
