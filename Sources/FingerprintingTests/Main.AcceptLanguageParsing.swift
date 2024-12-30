@@ -38,17 +38,17 @@ extension Main.AcceptLanguageParsing:TestBattery
         if  let tests:TestGroup = tests / "EnglishUS"
         {
             let header:HTTP.AcceptLanguage = "en-US"
-            tests.expect(header.dominant ==? .init(language: .en, country: .us))
+            tests.expect(header.dominant ==? .init(language: .en, country: .US))
             tests.expect(header ..? [
-                .init(locale: .init(language: .en, country: .us), q: 1.0),
+                .init(locale: .init(language: .en, country: .US), q: 1.0),
             ])
         }
         if  let tests:TestGroup = tests / "MultipleChoices"
         {
             let header:HTTP.AcceptLanguage = "fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5"
-            tests.expect(header.dominant ==? .init(language: .fr, country: .ch))
+            tests.expect(header.dominant ==? .init(language: .fr, country: .CH))
             tests.expect(header ..? [
-                .init(locale: .init(language: .fr, country: .ch), q: 1.0),
+                .init(locale: .init(language: .fr, country: .CH), q: 1.0),
                 .init(locale: .init(language: .fr), q: 0.9),
                 .init(locale: .init(language: .en), q: 0.8),
                 .init(locale: .init(language: .de), q: 0.7),
@@ -58,9 +58,9 @@ extension Main.AcceptLanguageParsing:TestBattery
         if  let tests:TestGroup = tests / "MultipleChoicesCompact"
         {
             let header:HTTP.AcceptLanguage = "fr-CH,fr;q=0.9,en;q=0.8,de;q=0.7,*;q=0.5"
-            tests.expect(header.dominant ==? .init(language: .fr, country: .ch))
+            tests.expect(header.dominant ==? .init(language: .fr, country: .CH))
             tests.expect(header ..? [
-                .init(locale: .init(language: .fr, country: .ch), q: 1.0),
+                .init(locale: .init(language: .fr, country: .CH), q: 1.0),
                 .init(locale: .init(language: .fr), q: 0.9),
                 .init(locale: .init(language: .en), q: 0.8),
                 .init(locale: .init(language: .de), q: 0.7),
@@ -70,10 +70,10 @@ extension Main.AcceptLanguageParsing:TestBattery
         if  let tests:TestGroup = tests / "MultipleChoicesDenormalized"
         {
             let header:HTTP.AcceptLanguage = " en-US;q=0.1  ,fr-CH,, fr;;q=0.9;, en;q=0.8 "
-            tests.expect(header.dominant ==? .init(language: .fr, country: .ch))
+            tests.expect(header.dominant ==? .init(language: .fr, country: .CH))
             tests.expect(header ..? [
-                .init(locale: .init(language: .en, country: .us), q: 0.1),
-                .init(locale: .init(language: .fr, country: .ch), q: 1.0),
+                .init(locale: .init(language: .en, country: .US), q: 0.1),
+                .init(locale: .init(language: .fr, country: .CH), q: 1.0),
                 .init(locale: .init(language: .fr), q: 0.9),
                 .init(locale: .init(language: .en), q: 0.8),
             ])
