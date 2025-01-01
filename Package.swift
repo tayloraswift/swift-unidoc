@@ -627,23 +627,20 @@ let package:Package = .init(
                 .target(name: "UCF"),
             ]),
 
-        .executableTarget(name: "FingerprintingTests",
+        .testTarget(name: "FingerprintingTests",
             dependencies: [
                 .target(name: "Fingerprinting"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "FNV1Tests",
+        .testTarget(name: "FNV1Tests",
             dependencies: [
                 .target(name: "FNV1"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
-        .executableTarget(name: "MarkdownParsingTests",
+        .testTarget(name: "MarkdownParsingTests",
             dependencies: [
                 .target(name: "MarkdownParsing"),
                 .target(name: "MarkdownSemantics"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .testTarget(name: "MarkdownPluginSwiftTests",
@@ -652,10 +649,9 @@ let package:Package = .init(
                 .target(name: "MarkdownRendering"),
             ]),
 
-        .executableTarget(name: "MarkdownRenderingTests",
+        .testTarget(name: "MarkdownRenderingTests",
             dependencies: [
                 .target(name: "MarkdownRendering"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "PackageMetadataTests",
