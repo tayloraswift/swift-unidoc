@@ -74,11 +74,25 @@ extension SymbolGraphPart.Vertex
         doccomment:Doccomment?,
         interfaces:Interfaces?,
         extension:ExtensionContext,
-        fragments:__owned [Signature<Symbol.Decl>.Fragment],
+        fragments:[Signature<Symbol.Decl>.Fragment],
         generics:Signature<Symbol.Decl>.Generics,
         location:SourceLocation<Symbol.File>?,
         path:UnqualifiedPath)
     {
+        /// We will amend the actual phylum later in this function, but none of the amendments
+        /// should affect the overloadability of the symbol.
+        let isDirectlyOverloadable:Bool
+        if  case .decl(let decl) = phylum
+        {
+            isDirectlyOverloadable = decl.isDirectlyOverloadable
+        }
+        else
+        {
+            isDirectlyOverloadable = false
+        }
+        /// Static `Self` can appear in more places than just where `isDirectlyOverloadable`,
+        /// but it will only be used if that is also true, so there is no point in computing it
+        /// for symbols like instance properties.
         var landmarks:SignatureLandmarks = .init()
         var phylum:Phylum = phylum
 
@@ -97,6 +111,9 @@ extension SymbolGraphPart.Vertex
                 sugarDictionary: .sSD,
                 sugarArray: .sSa,
                 sugarOptional: .sSq,
+                desugarSelf: isDirectlyOverloadable
+                    ? path.prefixFormatted(inserting: generics.parameters)
+                    : nil,
                 landmarks: &landmarks)
         }
 
@@ -134,17 +151,6 @@ extension SymbolGraphPart.Vertex
             generics: generics,
             spis: interfaces.map { _ in [] })
 
-        let autograph:UCF.Autograph?
-
-        if  case .decl(let decl) = phylum, decl.isDirectlyOverloadable
-        {
-            autograph = .init(inputs: landmarks.inputs, output: landmarks.output)
-        }
-        else
-        {
-            autograph = nil
-        }
-
         //  strip empty parentheses from last path component
         let simplified:UnqualifiedPath
         if  let index:String.Index = path.last.index(path.last.endIndex,
@@ -167,7 +173,9 @@ extension SymbolGraphPart.Vertex
             final: landmarks.keywords.final,
             extension: `extension`,
             signature: signature,
-            autograph: autograph,
+            autograph: isDirectlyOverloadable
+                ? .init(inputs: landmarks.inputs, output: landmarks.output)
+                : nil,
             path: simplified,
             doccomment: doccomment.flatMap { $0.text.isEmpty ? nil : $0 },
             location: location)
@@ -186,6 +194,11 @@ extension SymbolGraphPart.Vertex:JSONObjectDecodable
 
         case swiftExtension
         case swiftGenerics
+        enum SwiftGenerics:String, Sendable
+        {
+            case constraints
+            case parameters
+        }
 
         case names
         enum Names:String, Sendable
@@ -238,7 +251,16 @@ extension SymbolGraphPart.Vertex:JSONObjectDecodable
             interfaces: try json[.spi]?.decode(as: Bool.self) { $0 ? .init() : nil },
             extension: try json[.swiftExtension]?.decode() ?? .init(),
             fragments: try json[.declarationFragments].decode(),
-            generics: try json[.swiftGenerics]?.decode() ?? .init(),
+            generics: try json[.swiftGenerics]?.decode(using: CodingKey.SwiftGenerics.self)
+            {
+                var parameters:[GenericParameterWithPosition]? = try $0[.parameters]?.decode()
+
+                /// The parameters should naturally occur in order, but we sort them anyway.
+                parameters?.sort { $0.position < $1.position }
+
+                return .init(constraints: try $0[.constraints]?.decode() ?? [],
+                    parameters: parameters?.map(\.parameter) ?? [])
+            } ?? .init(),
             location: try json[.location]?.decode(using: CodingKey.Location.self)
             {
                 let (line, column):(Int, Int) = try $0[.position].decode(

@@ -192,4 +192,25 @@ struct Autographs
         #expect(self.landmarks.inputs == ["[T]", "[U:V].Type"])
         #expect(self.landmarks.output == ["V?"])
     }
+
+    @Test mutating
+    func DesugaringStaticSelf()
+    {
+        let _:Signature<Symbol.Decl>.Expanded = .init([
+                "func a(_: `Self`, _: [(`Self`)]) -> `Self`?"
+            ],
+            sugarDictionary: .sSD,
+            sugarArray: .sSa,
+            sugarOptional: .sSq,
+            desugarSelf: "DesugaredSelf<A,B>.NestedType",
+            landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == [
+                "DesugaredSelf<A,B>.NestedType",
+                "[DesugaredSelf<A,B>.NestedType]"
+            ])
+        #expect(self.landmarks.output == [
+                "DesugaredSelf<A,B>.NestedType?"
+            ])
+    }
 }
