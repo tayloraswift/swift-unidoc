@@ -1,5 +1,5 @@
 import ExtendableTypesWithConstraints
 
-extension Struct:Protocol where T:Equatable
+extension Struct:@retroactive Protocol where T:Equatable
 {
 }

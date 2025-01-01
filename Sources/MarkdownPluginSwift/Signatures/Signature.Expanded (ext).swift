@@ -8,6 +8,7 @@ extension Signature.Expanded
         sugarDictionary:Scalar,
         sugarArray:Scalar,
         sugarOptional:Scalar,
+        desugarSelf:String? = nil,
         landmarks:inout SignatureLandmarks)
     {
         var utf8:[UInt8] = []
@@ -29,7 +30,8 @@ extension Signature.Expanded
             }
         }
 
-        let sugarMap:SignatureSyntax.SugarMap = linkTargets.reduce(into: .init())
+        let sugarMap:SignatureSyntax.SugarMap = linkTargets.reduce(
+            into: .init(staticSelf: desugarSelf))
         {
             switch $1.value
             {
@@ -84,7 +86,7 @@ extension Signature.Expanded
 
     @inlinable
     init(utf8:[UInt8],
-        sugarMap:SignatureSyntax.SugarMap = .init(),
+        sugarMap:SignatureSyntax.SugarMap = .init(staticSelf: nil),
         linkBoundaries:borrowing [Int],
         linkTargets:inout [Int: Scalar],
         landmarks:inout SignatureLandmarks)
