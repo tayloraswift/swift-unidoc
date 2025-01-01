@@ -215,7 +215,10 @@ extension SignatureSyntax.Autographer
         }
         else if name.text == "`Self`"
         {
-            self.autograph.append("Self")
+            /// This is serendipitously safe because if `Self` is dynamic or has been shadowed
+            /// by a generic parameter, it will appear without the enclosing backticks, even if
+            /// the original source code included unnecessary backticks.
+            self.autograph.append(self.sugarMap.staticSelf ?? "Self")
             return
         }
 
