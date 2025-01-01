@@ -11,7 +11,8 @@ swift build \
     -Xswiftc -emit-extension-block-symbols \
     -Xswiftc -include-spi-symbols \
     -Xswiftc -skip-inherited-docs \
-    -Xswiftc -pretty-print
+    -Xswiftc -pretty-print \
+    -Xswiftc -swift-version -Xswiftc 6
 
 swift package --package-path TestModules dump-package > TestModules/Package.swift.json
 
