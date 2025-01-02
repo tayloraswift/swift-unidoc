@@ -46,12 +46,15 @@ extension Phylum.Decl
     }
 
     @inlinable public
-    var isDirectlyOverloadable:Bool
+    var isOverloadable:Bool
     {
         switch self
         {
         case .actor:            false
         case .associatedtype:   false
+        //  No, `case` is not overloadable, even though it is function-like. It would never make
+        //  sense to try and disambiguate a `case` by type signature instead of using the
+        //  `[case]` disambiguator.
         case .case:             false
         case .class:            false
         case .deinitializer:    false
@@ -64,7 +67,9 @@ extension Phylum.Decl
         case .struct:           false
         case .subscript:        true
         case .typealias:        false
-        case .var:              false
+        //  Yes, `var` is overloadable! The most common example is `static var _:Self { get }`,
+        //  with different overloads for different generic constraints.
+        case .var:              true
         }
     }
     /// Indicates if the declaration is typelike. This is not the same as ``orientation``!

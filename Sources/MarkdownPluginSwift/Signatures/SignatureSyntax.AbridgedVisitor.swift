@@ -15,9 +15,4 @@ extension SignatureSyntax.AbridgedVisitor:SignatureVisitor
     {
         .init(syntax: parameter, type: type)
     }
-
-    mutating
-    func register(returns:TypeSyntax)
-    {
-    }
 }
