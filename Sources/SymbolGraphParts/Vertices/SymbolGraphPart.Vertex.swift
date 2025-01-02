@@ -81,14 +81,14 @@ extension SymbolGraphPart.Vertex
     {
         /// We will amend the actual phylum later in this function, but none of the amendments
         /// should affect the overloadability of the symbol.
-        let isDirectlyOverloadable:Bool
+        let isOverloadable:Bool
         if  case .decl(let decl) = phylum
         {
-            isDirectlyOverloadable = decl.isDirectlyOverloadable
+            isOverloadable = decl.isOverloadable
         }
         else
         {
-            isDirectlyOverloadable = false
+            isOverloadable = false
         }
         /// Static `Self` can appear in more places than just where `isDirectlyOverloadable`,
         /// but it will only be used if that is also true, so there is no point in computing it
@@ -111,7 +111,7 @@ extension SymbolGraphPart.Vertex
                 sugarDictionary: .sSD,
                 sugarArray: .sSa,
                 sugarOptional: .sSq,
-                desugarSelf: isDirectlyOverloadable
+                desugarSelf: isOverloadable
                     ? path.prefixFormatted(inserting: generics.parameters)
                     : nil,
                 landmarks: &landmarks)
@@ -173,7 +173,7 @@ extension SymbolGraphPart.Vertex
             final: landmarks.keywords.final,
             extension: `extension`,
             signature: signature,
-            autograph: isDirectlyOverloadable
+            autograph: isOverloadable
                 ? .init(inputs: landmarks.inputs, output: landmarks.output)
                 : nil,
             path: simplified,
