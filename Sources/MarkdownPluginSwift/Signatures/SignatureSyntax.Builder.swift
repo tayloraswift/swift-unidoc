@@ -43,13 +43,6 @@ extension SignatureSyntax.Builder
             }
         }
     }
-
-    private mutating
-    func register(returns clause:ReturnClauseSyntax)
-    {
-        self.visitor.register(returns: clause.type)
-        self.encoder += clause
-    }
 }
 
 extension SignatureSyntax.Builder<SignatureSyntax.ExpandedVisitor>
@@ -57,6 +50,25 @@ extension SignatureSyntax.Builder<SignatureSyntax.ExpandedVisitor>
     mutating
     func encode(decl:DeclSyntax)
     {
+        //  It’s easier to detect the return type this way, since we don’t inject any
+        //  indentation markers into its syntax.
+        if  let decl:FunctionDeclSyntax = decl.as(FunctionDeclSyntax.self),
+            let returns:ReturnClauseSyntax = decl.signature.returnClause
+        {
+            self.visitor.register(returns: returns.type)
+        }
+        else if
+            let decl:SubscriptDeclSyntax = decl.as(SubscriptDeclSyntax.self)
+        {
+            self.visitor.register(returns: decl.returnClause.type)
+        }
+        else if
+            let decl:VariableDeclSyntax = decl.as(VariableDeclSyntax.self),
+            let type:TypeSyntax = decl.bindings.first?.typeAnnotation?.type
+        {
+            self.visitor.register(returns: type)
+        }
+
         for region:Syntax in decl.children(viewMode: .sourceAccurate)
         {
             if  let region:TokenSyntax = region.as(TokenSyntax.self)
@@ -91,12 +103,6 @@ extension SignatureSyntax.Builder<SignatureSyntax.ExpandedVisitor>
                     {
                         self.register(parameters: clause, type: .func)
                     }
-                    else if
-                        let clause:ReturnClauseSyntax =
-                            region.as(ReturnClauseSyntax.self)
-                    {
-                        self.register(returns: clause)
-                    }
                     else
                     {
                         self.encoder += region
@@ -109,11 +115,6 @@ extension SignatureSyntax.Builder<SignatureSyntax.ExpandedVisitor>
                     region.as(FunctionParameterClauseSyntax.self)
             {
                 self.register(parameters: clause, type: .subscript)
-            }
-            else if
-                let clause:ReturnClauseSyntax = region.as(ReturnClauseSyntax.self)
-            {
-                self.register(returns: clause)
             }
             else
             {
@@ -247,7 +248,7 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
             self.encode(decl.genericParameterClause?.trimmed)
 
             self.register(parameters: decl.parameterClause, type: .subscript)
-            self.register(returns: decl.returnClause.trimmed)
+            self.encoder += decl.returnClause.trimmed
         }
         else if
             let decl:TypeAliasDeclSyntax = decl.as(TypeAliasDeclSyntax.self)
@@ -311,7 +312,7 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
         {
             self.register(parameters: function.parameterClause, type: .func)
             self.encoder ?= function.effectSpecifiers
-            self.register(returns: returns.trimmed)
+            self.encoder += returns.trimmed
         }
         else if
             let effects:FunctionEffectSpecifiersSyntax = function.effectSpecifiers
