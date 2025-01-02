@@ -6,8 +6,15 @@ DEST_ARCH=aarch64
 DEST_OS=noble
 LIBC=gnu
 
+LINKER_FLAGS="-Xlinker -ljemalloc"
+
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --no-jemalloc )
+        shift
+        LINKER_FLAGS=""
+        ;;
+
         --os )
         shift
 
@@ -50,4 +57,4 @@ docker run --rm \
         --cache-path /swiftpm \
         --destination Scripts/Linux/$HOST_ARCH/$DEST_ARCH-$DEST_OS.json \
         --static-swift-stdlib \
-        -Xlinker -ljemalloc
+        $LINKER_FLAGS
