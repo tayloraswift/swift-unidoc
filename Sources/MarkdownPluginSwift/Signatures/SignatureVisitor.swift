@@ -6,7 +6,4 @@ protocol SignatureVisitor
 
     mutating
     func register(parameter:FunctionParameterSyntax, type:SignatureParameterType) -> Parameter
-
-    mutating
-    func register(returns:TypeSyntax)
 }

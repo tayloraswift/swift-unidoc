@@ -33,7 +33,9 @@ extension SignatureSyntax.ExpandedVisitor:SignatureVisitor
         inputs.append(autographer.autograph)
         return .init(syntax: parameter)
     }
-
+}
+extension SignatureSyntax.ExpandedVisitor
+{
     mutating
     func register(returns:TypeSyntax)
     {
@@ -50,9 +52,7 @@ extension SignatureSyntax.ExpandedVisitor:SignatureVisitor
             self.register(output: element.type)
         }
     }
-}
-extension SignatureSyntax.ExpandedVisitor
-{
+
     private mutating
     func register(output:TypeSyntax)
     {
