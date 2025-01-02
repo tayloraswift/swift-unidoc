@@ -86,6 +86,36 @@ struct Autographs
     }
 
     @Test mutating
+    func Var1()
+    {
+        let decl:String = "static var x: (String)? { get }"
+        let _:Signature<Never>.Expanded = .init(decl, landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == [])
+        #expect(self.landmarks.output == ["String?"])
+    }
+
+    @Test mutating
+    func Var2()
+    {
+        let decl:String = "static var x: (T?, Set<T>) { get set }"
+        let _:Signature<Never>.Expanded = .init(decl, landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == [])
+        #expect(self.landmarks.output == ["T?", "Set<T>"])
+    }
+
+    @Test mutating
+    func Var3()
+    {
+        let decl:String = "var x: (Int, Int) -> (Int) -> Int"
+        let _:Signature<Never>.Expanded = .init(decl, landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == [])
+        #expect(self.landmarks.output == ["(Int,Int)->(Int)->Int"])
+    }
+
+    @Test mutating
     func SomeAndAnyTypes()
     {
         let decl:String = """
