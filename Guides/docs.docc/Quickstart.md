@@ -1,6 +1,6 @@
 # Previewing documentation locally
 
-This guide walks through how to use the `unidoc preview` tool to preview documentation locally on macOS 14. This guide won’t make any effort to explain how Unidoc itself works, it is merely intended to demonstrate how to preview multi-package documentation as quickly as possible. For a more-detailed Linux-centric tour, see the <doc:Getting-started> guide.
+This guide walks through how to use the `unidoc preview` tool to preview documentation locally on macOS 15. This guide won’t make any effort to explain how Unidoc itself works, it is merely intended to demonstrate how to preview multi-package documentation as quickly as possible. For a more-detailed Linux-centric tour, see the <doc:Getting-started> guide.
 
 In this guide, you will:
 
@@ -36,10 +36,6 @@ Pre-built binaries are available for a limited set of platforms.
 You can download and install the binary under `/usr/local/bin` like this:
 
 @Code(file: unidoc-install.sh, title: unidoc-install.sh)
-
->   Important:
->   On Linux, the prebuilt binaries use [jemalloc](https://jemalloc.net/) instead of the default
->   system allocator. You can install it on Ubuntu with `sudo apt install libjemalloc2`.
 
 ### Building Unidoc from source
 
