@@ -36,14 +36,9 @@ extension Unidoc
         {
             let packages:PackageContext = .init(principal: principal.id.package,
                 metadata: packages)
-            let media:PackageMedia
 
-            if  let override:PackageMedia = packages.principal?.media
-            {
-                media = override
-            }
-            else if
-                let repo:PackageRepo = packages.principal?.repo
+            var media:PackageMedia = packages.principal?.media ?? .init()
+            if  let repo:PackageRepo = packages.principal?.repo
             {
                 let ref:String = principal.refname ?? repo.master ?? "master"
                 let path:String
@@ -52,12 +47,8 @@ extension Unidoc
                 case .github(let origin):   path = "/\(origin.owner)/\(origin.name)/\(ref)"
                 }
 
-                media = .init(prefix: "https://raw.githubusercontent.com\(path)",
-                    webp: "https://media.githubusercontent.com/media\(path)")
-            }
-            else
-            {
-                media = .init()
+                media.prefix = media.prefix ?? "https://raw.githubusercontent.com\(path)"
+                media.webp = media.webp ?? "https://media.githubusercontent.com/media\(path)"
             }
 
             self.canonical = canonical
