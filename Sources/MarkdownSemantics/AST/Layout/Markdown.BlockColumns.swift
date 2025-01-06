@@ -20,11 +20,12 @@ extension Markdown
         override
         func emit(into binary:inout Markdown.BinaryEncoder)
         {
+            //  https://stackoverflow.com/questions/43311943/prevent-content-from-expanding-grid-items
             binary[.div]
             {
                 $0[.class] = "columns"
                 $0[.style] = """
-                grid-template-columns: repeat(\(self.count ?? self.elements.count), 1fr);
+                grid-template-columns: repeat(\(self.count ?? self.elements.count), minmax(0, 1fr));
                 """
             }
                 content:
