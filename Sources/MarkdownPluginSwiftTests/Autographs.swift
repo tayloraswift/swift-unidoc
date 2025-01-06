@@ -11,6 +11,13 @@ struct Autographs
     private
     var landmarks:SignatureLandmarks
 
+    private
+    var dictionary:Signature<Symbol.Decl>.Fragment { .init("Dictionary", referent: .sSD) }
+    private
+    var array:Signature<Symbol.Decl>.Fragment { .init("Array", referent: .sSa) }
+    private
+    var optional:Signature<Symbol.Decl>.Fragment { .init("Optional", referent: .sSq) }
+
     init()
     {
         self.landmarks = .init()
@@ -199,19 +206,15 @@ struct Autographs
     }
 
     @Test mutating
-    func Resugaring()
+    func Resugaring1()
     {
-        let dictionary:Signature<Symbol.Decl>.Fragment = .init("Dictionary", referent: .sSD)
-        let array:Signature<Symbol.Decl>.Fragment = .init("Array", referent: .sSa)
-        let optional:Signature<Symbol.Decl>.Fragment = .init("Optional", referent: .sSq)
-
         let _:Signature<Symbol.Decl>.Expanded = .init([
                 "func f<T, U, V>(\n    a: (",
-                array,
+                self.array,
                 "<T>),\n    b: ",
-                dictionary,
+                self.dictionary,
                 "<U, V>.Type) -> ",
-                optional,
+                self.optional,
                 "<V>",
             ],
             sugarDictionary: .sSD,
@@ -221,6 +224,42 @@ struct Autographs
 
         #expect(self.landmarks.inputs == ["[T]", "[U:V].Type"])
         #expect(self.landmarks.output == ["V?"])
+    }
+
+    @Test mutating
+    func Resugaring2()
+    {
+        let _:Signature<Symbol.Decl>.Expanded = .init([
+                "func f(_: ", self.dictionary, "<Int, String>.Index)",
+            ],
+            sugarDictionary: .sSD,
+            sugarArray: .sSa,
+            sugarOptional: .sSq,
+            landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == ["Dictionary<Int,String>.Index"])
+        #expect(self.landmarks.output == [])
+    }
+
+    @Test mutating
+    func Resugaring3()
+    {
+        let _:Signature<Symbol.Decl>.Expanded = .init([
+                "func f(_: ",
+                self.array,
+                "<",
+                self.dictionary,
+                "<",
+                self.optional,
+                "<Int>, String>>?)",
+            ],
+            sugarDictionary: .sSD,
+            sugarArray: .sSa,
+            sugarOptional: .sSq,
+            landmarks: &self.landmarks)
+
+        #expect(self.landmarks.inputs == ["[[Int?:String]]?"])
+        #expect(self.landmarks.output == [])
     }
 
     @Test mutating
