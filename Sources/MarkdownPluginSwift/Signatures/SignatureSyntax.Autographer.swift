@@ -32,7 +32,7 @@ extension SignatureSyntax.Autographer
     }
 
     mutating
-    func encode(type:TypeSyntax)
+    func encode(type:TypeSyntax, stem:Bool = false)
     {
         if  let type:AttributedTypeSyntax = type.as(AttributedTypeSyntax.self)
         {
@@ -56,14 +56,18 @@ extension SignatureSyntax.Autographer
         else if
             let type:IdentifierTypeSyntax = type.as(IdentifierTypeSyntax.self)
         {
-            self.encode(type: type.name, generics: type.genericArgumentClause?.arguments)
+            self.encode(type: type.name,
+                arguments: type.genericArgumentClause?.arguments,
+                resugar: !stem)
         }
         else if
             let type:MemberTypeSyntax = type.as(MemberTypeSyntax.self)
         {
-            self.encode(type: type.baseType)
+            self.encode(type: type.baseType, stem: true)
             self.autograph.append(".")
-            self.encode(type: type.name, generics: type.genericArgumentClause?.arguments)
+            self.encode(type: type.name,
+                arguments: type.genericArgumentClause?.arguments,
+                resugar: false)
         }
         else if
             let type:ArrayTypeSyntax = type.as(ArrayTypeSyntax.self)
@@ -183,32 +187,32 @@ extension SignatureSyntax.Autographer
     }
 
     private mutating
-    func encode(type name:TokenSyntax, generics:GenericArgumentListSyntax?)
+    func encode(type name:TokenSyntax, arguments:GenericArgumentListSyntax?, resugar:Bool)
     {
-        if  let generics:GenericArgumentListSyntax
+        if  let arguments:GenericArgumentListSyntax, resugar
         {
-            let generics:[TypeSyntax] = generics.map(\.argument)
+            let arguments:[TypeSyntax] = arguments.map(\.argument)
             let position:Int = name.positionAfterSkippingLeadingTrivia.utf8Offset
 
-            if  self.sugarMap.arrays.contains(position), generics.count == 1
+            if  self.sugarMap.arrays.contains(position), arguments.count == 1
             {
                 self.autograph.append("[")
-                self.encode(type: generics[0])
+                self.encode(type: arguments[0])
                 self.autograph.append("]")
                 return
             }
-            if  self.sugarMap.dictionaries.contains(position), generics.count == 2
+            if  self.sugarMap.dictionaries.contains(position), arguments.count == 2
             {
                 self.autograph.append("[")
-                self.encode(type: generics[0])
+                self.encode(type: arguments[0])
                 self.autograph.append(":")
-                self.encode(type: generics[1])
+                self.encode(type: arguments[1])
                 self.autograph.append("]")
                 return
             }
-            if  self.sugarMap.optionals.contains(position), generics.count == 1
+            if  self.sugarMap.optionals.contains(position), arguments.count == 1
             {
-                self.encode(type: generics[0])
+                self.encode(type: arguments[0])
                 self.autograph.append("?")
                 return
             }
@@ -224,12 +228,12 @@ extension SignatureSyntax.Autographer
 
         self.autograph.append(name.text)
 
-        if  let generics:GenericArgumentListSyntax
+        if  let arguments:GenericArgumentListSyntax
         {
             self.autograph.append("<")
 
             var first:Bool = true
-            for generic:GenericArgumentSyntax in generics
+            for type:GenericArgumentSyntax in arguments
             {
                 if  first
                 {
@@ -240,7 +244,7 @@ extension SignatureSyntax.Autographer
                     self.autograph.append(",")
                 }
 
-                self.encode(type: generic.argument)
+                self.encode(type: type.argument)
             }
 
             self.autograph.append(">")
