@@ -116,15 +116,26 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
             } = "Repo details and more versions"
         }
 
-        if !self.volume.dependencies.isEmpty
+        //  Every package should have at least one dependency, the standard library.
+        main[.h2] = Heading.dependencies
+        main[.table]
         {
-            main[.h2] = Heading.dependencies
-            main[.table]
+            $0.class = "dependencies"
+        } = Unidoc.DependencyTable.init(
+            dependencies: self.volume.dependencies,
+            context: self.context)
+
+        if !(self.volume.dependencies.contains { $0.exonym == .swift })
+        {
+            main[.section, { $0.class = "signage deprecation" }]
             {
-                $0.class = "dependencies"
-            } = Unidoc.DependencyTable.init(
-                dependencies: self.volume.dependencies,
-                context: self.context)
+                $0[.p] = """
+                This symbol graph was not linked against the Swift standard library! \
+                Check that you have correctly initialized the database with at least one copy \
+                of a standard library generated from the same or a newer version of Swift as \
+                was used to build this symbol graph.
+                """
+            }
         }
 
         main[.h2] = Heading.platforms
