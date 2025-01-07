@@ -8,6 +8,7 @@ extension SSGC
     {
         case annealedIncorrectHash(in:UCF.Selector, to:FNV24)
         case unresolvedAbsolute(Doclink)
+        case unresolvedRelative(Doclink)
         case suggestReformat(Doclink, to:UCF.Selector)
     }
 }
@@ -26,13 +27,16 @@ extension SSGC.OutlineDiagnostic:Diagnostic
             """
 
         case .unresolvedAbsolute(let doclink):
+            fallthrough
+
+        case .unresolvedRelative(let doclink):
             output[.warning] = """
-            doclink '\(doclink)' does not resolve to any article (or tutorial) in this package
+            doclink '\(doclink.value)' does not resolve to any article (or tutorial) in this package
             """
 
         case .suggestReformat(let doclink, to: _):
             output[.warning] = """
-            doclink '\(doclink)' referencing symbol documentation could be written as \
+            doclink '\(doclink.value)' referencing symbol documentation could be written as \
             a backtick-delimited codelink
             """
         }
@@ -50,6 +54,11 @@ extension SSGC.OutlineDiagnostic:Diagnostic
             output[.note] = """
             absolute doclinks may only refer to articles (or tutorials), not to symbol \
             documentation
+            """
+
+        case .unresolvedRelative(let doclink):
+            output[.note] = """
+            could not convert relative doclink '\(doclink.page)' to a UCF selector
             """
 
         case .suggestReformat(_, to: let codelink):

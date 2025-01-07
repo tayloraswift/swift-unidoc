@@ -2,7 +2,7 @@ import Grammar
 
 extension UCF
 {
-    /// FunctionPattern ::= TuplePattern ( '->' TypePattern ) ?
+    /// FunctionPattern ::= TuplePattern ( Arrow TypePattern ) ?
     enum FunctionPatternRule:ParsingRule
     {
         typealias Location = String.Index
@@ -18,8 +18,7 @@ extension UCF
         {
             let tuple:[TypePattern] = try input.parse(as: TuplePatternRule.self)
 
-            if  case ()? = input.parse(
-                    as: Pattern.Pad<ArrowRule, UnicodeEncoding<Location, Terminal>.Space>?.self)
+            if  case ()? = input.parse(as: ArrowRule?.self)
             {
                 return (tuple, try input.parse(as: TypePatternRule.self))
             }

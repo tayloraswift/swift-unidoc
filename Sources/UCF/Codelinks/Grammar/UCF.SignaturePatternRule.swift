@@ -2,7 +2,7 @@ import Grammar
 
 extension UCF
 {
-    /// SignaturePattern ::= FunctionPattern | '->' ' ' * TypePattern
+    /// SignaturePattern ::= FunctionPattern | Arrow TypePattern
     enum SignaturePatternRule:ParsingRule
     {
         typealias Location = String.Index
