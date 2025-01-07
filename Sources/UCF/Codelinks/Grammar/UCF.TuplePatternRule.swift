@@ -2,7 +2,7 @@ import Grammar
 
 extension UCF
 {
-    /// TuplePattern ::= '(' ( TypePattern ( ',' TypePattern ) * ) ? ')'
+    /// TuplePattern ::= '(' \s * ( TypePattern ( \s * ',' TypePattern ) * ) ? \s * ')'
     enum TuplePatternRule:ParsingRule
     {
         typealias Location = String.Index
@@ -15,6 +15,7 @@ extension UCF
             Diagnostics.Source.Index == Location
         {
             try input.parse(as: UnicodeEncoding<Location, Terminal>.ParenthesisLeft.self)
+            input.parse(as: UnicodeEncoding<Location, Terminal>.Space.self, in: Void.self)
 
             /// This is not a Join, as it is legal for there to be no elements in the tuple.
             var types:[TypePattern] = []
@@ -32,6 +33,7 @@ extension UCF
                 }
             }
 
+            input.parse(as: UnicodeEncoding<Location, Terminal>.Space.self, in: Void.self)
             try input.parse(as: UnicodeEncoding<Location, Terminal>.ParenthesisRight.self)
 
             return types
