@@ -232,16 +232,3 @@ extension UCF.Selector
         return nil
     }
 }
-extension UCF.Selector
-{
-    @inlinable public
-    static func equivalent(to doclink:Doclink) -> Self?
-    {
-        if  doclink.absolute
-        {
-            return nil
-        }
-
-        return .init(doclink.path.joined(separator: "/"))
-    }
-}

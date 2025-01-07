@@ -222,12 +222,17 @@ extension SSGC.OutlineResolver
         }
         else
         {
-            //  Resolution might still succeed by reinterpreting the doclink as a codelink.
-            guard
-            let codelink:UCF.Selector = .equivalent(to: doclink)
-            else
+            if  doclink.absolute
             {
                 self.diagnostics[source] = SSGC.OutlineDiagnostic.unresolvedAbsolute(doclink)
+                return nil
+            }
+            //  Resolution might still succeed by reinterpreting the doclink as a codelink.
+            guard
+            let codelink:UCF.Selector = .init(doclink.page)
+            else
+            {
+                self.diagnostics[source] = SSGC.OutlineDiagnostic.unresolvedRelative(doclink)
                 return nil
             }
             guard

@@ -2,7 +2,7 @@ import Grammar
 
 extension UCF.DisambiguatorRule.Clause
 {
-    /// AlphanumericWord ::= ' ' * [0-9A-Za-z] + ' ' *
+    /// AlphanumericWord ::= Space ? [0-9A-Za-z] + Space ?
     enum AlphanumericWord:ParsingRule
     {
         typealias Location = String.Index
@@ -14,14 +14,14 @@ extension UCF.DisambiguatorRule.Clause
             Diagnostics.Source.Element == Terminal,
             Diagnostics.Source.Index == Location
         {
-            input.parse(as: UnicodeEncoding<Location, Terminal>.Space.self, in: Void.self)
+            input.parse(as: UCF.SpaceRule?.self)
 
             let start:Location = input.index
             try input.parse(as: AlphanumericCodepoint.self)
             input.parse(as: AlphanumericCodepoint.self, in: Void.self)
             let end:Location = input.index
 
-            input.parse(as: UnicodeEncoding<Location, Terminal>.Space.self, in: Void.self)
+            input.parse(as: UCF.SpaceRule?.self)
 
             return start ..< end
         }
