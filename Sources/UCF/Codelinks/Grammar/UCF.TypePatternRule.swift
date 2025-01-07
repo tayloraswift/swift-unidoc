@@ -2,7 +2,7 @@ import Grammar
 
 extension UCF
 {
-    /// TypePattern ::= TypeElement ( '&' TypeElement ) *
+    /// TypePattern ::= TypeElement ( \s * '&' \s * TypeElement ) *
     enum TypePatternRule:ParsingRule
     {
         typealias Location = String.Index

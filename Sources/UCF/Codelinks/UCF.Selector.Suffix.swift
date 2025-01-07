@@ -50,11 +50,21 @@ extension UCF.Selector.Suffix
     /// The `string` must start with a hyphen (`-`)!
     static func parse(legacy string:Substring) -> Self?
     {
-        if  let pattern:UCF.SignaturePattern = try? UCF.SignatureSuffixRule.parse(
-                string.unicodeScalars)
+        let (signature, clauses):(UCF.SignaturePattern?, [(String, String?)])
+        do
         {
-            return .unidoc(.init(conditions: [],
-                signature: .init(parsed: pattern, source: string)))
+            (signature, clauses) = try UCF.DisambiguationSuffixRule.parse(string.unicodeScalars)
+
+            if  let disambiguator:UCF.Disambiguator = .init(
+                    signature: signature,
+                    clauses: clauses,
+                    source: string)
+            {
+                return .unidoc(disambiguator)
+            }
+        }
+        catch
+        {
         }
 
         assert(string.startIndex < string.endIndex)

@@ -2,7 +2,7 @@ import Grammar
 
 extension UCF.DisambiguatorRule
 {
-    /// Clauses ::= ' ' + '[' Clause ( ',' Clause ) * ']'
+    /// Clauses ::= Space '[' Clause ( ',' Clause ) * ']'
     ///
     /// Note that the leading whitespace is considered part of the filter.
     enum Clauses:ParsingRule
@@ -16,8 +16,7 @@ extension UCF.DisambiguatorRule
             Diagnostics.Source.Element == Terminal,
             Diagnostics.Source.Index == Location
         {
-            try input.parse(as: UnicodeEncoding<Location, Terminal>.Space.self)
-                input.parse(as: UnicodeEncoding<Location, Terminal>.Space.self, in: Void.self)
+            try input.parse(as: UCF.SpaceRule.self)
 
             //  No padding around structural characters; ``DisambiguationClauseRule`` already
             //  trims whitespace.

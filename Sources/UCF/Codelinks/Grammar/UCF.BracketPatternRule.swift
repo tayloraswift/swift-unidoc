@@ -2,7 +2,7 @@ import Grammar
 
 extension UCF
 {
-    /// BracketPattern ::= '[' TypePattern ( ':' TypePattern ) ? ']'
+    /// BracketPattern ::= '[' TypePattern ( \s * ':' \s * TypePattern ) ? ']'
     enum BracketPatternRule:ParsingRule
     {
         typealias Location = String.Index

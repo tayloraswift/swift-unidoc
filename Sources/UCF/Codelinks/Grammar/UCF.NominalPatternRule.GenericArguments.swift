@@ -2,7 +2,7 @@ import Grammar
 
 extension UCF.NominalPatternRule
 {
-    /// GenericArguments ::= '<' TypePattern ( ',' TypePattern ) * '>'
+    /// GenericArguments ::= '<' \s * TypePattern ( \s * ',' \s * TypePattern ) * \s * '>'
     enum GenericArguments:ParsingRule
     {
         typealias Location = String.Index
@@ -15,11 +15,13 @@ extension UCF.NominalPatternRule
             Diagnostics.Source.Index == Location
         {
             try input.parse(as: UnicodeEncoding<Location, Terminal>.AngleLeft.self)
+            input.parse(as: UnicodeEncoding<Location, Terminal>.Space.self, in: Void.self)
             let types:[UCF.TypePattern] = try input.parse(as: Pattern.Join<UCF.TypePatternRule,
                 Pattern.Pad<
                     UnicodeEncoding<Location, Terminal>.Comma,
                     UnicodeEncoding<Location, Terminal>.Space>,
                 [UCF.TypePattern]>.self)
+            input.parse(as: UnicodeEncoding<Location, Terminal>.Space.self, in: Void.self)
             try input.parse(as: UnicodeEncoding<Location, Terminal>.AngleRight.self)
             return types
         }

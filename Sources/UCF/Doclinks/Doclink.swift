@@ -25,6 +25,40 @@ extension Doclink
     {
         self.absolute ? self.path.first : nil
     }
+
+    @inlinable public
+    var page:String
+    {
+        var first:Bool = true
+        var text:String = self.absolute ? "//" : ""
+        for component:String in self.path
+        {
+            if  first
+            {
+                first = false
+            }
+            else
+            {
+                text.append("/")
+            }
+
+            text.append(component)
+        }
+        return text
+    }
+
+    @inlinable public
+    var value:String
+    {
+        var text:String = self.page
+        if  let fragment:String = self.fragment
+        {
+            text.append("#")
+            text.append(fragment)
+        }
+        return text
+    }
+
     /// Returns the string value of the doclink, without the `doc:` prefix, percent-encoding any
     /// special characters as needed.
     @inlinable public
@@ -53,6 +87,7 @@ extension Doclink
         return text
     }
 }
+@available(*, deprecated)
 extension Doclink:CustomStringConvertible
 {
     @inlinable public
@@ -113,11 +148,19 @@ extension Doclink
             end = uri.endIndex
         }
 
-        if  let path:URI.Path = .init(relative: uri[start ..< end])
+        /// The URI path parser doesn’t know how to handle optionals due to the
+        /// question character so we need to manually split it off and append
+        /// it to the last path component.
+        let question:String.Index? = uri[start ..< end].firstIndex(of: "?")
+        if  let path:URI.Path = .init(relative: uri[start ..< (question ?? end)])
         {
-            self.init(absolute: slashes >= 2,
-                path: path.normalized(),
-                fragment: fragment?.decoded)
+            var path:[String] = path.normalized()
+            if  let question:String.Index,
+                let i:Int = path.indices.last
+            {
+                path[i] += uri[question...]
+            }
+            self.init(absolute: slashes >= 2, path: path, fragment: fragment?.decoded)
         }
         else
         {
