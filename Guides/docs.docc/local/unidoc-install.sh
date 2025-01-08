@@ -1,4 +1,4 @@
-UNIDOC_MIRROR=https://static.swiftinit.org/unidoc
+UNIDOC_MIRROR=https://download.swiftinit.org/unidoc
 UNIDOC_VERSION=0.20.1
 UNIDOC_PLATFORM=macOS-ARM64
 
