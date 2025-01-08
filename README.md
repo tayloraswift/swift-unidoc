@@ -23,8 +23,53 @@ Unidoc powers the [Swiftinit](https://swiftinit.org) open source package index!
 
 Unidoc supports Linux and macOS. Unidoc requires Swift 6.0.
 
+We provide prebuilt binaries for the following platforms:
+
+| Platform | Architecture | Download |
+| -------- | ------------ | -------- |
+| macOS 15 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/macOS-ARM64/unidoc.tar.gz) |
+| Ubuntu 24.04 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-24.04-ARM64/unidoc.tar.gz) |
+| Ubuntu 24.04 | x86_64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-24.04-X64/unidoc.tar.gz) |
+| Ubuntu 22.04 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-22.04-ARM64/unidoc.tar.gz) |
+| Ubuntu 22.04 | x86_64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-22.04-X64/unidoc.tar.gz) |
+
+Follow our [quickstart guide](https://swiftinit.org/docs/swift-unidoc/guides/quickstart) to learn how to set up a local Unidoc server.
+
 
 ## Features
+
+### ✏️ Powerful symbol links
+
+Unidoc supports the [UCF](https://github.com/tayloraswift/swift-ucf) symbol link syntax — a superset of the DocC symbol link syntax — which supports [multi-component paths, cross-module references, and type signature disambiguation](https://swiftinit.org/docs/swift-ucf/help/codelinks).
+
+| Syntax | Renders as |
+| ------ | ---------- |
+| ``Int.init(_:) (Float)`` | [`Int`](https://swiftinit.org/docs/swift/swift/int)[`.init(_:)`](https://swiftinit.org/docs/swift/swift/int.init(_:)?hash=2OSCB) |
+| ``Int.init(_:) (Double)`` | [`Int`](https://swiftinit.org/docs/swift/swift/int)[`.init(_:)`](https://swiftinit.org/docs/swift/swift/int.init(_:)?hash=8VBWO) |
+| ``Int/init(_:) (Double)`` | [`init(_:)`](https://swiftinit.org/docs/swift/swift/int.init(_:)?hash=8VBWO) |
+
+### 🚦 Built for Continuous Integration
+
+The Unidoc documentation compiler can be run in CI mode to validate documentation and fail the pipeline if documentation errors (such as broken links) are diagnosed.
+
+The Unidoc compiler can diagnose *all* broken symbol links, including references to symbols in package dependencies and the standard library.
+
+We provide the [swift-unidoc-action](https://github.com/tayloraswift/swift-unidoc-action) for GitHub Actions.
+
+```yaml
+-   name: Validate documentation
+    run: |
+        unidoc compile \
+            --swift-toolchain $SWIFT_INSTALLATION \
+            --ci fail-on-errors \
+            --project-path .
+```
+
+### ✂ Rich code snippets
+
+Unidoc can render SwiftPM code snippets in documentation with linked IDE-style code references and hover-over tooltips.
+
+See [swiftonserver.com](https://swiftonserver.com/realtime-mongodb-updates-with-changestreams-and-websockets/#The%20Connection%20Manager), which uses Unidoc as its rendering backend, for an example of code snippets in action.
 
 ### 🪶 Small archive sizes
 

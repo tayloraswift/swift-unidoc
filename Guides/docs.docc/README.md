@@ -5,13 +5,9 @@
 ### Using Unidoc
 
 -   <doc:Quickstart>
--   <doc:Getting-started>
--   <doc:GeneratingCertificates>
 
 ### Developing Unidoc
 
+-   <doc:Getting-started>
+-   <doc:GeneratingCertificates>
 -   <doc:GeneratingSymbolGraphs>
-
-### Specifications
-
--   <doc:Codelinks>

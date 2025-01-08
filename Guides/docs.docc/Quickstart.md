@@ -1,6 +1,6 @@
 # Previewing documentation locally
 
-This guide walks through how to use the `unidoc preview` tool to preview documentation locally on macOS 15. This guide won’t make any effort to explain how Unidoc itself works, it is merely intended to demonstrate how to preview multi-package documentation as quickly as possible. For a more-detailed Linux-centric tour, see the <doc:Getting-started> guide.
+This guide walks through how to use the `unidoc preview` tool to preview documentation locally on macOS 15. This guide won’t make any effort to explain how Unidoc itself works, it is merely intended to demonstrate how to preview multi-package documentation as quickly as possible.
 
 In this guide, you will:
 
@@ -13,7 +13,7 @@ In this guide, you will:
 
 ## 1. Install Docker
 
-The easiest way by far to preview documentation locally is to use Docker. You can download Docker Desktop for macOS from the [official website](https://www.docker.com/products/docker-desktop).
+The easiest way to preview documentation locally is to use Docker. You can download Docker Desktop for macOS from the [official website](https://www.docker.com/products/docker-desktop).
 
 
 ## 2. Install Unidoc
@@ -24,13 +24,14 @@ Today, there are two main ways to install Unidoc — building it from source or 
 
 Pre-built binaries are available for a limited set of platforms.
 
-| Platform | String |
-|----------|----------|
-| macOS    | `macOS-ARM64` |
-| Ubuntu   | `Ubuntu-22.04-ARM64` |
-| Ubuntu   | `Ubuntu-22.04-X64` |
-| Ubuntu   | `Ubuntu-24.04-ARM64` |
-| Ubuntu   | `Ubuntu-24.04-X64` |
+
+| Platform | Architecture | Download |
+| -------- | ------------ | -------- |
+| macOS 15 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/macOS-ARM64/unidoc.tar.gz) |
+| Ubuntu 24.04 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-24.04-ARM64/unidoc.tar.gz) |
+| Ubuntu 24.04 | x86_64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-24.04-X64/unidoc.tar.gz) |
+| Ubuntu 22.04 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-22.04-ARM64/unidoc.tar.gz) |
+| Ubuntu 22.04 | x86_64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-22.04-X64/unidoc.tar.gz) |
 
 
 You can download and install the binary under `/usr/local/bin` like this:
