@@ -225,6 +225,7 @@ let package:Package = .init(
         .target(name: "LinkResolution",
             dependencies: [
                 .target(name: "InlineArray"),
+                .target(name: "LexicalPaths"),
                 .target(name: "SourceDiagnostics"),
                 .target(name: "Symbols"),
                 //  This dependency is present for (questionable?) performance reasons.
