@@ -15,7 +15,6 @@ let package:Package = .init(
 
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
-        .library(name: "FNV1", targets: ["FNV1"]),
 
         .library(name: "GitHubAPI", targets: ["GitHubAPI"]),
         .library(name: "GitHubClient", targets: ["GitHubClient"]),
@@ -53,7 +52,6 @@ let package:Package = .init(
         .library(name: "SourceDiagnostics", targets: ["SourceDiagnostics"]),
         .library(name: "Sources", targets: ["Sources"]),
 
-
         .library(name: "SymbolGraphBuilder", targets: ["SymbolGraphBuilder"]),
         .library(name: "SymbolGraphCompiler", targets: ["SymbolGraphCompiler"]),
         .library(name: "SymbolGraphLinker", targets: ["SymbolGraphLinker"]),
@@ -65,8 +63,6 @@ let package:Package = .init(
         .library(name: "System_ArgumentParser", targets: ["System_ArgumentParser"]),
 
         .library(name: "UA", targets: ["UA"]),
-
-        .library(name: "UCF", targets: ["UCF"]),
 
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
@@ -80,8 +76,6 @@ let package:Package = .init(
         .library(name: "UnidocRecords", targets: ["UnidocRecords"]),
         .library(name: "UnidocServer", targets: ["UnidocServer"]),
         .library(name: "UnidocUI", targets: ["UnidocUI"]),
-
-        .library(name: "URI", targets: ["URI"]),
     ],
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-bson", .upToNextMinor(
@@ -171,8 +165,6 @@ let package:Package = .init(
                 .product(name: "ISO", package: "swift-unixtime"),
             ]),
 
-        .target(name: "FNV1"),
-
         .target(name: "GitHubClient",
             dependencies: [
                 .target(name: "GitHubAPI"),
@@ -212,7 +204,6 @@ let package:Package = .init(
                 .target(name: "_AsyncChannel"),
                 .target(name: "HTTP"),
                 .target(name: "UA"),
-                .target(name: "URI"),
 
                 .product(name: "Firewalls", package: "swift-ip"),
                 .product(name: "IP", package: "swift-ip"),
@@ -223,6 +214,7 @@ let package:Package = .init(
                 .product(name: "NIOHTTP2", package: "swift-nio-http2"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "TraceableErrors", package: "swift-grammar"),
+                .product(name: "URI", package: "swift-ucf"),
             ]),
 
         .target(name: "InlineArray"),
@@ -236,9 +228,9 @@ let package:Package = .init(
                 .target(name: "InlineArray"),
                 .target(name: "SourceDiagnostics"),
                 .target(name: "Symbols"),
-                .target(name: "UCF"),
                 //  This dependency is present for (questionable?) performance reasons.
                 .target(name: "Unidoc"),
+                .product(name: "UCF", package: "swift-ucf"),
             ]),
 
         .target(name: "MarkdownABI"),
@@ -258,8 +250,8 @@ let package:Package = .init(
         .target(name: "MarkdownRendering",
             dependencies: [
                 .target(name: "MarkdownABI"),
-                .target(name: "URI"),
                 .product(name: "HTML", package: "swift-dom"),
+                .product(name: "URI", package: "swift-ucf"),
             ]),
 
         .target(name: "MarkdownParsing",
@@ -288,9 +280,8 @@ let package:Package = .init(
                 .target(name: "MarkdownDisplay"),
                 .target(name: "Snippets"),
                 .target(name: "SourceDiagnostics"),
-                .target(name: "UCF"),
-
                 .product(name: "OrderedCollections", package: "swift-collections"),
+                .product(name: "UCF", package: "swift-ucf"),
             ]),
 
         .target(name: "Media"),
@@ -373,8 +364,8 @@ let package:Package = .init(
 
         .target(name: "Symbols",
             dependencies: [
-                .target(name: "FNV1"),
                 .target(name: "Sources"),
+                .product(name: "FNV1", package: "swift-ucf"),
             ]),
 
         .target(name: "SymbolGraphBuilder",
@@ -408,8 +399,8 @@ let package:Package = .init(
                 .target(name: "SymbolGraphs"),
                 .target(name: "Symbols"),
                 .target(name: "SourceDiagnostics"),
-                .target(name: "URI"),
                 .product(name: "SHA1", package: "swift-hash"),
+                .product(name: "URI", package: "swift-ucf"),
             ]),
 
         .target(name: "SymbolGraphParts",
@@ -456,13 +447,6 @@ let package:Package = .init(
                 .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
-        .target(name: "UCF",
-            dependencies: [
-                .target(name: "FNV1"),
-                .target(name: "LexicalPaths"),
-                .target(name: "URI"),
-            ]),
-
         .target(name: "Unidoc"),
 
         .target(name: "UnidocAPI",
@@ -471,7 +455,7 @@ let package:Package = .init(
                 .target(name: "SHA1_JSON"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
-                .target(name: "URI"),
+                .product(name: "URI", package: "swift-ucf"),
             ]),
 
         .target(name: "UnidocAssets",
@@ -544,10 +528,10 @@ let package:Package = .init(
 
         .target(name: "UnidocRecords",
             dependencies: [
-                .target(name: "FNV1"),
                 .target(name: "GitHubAPI"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocAPI"),
+                .product(name: "FNV1", package: "swift-ucf"),
                 .product(name: "MD5", package: "swift-hash"),
             ]),
 
@@ -601,13 +585,8 @@ let package:Package = .init(
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocAPI"),
                 .target(name: "UnidocQueries"),
-                .target(name: "URI"),
+                .product(name: "URI", package: "swift-ucf"),
                 .product(name: "UnixTime", package: "swift-unixtime"),
-            ]),
-
-        .target(name: "URI",
-            dependencies: [
-                .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
         .target(name: "System_",
@@ -622,19 +601,10 @@ let package:Package = .init(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]),
 
-        .testTarget(name: "UCFTests",
-            dependencies: [
-                .target(name: "UCF"),
-            ]),
 
         .testTarget(name: "FingerprintingTests",
             dependencies: [
                 .target(name: "Fingerprinting"),
-            ]),
-
-        .testTarget(name: "FNV1Tests",
-            dependencies: [
-                .target(name: "FNV1"),
             ]),
 
         .testTarget(name: "MarkdownParsingTests",
@@ -756,11 +726,6 @@ let package:Package = .init(
         .testTarget(name: "UnidocRecordsTests",
             dependencies: [
                 .target(name: "UnidocRecords"),
-            ]),
-
-        .testTarget(name: "URITests",
-            dependencies: [
-                .target(name: "URI"),
             ]),
 
         .target(name: "guides", path: "Guides"),
