@@ -1,4 +1,4 @@
-# Getting started with Unidoc
+# Bootstrapping Unidoc
 
 This guide outlines how to set up and run a local Unidoc server you can use to preview your documentation as it would appear on [Swiftinit](https://swiftinit.org).
 
@@ -16,7 +16,7 @@ It is theoretically possible to run Unidoc without Docker, but Docker makes it m
 The examples in this tutorial assume you are building Unidoc from source. However, you can also download [pre-built binaries](/Quickstart) for a select set of platforms.
 
 
-## Setting up a local database automatically 
+## Setting up a local database automatically
 
 Unidoc can set up a `mongod` instance for you automatically through the `unidoc init` command. This tool takes a directory path as an argument, which it uses to persist the state of the database. In the example below, we will create the documentation database in a directory named `unidoc` in your home directory.
 
