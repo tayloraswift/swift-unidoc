@@ -44,7 +44,7 @@ swift symbolgraph-extract \
     -n swift \
     -o TestPackages/swift.bson
 
-for PACKAGE in swift-test swift-malibu swift-snippets swift-exportation
+for PACKAGE in swift-test swift-malibu swift-snippets swift-exportation cross-module-articles
 do
     .build/release/ssgc -u $SWIFT_INSTALLATION \
         -p TestPackages/$PACKAGE \
