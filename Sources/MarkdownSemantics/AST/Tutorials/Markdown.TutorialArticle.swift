@@ -13,15 +13,10 @@ extension Markdown
 extension Markdown.TutorialArticle:Markdown.BlockDirectiveType
 {
     public
-    func configure(option:String, value:Markdown.SourceString) throws
-    {
-        switch option
-        {
-        case "time":
-            break
+    typealias Option = Markdown.Tutorial.Option
 
-        case let option:
-            throw ArgumentError.unexpected(option)
-        }
+    public
+    func configure(option:Option, value:Markdown.SourceString)
+    {
     }
 }

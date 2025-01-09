@@ -1,7 +1,7 @@
 extension Markdown.SemanticMetadata
 {
     @frozen public
-    enum MergeBehavior
+    enum MergeBehavior:String
     {
         case append
         case override

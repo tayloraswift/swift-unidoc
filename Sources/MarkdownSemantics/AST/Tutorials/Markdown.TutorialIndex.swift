@@ -12,17 +12,20 @@ extension Markdown
 }
 extension Markdown.TutorialIndex:Markdown.BlockDirectiveType
 {
+    @frozen public
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case name
+    }
+
     public
-    func configure(option:String, value:Markdown.SourceString) throws
+    func configure(option:Option, value:Markdown.SourceString)
     {
         switch option
         {
-        case "name":
+        case .name:
             //  This is almost always the package name, and thus utterly redundant.
             break
-
-        case let option:
-            throw ArgumentError.unexpected(option)
         }
     }
 }

@@ -44,29 +44,32 @@ extension Markdown.TutorialIndex
 }
 extension Markdown.TutorialIndex.ExternalLinks:Markdown.BlockDirectiveType
 {
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case destination
+        case title, name
+    }
+
     final
-    func configure(option:String, value:Markdown.SourceString) throws
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         switch option
         {
-        case "destination":
+        case .destination:
             guard case nil = self.destination
             else
             {
-                throw ArgumentError.duplicated(option)
+                throw option.duplicate
             }
 
-        case "title", "name":
+        case .title, .name:
             guard case nil = self.title
             else
             {
-                throw ArgumentError.duplicated(option)
+                throw option.duplicate
             }
 
             self.title = value.string
-
-        case let option:
-            throw ArgumentError.unexpected(option)
         }
     }
 }
