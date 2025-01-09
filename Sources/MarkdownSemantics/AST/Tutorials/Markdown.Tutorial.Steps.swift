@@ -46,13 +46,11 @@ extension Markdown.Tutorial
 }
 extension Markdown.Tutorial.Steps:Markdown.BlockDirectiveType
 {
-    /// Always throws an error, as this directive does not support any options.
-    func configure(option:String, value _:Markdown.SourceString) throws
+    func configure(option:Markdown.NeverOption, value _:Markdown.SourceString)
     {
-        throw ArgumentError.unexpected(option)
     }
 
-    func append(_ element:Markdown.BlockElement) throws
+    func append(_ element:Markdown.BlockElement)
     {
         if  case let step as Markdown.Tutorial.Step = element
         {

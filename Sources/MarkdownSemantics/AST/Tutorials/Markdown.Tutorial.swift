@@ -33,21 +33,17 @@ extension Markdown
 }
 extension Markdown.Tutorial:Markdown.BlockDirectiveType
 {
-    public
-    func configure(option:String, value:Markdown.SourceString) throws
+    @frozen public
+    enum Option:String, Markdown.BlockDirectiveOption
     {
-        switch option
-        {
-        case "time":
-            //  We don’t support this, or really, believe in its accuracy.
-            break
+        //  We don’t support this, or really, believe in its accuracy.
+        case time
+        //  TODO: unimplemented
+        case projectFiles
+    }
 
-        case "projectFiles":
-            //  TODO: unimplemented
-            break
-
-        case let option:
-            throw ArgumentError.unexpected(option)
-        }
+    public
+    func configure(option:Option, value:Markdown.SourceString)
+    {
     }
 }

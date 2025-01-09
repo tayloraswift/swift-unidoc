@@ -60,25 +60,27 @@ extension Markdown
 }
 extension Markdown.BlockTopicReference:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:Markdown.SourceString) throws
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case tutorial
+    }
+
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         //  Yes, this technically means the block directive can accept more than one `tutorial`
         //  argument. This makes it easier to accumulate multiple consecutive instances of this
         //  directive into a single topic list.
         switch option
         {
-        case "tutorial":
+        case .tutorial:
             guard
             let doclink:Doclink = .init(value.string)
             else
             {
-                throw ArgumentError.doclink(value.string)
+                throw TargetError.doclink(value.string)
             }
 
             self.targets.append(.inline(.init(source: value.source, string: doclink.text)))
-
-        case let option:
-            throw ArgumentError.unexpected(option)
         }
     }
 }

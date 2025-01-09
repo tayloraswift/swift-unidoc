@@ -24,30 +24,35 @@ extension Markdown
 }
 extension Markdown.BlockOption:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:Markdown.SourceString) throws
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case `_` = ""
+    }
+
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         switch option
         {
-        case "":
+        case ._:
             guard case nil = self.value
             else
             {
-                throw ArgumentError.duplicated(option)
+                throw option.duplicate
             }
-            switch value.string
+
+            if  let value:Bool = .init(value.string)
             {
-            case "true", "enabled":
-                self.value = true
-
-            case "false", "disabled":
-                self.value = false
-
-            default:
-                throw ArgumentError.enabledness(value.string)
+                self.value = value
             }
-
-        case let option:
-            throw ArgumentError.unexpected(option)
+            else if
+                case .enabled = try option.case(value, of: Enabledness.self)
+            {
+                self.value = true
+            }
+            else
+            {
+                self.value = false
+            }
         }
     }
 }

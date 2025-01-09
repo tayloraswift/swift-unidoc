@@ -22,27 +22,23 @@ extension Markdown
 }
 extension Markdown.BlockOptions:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:Markdown.SourceString) throws
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case scope
+    }
+
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         switch option
         {
-        case "scope":
+        case .scope:
             guard case nil = self.scope
             else
             {
-                throw ArgumentError.duplicated(option)
-            }
-            guard
-            let scope:Markdown.SemanticMetadata.OptionScope = .init(rawValue: value.string)
-            else
-            {
-                throw ArgumentError.scope(value.string)
+                throw option.duplicate
             }
 
-            self.scope = scope
-
-        case let option:
-            throw ArgumentError.unexpected(option)
+            self.scope = try option.case(value)
         }
     }
 }

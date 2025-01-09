@@ -41,23 +41,26 @@ extension Markdown
 }
 extension Markdown.BlockSection:Markdown.BlockDirectiveType
 {
+    @frozen public
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case title
+        case name
+    }
+
     public final
-    func configure(option:String, value:Markdown.SourceString) throws
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         switch option
         {
-        case "title", "name":
-            break
-        case let option:
-            throw ArgumentError.unexpected(option)
-        }
+        case .title, .name:
+            guard case nil = self.title
+            else
+            {
+                throw option.duplicate
+            }
 
-        guard case nil = self.title
-        else
-        {
-            throw ArgumentError.duplicated(option)
+            self.title = value.string
         }
-
-        self.title = value.string
     }
 }

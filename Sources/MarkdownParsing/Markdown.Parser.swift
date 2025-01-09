@@ -107,7 +107,8 @@ extension Markdown.Parser
                         option: argument.name,
                         value: .init(
                             source: .init(from: argument.valueRange, in: source),
-                            string: argument.value))
+                            string: argument.value),
+                        block: block.name)
                 }
                 catch let error
                 {

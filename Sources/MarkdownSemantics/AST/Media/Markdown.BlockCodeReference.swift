@@ -87,33 +87,43 @@ extension Markdown
 }
 extension Markdown.BlockCodeReference:Markdown.BlockDirectiveType
 {
-    public
-    func configure(option:String, value:Markdown.SourceString) throws
+    @frozen public
+    enum Option:String, Markdown.BlockDirectiveOption
     {
-        let value:String = value.string
+        case language
+        case title, name
+        case file
+        case base, previousFile
+        case reset
+    }
+
+    public
+    func configure(option:Option, value:Markdown.SourceString) throws
+    {
         switch option
         {
-        case "language":
+        case .language:
             //  Cannot check for duplicates, because the language can be guessed from the file
             //  extension.
-            self.language = value
+            self.language = value.string
 
-        case "title", "name":
+        case .title, .name:
             guard case nil = self.title
             else
             {
-                throw ArgumentError.duplicated(option)
+                throw option.duplicate
             }
 
-            self.title = value
+            self.title = value.string
 
-        case "file":
+        case .file:
             guard case nil = self.file
             else
             {
-                throw ArgumentError.duplicated(option)
+                throw option.duplicate
             }
 
+            let value:String = value.string
             self.file = value
 
             //  Guess the language from the file extension
@@ -124,33 +134,28 @@ extension Markdown.BlockCodeReference:Markdown.BlockDirectiveType
                 self.language = String.init(value[value.index(after: i)...])
             }
 
-        case "base", "previousFile":
+        case .base, .previousFile:
             switch self.base
             {
-            case nil:       throw ArgumentError.resetContradictsBase
-            case .file?:    throw ArgumentError.duplicated(option)
+            case nil:       throw SemanticError.resetContradictsBase
+            case .file?:    throw option.duplicate
             case .auto?:    break
             }
 
-            self.base = .file(value)
+            self.base = .file(value.string)
 
-        case "reset": // Legacy DocC syntax
+        case .reset: // Legacy DocC syntax
             switch self.base
             {
-            case nil:       throw ArgumentError.duplicated(option)
-            case .file?:    throw ArgumentError.resetContradictsBase
+            case nil:       throw option.duplicate
+            case .file?:    throw SemanticError.resetContradictsBase
             case .auto?:    break
             }
 
-            switch value
+            if  try option.cast(value, to: Bool.self)
             {
-            case "true":    self.base = nil
-            case "false":   break
-            case let value: throw ArgumentError.reset(value)
+                self.base = nil
             }
-
-        case let option:
-            throw ArgumentError.unexpected(option)
         }
     }
 }
