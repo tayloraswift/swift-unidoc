@@ -10,8 +10,7 @@ extension Markdown.BlockMetadata
 }
 extension Markdown.BlockMetadata.IsRoot:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value _:Markdown.SourceString) throws
+    func configure(option:Markdown.NeverOption, value _:Markdown.SourceString)
     {
-        throw ArgumentError.unexpected(option)
     }
 }

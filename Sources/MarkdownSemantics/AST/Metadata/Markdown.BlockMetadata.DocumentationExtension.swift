@@ -18,25 +18,23 @@ extension Markdown.BlockMetadata
 }
 extension Markdown.BlockMetadata.DocumentationExtension:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:Markdown.SourceString) throws
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case mergeBehavior
+    }
+
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         switch option
         {
-        case "mergeBehavior":
+        case .mergeBehavior:
             guard case nil = self.mergeBehavior
             else
             {
-                throw ArgumentError.duplicated(option)
-            }
-            switch value.string
-            {
-            case "append":      self.mergeBehavior = .append
-            case "override":    self.mergeBehavior = .override
-            case let value:     throw ArgumentError.mergeBehavior(value)
+                throw option.duplicate
             }
 
-        case let option:
-            throw ArgumentError.unexpected(option)
+            self.mergeBehavior = try option.case(value)
         }
     }
 }

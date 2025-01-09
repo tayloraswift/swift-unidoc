@@ -52,13 +52,13 @@ extension Markdown
 extension Markdown.BlockDirective:Markdown.BlockDirectiveType
 {
     @inlinable public
-    func configure(option:String, value:Markdown.SourceString) throws
+    func configure(option:Markdown.AnyOption, value:Markdown.SourceString)
     {
-        self.arguments.append((option, value.string))
+        self.arguments.append((option.rawValue, value.string))
     }
 
     @inlinable public
-    func append(_ element:Markdown.BlockElement) throws
+    func append(_ element:Markdown.BlockElement)
     {
         self.elements.append(element)
     }

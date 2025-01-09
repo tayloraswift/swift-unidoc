@@ -18,19 +18,23 @@ extension Markdown.Tutorial
 }
 extension Markdown.Tutorial.Requirement:Markdown.BlockDirectiveType
 {
+    @frozen public
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case title
+        case destination
+    }
+
     public
-    func configure(option:String, value:Markdown.SourceString) throws
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         switch option
         {
-        case "title":
+        case .title:
             self.title = value.string
 
-        case "destination":
-            return
-
-        case let option:
-            throw ArgumentError.unexpected(option)
+        case .destination:
+            break
         }
     }
 }

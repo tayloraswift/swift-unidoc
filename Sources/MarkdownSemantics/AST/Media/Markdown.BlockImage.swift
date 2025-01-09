@@ -66,30 +66,33 @@ extension Markdown
 }
 extension Markdown.BlockImage:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:Markdown.SourceString) throws
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case src, source
+        case alt
+    }
+
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         switch option
         {
-        case "src", "source":
+        case .src, .source:
             guard case nil = self.src
             else
             {
-                throw ArgumentError.duplicated(option)
+                throw option.duplicate
             }
 
             self.src = .inline(value)
 
-        case "alt":
+        case .alt:
             guard case nil = self.alt
             else
             {
-                throw ArgumentError.duplicated(option)
+                throw option.duplicate
             }
 
             self.alt = value.string
-
-        case let option:
-            throw ArgumentError.unexpected(option)
         }
     }
 }

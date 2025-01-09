@@ -18,9 +18,7 @@ extension Markdown
 }
 extension Markdown.BlockMetadata:Markdown.BlockDirectiveType
 {
-    /// Always throws an error, as this directive does not support any options.
-    func configure(option:String, value _:Markdown.SourceString) throws
+    func configure(option:Markdown.NeverOption, value _:Markdown.SourceString)
     {
-        throw ArgumentError.unexpected(option)
     }
 }

@@ -4,9 +4,11 @@ import Sources
 extension Markdown
 {
     public
-    protocol BlockDirectiveType:BlockElement
+    protocol BlockDirectiveType<Option>:BlockElement
     {
-        func configure(option:String, value:SourceString) throws
+        associatedtype Option:BlockDirectiveOption
+
+        func configure(option:Option, value:SourceString) throws
         func append(_ element:BlockElement) throws
 
         /// Associates a source location with this block. For ideal formatting, this source range
@@ -17,7 +19,7 @@ extension Markdown
 extension Markdown.BlockDirectiveType where Self:Markdown.BlockContainer<Markdown.BlockElement>
 {
     public
-    func append(_ element:Markdown.BlockElement) throws
+    func append(_ element:Markdown.BlockElement)
     {
         self.elements.append(element)
     }
