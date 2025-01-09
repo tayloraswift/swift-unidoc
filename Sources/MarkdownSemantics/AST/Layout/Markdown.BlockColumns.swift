@@ -37,27 +37,23 @@ extension Markdown
 }
 extension Markdown.BlockColumns:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:Markdown.SourceString) throws
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case numberOfColumns
+    }
+
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         switch option
         {
-        case "numberOfColumns":
+        case .numberOfColumns:
             guard case nil = self.count
             else
             {
-                throw ArgumentError.duplicated(option)
-            }
-            guard
-            let count:Int = .init(value.string)
-            else
-            {
-                throw ArgumentError.count(value.string)
+                throw option.duplicate
             }
 
-            self.count = count
-
-        case let option:
-            throw ArgumentError.unexpected(option)
+            self.count = try option.cast(value, to: Int.self)
         }
     }
 }

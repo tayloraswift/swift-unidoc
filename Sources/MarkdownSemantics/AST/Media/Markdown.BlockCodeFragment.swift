@@ -50,26 +50,33 @@ extension Markdown
 }
 extension Markdown.BlockCodeFragment:Markdown.BlockDirectiveType
 {
-    func configure(option:String, value:Markdown.SourceString) throws
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case id
+        case path
+        case slice
+    }
+
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         let value:String = value.string
         switch option
         {
-        case "slice":
+        case .slice:
             guard case nil = self.slice
             else
             {
-                throw ArgumentError.duplicated(option)
+                throw option.duplicate
             }
 
             self.slice = value
 
         //  This is a Unidoc extension, and is not actually part of SE-0356. But SE-0356 is
         //  really poorly written and the `path:` syntax is just awful.
-        case "id":
+        case .id:
             self.snippet = value
 
-        case "path":
+        case .path:
             //  We are going to ignore the first path component, which is the package name,
             //  for several reasons.
             //
@@ -88,23 +95,20 @@ extension Markdown.BlockCodeFragment:Markdown.BlockDirectiveType
             let j:String.Index = value.lastIndex(of: "/")
             else
             {
-                throw ArgumentError.path(value)
+                throw PathError.format(value)
             }
 
             //  OK for the path to contain additional intermediate path components, which
             //  are just as irrelevant as the package name, because snippet names are
             //  unique within a package.
-            guard
-            case "Snippets" = value[value.index(after: i)...].prefix(while: { $0 != "/" })
-            else
+            switch value[value.index(after: i)...].prefix(while: { $0 != "/" })
             {
-                throw ArgumentError.path(value)
+            case "Snippets":
+                self.snippet = String.init(value[value.index(after: j)...])
+
+            case let invalid:
+                throw PathError.directory(String.init(invalid))
             }
-
-            self.snippet = String.init(value[value.index(after: j)...])
-
-        case let option:
-            throw ArgumentError.unexpected(option)
         }
     }
 }
@@ -123,7 +127,9 @@ extension Markdown.BlockCodeFragment
         let snippet:Markdown.Snippet = snippets[snippet]
         else
         {
-            throw ArgumentError.snippet(self.snippet, available: snippets.keys.sorted())
+            throw ReferenceError.snippet(
+                undefined: self.snippet,
+                available: snippets.keys.sorted())
         }
 
         if  let slice:String = self.slice
@@ -146,7 +152,9 @@ extension Markdown.BlockCodeFragment
             }
             else
             {
-                throw ArgumentError.slice(slice, available: snippet.slices.keys.elements)
+                throw ReferenceError.slice(
+                    undefined: slice,
+                    available: snippet.slices.keys.elements)
             }
         }
         else

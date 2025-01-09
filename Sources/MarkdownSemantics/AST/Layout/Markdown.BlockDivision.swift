@@ -34,28 +34,24 @@ extension Markdown
 }
 extension Markdown.BlockDivision:Markdown.BlockDirectiveType
 {
+    enum Option:String, Markdown.BlockDirectiveOption
+    {
+        case size
+    }
+
     public final
-    func configure(option:String, value:Markdown.SourceString) throws
+    func configure(option:Option, value:Markdown.SourceString) throws
     {
         switch option
         {
-        case "size":
+        case .size:
             guard case nil = self.size
             else
             {
-                throw ArgumentError.duplicated(option)
-            }
-            guard
-            let size:Int = .init(value.string)
-            else
-            {
-                throw ArgumentError.size(value.string)
+                throw option.duplicate
             }
 
-            self.size = size
-
-        case let option:
-            throw ArgumentError.unexpected(option)
+            self.size = try option.cast(value, to: Int.self)
         }
     }
 }
