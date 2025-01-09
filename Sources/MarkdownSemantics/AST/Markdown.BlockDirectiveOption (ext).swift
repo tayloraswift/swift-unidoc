@@ -8,7 +8,9 @@ extension Markdown.BlockDirectiveOption
         let value:Value = .init(rawValue: value.string)
         else
         {
-            throw Markdown.BlockDirectiveArgumentTypeError<Self, Value>.init(option: self)
+            throw Markdown.BlockDirectiveArgumentTypeError<Self, Value>.init(
+                option: self,
+                value: value.string)
         }
 
         return value
@@ -22,7 +24,9 @@ extension Markdown.BlockDirectiveOption
         let value:Value = .init(value.string)
         else
         {
-            throw Markdown.BlockDirectiveArgumentTypeError<Self, Value>.init(option: self)
+            throw Markdown.BlockDirectiveArgumentTypeError<Self, Value>.init(
+                option: self,
+                value: value.string)
         }
 
         return value

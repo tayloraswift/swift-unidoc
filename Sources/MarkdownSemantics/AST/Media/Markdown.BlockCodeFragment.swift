@@ -101,14 +101,14 @@ extension Markdown.BlockCodeFragment:Markdown.BlockDirectiveType
             //  OK for the path to contain additional intermediate path components, which
             //  are just as irrelevant as the package name, because snippet names are
             //  unique within a package.
-            guard
-            case "Snippets" = value[value.index(after: i)...].prefix(while: { $0 != "/" })
-            else
+            switch value[value.index(after: i)...].prefix(while: { $0 != "/" })
             {
-                throw PathError.directory(value)
-            }
+            case "Snippets":
+                self.snippet = String.init(value[value.index(after: j)...])
 
-            self.snippet = String.init(value[value.index(after: j)...])
+            case let invalid:
+                throw PathError.directory(String.init(invalid))
+            }
         }
     }
 }
