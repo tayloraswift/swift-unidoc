@@ -5,3 +5,10 @@ extension Markdown
         let option:Option
     }
 }
+extension Markdown.BlockDirectiveDuplicateOptionError:CustomStringConvertible
+{
+    var description:String
+    {
+        "duplicate option '\(self.option.rawValue)'"
+    }
+}

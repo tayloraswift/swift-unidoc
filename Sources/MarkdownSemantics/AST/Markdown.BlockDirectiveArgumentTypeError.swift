@@ -4,5 +4,16 @@ extension Markdown
         where Option:BlockDirectiveOption
     {
         let option:Option
+        let value:String
+    }
+}
+extension Markdown.BlockDirectiveArgumentTypeError:CustomStringConvertible
+{
+    var description:String
+    {
+        """
+        could not convert argument '\(self.value)' for option '\(self.option)' to expected \
+        type '\(Value.self)'
+        """
     }
 }
