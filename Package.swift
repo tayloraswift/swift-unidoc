@@ -79,7 +79,7 @@ let package:Package = .init(
     ],
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-bson", .upToNextMinor(
-            from: "0.6.0")),
+            from: "0.8.0")),
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
             from: "1.1.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
@@ -91,7 +91,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "1.1.0")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.28.3")),
+            from: "0.29.0")),
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.8")),
         .package(url: "https://github.com/tayloraswift/swift-ucf", .upToNextMinor(

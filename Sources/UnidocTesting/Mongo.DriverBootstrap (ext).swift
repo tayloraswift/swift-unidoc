@@ -9,7 +9,7 @@ extension Mongo.DriverBootstrap
     {
         MongoDB / ["unidoc-mongod"] /?
         {
-            $0.executors = .shared(MultiThreadedEventLoopGroup.singleton)
+            $0.executors = MultiThreadedEventLoopGroup.singleton
             $0.appname = "example app"
         }
     }
