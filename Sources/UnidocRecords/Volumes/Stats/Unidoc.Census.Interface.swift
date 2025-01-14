@@ -1,3 +1,5 @@
+import BSON
+
 extension Unidoc.Census
 {
     @frozen public
@@ -56,4 +58,7 @@ extension Unidoc.Census.Interface:RawRepresentable
         case .unrestricted:     ""
         }
     }
+}
+extension Unidoc.Census.Interface:BSON.Keyspace
+{
 }

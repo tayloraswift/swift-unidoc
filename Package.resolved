@@ -1,5 +1,5 @@
 {
-  "originHash" : "e7b8113b3b474b81e0bf52eecac27af8dd8f20dde6679f987f674ab3cddb79af",
+  "originHash" : "ca5600bf01d8dfa2abb549be41798bde53778a672bd68856e1ad15c650839d13",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -22,7 +22,7 @@
     {
       "identity" : "swift-atomics",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-atomics.git",
+      "location" : "https://github.com/apple/swift-atomics",
       "state" : {
         "revision" : "cd142fd2f64be2100422d658e7411e39489da985",
         "version" : "1.2.0"
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-bson",
       "state" : {
-        "revision" : "2cfde630e932b96e84a3ef24bc75abab3243b674",
-        "version" : "0.6.0"
+        "revision" : "247461a7ec458592cb428d1cfa36a413babeb62f",
+        "version" : "0.8.0"
       }
     },
     {
@@ -123,8 +123,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "7377126aafaf8b6ada0994c0203f62e6ea59a0ff",
-        "version" : "0.28.3"
+        "revision" : "036accb514bccc886e5856479fe38b0967eda245",
+        "version" : "0.29.0"
       }
     },
     {

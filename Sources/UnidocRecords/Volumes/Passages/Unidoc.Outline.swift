@@ -100,8 +100,9 @@ extension Unidoc.Outline:BSONDocumentDecodable
             /// Note: need to handle legacy array encoding
             let id:Unidoc.Scalar? = try bson[.scalar]?.decode() ?? bson[.scalars]?.decode
             {
-                try $0.shape.expect(length: 1)
-                return try $0[0].decode()
+                let first:Unidoc.Scalar = try $0[+].decode()
+                try $0[+]?.decode(to: Never.self)
+                return first
             }
             if  let id:Unidoc.Scalar
             {

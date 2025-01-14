@@ -9,7 +9,7 @@ extension BSON
     /// To defend against SQL injection, the `Key` type should never be allowed to contain null
     /// bytes.
     @frozen public
-    struct HomogenousFields<Key, Value> where Key:RawRepresentable<String>, Key:Sendable
+    struct HomogenousFields<Key, Value> where Key:Keyspace
     {
         public
         let ordered:[(key:Key, value:Value)]
@@ -40,21 +40,15 @@ extension BSON.HomogenousFields:ExpressibleByDictionaryLiteral
         self.init(ordered: dictionaryLiteral)
     }
 }
-extension BSON.HomogenousFields:BSONDecodable where Value:BSONDecodable
+extension BSON.HomogenousFields:BSONDecodable, BSONKeyspaceDecodable where Value:BSONDecodable
 {
     @inlinable public
-    init(bson:BSON.AnyValue) throws
-    {
-        try self.init(bson: try .init(bson: consume bson))
-    }
-    @inlinable public
-    init(bson:BSON.Document) throws
+    init(bson:consuming BSON.KeyspaceDecoder<Key>) throws
     {
         var ordered:[(key:Key, value:Value)] = []
-        try bson.parse
+        while let field:BSON.FieldDecoder<Key> = try bson[+]
         {
-            let field:BSON.FieldDecoder<Key> = .init(key: $0, value: $1)
-            ordered.append(($0, try field.decode(to: Value.self)))
+            ordered.append((field.key, try field.decode(to: Value.self)))
         }
         self.init(ordered: ordered)
     }

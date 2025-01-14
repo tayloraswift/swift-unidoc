@@ -53,7 +53,7 @@ extension Main:AsyncParsableCommand
 
         let mongodb:Mongo.DriverBootstrap = MongoDB / [self.db.mongod] /?
         {
-            $0.executors = .shared(MultiThreadedEventLoopGroup.singleton)
+            $0.executors = MultiThreadedEventLoopGroup.singleton
             $0.appname = "unidoc-linkerd"
 
             $0.connectionTimeout = .milliseconds(5_000)
