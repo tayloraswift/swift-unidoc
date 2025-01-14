@@ -106,8 +106,8 @@ extension Unidoc.DB.Snapshots
     {
         try await session.run(
             command: Mongo.Find<Mongo.Cursor<Unidoc.Snapshot>>.init(Self.name,
-                stride: 16,
-                limit: 32)
+                stride: 50,
+                limit: 50)
             {
                 $0[.filter]
                 {
