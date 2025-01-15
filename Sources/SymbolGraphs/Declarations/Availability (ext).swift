@@ -1,14 +1,14 @@
 import Availability
 import BSON
 
-extension Availability:BSONDocumentDecodable
+extension Availability:BSONKeyspaceDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
+    init(bson:consuming BSON.KeyspaceDecoder<CodingKey>) throws
     {
         self.init()
 
-        for field:BSON.FieldDecoder<CodingKey> in bson
+        while let field:BSON.FieldDecoder<CodingKey> = try bson[+]
         {
             switch field.key.domain
             {

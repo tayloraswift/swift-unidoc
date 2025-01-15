@@ -34,10 +34,10 @@ extension Unidoc.Stats.Coverage:ExpressibleByDictionaryLiteral
 }
 extension Unidoc.Stats.Coverage:Unidoc.StatsCounters,
     BSONDocumentEncodable,
-    BSONDocumentDecodable
+    BSONKeyspaceDecodable
 {
     @frozen public
-    enum CodingKey:String, Sendable, CaseIterable
+    enum CodingKey:String, CaseIterable, BSON.Keyspace
     {
         case undocumented = "U"
         case indirect = "I"

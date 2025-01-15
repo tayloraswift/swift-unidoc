@@ -45,9 +45,9 @@ extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
                     $0[Unidoc.EditionMetadata[.name]] = refname
                 }
 
-                $0[stage: .replaceWith] = .init
+                $0[stage: .replaceWith, using: Unidoc.EditionPlacement.CodingKey.self]
                 {
-                    $0[Unidoc.EditionPlacement[.edition]] = Mongo.Pipeline.ROOT
+                    $0[.edition] = Mongo.Pipeline.ROOT
                 }
             }
             $0[new]
@@ -59,12 +59,9 @@ extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
 
                 $0[stage: .limit] = 1
 
-                $0[stage: .replaceWith] = .init
+                $0[stage: .replaceWith, using: Unidoc.EditionPlacement.CodingKey.self]
                 {
-                    $0[Unidoc.EditionPlacement[.coordinate]] = .expr
-                    {
-                        $0[.add] = (Unidoc.EditionMetadata[.version], 1)
-                    }
+                    $0[.coordinate] { $0[.add] = (Unidoc.EditionMetadata[.version], 1) }
                 }
             }
         }
