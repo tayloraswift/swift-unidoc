@@ -31,7 +31,7 @@ extension Unidoc.RefStateDirectQuery:Mongo.PipelineQuery
         {
             $0[Unidoc.PackageMetadata[.id]] = self.package
         }
-        pipeline[stage: .replaceWith] = .init(Unidoc.RefState.CodingKey.self)
+        pipeline[stage: .replaceWith, using: Unidoc.RefState.CodingKey.self]
         {
             $0[.package] = Mongo.Pipeline.ROOT
         }
@@ -56,9 +56,9 @@ extension Unidoc.RefStateDirectQuery:Mongo.PipelineQuery
                         $0[Unidoc.EditionMetadata[.id]] = id
                     }
 
-                    $0[stage: .replaceWith] = .init
+                    $0[stage: .replaceWith, using: Unidoc.VersionState.CodingKey.self]
                     {
-                        $0[Unidoc.VersionState[.edition]] = Mongo.Pipeline.ROOT
+                        $0[.edition] = Mongo.Pipeline.ROOT
                     }
 
                     $0.loadResources(associatedTo: Unidoc.VersionState[.edition] /

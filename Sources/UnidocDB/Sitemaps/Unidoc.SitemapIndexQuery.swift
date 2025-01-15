@@ -33,11 +33,10 @@ extension Unidoc.SitemapIndexQuery:Mongo.PipelineQuery
 
         pipeline[stage: .unwind] = Unidoc.SitemapIndexEntry[.symbol]
 
-        pipeline[stage: .replaceWith] = .init
+        pipeline[stage: .replaceWith, using: Unidoc.SitemapIndexEntry.CodingKey.self]
         {
-            $0[Unidoc.SitemapIndexEntry[.modified]] = Unidoc.Sitemap[.modified]
-            $0[Unidoc.SitemapIndexEntry[.symbol]] =
-                Unidoc.SitemapIndexEntry[.symbol] / Unidoc.PackageMetadata[.symbol]
+            $0[.modified] = Unidoc.Sitemap[.modified]
+            $0[.symbol] = Unidoc.SitemapIndexEntry[.symbol] / Unidoc.PackageMetadata[.symbol]
         }
     }
 }

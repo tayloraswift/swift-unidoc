@@ -22,7 +22,7 @@ extension SHA1:@retroactive BSONBinaryDecodable
         }
         else
         {
-            throw BSON.ShapeError.init(invalid: bson.bytes.count, expected: .length(20))
+            throw BSON.BinaryShapeError.init(invalid: bson.bytes.count, expected: .size(20))
         }
     }
 }
