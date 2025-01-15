@@ -5,7 +5,7 @@ extension Unidoc
     public
     protocol StatsCounters:ExpressibleByDictionaryLiteral where Value == Never
     {
-        associatedtype CodingKey:RawRepresentable<String>, CaseIterable
+        associatedtype CodingKey:BSON.Keyspace, CaseIterable
 
         static
         subscript(key:CodingKey) -> WritableKeyPath<Self, Int> { get }
@@ -34,13 +34,13 @@ extension Unidoc.StatsCounters where Self:BSONDocumentEncodable
         }
     }
 }
-extension Unidoc.StatsCounters where Self:BSONDocumentDecodable
+extension Unidoc.StatsCounters where Self:BSONKeyspaceDecodable
 {
     @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
+    init(bson:consuming BSON.KeyspaceDecoder<CodingKey>) throws
     {
         self = [:]
-        for field:BSON.FieldDecoder<CodingKey> in bson
+        while let field:BSON.FieldDecoder<CodingKey> = try bson[+]
         {
             self[keyPath: Self[field.key]] = try field.decode()
         }

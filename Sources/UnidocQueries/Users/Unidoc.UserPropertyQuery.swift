@@ -48,9 +48,9 @@ extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
         {
             $0[.packages]
             {
-                $0[stage: .replaceWith] = .init
+                $0[stage: .replaceWith, using: Unidoc.EditionOutput.CodingKey.self]
                 {
-                    $0[Unidoc.EditionOutput[.package]] = Mongo.Pipeline.ROOT
+                    $0[.package] = Mongo.Pipeline.ROOT
                 }
 
                 $0.loadEdition(matching: .latest(.release),

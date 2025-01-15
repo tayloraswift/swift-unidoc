@@ -43,9 +43,9 @@ extension Unidoc.PackagesQuery:Mongo.PipelineQuery
     {
         self.package.extend(pipeline: &pipeline)
 
-        pipeline[stage: .replaceWith] = .init
+        pipeline[stage: .replaceWith, using: Unidoc.EditionOutput.CodingKey.self]
         {
-            $0[Unidoc.EditionOutput[.package]] = Mongo.Pipeline.ROOT
+            $0[.package] = Mongo.Pipeline.ROOT
         }
 
         pipeline.loadEdition(matching: .latest(.release),

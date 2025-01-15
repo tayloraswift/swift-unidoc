@@ -23,7 +23,7 @@ extension MD5:@retroactive BSONBinaryDecodable
         }
         else
         {
-            throw BSON.ShapeError.init(invalid: bson.bytes.count, expected: .length(16))
+            throw BSON.BinaryShapeError.init(invalid: bson.bytes.count, expected: .size(16))
         }
     }
 }

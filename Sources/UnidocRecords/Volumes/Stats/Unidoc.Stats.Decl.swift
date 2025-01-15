@@ -149,10 +149,10 @@ extension Unidoc.Stats.Decl:ExpressibleByDictionaryLiteral
 }
 extension Unidoc.Stats.Decl:Unidoc.StatsCounters,
     BSONDocumentEncodable,
-    BSONDocumentDecodable
+    BSONKeyspaceDecodable
 {
     @frozen public
-    enum CodingKey:String, Sendable, CaseIterable
+    enum CodingKey:String, CaseIterable, BSON.Keyspace
     {
         case typealiases = "T"
         case structures = "V"

@@ -33,9 +33,9 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
         {
             $0[Aliases.Element[.id]] = self.symbol
         }
-        pipeline[stage: .replaceWith] = .init
+        pipeline[stage: .replaceWith, using: Output.CodingKey.self]
         {
-            $0[Output[.id]] = Aliases.Element[.coordinate]
+            $0[.id] = Aliases.Element[.coordinate]
         }
         pipeline[stage: .lookup]
         {
@@ -58,12 +58,9 @@ extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
 
                 $0[stage: .limit] = 1
 
-                $0[stage: .replaceWith] = .init
+                $0[stage: .replaceWith, using: Output.CodingKey.self]
                 {
-                    $0[Output[.id]] = .expr
-                    {
-                        $0[.add] = (Aliases.Element[.coordinate], 1)
-                    }
+                    $0[.id] { $0[.add] = (Aliases.Element[.coordinate], 1) }
                 }
             }
         }
