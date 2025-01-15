@@ -67,7 +67,7 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
         let patch:Mongo.AnyKeyPath = "_patch"
 
         //  We are only interested in the coordinate value stored in the alias documents.
-        pipeline[stage: .replaceWith] = .init
+        pipeline[stage: .replaceWith]
         {
             $0[Output[.package]] = Unidoc.PackageAlias[.id]
             $0[coordinate] = Unidoc.PackageAlias[.coordinate]

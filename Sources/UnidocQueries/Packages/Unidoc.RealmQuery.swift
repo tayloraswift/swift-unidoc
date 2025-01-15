@@ -69,9 +69,9 @@ extension Unidoc.RealmQuery:Unidoc.AliasingQuery
             $0[.foreignField] = Unidoc.PackageMetadata[.realm]
             $0[.pipeline]
             {
-                $0[stage: .replaceWith] = .init
+                $0[stage: .replaceWith, using: Unidoc.EditionOutput.CodingKey.self]
                 {
-                    $0[Unidoc.EditionOutput[.package]] = Mongo.Pipeline.ROOT
+                    $0[.package] = Mongo.Pipeline.ROOT
                 }
 
                 $0.loadEdition(matching: .latest(.release),

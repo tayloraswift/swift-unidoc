@@ -103,7 +103,7 @@ extension Mongo.PipelineEncoder
 
                 $0[stage: .limit] = limit
 
-                $0[stage: .replaceWith] = .init
+                $0[stage: .replaceWith]
                 {
                     $0[edition] = Mongo.Pipeline.ROOT
                 }
@@ -141,7 +141,7 @@ extension Mongo.PipelineEncoder
 
                 $0[stage: .limit] = limit
 
-                $0[stage: .replaceWith] = .init
+                $0[stage: .replaceWith]
                 {
                     $0[edition] = Mongo.Pipeline.ROOT
                 }
@@ -178,7 +178,7 @@ extension Mongo.PipelineEncoder
             $0[.foreignField] = Unidoc.Snapshot[.id]
             $0[.pipeline]
             {
-                $0[stage: .replaceWith] = .init(Unidoc.VersionState.Graph.CodingKey.self)
+                $0[stage: .replaceWith, using: Unidoc.VersionState.Graph.CodingKey.self]
                 {
                     $0[.id] = Unidoc.Snapshot[.id]
                     $0[.inlineBytes] = .expr

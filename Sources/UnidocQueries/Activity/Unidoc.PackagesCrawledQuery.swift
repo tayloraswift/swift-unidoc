@@ -45,9 +45,9 @@ extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
             }
         }
 
-        pipeline[stage: .replaceWith] = .init
+        pipeline[stage: .replaceWith, using: Date.CodingKey.self]
         {
-            $0[Date[.window]] = Mongo.Pipeline.ROOT
+            $0[.window] = Mongo.Pipeline.ROOT
         }
 
         let count:Mongo.AnyKeyPath = "_count"

@@ -1,4 +1,5 @@
 import Availability
+import BSON
 
 extension Availability
 {
@@ -6,7 +7,7 @@ extension Availability
     /// single-character raw value, for storage efficiency, and is not intended
     /// to be human-readable.
     @frozen public
-    struct CodingKey:Equatable, Hashable, Sendable
+    struct CodingKey:BSON.Keyspace
     {
         public
         let domain:AnyDomain
