@@ -35,36 +35,30 @@ extension HTTP.Client2
             .connectTimeout(.seconds(3))
             .channelInitializer
         {
-            (channel:any Channel) in
-
-            do
+            (channel:any Channel) in channel.eventLoop.makeCompletedFuture
             {
-                let tls:NIOSSLClientHandler = try .init(context: niossl,
+                let tlsHandler:NIOSSLClientHandler = try .init(context: niossl,
                     serverHostname: remote)
+                let multiplexer:NIOHTTP2Handler.StreamMultiplexer
 
-                return channel.pipeline.addHandler(tls)
-                    .flatMap
+                try channel.pipeline.syncOperations.addHandler(tlsHandler)
+
+                multiplexer = try channel.pipeline.syncOperations.configureHTTP2Pipeline(
+                    mode: .client,
+                    connectionConfiguration: .init(),
+                    streamConfiguration: .init())
                 {
-                    channel.configureHTTP2Pipeline(mode: .client,
-                        connectionConfiguration: .init(),
-                        streamConfiguration: .init())
+                    (channel:any Channel) in channel.eventLoop.makeCompletedFuture
                     {
                         //  With no owner, the stream is unsolicited and will drop any
                         //  responses it receives.
-                        $0.pipeline.addHandler(StreamHandler.init(owner: nil))
-                    }
-                        .flatMap
-                    {
-                        (multiplexer:NIOHTTP2Handler.StreamMultiplexer) in
-
-                        channel.pipeline.addHandler(InterfaceHandler.init(
-                            multiplexer: multiplexer))
+                        try channel.pipeline.syncOperations.addHandler(StreamHandler.init(
+                            owner: nil))
                     }
                 }
-            }
-            catch let error
-            {
-                return channel.eventLoop.makeFailedFuture(error)
+
+                try channel.pipeline.syncOperations.addHandler(InterfaceHandler.init(
+                    multiplexer: multiplexer))
             }
         }
 
