@@ -32,6 +32,9 @@ struct Main
         name: [.customLong("assume-encrypted")],
         help: "Assume that the connection is encrypted")
     var assumeEncrypted:Bool = false
+
+    @Flag(name: [.customLong("version")], help: "Print version information and exit")
+    var version:Bool = false
 }
 
 @main
@@ -39,6 +42,12 @@ extension Main:AsyncParsableCommand
 {
     func run() async throws
     {
+        if  self.version
+        {
+            print(Unidoc.version)
+            return
+        }
+
         NIOSingletons.groupLoopCountSuggestion = 2
 
         let clientIdentity:NIOSSLContext = try .clientDefault

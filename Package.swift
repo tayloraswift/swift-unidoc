@@ -148,6 +148,11 @@ let package:Package = .init(
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ]),
 
+        .target(name: "_GitVersion",
+            cSettings: [
+                .define("SWIFTPM_GIT_VERSION", to: "\"\(version)\"")
+            ]),
+
         .target(name: "AvailabilityDomain"),
 
         .target(name: "Availability",
@@ -476,6 +481,7 @@ let package:Package = .init(
 
         .target(name: "UnidocCLI",
             dependencies: [
+                .target(name: "_GitVersion"),
                 .target(name: "System_ArgumentParser"),
                 .target(name: "UnidocServer"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
@@ -770,4 +776,17 @@ for target:PackageDescription.Target in package.targets
 
         $0 = settings
     } (&target.swiftSettings)
+}
+
+var version:String
+{
+    if  let git:GitInformation = Context.gitInformation
+    {
+        let base:String = git.currentTag ?? git.currentCommit
+        return git.hasUncommittedChanges ? "\(base) (modified)" : base
+    }
+    else
+    {
+        return "(untracked)"
+    }
 }
