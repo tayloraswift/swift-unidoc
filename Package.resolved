@@ -1,5 +1,5 @@
 {
-  "originHash" : "243c8d3966ebc3a2ab3ef34168e2e9d9609eef1643c2e645f6fe395b909c1067",
+  "originHash" : "e1e5bc4097a648e30bd54ed58c2183ece694fa7de97d79d6e3ac430b8877cf50",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-bson",
       "state" : {
-        "revision" : "0fa7c4a61c509c78bcdc239f0185af188d9bc7da",
-        "version" : "0.9.0"
+        "revision" : "0d7c9735b726f931a67da00b836e8fd383f43cb3",
+        "version" : "1.0.0"
       }
     },
     {
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-grammar",
       "state" : {
-        "revision" : "4b47a153732e0b094ef7dd95d891b37b7ae37a69",
-        "version" : "0.4.1"
+        "revision" : "0dac977b50bf677b2c3adabd7d5586a7b6e09b17",
+        "version" : "0.5.0"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-ip",
       "state" : {
-        "revision" : "4e5becfec18bf491e7bf21225801a3e953f3ef25",
-        "version" : "0.3.2"
+        "revision" : "ba4efb6457f69f5f483094aa1230e8e76cc4999c",
+        "version" : "0.3.3"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-json",
       "state" : {
-        "revision" : "39e1388535aa0bb327880de5a69786396cc2bc9b",
-        "version" : "1.1.1"
+        "revision" : "264cb5b0cb691cc7753be0186e562745e8e47252",
+        "version" : "1.1.2"
       }
     },
     {
@@ -123,8 +123,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "bc7dd00cf20963cabcb564808184353080cc93c2",
-        "version" : "0.29.1"
+        "revision" : "3c45a4338770f7c6d9116a9becc64e0523e4817f",
+        "version" : "0.29.2"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio",
       "state" : {
-        "revision" : "dca6594f65308c761a9c409e09fbf35f48d50d34",
-        "version" : "2.77.0"
+        "revision" : "ba72f31e11275fc5bf060c966cf6c1f36842a291",
+        "version" : "2.79.0"
       }
     },
     {
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-png",
       "state" : {
-        "revision" : "f985834be36f6e49ca9ed5a52c29b4d20fca9e70",
-        "version" : "4.4.8"
+        "revision" : "d444d98aa32f022bf4a8e74b5a697c7ee856a6ad",
+        "version" : "4.4.9"
       }
     },
     {

@@ -65,7 +65,11 @@ extension HTTP.Client2.InterfaceHandler:ChannelOutboundHandler
         {
             self.multiplexer.createStreamChannel
             {
-                $0.pipeline.addHandler(HTTP.Client2.StreamHandler.init(owner: owner))
+                (channel:any Channel) in channel.eventLoop.makeCompletedFuture
+                {
+                    try channel.pipeline.syncOperations.addHandler(
+                        HTTP.Client2.StreamHandler.init(owner: owner))
+                }
             }
                 .whenComplete
             {
