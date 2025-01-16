@@ -34,35 +34,17 @@ extension HTTP.Client1
         {
             (channel:any Channel) in
 
-            guard
-            let niossl:NIOSSLContext
-            else
+            channel.eventLoop.makeCompletedFuture
             {
-                return channel.pipeline.addHTTPClientHandlers()
-                    .flatMap
+                if  let niossl:NIOSSLContext
                 {
-                    channel.pipeline.addHandler(InterfaceHandler.init())
+                    let tlsHandler:NIOSSLClientHandler = try .init(context: niossl,
+                        serverHostname: remote)
+                    try channel.pipeline.syncOperations.addHandler(tlsHandler)
                 }
-            }
 
-            do
-            {
-                let tls:NIOSSLClientHandler = try .init(context: niossl,
-                    serverHostname: remote)
-
-                return channel.pipeline.addHandler(tls)
-                    .flatMap
-                {
-                    channel.pipeline.addHTTPClientHandlers()
-                        .flatMap
-                    {
-                        channel.pipeline.addHandler(InterfaceHandler.init())
-                    }
-                }
-            }
-            catch let error
-            {
-                return channel.eventLoop.makeFailedFuture(error)
+                try channel.pipeline.syncOperations.addHTTPClientHandlers()
+                try channel.pipeline.syncOperations.addHandler(InterfaceHandler.init())
             }
         }
 

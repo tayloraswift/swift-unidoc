@@ -88,61 +88,59 @@ extension HTTP.Server
             {
                 (channel:any Channel) in
 
-                let encryptionHandlers:[any ChannelHandler]
-
-                switch encryption
+                if  case .local(let context) = encryption
                 {
-                case .local(let context):
-                    encryptionHandlers = [NIOSSLServerHandler.init(context: context)]
-
-                case .proxy:
-                    encryptionHandlers = []
+                    let encryptionHandler:NIOSSLServerHandler = .init(context: context)
+                    do
+                    {
+                        try channel.pipeline.syncOperations.addHandler(encryptionHandler)
+                    }
+                    catch let error
+                    {
+                        return channel.eventLoop.makeFailedFuture(error)
+                    }
                 }
 
-                return channel.pipeline.addHandlers(encryptionHandlers)
-                    .flatMap
+                return channel.configureAsyncHTTPServerPipeline
                 {
-                    channel.configureAsyncHTTPServerPipeline
+                    (connection:any Channel) in
+
+                    connection.eventLoop.makeCompletedFuture
                     {
-                        (connection:any Channel) in
+                        try connection.pipeline.syncOperations.addHandler(
+                            HTTP.OutboundShimHandler.init())
 
-                        connection.eventLoop.makeCompletedFuture
-                        {
-                            try connection.pipeline.syncOperations.addHandler(
-                                HTTP.OutboundShimHandler.init())
-
-                            return try NIOAsyncChannel<
-                                HTTPPart<HTTPRequestHead, ByteBuffer>,
-                                HTTPPart<HTTPResponseHead, ByteBuffer>>.init(
-                                wrappingChannelSynchronously: connection,
-                                configuration: .init())
-                        }
+                        return try NIOAsyncChannel<
+                            HTTPPart<HTTPRequestHead, ByteBuffer>,
+                            HTTPPart<HTTPResponseHead, ByteBuffer>>.init(
+                            wrappingChannelSynchronously: connection,
+                            configuration: .init())
                     }
-                        http2ConnectionInitializer:
-                    {
-                        (connection:any Channel) in
+                }
+                    http2ConnectionInitializer:
+                {
+                    (connection:any Channel) in
 
-                        connection.eventLoop.makeCompletedFuture { connection }
-                    }
-                        http2StreamInitializer:
-                    {
-                        (stream:any Channel) in
+                    connection.eventLoop.makeCompletedFuture { connection }
+                }
+                    http2StreamInitializer:
+                {
+                    (stream:any Channel) in
 
-                        stream.eventLoop.makeCompletedFuture
+                    stream.eventLoop.makeCompletedFuture
+                    {
+                        guard
+                        let id:HTTP2StreamID = try stream.syncOptions?.getOption(
+                            HTTP2StreamChannelOptions.streamID)
+                        else
                         {
-                            guard
-                            let id:HTTP2StreamID = try stream.syncOptions?.getOption(
-                                HTTP2StreamChannelOptions.streamID)
-                            else
-                            {
-                                throw HTTP.StreamIdentifierError.missing
-                            }
-
-                            return .init(frames: try .init(
-                                    wrappingChannelSynchronously: stream,
-                                    configuration: .init()),
-                                id: id)
+                            throw HTTP.StreamIdentifierError.missing
                         }
+
+                        return .init(frames: try .init(
+                                wrappingChannelSynchronously: stream,
+                                configuration: .init()),
+                            id: id)
                     }
                 }
             }
