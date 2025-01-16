@@ -79,21 +79,21 @@ let package:Package = .init(
     ],
     dependencies: [
         .package(url: "https://github.com/tayloraswift/swift-bson", .upToNextMinor(
-            from: "0.9.0")),
+            from: "1.0.0")),
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
             from: "1.1.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
-            from: "0.4.0")),
+            from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
             from: "0.7.1")),
         .package(url: "https://github.com/tayloraswift/swift-ip", .upToNextMinor(
-            from: "0.3.2")),
+            from: "0.3.3")),
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-            from: "1.1.0")),
+            from: "1.1.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.29.1")),
+            from: "0.29.2")),
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-            from: "4.4.8")),
+            from: "4.4.9")),
         .package(url: "https://github.com/tayloraswift/swift-ucf", .upToNextMinor(
             from: "0.1.0")),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
@@ -107,10 +107,8 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-collections", .upToNextMinor(
             from: "1.1.1")),
 
-        .package(url: "https://github.com/apple/swift-nio",
-            from: "2.68.0"),
-        .package(url: "https://github.com/apple/swift-nio-ssl",
-            from: "2.27.0"),
+        .package(url: "https://github.com/apple/swift-nio", from: "2.79.0"),
+        .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.27.0"),
 
         .package(url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
             from: "1.33.0")),
@@ -442,6 +440,11 @@ let package:Package = .init(
 
         .target(name: "TopologicalSorting"),
 
+        .target(name: "Testing_",
+            dependencies: [
+                .product(name: "Atomics", package: "swift-atomics"),
+            ]),
+
         .target(name: "UA",
             dependencies: [
                 .product(name: "Grammar", package: "swift-grammar"),
@@ -628,19 +631,19 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "PackageMetadata"),
                 .target(name: "System_"),
-                .product(name: "Testing_", package: "swift-grammar"),
+                .target(name: "Testing_"),
             ]),
 
         .executableTarget(name: "S3Tests",
             dependencies: [
                 .target(name: "S3Client"),
-                .product(name: "Testing_", package: "swift-grammar"),
+                .target(name: "Testing_"),
             ]),
 
         .executableTarget(name: "SemanticVersionTests",
             dependencies: [
                 .target(name: "SemanticVersions"),
-                .product(name: "Testing_", package: "swift-grammar"),
+                .target(name: "Testing_"),
             ]),
 
         .testTarget(name: "SymbolGraphValidationTests",
@@ -652,13 +655,13 @@ let package:Package = .init(
         .executableTarget(name: "SymbolGraphBuilderTests",
             dependencies: [
                 .target(name: "SymbolGraphBuilder"),
-                .product(name: "Testing_", package: "swift-grammar"),
+                .target(name: "Testing_"),
             ]),
 
         .executableTarget(name: "SymbolGraphCompilerTests",
             dependencies: [
                 .target(name: "SymbolGraphBuilder"),
-                .product(name: "Testing_", package: "swift-grammar"),
+                .target(name: "Testing_"),
             ]),
 
         .testTarget(name: "SymbolGraphLinkerTests",
@@ -671,25 +674,25 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "SymbolGraphParts"),
                 .target(name: "System_"),
-                .product(name: "Testing_", package: "swift-grammar"),
+                .target(name: "Testing_"),
             ]),
 
         .executableTarget(name: "SymbolGraphTests",
             dependencies: [
                 .target(name: "SymbolGraphs"),
-                .product(name: "Testing_", package: "swift-grammar"),
+                .target(name: "Testing_"),
             ]),
 
         .executableTarget(name: "SymbolTests",
             dependencies: [
                 .target(name: "Symbols"),
-                .product(name: "Testing_", package: "swift-grammar"),
+                .target(name: "Testing_"),
             ]),
 
         .executableTarget(name: "SystemTests",
             dependencies: [
                 .target(name: "System_"),
-                .product(name: "Testing_", package: "swift-grammar"),
+                .target(name: "Testing_"),
             ],
             exclude:
             [
@@ -698,14 +701,14 @@ let package:Package = .init(
 
         .executableTarget(name: "TopologicalSortingTests",
             dependencies: [
+                .target(name: "Testing_"),
                 .target(name: "TopologicalSorting"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .executableTarget(name: "UATests",
             dependencies: [
+                .target(name: "Testing_"),
                 .target(name: "UA"),
-                .product(name: "Testing_", package: "swift-grammar"),
             ]),
 
         .testTarget(name: "UnidocDBTests",
