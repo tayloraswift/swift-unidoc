@@ -65,12 +65,14 @@ extension SSGC
 }
 extension SSGC.Linker
 {
-    init(plugins:[any Markdown.CodeLanguageType] = [], modules:[SymbolGraph.Module])
+    init(definitions:[String: Void],
+        plugins:[any Markdown.CodeLanguageType],
+        modules:[SymbolGraph.Module])
     {
         //  If we were given a plugin that says it can highlight swift,
         //  make it the default plugin for the doccomment parser.
         let swift:(any Markdown.CodeLanguageType)? = plugins.first { $0.name == "swift" }
-        let tables:Tables = .init(modules: modules)
+        let tables:Tables = .init(definitions: definitions, modules: modules)
 
         self = .init(
             doccommentParser: .init(plugins: plugins, default: swift),

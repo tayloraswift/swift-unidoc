@@ -57,8 +57,8 @@ extension SSGC.Workspace
         validation:SSGC.ValidationBehavior = .ignoreErrors,
         clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, 
-            status: nil, 
+        try self.build(some: build,
+            toolchain: swift,
             logger: .init(validation: validation, file: nil),
             clean: clean)
     }
@@ -69,8 +69,8 @@ extension SSGC.Workspace
         validation:SSGC.ValidationBehavior = .ignoreErrors,
         clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build, toolchain: swift, 
-            status: nil, 
+        try self.build(some: build,
+            toolchain: swift,
             logger: .init(validation: validation, file: nil),
             clean: clean)
     }
@@ -79,11 +79,15 @@ extension SSGC.Workspace
 {
     func build<Build>(some build:consuming Build,
         toolchain swift:SSGC.Toolchain,
-        status:SSGC.StatusStream?,
+        define defines:[String] = [],
+        status:SSGC.StatusStream? = nil,
         logger:SSGC.Logger = .default(),
         clean:Bool) throws -> SymbolGraphObject<Void>
         where Build:SSGC.DocumentationBuild
     {
+        /// TODO: support values?
+        let definitions:[String: Void] = defines.reduce(into: [:]) { $0[$1] = () }
+
         let metadata:SymbolGraphMetadata
         let package:any SSGC.DocumentationSources
 
@@ -96,6 +100,7 @@ extension SSGC.Workspace
             clean: clean)
 
         let documentation:SymbolGraph = try package.link(
+            definitions: definitions,
             logger: logger,
             with: swift)
 

@@ -11,6 +11,7 @@ extension SSGC.Linker
     @_spi(testable) public
     struct Tables//:~Copyable
     {
+        let definitions:[String: Void]
         var diagnostics:Diagnostics<SSGC.Symbolicator>
 
         @_spi(testable) public
@@ -34,12 +35,15 @@ extension SSGC.Linker
         var graph:SymbolGraph
 
         @_spi(testable) public
-        init(diagnostics:Diagnostics<SSGC.Symbolicator> = .init(),
+        init(
+            definitions:[String: Void] = [:],
+            diagnostics:Diagnostics<SSGC.Symbolicator> = .init(),
             packageLinks:UCF.ResolutionTable<UCF.PackageOverload> = .init(),
             articleLinks:UCF.ArticleTable = .init(),
             anchors:SSGC.AnchorResolver = .init(),
             modules:[SymbolGraph.Module] = [])
         {
+            self.definitions = definitions
             self.diagnostics = diagnostics
             self.packageLinks = packageLinks
             self.articleLinks = articleLinks
@@ -57,7 +61,6 @@ extension SSGC.Linker
             self.files = [:]
 
             self.graph = .init(modules: modules)
-
         }
     }
 }
@@ -400,6 +403,7 @@ extension SSGC.Linker.Tables
     {
         var outliner:SSGC.Outliner = .init(
             resolver: .init(scopes: environment, tables: consume self))
+
         do
         {
             let success:Success = try body(&outliner)

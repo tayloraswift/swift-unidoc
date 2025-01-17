@@ -9,14 +9,19 @@ import Symbols
 extension SymbolGraph
 {
     public
-    static func link(projectRoot:Symbol.FileBase? = nil,
+    static func link(
+        projectRoot:Symbol.FileBase? = nil,
+        definitions:[String: Void],
         plugins:consuming [any Markdown.CodeLanguageType] = [],
         modules:consuming [SymbolGraph.Module],
         indexes:consuming [SSGC.ModuleIndex],
         snippets:[any SSGC.ResourceFile],
         logger:any DiagnosticLogger) throws -> Self
     {
-        var linker:SSGC.Linker = .init(plugins: plugins, modules: modules)
+        var linker:SSGC.Linker = .init(definitions: definitions,
+            plugins: plugins,
+            modules: modules)
+
         try linker.attach(snippets: snippets, indexes: indexes, projectRoot: projectRoot)
         try linker.collate()
 
