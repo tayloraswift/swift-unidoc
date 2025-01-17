@@ -29,13 +29,17 @@ extension UCF
 extension UCF.ProjectWideResolver
 {
     public
-    func resolve(_ selector:UCF.Selector) -> UCF.Resolution<any UCF.ResolvableOverload>
+    func resolve(_ selector:UCF.Selector) throws -> UCF.Resolution<any UCF.ResolvableOverload>
     {
+        let predicate:UCF.Predicate = try .init(from: selector)
         var rejected:[FNV24: any UCF.ResolvableOverload]
 
         if  let causal:UCF.ResolutionTable<UCF.CausalOverload> = self.causal
         {
-            switch causal.resolve(selector, in: self.scope)
+            switch causal.resolve(matching: predicate,
+                base: selector.base,
+                path: selector.path,
+                in: self.scope)
             {
             case .module(let module):
                 return .module(module)
@@ -58,7 +62,10 @@ extension UCF.ProjectWideResolver
             rejected = [:]
         }
 
-        switch self.global.resolve(selector, in: self.scope)
+        switch self.global.resolve(matching: predicate,
+            base: selector.base,
+            path: selector.path,
+            in: self.scope)
         {
         case .module(let module):
             return .module(module)

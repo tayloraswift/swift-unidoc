@@ -1,13 +1,5 @@
-import FNV1
 import UCF
 
-extension UCF.Selector
-{
-    var predicate:UCF.Predicate 
-    {
-        .init(suffix: self.suffix, seal: self.path.seal)
-    }
-}
 //  TODO: this does not belong in this module
 extension UCF.Selector
 {

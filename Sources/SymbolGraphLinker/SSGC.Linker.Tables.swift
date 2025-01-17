@@ -254,7 +254,7 @@ extension SSGC.Linker.Tables
                 imports: []),
             global: self.packageLinks)
 
-        switch resolver.resolve(selector)
+        switch try resolver.resolve(selector)
         {
         case .module(let module):
             throw SSGC.SupplementBindingError.init(selector: selector,
