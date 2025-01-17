@@ -31,7 +31,9 @@ extension SSGC
 }
 extension SSGC.DocumentationSources
 {
-    func link(logger:SSGC.Logger, with swift:SSGC.Toolchain) throws -> SymbolGraph
+    func link(definitions:[String: Void],
+        logger:SSGC.Logger,
+        with swift:SSGC.Toolchain) throws -> SymbolGraph
     {
         let moduleLayouts:[SSGC.ModuleLayout] = self.cultures
         let snippets:[SSGC.LazyFile] = self.snippets
@@ -143,6 +145,7 @@ extension SSGC.DocumentationSources
             let graph:SymbolGraph = try profiler.measure(\.linking)
             {
                 try .link(projectRoot: prefix,
+                    definitions: definitions,
                     plugins: [.swift(index: index)],
                     modules: moduleLayouts.map(\.module),
                     indexes: moduleIndexes,
