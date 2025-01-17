@@ -110,7 +110,18 @@ extension SSGC.OutlineResolver
             return nil
         }
 
-        switch self.codelinks.resolve(selector)
+        let resolution:UCF.Resolution<any UCF.ResolvableOverload>
+        do
+        {
+            resolution = try self.codelinks.resolve(selector)
+        }
+        catch let error
+        {
+            self.diagnostics[location] = .error(error)
+            return nil
+        }
+
+        switch resolution
         {
         case .overload(let overload as UCF.PackageOverload):
             //  For renames, we do not distinguish between members and features.
@@ -146,7 +157,18 @@ extension SSGC.OutlineResolver
             return nil
         }
 
-        switch self.scopes.causalURLs.resolve(qualified: translatable)
+        let resolution:UCF.Resolution<UCF.CausalOverload>
+        do
+        {
+            resolution = try self.scopes.causalURLs.resolve(qualified: translatable)
+        }
+        catch let error
+        {
+            self.diagnostics[url.suffix.source] = .error(error)
+            return nil
+        }
+
+        switch resolution
         {
         case .module(let module):
             //  Unidoc linker doesn’t currently support `symbol` outlines that are not
@@ -299,7 +321,20 @@ extension SSGC.OutlineResolver
     {
         let chosen:any UCF.ResolvableOverload
 
-        switch self.codelinks.resolve(codelink)
+        let ignoreUnresolvedCodelinks:Bool
+        let resolution:UCF.Resolution<any UCF.ResolvableOverload>
+        do
+        {
+            ignoreUnresolvedCodelinks = try codelink.ignore(when: self.tables.definitions)
+            resolution = try self.codelinks.resolve(codelink)
+        }
+        catch let error
+        {
+            self.diagnostics[source] = .error(error)
+            return nil
+        }
+
+        switch resolution
         {
         case .module(let module):
             return (self.tables.intern(module) * .module, nil)
@@ -311,7 +346,12 @@ extension SSGC.OutlineResolver
             chosen = overload
 
         case .ambiguous(let overloads, rejected: let rejected):
-            guard overloads.isEmpty, rejected.count == 1
+            if  ignoreUnresolvedCodelinks, overloads.isEmpty
+            {
+                return nil
+            }
+
+            guard rejected.count == 1, overloads.isEmpty
             else
             {
                 self.diagnostics[source] = UCF.ResolutionError<SSGC.Symbolicator>.init(
