@@ -213,6 +213,28 @@ extension UCF.Predicate
             case (.var(.instance?),         .var):              given = true
             case (.var(.class?),            .class_var):        given = true
             case (.var(.static?),           .static_var):       given = true
+
+            case (_,                        .actor):            given = false
+            case (_,                        .associatedtype):   given = false
+            case (_,                        .case):             given = false
+            case (_,                        .class):            given = false
+            case (_,                        .deinit):           given = false
+            case (_,                        .enum):             given = false
+            case (_,                        .func):             given = false
+            case (_,                        .class_func):       given = false
+            case (_,                        .static_func):      given = false
+            case (_,                        .`init`):           given = false
+            case (_,                        .macro):            given = false
+            case (_,                        .protocol):         given = false
+            case (_,                        .struct):           given = false
+            case (_,                        .subscript):        given = false
+            case (_,                        .class_subscript):  given = false
+            case (_,                        .static_subscript): given = false
+            case (_,                        .typealias):        given = false
+            case (_,                        .var):              given = false
+            case (_,                        .class_var):        given = false
+            case (_,                        .static_var):       given = false
+
             case (_,                        .requirement):      given = kinks[is: .required]
             default:                                            continue
             }
