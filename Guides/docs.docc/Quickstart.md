@@ -27,11 +27,11 @@ Pre-built binaries are available for a limited set of platforms.
 
 | Platform | Architecture | Download |
 | -------- | ------------ | -------- |
-| macOS 15 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/macOS-ARM64/unidoc.tar.gz) |
-| Ubuntu 24.04 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-24.04-ARM64/unidoc.tar.gz) |
-| Ubuntu 24.04 | x86_64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-24.04-X64/unidoc.tar.gz) |
-| Ubuntu 22.04 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-22.04-ARM64/unidoc.tar.gz) |
-| Ubuntu 22.04 | x86_64 | [tar.gz](https://download.swiftinit.org/unidoc/0.20.1/Ubuntu-22.04-X64/unidoc.tar.gz) |
+| macOS 15 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.21.0/macOS-ARM64/unidoc.tar.gz) |
+| Ubuntu 24.04 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.21.0/Ubuntu-24.04-ARM64/unidoc.tar.gz) |
+| Ubuntu 24.04 | x86_64 | [tar.gz](https://download.swiftinit.org/unidoc/0.21.0/Ubuntu-24.04-X64/unidoc.tar.gz) |
+| Ubuntu 22.04 | arm64 | [tar.gz](https://download.swiftinit.org/unidoc/0.21.0/Ubuntu-22.04-ARM64/unidoc.tar.gz) |
+| Ubuntu 22.04 | x86_64 | [tar.gz](https://download.swiftinit.org/unidoc/0.21.0/Ubuntu-22.04-X64/unidoc.tar.gz) |
 
 
 You can download and install the binary under `/usr/local/bin` like this:
