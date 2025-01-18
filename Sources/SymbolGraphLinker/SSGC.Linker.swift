@@ -337,6 +337,7 @@ extension SSGC.Linker
                         autograph: feature.autograph,
                         phylum: feature.phylum,
                         kinks: feature.kinks,
+                        async: feature.async,
                         hash: .decl(.init(id, self: $0.extendee.id))),
                     decl: f,
                     heir: extendee,

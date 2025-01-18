@@ -86,6 +86,11 @@ extension SignatureSyntax
 
         builder.encode(decl: .parse(from: &parser))
 
+        landmarks.keywords.actor = builder.visitor.actor
+        landmarks.keywords.async = builder.visitor.async
+        landmarks.keywords.class = builder.visitor.class
+        landmarks.keywords.final = builder.visitor.final
+
         landmarks.inputs = builder.visitor.inputs
         landmarks.output = builder.visitor.output
 

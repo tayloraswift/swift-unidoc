@@ -7,6 +7,14 @@ extension SignatureSyntax
     {
         let sugarMap:SugarMap
 
+        var actor:Bool
+        private(set)
+        var async:Bool
+        private(set)
+        var `class`:Bool
+        private(set)
+        var final:Bool
+
         private(set)
         var inputs:[String]
         private(set)
@@ -16,11 +24,16 @@ extension SignatureSyntax
         init(sugaring sugarMap:SugarMap)
         {
             self.sugarMap = sugarMap
+            self.actor = false
+            self.async = false
+            self.class = false
+            self.final = false
             self.inputs = []
             self.output = []
         }
     }
 }
+
 extension SignatureSyntax.ExpandedVisitor:SignatureVisitor
 {
     mutating
@@ -32,6 +45,48 @@ extension SignatureSyntax.ExpandedVisitor:SignatureVisitor
         autographer.encode(parameter: parameter)
         inputs.append(autographer.autograph)
         return .init(syntax: parameter)
+    }
+}
+extension SignatureSyntax.ExpandedVisitor
+{
+    mutating
+    func mark(with modifiers:DeclModifierListSyntax)
+    {
+        for modifier:DeclModifierSyntax in modifiers
+        {
+            switch modifier.name.tokenKind
+            {
+            case .keyword(.class):  self.class = true
+            case .keyword(.final):  self.final = true
+            default:                continue
+            }
+        }
+    }
+
+    mutating
+    func mark(with effects:FunctionEffectSpecifiersSyntax?)
+    {
+        if  case .keyword(.async)? = effects?.asyncSpecifier?.tokenKind
+        {
+            self.async = true
+        }
+    }
+
+    mutating
+    func mark(with accessorBlock:AccessorBlockSyntax?)
+    {
+        if  case .accessors(let accessors)? = accessorBlock?.accessors
+        {
+            for accessor:AccessorDeclSyntax in accessors
+            {
+                if  let effects:AccessorEffectSpecifiersSyntax = accessor.effectSpecifiers,
+                    case .keyword(.get) = accessor.accessorSpecifier.tokenKind,
+                    case .keyword(.async)? = effects.asyncSpecifier?.tokenKind
+                {
+                    self.async = true
+                }
+            }
+        }
     }
 }
 extension SignatureSyntax.ExpandedVisitor

@@ -20,6 +20,8 @@ extension SymbolGraphPart
         public
         let phylum:Phylum
         public
+        let async:Bool
+        public
         let final:Bool
 
         public
@@ -43,6 +45,7 @@ extension SymbolGraphPart
             usr:Symbol.USR,
             acl:Symbol.ACL,
             phylum:Phylum,
+            async:Bool,
             final:Bool,
             extension:ExtensionContext,
             signature:Signature<Symbol.Decl>,
@@ -54,6 +57,7 @@ extension SymbolGraphPart
             self.usr = usr
             self.acl = acl
             self.phylum = phylum
+            self.async = async
             self.final = final
             self.extension = `extension`
             self.signature = signature
@@ -169,6 +173,7 @@ extension SymbolGraphPart.Vertex
             usr: usr,
             acl: acl,
             phylum: phylum,
+            async: landmarks.keywords.async,
             //  Actors would also imply `final`, but we don’t want to flatten that here.
             final: landmarks.keywords.final,
             extension: `extension`,
