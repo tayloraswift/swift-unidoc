@@ -66,6 +66,12 @@ extension SSGC
 
 
         @Option(
+            name: [.customLong("define"), .customShort("D")],
+            parsing: .unconditionalSingleValue,
+            help: "Define a trait for the Documentation compiler")
+        var defines:[String] = []
+
+        @Option(
             name: [.customLong("Xswiftc")],
             parsing: .unconditionalSingleValue,
             help: "Extra flags to pass to the Swift compiler")
@@ -304,6 +310,7 @@ extension SSGC.CompileCommand
 
             object = try workspace.build(some: build,
                 toolchain: toolchain,
+                define: self.defines,
                 status: status,
                 logger: logger,
                 clean: self.cleanArtifacts)
@@ -312,6 +319,7 @@ extension SSGC.CompileCommand
         {
             object = try workspace.build(some: SSGC.StandardLibraryBuild.swift,
                 toolchain: toolchain,
+                define: self.defines,
                 status: status,
                 logger: logger,
                 clean: self.cleanArtifacts)
@@ -355,6 +363,7 @@ extension SSGC.CompileCommand
 
             object = try workspace.build(some: build,
                 toolchain: toolchain,
+                define: self.defines,
                 status: status,
                 logger: logger,
                 clean: self.cleanArtifacts)

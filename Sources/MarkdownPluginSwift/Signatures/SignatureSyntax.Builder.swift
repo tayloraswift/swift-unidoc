@@ -52,28 +52,57 @@ extension SignatureSyntax.Builder<SignatureSyntax.ExpandedVisitor>
     {
         //  It’s easier to detect the return type this way, since we don’t inject any
         //  indentation markers into its syntax.
-        if  let decl:FunctionDeclSyntax = decl.as(FunctionDeclSyntax.self),
-            let returns:ReturnClauseSyntax = decl.signature.returnClause
+        if  let decl:InitializerDeclSyntax = decl.as(InitializerDeclSyntax.self)
         {
-            self.visitor.register(returns: returns.type)
+            self.visitor.mark(with: decl.modifiers)
+            self.visitor.mark(with: decl.signature.effectSpecifiers)
+        }
+        else if
+            let decl:FunctionDeclSyntax = decl.as(FunctionDeclSyntax.self)
+        {
+            self.visitor.mark(with: decl.modifiers)
+            self.visitor.mark(with: decl.signature.effectSpecifiers)
+            if  let returns:ReturnClauseSyntax = decl.signature.returnClause
+            {
+                self.visitor.register(returns: returns.type)
+            }
         }
         else if
             let decl:SubscriptDeclSyntax = decl.as(SubscriptDeclSyntax.self)
         {
+            self.visitor.mark(with: decl.modifiers)
+            self.visitor.mark(with: decl.accessorBlock)
+
             self.visitor.register(returns: decl.returnClause.type)
         }
         else if
             let decl:VariableDeclSyntax = decl.as(VariableDeclSyntax.self),
-            let type:TypeSyntax = decl.bindings.first?.typeAnnotation?.type
+            let binding:PatternBindingSyntax = decl.bindings.first
         {
-            self.visitor.register(returns: type)
+            self.visitor.mark(with: decl.modifiers)
+            self.visitor.mark(with: binding.accessorBlock)
+            if  let type:TypeSyntax = binding.typeAnnotation?.type
+            {
+                self.visitor.register(returns: type)
+            }
+        }
+        else if
+            let decl:ActorDeclSyntax = decl.as(ActorDeclSyntax.self)
+        {
+            self.visitor.mark(with: decl.modifiers)
+            self.visitor.actor = true
+        }
+        else if
+            let decl:ClassDeclSyntax = decl.as(ClassDeclSyntax.self)
+        {
+            self.visitor.mark(with: decl.modifiers)
         }
 
         for region:Syntax in decl.children(viewMode: .sourceAccurate)
         {
             if  let region:TokenSyntax = region.as(TokenSyntax.self)
             {
-                //  Allows us to detect phylum keywords.
+                //  Do we still need this?
                 self.encoder[at: .toplevel] += region
             }
             else if
@@ -84,7 +113,7 @@ extension SignatureSyntax.Builder<SignatureSyntax.ExpandedVisitor>
             else if
                 let region:DeclModifierListSyntax = region.as(DeclModifierListSyntax.self)
             {
-                //  Allows us to detect `class` modifier keywords.
+                //  Do we still need this?
                 self.encoder[at: .toplevel] += region
             }
             else if
