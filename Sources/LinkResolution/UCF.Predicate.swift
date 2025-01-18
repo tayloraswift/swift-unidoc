@@ -235,6 +235,7 @@ extension UCF.Predicate
             case (_,                        .class_var):        given = false
             case (_,                        .static_var):       given = false
 
+            case (_,                        .async):            given = traits.async
             case (_,                        .requirement):      given = kinks[is: .required]
             default:                                            continue
             }

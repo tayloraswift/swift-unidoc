@@ -85,6 +85,7 @@ extension SSGC.Declarations
                     phylum: phylum,
                     path: vertex.path,
                     kinks: kinks,
+                    async: vertex.async,
                     comment: vertex.doccomment.map { .init($0.text, at: $0.start) } ?? nil))
 
             $0 = decl

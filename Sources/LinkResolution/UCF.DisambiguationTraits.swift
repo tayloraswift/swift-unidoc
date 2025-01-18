@@ -14,17 +14,21 @@ extension UCF
         public
         let kinks:Phylum.Decl.Kinks
         public
+        let async:Bool
+        public
         let hash:FNV24
 
         @inlinable public
         init(autograph:Autograph?,
             phylum:Phylum.Decl,
             kinks:Phylum.Decl.Kinks,
+            async:Bool,
             hash:FNV24)
         {
             self.autograph = autograph
             self.phylum = phylum
             self.kinks = kinks
+            self.async = async
             self.hash = hash
         }
     }

@@ -123,18 +123,6 @@ extension Signature.Expanded
                         default:                break
                         }
                     }
-                    if  case .keyword = color
-                    {
-                        //  The `actor` and `async` keywords are contextual; there is no
-                        //  other way to detect them besides inspecting token text!
-                        switch String.init(decoding: utf8[range], as: Unicode.UTF8.self)
-                        {
-                        case "actor":           landmarks.keywords.actor = true
-                        case "class":           landmarks.keywords.class = true
-                        case "final":           landmarks.keywords.final = true
-                        default:                break
-                        }
-                    }
 
                     fallthrough
 

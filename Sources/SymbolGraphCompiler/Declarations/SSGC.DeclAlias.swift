@@ -16,6 +16,8 @@ extension SSGC
         public
         let kinks:Phylum.Decl.Kinks
         public
+        let async:Bool
+        public
         let path:UnqualifiedPath
         public
         let documented:Bool
@@ -23,12 +25,14 @@ extension SSGC
         init(autograph:UCF.Autograph?,
             phylum:Phylum.Decl,
             kinks:Phylum.Decl.Kinks,
+            async:Bool,
             path:UnqualifiedPath,
             documented:Bool)
         {
             self.autograph = autograph
             self.phylum = phylum
             self.kinks = kinks
+            self.async = async
             self.path = path
             self.documented = documented
         }
@@ -42,6 +46,7 @@ extension SSGC.DeclAlias
             autograph: decl.autograph,
             phylum: decl.phylum,
             kinks: decl.kinks,
+            async: decl.async,
             path: decl.path,
             documented: decl.comment != nil)
     }

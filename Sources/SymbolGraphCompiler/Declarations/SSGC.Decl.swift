@@ -26,6 +26,8 @@ extension SSGC
         public
         let phylum:Phylum.Decl
         public
+        let async:Bool
+        public
         let path:UnqualifiedPath
 
         /// Protocol requirements.
@@ -67,6 +69,7 @@ extension SSGC
             phylum:Phylum.Decl,
             path:UnqualifiedPath,
             kinks:Phylum.Decl.Kinks,
+            async:Bool,
             comment:DocumentationComment?)
         {
             self.id = id
@@ -75,6 +78,7 @@ extension SSGC
             self.autograph = autograph
             self.location = location
             self.phylum = phylum
+            self.async = async
             self.path = path
 
             self.requirements = []
@@ -96,6 +100,7 @@ extension SSGC.Decl
             autograph: self.autograph,
             phylum: self.phylum,
             kinks: self.kinks,
+            async: self.async,
             hash: .decl(self.id))
     }
 
@@ -106,6 +111,7 @@ extension SSGC.Decl
             autograph: self.autograph,
             phylum: self.phylum,
             kinks: self.kinks,
+            async: self.async,
             hash: .decl(.init(self.id, self: heir)))
     }
 }
