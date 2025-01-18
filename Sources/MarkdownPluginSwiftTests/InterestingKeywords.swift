@@ -26,6 +26,63 @@ struct InterestingKeywords
         #expect("\(signature.bytecode.safe)" == decl)
         #expect(self.landmarks.keywords.actor)
     }
+
+    @Test mutating
+    func Async1()
+    {
+        let decl:String = "func f() async"
+
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
+
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.async)
+    }
+    @Test mutating
+    func Async2()
+    {
+        let decl:String = "func async(async: Int)"
+
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
+
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(!self.landmarks.keywords.async)
+    }
+    @Test mutating
+    func Async3()
+    {
+        let decl:String = "func f(_: (Int) async -> ())"
+
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
+
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(!self.landmarks.keywords.async)
+    }
+    @Test mutating
+    func Async4()
+    {
+        let decl:String = "subscript(i: Int) { get async throws set }"
+
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
+
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.async)
+    }
+    @Test mutating
+    func Async5()
+    {
+        let decl:String = "var x: Int { get async set }"
+
+        let signature:Signature<Never>.Expanded = .init(decl,
+            landmarks: &self.landmarks)
+
+        #expect("\(signature.bytecode.safe)" == decl)
+        #expect(self.landmarks.keywords.async)
+    }
+
     @Test mutating
     func Final()
     {

@@ -99,25 +99,28 @@ extension UCF.ResolutionTable
 extension UCF.ResolutionTable
 {
     public
-    func resolve(qualified:UCF.Selector) -> UCF.Resolution<Overload>
+    func resolve(qualified:UCF.Selector) throws -> UCF.Resolution<Overload>
     {
-        var search:Search = .init(matching: qualified.predicate)
+        let predicate:UCF.Predicate = try .init(from: qualified)
+        var search:Search = .init(matching: predicate)
         return self.resolve(qualified: qualified.path, with: &search)
     }
 
-    func resolve(_ selector:UCF.Selector,
+    func resolve(matching predicate:UCF.Predicate,
+        base:UCF.Selector.Base,
+        path:UCF.Selector.Path,
         in scope:UCF.ResolutionScope) -> UCF.Resolution<Overload>
     {
-        var search:Search = .init(matching: selector.predicate)
+        var search:Search = .init(matching: predicate)
 
-        if  case .relative = selector.base
+        if  case .relative = base
         {
             let ends:ClosedRange<Int> = scope.path.startIndex ... scope.path.endIndex
             for end:Int in ends.reversed()
             {
                 let path:UCF.ResolutionPath = .join(["\(scope.namespace)"]
                     + scope.path.prefix(upTo: end)
-                    + selector.path.components)
+                    + path.components)
 
                 if  let list:InlineArray<Overload> = self.entries[path]
                 {
@@ -132,7 +135,7 @@ extension UCF.ResolutionTable
             for namespace:Symbol.Module in self.modules.values where
                 namespace != scope.namespace
             {
-                let path:UCF.ResolutionPath = .join(["\(namespace)"] + selector.path.components)
+                let path:UCF.ResolutionPath = .join(["\(namespace)"] + path.components)
                 if  let list:InlineArray<Overload> = self.entries[path]
                 {
                     search.add(list)
@@ -145,7 +148,7 @@ extension UCF.ResolutionTable
             }
         }
 
-        return self.resolve(qualified: selector.path, with: &search)
+        return self.resolve(qualified: path, with: &search)
     }
 
     private

@@ -1,5 +1,5 @@
 {
-  "originHash" : "e1e5bc4097a648e30bd54ed58c2183ece694fa7de97d79d6e3ac430b8877cf50",
+  "originHash" : "ac889a2138081f33b7082197e1abaad3a29c5bd9bfc43d6642472e675a7b8fdc",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -186,8 +186,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-ucf",
       "state" : {
-        "revision" : "b9e4a2d860a47877c0ee71c56f2381587609e086",
-        "version" : "0.1.0"
+        "revision" : "f3f9ed12bad3915fefb5653fd0eda8555b586c97",
+        "version" : "0.2.0"
       }
     },
     {

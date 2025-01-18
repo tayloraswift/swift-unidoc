@@ -8,6 +8,8 @@ extension SignatureLandmarks
         public
         var actor:Bool
         public
+        var async:Bool
+        public
         var attached:Bool
         public
         var `class`:Bool
@@ -17,13 +19,16 @@ extension SignatureLandmarks
         var freestanding:Bool
 
         @inlinable
-        init(actor:Bool = false,
+        init(
+            actor:Bool = false,
+            async:Bool = false,
             attached:Bool = false,
             `class`:Bool = false,
             final:Bool = false,
             freestanding:Bool = false)
         {
             self.actor = actor
+            self.async = async
             self.attached = attached
             self.class = `class`
             self.final = final

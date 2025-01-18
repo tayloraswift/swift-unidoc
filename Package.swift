@@ -95,7 +95,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.9")),
         .package(url: "https://github.com/tayloraswift/swift-ucf", .upToNextMinor(
-            from: "0.1.0")),
+            from: "0.2.0")),
         .package(url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
             from: "0.2.0")),
 
