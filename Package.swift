@@ -62,8 +62,6 @@ let package:Package = .init(
         .library(name: "System_", targets: ["System_"]),
         .library(name: "System_ArgumentParser", targets: ["System_ArgumentParser"]),
 
-        .library(name: "UA", targets: ["UA"]),
-
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
         .library(name: "UnidocAssets_System", targets: ["UnidocAssets_System"]),
@@ -205,7 +203,6 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "_AsyncChannel"),
                 .target(name: "HTTP"),
-                .target(name: "UA"),
 
                 .product(name: "Firewalls", package: "swift-ip"),
                 .product(name: "IP", package: "swift-ip"),
@@ -448,11 +445,6 @@ let package:Package = .init(
         .target(name: "Testing_",
             dependencies: [
                 .product(name: "Atomics", package: "swift-atomics"),
-            ]),
-
-        .target(name: "UA",
-            dependencies: [
-                .product(name: "Grammar", package: "swift-grammar"),
             ]),
 
         .target(name: "Unidoc"),
@@ -709,11 +701,6 @@ let package:Package = .init(
             dependencies: [
                 .target(name: "Testing_"),
                 .target(name: "TopologicalSorting"),
-            ]),
-
-        .testTarget(name: "UATests",
-            dependencies: [
-                .target(name: "UA"),
             ]),
 
         .testTarget(name: "UnidocDBTests",

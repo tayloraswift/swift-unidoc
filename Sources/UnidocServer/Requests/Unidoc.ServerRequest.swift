@@ -3,7 +3,6 @@ import HTTPServer
 import IP
 import NIOHPACK
 import NIOHTTP1
-import UA
 import UnidocRecords
 import UnixTime
 import URI
