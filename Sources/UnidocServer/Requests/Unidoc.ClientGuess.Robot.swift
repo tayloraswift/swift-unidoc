@@ -34,6 +34,8 @@ extension Unidoc.ClientGuess
         case google
         /// Crawler belonging to Google, an American search engine.
         case googlebot
+
+        case googleOther
         /// Crawler belonging to Quant, a French search engine.
         case quant
         /// Crawler belonging to Naver, a Korean search engine.
