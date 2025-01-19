@@ -711,9 +711,8 @@ let package:Package = .init(
                 .target(name: "TopologicalSorting"),
             ]),
 
-        .executableTarget(name: "UATests",
+        .testTarget(name: "UATests",
             dependencies: [
-                .target(name: "Testing_"),
                 .target(name: "UA"),
             ]),
 
