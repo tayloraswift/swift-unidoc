@@ -29,7 +29,7 @@ enum Main:TestMain, TestBattery
         }
         if  let tests:TestGroup = tests / "Scalar" / "InvalidCharacters"
         {
-            tests.expect(nil: Symbol.USR.init("s:s12Identifi+ableP"))
+            tests.expect(nil: Symbol.USR.init("s:s12Identifi ableP"))
         }
 
         if  let tests:TestGroup = tests / "Compound"
