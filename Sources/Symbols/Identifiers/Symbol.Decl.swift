@@ -57,8 +57,8 @@ extension Symbol.Decl
     /// mangled suffix, returning nil if the suffix contains characters
     /// that are not allowed to appear in a symbol identifier.
     ///
-    /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, '(', ')', '*', ':', '.', '-', `@`,
-    /// `#`, and `$`.
+    /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, '(', ')', '*', '+', ':', '.', '-',
+    /// `@`, `#`, and `$`.
     @inlinable public
     init?(_ language:Language, _ suffix:some StringProtocol)
     {
@@ -79,6 +79,7 @@ extension Symbol.Decl
             case "(":           continue
             case ")":           continue
             case "*":           continue
+            case "+":           continue
             case "0" ... "9":   continue
             case "@":           continue
             case "A" ... "Z":   continue
