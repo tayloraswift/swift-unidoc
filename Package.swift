@@ -636,10 +636,9 @@ let package:Package = .init(
                 .target(name: "S3Client"),
             ]),
 
-        .executableTarget(name: "SemanticVersionTests",
+        .testTarget(name: "SemanticVersionTests",
             dependencies: [
                 .target(name: "SemanticVersions"),
-                .target(name: "Testing_"),
             ]),
 
         .testTarget(name: "SymbolGraphValidationTests",
