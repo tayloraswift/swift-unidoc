@@ -672,10 +672,9 @@ let package:Package = .init(
                 .target(name: "Testing_"),
             ]),
 
-        .executableTarget(name: "SymbolGraphTests",
+        .testTarget(name: "SymbolGraphTests",
             dependencies: [
                 .target(name: "SymbolGraphs"),
-                .target(name: "Testing_"),
             ]),
 
         .executableTarget(name: "SymbolTests",
@@ -689,8 +688,7 @@ let package:Package = .init(
                 .target(name: "System_"),
                 .target(name: "Testing_"),
             ],
-            exclude:
-            [
+            exclude: [
                 "directories",
             ]),
 
