@@ -690,9 +690,8 @@ let package:Package = .init(
                 "directories",
             ]),
 
-        .executableTarget(name: "TopologicalSortingTests",
+        .testTarget(name: "TopologicalSortingTests",
             dependencies: [
-                .target(name: "Testing_"),
                 .target(name: "TopologicalSorting"),
             ]),
 
