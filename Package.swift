@@ -682,10 +682,9 @@ let package:Package = .init(
                 .target(name: "Symbols"),
             ]),
 
-        .executableTarget(name: "SystemTests",
+        .testTarget(name: "SystemTests",
             dependencies: [
                 .target(name: "System_"),
-                .target(name: "Testing_"),
             ],
             exclude: [
                 "directories",
