@@ -23,9 +23,3 @@ extension SymbolGraphMetadata.Package:Identifiable
     @inlinable public
     var id:Symbol.Package { self.scope.map { $0 | self.name } ?? self.name }
 }
-@available(*, deprecated)
-extension SymbolGraphMetadata.Package:CustomStringConvertible
-{
-    public
-    var description:String { fatalError() }
-}
