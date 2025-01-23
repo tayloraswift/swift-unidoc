@@ -625,23 +625,20 @@ let package:Package = .init(
                 .target(name: "MarkdownRendering"),
             ]),
 
-        .executableTarget(name: "PackageMetadataTests",
+        .testTarget(name: "PackageMetadataTests",
             dependencies: [
                 .target(name: "PackageMetadata"),
                 .target(name: "System_"),
-                .target(name: "Testing_"),
             ]),
 
-        .executableTarget(name: "S3Tests",
+        .testTarget(name: "S3Tests",
             dependencies: [
                 .target(name: "S3Client"),
-                .target(name: "Testing_"),
             ]),
 
-        .executableTarget(name: "SemanticVersionTests",
+        .testTarget(name: "SemanticVersionTests",
             dependencies: [
                 .target(name: "SemanticVersions"),
-                .target(name: "Testing_"),
             ]),
 
         .testTarget(name: "SymbolGraphValidationTests",
@@ -675,31 +672,26 @@ let package:Package = .init(
                 .target(name: "Testing_"),
             ]),
 
-        .executableTarget(name: "SymbolGraphTests",
+        .testTarget(name: "SymbolGraphTests",
             dependencies: [
                 .target(name: "SymbolGraphs"),
-                .target(name: "Testing_"),
             ]),
 
-        .executableTarget(name: "SymbolTests",
+        .testTarget(name: "SymbolTests",
             dependencies: [
                 .target(name: "Symbols"),
-                .target(name: "Testing_"),
             ]),
 
-        .executableTarget(name: "SystemTests",
+        .testTarget(name: "SystemTests",
             dependencies: [
                 .target(name: "System_"),
-                .target(name: "Testing_"),
             ],
-            exclude:
-            [
+            exclude: [
                 "directories",
             ]),
 
-        .executableTarget(name: "TopologicalSortingTests",
+        .testTarget(name: "TopologicalSortingTests",
             dependencies: [
-                .target(name: "Testing_"),
                 .target(name: "TopologicalSorting"),
             ]),
 
