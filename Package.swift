@@ -677,10 +677,9 @@ let package:Package = .init(
                 .target(name: "SymbolGraphs"),
             ]),
 
-        .executableTarget(name: "SymbolTests",
+        .testTarget(name: "SymbolTests",
             dependencies: [
                 .target(name: "Symbols"),
-                .target(name: "Testing_"),
             ]),
 
         .executableTarget(name: "SystemTests",
