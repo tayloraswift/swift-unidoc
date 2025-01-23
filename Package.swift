@@ -625,11 +625,10 @@ let package:Package = .init(
                 .target(name: "MarkdownRendering"),
             ]),
 
-        .executableTarget(name: "PackageMetadataTests",
+        .testTarget(name: "PackageMetadataTests",
             dependencies: [
                 .target(name: "PackageMetadata"),
                 .target(name: "System_"),
-                .target(name: "Testing_"),
             ]),
 
         .executableTarget(name: "S3Tests",
