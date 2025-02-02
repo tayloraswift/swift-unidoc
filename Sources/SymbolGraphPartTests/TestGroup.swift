@@ -1,6 +1,6 @@
 import JSONDecoding
 import SymbolGraphParts
-import System_
+import SystemIO
 import Testing_
 
 extension TestGroup

@@ -2,7 +2,7 @@ import MarkdownABI
 import SymbolGraphParts
 import SymbolGraphs
 import Symbols
-import System_
+import SystemIO
 
 extension SSGC
 {

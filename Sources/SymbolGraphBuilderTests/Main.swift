@@ -5,7 +5,7 @@ import MarkdownRendering
 @_spi(testable)
 import SymbolGraphBuilder
 import SymbolGraphs
-import System_
+import SystemIO
 import Testing_
 
 @main

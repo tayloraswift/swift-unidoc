@@ -1,7 +1,7 @@
 @_spi(testable) import SymbolGraphBuilder
 import SymbolGraphCompiler
 import Symbols
-import System_
+import SystemIO
 import Testing_
 
 extension Main

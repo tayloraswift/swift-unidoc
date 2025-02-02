@@ -2,7 +2,7 @@ import BSON
 import SymbolGraphs
 import SymbolGraphTesting
 import Symbols
-import System_
+import SystemIO
 import Testing
 
 @Suite
