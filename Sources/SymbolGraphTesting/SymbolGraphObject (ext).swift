@@ -2,7 +2,7 @@ import BSON
 import SemanticVersions
 import SymbolGraphs
 import Symbols
-import System_
+import SystemIO
 
 #if canImport(Testing)
 import Testing

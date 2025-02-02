@@ -59,9 +59,6 @@ let package:Package = .init(
         .library(name: "SymbolGraphs", targets: ["SymbolGraphs"]),
         .library(name: "Symbols", targets: ["Symbols"]),
 
-        .library(name: "System_", targets: ["System_"]),
-        .library(name: "System_ArgumentParser", targets: ["System_ArgumentParser"]),
-
         .library(name: "UnidocAPI", targets: ["UnidocAPI"]),
         .library(name: "UnidocAssets", targets: ["UnidocAssets"]),
         .library(name: "UnidocAssets_System", targets: ["UnidocAssets_System"]),
@@ -86,6 +83,8 @@ let package:Package = .init(
             from: "0.7.1")),
         .package(url: "https://github.com/tayloraswift/swift-ip", .upToNextMinor(
             from: "0.3.3")),
+        .package(url: "https://github.com/tayloraswift/swift-io", .upToNextMinor(
+            from: "0.1.0")),
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "1.1.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
@@ -375,8 +374,8 @@ let package:Package = .init(
                 .target(name: "PackageMetadata"),
                 .target(name: "SymbolGraphCompiler"),
                 .target(name: "SymbolGraphLinker"),
-                .target(name: "System_ArgumentParser"),
-                .target(name: "System_"),
+                .product(name: "SystemIO", package: "swift-io"),
+                .product(name: "System_ArgumentParser", package: "swift-io"),
             ]),
 
         .target(name: "SymbolGraphCompiler",
@@ -437,7 +436,7 @@ let package:Package = .init(
         .target(name: "SymbolGraphTesting",
             dependencies: [
                 .target(name: "SymbolGraphs"),
-                .target(name: "System_"),
+                .product(name: "SystemIO", package: "swift-io"),
             ]),
 
         .target(name: "TopologicalSorting"),
@@ -467,16 +466,15 @@ let package:Package = .init(
         .target(name: "UnidocAssets_System",
             dependencies: [
                 .target(name: "Media"),
-                .target(name: "System_"),
                 .target(name: "UnidocAssets"),
+                .product(name: "SystemIO", package: "swift-io"),
             ]),
 
         .target(name: "UnidocCLI",
             dependencies: [
                 .target(name: "_GitVersion"),
-                .target(name: "System_ArgumentParser"),
                 .target(name: "UnidocServer"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "System_ArgumentParser", package: "swift-io"),
             ]),
 
         .target(name: "UnidocClient",
@@ -590,18 +588,6 @@ let package:Package = .init(
                 .product(name: "UnixTime", package: "swift-unixtime"),
             ]),
 
-        .target(name: "System_",
-            dependencies: [
-                .product(name: "SystemPackage", package: "swift-system"),
-                .product(name: "TraceableErrors", package: "swift-grammar"),
-            ]),
-
-        .target(name: "System_ArgumentParser",
-            dependencies: [
-                .target(name: "System_"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-            ]),
-
 
         .testTarget(name: "FingerprintingTests",
             dependencies: [
@@ -628,7 +614,7 @@ let package:Package = .init(
         .testTarget(name: "PackageMetadataTests",
             dependencies: [
                 .target(name: "PackageMetadata"),
-                .target(name: "System_"),
+                .product(name: "SystemIO", package: "swift-io"),
             ]),
 
         .testTarget(name: "S3Tests",
@@ -644,7 +630,7 @@ let package:Package = .init(
         .testTarget(name: "SymbolGraphValidationTests",
             dependencies: [
                 .target(name: "SymbolGraphTesting"),
-                .target(name: "System_"),
+                .product(name: "SystemIO", package: "swift-io"),
             ]),
 
         .executableTarget(name: "SymbolGraphBuilderTests",
@@ -668,8 +654,8 @@ let package:Package = .init(
         .executableTarget(name: "SymbolGraphPartTests",
             dependencies: [
                 .target(name: "SymbolGraphParts"),
-                .target(name: "System_"),
                 .target(name: "Testing_"),
+                .product(name: "SystemIO", package: "swift-io"),
             ]),
 
         .testTarget(name: "SymbolGraphTests",
@@ -680,14 +666,6 @@ let package:Package = .init(
         .testTarget(name: "SymbolTests",
             dependencies: [
                 .target(name: "Symbols"),
-            ]),
-
-        .testTarget(name: "SystemTests",
-            dependencies: [
-                .target(name: "System_"),
-            ],
-            exclude: [
-                "directories",
             ]),
 
         .testTarget(name: "TopologicalSortingTests",
