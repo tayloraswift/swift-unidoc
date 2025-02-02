@@ -1,5 +1,5 @@
 import SourceDiagnostics
-import System_
+import SystemIO
 
 extension SSGC
 {

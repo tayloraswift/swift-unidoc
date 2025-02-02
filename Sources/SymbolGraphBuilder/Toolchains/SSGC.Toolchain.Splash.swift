@@ -1,7 +1,7 @@
 import SemanticVersions
 import SymbolGraphs
 import Symbols
-import System_
+import SystemIO
 
 extension SSGC.Toolchain
 {

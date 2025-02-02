@@ -2,7 +2,7 @@ import ArgumentParser
 import BSON
 import SymbolGraphs
 import Symbols
-import System_
+import SystemIO
 import System_ArgumentParser
 
 extension SSGC
