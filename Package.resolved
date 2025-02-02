@@ -1,5 +1,5 @@
 {
-  "originHash" : "d1ea6e052e3a4c0763c080a1895031f8a242744f1c7bd70b9abeb3057fa86a25",
+  "originHash" : "e55ab1bd27ee2fd5913a1597116db214d4284763763234fedd67e53da4f4a1a7",
   "pins" : [
     {
       "identity" : "indexstore-db",
@@ -80,6 +80,15 @@
       "state" : {
         "revision" : "ea0b9fc3152ed5941dd82e4a01e65f99fe1a75d2",
         "version" : "0.7.1"
+      }
+    },
+    {
+      "identity" : "swift-io",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tayloraswift/swift-io",
+      "state" : {
+        "revision" : "1cbe8b229f4dd2dd758183b1dc377b39f474c070",
+        "version" : "0.1.0"
       }
     },
     {
