@@ -1,6 +1,6 @@
 import SymbolGraphLinker
 import Symbols
-import System_
+import SystemIO
 import URI
 
 extension SSGC

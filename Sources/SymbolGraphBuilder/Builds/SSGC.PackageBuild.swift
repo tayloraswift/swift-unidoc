@@ -4,7 +4,7 @@ import SemanticVersions
 import SHA1
 import SymbolGraphs
 import Symbols
-import System_
+import SystemIO
 
 extension SSGC
 {

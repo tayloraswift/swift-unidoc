@@ -1,7 +1,7 @@
 import SymbolGraphCompiler
 import SymbolGraphParts
 import Symbols
-import System_
+import SystemIO
 
 extension SSGC.SymbolDump
 {
