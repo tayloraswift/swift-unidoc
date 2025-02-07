@@ -128,8 +128,6 @@ extension SSGC.PackageBuild
                 {
                     $0.moduleMaps.append(file)
                 }
-
-                $0.includePaths += $1.include
             }
         }
         return modules.sorted { $0.moduleName < $1.moduleName }
