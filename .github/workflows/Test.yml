@@ -55,7 +55,6 @@ jobs:
 
             -   name: Build release
                 run: |
-                    which swift
                     swift --version
                     swift build -c release \
                         --product ssgc \
