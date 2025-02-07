@@ -21,6 +21,8 @@ extension SSGC
         var include:[FilePath.Directory]
 
         private(set)
+        var modulemap:FilePath?
+        private(set)
         var module:SymbolGraph.Module
 
         /// Absolute path to the module sources directory, if known.
@@ -33,6 +35,7 @@ extension SSGC
             self.resources = []
             self.markdown = []
             self.include = []
+            self.modulemap = nil
             self.module = module
             self.origin = origin
         }
@@ -223,6 +226,14 @@ extension SSGC.ModuleLayout
             case "modulemap":
                 //  But modulemaps do.
                 headers.update(with: $0)
+
+                guard case nil = self.modulemap
+                else
+                {
+                    throw SSGC.ModuleLayoutError.foundMultipleModulemapFiles
+                }
+
+                self.modulemap = file.path
                 fallthrough
 
             case "c":

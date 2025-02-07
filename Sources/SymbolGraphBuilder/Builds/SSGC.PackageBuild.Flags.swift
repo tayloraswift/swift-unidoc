@@ -23,19 +23,9 @@ extension SSGC.PackageBuild
 }
 extension SSGC.PackageBuild.Flags
 {
-    /// This is pretty useless right now, because `swift build -emit-symbol-graph` incorrectly
-    /// duplicates `@_exported` symbols. But Apple might fix this in the future, which would be
-    /// a much better way to generate symbol graphs than the current method of using
-    /// `swift symbolgraph-extract`.
-    consuming
-    func dumping(symbols options:SSGC.Toolchain.SymbolDumpOptions,
-        to output:FilePath.Directory) -> Self
-    {
-        self.dump(symbols: options, to: output)
-        return self
-    }
-
-    mutating
+    /// This is kept for historical interest.
+    @available(*, unavailable)
+    private mutating
     func dump(symbols options:SSGC.Toolchain.SymbolDumpOptions, to output:FilePath.Directory)
     {
         self.swift.append("-emit-symbol-graph")

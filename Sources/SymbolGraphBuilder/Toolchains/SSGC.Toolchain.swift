@@ -223,10 +223,10 @@ extension SSGC.Toolchain
 
             for module:SymbolGraph.Module in standardLibrary.modules
             {
-                try self.dump(module: module.id,
-                    to: temporary,
+                try self.dump(
+                    parameters: .init(moduleName: module.id, allowedReexportedModules: dumped),
                     options: options,
-                    allowedReexportedModules: dumped)
+                    to: temporary)
 
                 dumped.append(module.id)
             }
@@ -239,19 +239,17 @@ extension SSGC.Toolchain
 
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
-    func dump(module id:Symbol.Module,
-        to output:FilePath.Directory,
+    func dump(parameters:SymbolDumpParameters,
         options:SymbolDumpOptions,
-        include:[FilePath.Directory] = [],
-        allowedReexportedModules:[Symbol.Module] = []) throws
+        to output:FilePath.Directory) throws
     {
-        print("Dumping symbols for module '\(id)'")
+        print("Dumping symbols for module '\(parameters.moduleName)'")
 
         var arguments:[String] =
         [
             "symbolgraph-extract",
 
-            "-module-name",                     "\(id)",
+            "-module-name",                     "\(parameters.moduleName)",
             "-target",                          "\(self.splash.triple)",
             "-output-dir",                      "\(output.path)",
         ]
@@ -271,10 +269,12 @@ extension SSGC.Toolchain
         {
             arguments.append("-skip-inherited-docs")
         }
-        if  self.splash.swift.version >= .v(6, 0, 0), !allowedReexportedModules.isEmpty
+        if !parameters.allowedReexportedModules.isEmpty
         {
-            let whitelist:String = allowedReexportedModules.lazy.map { "\($0)" }.joined(
-                separator: ",")
+            let whitelist:String = parameters.allowedReexportedModules.lazy.map
+            {
+                "\($0)"
+            }.joined(separator: ",")
 
             arguments.append("""
                 -experimental-allowed-reexported-modules=\(whitelist)
@@ -299,10 +299,15 @@ extension SSGC.Toolchain
         {
             arguments.append("-pretty-print")
         }
-        for include:FilePath.Directory in include
+        for includePath:FilePath.Directory in parameters.includePaths
         {
             arguments.append("-I")
-            arguments.append("\(include)")
+            arguments.append("\(includePath)")
+        }
+        for moduleMap:FilePath in parameters.moduleMaps
+        {
+            arguments.append("-Xcc")
+            arguments.append("-fmodule-map-file=\(moduleMap)")
         }
 
         let environment:SystemProcess.Environment = .inherit
@@ -330,23 +335,23 @@ extension SSGC.Toolchain
             {
             case 139:
                 print("""
-                    Failed to dump symbols for module '\(id)' due to SIGSEGV \
-                    from 'swift symbolgraph-extract'. \
+                    Failed to dump symbols for module '\(parameters.moduleName)' due to \
+                    SIGSEGV from 'swift symbolgraph-extract'. \
                     This is a known bug in the Apple Swift compiler; see \
                     https://github.com/apple/swift/issues/68767.
                     """)
             case 134:
                 print("""
-                    Failed to dump symbols for module '\(id)' due to SIGABRT \
-                    from 'swift symbolgraph-extract'. \
+                    Failed to dump symbols for module '\(parameters.moduleName)' due to \
+                    SIGABRT from 'swift symbolgraph-extract'. \
                     This is a known bug in the Apple Swift compiler; see \
                         https://github.com/swiftlang/swift/issues/75318.
                     """)
 
             case let code:
                 print("""
-                    Failed to dump symbols for module '\(id)' due to exit code \(code) \
-                    from 'swift symbolgraph-extract'. \
+                    Failed to dump symbols for module '\(parameters.moduleName)' due to exit \
+                    code \(code) from 'swift symbolgraph-extract'. \
                     If the output above indicates 'swift symbolgraph-extract' exited \
                     gracefully, this is most likely because the module.modulemap file declares \
                     a different module name than we detected from the package manifest.

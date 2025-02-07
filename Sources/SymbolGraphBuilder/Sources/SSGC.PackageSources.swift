@@ -106,7 +106,7 @@ extension SSGC.PackageSources:SSGC.DocumentationSources
         #if canImport(IndexStoreDB)
 
         let libIndexStore:IndexStoreLibrary = try swift.libIndexStore()
-        let indexPath:FilePath = self.scratch.include / "index"
+        let indexPath:FilePath.Directory = self.scratch.index
         return try IndexStoreDB.init(storePath: "\(indexPath)/store",
             databasePath: "\(indexPath)/db",
             library: libIndexStore,

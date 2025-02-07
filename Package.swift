@@ -111,8 +111,6 @@ let package:Package = .init(
             from: "1.33.0")),
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.4.0")),
-        .package(url: "https://github.com/apple/swift-system", .upToNextMinor(
-            from: "1.4.0")),
         .package(url: "https://github.com/apple/swift-syntax",
             from: "600.0.1"),
     ],

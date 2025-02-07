@@ -68,35 +68,71 @@ extension SSGC.PackageBuild
 
     private
     func modulesToDump(
-        among modules:SSGC.ModuleGraph) throws -> [(Symbol.Module, [FilePath.Directory])]
+        among modules:SSGC.ModuleGraph) throws -> [SSGC.Toolchain.SymbolDumpParameters]
     {
-        var modulesToDump:[Symbol.Module: [FilePath.Directory]] = [:]
+        var moduleCohabitants:[Symbol.Module: [SSGC.ModuleLayout]] = [:]
         for module:SSGC.ModuleLayout in modules.sinkLayout.cultures
         {
             let constituents:[SSGC.ModuleLayout] = try modules.constituents(of: module)
-            let include:[FilePath.Directory] = constituents.reduce(into: [self.scratch.include])
+            for constituent:SSGC.ModuleLayout in constituents where
+                constituent.module.type.hasSymbols
             {
-                $0 += $1.include
-            }
-            for constituent:SSGC.ModuleLayout in constituents
-            {
-                //  The Swift compiler won’t generate these automatically, so we need to extract
-                //  the symbols manually.
-                switch constituent.language
                 {
-                case .c?:   break
-                case .cpp?: break
-                default:    continue
-                }
-
-                if  constituent.module.type.hasSymbols
-                {
-                    modulesToDump[constituent.id] = include
-                }
+                    guard
+                    let modules:[SSGC.ModuleLayout] = $0
+                    else
+                    {
+                        $0 = constituents
+                        return
+                    }
+                    //  This is a shared dependency, but we know it can be built alongside a
+                    //  smaller set of cohabitating modules.
+                    if  modules.count > constituents.count
+                    {
+                        $0 = constituents
+                    }
+                } (&moduleCohabitants[constituent.id])
             }
         }
 
-        return modulesToDump.sorted { $0.key < $1.key }
+        let moduleMaps:[Symbol.Module: FilePath] = moduleCohabitants.values.reduce(into: [:])
+        {
+            for layout:SSGC.ModuleLayout in $1
+            {
+                switch layout.module.language
+                {
+                case .cpp?: break
+                case .c?:   break
+                default:    continue
+                }
+
+                {
+                    $0 = $0 ?? layout.modulemap ?? self.scratch.modulemap(
+                        target: layout.module.name)
+                } (&$0[layout.module.id])
+            }
+        }
+
+        let modules:[SSGC.Toolchain.SymbolDumpParameters] = moduleCohabitants.map
+        {
+            $0.value.reduce(into: .init(
+                moduleName: $0.key,
+                includePaths: [self.scratch.modules]))
+            {
+                let id:Symbol.Module = $1.id
+                if  id != $0.moduleName
+                {
+                    $0.allowedReexportedModules.append(id)
+                }
+                if  let file:FilePath = moduleMaps[id]
+                {
+                    $0.moduleMaps.append(file)
+                }
+
+                $0.includePaths += $1.include
+            }
+        }
+        return modules.sorted { $0.moduleName < $1.moduleName }
     }
 }
 extension SSGC.PackageBuild
@@ -317,9 +353,7 @@ extension SSGC.PackageBuild
 
         do
         {
-            try toolchain.build(package: self.root,
-                using: self.scratch,
-                flags: self.flags.dumping(symbols: .init(), to: artifacts))
+            try toolchain.build(package: self.root, using: self.scratch, flags: self.flags)
         }
         catch SystemProcessError.exit(let code, let invocation)
         {
@@ -352,13 +386,10 @@ extension SSGC.PackageBuild
         let artifactsCached:FilePath.Directory = try toolchain.dump(
             standardLibrary: standardLibrary,
             cache: cache)
-        for (module, include):(Symbol.Module, [FilePath.Directory]) in try self.modulesToDump(
+        for parameters:SSGC.Toolchain.SymbolDumpParameters in try self.modulesToDump(
             among: modules)
         {
-            try toolchain.dump(module: module,
-                to: artifacts,
-                options: .init(),
-                include: include)
+            try toolchain.dump(parameters: parameters, options: .init(), to: artifacts)
         }
 
         //  This step is considered part of documentation building.
