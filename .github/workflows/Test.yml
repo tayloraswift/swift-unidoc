@@ -57,10 +57,9 @@ jobs:
                 run: |
                     swift --version
                     swift build -c release \
-                        --build-tests \
+                        --product ssgc \
                         --explicit-target-dependency-import-check=error \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
+                        --destination Scripts/Linux/x86_64/x86_64.json
                     mkdir $HOME/bin
                     mv .build/release/ssgc $HOME/bin
                     echo "$HOME/bin" >> $GITHUB_PATH
@@ -71,10 +70,9 @@ jobs:
             -   name: Validate packages
                 run: |
                     swift test -c release \
-                        --skip-build \
+                        --no-parallel \
                         --filter SymbolGraphValidationTests \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
+                        --destination Scripts/Linux/x86_64/x86_64.json
 
     macos:
         runs-on: macos-15
@@ -102,4 +100,5 @@ jobs:
             -   name: Validate packages
                 run: |
                     swift test -c release \
+                        --no-parallel \
                         --filter SymbolGraphValidationTests
