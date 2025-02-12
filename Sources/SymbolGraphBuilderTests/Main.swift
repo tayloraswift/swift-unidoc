@@ -89,7 +89,7 @@ enum Main:TestMain, TestBattery
 
                 guard
                 let snippet:SSGC.LazyFile = tests.expect(
-                    value: sources.snippets.first(where: { $0.name == "UnitTests" }))
+                    value: sources.modules.snippets.first(where: { $0.name == "UnitTests" }))
                 else
                 {
                     return

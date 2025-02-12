@@ -15,8 +15,8 @@ extension SSGC
         var packageManifests:[Symbol.Package: SPM.Manifest]
         private
         var packagesUnused:Set<Symbol.Package>
-        private
-        var sparseEdges:[(Vertex, Vertex)]
+        private(set)
+        var sparseEdges:[(ModuleGraph.NodeIdentifier, ModuleGraph.NodeIdentifier)]
 
         let platform:SymbolGraphMetadata.Platform
 
@@ -28,6 +28,24 @@ extension SSGC
             self.sparseEdges = []
 
             self.platform = platform
+        }
+    }
+}
+extension SSGC.PackageGraph
+{
+    private
+    func diagnoseUnusedPackages()
+    {
+        if !self.packagesUnused.isEmpty
+        {
+            print("""
+                Note: \
+                the following packages were never used in any documentation-bearing product:
+                """)
+        }
+        for (i, package):(Int, Symbol.Package) in self.packagesUnused.sorted().enumerated()
+        {
+            print("\(i + 1). \(package)")
         }
     }
 }
@@ -69,7 +87,7 @@ extension SSGC.PackageGraph
             }
         } (&self.packageManifests[id])
 
-        return try .all(flattening: dependencyManifest, on: self.platform, as: id)
+        return try .init(from: dependencyManifest, on: self.platform, as: id)
     }
 
     private mutating
@@ -77,10 +95,12 @@ extension SSGC.PackageGraph
     {
         for target:TargetNode in normalizedManifest.targets.values
         {
-            let dependent:Vertex = .init(package: id, module: .init(mangling: target.id))
+            let dependent:SSGC.ModuleGraph.NodeIdentifier = .init(package: id,
+                module: .init(mangling: target.id))
             for dependency:String in target.dependencies.targets(on: self.platform)
             {
-                let dependency:Vertex = .init(package: id, module: .init(mangling: dependency))
+                let dependency:SSGC.ModuleGraph.NodeIdentifier = .init(package: id,
+                    module: .init(mangling: dependency))
                 self.sparseEdges.append((dependency, dependent))
             }
             for dependency:Symbol.Product in target.dependencies.products(on: self.platform)
@@ -98,7 +118,7 @@ extension SSGC.PackageGraph
 
                 for constituent:String in product.targets
                 {
-                    let dependency:Vertex = .init(
+                    let dependency:SSGC.ModuleGraph.NodeIdentifier = .init(
                         package: dependency.package,
                         module: .init(mangling: constituent))
 
@@ -108,17 +128,17 @@ extension SSGC.PackageGraph
         }
     }
 
-    consuming
-    func join(dependencies pins:[SPM.DependencyPin],
-        standardLibrary:SSGC.StandardLibrary,
-        with sinkManifest:inout SPM.Manifest,
-        as id:Symbol.Package) throws -> SSGC.ModuleGraph
+    mutating
+    func join(
+        dependencies dependencyPins:[SPM.DependencyPin],
+        sinkManifest:SPM.Manifest,
+        sinkPackage:Symbol.Package) throws -> ([PackageNode], PackageNode)
     {
         /// This pass must not make any assumptions about the ordering of the pins.
         ///
         /// These nodes are partially flattened, but they are still considered partitioned, as
         /// we have not yet flattened the product dependencies.
-        let dependencies:[PackageNode] = try pins.reduce(into: [])
+        let dependencies:[PackageNode] = try dependencyPins.reduce(into: [])
         {
             $0.append(try self.normalizeManifest(for: $1.identity))
         }
@@ -128,27 +148,17 @@ extension SSGC.PackageGraph
             self.createEdges(from: dependencyManifest, as: id)
         }
 
-        self.indexProducts(in: sinkManifest, from: id)
+        self.indexProducts(in: sinkManifest, from: sinkPackage)
+        var sinkManifest:SPM.Manifest = sinkManifest
         try sinkManifest.normalizeUnqualifiedDependencies(with: self.packageContainingProduct)
 
-        self.createEdges(from: sinkManifest, as: id)
+        let sink:PackageNode = try .init(from: sinkManifest,
+            on: self.platform,
+            as: sinkPackage)
 
-        if !self.packagesUnused.isEmpty
-        {
-            print("""
-                Note: \
-                the following packages were never used in any documentation-bearing product:
-                """)
-        }
-        for (i, package):(Int, Symbol.Package) in self.packagesUnused.sorted().enumerated()
-        {
-            print("\(i + 1). \(package)")
-        }
+        self.createEdges(from: sinkManifest, as: sinkPackage)
+        self.diagnoseUnusedPackages()
 
-        return try .init(
-            standardLibrary: standardLibrary.modules.map(SSGC.ModuleLayout.init(toolchain:)),
-            sparseEdges: self.sparseEdges,
-            dependencies: dependencies,
-            sink: try .all(flattening: sinkManifest, on: self.platform, as: id))
+        return (dependencies, sink)
     }
 }

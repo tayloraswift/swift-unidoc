@@ -65,73 +65,6 @@ extension SSGC.PackageBuild
 
         return versions
     }
-
-    private
-    func modulesToDump(
-        among modules:SSGC.ModuleGraph) throws -> [SSGC.Toolchain.SymbolDumpParameters]
-    {
-        var moduleCohabitants:[Symbol.Module: [SSGC.ModuleLayout]] = [:]
-        for module:SSGC.ModuleLayout in modules.sinkLayout.cultures
-        {
-            let constituents:[SSGC.ModuleLayout] = try modules.constituents(of: module)
-            for constituent:SSGC.ModuleLayout in constituents where
-                constituent.module.type.hasSymbols
-            {
-                {
-                    guard
-                    let modules:[SSGC.ModuleLayout] = $0
-                    else
-                    {
-                        $0 = constituents
-                        return
-                    }
-                    //  This is a shared dependency, but we know it can be built alongside a
-                    //  smaller set of cohabitating modules.
-                    if  modules.count > constituents.count
-                    {
-                        $0 = constituents
-                    }
-                } (&moduleCohabitants[constituent.id])
-            }
-        }
-
-        let moduleMaps:[Symbol.Module: FilePath] = moduleCohabitants.values.reduce(into: [:])
-        {
-            for layout:SSGC.ModuleLayout in $1
-            {
-                switch layout.module.language
-                {
-                case .cpp?: break
-                case .c?:   break
-                default:    continue
-                }
-
-                {
-                    $0 = $0 ?? layout.modulemap ?? self.scratch.modulemap(
-                        target: layout.module.name)
-                } (&$0[layout.module.id])
-            }
-        }
-
-        let modules:[SSGC.Toolchain.SymbolDumpParameters] = moduleCohabitants.map
-        {
-            $0.value.reduce(into: .init(
-                moduleName: $0.key,
-                includePaths: [self.scratch.modules]))
-            {
-                let id:Symbol.Module = $1.id
-                if  id != $0.moduleName
-                {
-                    $0.allowedReexportedModules.append(id)
-                }
-                if  let file:FilePath = moduleMaps[id]
-                {
-                    $0.moduleMaps.append(file)
-                }
-            }
-        }
-        return modules.sorted { $0.moduleName < $1.moduleName }
-    }
 }
 extension SSGC.PackageBuild
 {
@@ -266,15 +199,18 @@ extension SSGC.PackageBuild
         }
 
         //  This step is considered part of documentation building.
-        let sources:SSGC.BookSources
+        let modules:SSGC.ModuleGraph
         do
         {
-            sources = try .init(scanning: self.root)
+            modules = try .book(name: self.id.package, root: self.root)
         }
         catch let error
         {
             throw SSGC.DocumentationBuildError.scanning(error)
         }
+
+        let sources:SSGC.BookSources = .init(modules: modules,
+            root: .init(self.root.path.string))
 
         let metadata:SymbolGraphMetadata = .init(
             package: .init(
@@ -296,7 +232,7 @@ extension SSGC.PackageBuild
 
     @_spi(testable) public
     func compileSwiftPM(updating status:SSGC.StatusStream? = nil,
-        cache:FilePath.Directory,
+        cache _:FilePath.Directory,
         with toolchain:SSGC.Toolchain,
         clean:Bool = true) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
@@ -319,7 +255,7 @@ extension SSGC.PackageBuild
         }
 
         let manifestVersions:[MinorVersion] = try self.listExtraManifests()
-        var manifest:SPM.Manifest = try toolchain.manifest(package: self.root,
+        let manifest:SPM.Manifest = try toolchain.manifest(package: self.root,
             json: artifacts / "\(self.id.package).package.json",
             leaf: true)
 
@@ -358,7 +294,7 @@ extension SSGC.PackageBuild
             throw SSGC.PackageBuildError.swift_build(code, invocation)
         }
 
-        var packages:SSGC.PackageGraph = .init(platform: try toolchain.platform())
+        var packageGraph:SSGC.PackageGraph = .init(platform: try toolchain.platform())
 
         for pin:SPM.DependencyPin in pins
         {
@@ -369,56 +305,38 @@ extension SSGC.PackageBuild
                 json: artifacts / "\(pin.identity).package.json",
                 leaf: false)
 
-            packages.attach(manifest, as: pin.identity)
+            packageGraph.attach(manifest, as: pin.identity)
         }
 
-        let standardLibrary:SSGC.StandardLibrary = .init(platform: packages.platform,
+        let packageNodes:([PackageNode], sink:PackageNode) = try packageGraph.join(
+            dependencies: pins,
+            sinkManifest: manifest,
+            sinkPackage: self.id.package)
+
+        let stdlib:SSGC.ModuleGraph = .stdlib(
+            platform: packageGraph.platform,
             version: toolchain.splash.swift.version.minor)
 
-        let modules:SSGC.ModuleGraph = try packages.join(dependencies: pins,
-            standardLibrary: standardLibrary,
-            with: &manifest,
-            as: self.id.package)
+        let modules:SSGC.ModuleGraph = try .package(sink: packageNodes.sink,
+            dependencies: packageNodes.0,
+            substrate: stdlib.cultures.map(\.layout),
+            sparseEdges: packageGraph.sparseEdges)
 
         //  Dump the standard library’s symbols, unless they’re already cached.
-        let artifactsCached:FilePath.Directory = try toolchain.dump(
-            standardLibrary: standardLibrary,
-            cache: cache)
-        for parameters:SSGC.Toolchain.SymbolDumpParameters in try self.modulesToDump(
-            among: modules)
-        {
-            try toolchain.dump(parameters: parameters, options: .init(), to: artifacts)
-        }
+        let symbolsCached:FilePath.Directory = try toolchain.dump(stdlib: stdlib,
+            cache: artifacts)
+
+        let symbols:FilePath.Directory = artifacts / "symbols"
+        try symbols.create(clean: false)
+
+        try toolchain.dump(scratch: self.scratch, modules: modules, to: symbols)
 
         //  This step is considered part of documentation building.
-        var sources:SSGC.PackageSources = .init(scratch: self.scratch,
-            symbols: [artifacts, artifactsCached],
-            modules: modules)
-        do
-        {
-            let snippetsDirectory:FilePath.Component
-            if  let customDirectory:String = manifest.snippets
-            {
-                guard
-                let customDirectory:FilePath.Component = .init(customDirectory)
-                else
-                {
-                    throw SSGC.SnippetDirectoryError.invalid(customDirectory)
-                }
-
-                snippetsDirectory = customDirectory
-            }
-            else
-            {
-                snippetsDirectory = "Snippets"
-            }
-
-            try sources.detect(snippets: snippetsDirectory)
-        }
-        catch let error
-        {
-            throw SSGC.DocumentationBuildError.scanning(error)
-        }
+        let sources:SSGC.PackageSources = .init(
+            modules: modules,
+            symbols: [symbols, symbolsCached],
+            scratch: self.scratch,
+            root: packageNodes.sink.root)
 
         let metadata:SymbolGraphMetadata = .init(
             package: .init(
@@ -430,8 +348,8 @@ extension SSGC.PackageBuild
             tools: manifest.format,
             manifests: manifestVersions,
             requirements: manifest.requirements,
-            dependencies: try modules.dependenciesUsed(pins: pins),
-            products: .init(viewing: modules.sink.products),
+            dependencies: try modules.dependenciesUsed(among: pins),
+            products: .init(viewing: modules.products),
             display: manifest.name,
             root: sources.prefix)
 
