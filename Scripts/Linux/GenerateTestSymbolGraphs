@@ -3,42 +3,41 @@
 set -e
 
 swift --version
-swift build \
-    --package-path TestModules \
-    -Xswiftc -emit-symbol-graph \
-    -Xswiftc -emit-symbol-graph-dir -Xswiftc SymbolGraphs \
-    -Xswiftc -symbol-graph-minimum-access-level -Xswiftc internal \
-    -Xswiftc -emit-extension-block-symbols \
-    -Xswiftc -include-spi-symbols \
-    -Xswiftc -skip-inherited-docs \
-    -Xswiftc -pretty-print \
-    -Xswiftc -swift-version -Xswiftc 6
-
+swift build --package-path TestModules
 swift package --package-path TestModules dump-package > TestModules/Package.swift.json
 
-for TARGET in Swift _Concurrency
+for module in Swift _Concurrency _Differentiation
 do
-    swift symbolgraph-extract \
-        -target x86_64-unknown-linux-gnu \
-        -minimum-access-level internal \
-        -output-dir TestModules/SymbolGraphs \
-        -skip-inherited-docs \
-        -emit-extension-block-symbols \
-        -include-spi-symbols \
-        -pretty-print \
-        -module-name $TARGET
+    for output in SymbolGraphs Determinism
+    do
+        swift symbolgraph-extract \
+            -target x86_64-unknown-linux-gnu \
+            -minimum-access-level internal \
+            -output-dir TestModules/$output \
+            -skip-inherited-docs \
+            -emit-extension-block-symbols \
+            -include-spi-symbols \
+            -pretty-print \
+            -module-name $module
+    done
 done
 
-swift symbolgraph-extract \
-    -target x86_64-unknown-linux-gnu \
-    -minimum-access-level internal \
-    -output-dir TestModules/Determinism \
-    -skip-inherited-docs \
-    -emit-extension-block-symbols \
-    -include-spi-symbols \
-    -pretty-print \
-    -module-name Swift
-
+for include in TestModules/.build/debug/Modules
+do
+    for file in $include/*.swiftmodule
+    do
+        swift symbolgraph-extract \
+            -target x86_64-unknown-linux-gnu \
+            -minimum-access-level internal \
+            -output-dir TestModules/SymbolGraphs \
+            -skip-inherited-docs \
+            -emit-extension-block-symbols \
+            -include-spi-symbols \
+            -pretty-print \
+            -module-name $(basename $file .swiftmodule) \
+            -I $include
+    done
+done
 
 .build/release/ssgc -u $SWIFT_INSTALLATION \
     -n swift \

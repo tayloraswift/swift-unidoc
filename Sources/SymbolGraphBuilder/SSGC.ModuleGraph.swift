@@ -81,7 +81,8 @@ extension SSGC.ModuleGraph
         }
         for module:Node in modules
         {
-            constituents[module.id] = module.layout.dependencies.modules.map { modules[$0] }
+            let nodes:[Node] = module.layout.dependencies.modules.map { modules[$0] }
+            constituents[module.id] = nodes + [module]
         }
 
         return .init(
