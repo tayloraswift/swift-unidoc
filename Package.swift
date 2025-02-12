@@ -649,10 +649,9 @@ let package:Package = .init(
                 .target(name: "SymbolGraphLinker"),
             ]),
 
-        .executableTarget(name: "SymbolGraphPartTests",
+        .testTarget(name: "SymbolGraphPartTests",
             dependencies: [
                 .target(name: "SymbolGraphParts"),
-                .target(name: "Testing_"),
                 .product(name: "SystemIO", package: "swift-io"),
             ]),
 
