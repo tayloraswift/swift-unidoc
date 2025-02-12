@@ -6,9 +6,10 @@ swift --version
 swift build --package-path TestModules
 swift package --package-path TestModules dump-package > TestModules/Package.swift.json
 
-for module in Swift _Concurrency _Differentiation
+for output in SymbolGraphs Determinism
 do
-    for output in SymbolGraphs Determinism
+    mkdir -p TestModules/$output
+    for module in Swift _Concurrency _Differentiation
     do
         swift symbolgraph-extract \
             -target x86_64-unknown-linux-gnu \
