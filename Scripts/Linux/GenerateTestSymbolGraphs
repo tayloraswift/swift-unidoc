@@ -36,6 +36,7 @@ do
             -include-spi-symbols \
             -pretty-print \
             -module-name $(basename $file .swiftmodule) \
+            -experimental-allowed-reexported-modules=ACL \
             -I $include
     done
 done
