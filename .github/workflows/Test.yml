@@ -57,7 +57,7 @@ jobs:
                 run: |
                     swift --version
                     swift build -c release \
-                        --build-tests \
+                        --product ssgc \
                         --explicit-target-dependency-import-check=error \
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
@@ -71,7 +71,7 @@ jobs:
             -   name: Validate packages
                 run: |
                     swift test -c release \
-                        --skip-build \
+                        --no-parallel \
                         --filter SymbolGraphValidationTests \
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
@@ -102,4 +102,5 @@ jobs:
             -   name: Validate packages
                 run: |
                     swift test -c release \
+                        --no-parallel \
                         --filter SymbolGraphValidationTests

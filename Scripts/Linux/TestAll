@@ -7,8 +7,7 @@ swift --version
 swift build -c release \
     --explicit-target-dependency-import-check=error \
     -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-    -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block \
-    --build-tests
+    -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
 
 Scripts/Linux/GenerateTestSymbolGraphs
 
@@ -17,7 +16,6 @@ swift test -c release \
     -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
     -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block \
     --no-parallel \
-    --skip-build \
     --skip SymbolGraphValidationTests \
     --disable-testable-imports
 

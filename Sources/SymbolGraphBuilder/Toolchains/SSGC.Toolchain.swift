@@ -206,58 +206,60 @@ extension SSGC.Toolchain
 extension SSGC.Toolchain
 {
     /// Dumps the symbols for the standard library. Due to upstream bugs in the Swift compiler,
-    /// this methods disables extension block symbols by default.
-    func dump(
-        standardLibrary:SSGC.StandardLibrary,
-        options:SymbolDumpOptions = .init(emitExtensionBlockSymbols: false),
-        cache:FilePath.Directory) throws -> FilePath.Directory
+    /// this methods disables extension block symbols.
+    func dump(stdlib:SSGC.ModuleGraph, cache:FilePath.Directory) throws -> FilePath.Directory
     {
         let cached:FilePath.Directory = cache / "swift@\(self.splash.swift.version)"
-
-        if !cached.exists()
+        if  cached.exists()
         {
-            let temporary:FilePath.Directory = cache / "swift"
-            try temporary.create(clean: true)
-
-            var dumped:[Symbol.Module] = []
-
-            for module:SymbolGraph.Module in standardLibrary.modules
-            {
-                try self.dump(module: module.id,
-                    to: temporary,
-                    options: options,
-                    allowedReexportedModules: dumped)
-
-                dumped.append(module.id)
-            }
-
-            try temporary.move(replacing: cached)
+            return cached
         }
+
+        let temporary:FilePath.Directory = cache / "_batch"
+        try temporary.create(clean: true)
+
+        for options:SymbolDumpOptions in try stdlib.symbolDumpCommands(
+            emitExtensionBlockSymbols: false)
+        {
+            try self.dump(options: options, to: temporary)
+        }
+
+        try temporary.move(replacing: cached)
 
         return cached
     }
 
     /// Dumps the symbols for the given targets, using the `output` workspace as the
     /// output directory.
-    func dump(module id:Symbol.Module,
-        to output:FilePath.Directory,
-        options:SymbolDumpOptions,
-        include:[FilePath.Directory] = [],
-        allowedReexportedModules:[Symbol.Module] = []) throws
+    func dump(
+        scratch:SSGC.PackageBuildDirectory,
+        modules:SSGC.ModuleGraph,
+        to output:FilePath.Directory) throws
     {
-        print("Dumping symbols for module '\(id)'")
+        for options:SymbolDumpOptions in try modules.symbolDumpCommands(
+            scratch: scratch)
+        {
+            try self.dump(options: options, to: output)
+        }
+    }
+
+    private
+    func dump(options:SymbolDumpOptions,
+        to output:FilePath.Directory) throws
+    {
+        print("Dumping symbols for module '\(options.moduleName)'")
 
         var arguments:[String] =
         [
             "symbolgraph-extract",
 
-            "-module-name",                     "\(id)",
+            "-module-name",                     "\(options.moduleName)",
             "-target",                          "\(self.splash.triple)",
             "-output-dir",                      "\(output.path)",
         ]
 
         arguments.append("-minimum-access-level")
-        arguments.append("\(options.minimumACL)")
+        arguments.append("\(options.minimumAccessLevel)")
 
         if  options.emitExtensionBlockSymbols
         {
@@ -271,10 +273,12 @@ extension SSGC.Toolchain
         {
             arguments.append("-skip-inherited-docs")
         }
-        if  self.splash.swift.version >= .v(6, 0, 0), !allowedReexportedModules.isEmpty
+        if !options.allowedReexportedModules.isEmpty
         {
-            let whitelist:String = allowedReexportedModules.lazy.map { "\($0)" }.joined(
-                separator: ",")
+            let whitelist:String = options.allowedReexportedModules.lazy.map
+            {
+                "\($0)"
+            }.joined(separator: ",")
 
             arguments.append("""
                 -experimental-allowed-reexported-modules=\(whitelist)
@@ -299,10 +303,15 @@ extension SSGC.Toolchain
         {
             arguments.append("-pretty-print")
         }
-        for include:FilePath.Directory in include
+        for includePath:FilePath.Directory in options.includePaths
         {
             arguments.append("-I")
-            arguments.append("\(include)")
+            arguments.append("\(includePath)")
+        }
+        for moduleMap:FilePath in options.moduleMaps
+        {
+            arguments.append("-Xcc")
+            arguments.append("-fmodule-map-file=\(moduleMap)")
         }
 
         let environment:SystemProcess.Environment = .inherit
@@ -330,23 +339,23 @@ extension SSGC.Toolchain
             {
             case 139:
                 print("""
-                    Failed to dump symbols for module '\(id)' due to SIGSEGV \
-                    from 'swift symbolgraph-extract'. \
+                    Failed to dump symbols for module '\(options.moduleName)' due to \
+                    SIGSEGV from 'swift symbolgraph-extract'. \
                     This is a known bug in the Apple Swift compiler; see \
                     https://github.com/apple/swift/issues/68767.
                     """)
             case 134:
                 print("""
-                    Failed to dump symbols for module '\(id)' due to SIGABRT \
-                    from 'swift symbolgraph-extract'. \
+                    Failed to dump symbols for module '\(options.moduleName)' due to \
+                    SIGABRT from 'swift symbolgraph-extract'. \
                     This is a known bug in the Apple Swift compiler; see \
                         https://github.com/swiftlang/swift/issues/75318.
                     """)
 
             case let code:
                 print("""
-                    Failed to dump symbols for module '\(id)' due to exit code \(code) \
-                    from 'swift symbolgraph-extract'. \
+                    Failed to dump symbols for module '\(options.moduleName)' due to exit \
+                    code \(code) from 'swift symbolgraph-extract'. \
                     If the output above indicates 'swift symbolgraph-extract' exited \
                     gracefully, this is most likely because the module.modulemap file declares \
                     a different module name than we detected from the package manifest.

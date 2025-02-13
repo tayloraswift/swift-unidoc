@@ -1,3 +1,4 @@
+import Symbols
 import SystemIO
 
 extension SSGC
@@ -26,5 +27,25 @@ extension SSGC
 }
 extension SSGC.PackageBuildDirectory
 {
-    var include:FilePath.Directory { self.location / "\(self.configuration)" }
+    var index:FilePath.Directory
+    {
+        self.location / "\(self.configuration)" / "index"
+    }
+
+    var modules:FilePath.Directory
+    {
+        self.location / "\(self.configuration)" / "Modules"
+    }
+
+    func modulemap(target:String) -> FilePath
+    {
+        self.build(target: target) / "module.modulemap"
+    }
+
+    /// This takes an unmangled target name, not a c99 name.
+    private
+    func build(target:String) -> FilePath.Directory
+    {
+        self.location / "\(self.configuration)" / "\(target).build"
+    }
 }

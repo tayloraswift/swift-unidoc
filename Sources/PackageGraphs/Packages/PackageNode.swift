@@ -13,6 +13,9 @@ struct PackageNode:Identifiable
     public
     var dependencies:[any Identifiable<Symbol.Package>]
 
+    /// The name of the snippets directory.
+    public
+    var snippets:String
     public
     var products:[SymbolGraph.Product]
     public
@@ -26,6 +29,7 @@ struct PackageNode:Identifiable
     @inlinable public
     init(id:Symbol.Package,
         dependencies:[any Identifiable<Symbol.Package>],
+        snippets:String,
         products:[SymbolGraph.Product],
         modules:[SymbolGraph.Module],
         exclude:[[String]],
@@ -33,6 +37,7 @@ struct PackageNode:Identifiable
     {
         self.id = id
         self.dependencies = dependencies
+        self.snippets = snippets
         self.products = products
         self.modules = modules
         self.exclude = exclude
@@ -42,46 +47,51 @@ struct PackageNode:Identifiable
 extension PackageNode
 {
     public consuming
-    func flattened(dependencies:[PackageNode]) throws -> Self
+    func joined(with dependencies:[PackageNode]) throws -> ([Densified], Densified)
     {
-        try self.flatten(dependencies: dependencies)
-        return self
-    }
-
-    mutating
-    func flatten(dependencies:[PackageNode]) throws
-    {
-        var nodes:DigraphExplorer<ProductNode>.Nodes = .init()
-        for package:PackageNode in dependencies
+        let nodes:DigraphExplorer<ProductNode>.Nodes = try dependencies.reduce(into: .init())
         {
-            for product:SymbolGraph.Product in package.products
+            for product:SymbolGraph.Product in $1.products
             {
-                try nodes.index(.init(id: .init(name: product.name, package: package.id),
-                    predecessors: product.dependencies))
+                let id:Symbol.Product = .init(name: product.name, package: $1.id)
+                try $0.index(.init(id: id, predecessors: product.dependencies))
             }
         }
 
+        let densifiedUpstream:[Densified] = try dependencies.map
+        {
+            try $0.densified(products: nodes, packages: dependencies)
+        }
+        let densifiedSink:Densified = try self.densified(
+            products: nodes,
+            packages: dependencies)
+
+        return (densifiedUpstream, densifiedSink)
+    }
+
+    private consuming
+    func densified(
+        products:DigraphExplorer<ProductNode>.Nodes,
+        packages:[PackageNode]) throws -> Densified
+    {
         var cache:[Symbol.Product: [Symbol.Product]] = [:]
 
-        self.products = try self.products.map
+        for i:Int in self.products.indices
         {
-            .init(name: $0.name, type: $0.type,
-                dependencies: try nodes.included(by: $0.dependencies, cache: &cache),
-                cultures: $0.cultures)
+            try
+            {
+                $0 = try products.included(by: $0, cache: &cache)
+            } (&self.products[i].dependencies)
         }
-        self.modules = try self.modules.map
+        for i:Int in self.modules.indices
         {
-            .init(name: $0.name, type: $0.type, dependencies: .init(
-                    products: try nodes.included(by: $0.dependencies.products,
-                        cache: &cache),
-                    modules: $0.dependencies.modules),
-                location: $0.location)
+            try
+            {
+                $0 = try products.included(by: $0, cache: &cache)
+            } (&self.modules[i].dependencies.products)
         }
 
-        let declared:[Symbol.Package: any Identifiable<Symbol.Package>] =
-            self.dependencies.reduce(into: [:]) { $0[$1.id] = $1 }
-
-        let actuallyUsed:Set<Symbol.Package> = cache.values.reduce(into: [])
+        let dependenciesActuallyUsed:Set<Symbol.Package> = cache.values.reduce(into: [])
         {
             for product:Symbol.Product in $1
             {
@@ -89,28 +99,20 @@ extension PackageNode
             }
         }
 
-        let directedEdges:[(Symbol.Package, Symbol.Package)] = dependencies.reduce(into: [])
+        let dependenciesDeclared:[Symbol.Package: any Identifiable<Symbol.Package>] =
+            self.dependencies.reduce(into: [:]) { $0[$1.id] = $1 }
+
+        let dependenciesBlamed:[any Identifiable<Symbol.Package>] = packages.reduce(
+            into: [])
         {
-            for dependency:any Identifiable<Symbol.Package> in $1.dependencies
+            if  dependenciesActuallyUsed.contains($1.id)
             {
-                $0.append((dependency.id, $1.id))
+                $0.append(dependenciesDeclared[$1.id] ?? TransitiveDependency.init(id: $1.id))
             }
         }
 
-        //  FIXME: in Swift 6, it will be legal to have cyclic package dependencies!
-        guard
-        let dependenciesOrdered:[PackageNode] = dependencies.sortedTopologically(
-            by: directedEdges)
-        else
-        {
-            throw DigraphCycleError<PackageNode>.init()
-        }
-
-        self.dependencies = dependenciesOrdered.compactMap
-        {
-            actuallyUsed.contains($0.id)
-                ? declared[$0.id] ?? TransitiveDependency.init(id: $0.id)
-                : nil
-        }
+        return .init(dependencies: dependenciesBlamed,
+            products: self.products,
+            modules: self.modules)
     }
 }

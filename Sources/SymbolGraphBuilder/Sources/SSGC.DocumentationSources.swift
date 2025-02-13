@@ -14,16 +14,13 @@ extension SSGC
 {
     protocol DocumentationSources
     {
+        var modules:ModuleGraph { get }
         var symbols:[FilePath.Directory] { get }
-
-        var cultures:[ModuleLayout] { get }
-        var snippets:[LazyFile] { get }
-
         var prefix:Symbol.FileBase? { get }
 
         /// Returns all constituents of the given module (including transitive dependencies),
         /// sorted in topological dependency order. The list ends with the given module.
-        func constituents(of culture:__owned ModuleLayout) throws -> [ModuleLayout]
+        // func constituents(of culture:__owned ModuleLayout) throws -> [ModuleLayout]
 
         func indexStore(
             for swift:SSGC.Toolchain) throws -> (any Markdown.SwiftLanguage.IndexStore)?
@@ -35,8 +32,8 @@ extension SSGC.DocumentationSources
         logger:SSGC.Logger,
         with swift:SSGC.Toolchain) throws -> SymbolGraph
     {
-        let moduleLayouts:[SSGC.ModuleLayout] = self.cultures
-        let snippets:[SSGC.LazyFile] = self.snippets
+        let plans:[(SSGC.ModuleLayout, [SSGC.ModuleLayout])] = self.modules.plans
+        let snippets:[SSGC.LazyFile] = self.modules.snippets
         let prefix:Symbol.FileBase? = self.prefix
 
         let moduleIndexes:[SSGC.ModuleIndex]
@@ -46,11 +43,10 @@ extension SSGC.DocumentationSources
         {
             var symbolCache:SSGC.SymbolCache = .init(symbols: try .collect(from: self.symbols))
 
-            moduleIndexes = try moduleLayouts.map
+            moduleIndexes = try plans.map
             {
+                let constituents:[SSGC.ModuleLayout] = $1.filter(\.module.type.hasSymbols)
                 let id:Symbol.Module = $0.id
-                let constituents:[SSGC.ModuleLayout] = try self.constituents(of: $0).filter(
-                    \.module.type.hasSymbols)
 
                 let symbols:
                 (
@@ -111,7 +107,7 @@ extension SSGC.DocumentationSources
                 Compiled documentation!
                     time loading symbols    : \(profiler.loadingSymbols)
                     time compiling          : \(profiler.compiling)
-                cultures        : \(cultures.count)
+                cultures        : \(plans.count)
                 namespaces      : \(moduleIndexes.reduce(0) { $0 + $1.declarations.count })
                 declarations    : \(moduleIndexes.reduce(0)
                 {
@@ -147,18 +143,18 @@ extension SSGC.DocumentationSources
                 try .link(projectRoot: prefix,
                     definitions: definitions,
                     plugins: [.swift(index: index)],
-                    modules: moduleLayouts.map(\.module),
+                    modules: plans.map(\.0.module),
                     indexes: moduleIndexes,
                     snippets: snippets,
                     logger: logger)
             }
 
-            for resource:SSGC.LazyFile in moduleLayouts.lazy.map(\.resources).joined()
+            for resource:SSGC.LazyFile in plans.lazy.map(\.0.resources).joined()
             {
                 profiler.loadingSources += resource.loadingTime
                 profiler.linking -= resource.loadingTime
             }
-            for markdown:SSGC.LazyFile in moduleLayouts.lazy.map(\.markdown).joined()
+            for markdown:SSGC.LazyFile in plans.lazy.map(\.0.markdown).joined()
             {
                 profiler.loadingSources += markdown.loadingTime
                 profiler.linking -= markdown.loadingTime

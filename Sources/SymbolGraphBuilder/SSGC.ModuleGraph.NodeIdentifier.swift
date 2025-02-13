@@ -1,8 +1,8 @@
 import Symbols
 
-extension SSGC.PackageGraph
+extension SSGC.ModuleGraph
 {
-    struct Vertex:Equatable, Hashable
+    struct NodeIdentifier:Equatable, Hashable
     {
         let package:Symbol.Package
         let module:Symbol.Module
@@ -14,7 +14,7 @@ extension SSGC.PackageGraph
         }
     }
 }
-extension SSGC.PackageGraph.Vertex:Comparable
+extension SSGC.ModuleGraph.NodeIdentifier:Comparable
 {
     static func < (a:Self, b:Self) -> Bool
     {

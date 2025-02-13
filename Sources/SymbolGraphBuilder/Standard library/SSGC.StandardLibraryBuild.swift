@@ -24,19 +24,17 @@ extension SSGC.StandardLibraryBuild:SSGC.DocumentationBuild
         with toolchain:SSGC.Toolchain,
         clean _:Bool) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
-        let standardLibrary:SSGC.StandardLibrary = .init(platform: try toolchain.platform(),
+        let modules:SSGC.ModuleGraph = .stdlib(platform: try toolchain.platform(),
             version: toolchain.splash.swift.version.minor)
 
-        let artifacts:FilePath.Directory = try toolchain.dump(standardLibrary: standardLibrary,
-            cache: cache)
+        let artifacts:FilePath.Directory = try toolchain.dump(stdlib: modules, cache: cache)
 
         let metadata:SymbolGraphMetadata = .swift(toolchain.splash.swift,
             commit: toolchain.splash.commit,
             triple: toolchain.splash.triple,
-            products: standardLibrary.products)
+            products: .init(viewing: modules.products))
 
-        let sources:SSGC.StandardLibrarySources = .init(modules: standardLibrary.modules,
-            symbols: [artifacts])
+        let sources:SSGC.StandardLibrarySources = .init(modules: modules, symbols: [artifacts])
         return (metadata, sources)
     }
 }
