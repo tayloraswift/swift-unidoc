@@ -33,7 +33,10 @@ jobs:
 
             -   name: Build documentation
                 run: |
-                    unidoc build --ci fail-on-errors --swift-toolchain $SWIFT_INSTALLATION
+                    unidoc compile -I .. \
+                        --ci fail-on-errors \
+                        --package-name swift-unidoc \
+                        --swift-toolchain $SWIFT_INSTALLATION
 
     macos:
         runs-on: macos-15
@@ -50,4 +53,6 @@ jobs:
 
             -   name: Build documentation
                 run: |
-                    unidoc build --ci fail-on-errors
+                    unidoc compile -I .. \
+                        --ci fail-on-errors \
+                        --package-name swift-unidoc
