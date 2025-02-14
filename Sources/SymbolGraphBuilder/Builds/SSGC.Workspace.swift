@@ -28,16 +28,9 @@ extension SSGC.Workspace
 }
 extension SSGC.Workspace
 {
-    private
     init(location:FilePath.Directory)
     {
         self.init(absolute: location.absolute())
-    }
-
-    public static
-    func existing(at location:FilePath.Directory) -> Self
-    {
-        .init(location: location)
     }
 
     public static
@@ -52,58 +45,28 @@ extension SSGC.Workspace
 extension SSGC.Workspace
 {
     public
-    func build(package build:SSGC.PackageBuild,
+    func build(package:SSGC.PackageBuild,
         with swift:SSGC.Toolchain,
         validation:SSGC.ValidationBehavior = .ignoreErrors,
         clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build,
+        try package.build(
             toolchain: swift,
             logger: .init(validation: validation, file: nil),
             clean: clean)
     }
 
     public
-    func build(special build:SSGC.StandardLibraryBuild,
+    func buildStandardLibrary(
         with swift:SSGC.Toolchain,
         validation:SSGC.ValidationBehavior = .ignoreErrors,
         clean:Bool = true) throws -> SymbolGraphObject<Void>
     {
-        try self.build(some: build,
+        let stdlib:SSGC.StandardLibraryBuild = .init(cache: self.cache)
+        try stdlib.cache.create(clean: clean)
+        return try stdlib.build(
             toolchain: swift,
             logger: .init(validation: validation, file: nil),
             clean: clean)
-    }
-}
-extension SSGC.Workspace
-{
-    func build<Build>(some build:consuming Build,
-        toolchain swift:SSGC.Toolchain,
-        define defines:[String] = [],
-        status:SSGC.StatusStream? = nil,
-        logger:SSGC.Logger = .default(),
-        clean:Bool) throws -> SymbolGraphObject<Void>
-        where Build:SSGC.DocumentationBuild
-    {
-        /// TODO: support values?
-        let definitions:[String: Void] = defines.reduce(into: [:]) { $0[$1] = () }
-
-        let metadata:SymbolGraphMetadata
-        let package:any SSGC.DocumentationSources
-
-        let cache:FilePath.Directory = self.cache
-        try cache.create(clean: clean)
-
-        (metadata, package) = try build.compile(updating: status,
-            cache: cache,
-            with: swift,
-            clean: clean)
-
-        let documentation:SymbolGraph = try package.link(
-            definitions: definitions,
-            logger: logger,
-            with: swift)
-
-        return .init(metadata: metadata, graph: documentation)
     }
 }

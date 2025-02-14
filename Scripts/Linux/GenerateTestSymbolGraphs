@@ -41,13 +41,13 @@ do
     done
 done
 
-.build/release/ssgc -u $SWIFT_INSTALLATION \
+.build/release/ssgc build -u $SWIFT_INSTALLATION \
     -n swift \
     -o TestPackages/swift.bson
 
 for PACKAGE in swift-test swift-malibu swift-snippets swift-exportation cross-module-articles
 do
-    .build/release/ssgc -u $SWIFT_INSTALLATION \
+    .build/release/ssgc build -u $SWIFT_INSTALLATION \
         -p TestPackages/$PACKAGE \
         -o TestPackages/$PACKAGE.bson
 done

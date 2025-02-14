@@ -3,53 +3,37 @@ set -e
 
 swift --version
 
-ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/apple/swift-atomics.git \
-    -t 1.2.0 \
-    -n swift-atomics \
+ssgc slave https://github.com/apple/swift-atomics.git 1.2.0 \
+    -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-atomics.bson
 
-ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/apple/swift-nio.git \
-    -t 2.75.0 \
-    -n swift-nio \
+ssgc slave https://github.com/apple/swift-nio.git 2.75.0 \
+    -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-nio.bson
 
-ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/apple/swift-nio-ssl.git \
-    -t 2.29.0 \
-    -n swift-nio-ssl \
+ssgc slave https://github.com/apple/swift-nio-ssl.git 2.29.0 \
+    -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-nio-ssl.bson
 
-ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/apple/swift-async-dns-resolver.git \
-    -t 0.1.2 \
-    -n swift-async-dns-resolver \
+ssgc slave https://github.com/apple/swift-async-dns-resolver.git 0.1.2 \
+    -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-async-dns-resolver.bson
 
-ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/swiftlang/swift-syntax.git \
-    -t 600.0.1 \
-    -n swift-syntax \
+ssgc slave https://github.com/swiftlang/swift-syntax.git 600.0.1 \
+    -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-syntax.bson
 
-ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/pointfreeco/swift-snapshot-testing.git \
-    -t 1.17.5 \
-    -n swift-snapshot-testing \
+ssgc slave https://github.com/pointfreeco/swift-snapshot-testing.git 1.17.5 \
+    -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-snapshot-testing.bson
 
-ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/swiftlang/indexstore-db.git \
-    -t swift-6.0-RELEASE \
-    -n indexstore-db \
+ssgc slave https://github.com/swiftlang/indexstore-db.git swift-6.0-RELEASE \
+    -u $SWIFT_INSTALLATION \
     -o TestPackages/indexstore-db.bson \
     --Xcxx -I$SWIFT_INSTALLATION/lib/swift \
     --Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
 
-ssgc -u $SWIFT_INSTALLATION \
-    -r https://github.com/swiftlang/swift-book.git \
-    -t swift-5.10-fcs \
+ssgc slave https://github.com/swiftlang/swift-book.git swift-5.10-fcs \
+    -u $SWIFT_INSTALLATION \
     -b book \
-    -n swift-book \
     -o TestPackages/swift-book.bson

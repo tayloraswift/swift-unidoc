@@ -191,12 +191,11 @@ extension Unidoc.Client<HTTP.Client2>
                 options: [.create, .truncate])
             {
                 var arguments:[String] = [
-                    "compile",
-
-                    "--package-name", "\(labels.package)",
+                    "slave",
+                    labels.repo,
+                    labels.ref,
+                    "--project-name", "\(labels.package)",
                     "--project-type", "\(type)",
-                    "--project-repo", labels.repo,
-                    "--ref", labels.ref,
                     "--workspace", "\(workspace.location)",
                     "--status", "3",
                     "--output", "\(docs)",
@@ -330,14 +329,12 @@ extension Unidoc.Client
         type:SSGC.ProjectType,
         with toolchain:Unidoc.Toolchain) async throws -> SymbolGraphObject<Void>
     {
-        let workspace:SSGC.Workspace = try .create(at: ".ssgc")
-        let docs:FilePath = workspace.location / "docs.bson"
+        let docs:FilePath = "docs.bson"
 
         var arguments:[String] = [
-            "compile",
+            "build",
 
             "--project-type", "\(type)",
-            "--workspace", "\(workspace.location)",
             "--output", "\(docs)",
             // "--recover-from-apple-bugs",
         ]
@@ -362,7 +359,7 @@ extension Unidoc.Client
         }
         if  let name:String
         {
-            arguments.append("--package-name")
+            arguments.append("--project-name")
             arguments.append("\(name)")
         }
 

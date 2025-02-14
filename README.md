@@ -3,7 +3,7 @@
 <strong><em><code>unidoc</code></em></strong>
 
 [![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Test.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Test.yml)
-[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/docs.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/docs.yml)
+[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Docs.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Docs.yml)
 [![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Deploy.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Deploy.yml)
 
 </div>

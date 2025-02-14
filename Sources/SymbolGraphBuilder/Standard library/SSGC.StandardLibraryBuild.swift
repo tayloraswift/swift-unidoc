@@ -6,28 +6,27 @@ extension SSGC
     public
     struct StandardLibraryBuild
     {
-        private
-        init()
+        let cache:FilePath.Directory
+
+        public
+        init(cache:FilePath.Directory)
         {
+            self.cache = cache
         }
     }
-}
-extension SSGC.StandardLibraryBuild
-{
-    public static
-    var swift:Self { .init() }
 }
 extension SSGC.StandardLibraryBuild:SSGC.DocumentationBuild
 {
     func compile(updating _:SSGC.StatusStream?,
-        cache:FilePath.Directory,
         with toolchain:SSGC.Toolchain,
         clean _:Bool) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
         let modules:SSGC.ModuleGraph = .stdlib(platform: try toolchain.platform(),
             version: toolchain.splash.swift.version.minor)
 
-        let artifacts:FilePath.Directory = try toolchain.dump(stdlib: modules, cache: cache)
+        let artifacts:FilePath.Directory = try toolchain.dump(
+            stdlib: modules,
+            cache: self.cache)
 
         let metadata:SymbolGraphMetadata = .swift(toolchain.splash.swift,
             commit: toolchain.splash.commit,
