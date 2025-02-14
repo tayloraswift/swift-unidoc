@@ -3,51 +3,27 @@ set -e
 
 swift --version
 
-ssgc \
-    -r https://github.com/apple/swift-atomics.git \
-    -t 1.2.0 \
-    -n swift-atomics \
+ssgc slave https://github.com/apple/swift-atomics.git 1.2.0 \
     -o TestPackages/swift-atomics.bson
 
-ssgc \
-    -r https://github.com/apple/swift-nio.git \
-    -t 2.75.0 \
-    -n swift-nio \
+ssgc slave https://github.com/apple/swift-nio.git 2.75.0 \
     -o TestPackages/swift-nio.bson
 
-ssgc \
-    -r https://github.com/apple/swift-nio-ssl.git \
-    -t 2.29.0 \
-    -n swift-nio-ssl \
+ssgc slave https://github.com/apple/swift-nio-ssl.git 2.29.0 \
     -o TestPackages/swift-nio-ssl.bson
 
-ssgc \
-    -r https://github.com/apple/swift-async-dns-resolver.git \
-    -t 0.1.2 \
-    -n swift-async-dns-resolver \
+ssgc slave https://github.com/apple/swift-async-dns-resolver.git 0.1.2 \
     -o TestPackages/swift-async-dns-resolver.bson
 
-ssgc \
-    -r https://github.com/swiftlang/swift-syntax.git \
-    -t 600.0.1 \
-    -n swift-syntax \
+ssgc slave https://github.com/swiftlang/swift-syntax.git 600.0.1 \
     -o TestPackages/swift-syntax.bson
 
-ssgc \
-    -r https://github.com/pointfreeco/swift-snapshot-testing.git \
-    -t 1.17.5 \
-    -n swift-snapshot-testing \
+ssgc slave https://github.com/pointfreeco/swift-snapshot-testing.git 1.17.5 \
     -o TestPackages/swift-snapshot-testing.bson
 
-ssgc \
-    -r https://github.com/swiftlang/indexstore-db.git \
-    -t swift-6.0-RELEASE \
-    -n indexstore-db \
+ssgc slave https://github.com/swiftlang/indexstore-db.git swift-6.0-RELEASE \
     -o TestPackages/indexstore-db.bson
 
-ssgc \
-    -r https://github.com/swiftlang/swift-book.git \
-    -t swift-5.10-fcs \
+ssgc slave https://github.com/swiftlang/swift-book.git swift-5.10-fcs \
     -b book \
-    -n swift-book \
     -o TestPackages/swift-book.bson

@@ -63,7 +63,7 @@ enum Main:TestMain, TestBattery
         if  let tests:TestGroup = tests / "standard-library",
             let docs:SymbolGraphObject<Void> = (tests.do
             {
-                try workspace.build(special: .swift, with: toolchain)
+                try workspace.buildStandardLibrary(with: toolchain)
             })
         {
             docs.roundtrip(for: tests)
@@ -81,7 +81,6 @@ enum Main:TestMain, TestBattery
                 try workspace.cache.create()
 
                 let (_, sources):(_, SSGC.PackageSources) = try package.compileSwiftPM(
-                    cache: workspace.cache,
                     with: toolchain)
 
                 let parser:Markdown.SwiftLanguage = .swift(
