@@ -9,16 +9,16 @@ struct Main
 }
 extension Main:AsyncParsableCommand
 {
-    static var configuration:CommandConfiguration
-    {
-        .init(subcommands: [
-                SSGC.CompileCommand.self,
-                Unidoc.InitCommand.self,
-                Unidoc.LocalCommand.self,
-                Unidoc.PreviewCommand.self,
-                Unidoc.ListAssetsCommand.self,
-            ])
-    }
+    static let configuration:CommandConfiguration = .init(commandName: "unidoc",
+        subcommands: [
+            SSGC.CompileCommand.self,
+            SSGC.BuildCommand.self,
+            SSGC.SlaveCommand.self,
+            Unidoc.InitCommand.self,
+            Unidoc.LocalCommand.self,
+            Unidoc.PreviewCommand.self,
+            Unidoc.ListAssetsCommand.self,
+        ])
 
     func run() async throws
     {

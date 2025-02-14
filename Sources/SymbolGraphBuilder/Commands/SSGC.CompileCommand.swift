@@ -7,6 +7,7 @@ import System_ArgumentParser
 
 extension SSGC
 {
+    /// This command is deprecated and will be removed in a future release.
     public
     struct CompileCommand:Decodable
     {
@@ -37,63 +38,8 @@ extension SSGC
             completion: .directory)
         var search:FilePath.Directory? = nil
 
-        @Option(
-            name: [.customLong("output"), .customShort("o")],
-            help: "The path to write the compiled symbol graph to")
-        var output:FilePath? = nil
-
-        @Option(
-            name: [.customLong("output-log"), .customShort("l")],
-            help: "The path to write the log of the build process to")
-        var outputLog:FilePath? = nil
-
-        @Option(
-            name: [.customLong("swift-toolchain"), .customShort("u")],
-            help: "The path to a Swift toolchain directory, usually ending in 'usr'",
-            completion: .directory)
-        var swiftTools:FilePath.Directory?
-
-        @Option(
-            name: [.customLong("swiftpm-cache")],
-            help: "The path to the SwiftPM cache directory to use",
-            completion: .directory)
-        var swiftCache:FilePath.Directory?
-
-        @Option(
-            name: [.customLong("sdk"), .customShort("k")],
-            help: "The Apple SDK to use")
-        var appleSDK:AppleSDK? = nil
-
-
-        @Option(
-            name: [.customLong("define"), .customShort("D")],
-            parsing: .unconditionalSingleValue,
-            help: "Define a trait for the Documentation compiler")
-        var defines:[String] = []
-
-        @Option(
-            name: [.customLong("Xswiftc")],
-            parsing: .unconditionalSingleValue,
-            help: "Extra flags to pass to the Swift compiler")
-        var swiftc:[String] = []
-
-        @Option(
-            name: [.customLong("Xcxx")],
-            parsing: .unconditionalSingleValue,
-            help: "Extra flags to pass to the C++ compiler")
-        var cxx:[String] = []
-
-        @Option(
-            name: [.customLong("Xcc")],
-            parsing: .unconditionalSingleValue,
-            help: "Extra flags to pass to the C compiler")
-        var cc:[String] = []
-
-
-        @Option(
-            name: [.customLong("ci")],
-            help: "Run in CI mode under the specified validation level")
-        var ci:ValidationBehavior? = nil
+        @OptionGroup(title: "Compilation Options")
+        var build:BuildOptions
 
         @Option(
             name: [.customLong("project-path"), .customShort("p")],
@@ -101,18 +47,6 @@ extension SSGC
             completion: .directory)
         var projectPath:FilePath.Directory?
 
-        @Option(
-            name: [.customLong("package-name"), .customShort("n")],
-            help: """
-                The symbolic name of the project to build — \
-                this is not the name specified in the `Package.swift` manifest!
-                """)
-        var project:String?
-
-        @Option(
-            name: [.customLong("project-type"), .customShort("b")],
-            help: "The type of project to build as")
-        var type:ProjectType = .package
 
         @Option(
             name: [.customLong("project-repo"), .customShort("r")],
@@ -163,13 +97,6 @@ extension SSGC
         var recoverFromAppleBugs:Bool = false
         */
 
-        @Flag(
-            name: [.customLong("pretty")],
-            help: """
-                Tell lib/SymbolGraphGen to pretty-print the JSON output, if possible
-                """)
-        var pretty:Bool = false
-
         public
         init()
         {
@@ -200,12 +127,12 @@ extension SSGC.CompileCommand
         }
         else
         {
-            let workspace:SSGC.Workspace = .existing(at: workspacePath)
+            let workspace:SSGC.Workspace = .init(location: workspacePath)
             try self.launch(workspace: workspace, status: nil)
             return
         }
 
-        let workspace:SSGC.Workspace = .existing(at: workspacePath)
+        let workspace:SSGC.Workspace = .init(location: workspacePath)
         do
         {
             try self.launch(workspace: workspace, status: status)
@@ -242,8 +169,8 @@ extension SSGC.CompileCommand
     private
     func launch(workspace:SSGC.Workspace, status:SSGC.StatusStream?) throws
     {
-        let validation:SSGC.ValidationBehavior = self.ci ?? .ignoreErrors
-        if  let path:FilePath = self.outputLog
+        let validation:SSGC.ValidationBehavior = self.build.ci ?? .ignoreErrors
+        if  let path:FilePath = self.build.outputLog
         {
             try path.open(.writeOnly,
                 permissions: (.rw, .r, .r),
@@ -267,15 +194,10 @@ extension SSGC.CompileCommand
         status:SSGC.StatusStream?,
         logger:SSGC.Logger) throws
     {
-        let toolchain:SSGC.Toolchain = try .detect(appleSDK: self.appleSDK,
-            paths: .init(swiftPM: self.swiftCache, usr: self.swiftTools),
-            recoverFromAppleBugs: true, // self.recoverFromAppleBugs,
-            pretty: self.pretty)
-
-        let flags:SSGC.PackageBuild.Flags = .init(swift: self.swiftc, cxx: self.cxx, c: self.cc)
+        let toolchain:SSGC.Toolchain = try self.build.toolchain
         let object:SymbolGraphObject<Void>
 
-        if  let project:String = self.project,
+        if  let project:String = self.build.projectName,
             let repo:String = self.repo,
             let ref:String = self.ref
         {
@@ -291,41 +213,51 @@ extension SSGC.CompileCommand
                 }
             }
 
-            let build:SSGC.PackageBuild = try .remote(project: symbol,
+            let package:SSGC.PackageBuild = try .remote(project: symbol,
                 from: repo,
                 at: ref,
-                as: self.type,
+                as: self.build.projectType,
                 in: workspace,
-                flags: flags)
+                flags: self.build.flags)
 
             defer
             {
                 if  self.removeBuild
                 {
-                    try? build.scratch.location.remove()
+                    try? package.scratch.location.remove()
                 }
             }
 
             try status?.send(.didCloneRepository)
 
-            object = try workspace.build(some: build,
+            object = try package.build(
                 toolchain: toolchain,
-                define: self.defines,
+                define: self.build.defines,
                 status: status,
                 logger: logger,
                 clean: self.cleanArtifacts)
         }
-        else if case "swift"? = self.project
+        else if case "swift"? = self.build.projectName
         {
-            object = try workspace.build(some: SSGC.StandardLibraryBuild.swift,
+            print("""
+                Warning: 'compile' is deprecated, use the 'build' subcommand instead
+                """)
+
+            let stdlib:SSGC.StandardLibraryBuild = .init(cache: workspace.cache)
+            try stdlib.cache.create(clean: self.cleanArtifacts)
+            object = try stdlib.build(
                 toolchain: toolchain,
-                define: self.defines,
+                define: self.build.defines,
                 status: status,
                 logger: logger,
                 clean: self.cleanArtifacts)
         }
         else
         {
+            print("""
+                Warning: 'compile' is deprecated, use the 'build' subcommand instead
+                """)
+
             let computedPath:FilePath.Directory
 
             if  let projectPath:FilePath.Directory = self.projectPath
@@ -334,7 +266,7 @@ extension SSGC.CompileCommand
             }
             else if
                 let search:FilePath.Directory = self.search,
-                let name:String = self.project
+                let name:String = self.build.projectName
             {
                 print("""
                     Warning: '--search-path' is deprecated, use '--project-path' with the
@@ -348,28 +280,28 @@ extension SSGC.CompileCommand
                 throw SSGC.ProjectPathRequiredError.init()
             }
 
-            let build:SSGC.PackageBuild = .local(project: computedPath,
+            let package:SSGC.PackageBuild = .local(project: computedPath,
                 using: ".build.ssgc",
-                as: self.type,
-                flags: flags)
+                as: self.build.projectType,
+                flags: self.build.flags)
 
             defer
             {
                 if  self.removeBuild
                 {
-                    try? build.scratch.location.remove()
+                    try? package.scratch.location.remove()
                 }
             }
 
-            object = try workspace.build(some: build,
+            object = try package.build(
                 toolchain: toolchain,
-                define: self.defines,
+                define: self.build.defines,
                 status: status,
                 logger: logger,
                 clean: self.cleanArtifacts)
         }
 
-        let output:FilePath = self.output ?? workspace.location / "docs.bson"
+        let output:FilePath = self.build.output ?? workspace.location / "docs.bson"
         try output.open(.writeOnly,
             permissions: (.rw, .r, .r),
             options: [.create, .truncate])

@@ -81,8 +81,8 @@ extension SSGC.PackageBuild
     ///         The type of project to build.
     ///     -   flags:
     ///         Additional flags to pass to the Swift compiler.
-    public static
-    func local(project location:FilePath.Directory,
+    public
+    static func local(project location:FilePath.Directory,
         using scratchName:FilePath.Component = ".build.ssgc",
         as type:SSGC.ProjectType = .package,
         flags:Flags = .init()) -> Self
@@ -124,8 +124,8 @@ extension SSGC.PackageBuild
     ///         The type of project to build.
     ///     -   workspace:
     ///         The directory in which this function will create folders.
-    public static
-    func remote(project projectName:Symbol.Package,
+    public
+    static func remote(project projectName:Symbol.Package,
         from repository:String,
         at refName:String,
         as type:SSGC.ProjectType = .package,
@@ -162,22 +162,16 @@ extension SSGC.PackageBuild
 extension SSGC.PackageBuild:SSGC.DocumentationBuild
 {
     func compile(updating status:SSGC.StatusStream?,
-        cache:FilePath.Directory,
         with toolchain:SSGC.Toolchain,
         clean:Bool = true) throws -> (SymbolGraphMetadata, any SSGC.DocumentationSources)
     {
         switch self.type
         {
         case .package:
-            try self.compileSwiftPM(updating: status,
-                cache: cache,
-                with: toolchain,
-                clean: clean)
+            try self.compileSwiftPM(updating: status, with: toolchain, clean: clean)
 
         case .book:
-            try self.compileBook(updating: status,
-                cache: cache,
-                with: toolchain)
+            try self.compileBook(updating: status, with: toolchain)
         }
     }
 }
@@ -186,7 +180,6 @@ extension SSGC.PackageBuild
 {
     @_spi(testable) public
     func compileBook(updating status:SSGC.StatusStream? = nil,
-        cache _:FilePath.Directory,
         with toolchain:SSGC.Toolchain) throws -> (SymbolGraphMetadata, SSGC.BookSources)
     {
         switch self.id
@@ -232,7 +225,6 @@ extension SSGC.PackageBuild
 
     @_spi(testable) public
     func compileSwiftPM(updating status:SSGC.StatusStream? = nil,
-        cache _:FilePath.Directory,
         with toolchain:SSGC.Toolchain,
         clean:Bool = true) throws -> (SymbolGraphMetadata, SSGC.PackageSources)
     {
