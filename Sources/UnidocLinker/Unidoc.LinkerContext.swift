@@ -111,7 +111,7 @@ extension Unidoc.LinkerContext
         let metadata:Unidoc.VolumeMetadata = .init(id: self.current.id,
             dependencies: boundaries.map(\.target),
             display: self.current.metadata.display,
-            refname: self.current.metadata.commit?.name,
+            commit: self.current.metadata.commit,
             symbol: volume,
             latest: self.current.id == latestRelease,
             realm: realm,

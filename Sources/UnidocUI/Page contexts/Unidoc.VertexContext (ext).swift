@@ -67,7 +67,7 @@ extension Unidoc.VertexContext
     func link(source file:Unidoc.Scalar, line:Int? = nil) -> Unidoc.SourceLink?
     {
         guard
-        let refname:String = self[file.edition]?.refname,
+        let refname:String = self[file.edition]?.commit?.name,
         let vertex:Unidoc.FileVertex = self.vertices[file]?.vertex.file,
         let origin:Unidoc.PackageOrigin = self.repo?.origin
         else

@@ -9,6 +9,7 @@ import Symbols
 import Unidoc
 import UnidocDB
 import UnidocRecords
+import UnixCalendar
 import UnixTime
 import URI
 
@@ -99,7 +100,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
             $0[.div]
             {
                 $0.class = "chyron"
-            } = repo.chyron(now: format.time, ref: self.volume.refname)
+            } = repo.chyron(now: format.time, ref: self.volume.commit?.name)
         }
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical
@@ -231,7 +232,9 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
                 }
             }
 
-            if  let commit:SHA1 = self.apex.snapshot.commit
+            //  TODO: we shouldn’t need the SnapshotDetails for this, after uplinking all
+            //  the volume metadata.
+            if  let commit:SHA1 = self.volume.commit?.sha1 ?? self.apex.snapshot.commit
             {
                 $0[.dt] = "Git revision"
                 $0[.dd]
@@ -248,6 +251,12 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
 
                     $0[link: url] { $0.external(safe: false) } = "\(commit)"
                 }
+            }
+            if  let date:UnixMillisecond = self.volume.commit?.date,
+                let date:Timestamp = date.timestamp
+            {
+                $0[.dt] = "Git commit date"
+                $0[.dd] = "\(date.http)"
             }
         }
 

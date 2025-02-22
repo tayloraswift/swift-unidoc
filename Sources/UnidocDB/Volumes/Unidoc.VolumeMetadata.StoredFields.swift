@@ -17,7 +17,9 @@ extension Unidoc.VolumeMetadata
             projection[.package] = true
             projection[.version] = true
             projection[.display] = true
-            projection[.refname] = true
+            projection[.commit_name] = true
+            projection[.commit_sha1] = true
+            projection[.commit_date] = true
             projection[.patch] = true
 
             //  TODO: we only need this for top-level queries and
