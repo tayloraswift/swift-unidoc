@@ -18,7 +18,7 @@ extension Unidoc
         public
         var display:String?
         public
-        var refname:String?
+        var commit:SymbolGraphMetadata.Commit?
 
         public
         var symbol:Symbol.Volume
@@ -42,7 +42,7 @@ extension Unidoc
         init(id:Unidoc.Edition,
             dependencies:[Dependency] = [],
             display:String? = nil,
-            refname:String? = nil,
+            commit:SymbolGraphMetadata.Commit? = nil,
             symbol:Symbol.Volume,
             latest:Bool,
             realm:Unidoc.Realm?,
@@ -55,7 +55,7 @@ extension Unidoc
             self.id = id
             self.dependencies = dependencies
             self.display = display
-            self.refname = refname
+            self.commit = commit
             self.symbol = symbol
             self.latest = latest
             self.realm = realm
@@ -91,7 +91,9 @@ extension Unidoc.VolumeMetadata
         /// This is currently copied verbatim from the symbol graph archive, but it is expected
         /// to match (and duplicate) the refname in the associated ``Unidoc.EditionMetadata``
         /// record.
-        case refname = "G"
+        case commit_name = "G"
+        case commit_sha1 = "M"
+        case commit_date = "N"
 
         @available(*, unavailable)
         case commit = "H"
@@ -139,7 +141,9 @@ extension Unidoc.VolumeMetadata:BSONDocumentEncodable
         bson[.version] = self.symbol.version
 
         bson[.display] = self.display
-        bson[.refname] = self.refname
+        bson[.commit_name] = self.commit?.name
+        bson[.commit_sha1] = self.commit?.sha1
+        bson[.commit_date] = self.commit?.date
 
         bson[.latest] = self.latest ? true : nil
         bson[.realm] = self.realm
@@ -162,10 +166,22 @@ extension Unidoc.VolumeMetadata:BSONDocumentDecodable
     @inlinable public
     init(bson:BSON.DocumentDecoder<CodingKey>) throws
     {
+        let commit:SymbolGraphMetadata.Commit?
+        if  let name:String = try bson[.commit_name]?.decode()
+        {
+            commit = .init(name: name,
+                sha1: try bson[.commit_sha1]?.decode(),
+                date: try bson[.commit_date]?.decode())
+        }
+        else
+        {
+            commit = nil
+        }
+
         self.init(id: try bson[.id].decode(),
             dependencies: try bson[.dependencies]?.decode() ?? [],
             display: try bson[.display]?.decode(),
-            refname: try bson[.refname]?.decode(),
+            commit: commit,
             symbol: .init(
                 package: try bson[.package].decode(),
                 version: try bson[.version].decode()),
