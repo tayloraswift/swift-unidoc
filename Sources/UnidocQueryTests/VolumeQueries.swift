@@ -82,7 +82,7 @@ struct VolumeQueries:Unidoc.TestBattery
 
             #expect(output.canonicalVolume?.patch == .v(0, 2, 0))
             #expect(output.principalVolume.patch == nil)
-            #expect(output.principalVolume.refname == "1.0.0-beta.1")
+            #expect(output.principalVolume.commit?.name == "1.0.0-beta.1")
             #expect(output.principalVertex?.landing != nil)
         }
     }

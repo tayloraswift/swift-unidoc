@@ -15,7 +15,7 @@ extension Unidoc.VolumeMetadata
             projection[.id] = true
             projection[.package] = true
             projection[.version] = true
-            projection[.refname] = true
+            projection[.commit_name] = true
             projection[.display] = true
             projection[.latest] = true
             projection[.realm] = true

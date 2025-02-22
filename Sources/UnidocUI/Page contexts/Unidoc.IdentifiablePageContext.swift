@@ -40,7 +40,7 @@ extension Unidoc
             var media:PackageMedia = packages.principal?.media ?? .init()
             if  let repo:PackageRepo = packages.principal?.repo
             {
-                let ref:String = principal.refname ?? repo.master ?? "master"
+                let ref:String = principal.commit?.name ?? repo.master ?? "master"
                 let path:String
                 switch repo.origin
                 {

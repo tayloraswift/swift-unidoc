@@ -21,6 +21,8 @@ extension Unidoc
         /// `Package.swift` manifest.
         public
         var requirements:[SymbolGraphMetadata.PlatformRequirement]
+
+        /// TODO: we get this from the Volume Metadata instead.
         /// The git commit hash from the symbol graph metadata.
         public
         var commit:SHA1?
