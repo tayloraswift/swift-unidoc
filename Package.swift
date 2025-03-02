@@ -10,6 +10,7 @@ let package:Package = .init(
         .executable(name: "ssgc", targets: ["ssgc"]),
         .executable(name: "unidoc", targets: ["unidoc-tools"]),
         .executable(name: "unidoc-linkerd", targets: ["unidoc-linkerd"]),
+        .executable(name: "unidocd", targets: ["unidocd"]),
 
         .library(name: "guides", targets: ["guides"]),
 
@@ -135,6 +136,13 @@ let package:Package = .init(
                 .target(name: "UnidocServer"),
                 .target(name: "UnidocServerInsecure"),
                 .target(name: "UnidocLinkerPlugin"),
+            ]),
+
+        .executableTarget(name: "unidocd",
+            dependencies: [
+                .target(name: "UnidocClient"),
+                .product(name: "System_ArgumentParser", package: "swift-io"),
+                .product(name: "UnixCalendar", package: "swift-unixtime"),
             ]),
 
 

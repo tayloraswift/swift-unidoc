@@ -4,7 +4,7 @@ set -e
 SWIFTPM_SCRATCH=$1
 
 if [ -z $SWIFTPM_SCRATCH ]; then
-    echo "Usage: $0 <scratch-path> [ unidoc | unidoc-linkerd ]"
+    echo "Usage: $0 <scratch-path> [ unidoc | unidoc-linkerd | unidocd ]"
     exit 1
 else
     shift
@@ -20,10 +20,10 @@ while [[ $# -gt 0 ]]; do
             -C $SWIFTPM_SCRATCH/release unidoc
         ;;
 
-        unidoc-linkerd )
+        unidoc-linkerd | unidocd )
+        tar -czf $1.tar.gz \
+            -C $SWIFTPM_SCRATCH/release $1
         shift
-        tar -czf unidoc-linkerd.tar.gz \
-            -C $SWIFTPM_SCRATCH/release unidoc-linkerd
         ;;
 
         * )

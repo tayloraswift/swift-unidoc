@@ -113,11 +113,12 @@ jobs:
                     Scripts/Linux/Build ${{ matrix.arch.id }} \
                         --os ${{ matrix.os.codename }}
                     Scripts/Package .build.${{ matrix.arch.id }} \
-                        unidoc-linkerd
+                        unidoc-linkerd \
+                        unidocd
 
             -   name: Upload products
                 env:
                     UNIDOC_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
                     UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
 
-                run: Scripts/Deploy unidoc-linkerd.tar.gz
+                run: Scripts/Deploy unidoc-linkerd.tar.gz unidocd.tar.gz
