@@ -10,7 +10,7 @@ import NIOCore
 import NIOSSL
 import Symbols
 import SystemIO
-import SymbolGraphCompiler
+import SymbolGraphBuilder
 import UnidocClient
 
 struct Main
@@ -117,7 +117,11 @@ extension Main
 @main
 extension Main:AsyncParsableCommand
 {
-    static var configuration:CommandConfiguration { .init(commandName: "unidocd") }
+    static var configuration:CommandConfiguration
+    {
+        .init(commandName: "unidocd",
+            subcommands: [SSGC.SlaveCommand.self])
+    }
 
     mutating
     func run() async throws
