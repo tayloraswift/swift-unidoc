@@ -56,6 +56,7 @@ extension Unidoc.DocsEndpoint.ProductPage:Unidoc.ApicalPage
             }
 
             $0[.h1] = self.apex.symbol
+            $0[.time] { $0.class = "byline" } = self.context.byline(format.locale)
         }
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical

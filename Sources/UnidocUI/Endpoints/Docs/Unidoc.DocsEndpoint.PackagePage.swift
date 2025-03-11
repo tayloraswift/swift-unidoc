@@ -88,6 +88,7 @@ extension Unidoc.DocsEndpoint.PackagePage:Unidoc.ApicalPage
             }
 
             $0[.h1] = self.title
+            $0[.time] { $0.class = "byline" } = self.context.byline(format.locale)
 
             guard
             let repo:Unidoc.PackageRepo = self.context.repo
