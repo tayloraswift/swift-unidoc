@@ -41,6 +41,7 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.RenderablePage
     {
         //  We need this for the relative links to work.
         head[.base] { $0.href = "\(self.location)/" ; $0.target = "_self" }
+        head[unsafe: .script] { $0.type = "ld+json" } = self.context.structuredData
     }
 }
 extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
@@ -70,6 +71,7 @@ extension Unidoc.BlogEndpoint.ArticlePage:Unidoc.StaticPage
                 $0[.header, { $0.class = "hero" }]
                 {
                     $0[.h1] = self.apex.headline.safe
+                    $0[.time] { $0.class = "byline" } = self.context.byline(format.locale)
                 }
                 $0[.div, { $0.class = "docc" }]
                 {
