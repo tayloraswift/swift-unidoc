@@ -62,6 +62,7 @@ extension Unidoc.DocsEndpoint.ArticlePage:Unidoc.ApicalPage
             }
 
             $0[.h1] = self.apex.headline.safe
+            $0[.time] { $0.class = "byline" } = self.context.byline(format.locale)
             $0[.div] { $0.class = "docc" } = self.cone.overview
 
             if  let file:Unidoc.Scalar = self.apex.readme
