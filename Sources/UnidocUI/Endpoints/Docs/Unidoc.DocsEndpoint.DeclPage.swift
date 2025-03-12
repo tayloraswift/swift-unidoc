@@ -112,6 +112,7 @@ extension Unidoc.DocsEndpoint.DeclPage:Unidoc.ApicalPage
                 scalars: self.apex.scope)
 
             $0[.h1] = self.stem.last
+            $0[.time] { $0.class = "byline" } = self.context.byline(format.locale)
             $0[.div] { $0.class = "docc" } = self.cone.overview
 
             if  let location:SourceLocation<Unidoc.Scalar> = self.apex.location

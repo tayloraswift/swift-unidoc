@@ -1,13 +1,50 @@
 import HTML
+import ISO
 import LexicalPaths
 import MarkdownABI
 import MarkdownRendering
 import Symbols
 import UnidocRender
+import UnixCalendar
 import URI
 
 extension Unidoc.VertexContext
 {
+    var structuredData:String
+    {
+        if  let tagged:Timestamp = self.volume.commit?.date?.timestamp
+        {
+            """
+            {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "datePublished": "\(tagged.date)"
+            }
+            """
+        }
+        else
+        {
+            """
+            {
+            "@context": "https://schema.org",
+            "@type": "Article"
+            }
+            """
+        }
+    }
+
+    func byline(_ locale:ISO.Locale) -> Unidoc.Byline?
+    {
+        guard
+        let tagged:Timestamp = self.volume.commit?.date?.timestamp
+        else
+        {
+            return nil
+        }
+
+        return .init(published: tagged, locale: locale)
+    }
+
     func card(decl id:Unidoc.Scalar) -> Unidoc.DeclCard?
     {
         guard

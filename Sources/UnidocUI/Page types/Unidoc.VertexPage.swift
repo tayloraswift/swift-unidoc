@@ -54,6 +54,7 @@ extension Unidoc.VertexPage
         }
 
         head[unsafe: .script] = format.assets.script(volumes: json)
+        head[unsafe: .script] { $0.type = "ld+json" } = self.context.structuredData
     }
 
     public
