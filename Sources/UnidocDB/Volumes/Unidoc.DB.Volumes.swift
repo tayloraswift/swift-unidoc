@@ -24,16 +24,8 @@ extension Unidoc.DB
 }
 extension Unidoc.DB.Volumes
 {
-    public static
-    let indexCoordinateLatest:Mongo.CollectionIndex = .init("CoordinateLatest",
-        unique: true)
-    {
-        $0[Unidoc.VolumeMetadata[.id]] = (+)
-        $0[Unidoc.VolumeMetadata[.latest]] = (-)
-    }
-
-    public static
-    let indexCoordinatePatch:Mongo.CollectionIndex = .init("CoordinatePatch",
+    public
+    static let indexCoordinatePatch:Mongo.CollectionIndex = .init("CoordinatePatch",
         unique: true)
     {
         $0[Unidoc.VolumeMetadata[.id]] = (+)
@@ -44,8 +36,8 @@ extension Unidoc.DB.Volumes
         $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
     }
 
-    public static
-    let indexSymbolicPatch:Mongo.CollectionIndex = .init("SymbolicPatch",
+    public
+    static let indexSymbolicPatch:Mongo.CollectionIndex = .init("SymbolicPatch",
         collation: .casefolding,
         unique: true)
     {
@@ -57,8 +49,8 @@ extension Unidoc.DB.Volumes
         $0[Unidoc.VolumeMetadata[.patch]] { $0[.exists] = true }
     }
 
-    public static
-    let indexSymbolic:Mongo.CollectionIndex = .init("Symbolic",
+    public
+    static let indexSymbolic:Mongo.CollectionIndex = .init("Symbolic",
         collation: .casefolding,
         unique: true)
     {
@@ -66,8 +58,8 @@ extension Unidoc.DB.Volumes
         $0[Unidoc.VolumeMetadata[.version]] = (+)
     }
 
-    public static
-    let indexRealm:Mongo.CollectionIndex = .init("Realm",
+    public
+    static let indexRealm:Mongo.CollectionIndex = .init("Realm",
         unique: false)
     {
         $0[Unidoc.VolumeMetadata[.realm]] = (+)
@@ -76,6 +68,15 @@ extension Unidoc.DB.Volumes
     {
         $0[Unidoc.VolumeMetadata[.realm]] { $0[.exists] = true }
     }
+
+    public
+    static let indexLatestFlag:Mongo.CollectionIndex = .init("LatestFlag",
+        unique: true)
+    {
+        $0[Unidoc.VolumeMetadata[.latest]] = (+)
+        $0[Unidoc.VolumeMetadata[.id]] = (+)
+    }
+
 }
 extension Unidoc.DB.Volumes:Mongo.CollectionModel
 {
@@ -89,11 +90,11 @@ extension Unidoc.DB.Volumes:Mongo.CollectionModel
     var indexes:[Mongo.CollectionIndex]
     {
         [
-            Self.indexCoordinateLatest,
             Self.indexCoordinatePatch,
             Self.indexSymbolicPatch,
             Self.indexSymbolic,
             Self.indexRealm,
+            Self.indexLatestFlag,
         ]
     }
 }

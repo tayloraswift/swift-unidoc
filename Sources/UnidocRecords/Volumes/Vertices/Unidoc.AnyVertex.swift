@@ -229,6 +229,11 @@ extension Unidoc.AnyVertex
         /// Only appears in ``DeclVertex``.
         case position = "P"
 
+        /// Used to mark the latest version of article vertices.
+        /// This is *not* currently used for URL routing — that goes through volume lookup
+        /// instead.
+        case linkable = "R"
+
         /// Appears in ``ArticleVertex``, and sometimes in ``CultureVertex`` as well.
         case headline = "T"
         /// Optional, but can appear in any master record.
