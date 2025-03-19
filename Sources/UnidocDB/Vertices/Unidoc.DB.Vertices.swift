@@ -23,8 +23,8 @@ extension Unidoc.DB
 }
 extension Unidoc.DB.Vertices
 {
-    public static
-    let indexStem:Mongo.CollectionIndex = .init("Stem",
+    public
+    static let indexStem:Mongo.CollectionIndex = .init("Stem",
         collation: .casefolding,
         unique: true)
     {
@@ -44,13 +44,32 @@ extension Unidoc.DB.Vertices
         $0[Unidoc.AnyVertex[.stem]] { $0[.exists] = true }
     }
 
-    public static
-    let indexHash:Mongo.CollectionIndex = .init("Hash",
+    public
+    static let indexHash:Mongo.CollectionIndex = .init("Hash",
         collation: .casefolding,
         unique: true)
     {
         $0[Unidoc.AnyVertex[.hash]] = (+)
         $0[Unidoc.AnyVertex[.id]] = (+)
+    }
+
+    public
+    static let indexLinkableFlag:Mongo.CollectionIndex = .init("LinkableFlag",
+        unique: true)
+    {
+        $0[Unidoc.AnyVertex[.linkable]] = (+)
+        $0[Unidoc.AnyVertex[.id]] = (+)
+    }
+
+    public
+    static let indexLinkableStem:Mongo.CollectionIndex = .init("LinkableStem",
+        collation: .casefolding)
+    {
+        $0[Unidoc.AnyVertex[.stem]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.AnyVertex[.linkable]] = true
     }
 }
 extension Unidoc.DB.Vertices:Mongo.CollectionModel
@@ -64,13 +83,17 @@ extension Unidoc.DB.Vertices:Mongo.CollectionModel
     @inlinable public static
     var indexes:[Mongo.CollectionIndex] { [ Self.indexStem, Self.indexHash ] }
 }
+@available(*, unavailable, message: """
+    Vertices contain flags set by the database, which would be lost if they were decoded and \
+    re-encoded.
+    """)
 extension Unidoc.DB.Vertices:Mongo.RecodableModel
 {
 }
 extension Unidoc.DB.Vertices
 {
     @discardableResult
-    func insert(_ vertices:Unidoc.Mesh.Vertices) async throws -> Mongo.Insertions
+    func insert(_ vertices:Unidoc.Mesh.Vertices, latest:Bool) async throws -> Mongo.Insertions
     {
         let response:Mongo.InsertResponse = try await session.run(
             command: Mongo.Insert.init(Self.name,
@@ -80,7 +103,16 @@ extension Unidoc.DB.Vertices
             }
                 documents:
             {
-                $0 += vertices.articles.lazy.map(Unidoc.AnyVertex.article(_:))
+                for article:Unidoc.ArticleVertex in vertices.articles
+                {
+                    $0[Unidoc.AnyVertex.CodingKey.self]
+                    {
+                        Unidoc.AnyVertex.article(article).encode(to: &$0)
+
+                        $0[.linkable] = latest ? latest : nil
+                    }
+                }
+
                 $0 += vertices.cultures.lazy.map(Unidoc.AnyVertex.culture(_:))
                 $0 += vertices.decls.lazy.map(Unidoc.AnyVertex.decl(_:))
                 $0 += vertices.files.lazy.map(Unidoc.AnyVertex.file(_:))

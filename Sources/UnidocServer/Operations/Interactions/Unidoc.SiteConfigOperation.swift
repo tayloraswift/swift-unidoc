@@ -32,7 +32,6 @@ extension Unidoc.SiteConfigOperation:Unidoc.AdministrativeOperation
             case .packageDependencies:  collection = db.packageDependencies
             case .packages:             collection = db.packages
             case .editions:             collection = db.editions
-            case .vertices:             collection = db.vertices
             case .volumes:              collection = db.volumes
             }
 
