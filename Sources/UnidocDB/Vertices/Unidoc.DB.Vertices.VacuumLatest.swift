@@ -51,6 +51,7 @@ extension Unidoc.DB.Vertices.VacuumLatest:Mongo.UpdateQuery
             $0[.u]
             {
                 $0[.unset] { $0[Unidoc.AnyVertex[.linkable]] = true }
+                $0[.unset] { $0[Unidoc.AnyVertex[.trunk]] = true }
             }
         }
     }
