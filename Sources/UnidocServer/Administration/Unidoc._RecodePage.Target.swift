@@ -9,7 +9,6 @@ extension Unidoc._RecodePage
         case packageDependencies = "package-dependencies"
         case packages
         case editions
-        case vertices
         case volumes
     }
 }
@@ -23,7 +22,6 @@ extension Unidoc._RecodePage.Target
         case .packages:             "Packages"
         case .editions:             "Editions"
         case .volumes:              "Volume metadata"
-        case .vertices:             "Vertices"
         }
     }
 
@@ -36,7 +34,6 @@ extension Unidoc._RecodePage.Target
         case .packages:             "This will recode all package records. Are you sure?"
         case .editions:             "This will recode all edition records. Are you sure?"
         case .volumes:              "This will recode all volume metadata. Are you sure?"
-        case .vertices:             "This will recode all volume vertices. Are you sure?"
         }
     }
 }

@@ -169,6 +169,10 @@ extension Unidoc.AnyVertex
         case extendee = "j"
         /// Appears in ``ArticleVertex``, ``DeclVertex``, ``CultureVertex``, and ``FileVertex``.
         case symbol = "Y"
+
+        /// Appears in ``ArticleVertex`` only, used for direct linking. This should only appear
+        /// if ``linkable`` is true.
+        case trunk = "V"
         /// Appears in every vertex type except for ``FileVertex``. In ``LandingVertex``, it is
         /// always the empty string.
         case stem = "U"
@@ -228,6 +232,11 @@ extension Unidoc.AnyVertex
 
         /// Only appears in ``DeclVertex``.
         case position = "P"
+
+        /// Used to mark the latest version of article vertices.
+        /// This is *not* currently used for URL routing — that goes through volume lookup
+        /// instead.
+        case linkable = "R"
 
         /// Appears in ``ArticleVertex``, and sometimes in ``CultureVertex`` as well.
         case headline = "T"
