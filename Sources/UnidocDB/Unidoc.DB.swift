@@ -600,7 +600,7 @@ extension Unidoc.DB
 
         try await self.redirects.insert(mesh.redirects)
         try await self.vertices.insert(mesh.vertices,
-            latest: mesh.metadata.latest)
+            trunk: mesh.metadata.latest ? mesh.metadata.symbol.package : nil)
         try await self.groups.insert(mesh.groups,
             realm: mesh.metadata.latest ? mesh.metadata.realm : nil)
 

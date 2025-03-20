@@ -1,5 +1,6 @@
 import MongoDB
 import MongoQL
+import Symbols
 import Unidoc
 import UnidocRecords
 
@@ -62,9 +63,10 @@ extension Unidoc.DB.Vertices
     }
 
     public
-    static let indexLinkableStem:Mongo.CollectionIndex = .init("LinkableStem",
+    static let indexLinkablePath:Mongo.CollectionIndex = .init("LinkablePath",
         collation: .casefolding)
     {
+        $0[Unidoc.AnyVertex[.trunk]] = (+)
         $0[Unidoc.AnyVertex[.stem]] = (+)
     }
         where:
@@ -81,7 +83,15 @@ extension Unidoc.DB.Vertices:Mongo.CollectionModel
     var name:Mongo.Collection { "VolumeVertices" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [ Self.indexStem, Self.indexHash ] }
+    var indexes:[Mongo.CollectionIndex]
+    {
+        [
+            Self.indexStem,
+            Self.indexHash,
+            Self.indexLinkableFlag,
+            Self.indexLinkablePath,
+        ]
+    }
 }
 @available(*, unavailable, message: """
     Vertices contain flags set by the database, which would be lost if they were decoded and \
@@ -93,7 +103,8 @@ extension Unidoc.DB.Vertices:Mongo.RecodableModel
 extension Unidoc.DB.Vertices
 {
     @discardableResult
-    func insert(_ vertices:Unidoc.Mesh.Vertices, latest:Bool) async throws -> Mongo.Insertions
+    func insert(_ vertices:Unidoc.Mesh.Vertices,
+        trunk:Symbol.Package?) async throws -> Mongo.Insertions
     {
         let response:Mongo.InsertResponse = try await session.run(
             command: Mongo.Insert.init(Self.name,
@@ -109,7 +120,11 @@ extension Unidoc.DB.Vertices
                     {
                         Unidoc.AnyVertex.article(article).encode(to: &$0)
 
-                        $0[.linkable] = latest ? latest : nil
+                        if  let trunk:Symbol.Package
+                        {
+                            $0[.linkable] = true
+                            $0[.trunk] = trunk
+                        }
                     }
                 }
 
