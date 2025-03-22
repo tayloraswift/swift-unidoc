@@ -89,12 +89,12 @@ extension Unidoc.VertexQuery
 extension Unidoc.VertexQuery:Mongo.PipelineQuery
 {
     public
-    typealias CollectionOrigin = Unidoc.DB.Volumes
-    public
     typealias Iteration = Mongo.Single<Unidoc.VertexOutput>
 
     @inlinable public
     var collation:Mongo.Collation { .casefolding }
+    @inlinable public
+    var from:Mongo.Collection? { Unidoc.DB.Volumes.name }
     @inlinable public
     var hint:Mongo.CollectionIndex?
     {

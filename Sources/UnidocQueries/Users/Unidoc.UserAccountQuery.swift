@@ -20,12 +20,12 @@ extension Unidoc
 extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
 {
     public
-    typealias CollectionOrigin = Unidoc.DB.Users
-    public
     typealias Iteration = Mongo.Single<Output>
 
     @inlinable public
     var collation:Mongo.Collation { .simple }
+    @inlinable public
+    var from:Mongo.Collection? { Unidoc.DB.Users.name }
     @inlinable public
     var hint:Mongo.CollectionIndex? { nil }
 

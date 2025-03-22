@@ -89,7 +89,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
             from: "1.1.2")),
         .package(url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-            from: "0.29.2")),
+            from: "0.29.3")),
         .package(url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
             from: "4.4.9")),
         .package(url: "https://github.com/tayloraswift/swift-ucf", .upToNextMinor(

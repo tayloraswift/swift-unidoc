@@ -21,10 +21,10 @@ extension Unidoc
 }
 extension Unidoc.RedirectByInternalHintQuery:Mongo.PipelineQuery
 {
-    typealias CollectionOrigin = Unidoc.DB.Volumes
     typealias Iteration = Mongo.Single<Unidoc.RedirectOutput>
 
     var collation:Mongo.Collation { .casefolding }
+    var from:Mongo.Collection? { Unidoc.DB.Volumes.name }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)
