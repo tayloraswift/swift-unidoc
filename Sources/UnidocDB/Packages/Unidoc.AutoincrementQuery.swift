@@ -21,10 +21,10 @@ extension Unidoc
 }
 extension Unidoc.AutoincrementQuery:Mongo.PipelineQuery
 {
-    typealias CollectionOrigin = Aliases
     typealias Iteration = Mongo.Single<Unidoc.Autoincrement<Targets.Element>>
 
     var collation:Mongo.Collation { .simple }
+    var from:Mongo.Collection? { Aliases.name }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)

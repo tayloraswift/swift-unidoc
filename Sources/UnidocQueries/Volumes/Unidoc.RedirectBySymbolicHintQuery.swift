@@ -26,12 +26,12 @@ extension Unidoc
 extension Unidoc.RedirectBySymbolicHintQuery:Mongo.PipelineQuery
 {
     public
-    typealias CollectionOrigin = Unidoc.DB.Volumes
-    public
     typealias Iteration = Mongo.Single<Unidoc.RedirectOutput>
 
     @inlinable public
     var collation:Mongo.Collation { .casefolding }
+    @inlinable public
+    var from:Mongo.Collection? { Unidoc.DB.Volumes.name }
     @inlinable public
     var hint:Mongo.CollectionIndex?
     {

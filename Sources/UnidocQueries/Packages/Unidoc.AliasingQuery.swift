@@ -11,6 +11,7 @@ extension Unidoc
     protocol AliasingQuery<CollectionOrigin, CollectionTarget>:Mongo.PipelineQuery
         where CollectionOrigin.Element:Mongo.MasterCodingModel<AliasKey>
     {
+        associatedtype CollectionOrigin:Mongo.CollectionModel
         associatedtype CollectionTarget:Mongo.CollectionModel
 
         /// The field to store the target document (a `CollectionTarget.Element`) in.
@@ -26,6 +27,8 @@ extension Unidoc.AliasingQuery
 {
     @inlinable public
     var collation:Mongo.Collation { .simple }
+    @inlinable public
+    var from:Mongo.Collection? { CollectionOrigin.name }
     @inlinable public
     var hint:Mongo.CollectionIndex? { nil }
 
