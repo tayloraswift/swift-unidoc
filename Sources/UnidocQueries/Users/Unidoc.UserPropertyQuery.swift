@@ -23,12 +23,12 @@ extension Unidoc
 extension Unidoc.UserPropertyQuery:Mongo.PipelineQuery
 {
     public
-    typealias CollectionOrigin = Unidoc.DB.Packages
-    public
     typealias Iteration = Mongo.Single<Output>
 
     @inlinable public
     var collation:Mongo.Collation { .simple }
+    @inlinable public
+    var from:Mongo.Collection? { Unidoc.DB.Packages.name }
     @inlinable public
     var hint:Mongo.CollectionIndex? { Unidoc.DB.Packages.indexAccount }
 

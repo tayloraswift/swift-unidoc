@@ -4,10 +4,8 @@ import MongoDB
 extension Mongo
 {
     public
-    protocol PipelineQuery<CollectionOrigin>:Sendable
+    protocol PipelineQuery:Sendable
     {
-        /// The collection the pipeline draws its input documents from.
-        associatedtype CollectionOrigin:CollectionModel
         /// Specifies the iteration mode for the pipeline’s expected output.
         ///
         /// For pipelines that return a single document, use ``Single``.
@@ -22,6 +20,8 @@ extension Mongo
         /// Specifies the collation to use for the query. This should match any collation
         /// specified in the index ``hint``, if provided.
         var collation:Collation { get }
+        /// The collection the pipeline draws its input documents from.
+        var from:Collection? { get }
         /// The index to use.
         var hint:CollectionIndex? { get }
     }
@@ -37,9 +37,7 @@ extension Mongo.PipelineQuery
     @inlinable package
     func command(stride:Iteration.Stride?) -> Mongo.Aggregate<Iteration>
     {
-        .init(CollectionOrigin.name,
-            stride: stride,
-            pipeline: self.build(pipeline:))
+        .init(self.from, stride: stride, pipeline: self.build(pipeline:))
         {
             $0[.collation] = self.collation
             $0[.hint] = self.hint?.id

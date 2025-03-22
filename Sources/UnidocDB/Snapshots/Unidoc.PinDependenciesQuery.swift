@@ -49,10 +49,10 @@ extension Unidoc.PinDependenciesQuery
 }
 extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
 {
-    typealias CollectionOrigin = Unidoc.DB.PackageAliases
     typealias Iteration = Mongo.SingleBatch<Symbol.PackageDependency<Unidoc.EditionMetadata>>
 
     var collation:Mongo.Collation { .simple }
+    var from:Mongo.Collection? { Unidoc.DB.PackageAliases.name }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)
@@ -75,6 +75,8 @@ extension Unidoc.PinDependenciesQuery:Mongo.PipelineQuery
 
         //  Map the coordinates back to the patch versions associated with the original
         //  packages.
+        //
+        //  https://www.mongodb.com/docs/manual/reference/operator/aggregation/documents/#use-a--documents-stage-in-a--lookup-stage
         pipeline[stage: .lookup]
         {
             $0[.foreignField] = Symbol.PackageDependency<PatchVersion>[.package]

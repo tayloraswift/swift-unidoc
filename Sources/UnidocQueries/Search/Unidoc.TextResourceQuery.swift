@@ -34,6 +34,8 @@ extension Unidoc.TextResourceQuery:Mongo.PipelineQuery
     @inlinable public
     var collation:Mongo.Collation { .casefolding }
     @inlinable public
+    var from:Mongo.Collection? { CollectionOrigin.name }
+    @inlinable public
     var hint:Mongo.CollectionIndex? { nil }
 
     public

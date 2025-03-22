@@ -1,5 +1,6 @@
 import MongoDB
 import MongoQL
+import Symbols
 import Unidoc
 import UnidocRecords
 
@@ -23,8 +24,8 @@ extension Unidoc.DB
 }
 extension Unidoc.DB.Vertices
 {
-    public static
-    let indexStem:Mongo.CollectionIndex = .init("Stem",
+    public
+    static let indexStem:Mongo.CollectionIndex = .init("Stem",
         collation: .casefolding,
         unique: true)
     {
@@ -44,13 +45,33 @@ extension Unidoc.DB.Vertices
         $0[Unidoc.AnyVertex[.stem]] { $0[.exists] = true }
     }
 
-    public static
-    let indexHash:Mongo.CollectionIndex = .init("Hash",
+    public
+    static let indexHash:Mongo.CollectionIndex = .init("Hash",
         collation: .casefolding,
         unique: true)
     {
         $0[Unidoc.AnyVertex[.hash]] = (+)
         $0[Unidoc.AnyVertex[.id]] = (+)
+    }
+
+    public
+    static let indexLinkableFlag:Mongo.CollectionIndex = .init("LinkableFlag",
+        unique: true)
+    {
+        $0[Unidoc.AnyVertex[.linkable]] = (+)
+        $0[Unidoc.AnyVertex[.id]] = (+)
+    }
+
+    public
+    static let indexLinkablePath:Mongo.CollectionIndex = .init("LinkablePath",
+        collation: .casefolding)
+    {
+        $0[Unidoc.AnyVertex[.trunk]] = (+)
+        $0[Unidoc.AnyVertex[.stem]] = (+)
+    }
+        where:
+    {
+        $0[Unidoc.AnyVertex[.linkable]] = true
     }
 }
 extension Unidoc.DB.Vertices:Mongo.CollectionModel
@@ -62,15 +83,28 @@ extension Unidoc.DB.Vertices:Mongo.CollectionModel
     var name:Mongo.Collection { "VolumeVertices" }
 
     @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [ Self.indexStem, Self.indexHash ] }
+    var indexes:[Mongo.CollectionIndex]
+    {
+        [
+            Self.indexStem,
+            Self.indexHash,
+            Self.indexLinkableFlag,
+            Self.indexLinkablePath,
+        ]
+    }
 }
+@available(*, unavailable, message: """
+    Vertices contain flags set by the database, which would be lost if they were decoded and \
+    re-encoded.
+    """)
 extension Unidoc.DB.Vertices:Mongo.RecodableModel
 {
 }
 extension Unidoc.DB.Vertices
 {
     @discardableResult
-    func insert(_ vertices:Unidoc.Mesh.Vertices) async throws -> Mongo.Insertions
+    func insert(_ vertices:Unidoc.Mesh.Vertices,
+        trunk:Symbol.Package?) async throws -> Mongo.Insertions
     {
         let response:Mongo.InsertResponse = try await session.run(
             command: Mongo.Insert.init(Self.name,
@@ -80,7 +114,20 @@ extension Unidoc.DB.Vertices
             }
                 documents:
             {
-                $0 += vertices.articles.lazy.map(Unidoc.AnyVertex.article(_:))
+                for article:Unidoc.ArticleVertex in vertices.articles
+                {
+                    $0[Unidoc.AnyVertex.CodingKey.self]
+                    {
+                        Unidoc.AnyVertex.article(article).encode(to: &$0)
+
+                        if  let trunk:Symbol.Package
+                        {
+                            $0[.linkable] = true
+                            $0[.trunk] = trunk
+                        }
+                    }
+                }
+
                 $0 += vertices.cultures.lazy.map(Unidoc.AnyVertex.culture(_:))
                 $0 += vertices.decls.lazy.map(Unidoc.AnyVertex.decl(_:))
                 $0 += vertices.files.lazy.map(Unidoc.AnyVertex.file(_:))
