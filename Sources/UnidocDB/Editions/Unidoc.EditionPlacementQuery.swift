@@ -20,10 +20,10 @@ extension Unidoc
 }
 extension Unidoc.EditionPlacementQuery:Mongo.PipelineQuery
 {
-    typealias CollectionOrigin = Unidoc.DB.Editions
     typealias Iteration = Mongo.Single<Unidoc.EditionPlacement>
 
     var collation:Mongo.Collation { .simple }
+    var from:Mongo.Collection? { Unidoc.DB.Editions.name }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)

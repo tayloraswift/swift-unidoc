@@ -599,7 +599,8 @@ extension Unidoc.DB
         try await self.trees.insert(mesh.trees)
 
         try await self.redirects.insert(mesh.redirects)
-        try await self.vertices.insert(mesh.vertices)
+        try await self.vertices.insert(mesh.vertices,
+            trunk: mesh.metadata.latest ? mesh.metadata.symbol.package : nil)
         try await self.groups.insert(mesh.groups,
             realm: mesh.metadata.latest ? mesh.metadata.realm : nil)
 
@@ -654,7 +655,8 @@ extension Unidoc.DB
         alignment:
         if  let latest:Unidoc.Edition = mesh.latestRelease
         {
-            try await self.update(with: Volumes.AlignLatest.init(to: latest))
+            try await self.update(with: Vertices.VacuumLatest.init(around: latest))
+            try await self.update(with: Volumes.VacuumLatest.init(around: latest))
 
             guard
             let realm:Unidoc.Realm = mesh.metadata.realm

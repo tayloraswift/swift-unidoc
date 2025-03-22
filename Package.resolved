@@ -1,6 +1,15 @@
 {
-  "originHash" : "16296f92659fd581601ade1c6f0a9a75c02b6e7e1206ed686b148905a82b56b7",
+  "originHash" : "2250db4e1bf15695a447f318027ed49373029667748d2116315fc42b58e440b2",
   "pins" : [
+    {
+      "identity" : "indexstore-db",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/indexstore-db",
+      "state" : {
+        "branch" : "main",
+        "revision" : "e08105badfbea2ff27cc4519c4ebb287b91c3cb8"
+      }
+    },
     {
       "identity" : "swift-argument-parser",
       "kind" : "remoteSourceControl",
@@ -101,6 +110,15 @@
       }
     },
     {
+      "identity" : "swift-lmdb",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-lmdb.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "29e6ac814f4f5138576bcb3d3995ed900aa8714e"
+      }
+    },
+    {
       "identity" : "swift-markdown",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-markdown",
@@ -114,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tayloraswift/swift-mongodb",
       "state" : {
-        "revision" : "3c45a4338770f7c6d9116a9becc64e0523e4817f",
-        "version" : "0.29.2"
+        "revision" : "b4ba79f3b3ddd210165ad765e73b417776865891",
+        "version" : "0.29.3"
       }
     },
     {

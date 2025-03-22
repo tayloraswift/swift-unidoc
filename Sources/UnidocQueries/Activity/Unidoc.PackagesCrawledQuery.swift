@@ -21,12 +21,12 @@ extension Unidoc
 extension Unidoc.PackagesCrawledQuery:Mongo.PipelineQuery
 {
     public
-    typealias CollectionOrigin = Unidoc.DB.CrawlingWindows
-    public
     typealias Iteration = Mongo.SingleBatch<Date>
 
     @inlinable public
     var collation:Mongo.Collation { .simple }
+    @inlinable public
+    var from:Mongo.Collection? { Unidoc.DB.CrawlingWindows.name }
     @inlinable public
     var hint:Mongo.CollectionIndex? { nil }
 

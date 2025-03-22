@@ -10,10 +10,10 @@ extension Unidoc
 }
 extension Unidoc.SitemapIndexQuery:Mongo.PipelineQuery
 {
-    typealias CollectionOrigin = Unidoc.DB.Sitemaps
     typealias Iteration = Mongo.Cursor<Unidoc.SitemapIndexEntry>
 
     var collation:Mongo.Collation { .simple }
+    var from:Mongo.Collection? { Unidoc.DB.Sitemaps.name }
     var hint:Mongo.CollectionIndex? { nil }
 
     func build(pipeline:inout Mongo.PipelineEncoder)
