@@ -114,7 +114,6 @@ extension SSGC.SymbolDump
                 }
 
                 $0.location?.file = rebased
-
             } (&self.vertices[j])
         }
     }
