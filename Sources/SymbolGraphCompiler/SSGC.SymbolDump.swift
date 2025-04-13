@@ -94,7 +94,6 @@ extension SSGC.SymbolDump
 
         for j:Int in self.vertices.indices
         {
-            try
             {
                 //  Deport foreign doccomments.
                 if  let doccomment:SymbolGraphPart.Vertex.Doccomment = $0.doccomment,
@@ -103,15 +102,18 @@ extension SSGC.SymbolDump
                     $0.doccomment = nil
                 }
                 //  Trim file path prefixes.
+                //  As of 6.1, symbolgraph-extract sometimes emits paths from inside the swift
+                //  installation directory.
                 guard
-                let base:Symbol.FileBase = copy base
+                let base:Symbol.FileBase = copy base,
+                let rebased:Symbol.File = try? $0.location?.file.rebased(against: base)
                 else
                 {
                     $0.location = nil
                     return
                 }
 
-                try $0.location?.file.rebase(against: base)
+                $0.location?.file = rebased
 
             } (&self.vertices[j])
         }
