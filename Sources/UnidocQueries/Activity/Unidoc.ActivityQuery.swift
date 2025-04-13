@@ -27,6 +27,9 @@ extension Unidoc.ActivityQuery
     static var featured:[Featured<Unidoc.Stem>]
     {
         [
+            .init(
+                package: "__swiftinit",
+                article: "articles cross-compiling-x86_64-linux-to-aarch64-linux"),
         ]
     }
 }

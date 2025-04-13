@@ -11,13 +11,19 @@ extension Unidoc
     {
         let repo:[DB.RepoFeed.Activity]
         let docs:[DB.DocsFeed.Activity<VolumeMetadata>]
+        let blogPosts:[Unidoc.ArticleVertex]
+        let tutorials:[Unidoc.ActivityQuery.Featured<Unidoc.ArticleVertex>]
 
         init(
             repo:[DB.RepoFeed.Activity],
-            docs:[DB.DocsFeed.Activity<VolumeMetadata>])
+            docs:[DB.DocsFeed.Activity<VolumeMetadata>],
+            blogPosts:[Unidoc.ArticleVertex],
+            tutorials:[Unidoc.ActivityQuery.Featured<Unidoc.ArticleVertex>])
         {
             self.repo = repo
             self.docs = docs
+            self.blogPosts = blogPosts
+            self.tutorials = tutorials
         }
     }
 }
@@ -114,6 +120,18 @@ extension Unidoc.HomePage:Unidoc.RenderablePage
                             {
                                 $0.href = "/help/self-serve"
                             } = "Self-serve help"
+                        }
+                    }
+                }
+
+                $0[.div, { $0.class = "featured blog-posts" }]
+                {
+                    for article:Unidoc.ArticleVertex in self.blogPosts
+                    {
+                        $0[.div]
+                        {
+                            $0[.h2] = article.headline.safe
+                            $0 ?= article.overview?.markdown.safe
                         }
                     }
                 }

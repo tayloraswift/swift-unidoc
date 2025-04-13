@@ -40,9 +40,32 @@ extension Unidoc.HomeEndpoint:HTTP.ServerEndpoint
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
+        let featured:
+        (
+            blogPosts:[Unidoc.ArticleVertex],
+            tutorials:[Unidoc.ActivityQuery.Featured<Unidoc.ArticleVertex>]
+        ) = output.featured.reduce(into: ([], []))
+        {
+            guard case .article(let article) = $1.article
+            else
+            {
+                return
+            }
+            if  $1.package == "__swiftinit"
+            {
+                $0.blogPosts.append(article)
+            }
+            else
+            {
+                $0.tutorials.append(.init(package: $1.package, article: article))
+            }
+        }
+
         let page:Unidoc.HomePage = .init(
             repo: output.repo,
-            docs: output.docs)
+            docs: output.docs,
+            blogPosts: featured.blogPosts,
+            tutorials: featured.tutorials)
 
         return .ok(page.resource(format: format))
     }
