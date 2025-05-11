@@ -34,7 +34,8 @@ extension Symbol.ConformanceRelationship:CustomStringConvertible
     var description:String
     {
         """
-        (conformance: \(self.source), to: \(self.target))
+        /\(self.source) CONFORMS TO \(self.target) \
+        (\(self.conditions.count) condition(s), \(self.origin == nil ? 0 : 1) origin(s))/
         """
     }
 }

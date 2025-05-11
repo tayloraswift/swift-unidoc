@@ -132,36 +132,42 @@ struct DocumentationInheritance
                 .intrinsicWitness(.init(
                     _ : "s24DocumentationInheritance15OtherRefinementPAAE8protocolytvp",
                     of: "s24DocumentationInheritance8ProtocolP8protocolytvp",
-                    origin: .init("s24DocumentationInheritance8ProtocolP8protocolytvp"))),
+                    origin: "s24DocumentationInheritance8ProtocolP8protocolytvp")),
+
+                .requirement(.init(
+                    _ : "s24DocumentationInheritance10RefinementP8protocolytvp",
+                    of: "s24DocumentationInheritance10RefinementP",
+                    origin: "s24DocumentationInheritance8ProtocolP8protocolytvp")),
+
+                .override(.init(
+                    _ : "s24DocumentationInheritance10RefinementP8protocolytvp",
+                    of: "s24DocumentationInheritance8ProtocolP8protocolytvp",
+                    origin: "s24DocumentationInheritance8ProtocolP8protocolytvp")),
 
                 .member(.init(
                     _ : "s24DocumentationInheritance9ConformerV7nowhereytvp",
                     in: .scalar("s24DocumentationInheritance9ConformerV"),
-                    origin: .init("s24DocumentationInheritance10RefinementP7nowhereytvp"))),
+                    origin: "s24DocumentationInheritance10RefinementP7nowhereytvp")),
 
                 .member(.init(
                     _ : "s24DocumentationInheritance9ConformerV10refinementytvp",
                     in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                    origin: .init(.init(
-                        "s:24DocumentationInheritance10RefinementP10refinementytvp")!))),
+                    origin: "s24DocumentationInheritance10RefinementP10refinementytvp")),
 
                 .member(.init(
                     _ : "s24DocumentationInheritance9ConformerV9conformerytvp",
                     in: .scalar("s24DocumentationInheritance9ConformerV"),
-                    origin: .init(
-                        "s24DocumentationInheritance10RefinementP9conformerytvp"))),
+                    origin: "s24DocumentationInheritance10RefinementP9conformerytvp")),
 
                 .member(.init(
                     _ : "s24DocumentationInheritance9ConformerV10everywhereytvp",
                     in: .scalar("s24DocumentationInheritance9ConformerV"),
-                    origin: .init(
-                        "s24DocumentationInheritance10RefinementP10everywhereytvp"))),
+                    origin: "s24DocumentationInheritance10RefinementP10everywhereytvp")),
 
                 .member(.init(
                     _ : "s24DocumentationInheritance9ConformerV8protocolytvp",
                     in: .scalar("s24DocumentationInheritance9ConformerV"),
-                    origin: .init(
-                        "s24DocumentationInheritance8ProtocolP8protocolytvp"))),
+                    origin: "s24DocumentationInheritance8ProtocolP8protocolytvp")),
             ])
     }
 }
