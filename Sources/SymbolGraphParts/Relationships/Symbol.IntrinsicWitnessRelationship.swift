@@ -57,7 +57,7 @@ extension Symbol.IntrinsicWitnessRelationship:CustomStringConvertible
     var description:String
     {
         """
-        (default implementation: \(self.source), of: \(self.target))
+        /\(self.source) IMPLEMENTS \(self.target) (\(self.origin == nil ? 0 : 1) origin(s))/
         """
     }
 }

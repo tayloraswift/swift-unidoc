@@ -29,7 +29,7 @@ extension Symbol.ExtensionRelationship:CustomStringConvertible
     var description:String
     {
         """
-        (extension: \(self.source), of: \(self.target))
+        /\(self.source) EXTENDS \(self.target)/
         """
     }
 }

@@ -14,6 +14,7 @@ extension Symbol
         public
         let optional:Bool
 
+        @inlinable public
         init(_ source:Symbol.Decl,
             of target:Symbol.Decl,
             origin:Symbol.Decl? = nil,
@@ -65,7 +66,8 @@ extension Symbol.RequirementRelationship:CustomStringConvertible
     var description:String
     {
         """
-        (\(self.optional ? "optional " : "")requirement: \(self.source), of: \(self.target))
+        /\(self.source) REQUIRED BY \(self.target) \
+        (\(self.origin == nil ? 0 : 1) origin(s), optional: \(self.optional))/
         """
     }
 }
