@@ -123,7 +123,7 @@ struct Precompiled
             $0.insert($1.package.name)
         }
 
-        #expect(dependencies == ["swift-syntax"])
+        #expect(dependencies == ["swift-syntax", "swift-custom-dump", "xctest-dynamic-overlay"])
 
         #expect(object.graph.cultures.count > 0)
         #expect(object.graph.decls.nodes.count > 0)
