@@ -43,8 +43,8 @@ struct PackageAliasing:Unidoc.TestBattery
         try await unidoc.alias(existing: "cc", package: "ccc")
         try await unidoc.alias(existing: "cc", package: "ccc")
 
-        for (queried, expected):
-            (Symbol.Package, (symbol:Symbol.Package, id:Unidoc.Package)) in [
+        for (queried, (symbol, id)):
+            (Symbol.Package, (Symbol.Package, Unidoc.Package)) in [
             ("a", ("a", 0)),
             ("b", ("b", 1)),
             ("c", ("c", 2)),
@@ -57,8 +57,8 @@ struct PackageAliasing:Unidoc.TestBattery
             let (package, new):(Unidoc.PackageMetadata, Bool) = try await unidoc.index(
                 package: queried)
 
-            #expect(package.symbol == expected.symbol)
-            #expect(package.id == expected.id)
+            #expect(package.symbol == symbol)
+            #expect(package.id == id)
             #expect(!new)
         }
     }

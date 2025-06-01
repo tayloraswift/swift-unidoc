@@ -29,7 +29,7 @@ extension Symbol.FeatureRelationship:CustomStringConvertible
     var description:String
     {
         """
-        (feature: \(self.source), of: \(self.target))
+        /\(self.source) INHERITED BY \(self.target) (\(self.origin == nil ? 0 : 1) origin(s))/
         """
     }
 }

@@ -16,6 +16,24 @@ extension Symbol
         case requirement            (RequirementRelationship)
     }
 }
+extension Symbol.AnyRelationship:CustomStringConvertible
+{
+    public
+    var description:String
+    {
+        switch self
+        {
+        case .conformance       (let self): self.description
+        case .intrinsicWitness  (let self): self.description
+        case .extension         (let self): self.description
+        case .inheritance       (let self): self.description
+        case .feature           (let self): self.description
+        case .member            (let self): self.description
+        case .override          (let self): self.description
+        case .requirement       (let self): self.description
+        }
+    }
+}
 extension Symbol.AnyRelationship
 {
     @inlinable public
@@ -23,14 +41,14 @@ extension Symbol.AnyRelationship
     {
         switch self
         {
-        case .conformance           (let relationship): relationship
-        case .intrinsicWitness      (let relationship): relationship
-        case .extension             (let relationship): relationship
-        case .inheritance           (let relationship): relationship
-        case .feature               (let relationship): relationship
-        case .member                (let relationship): relationship
-        case .override              (let relationship): relationship
-        case .requirement           (let relationship): relationship
+        case .conformance       (let self): self
+        case .intrinsicWitness  (let self): self
+        case .extension         (let self): self
+        case .inheritance       (let self): self
+        case .feature           (let self): self
+        case .member            (let self): self
+        case .override          (let self): self
+        case .requirement       (let self): self
         }
     }
 

@@ -57,7 +57,7 @@ extension Symbol.MemberRelationship:CustomStringConvertible
     var description:String
     {
         """
-        (member: \(self.source), of: \(self.target))
+        /\(self.source) MEMBER OF \(self.target) (\(self.origin == nil ? 0 : 1) origin(s))/
         """
     }
 }
