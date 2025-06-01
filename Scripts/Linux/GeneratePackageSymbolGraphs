@@ -27,7 +27,7 @@ ssgc slave https://github.com/pointfreeco/swift-snapshot-testing.git 1.18.3 \
     -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-snapshot-testing.bson
 
-ssgc slave https://github.com/swiftlang/indexstore-db.git swift-6.1-RELEASE \
+ssgc slave https://github.com/swiftlang/indexstore-db.git swift-6.1.2-RELEASE \
     -u $SWIFT_INSTALLATION \
     -o TestPackages/indexstore-db.bson \
     --Xcxx -I$SWIFT_INSTALLATION/lib/swift \
