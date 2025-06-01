@@ -55,7 +55,7 @@ extension Symbol.InheritanceRelationship:CustomStringConvertible
     var description:String
     {
         """
-        (inheritance by: \(self.source), of: \(self.target))
+        /\(self.source) INHERITS FROM \(self.target) (\(self.origin == nil ? 0 : 1) origin(s))/
         """
     }
 }

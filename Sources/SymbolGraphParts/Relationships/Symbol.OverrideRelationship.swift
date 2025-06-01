@@ -58,7 +58,7 @@ extension Symbol.OverrideRelationship:CustomStringConvertible
     var description:String
     {
         """
-        (override: \(self.source), of: \(self.target))
+        /\(self.source) OVERRIDES \(self.target) (\(self.origin == nil ? 0 : 1) origin(s))/
         """
     }
 }
