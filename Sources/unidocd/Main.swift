@@ -120,7 +120,7 @@ extension Main:AsyncParsableCommand
     static var configuration:CommandConfiguration
     {
         .init(commandName: "unidocd",
-            subcommands: [SSGC.SlaveCommand.self])
+            subcommands: [SSGC.BuildCommand.self, SSGC.SlaveCommand.self])
     }
 
     mutating
