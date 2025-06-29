@@ -33,9 +33,9 @@ jobs:
 
             -   name: Build documentation
                 run: |
-                    unidoc compile -I .. \
+                    unidoc compile \
                         --ci fail-on-errors \
-                        --package-name swift-unidoc \
+                        --project-path . \
                         --swift-toolchain $SWIFT_INSTALLATION
 
     macos:
@@ -53,6 +53,6 @@ jobs:
 
             -   name: Build documentation
                 run: |
-                    unidoc compile -I .. \
+                    unidoc compile \
                         --ci fail-on-errors \
-                        --package-name swift-unidoc
+                        --project-path .
