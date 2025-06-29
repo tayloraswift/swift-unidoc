@@ -1,6 +1,6 @@
 import ArgumentParser
 
-extension Regex<Substring>:@retroactive ExpressibleByArgument
+extension Regex<Substring>:@retroactive ExpressibleByArgument, @retroactive _SendableMetatype
 {
     @inlinable public
     init?(argument:String)
