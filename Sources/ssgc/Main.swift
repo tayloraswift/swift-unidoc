@@ -2,7 +2,7 @@ import ArgumentParser
 import SymbolGraphBuilder
 
 @main
-struct Main:ParsableCommand
+struct Main:AsyncParsableCommand
 {
     static var configuration:CommandConfiguration
     {
