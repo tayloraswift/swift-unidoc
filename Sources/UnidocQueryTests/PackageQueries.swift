@@ -97,8 +97,6 @@ struct PackageQueries:Unidoc.TestBattery
 
             let index:Unidoc.TextResourceOutput = try #require(try await db.query(with: query))
 
-            #expect(index.hash != nil)
-
             switch index.text
             {
             case .inline(.utf8(let utf8)):

@@ -4,8 +4,9 @@
 .ssgc
 .testing
 .unidoc
-.vscode
-.DS_Store
+
+/.vscode/launch.json
+/.vscode/settings.json
 
 /*.tar.gz
 /unidoc
