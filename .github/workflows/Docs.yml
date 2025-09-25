@@ -33,7 +33,7 @@ jobs:
 
             -   name: Build documentation
                 run: |
-                    unidoc compile \
+                    unidoc build \
                         --ci fail-on-errors \
                         --project-path . \
                         --swift-toolchain $SWIFT_INSTALLATION
@@ -53,6 +53,6 @@ jobs:
 
             -   name: Build documentation
                 run: |
-                    unidoc compile \
+                    unidoc build \
                         --ci fail-on-errors \
                         --project-path .
