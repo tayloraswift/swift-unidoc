@@ -1,0 +1,159 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "type": "swift",
+            "args": [
+                "build",
+                "-c",
+                "debug",
+                "--build-tests",
+                "--explicit-target-dependency-import-check=error",
+                "--destination", "Scripts/Linux/x86_64/x86_64.json"
+            ],
+            "env": {
+                "UNIDOC_ENABLE_INDEXSTORE": "1"
+            },
+            "disableTaskQueue": true,
+            "problemMatcher": [
+                "$swiftc"
+            ],
+            "group": "build",
+            "label": "swift: Build All",
+            "detail": "swift build"
+        },
+        {
+            "type": "swift",
+            "args": [
+                "build",
+                "-c",
+                "release",
+                "--build-tests",
+                "--explicit-target-dependency-import-check=error",
+                "--destination", "Scripts/Linux/x86_64/x86_64.json"
+            ],
+            "env": {
+                "UNIDOC_ENABLE_INDEXSTORE": "1"
+            },
+            "disableTaskQueue": true,
+            "problemMatcher": [
+                "$swiftc"
+            ],
+            "group": "build",
+            "label": "swift: Build All (release)",
+            "detail": "swift build -c release"
+        },
+        {
+            "type": "swift",
+            "args": [
+                "test",
+                "-c",
+                "release",
+                "--skip-build",
+                "--skip",
+                "SymbolGraphValidationTests",
+                "--no-parallel",
+                "--explicit-target-dependency-import-check=error",
+                "--destination", "Scripts/Linux/x86_64/x86_64.json"
+            ],
+            "env": {
+                "UNIDOC_ENABLE_INDEXSTORE": "1"
+            },
+            "disableTaskQueue": true,
+            "problemMatcher": [
+                "$swiftc"
+            ],
+            "group": "build",
+            "label": "swift: Test All (release)",
+            "detail": "swift test -c release"
+        },
+        {
+            "type": "swift",
+            "args": [
+                "test",
+                "--skip-build",
+                "--filter",
+                "UCFTests",
+                "--no-parallel",
+                "--explicit-target-dependency-import-check=error",
+                "--destination", "Scripts/Linux/x86_64/x86_64.json"
+            ],
+            "env": {
+                "UNIDOC_ENABLE_INDEXSTORE": "1"
+            },
+            "disableTaskQueue": true,
+            "problemMatcher": [
+                "$swiftc"
+            ],
+            "group": "build",
+            "label": "swift: Test UCF",
+            "detail": "swift test"
+        },
+        {
+            "type": "swift",
+            "args": [
+                "test",
+                "--skip-build",
+                "--filter",
+                "MarkdownPluginSwiftTests",
+                "--no-parallel",
+                "--explicit-target-dependency-import-check=error",
+                "--destination", "Scripts/Linux/x86_64/x86_64.json"
+            ],
+            "env": {
+                "UNIDOC_ENABLE_INDEXSTORE": "1"
+            },
+            "disableTaskQueue": true,
+            "problemMatcher": [
+                "$swiftc"
+            ],
+            "group": "build",
+            "label": "swift: Test MarkdownPluginSwift",
+            "detail": "swift test"
+        },
+        {
+            "type": "swift",
+            "args": [
+                "test",
+                "--skip-build",
+                "--filter",
+                "MarkdownRenderingTests",
+                "--no-parallel",
+                "--explicit-target-dependency-import-check=error",
+                "--destination", "Scripts/Linux/x86_64/x86_64.json"
+            ],
+            "env": {
+                "UNIDOC_ENABLE_INDEXSTORE": "1"
+            },
+            "disableTaskQueue": true,
+            "problemMatcher": [
+                "$swiftc"
+            ],
+            "group": "build",
+            "label": "swift: Test MarkdownRendering",
+            "detail": "swift test"
+        },
+        {
+            "type": "swift",
+            "args": [
+                "test",
+                "--skip-build",
+                "--filter",
+                "SymbolGraphLinkerTests",
+                "--no-parallel",
+                "--explicit-target-dependency-import-check=error",
+                "--destination", "Scripts/Linux/x86_64/x86_64.json"
+            ],
+            "env": {
+                "UNIDOC_ENABLE_INDEXSTORE": "1"
+            },
+            "disableTaskQueue": true,
+            "problemMatcher": [
+                "$swiftc"
+            ],
+            "group": "build",
+            "label": "swift: Test SymbolGraphLinkerTests",
+            "detail": "swift test"
+        },
+    ]
+}

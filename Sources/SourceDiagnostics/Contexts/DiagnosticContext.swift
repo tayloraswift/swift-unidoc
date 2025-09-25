@@ -1,7 +1,7 @@
 import Sources
 
 @frozen @usableFromInline
-struct DiagnosticContext<File>
+struct DiagnosticContext<File>:SendableMetatype
 {
     @usableFromInline
     let location:SourceLocation<File>?
