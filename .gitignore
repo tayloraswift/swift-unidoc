@@ -23,5 +23,7 @@
 /TestPackages/*.bson
 /TypeScript/node_modules
 
+/Package.resolved
+
 *.profdata
 *.profraw
