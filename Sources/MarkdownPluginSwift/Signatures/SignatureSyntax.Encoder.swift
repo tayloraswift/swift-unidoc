@@ -73,22 +73,37 @@ extension SignatureSyntax.Encoder
         }
     }
 }
-extension SignatureSyntax.Encoder
-{
-    static
-    func ?= (self:inout Self, syntax:(some SyntaxProtocol)?)
-    {
+extension SignatureSyntax.Encoder {
+    static func ?= (self: inout Self, syntax: TrimmedSyntax<some SyntaxProtocol>?) {
         syntax.map { self += $0 }
     }
-    static
-    func += (self:inout Self, syntax:some SyntaxProtocol)
-    {
-        for span:SyntaxClassifiedRange in syntax.classifications
-        {
-            let range:Range<Int> = span.offset ..< span.offset + span.length
-            let color:Markdown.Bytecode.Context? = .init(classification: span.kind)
+    static func ?= (self: inout Self, syntax: (some SyntaxProtocol)?) {
+        syntax.map { self += $0 }
+    }
 
-            self.spans.append(.text(range, color.map { self.color ?? $0 }, self.depth))
+
+    static func += (self: inout Self, syntax: TrimmedSyntax<some SyntaxProtocol>) {
+        let start: Int = syntax.node.positionAfterSkippingLeadingTrivia.utf8Offset
+        self.write(classifications: syntax.node.trimmed.classifications, from: start)
+    }
+
+    static func += (self: inout Self, syntax: some SyntaxProtocol) {
+        self.write(classifications: syntax.classifications, from: 0)
+    }
+}
+extension SignatureSyntax.Encoder {
+    private mutating func write(classifications: SyntaxClassifications, from start: Int) {
+        for span: SyntaxClassifiedRange in classifications {
+            let color: Markdown.Bytecode.Context? = .init(classification: span.kind)
+
+            self.spans.append(
+                .text(
+                    start + span.range.lowerBound.utf8Offset ..<
+                    start + span.range.upperBound.utf8Offset,
+                    color.map { self.color ?? $0 },
+                    self.depth
+                )
+            )
         }
     }
 }

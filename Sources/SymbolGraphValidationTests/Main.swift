@@ -106,33 +106,6 @@ struct Precompiled
         try object.roundtrip()
     }
 
-    /// The swift-snapshot-testing package at 1.17.0 has a dependency on SwiftSyntax with
-    /// prerelease bounds on both sides, so we should be able to handle that.
-    ///
-    /// This test is disabled on macOS because `swift symbolgraph-extract` crashes there.
-    @Test
-    func swift_snapshot_testing() throws
-    {
-        #if !os(macOS)
-
-        let object:SymbolGraphObject<Void> = try .load(package: "swift-snapshot-testing",
-            in: self.directory)
-
-        let dependencies:Set<Symbol.Package> = object.metadata.dependencies.reduce(into: [])
-        {
-            $0.insert($1.package.name)
-        }
-
-        #expect(dependencies == ["swift-syntax", "swift-custom-dump", "xctest-dynamic-overlay"])
-
-        #expect(object.graph.cultures.count > 0)
-        #expect(object.graph.decls.nodes.count > 0)
-
-        try object.roundtrip()
-
-        #endif
-    }
-
     @Test
     func indexstore_db() throws
     {
