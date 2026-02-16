@@ -18,29 +18,19 @@ extension SignatureSyntax
 }
 extension SignatureSyntax.Builder
 {
-    private mutating
-    func register(parameters clause:FunctionParameterClauseSyntax, type:SignatureParameterType)
-    {
-        for region:Syntax in clause.children(viewMode: .sourceAccurate)
-        {
-            guard
-            let parameters:FunctionParameterListSyntax =
-                region.as(FunctionParameterListSyntax.self)
-            else
-            {
-                self.encoder += region
-                continue
-            }
+    private mutating func register(parameters clause: FunctionParameterClauseSyntax, type: SignatureParameterType, trimAfter: Bool = false) {
+        self.encoder += clause.leftParen
+        for parameter: FunctionParameterSyntax in clause.parameters {
+            self.encoder.wbr(indent: true)
+            self.encoder += self.visitor.register(parameter: parameter, type: type)
+        }
 
-            defer
-            {
-                self.encoder.wbr(indent: false)
-            }
-            for parameter:FunctionParameterSyntax in parameters
-            {
-                self.encoder.wbr(indent: true)
-                self.encoder += self.visitor.register(parameter: parameter, type: type)
-            }
+        self.encoder.wbr(indent: false)
+
+        if  trimAfter {
+            self.encoder += clause.rightParen.trimmedPreservingLocation
+        } else {
+            self.encoder += clause.rightParen
         }
     }
 }
@@ -193,62 +183,62 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
         {
             self.encode(decl.modifiers)
             self.encoder += decl.actorKeyword
-            self.encoder[at: .toplevel] += decl.name.trimmed
-            self.encode(decl.genericParameterClause?.trimmed)
+            self.encoder[at: .toplevel] += decl.name.trimmedPreservingLocation
+            self.encode(decl.genericParameterClause)
         }
         else if
             let decl:AssociatedTypeDeclSyntax = decl.as(AssociatedTypeDeclSyntax.self)
         {
             self.encode(decl.modifiers)
             self.encoder += decl.associatedtypeKeyword
-            self.encoder[at: .toplevel] += decl.name.trimmed
+            self.encoder[at: .toplevel] += decl.name.trimmedPreservingLocation
         }
         else if
             let decl:ClassDeclSyntax = decl.as(ClassDeclSyntax.self)
         {
             self.encode(decl.modifiers)
             self.encoder += decl.classKeyword
-            self.encoder[at: .toplevel] += decl.name.trimmed
-            self.encode(decl.genericParameterClause?.trimmed)
+            self.encoder[at: .toplevel] += decl.name.trimmedPreservingLocation
+            self.encode(decl.genericParameterClause)
         }
         else if
             let decl:EnumDeclSyntax = decl.as(EnumDeclSyntax.self)
         {
             self.encode(decl.modifiers)
             self.encoder += decl.enumKeyword
-            self.encoder[at: .toplevel] += decl.name.trimmed
-            self.encode(decl.genericParameterClause?.trimmed)
+            self.encoder[at: .toplevel] += decl.name.trimmedPreservingLocation
+            self.encode(decl.genericParameterClause)
         }
         else if
             let decl:ProtocolDeclSyntax = decl.as(ProtocolDeclSyntax.self)
         {
             self.encode(decl.modifiers)
             self.encoder += decl.protocolKeyword
-            self.encoder[at: .toplevel] += decl.name.trimmed
-            self.encoder ?= decl.primaryAssociatedTypeClause?.trimmed
+            self.encoder[at: .toplevel] += decl.name.trimmedPreservingLocation
+            self.encoder ?= decl.primaryAssociatedTypeClause?.trimmedPreservingLocation
         }
         else if
             let decl:StructDeclSyntax = decl.as(StructDeclSyntax.self)
         {
             self.encode(decl.modifiers)
             self.encoder += decl.structKeyword
-            self.encoder[at: .toplevel] += decl.name.trimmed
-            self.encode(decl.genericParameterClause?.trimmed)
+            self.encoder[at: .toplevel] += decl.name.trimmedPreservingLocation
+            self.encode(decl.genericParameterClause)
         }
         else if
             let decl:DeinitializerDeclSyntax = decl.as(DeinitializerDeclSyntax.self)
         {
             self.encode(decl.modifiers)
             self.encoder[at: .toplevel] += decl.deinitKeyword
-            self.encoder ?= decl.effectSpecifiers?.trimmed
+            self.encoder ?= decl.effectSpecifiers?.trimmedPreservingLocation
         }
         else if
             let decl:FunctionDeclSyntax = decl.as(FunctionDeclSyntax.self)
         {
             self.encode(decl.modifiers)
             self.encoder += decl.funcKeyword
-            self.encoder[at: .toplevel] += decl.name
-            self.encode(decl.genericParameterClause?.trimmed)
+            self.encoder[at: .toplevel] += decl.name.trimmedPreservingLocation
+            self.encode(decl.genericParameterClause)
             self.encode(decl.signature)
         }
         else if
@@ -257,7 +247,7 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
             self.encode(decl.modifiers)
             self.encoder[at: .toplevel] += decl.initKeyword
             self.encoder ?= decl.optionalMark
-            self.encode(decl.genericParameterClause?.trimmed)
+            self.encode(decl.genericParameterClause)
             self.encode(decl.signature)
         }
         else if
@@ -265,8 +255,8 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
         {
             self.encode(decl.modifiers)
             self.encoder += decl.macroKeyword
-            self.encoder[at: .toplevel] += decl.name
-            self.encode(decl.genericParameterClause?.trimmed)
+            self.encoder[at: .toplevel] += decl.name.trimmedPreservingLocation
+            self.encode(decl.genericParameterClause)
             self.encode(decl.signature)
         }
         else if
@@ -274,18 +264,18 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
         {
             self.encode(decl.modifiers)
             self.encoder[at: .toplevel] += decl.subscriptKeyword
-            self.encode(decl.genericParameterClause?.trimmed)
+            self.encode(decl.genericParameterClause)
 
             self.register(parameters: decl.parameterClause, type: .subscript)
-            self.encoder += decl.returnClause.trimmed
+            self.encoder += decl.returnClause.trimmedPreservingLocation
         }
         else if
             let decl:TypeAliasDeclSyntax = decl.as(TypeAliasDeclSyntax.self)
         {
             self.encode(decl.modifiers)
             self.encoder += decl.typealiasKeyword
-            self.encoder[at: .toplevel] += decl.name.trimmed
-            self.encode(decl.genericParameterClause?.trimmed)
+            self.encoder[at: .toplevel] += decl.name.trimmedPreservingLocation
+            self.encode(decl.genericParameterClause)
         }
         else if
             let decl:VariableDeclSyntax = decl.as(VariableDeclSyntax.self)
@@ -294,8 +284,8 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
             self.encoder += decl.bindingSpecifier
             for binding:PatternBindingSyntax in decl.bindings
             {
-                self.encoder[at: .toplevel] += binding.pattern.trimmed
-                self.encoder ?= binding.typeAnnotation?.trimmed
+                self.encoder[at: .toplevel] += binding.pattern.trimmedPreservingLocation
+                self.encoder ?= binding.typeAnnotation?.trimmedPreservingLocation
                 break
             }
         }
@@ -306,7 +296,7 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
             self.encoder += decl.caseKeyword
             for element:EnumCaseElementSyntax in decl.elements
             {
-                self.encoder[at: .toplevel] += element.name.trimmed
+                self.encoder[at: .toplevel] += element.name.trimmedPreservingLocation
 
                 if  let payload:EnumCaseParameterClauseSyntax = element.parameterClause
                 {
@@ -317,13 +307,13 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
                         if  let label:TokenSyntax = parameter.firstName,
                                 label.tokenKind != .wildcard
                         {
-                            self.encoder[at: .toplevel] += label.trimmed
+                            self.encoder[at: .toplevel] += label.trimmedPreservingLocation
                             self.encoder ?= parameter.colon
                         }
-                        self.encoder += parameter.type.trimmed
+                        self.encoder += parameter.type.trimmedPreservingLocation
                         self.encoder ?= parameter.trailingComma
                     }
-                    self.encoder += payload.rightParen.trimmed
+                    self.encoder += payload.rightParen.trimmedPreservingLocation
                 }
                 break
             }
@@ -341,17 +331,17 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
         {
             self.register(parameters: function.parameterClause, type: .func)
             self.encoder ?= function.effectSpecifiers
-            self.encoder += returns.trimmed
+            self.encoder += returns.trimmedPreservingLocation
         }
         else if
             let effects:FunctionEffectSpecifiersSyntax = function.effectSpecifiers
         {
             self.register(parameters: function.parameterClause, type: .func)
-            self.encoder += effects.trimmed
+            self.encoder += effects.trimmedPreservingLocation
         }
         else
         {
-            self.register(parameters: function.parameterClause.trimmed, type: .func)
+            self.register(parameters: function.parameterClause, type: .func, trimAfter: true)
         }
     }
 
@@ -376,7 +366,7 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
     }
 
     private mutating
-    func encode(_ clause:GenericParameterClauseSyntax?)
+    func encode(_ clause: GenericParameterClauseSyntax?)
     {
         guard
         let clause:GenericParameterClauseSyntax
@@ -385,13 +375,13 @@ extension SignatureSyntax.Builder<SignatureSyntax.AbridgedVisitor>
             return
         }
 
-        self.encoder += clause.leftAngle
+        self.encoder += clause.leftAngle.trimmedPreservingLocation
         for parameter:GenericParameterSyntax in clause.parameters
         {
-            self.encoder ?= parameter.eachKeyword
-            self.encoder += parameter.name.trimmed
+            self.encoder ?= parameter.specifier
+            self.encoder += parameter.name.trimmedPreservingLocation
             self.encoder ?= parameter.trailingComma
         }
-        self.encoder += clause.rightAngle
+        self.encoder += clause.rightAngle.trimmedPreservingLocation
     }
 }
