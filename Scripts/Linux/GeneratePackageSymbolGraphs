@@ -23,10 +23,6 @@ ssgc slave https://github.com/swiftlang/swift-syntax.git 600.0.1 \
     -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-syntax.bson
 
-ssgc slave https://github.com/pointfreeco/swift-snapshot-testing.git 1.18.9 \
-    -u $SWIFT_INSTALLATION \
-    -o TestPackages/swift-snapshot-testing.bson
-
 ssgc slave https://github.com/swiftlang/indexstore-db.git swift-6.1.2-RELEASE \
     -u $SWIFT_INSTALLATION \
     -o TestPackages/indexstore-db.bson \
