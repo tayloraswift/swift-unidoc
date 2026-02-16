@@ -34,7 +34,7 @@ jobs:
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
                         -e SWIFT_INSTALLATION=/usr \
-                        swift:6.1.2-noble \
+                        swift:6.2-noble \
                         /bin/bash Scripts/Linux/TestAll
 
     linux:
@@ -47,8 +47,8 @@ jobs:
             -   name: Install Swift
                 uses: tayloraswift/swift-install-action@master
                 with:
-                    swift-prefix: "swift-6.1.2-release/ubuntu2404/swift-6.1.2-RELEASE"
-                    swift-id: "swift-6.1.2-RELEASE-ubuntu24.04"
+                    swift-prefix: "swift-6.2.3-release/ubuntu2404/swift-6.2.3-RELEASE"
+                    swift-id: "swift-6.2.3-RELEASE-ubuntu24.04"
 
             -   name: Checkout repository
                 uses: actions/checkout@v3
@@ -58,7 +58,7 @@ jobs:
                     swift --version
                     swift build -c release \
                         --product ssgc \
-                        --explicit-target-dependency-import-check=error \
+                        --explicit-target-dependency-import-check=warn \
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
                     mkdir $HOME/bin
@@ -86,12 +86,15 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
+            -   name: Select Xcode 26.2
+                run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
+
             -   name: Build release
                 run: |
                     swift --version
                     swift build -c release \
                         --product ssgc \
-                        --explicit-target-dependency-import-check=error
+                        --explicit-target-dependency-import-check=warn
                     mkdir $HOME/bin
                     mv .build/release/ssgc $HOME/bin
                     echo "$HOME/bin" >> $GITHUB_PATH

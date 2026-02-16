@@ -1,5 +1,5 @@
 public
-protocol TestBattery
+protocol TestBattery:SendableMetatype
 {
     static
     var name:String { get }

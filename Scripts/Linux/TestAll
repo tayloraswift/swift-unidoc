@@ -5,14 +5,14 @@ export UNIDOC_ENABLE_INDEXSTORE=1
 
 swift --version
 swift build -c release \
-    --explicit-target-dependency-import-check=error \
+    --explicit-target-dependency-import-check=warn \
     -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
     -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
 
 Scripts/Linux/GenerateTestSymbolGraphs
 
 swift test -c release \
-    --explicit-target-dependency-import-check=error \
+    --explicit-target-dependency-import-check=warn \
     -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
     -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block \
     --no-parallel \

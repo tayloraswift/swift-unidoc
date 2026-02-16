@@ -32,6 +32,18 @@ extension SignatureSyntax.Autographer
     }
 
     mutating
+    func encode(type:GenericArgumentSyntax.Argument, stem:Bool = false)
+    {
+        switch type
+        {
+        case .type(let type):
+            self.encode(type: type, stem: stem)
+
+        case .expr:
+            self.autograph.append("_")
+        }
+    }
+    mutating
     func encode(type:TypeSyntax, stem:Bool = false)
     {
         if  let type:AttributedTypeSyntax = type.as(AttributedTypeSyntax.self)
@@ -191,7 +203,7 @@ extension SignatureSyntax.Autographer
     {
         if  let arguments:GenericArgumentListSyntax, resugar
         {
-            let arguments:[TypeSyntax] = arguments.map(\.argument)
+            let arguments:[GenericArgumentSyntax.Argument] = arguments.map(\.argument)
             let position:Int = name.positionAfterSkippingLeadingTrivia.utf8Offset
 
             if  self.sugarMap.arrays.contains(position), arguments.count == 1
