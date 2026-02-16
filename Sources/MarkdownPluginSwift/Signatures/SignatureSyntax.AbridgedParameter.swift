@@ -44,16 +44,16 @@ extension SignatureSyntax.AbridgedParameter:SignatureParameter
     {
         if  self.unlabeled
         {
-            signature += self.syntax.type.trimmed
-            signature ?= self.syntax.ellipsis?.trimmed
+            signature += self.syntax.type.trimmedPreservingLocation
+            signature ?= self.syntax.ellipsis?.trimmedPreservingLocation
             signature ?= self.syntax.trailingComma
         }
         else
         {
-            signature[at: .toplevel] += self.syntax.firstName.trimmed
+            signature[at: .toplevel] += self.syntax.firstName.trimmedPreservingLocation
             signature += self.syntax.colon
-            signature += self.syntax.type.trimmed
-            signature ?= self.syntax.ellipsis?.trimmed
+            signature += self.syntax.type.trimmedPreservingLocation
+            signature ?= self.syntax.ellipsis?.trimmedPreservingLocation
             signature ?= self.syntax.trailingComma
         }
     }
