@@ -4,8 +4,9 @@
 .ssgc
 .testing
 .unidoc
-.vscode
-.DS_Store
+
+/.vscode/launch.json
+/.vscode/settings.json
 
 /*.tar.gz
 /unidoc
@@ -21,6 +22,8 @@
 /TestModules/*.json
 /TestPackages/*.bson
 /TypeScript/node_modules
+
+/Package.resolved
 
 *.profdata
 *.profraw

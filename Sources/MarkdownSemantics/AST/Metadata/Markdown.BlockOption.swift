@@ -33,7 +33,7 @@ extension Markdown.BlockOption:Markdown.BlockDirectiveType
     {
         switch option
         {
-        case ._:
+        case .`_`:
             guard case nil = self.value
             else
             {

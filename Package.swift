@@ -1,9 +1,9 @@
-// swift-tools-version:6.0
+// swift-tools-version:6.2
 import class Foundation.ProcessInfo
 import PackageDescription
 import CompilerPluginSupport
 
-let package:Package = .init(
+let package: Package = .init(
     name: "Swift Unidoc",
     platforms: [.macOS(.v15), .iOS(.v18), .tvOS(.v18), .visionOS(.v2), .watchOS(.v11)],
     products: [
@@ -77,7 +77,7 @@ let package:Package = .init(
         .package(url: "https://github.com/tayloraswift/swift-bson", .upToNextMinor(
             from: "1.0.0")),
         .package(url: "https://github.com/tayloraswift/swift-dom", .upToNextMinor(
-            from: "1.1.0")),
+            from: "1.2.0")),
         .package(url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
             from: "0.5.0")),
         .package(url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
@@ -113,7 +113,7 @@ let package:Package = .init(
         .package(url: "https://github.com/apple/swift-markdown", .upToNextMinor(
             from: "0.4.0")),
         .package(url: "https://github.com/apple/swift-syntax",
-            from: "600.0.1"),
+            from: "602.0.0"),
     ],
     targets: [
         .executableTarget(name: "ssgc",
@@ -732,6 +732,9 @@ for target:PackageDescription.Target in package.targets
 
         settings.append(.enableUpcomingFeature("ExistentialAny"))
         settings.append(.enableExperimentalFeature("StrictConcurrency"))
+
+        settings.append(.treatWarning("ExistentialAny", as: .error))
+        settings.append(.treatWarning("MutableGlobalVariable", as: .error))
 
         settings.append(.define("DEBUG", .when(configuration: .debug)))
 

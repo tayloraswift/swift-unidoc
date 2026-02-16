@@ -88,7 +88,6 @@ extension LinkResolution.TestCase
                 fragmentLinks.insert(display)
 
             case .bare(line: _, let id):
-                let id:Unidoc.Scalar = try #require(id)
                 let full:String = try #require(loadable[id])
 
                 internalLinks[full, default: []].append("__attribute")
