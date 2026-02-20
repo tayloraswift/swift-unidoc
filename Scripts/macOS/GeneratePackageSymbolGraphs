@@ -18,7 +18,7 @@ ssgc slave https://github.com/apple/swift-async-dns-resolver.git 0.1.2 \
 ssgc slave https://github.com/swiftlang/swift-syntax.git 600.0.1 \
     -o TestPackages/swift-syntax.bson
 
-ssgc slave https://github.com/swiftlang/indexstore-db.git swift-6.0-RELEASE \
+ssgc slave https://github.com/swiftlang/indexstore-db.git swift-6.2.3-RELEASE \
     -o TestPackages/indexstore-db.bson
 
 ssgc slave https://github.com/swiftlang/swift-book.git swift-5.10-fcs \
