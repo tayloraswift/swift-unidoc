@@ -17,6 +17,6 @@ extension Unidoc.RenderFormat
 
     var availableVersions:[String]
     {
-        ["6.1.2"]
+        ["6.2.3"]
     }
 }
