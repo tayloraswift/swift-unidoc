@@ -112,7 +112,12 @@ struct Precompiled
         let object:SymbolGraphObject<Void> = try .load(package: "indexstore-db",
             in: self.directory)
 
-        #expect(object.metadata.dependencies == [])
+        let dependencies:Set<Symbol.Package> = object.metadata.dependencies.reduce(into: [])
+        {
+            $0.insert($1.package.name)
+        }
+
+        #expect(dependencies == ["swift-lmdb"])
 
         #expect(object.graph.cultures.count > 0)
         #expect(object.graph.decls.nodes.count > 0)
