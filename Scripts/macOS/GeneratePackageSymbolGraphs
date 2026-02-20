@@ -6,10 +6,10 @@ swift --version
 ssgc slave https://github.com/apple/swift-atomics.git 1.2.0 \
     -o TestPackages/swift-atomics.bson
 
-ssgc slave https://github.com/apple/swift-nio.git 2.75.0 \
+ssgc slave https://github.com/apple/swift-nio.git 2.94.0 \
     -o TestPackages/swift-nio.bson
 
-ssgc slave https://github.com/apple/swift-nio-ssl.git 2.29.0 \
+ssgc slave https://github.com/apple/swift-nio-ssl.git 2.36.0 \
     -o TestPackages/swift-nio-ssl.bson
 
 ssgc slave https://github.com/apple/swift-async-dns-resolver.git 0.1.2 \
