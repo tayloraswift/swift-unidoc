@@ -42,7 +42,7 @@ struct UpCommand
         name: [.customLong("swift-toolchain"), .customShort("u")],
         help: "The path to a Swift toolchain directory, usually ending in 'usr'",
         completion: .directory)
-    var toolchain:FilePath.Directory = "/home/ubuntu/6.1.2/aarch64/usr"
+    var toolchain:FilePath.Directory = "/home/ubuntu/6.2.3/aarch64/usr"
 
     @Option(
         name: [.customLong("swift-sdk"), .customShort("k")],
