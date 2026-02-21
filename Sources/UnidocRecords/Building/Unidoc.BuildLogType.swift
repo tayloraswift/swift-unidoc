@@ -1,10 +1,11 @@
 import BSON
 
-extension Unidoc
-{
-    @frozen public
-    enum BuildLogType:String, BSONDecodable, BSONEncodable, Equatable, Sendable
-    {
+extension Unidoc {
+    @frozen public enum BuildLogType: String,
+        BSONDecodable,
+        BSONEncodable,
+        Equatable,
+        Sendable {
         /// Deprecated.
         case ssgc = "C"
         /// Deprecated.
@@ -14,13 +15,9 @@ extension Unidoc
         case documentation = "A"
     }
 }
-extension Unidoc.BuildLogType
-{
-    @inlinable public
-    var name:String
-    {
-        switch self
-        {
+extension Unidoc.BuildLogType {
+    @inlinable public var name: String {
+        switch self {
         case .ssgc:             "build"
         case .ssgcDiagnostics:  "documentation"
         case .build:            "build"

@@ -3,44 +3,36 @@ import SemanticVersions
 import UnidocRender
 import URI
 
-extension Unidoc.CanonicalVersion
-{
-    init?(principalVolume:__shared Unidoc.VolumeMetadata,
-        principalVertex:__shared Unidoc.AnyVertex?,
-        canonicalVolume:__shared Unidoc.VolumeMetadata?,
-        canonicalVertex:__shared Unidoc.AnyVertex?,
-        layer:(some Unidoc.VertexLayer).Type)
-    {
+extension Unidoc.CanonicalVersion {
+    init?(
+        principalVolume: __shared Unidoc.VolumeMetadata,
+        principalVertex: __shared Unidoc.AnyVertex?,
+        canonicalVolume: __shared Unidoc.VolumeMetadata?,
+        canonicalVertex: __shared Unidoc.AnyVertex?,
+        layer: (some Unidoc.VertexLayer).Type
+    ) {
         guard
-        let canonicalVolume:Unidoc.VolumeMetadata,
-        let canonicalPatch:PatchVersion = canonicalVolume.patch
-        else
-        {
+        let canonicalVolume: Unidoc.VolumeMetadata,
+        let canonicalPatch: PatchVersion = canonicalVolume.patch else {
             return nil
         }
 
         //  This can happen if you visit the latest stable release explicitly in the URL bar.
-        if  principalVolume.id == canonicalVolume.id
-        {
+        if  principalVolume.id == canonicalVolume.id {
             return nil
         }
 
-        let relationship:Relationship
-        if  let origin:PatchVersion = principalVolume.patch
-        {
+        let relationship: Relationship
+        if  let origin: PatchVersion = principalVolume.patch {
             relationship = origin < canonicalPatch ? .later : .earlier
-        }
-        else
-        {
+        } else {
             relationship = .stable
         }
 
-        let target:Target
+        let target: Target
 
-        if  let canonicalVertex:Unidoc.AnyVertex
-        {
-            switch canonicalVertex
-            {
+        if  let canonicalVertex: Unidoc.AnyVertex {
+            switch canonicalVertex {
             case .article(let canonical):
                 target = .article(layer[canonicalVolume, canonical.route])
 
@@ -62,11 +54,8 @@ extension Unidoc.CanonicalVersion
             case .landing:
                 target = .landing
             }
-        }
-        else
-        {
-            switch principalVertex
-            {
+        } else {
+            switch principalVertex {
             case .article?:     target = .article(nil)
             case .culture?:     target = .culture(nil)
             case .decl?:        target = .decl(nil)
@@ -77,19 +66,17 @@ extension Unidoc.CanonicalVersion
             }
         }
 
-        self.init(relationship: relationship,
+        self.init(
+            relationship: relationship,
             package: canonicalVolume.title,
             volume: Unidoc.DocsEndpoint[canonicalVolume], // this does *not* use `layer`!
-            target: target)
+            target: target
+        )
     }
 }
-extension Unidoc.CanonicalVersion
-{
-    @inlinable
-    var uri:URI?
-    {
-        switch self.target
-        {
+extension Unidoc.CanonicalVersion {
+    @inlinable var uri: URI? {
+        switch self.target {
         case .article(let uri): uri
         case .culture(let uri): uri
         case .decl(let uri):    uri
@@ -99,42 +86,33 @@ extension Unidoc.CanonicalVersion
         }
     }
 }
-extension Unidoc.CanonicalVersion:HTML.OutputStreamable
-{
-    public static
-    func += (section:inout HTML.ContentEncoder, self:Self)
-    {
-        switch self.relationship
-        {
+extension Unidoc.CanonicalVersion: HTML.OutputStreamable {
+    public static func += (section: inout HTML.ContentEncoder, self: Self) {
+        switch self.relationship {
         case .earlier:
-            section[.p]
-            {
+            section[.p] {
                 $0 += "You’re reading documentation from a "
                 $0[.em] = "prerelease"
                 $0 += " version of \(self.package)."
             }
 
         case .stable:
-            section[.p]
-            {
+            section[.p] {
                 $0 += "You’re reading documentation from an "
                 $0[.em] = "experimental"
                 $0 += " version of \(self.package)."
             }
 
         case .later:
-            section[.p]
-            {
+            section[.p] {
                 $0 += "You’re reading documentation from an "
                 $0[.em] = "older"
                 $0 += " version of \(self.package)."
             }
         }
 
-        if  case .landing = self.target
-        {
-            section[.p]
-            {
+        if  case .landing = self.target {
+            section[.p] {
                 $0 += "Read the documentation for the "
                 $0[.a] { $0.href = "\(self.volume)" } = "latest stable release"
                 $0 += " instead."
@@ -142,10 +120,8 @@ extension Unidoc.CanonicalVersion:HTML.OutputStreamable
             return
         }
 
-        if  let uri:URI = self.target.uri
-        {
-            section[.p]
-            {
+        if  let uri: URI = self.target.uri {
+            section[.p] {
                 $0[.a] { $0.href = "\(uri)" } = """
                 \(self.target.indefiniteArticle) \(self.target.demonym) with the same \
                 \(self.target.identity)
@@ -154,13 +130,9 @@ extension Unidoc.CanonicalVersion:HTML.OutputStreamable
                 $0[.a] { $0.href = "\(self.volume)" } = "latest stable release"
                 $0 += " of \(self.package)."
             }
-        }
-        else
-        {
-            section[.p]
-            {
-                switch self.relationship
-                {
+        } else {
+            section[.p] {
+                switch self.relationship {
                 case .earlier, .stable:
                     $0 += """
                     This \(self.target.demonym) might be new or have a different \

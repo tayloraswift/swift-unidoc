@@ -1,10 +1,7 @@
 import BSON
 
-extension SymbolGraph
-{
-    @frozen public
-    enum ProductType:Hashable, Equatable, Sendable
-    {
+extension SymbolGraph {
+    @frozen public enum ProductType: Hashable, Equatable, Sendable {
         case executable
         case library(LibraryType)
         case macro
@@ -13,13 +10,9 @@ extension SymbolGraph
         case test
     }
 }
-extension SymbolGraph.ProductType:CustomStringConvertible
-{
-    @inlinable public
-    var description:String
-    {
-        switch self
-        {
+extension SymbolGraph.ProductType: CustomStringConvertible {
+    @inlinable public var description: String {
+        switch self {
         case .executable:           "executable"
         case .library(.automatic):  "library.automatic"
         case .library(.dynamic):    "library.dynamic"
@@ -31,13 +24,9 @@ extension SymbolGraph.ProductType:CustomStringConvertible
         }
     }
 }
-extension SymbolGraph.ProductType:LosslessStringConvertible
-{
-    @inlinable public
-    init?(_ description:String)
-    {
-        switch description
-        {
+extension SymbolGraph.ProductType: LosslessStringConvertible {
+    @inlinable public init?(_ description: String) {
+        switch description {
         case "executable":          self = .executable
         case "library.automatic":   self = .library(.automatic)
         case "library.dynamic":     self = .library(.dynamic)
@@ -50,6 +39,5 @@ extension SymbolGraph.ProductType:LosslessStringConvertible
         }
     }
 }
-extension SymbolGraph.ProductType:BSONStringDecodable, BSONStringEncodable
-{
+extension SymbolGraph.ProductType: BSONStringDecodable, BSONStringEncodable {
 }

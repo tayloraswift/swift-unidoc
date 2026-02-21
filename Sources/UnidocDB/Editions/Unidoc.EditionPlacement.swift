@@ -4,37 +4,26 @@ import SHA1
 import Unidoc
 import UnidocRecords
 
-extension Unidoc
-{
-    enum EditionPlacement
-    {
+extension Unidoc {
+    enum EditionPlacement {
         case new(Unidoc.Version)
         case old(Unidoc.EditionMetadata)
     }
 }
-extension Unidoc.EditionPlacement
-{
-    static
-    var first:Self { .new(0) }
+extension Unidoc.EditionPlacement {
+    static var first: Self { .new(0) }
 }
-extension Unidoc.EditionPlacement:Mongo.MasterCodingModel
-{
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.EditionPlacement: Mongo.MasterCodingModel {
+    enum CodingKey: String, Sendable {
         case coordinate
         case edition
     }
 }
-extension Unidoc.EditionPlacement:BSONDocumentDecodable
-{
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        if  let edition:Unidoc.EditionMetadata = try bson[.edition]?.decode()
-        {
+extension Unidoc.EditionPlacement: BSONDocumentDecodable {
+    init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        if  let edition: Unidoc.EditionMetadata = try bson[.edition]?.decode() {
             self = .old(edition)
-        }
-        else
-        {
+        } else {
             self = .new(try bson[.coordinate].decode())
         }
     }

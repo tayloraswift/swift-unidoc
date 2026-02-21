@@ -2,28 +2,22 @@ import LinkResolution
 import SourceDiagnostics
 import UCF
 
-extension SSGC
-{
-    struct SupplementBindingError:Error
-    {
-        let selector:UCF.Selector
-        let variant:Variant
+extension SSGC {
+    struct SupplementBindingError: Error {
+        let selector: UCF.Selector
+        let variant: Variant
 
-        init(selector:UCF.Selector, variant:Variant)
-        {
+        init(selector: UCF.Selector, variant: Variant) {
             self.selector = selector
             self.variant = variant
         }
     }
 }
-extension SSGC.SupplementBindingError:Diagnostic
-{
+extension SSGC.SupplementBindingError: Diagnostic {
     typealias Symbolicator = SSGC.Symbolicator
 
-    func emit(summary output:inout DiagnosticOutput<SSGC.Symbolicator>)
-    {
-        switch self.variant
-        {
+    func emit(summary output: inout DiagnosticOutput<SSGC.Symbolicator>) {
+        switch self.variant {
         case .ambiguousBinding(let overloads, rejected: _):
             output[.error] = overloads.isEmpty ? """
             article binding '\(self.selector)' does not refer to any declarations
@@ -44,14 +38,11 @@ extension SSGC.SupplementBindingError:Diagnostic
         }
     }
 
-    func emit(details output:inout DiagnosticOutput<SSGC.Symbolicator>)
-    {
-        switch self.variant
-        {
+    func emit(details output: inout DiagnosticOutput<SSGC.Symbolicator>) {
+        switch self.variant {
         case .ambiguousBinding(_, rejected: let rejected):
-            for overload:any UCF.ResolvableOverload in rejected
-            {
-                let suggested:UCF.Selector = self.selector.with(hash: overload.traits.hash)
+            for overload: any UCF.ResolvableOverload in rejected {
+                let suggested: UCF.Selector = self.selector.with(hash: overload.traits.hash)
 
                 output[.note] = """
                 did you mean '\(suggested)'? (\(output.symbolicator.demangle(overload.id)))

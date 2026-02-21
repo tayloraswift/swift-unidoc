@@ -1,10 +1,7 @@
 import URI
 
-extension Unidoc
-{
-    @frozen public
-    enum PostAction:String, URI.Path.ComponentConvertible
-    {
+extension Unidoc {
+    @frozen public enum PostAction: String, URI.Path.ComponentConvertible {
         case package
 
         case packageAlias = "package-alias"

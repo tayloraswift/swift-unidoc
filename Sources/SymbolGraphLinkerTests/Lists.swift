@@ -1,11 +1,7 @@
 import Testing
 
-@Suite
-struct Lists:MarkdownTestSuite
-{
-    @Test
-    static func Asides() throws
-    {
+@Suite struct Lists: MarkdownTestSuite {
+    @Test static func Asides() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -26,11 +22,10 @@ struct Lists:MarkdownTestSuite
             <p>i am very complex.</p>\
             </aside>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Formatting() throws
-    {
+    @Test static func Formatting() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -51,6 +46,7 @@ struct Lists:MarkdownTestSuite
             <p>i am very complex.</p>\
             </aside>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
 }

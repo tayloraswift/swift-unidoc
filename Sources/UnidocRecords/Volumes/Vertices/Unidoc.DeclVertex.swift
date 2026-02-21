@@ -5,75 +5,54 @@ import Symbols
 import Unidoc
 import UnidocAPI
 
-extension Unidoc
-{
-    @frozen public
-    struct DeclVertex:Identifiable, Equatable, Sendable
-    {
-        public
-        let id:Unidoc.Scalar
+extension Unidoc {
+    @frozen public struct DeclVertex: Identifiable, Equatable, Sendable {
+        public let id: Unidoc.Scalar
 
-        public
-        let flags:Phylum.DeclFlags
+        public let flags: Phylum.DeclFlags
 
-        public
-        let signature:Signature<Unidoc.Scalar?>
-        public
-        let symbol:Symbol.Decl
-        public
-        let stem:Unidoc.Stem
+        public let signature: Signature<Unidoc.Scalar?>
+        public let symbol: Symbol.Decl
+        public let stem: Unidoc.Stem
 
         /// Deprecated.
-        public
-        let _requirements:[Unidoc.Scalar]
-        public
-        let superforms:[Unidoc.Scalar]
-        public
-        let namespace:Unidoc.Scalar
-        public
-        let culture:Unidoc.Scalar
-        public
-        let scope:[Unidoc.Scalar]
+        public let _requirements: [Unidoc.Scalar]
+        public let superforms: [Unidoc.Scalar]
+        public let namespace: Unidoc.Scalar
+        public let culture: Unidoc.Scalar
+        public let scope: [Unidoc.Scalar]
 
-        public
-        var renamed:Unidoc.Scalar?
-        public
-        var readme:Unidoc.Scalar?
-        public
-        var file:Unidoc.Scalar?
+        public var renamed: Unidoc.Scalar?
+        public var readme: Unidoc.Scalar?
+        public var file: Unidoc.Scalar?
         //  TODO: consider combining this into flags.
-        public
-        var position:SourcePosition?
-        public
-        var overview:Unidoc.Passage?
-        public
-        var details:Unidoc.Passage?
+        public var position: SourcePosition?
+        public var overview: Unidoc.Passage?
+        public var details: Unidoc.Passage?
 
-        public
-        var peers:Unidoc.Group?
-        public
-        var group:Unidoc.Group?
+        public var peers: Unidoc.Group?
+        public var group: Unidoc.Group?
 
-        @inlinable public
-        init(id:Unidoc.Scalar,
-            flags:Phylum.DeclFlags,
-            signature:Signature<Unidoc.Scalar?>,
-            symbol:Symbol.Decl,
-            stem:Unidoc.Stem,
-            _requirements:[Unidoc.Scalar] = [],
-            superforms:[Unidoc.Scalar] = [],
-            namespace:Unidoc.Scalar,
-            culture:Unidoc.Scalar,
-            scope:[Unidoc.Scalar],
-            renamed:Unidoc.Scalar? = nil,
-            readme:Unidoc.Scalar? = nil,
-            file:Unidoc.Scalar? = nil,
-            position:SourcePosition? = nil,
-            overview:Unidoc.Passage? = nil,
-            details:Unidoc.Passage? = nil,
-            peers:Unidoc.Group? = nil,
-            group:Unidoc.Group? = nil)
-        {
+        @inlinable public init(
+            id: Unidoc.Scalar,
+            flags: Phylum.DeclFlags,
+            signature: Signature<Unidoc.Scalar?>,
+            symbol: Symbol.Decl,
+            stem: Unidoc.Stem,
+            _requirements: [Unidoc.Scalar] = [],
+            superforms: [Unidoc.Scalar] = [],
+            namespace: Unidoc.Scalar,
+            culture: Unidoc.Scalar,
+            scope: [Unidoc.Scalar],
+            renamed: Unidoc.Scalar? = nil,
+            readme: Unidoc.Scalar? = nil,
+            file: Unidoc.Scalar? = nil,
+            position: SourcePosition? = nil,
+            overview: Unidoc.Passage? = nil,
+            details: Unidoc.Passage? = nil,
+            peers: Unidoc.Group? = nil,
+            group: Unidoc.Group? = nil
+        ) {
             self.id = id
             self.flags = flags
 
@@ -98,63 +77,44 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.DeclVertex:Unidoc.PrincipalVertex
-{
-    @inlinable public
-    var route:Unidoc.Route
-    {
+extension Unidoc.DeclVertex: Unidoc.PrincipalVertex {
+    @inlinable public var route: Unidoc.Route {
         .init(shoot: self.shoot, cdecl: self.flags.cdecl)
     }
 
-    @inlinable public
-    var shoot:Unidoc.Shoot
-    {
+    @inlinable public var shoot: Unidoc.Shoot {
         .init(
             stem: self.stem,
-            hash: self.flags.route.hashed ? .init(truncating: self.hash) : nil)
+            hash: self.flags.route.hashed ? .init(truncating: self.hash) : nil
+        )
     }
 
-    @inlinable public
-    var hash:FNV24.Extended { .decl(self.symbol) }
+    @inlinable public var hash: FNV24.Extended { .decl(self.symbol) }
 
-    @inlinable public
-    var bias:Unidoc.Bias { .culture(self.culture) }
+    @inlinable public var bias: Unidoc.Bias { .culture(self.culture) }
 
-    @inlinable public
-    var decl:Phylum.DeclFlags? { self.flags }
+    @inlinable public var decl: Phylum.DeclFlags? { self.flags }
 }
-extension Unidoc.DeclVertex
-{
-    @inlinable public
-    var location:SourceLocation<Unidoc.Scalar>?
-    {
-        if  let position:SourcePosition = self.position,
-            let file:Unidoc.Scalar = self.file
-        {
+extension Unidoc.DeclVertex {
+    @inlinable public var location: SourceLocation<Unidoc.Scalar>? {
+        if  let position: SourcePosition = self.position,
+            let file: Unidoc.Scalar = self.file {
             .init(position: position, file: file)
-        }
-        else
-        {
+        } else {
             nil
         }
     }
 
     /// Returns ``namespace`` if and only if it is different from ``culture``.
-    @inlinable public
-    var colony:Unidoc.Scalar?
-    {
+    @inlinable public var colony: Unidoc.Scalar? {
         self.culture != self.namespace ? self.namespace : nil
     }
 
-    @inlinable public
-    var phylum:Phylum.Decl
-    {
+    @inlinable public var phylum: Phylum.Decl {
         self.flags.phylum
     }
 
-    @inlinable public
-    var kinks:Phylum.Decl.Kinks
-    {
+    @inlinable public var kinks: Phylum.Decl.Kinks {
         self.flags.kinks
     }
 }

@@ -1,49 +1,36 @@
 import MarkdownPluginSwift
 import Testing
 
-@Suite
-struct Snippets
-{
-    @Test
-    static func MissingFinalNewline()
-    {
+@Suite struct Snippets {
+    @Test static func MissingFinalNewline() {
         Self.test(
-            snippet:
-            """
+            snippet: """
             print("Hi Barbie!")
             """,
-            caption:
-            """
+            caption: """
             """,
-            slices:
-            """
+            slices: """
             print("Hi Barbie!")
-            """)
+            """
+        )
     }
-    @Test
-    static func NoCaption()
-    {
+    @Test static func NoCaption() {
         Self.test(
-            snippet:
-            """
+            snippet: """
             print("Hi Barbie!")
 
             """,
-            caption:
-            """
+            caption: """
             """,
-            slices:
-            """
+            slices: """
             print("Hi Barbie!")
 
-            """)
-    }
-    @Test
-    static func NoCaptionButHidden()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func NoCaptionButHidden() {
+        Self.test(
+            snippet: """
             //  snippet.hide
             import Barbie
 
@@ -51,40 +38,32 @@ struct Snippets
             print("Hi Barbie!")
 
             """,
-            caption:
-            """
+            caption: """
             """,
-            slices:
-            """
+            slices: """
             print("Hi Barbie!")
 
-            """)
-    }
-    @Test
-    static func NoCaptionButSliced()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func NoCaptionButSliced() {
+        Self.test(
+            snippet: """
             //  snippet.HI_BARBIE
             print("Hi Barbie!")
 
             """,
-            caption:
-            """
+            caption: """
             """,
-            slices:
-            """
+            slices: """
             print("Hi Barbie!")
 
-            """)
-    }
-    @Test
-    static func NoCaptionButSlicedAndTrimmed()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func NoCaptionButSlicedAndTrimmed() {
+        Self.test(
+            snippet: """
             //  snippet.HI_BARBIE
 
             print("Hi Barbie!")
@@ -92,42 +71,34 @@ struct Snippets
             //  snippet.end
 
             """,
-            caption:
-            """
+            caption: """
             """,
-            slices:
-            """
+            slices: """
             print("Hi Barbie!")
-            """)
-    }
-    @Test
-    static func WithCaption()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func WithCaption() {
+        Self.test(
+            snippet: """
             //  Here’s how to say ‘hi’ to Barbie.
 
             print("Hi Barbie!")
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             """,
-            slices:
-            """
+            slices: """
             print("Hi Barbie!")
 
-            """)
-    }
-    @Test
-    static func WithCaptionDocComment()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func WithCaptionDocComment() {
+        Self.test(
+            snippet: """
             /// Here’s how to say ‘hi’ to Barbie.
             ///
             /// This is a multi-line comment.
@@ -135,47 +106,39 @@ struct Snippets
             print("Hi Barbie!")
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             This is a multi-line comment.
 
             """,
-            slices:
-            """
+            slices: """
             print("Hi Barbie!")
 
-            """)
-    }
-    @Test
-    static func TriviaOnly()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func TriviaOnly() {
+        Self.test(
+            snippet: """
             /// Here’s how to say ‘hi’ to Barbie.
 
             // print("Hi Barbie!")
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             """,
-            slices:
-            """
+            slices: """
             // print("Hi Barbie!")
 
-            """)
-    }
-    @Test
-    static func TriviaOnlyManualViewbox()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func TriviaOnlyManualViewbox() {
+        Self.test(
+            snippet: """
             /// Here’s how to say ‘hi’ to Barbie and Skipper.
 
             // snippet.HI_BARBIE
@@ -191,24 +154,20 @@ struct Snippets
             // snippet.end
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie and Skipper.
 
             """,
-            slices: // This should preserve the empty line before `Hi Skipper!`.
-            """
+            slices: /* This should preserve the empty line before `Hi Skipper!`.*/ """
             // print("Hi Barbie!")
 
             // print("Hi Skipper!")
-            """)
-    }
-    @Test
-    static func Indented()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func Indented() {
+        Self.test(
+            snippet: """
             /// Here’s how to say ‘hi’ to Barbie.
 
             @main
@@ -223,13 +182,11 @@ struct Snippets
             }
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             """,
-            slices:
-            """
+            slices: """
             @main
             enum Main
             {
@@ -239,14 +196,12 @@ struct Snippets
             {
                 print("Hi Barbie!")
             }
-            """)
-    }
-    @Test
-    static func IndentedNonContiguous()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func IndentedNonContiguous() {
+        Self.test(
+            snippet: """
             /// Here’s how to say ‘hi’ to Barbie.
             //  snippet.end
             @main
@@ -267,25 +222,21 @@ struct Snippets
             }
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             """,
-            slices:
-            """
+            slices: """
             static func main()
             {
                 print("Hi Barbie!")
             }
-            """)
-    }
-    @Test
-    static func AnonymousNonContiguous()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func AnonymousNonContiguous() {
+        Self.test(
+            snippet: """
             //  Here’s how to say ‘hi’ to Barbie.
 
             //  snippet.hide
@@ -307,25 +258,21 @@ struct Snippets
             }
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             """,
-            slices:
-            """
+            slices: """
             static func main()
             {
                 print("Hi Barbie!")
             }
-            """)
-    }
-    @Test
-    static func AnonymousExplicitShow()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func AnonymousExplicitShow() {
+        Self.test(
+            snippet: """
             //  Here’s how to say ‘hi’ to Barbie.
             @main
             enum Main
@@ -341,27 +288,23 @@ struct Snippets
             }
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             """,
-            slices:
-            """
+            slices: """
             static func main()
             {
                 print("Hi Barbie!")
 
                 print("Hi Ken!")
             }
-            """)
-    }
-    @Test
-    static func AnonymousCollapseWhitespace()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func AnonymousCollapseWhitespace() {
+        Self.test(
+            snippet: """
             /// Here’s how to say ‘hi’ to Barbie.
 
 
@@ -369,23 +312,19 @@ struct Snippets
             print("Hi Barbie!")
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             """,
-            slices:
-            """
+            slices: """
             print("Hi Barbie!")
 
-            """)
-    }
-    @Test
-    static func NominalCollapseWhitespace()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func NominalCollapseWhitespace() {
+        Self.test(
+            snippet: """
             /// Here’s how to say ‘hi’ to Barbie.
 
 
@@ -394,23 +333,19 @@ struct Snippets
             print("Hi Barbie!")
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             """,
-            slices:
-            """
+            slices: """
             print("Hi Barbie!")
 
-            """)
-    }
-    @Test
-    static func Empty()
-    {
-        Self.test(
-            snippet:
             """
+        )
+    }
+    @Test static func Empty() {
+        Self.test(
+            snippet: """
             /// Here’s how to say ‘hi’ to Barbie.
 
             // snippet.end
@@ -427,34 +362,31 @@ struct Snippets
             }
 
             """,
-            caption:
-            """
+            caption: """
             Here’s how to say ‘hi’ to Barbie.
 
             """,
-            slices:
+            slices: """
             """
-            """)
+        )
     }
 }
-extension Snippets
-{
-    private
-    static func test(snippet:String,
-        caption captionExpectation:String,
-        slices sliceExpectations:String...)
-    {
-        let swift:Markdown.SwiftLanguage = .swift
-        let (caption, slices):(String, [Markdown.SnippetSlice]) = swift.parse(
-            snippet: [_].init(snippet.utf8))
+extension Snippets {
+    private static func test(
+        snippet: String,
+        caption captionExpectation: String,
+        slices sliceExpectations: String...
+    ) {
+        let swift: Markdown.SwiftLanguage = .swift
+        let (caption, slices): (String, [Markdown.SnippetSlice]) = swift.parse(
+            snippet: [_].init(snippet.utf8)
+        )
 
         #expect(caption == captionExpectation)
         #expect(slices.count == sliceExpectations.count)
 
-        for (i, sliceExpectation):(Int, String) in sliceExpectations.enumerated()
-        {
-            if  slices.indices.contains(i)
-            {
+        for (i, sliceExpectation): (Int, String) in sliceExpectations.enumerated() {
+            if  slices.indices.contains(i) {
                 #expect("\(slices[i].text)" == sliceExpectation)
             }
         }

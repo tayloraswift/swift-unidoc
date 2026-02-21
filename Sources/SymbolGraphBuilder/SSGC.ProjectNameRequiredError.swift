@@ -1,6 +1,4 @@
-extension SSGC
-{
-    struct ProjectNameRequiredError:Error
-    {
+extension SSGC {
+    struct ProjectNameRequiredError: Error {
     }
 }

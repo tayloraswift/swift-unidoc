@@ -1,19 +1,12 @@
-extension SemanticVersion
-{
-    @frozen public
-    enum Suffix:Equatable, Hashable, Sendable
-    {
-        case release(build:String? = nil)
-        case prerelease(String, build:String? = nil)
+extension SemanticVersion {
+    @frozen public enum Suffix: Equatable, Hashable, Sendable {
+        case release(build: String? = nil)
+        case prerelease(String, build: String? = nil)
     }
 }
-extension SemanticVersion.Suffix:CustomStringConvertible
-{
-    @inlinable public
-    var description:String
-    {
-        switch self
-        {
+extension SemanticVersion.Suffix: CustomStringConvertible {
+    @inlinable public var description: String {
+        switch self {
         case .release(build: nil):
             return ""
 
@@ -28,50 +21,35 @@ extension SemanticVersion.Suffix:CustomStringConvertible
         }
     }
 }
-extension SemanticVersion.Suffix:LosslessStringConvertible
-{
-    @inlinable public
-    init(_ string:some StringProtocol)
-    {
-        var i:String.Index = string.endIndex
+extension SemanticVersion.Suffix: LosslessStringConvertible {
+    @inlinable public init(_ string: some StringProtocol) {
+        var i: String.Index = string.endIndex
         self.init(string, index: &i)
     }
 }
-extension SemanticVersion.Suffix
-{
-    @inlinable
-    init(_ string:some StringProtocol, index i:inout String.Index)
-    {
-        let alpha:String?
-        let build:String?
+extension SemanticVersion.Suffix {
+    @inlinable init(_ string: some StringProtocol, index i: inout String.Index) {
+        let alpha: String?
+        let build: String?
 
-        if  let plus:String.Index = string.lastIndex(of: "+")
-        {
+        if  let plus: String.Index = string.lastIndex(of: "+") {
             build = .init(string[string.index(after: plus)...])
             i = plus
-        }
-        else
-        {
+        } else {
             build = nil
         }
 
         //  First index, not last index, because a prerelease suffix can contain dashes.
-        if  let dash:String.Index = string[..<i].firstIndex(of: "-")
-        {
+        if  let dash: String.Index = string[..<i].firstIndex(of: "-") {
             alpha = .init(string[string.index(after: dash) ..< i])
             i = dash
-        }
-        else
-        {
+        } else {
             alpha = nil
         }
 
-        if  let alpha:String
-        {
+        if  let alpha: String {
             self = .prerelease(alpha, build: build)
-        }
-        else
-        {
+        } else {
             self = .release(build: build)
         }
     }

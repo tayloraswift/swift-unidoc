@@ -1,11 +1,7 @@
 import Testing
 
-@Suite
-struct ListsWithMultipleItems:MarkdownTestSuite
-{
-    private
-    static var html:String
-    {
+@Suite struct ListsWithMultipleItems: MarkdownTestSuite {
+    private static var html: String {
         """
         <p>Overview overview overview</p>\
 
@@ -29,9 +25,7 @@ struct ListsWithMultipleItems:MarkdownTestSuite
         """
     }
 
-    @Test
-    static func Basic() throws
-    {
+    @Test static func Basic() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -46,11 +40,10 @@ struct ListsWithMultipleItems:MarkdownTestSuite
 
             Details details details
             """,
-            expected: Self.html)
+            expected: Self.html
+        )
     }
-    @Test
-    static func Interlopers() throws
-    {
+    @Test static func Interlopers() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -65,11 +58,10 @@ struct ListsWithMultipleItems:MarkdownTestSuite
 
             Details details details
             """,
-            expected: Self.html)
+            expected: Self.html
+        )
     }
-    @Test
-    static func Reordering() throws
-    {
+    @Test static func Reordering() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -84,6 +76,7 @@ struct ListsWithMultipleItems:MarkdownTestSuite
 
             Details details details
             """,
-            expected: Self.html)
+            expected: Self.html
+        )
     }
 }

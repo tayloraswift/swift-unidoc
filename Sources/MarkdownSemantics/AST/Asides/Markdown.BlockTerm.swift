@@ -1,40 +1,27 @@
 import MarkdownABI
 import MarkdownAST
 
-extension Markdown
-{
-    public final
-    class BlockTerm:BlockContainer<BlockElement>
-    {
-        public
-        let name:String
-        public
-        let code:Bool
+extension Markdown {
+    public final class BlockTerm: BlockContainer<BlockElement> {
+        public let name: String
+        public let code: Bool
 
-        @inlinable public
-        init(elements:[BlockElement], name:String, code:Bool)
-        {
+        @inlinable public init(elements: [BlockElement], name: String, code: Bool) {
             self.name = name
             self.code = code
             super.init(elements)
         }
 
-        public override
-        func emit(into binary:inout BinaryEncoder)
-        {
-            binary[.dt, { $0[.id] = self.id }]
-            {
+        public override func emit(into binary: inout BinaryEncoder) {
+            binary[.dt, { $0[.id] = self.id }] {
                 $0[self.code ? .code : .em] = self.name
             }
-            binary[.dd]
-            {
+            binary[.dd] {
                 super.emit(into: &$0)
             }
         }
     }
 }
-extension Markdown.BlockTerm
-{
-    @inlinable public
-    var id:String { "st:\(self.name)" }
+extension Markdown.BlockTerm {
+    @inlinable public var id: String { "st:\(self.name)" }
 }

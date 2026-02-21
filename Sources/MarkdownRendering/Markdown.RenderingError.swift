@@ -1,8 +1,5 @@
-extension Markdown
-{
-    @frozen public
-    enum RenderingError:Error, Equatable, Sendable
-    {
+extension Markdown {
+    @frozen public enum RenderingError: Error, Equatable, Sendable {
         /// A renderer executed an illegal instruction, such as
         /// returning from an empty element context stack.
         case illegalInstruction

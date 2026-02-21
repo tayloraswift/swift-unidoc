@@ -7,29 +7,21 @@ import UnidocRecords
 import UnixTime
 import URI
 
-extension Unidoc
-{
+extension Unidoc {
     /// A ``ServerRequest`` is a request that has not yet been routed to an operation through
     /// a `Router`.
-    @dynamicMemberLookup
-    @frozen public
-    struct ServerRequest:Sendable
-    {
-        public
-        let metadata:HTTP.ServerRequest
-        public
-        let authorization:Authorization
-        public
-        let accepted:UnixAttosecond
-        public
-        let client:ClientGuess?
+    @dynamicMemberLookup @frozen public struct ServerRequest: Sendable {
+        public let metadata: HTTP.ServerRequest
+        public let authorization: Authorization
+        public let accepted: UnixAttosecond
+        public let client: ClientGuess?
 
-        private
-        init(metadata:HTTP.ServerRequest,
-            authorization:Authorization,
-            accepted:UnixAttosecond,
-            client:ClientGuess?)
-        {
+        private init(
+            metadata: HTTP.ServerRequest,
+            authorization: Authorization,
+            accepted: UnixAttosecond,
+            client: ClientGuess?
+        ) {
             self.metadata = metadata
             self.authorization = authorization
             self.accepted = accepted
@@ -37,35 +29,26 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.ServerRequest
-{
-    @inlinable public
-    subscript<T>(dynamicMember keyPath:KeyPath<HTTP.ServerRequest, T>) -> T
-    {
+extension Unidoc.ServerRequest {
+    @inlinable public subscript<T>(dynamicMember keyPath: KeyPath<HTTP.ServerRequest, T>) -> T {
         self.metadata[keyPath: keyPath]
     }
 
-    func parameter(_ key:String) -> String?
-    {
+    func parameter(_ key: String) -> String? {
         guard
-        let query:URI.Query = self.uri.query
-        else
-        {
+        let query: URI.Query = self.uri.query else {
             return nil
         }
 
-        for case (key, let value) in query.parameters
-        {
+        for case (key, let value) in query.parameters {
             return value
         }
 
         return nil
     }
 
-    var privilege:Unidoc.ClientPrivilege?
-    {
-        switch self.origin.claimant
-        {
+    var privilege: Unidoc.ClientPrivilege? {
+        switch self.origin.claimant {
         case .google_common?:
             return .majorSearchEngine(.googlebot, verified: true)
 
@@ -76,15 +59,11 @@ extension Unidoc.ServerRequest
             break
         }
 
-        switch self.client
-        {
+        switch self.client {
         case .barbie(let locale)?:
-            if  case .web(_?, login: _) = self.authorization
-            {
+            if  case .web(_?, login: _) = self.authorization {
                 return .barbie(locale, verified: true)
-            }
-            else
-            {
+            } else {
                 return .barbie(locale, verified: false)
             }
 
@@ -96,14 +75,13 @@ extension Unidoc.ServerRequest
         }
     }
 }
-extension Unidoc.ServerRequest
-{
-    public
-    init(metadata:HTTP.ServerRequest, client:Unidoc.ClientGuess?)
-    {
-        self.init(metadata: metadata,
+extension Unidoc.ServerRequest {
+    public init(metadata: HTTP.ServerRequest, client: Unidoc.ClientGuess?) {
+        self.init(
+            metadata: metadata,
             authorization: metadata.headers.authorization,
             accepted: .now(),
-            client: client)
+            client: client
+        )
     }
 }

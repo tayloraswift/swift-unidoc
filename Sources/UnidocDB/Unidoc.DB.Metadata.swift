@@ -3,34 +3,23 @@ import MongoDB
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.DB
-{
+extension Unidoc.DB {
     /// A single-document collection containing a search index of all the packages in the
     /// database.
-    @frozen public
-    struct Metadata
-    {
-        public
-        let database:Mongo.Database
-        public
-        let session:Mongo.Session
+    @frozen public struct Metadata {
+        public let database: Mongo.Database
+        public let session: Mongo.Session
 
-        @inlinable
-        init(database:Mongo.Database, session:Mongo.Session)
-        {
+        @inlinable init(database: Mongo.Database, session: Mongo.Session) {
             self.database = database
             self.session = session
         }
     }
 }
-extension Unidoc.DB.Metadata:Mongo.CollectionModel
-{
-    public
-    typealias Element = Unidoc.TextResource<Key>
+extension Unidoc.DB.Metadata: Mongo.CollectionModel {
+    public typealias Element = Unidoc.TextResource<Key>
 
-    @inlinable public static
-    var name:Mongo.Collection { "Metadata" }
+    @inlinable public static var name: Mongo.Collection { "Metadata" }
 
-    @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [] }
+    @inlinable public static var indexes: [Mongo.CollectionIndex] { [] }
 }

@@ -1,23 +1,19 @@
 import URI
 
-extension Unidoc.Router
-{
-    struct AuthParameters
-    {
+extension Unidoc.Router {
+    struct AuthParameters {
         /// Only used for testing, never sent by GitHub.
-        var token:String?
+        var token: String?
         /// Defined and sent by GitHub.
-        var state:String?
+        var state: String?
         /// Defined and sent by GitHub.
-        var code:String?
+        var code: String?
         /// Defined by us and parroted back by GitHub.
-        var from:String?
+        var from: String?
 
-        var flow:Unidoc.LoginFlow?
+        var flow: Unidoc.LoginFlow?
 
-        private
-        init()
-        {
+        private init() {
             self.token = nil
             self.state = nil
             self.code = nil
@@ -26,16 +22,12 @@ extension Unidoc.Router
         }
     }
 }
-extension Unidoc.Router.AuthParameters
-{
-    init(_ query:__shared URI.Query)
-    {
+extension Unidoc.Router.AuthParameters {
+    init(_ query: __shared URI.Query) {
         self.init()
 
-        for (key, value):(String, String) in query.parameters
-        {
-            switch key
-            {
+        for (key, value): (String, String) in query.parameters {
+            switch key {
             case "token":   self.token = value
             case "state":   self.state = value
             case "code":    self.code = value

@@ -5,42 +5,35 @@ import UnidocRecords
 import UnixCalendar
 import UnixTime
 
-extension Unidoc.PackageRepo:Mongo.MasterCodingModel
-{
+extension Unidoc.PackageRepo: Mongo.MasterCodingModel {
 }
-extension Unidoc.PackageRepo
-{
-    @inlinable public static
-    func github(_ repo:GitHub.Repo,
-        crawled:UnixMillisecond) throws -> Self
-    {
+extension Unidoc.PackageRepo {
+    @inlinable public static func github(
+        _ repo: GitHub.Repo,
+        crawled: UnixMillisecond
+    ) throws -> Self {
         /// We clip this to Midnights because we use this as a shard key, and also because
         /// Midnights are Swifty.
         guard
-        let created:Timestamp.Components = .init(iso8601: repo.created),
-        let created:UnixDate = .init(utc: created.date)
-        else
-        {
+        let created: Timestamp.Components = .init(iso8601: repo.created),
+        let created: UnixDate = .init(utc: created.date) else {
             throw Unidoc.GitHubRepoMetadataError.created(repo.created)
         }
 
         guard
-        let updated:Timestamp.Components = .init(iso8601: repo.updated),
-        let updated:UnixMillisecond = .init(utc: updated)
-        else
-        {
+        let updated: Timestamp.Components = .init(iso8601: repo.updated),
+        let updated: UnixMillisecond = .init(utc: updated) else {
             throw Unidoc.GitHubRepoMetadataError.updated(repo.updated)
         }
 
         guard
-        let pushed:Timestamp.Components = .init(iso8601: repo.pushed),
-        let pushed:UnixMillisecond = .init(utc: pushed)
-        else
-        {
+        let pushed: Timestamp.Components = .init(iso8601: repo.pushed),
+        let pushed: UnixMillisecond = .init(utc: pushed) else {
             throw Unidoc.GitHubRepoMetadataError.pushed(repo.pushed)
         }
 
-        return .init(crawled: crawled,
+        return .init(
+            crawled: crawled,
             account: .init(type: .github, user: repo.owner.id),
             created: .init(created),
             updated: updated,
@@ -48,64 +41,57 @@ extension Unidoc.PackageRepo
             private: repo.visibility < .public,
             topics: repo.topics,
             master: repo.master,
-            origin: .github(.init(
-                id: repo.id,
-                owner: repo.owner.login,
-                name: repo.name,
-                node: repo.node,
-                pushed: pushed,
-                homepage: repo.homepage,
-                about: repo.about,
-                size: repo.size,
-                archived: repo.archived,
-                disabled: repo.disabled,
-                fork: repo.fork)),
+            origin: .github(
+                .init(
+                    id: repo.id,
+                    owner: repo.owner.login,
+                    name: repo.name,
+                    node: repo.node,
+                    pushed: pushed,
+                    homepage: repo.homepage,
+                    about: repo.about,
+                    size: repo.size,
+                    archived: repo.archived,
+                    disabled: repo.disabled,
+                    fork: repo.fork
+                )
+            ),
             forks: repo.forks,
-            stars: repo.stars)
+            stars: repo.stars
+        )
     }
 }
 
-extension Unidoc.PackageRepo
-{
-    public
-    func dormant(by now:UnixAttosecond) -> Duration?
-    {
-        let pushed:UnixMillisecond
+extension Unidoc.PackageRepo {
+    public func dormant(by now: UnixAttosecond) -> Duration? {
+        let pushed: UnixMillisecond
 
-        switch self.origin
-        {
+        switch self.origin {
         case .github(let origin):   pushed = origin.pushed
         }
 
-        let dormancy:Duration = now - .init(pushed)
+        let dormancy: Duration = now - .init(pushed)
         //  If the repo has been dormant for two years, we consider it abandoned.
-        if  dormancy > .seconds(60 * 60 * 24 * 365 * 2)
-        {
+        if  dormancy > .seconds(60 * 60 * 24 * 365 * 2) {
             return dormancy
-        }
-        else
-        {
+        } else {
             return nil
         }
     }
 
-    public
-    func crawlingIntervalTarget(
-        dormant:Duration?,
-        hidden:Bool,
-        realm:Unidoc.Realm?) -> Milliseconds?
-    {
-        guard self.origin.alive
-        else
-        {
+    public func crawlingIntervalTarget(
+        dormant: Duration?,
+        hidden: Bool,
+        realm: Unidoc.Realm?
+    ) -> Milliseconds? {
+        guard self.origin.alive else {
             //  Repo has been deleted from, archived in, or disabled by the registrar.
             return nil
         }
 
-        var interval:Milliseconds = .zero
+        var interval: Milliseconds = .zero
 
-        switch self.license?.free
-        {
+        switch self.license?.free {
         //  The license is free.
         case true?:     interval += .minute * 10
         //  No license. The package is probably new and the author hasn’t gotten around to
@@ -116,8 +102,7 @@ extension Unidoc.PackageRepo
         }
 
         //  Deprioritize hidden packages.
-        if  hidden
-        {
+        if  hidden {
             interval += .hour * 1
         }
         //  Prioritize packages with more stars. (We currently only index packages with at
@@ -125,13 +110,11 @@ extension Unidoc.PackageRepo
         //
         //  If the package is part of the `public` realm (or whatever realm `0` has been named),
         //  we consider it to have infinite stars, and we do not care about dormancy.
-        if  case 0? = realm
-        {
+        if  case 0? = realm {
             return interval
         }
 
-        switch self.stars
-        {
+        switch self.stars {
         case    0 ...    2: interval += .day * 4
         case    3 ...   10: interval += .day * 3
         case   11 ...   20: interval += .day * 2
@@ -147,8 +130,7 @@ extension Unidoc.PackageRepo
         }
 
         //  Deprioritize dormant packages.
-        if  case _? = dormant
-        {
+        if  case _? = dormant {
             interval += .day * 7
         }
 

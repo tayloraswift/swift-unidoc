@@ -5,51 +5,45 @@ import MarkdownPluginSwift
 import Sources
 import Symbols
 
-extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
-{
-    public
-    func load(for id:String, utf8:[UInt8]) -> [Int: Markdown.SwiftLanguage.IndexMarker]
-    {
-        let locallyDeclared:Set<String> = self.symbols(inFilePath: id).reduce(into: [])
-        {
+extension IndexStoreDB: Markdown.SwiftLanguage.IndexStore {
+    public func load(
+        for id: String,
+        utf8: [UInt8]
+    ) -> [Int: Markdown.SwiftLanguage.IndexMarker] {
+        let locallyDeclared: Set<String> = self.symbols(inFilePath: id).reduce(into: []) {
             $0.insert($1.usr)
         }
 
         //  Compute line positions
-        var lines:[Int: Int] = [1: utf8.startIndex]
-        var line:Int = 1
-        for (i, byte):(Int, UInt8) in zip(utf8.indices, utf8)
-        {
-            if  byte == 0x0A
-            {
+        var lines: [Int: Int] = [1: utf8.startIndex]
+        var line: Int = 1
+        for (i, byte): (Int, UInt8) in zip(utf8.indices, utf8) {
+            if  byte == 0x0A {
                 line += 1
                 lines[line] = utf8.index(after: i)
             }
         }
 
-        var markers:[Int: Markdown.SwiftLanguage.IndexMarker] = [:]
-        for occurence:IndexStoreDB.SymbolOccurrence_ in self.symbolOccurrences(inFilePath: id)
-        {
+        var markers: [Int: Markdown.SwiftLanguage.IndexMarker] = [:]
+        for occurence: IndexStoreDB.SymbolOccurrence_ in self.symbolOccurrences(
+                inFilePath: id
+            ) {
             guard
-            let position:SourcePosition = .init(line: occurence.location.line - 1,
-                column: occurence.location.utf8Column - 1),
-            let base:Int = lines[occurence.location.line],
-            let usr:Symbol.USR = .init(occurence.symbol.usr)
-            else
-            {
+            let position: SourcePosition = .init(
+                line: occurence.location.line - 1,
+                column: occurence.location.utf8Column - 1
+            ),
+            let base: Int = lines[occurence.location.line],
+            let usr: Symbol.USR = .init(occurence.symbol.usr) else {
                 continue
             }
 
-            let phylum:Phylum.Decl?
+            let phylum: Phylum.Decl?
 
-            if  occurence.roles.contains(.implicit)
-            {
+            if  occurence.roles.contains(.implicit) {
                 phylum = nil
-            }
-            else
-            {
-                switch occurence.symbol.kind
-                {
+            } else {
+                switch occurence.symbol.kind {
                 case .constructor:
                     phylum = occurence.roles.contains(.call)
                         ? .func(.static)
@@ -87,20 +81,19 @@ extension IndexStoreDB:Markdown.SwiftLanguage.IndexStore
             }
 
             {
-                let stacked:Markdown.SwiftLanguage.IndexMarker = .init(position: position,
+                let stacked: Markdown.SwiftLanguage.IndexMarker = .init(
+                    position: position,
                     symbol: locallyDeclared.contains(occurence.symbol.usr) ? nil : usr,
-                    phylum: phylum)
+                    phylum: phylum
+                )
 
                 guard
-                let marker:Markdown.SwiftLanguage.IndexMarker = $0
-                else
-                {
+                let marker: Markdown.SwiftLanguage.IndexMarker = $0 else {
                     $0 = stacked
                     return
                 }
 
-                switch marker.phylum
-                {
+                switch marker.phylum {
                 case .actor, .associatedtype, .class, .enum, .protocol, .struct, .typealias:
                     return
 

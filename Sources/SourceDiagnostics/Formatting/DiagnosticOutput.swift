@@ -3,92 +3,73 @@ import Sources
 /// A `DiagnosticOutput` is just an opaque list of diagnostic fragments glued to some
 /// ``DiagnosticSymbolicator`` that individual ``Diagnostic``s can use to generate those
 /// messages.
-@frozen public
-struct DiagnosticOutput<Symbolicator>:~Copyable where Symbolicator:DiagnosticSymbolicator
-{
-    public
-    let symbolicator:Symbolicator
+@frozen public struct DiagnosticOutput<
+    Symbolicator
+>: ~Copyable where Symbolicator: DiagnosticSymbolicator {
+    public let symbolicator: Symbolicator
 
-    @usableFromInline
-    var fragments:[DiagnosticFragment]
+    @usableFromInline var fragments: [DiagnosticFragment]
 
-    init(symbolicator:Symbolicator)
-    {
+    init(symbolicator: Symbolicator) {
         self.symbolicator = symbolicator
         self.fragments = []
     }
 }
-extension DiagnosticOutput
-{
-    @inlinable public
-    subscript(type:DiagnosticLevel) -> String
-    {
-        get
-        {
+extension DiagnosticOutput {
+    @inlinable public subscript(type: DiagnosticLevel) -> String {
+        get {
             ""
         }
-        set(value)
-        {
-            if !value.isEmpty
-            {
+        set(value) {
+            if !value.isEmpty {
                 self.fragments.append(.message(type, value))
             }
         }
     }
 }
-extension DiagnosticOutput
-{
-    private mutating
-    func wrap(with context:DiagnosticContext<Symbolicator.Address>?, _ yield:(inout Self) -> ())
-    {
+extension DiagnosticOutput {
+    private mutating func wrap(
+        with context: DiagnosticContext<Symbolicator.Address>?,
+        _ yield: (inout Self) -> ()
+    ) {
         guard
-        let context:DiagnosticContext<Symbolicator.Address>
-        else
-        {
+        let context: DiagnosticContext<Symbolicator.Address> else {
             yield(&self)
             return
         }
 
-        if  let location:SourceLocation<Symbolicator.Address> = context.location,
-            let path:String = self.symbolicator.path(of: location.file)
-        {
+        if  let location: SourceLocation<Symbolicator.Address> = context.location,
+            let path: String = self.symbolicator.path(of: location.file) {
             self.fragments.append(.heading(.init(position: location.position, file: path)))
-        }
-        else
-        {
+        } else {
             self.fragments.append(.heading(nil))
         }
 
         yield(&self)
 
-        if !context.lines.isEmpty
-        {
+        if !context.lines.isEmpty {
             self.fragments.append(.context(context.lines))
         }
     }
 }
-extension DiagnosticOutput
-{
-    mutating
-    func append(_ alert:DiagnosticAlert,
-        with context:DiagnosticContext<Symbolicator.Address>?)
-    {
-        self.wrap(with: context)
-        {
+extension DiagnosticOutput {
+    mutating func append(
+        _ alert: DiagnosticAlert,
+        with context: DiagnosticContext<Symbolicator.Address>?
+    ) {
+        self.wrap(with: context) {
             $0.fragments.append(.message(alert.type, alert.text))
         }
     }
 }
-extension DiagnosticOutput
-{
+extension DiagnosticOutput {
     /// Implicitly opened existentials don’t work with operators, so we need this hook.
-    mutating
-    func append<DiagnosticType>(_ diagnostic:DiagnosticType,
-        with context:DiagnosticContext<Symbolicator.Address>?)
-        where DiagnosticType:Diagnostic<Symbolicator>
-    {
-        self.wrap(with: context)
-        {
+    mutating func append<DiagnosticType>(
+        _ diagnostic: DiagnosticType,
+        with context: DiagnosticContext<Symbolicator.Address>?
+    )
+        where DiagnosticType: Diagnostic<Symbolicator> {
+        self.wrap(with: context) {
             diagnostic.emit(summary: &$0)
         }
 

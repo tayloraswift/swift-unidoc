@@ -2,14 +2,10 @@ import FNV1
 import UnidocAPI
 import UnidocServer
 
-extension Unidoc.PluginContext
-{
-    func log(uplinked:Unidoc.UplinkStatus)
-    {
-        self.log
-        {
-            $0[.dl]
-            {
+extension Unidoc.PluginContext {
+    func log(uplinked: Unidoc.UplinkStatus) {
+        self.log {
+            $0[.dl] {
                 $0[.dt] = "Edition"
                 $0[.dd] = "\(uplinked.edition)"
 
@@ -20,18 +16,15 @@ extension Unidoc.PluginContext
                 $0[.dd] = uplinked.hidden ? "yes" : "no"
 
                 guard
-                let delta:Unidoc.SurfaceDelta = uplinked.delta
-                else
-                {
+                let delta: Unidoc.SurfaceDelta = uplinked.delta else {
                     return
                 }
 
                 $0[.dt] = "Delta"
 
-                let api:Unidoc.SitemapDelta?
+                let api: Unidoc.SitemapDelta?
 
-                switch delta
-                {
+                switch delta {
                 case .initial:
                     $0[.dd] = "Initial"
                     return
@@ -54,30 +47,21 @@ extension Unidoc.PluginContext
                 }
 
                 guard
-                let api:Unidoc.SitemapDelta
-                else
-                {
+                let api: Unidoc.SitemapDelta else {
                     return
                 }
 
-                for (list, name):([Unidoc.Shoot], String) in [
-                    (api.deletions, "Deletions"),
-                    (api.additions, "Additions")
-                ]   where !list.isEmpty
-                {
+                for (list, name): ([Unidoc.Shoot], String) in [
+                        (api.deletions, "Deletions"),
+                        (api.additions, "Additions")
+                    ]   where !list.isEmpty {
                     $0[.dt] = name
-                    $0[.dd]
-                    {
-                        $0[.ol]
-                        {
-                            for shoot:Unidoc.Shoot in list
-                            {
-                                if  let hash:FNV24 = shoot.hash
-                                {
+                    $0[.dd] {
+                        $0[.ol] {
+                            for shoot: Unidoc.Shoot in list {
+                                if  let hash: FNV24 = shoot.hash {
                                     $0[.li] = "\(shoot.stem) [\(hash)]"
-                                }
-                                else
-                                {
+                                } else {
                                     $0[.li] = "\(shoot.stem)"
                                 }
                             }
@@ -88,14 +72,10 @@ extension Unidoc.PluginContext
         }
     }
 
-    func log(unlinked:Unidoc.UnlinkStatus)
-    {
-        self.log
-        {
-            $0[.dl]
-            {
-                switch unlinked
-                {
+    func log(unlinked: Unidoc.UnlinkStatus) {
+        self.log {
+            $0[.dl] {
+                switch unlinked {
                 case .declined(let id):
                     $0[.dt] = "Declined"
                     $0[.dd] = "\(id)"
@@ -108,14 +88,10 @@ extension Unidoc.PluginContext
         }
     }
 
-    func log(deleted:Unidoc.DeleteStatus)
-    {
-        self.log
-        {
-            $0[.dl]
-            {
-                switch deleted
-                {
+    func log(deleted: Unidoc.DeleteStatus) {
+        self.log {
+            $0[.dl] {
+                switch deleted {
                 case .declined(let id):
                     $0[.dt] = "Declined"
                     $0[.dd] = "\(id)"
@@ -131,12 +107,9 @@ extension Unidoc.PluginContext
         }
     }
 
-    func log(failed action:Unidoc.LinkerAction, id:Unidoc.Edition)
-    {
-        self.log
-        {
-            $0[.dl]
-            {
+    func log(failed action: Unidoc.LinkerAction, id: Unidoc.Edition) {
+        self.log {
+            $0[.dl] {
                 $0[.dt] = "Edition"
                 $0[.dd] = "\(id)"
 

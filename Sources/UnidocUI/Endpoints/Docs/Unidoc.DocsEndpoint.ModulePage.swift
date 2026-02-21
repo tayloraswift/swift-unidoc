@@ -5,61 +5,49 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Unidoc.DocsEndpoint
-{
-    struct ModulePage
-    {
-        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>
-        let cone:Unidoc.Cone
-        let apex:Unidoc.CultureVertex
+extension Unidoc.DocsEndpoint {
+    struct ModulePage {
+        let sidebar: Unidoc.Sidebar<Unidoc.DocsEndpoint>
+        let cone: Unidoc.Cone
+        let apex: Unidoc.CultureVertex
 
-        init(cone:Unidoc.Cone, apex:Unidoc.CultureVertex, tree:Unidoc.TypeTree?)
-        {
+        init(cone: Unidoc.Cone, apex: Unidoc.CultureVertex, tree: Unidoc.TypeTree?) {
             self.cone = cone
             self.apex = apex
 
             self.sidebar = .module(
                 volume: self.cone.context.volume,
                 origin: self.apex.module.id,
-                tree: tree)
+                tree: tree
+            )
         }
     }
 }
-extension Unidoc.DocsEndpoint.ModulePage
-{
-    private
-    var demonym:Unidoc.ModuleDemonym
-    {
+extension Unidoc.DocsEndpoint.ModulePage {
+    private var demonym: Unidoc.ModuleDemonym {
         .init(
             language: self.apex.module.language ?? .swift,
-            type: self.apex.module.type)
+            type: self.apex.module.type
+        )
     }
 
-    private
-    var name:String { self.apex.module.name }
+    private var name: String { self.apex.module.name }
 
-    private
-    var stem:Unidoc.Stem { self.apex.stem }
+    private var stem: Unidoc.Stem { self.apex.stem }
 }
-extension Unidoc.DocsEndpoint.ModulePage:Unidoc.RenderablePage
-{
-    var title:String
-    {
+extension Unidoc.DocsEndpoint.ModulePage: Unidoc.RenderablePage {
+    var title: String {
         self.apex.headline?.safe.description ?? """
         \(self.name) · \(self.volume.title) documentation
         """
     }
 }
-extension Unidoc.DocsEndpoint.ModulePage:Unidoc.StaticPage
-{
-    var location:URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
+extension Unidoc.DocsEndpoint.ModulePage: Unidoc.StaticPage {
+    var location: URI { Unidoc.DocsEndpoint[self.volume, self.apex.route] }
 }
-extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
-{
-    var descriptionFallback:String
-    {
-        switch self.volume.symbol.package
-        {
+extension Unidoc.DocsEndpoint.ModulePage: Unidoc.ApicalPage {
+    var descriptionFallback: String {
+        switch self.volume.symbol.package {
         case .swift:
             "\(self.name) is \(self.demonym.phrase) in the Swift standard library."
 
@@ -78,19 +66,13 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
         }
     }
 
-    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
-    {
-        main[.header, { $0.class = "hero" }]
-        {
-            $0[.div, { $0.class = "eyebrows" }]
-            {
+    func main(_ main: inout HTML.ContentEncoder, format: Unidoc.RenderFormat) {
+        main[.header, { $0.class = "hero" }] {
+            $0[.div, { $0.class = "eyebrows" }] {
                 $0[.span] { $0.class = "phylum" } = self.demonym.title
-                $0[.span, { $0.class = "domain" }]
-                {
-                    $0[.span, { $0.class = "volume" }]
-                    {
-                        $0[.a]
-                        {
+                $0[.span, { $0.class = "domain" }] {
+                    $0[.span, { $0.class = "volume" }] {
+                        $0[.a] {
                             $0.href = "\(Unidoc.DocsEndpoint[self.volume])"
                         } = "\(self.volume.symbol.package) \(self.volume.symbol.version)"
                     }
@@ -99,37 +81,30 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                 }
             }
 
-            if  let custom:Markdown.Bytecode = self.apex.headline
-            {
+            if  let custom: Markdown.Bytecode = self.apex.headline {
                 $0[.h1] = custom.safe
-            }
-            else
-            {
+            } else {
                 $0[.h1] = self.name
             }
 
             $0[.time] { $0.class = "byline" } = self.context.byline(format.locale)
             $0[.div] { $0.class = "docc" } = self.cone.overview
 
-            if  let readme:Unidoc.Scalar = self.apex.readme
-            {
+            if  let readme: Unidoc.Scalar = self.apex.readme {
                 $0 ?= self.context.link(source: readme)
             }
         }
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
-        switch self.apex.module.type
-        {
+        switch self.apex.module.type {
         case .binary, .regular, .macro, .system:
-            main[.pre, { $0.class = "declaration" }]
-            {
+            main[.pre, { $0.class = "declaration" }] {
                 $0[.code] = Unidoc.ImportSection.init(module: self.apex.module.id)
             }
 
         case .executable, .plugin, .snippet, .test:
-            main[.section, { $0.class = "notice" }]
-            {
+            main[.section, { $0.class = "notice" }] {
                 $0[.p] = "This module is \(self.demonym.phrase). It cannot be imported."
             }
 
@@ -137,22 +112,17 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
             break
         }
 
-        main[.section]
-        {
+        main[.section] {
             $0.class = "details"
-        }
-            content:
-        {
-            switch self.apex.module.type
-            {
+        } content: {
+            switch self.apex.module.type {
             case .binary, .regular, .macro:
                 $0[.h2] = "Module information"
 
-                let decls:Int = self.apex.census.unweighted.decls.total
-                let symbols:Int = self.apex.census.weighted.decls.total
+                let decls: Int = self.apex.census.unweighted.decls.total
+                let symbols: Int = self.apex.census.weighted.decls.total
 
-                $0[.dl]
-                {
+                $0[.dl] {
                     $0[.dt] = "Declarations"
                     $0[.dd] = "\(decls)"
 
@@ -160,9 +130,7 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                     $0[.dd] = "\(symbols)"
                 }
 
-                guard decls > 0
-                else
-                {
+                guard decls > 0 else {
                     break
                 }
 
@@ -170,7 +138,8 @@ extension Unidoc.DocsEndpoint.ModulePage:Unidoc.ApicalPage
                     target: Unidoc.StatsEndpoint[self.volume, self.apex.route],
                     census: self.apex.census,
                     domain: self.name,
-                    title: "Module stats and coverage details")
+                    title: "Module stats and coverage details"
+                )
 
             default:
                 break

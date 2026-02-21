@@ -1,33 +1,29 @@
 import Symbols
 
-extension Symbol
-{
-    @frozen public
-    struct FeatureRelationship:SymbolRelationship, Equatable, Hashable, Sendable
-    {
+extension Symbol {
+    @frozen public struct FeatureRelationship: SymbolRelationship,
+        Equatable,
+        Hashable,
+        Sendable {
         /// Note that `source.heir` may not be the same as ``target``, as ``target`` may
         /// encode an extension block instead of a type.
-        public
-        let source:Symbol.Decl.Vector
-        public
-        let target:Symbol.USR
-        public
-        let origin:Symbol.Decl?
+        public let source: Symbol.Decl.Vector
+        public let target: Symbol.USR
+        public let origin: Symbol.Decl?
 
-        @inlinable public
-        init(_ source:Symbol.Decl.Vector, in target:Symbol.USR, origin:Symbol.Decl? = nil)
-        {
+        @inlinable public init(
+            _ source: Symbol.Decl.Vector,
+            in target: Symbol.USR,
+            origin: Symbol.Decl? = nil
+        ) {
             self.source = source
             self.target = target
             self.origin = origin
         }
     }
 }
-extension Symbol.FeatureRelationship:CustomStringConvertible
-{
-    public
-    var description:String
-    {
+extension Symbol.FeatureRelationship: CustomStringConvertible {
+    public var description: String {
         """
         /\(self.source) INHERITED BY \(self.target) (\(self.origin == nil ? 0 : 1) origin(s))/
         """

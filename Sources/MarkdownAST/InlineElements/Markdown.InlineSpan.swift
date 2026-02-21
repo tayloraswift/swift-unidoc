@@ -1,23 +1,16 @@
 import MarkdownABI
 
-extension Markdown
-{
-    @frozen public
-    enum InlineSpan:Equatable, Hashable, Sendable
-    {
+extension Markdown {
+    @frozen public enum InlineSpan: Equatable, Hashable, Sendable {
         case container(InlineContainer<Self>)
         case code(InlineCode)
         case html(InlineHTML)
         case text(String)
     }
 }
-extension Markdown.InlineSpan:Markdown.TreeElement
-{
-    @inlinable public
-    func emit(into binary:inout Markdown.BinaryEncoder)
-    {
-        switch self
-        {
+extension Markdown.InlineSpan: Markdown.TreeElement {
+    @inlinable public func emit(into binary: inout Markdown.BinaryEncoder) {
+        switch self {
         case .container(let container):
             container.emit(into: &binary)
 
@@ -32,13 +25,9 @@ extension Markdown.InlineSpan:Markdown.TreeElement
         }
     }
 }
-extension Markdown.InlineSpan:Markdown.TextElement
-{
-    @inlinable public static
-    func += (text:inout String, self:Self)
-    {
-        switch self
-        {
+extension Markdown.InlineSpan: Markdown.TextElement {
+    @inlinable public static func += (text: inout String, self: Self) {
+        switch self {
         case .container(let container): text += container
         case .code(let code):           text += code
         case .html:                     return

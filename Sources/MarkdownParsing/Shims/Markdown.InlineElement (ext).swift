@@ -1,12 +1,9 @@
 import MarkdownAST
 import Sources
 
-extension Markdown.InlineElement:ParsableAsInlineMarkup
-{
-    init(from markup:/* borrowing */ any _InlineMarkup, in source:borrowing Markdown.Source)
-    {
-        switch /* copy */ markup
-        {
+extension Markdown.InlineElement: ParsableAsInlineMarkup {
+    init(from markup:/* borrowing */ any _InlineMarkup, in source: borrowing Markdown.Source) {
+        switch /* copy */ markup {
         case is _LineBreak:
             self = .text("\n")
 
@@ -35,49 +32,52 @@ extension Markdown.InlineElement:ParsableAsInlineMarkup
             self = .container(.init(from: span, in: source, as: .strong))
 
         case let image as _Image:
-            self = .image(.init(
-                elements: image.inlineChildren.map
-                {
-                    Markdown.InlineSpan.init(from: $0, in: source)
-                },
-                target: image.source.map
-                {
-                    .inline(.init(
-                        source: .init(from: image.range, in: copy source),
-                        string: $0))
-                },
-                title: image.title))
+            self = .image(
+                .init(
+                    elements: image.inlineChildren.map {
+                        Markdown.InlineSpan.init(from: $0, in: source)
+                    },
+                    target: image.source.map {
+                        .inline(
+                            .init(
+                                source: .init(from: image.range, in: copy source),
+                                string: $0
+                            )
+                        )
+                    },
+                    title: image.title
+                )
+            )
 
         case let link as _SymbolLink:
             // exclude the backticks from the source range
-            let link:Markdown.InlineAutolink = .code(
+            let link: Markdown.InlineAutolink = .code(
                 link: link.destination ?? "",
-                at: .init(trimming: 2, from: link.range, in: copy source))
+                at: .init(trimming: 2, from: link.range, in: copy source)
+            )
 
             self = .autolink(link)
 
         case let link as _Link:
-            let elements:[Markdown.InlineSpan] = link.inlineChildren.map
-            {
+            let elements: [Markdown.InlineSpan] = link.inlineChildren.map {
                 Markdown.InlineSpan.init(from: $0, in: source)
             }
-            if  let destination:String = link.destination,
-                    elements.count == 1,
-                    elements[0] == .text(destination)
-            {
+            if  let destination: String = link.destination,
+                elements.count == 1,
+                elements[0] == .text(destination) {
                 // exclude the angle brackets from the source range
-                let link:Markdown.InlineAutolink = .doc(
+                let link: Markdown.InlineAutolink = .doc(
                     link: destination,
-                    at: .init(trimming: 1, from: link.range, in: copy source))
+                    at: .init(trimming: 1, from: link.range, in: copy source)
+                )
 
                 self = .autolink(link)
-            }
-            else
-            {
-                let link:Markdown.InlineHyperlink = .init(
+            } else {
+                let link: Markdown.InlineHyperlink = .init(
                     source: .init(trimming: 1, from: link.range, in: copy source),
                     target: link.destination,
-                    elements: elements)
+                    elements: elements
+                )
 
                 self = .link(link)
             }

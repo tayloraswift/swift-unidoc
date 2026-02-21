@@ -4,40 +4,36 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc
-{
-    struct RedirectByInternalHintQuery<Predicate>:Equatable, Hashable, Sendable
-        where Predicate:VertexPredicate
-    {
-        let volume:Edition
-        let vertex:Predicate
+extension Unidoc {
+    struct RedirectByInternalHintQuery<Predicate>: Equatable, Hashable, Sendable
+        where Predicate: VertexPredicate {
+        let volume: Edition
+        let vertex: Predicate
 
-        init(volume:Edition, lookup vertex:Predicate)
-        {
+        init(volume: Edition, lookup vertex: Predicate) {
             self.volume = volume
             self.vertex = vertex
         }
     }
 }
-extension Unidoc.RedirectByInternalHintQuery:Mongo.PipelineQuery
-{
+extension Unidoc.RedirectByInternalHintQuery: Mongo.PipelineQuery {
     typealias Iteration = Mongo.Single<Unidoc.RedirectOutput>
 
-    var collation:Mongo.Collation { .casefolding }
-    var from:Mongo.Collection? { Unidoc.DB.Volumes.name }
-    var hint:Mongo.CollectionIndex? { nil }
+    var collation: Mongo.Collation { .casefolding }
+    var from: Mongo.Collection? { Unidoc.DB.Volumes.name }
+    var hint: Mongo.CollectionIndex? { nil }
 
-    func build(pipeline:inout Mongo.PipelineEncoder)
-    {
+    func build(pipeline: inout Mongo.PipelineEncoder) {
         pipeline[stage: .match] { $0[Unidoc.VolumeMetadata[.id]] = self.volume }
-        pipeline[stage: .replaceWith, using: Unidoc.RedirectOutput.CodingKey.self]
-        {
+        pipeline[stage: .replaceWith, using: Unidoc.RedirectOutput.CodingKey.self] {
             $0[.volume] = Mongo.Pipeline.ROOT
         }
 
-        pipeline.lookup(vertex: self.vertex,
+        pipeline.lookup(
+            vertex: self.vertex,
             volume: Unidoc.RedirectOutput[.volume],
             output: Unidoc.RedirectOutput[.matches],
-            fields: .limited)
+            fields: .limited
+        )
     }
 }

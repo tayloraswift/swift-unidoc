@@ -2,24 +2,19 @@ import FNV1
 import SourceDiagnostics
 import UCF
 
-extension SSGC
-{
-    enum OutlineDiagnostic:Equatable, Error
-    {
-        case annealedIncorrectHash(in:UCF.Selector, to:FNV24)
+extension SSGC {
+    enum OutlineDiagnostic: Equatable, Error {
+        case annealedIncorrectHash(in: UCF.Selector, to: FNV24)
         case unresolvedAbsolute(Doclink)
         case unresolvedRelative(Doclink)
-        case suggestReformat(Doclink, to:UCF.Selector)
+        case suggestReformat(Doclink, to: UCF.Selector)
     }
 }
-extension SSGC.OutlineDiagnostic:Diagnostic
-{
+extension SSGC.OutlineDiagnostic: Diagnostic {
     typealias Symbolicator = SSGC.Symbolicator
 
-    func emit(summary output:inout DiagnosticOutput<Symbolicator>)
-    {
-        switch self
-        {
+    func emit(summary output: inout DiagnosticOutput<Symbolicator>) {
+        switch self {
         case .annealedIncorrectHash(in: let selector, to: _):
             output[.warning] = """
             codelink '\(selector)' is unambiguous, but the hash does not match the resolved \
@@ -31,7 +26,9 @@ extension SSGC.OutlineDiagnostic:Diagnostic
 
         case .unresolvedRelative(let doclink):
             output[.warning] = """
-            doclink '\(doclink.value)' does not resolve to any article (or tutorial) in this package
+            doclink '\(
+                doclink.value
+            )' does not resolve to any article (or tutorial) in this package
             """
 
         case .suggestReformat(let doclink, to: _):
@@ -41,10 +38,8 @@ extension SSGC.OutlineDiagnostic:Diagnostic
             """
         }
     }
-    func emit(details output:inout DiagnosticOutput<Symbolicator>)
-    {
-        switch self
-        {
+    func emit(details output: inout DiagnosticOutput<Symbolicator>) {
+        switch self {
         case .annealedIncorrectHash(in: _, to: let hash):
             output[.note] = """
             replace the hash with [\(hash)] to suppress this warning

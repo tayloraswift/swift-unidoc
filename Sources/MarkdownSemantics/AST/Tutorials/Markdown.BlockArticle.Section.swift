@@ -1,7 +1,4 @@
-extension Markdown.BlockArticle
-{
-    final
-    class Section:Markdown.BlockSection
-    {
+extension Markdown.BlockArticle {
+    final class Section: Markdown.BlockSection {
     }
 }

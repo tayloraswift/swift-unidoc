@@ -1,7 +1,5 @@
-extension Unidoc
-{
-    struct InlineLoaderError:Error
-    {
-        let path:GraphPath
+extension Unidoc {
+    struct InlineLoaderError: Error {
+        let path: GraphPath
     }
 }

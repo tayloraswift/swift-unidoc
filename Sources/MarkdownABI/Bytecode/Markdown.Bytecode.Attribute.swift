@@ -1,8 +1,5 @@
-extension Markdown.Bytecode
-{
-    @frozen public
-    enum Attribute:UInt8, RawRepresentable, Equatable, Hashable, Sendable
-    {
+extension Markdown.Bytecode {
+    @frozen public enum Attribute: UInt8, RawRepresentable, Equatable, Hashable, Sendable {
         case alt = 0x00
         /// Represents a `class` attribute. The bytecode executor will **coalesce but not
         /// de-duplicate** multiple `class` attributes into a single attribute.

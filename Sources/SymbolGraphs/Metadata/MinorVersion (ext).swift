@@ -1,6 +1,5 @@
 import BSON
 import SemanticVersions
 
-extension MinorVersion:BSONDecodable, BSONEncodable
-{
+extension MinorVersion: BSONDecodable, BSONEncodable {
 }

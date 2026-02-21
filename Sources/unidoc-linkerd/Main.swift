@@ -11,57 +11,51 @@ import UnidocLinkerPlugin
 import UnidocServer
 import UnidocServerInsecure
 
-struct Main
-{
+struct Main {
     @Option(
         name: [.customLong("host"), .customShort("h")],
-        help: "The name of a host to bind the documentation server to")
-    var host:String = "localhost"
+        help: "The name of a host to bind the documentation server to"
+    ) var host: String = "localhost"
 
     @Option(
         name: [.customLong("port"), .customShort("p")],
-        help: "The number of a port to bind the documentation server to")
-    var port:Int = 8080
+        help: "The number of a port to bind the documentation server to"
+    ) var port: Int = 8080
 
-    @OptionGroup
-    var db:Unidoc.DatabaseOptions
-    @OptionGroup
-    var s3:Unidoc.BucketOptions
+    @OptionGroup var db: Unidoc.DatabaseOptions
+    @OptionGroup var s3: Unidoc.BucketOptions
 
     @Flag(
         name: [.customLong("assume-encrypted")],
-        help: "Assume that the connection is encrypted")
-    var assumeEncrypted:Bool = false
+        help: "Assume that the connection is encrypted"
+    ) var assumeEncrypted: Bool = false
 
     @Flag(name: [.customLong("version")], help: "Print version information and exit")
-    var version:Bool = false
+    var version: Bool = false
 }
 
-@main
-extension Main:AsyncParsableCommand
-{
-    func run() async throws
-    {
-        if  self.version
-        {
+@main extension Main: AsyncParsableCommand {
+    func run() async throws {
+        if  self.version {
             print(Unidoc.version)
             return
         }
 
         NIOSingletons.groupLoopCountSuggestion = 2
 
-        let clientIdentity:NIOSSLContext = try .clientDefault
+        let clientIdentity: NIOSSLContext = try .clientDefault
 
-        let options:Unidoc.ServerOptions = .init(assetCache: nil,
+        let options: Unidoc.ServerOptions = .init(
+            assetCache: nil,
             builders: 0,
             bucket: self.s3.buckets,
             github: nil,
             access: .enforced,
             origin: .https(host: self.host, port: self.port),
-            preview: true)
+            preview: true
+        )
 
-        let mongodb:Mongo.DriverBootstrap = MongoDB / [self.db.mongod] /?
-        {
+        let mongodb: Mongo.DriverBootstrap = MongoDB / [self.db.mongod] /? {
             $0.executors = MultiThreadedEventLoopGroup.singleton
             $0.appname = "unidoc-linkerd"
 
@@ -71,21 +65,21 @@ extension Main:AsyncParsableCommand
             $0.topology = .replicated(set: self.db.rs)
         }
 
-        await mongodb.withSessionPool(logger: .init(level: .error))
-        {
-            @Sendable (pool:Mongo.SessionPool) in
+        await mongodb.withSessionPool(logger: .init(level: .error)) {
+            @Sendable (pool: Mongo.SessionPool) in
 
-            await Unidoc.ConsoleLogger.run
-            {
-                let settings:Unidoc.DatabaseSettings = .init(access: options.access)
+            await Unidoc.ConsoleLogger.run {
+                let settings: Unidoc.DatabaseSettings = .init(access: options.access)
 
-                let linker:Unidoc.LinkerPlugin = .init(bucket: options.bucket.graphs)
-                let server:Unidoc.Server = .init(clientIdentity: clientIdentity,
+                let linker: Unidoc.LinkerPlugin = .init(bucket: options.bucket.graphs)
+                let server: Unidoc.Server = .init(
+                    clientIdentity: clientIdentity,
                     coordinators: [],
                     plugins: [linker],
                     options: options,
                     logger: $0,
-                    db: .init(settings: settings, sessions: pool, unidoc: "unidoc"))
+                    db: .init(settings: settings, sessions: pool, unidoc: "unidoc")
+                )
 
                 try await server.run(on: self.port, with: self.assumeEncrypted ? .proxy : nil)
             }

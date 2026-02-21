@@ -1,11 +1,8 @@
 import SymbolGraphs
 
-extension SymbolGraph.ModuleType
-{
-    var hasSymbols:Bool
-    {
-        switch self
-        {
+extension SymbolGraph.ModuleType {
+    var hasSymbols: Bool {
+        switch self {
         case .binary:       true
         case .executable:   false
         case .regular:      true

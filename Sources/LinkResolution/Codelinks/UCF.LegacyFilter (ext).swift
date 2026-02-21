@@ -1,43 +1,38 @@
 import Symbols
 import UCF
 
-extension UCF.LegacyFilter
-{
-    static func ~= (self:Self, phylum:Phylum.Decl?) -> Bool
-    {
+extension UCF.LegacyFilter {
+    static func ~= (self: Self, phylum: Phylum.Decl?) -> Bool {
         guard
-        let phylum:Phylum.Decl
-        else
-        {
+        let phylum: Phylum.Decl else {
             return false
         }
 
-        switch  (phylum, self)
-        {
+        switch  (phylum, self) {
         case    (.actor,                .class),
-                (.associatedtype,       .associatedtype),
-                (.case,                 .enum_case),
-                (.class,                .class),
-                (.deinitializer,        .deinit),
-                (.enum,                 .enum),
-                (.func(nil),            .func),
-                (.func(nil),            .func_op),
-                (.func(.instance),      .method),
-                (.func(.class?),        .type_method),
-                (.func(.static?),       .type_method),
-                (.func(.static?),       .func_op),
-                (.initializer,          .`init`),
-                (.macro,                .macro),
-                (.protocol,             .protocol),
-                (.struct,               .struct),
-                (.subscript(.instance), .subscript),
-                (.subscript(.class),    .type_subscript),
-                (.subscript(.static),   .type_subscript),
-                (.typealias,            .typealias),
-                (.var(nil),             .var),
-                (.var(.instance?),      .property),
-                (.var(.class?),         .type_property),
-                (.var(.static?),        .type_property):
+            (.associatedtype,       .associatedtype),
+            (.case,                 .enum_case),
+            (.class,                .class),
+            (.deinitializer,        .deinit),
+            (.enum,                 .enum),
+            (.func(nil),            .func),
+            (.func(nil),            .func_op),
+            (.func(.instance),      .method),
+            (.func(.class?),        .type_method),
+            (.func(.static?),       .type_method),
+            (.func(.static?),       .func_op),
+            (.initializer,          .`init`),
+            (.macro,                .macro),
+            (.protocol,             .protocol),
+            (.struct,               .struct),
+            (.subscript(.instance), .subscript),
+            (.subscript(.class),    .type_subscript),
+            (.subscript(.static),   .type_subscript),
+            (.typealias,            .typealias),
+            (.var(nil),             .var),
+            (.var(.instance?),      .property),
+            (.var(.class?),         .type_property),
+            (.var(.static?),        .type_property):
             return true
 
         default:

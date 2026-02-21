@@ -1,10 +1,7 @@
 import URI
 
-extension Unidoc.CanonicalVersion
-{
-    @frozen public
-    enum Target
-    {
+extension Unidoc.CanonicalVersion {
+    @frozen public enum Target {
         case article(URI?)
         case culture(URI?)
         case decl(URI?)
@@ -13,13 +10,9 @@ extension Unidoc.CanonicalVersion
         case landing
     }
 }
-extension Unidoc.CanonicalVersion.Target
-{
-    @inlinable public
-    var uri:URI?
-    {
-        switch self
-        {
+extension Unidoc.CanonicalVersion.Target {
+    @inlinable public var uri: URI? {
+        switch self {
         case .article(let uri): uri
         case .culture(let uri): uri
         case .decl(let uri):    uri

@@ -1,13 +1,9 @@
 import JSONDecoding
 import Symbols
 
-extension Phylum:JSONDecodable, JSONStringDecodable
-{
-    public
-    init?(_ description:String)
-    {
-        switch description
-        {
+extension Phylum: JSONDecodable, JSONStringDecodable {
+    public init?(_ description: String) {
+        switch description {
         case "swift.extension":         self = .block
         //  All macros are initially assumed to be freestanding.
         case "swift.macro":             self = .decl(.macro(.freestanding))

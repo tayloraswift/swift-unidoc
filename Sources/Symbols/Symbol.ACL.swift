@@ -1,8 +1,5 @@
-extension Symbol
-{
-    @frozen public
-    enum ACL:Hashable, Comparable, Sendable
-    {
+extension Symbol {
+    @frozen public enum ACL: Hashable, Comparable, Sendable {
         case `private`
         case `fileprivate`
         case `internal`
@@ -11,13 +8,9 @@ extension Symbol
         case  open
     }
 }
-extension Symbol.ACL:CustomStringConvertible
-{
-    @inlinable public
-    var description:String
-    {
-        switch self
-        {
+extension Symbol.ACL: CustomStringConvertible {
+    @inlinable public var description: String {
+        switch self {
         case .private:      "private"
         case .fileprivate:  "fileprivate"
         case .internal:     "internal"
@@ -30,13 +23,9 @@ extension Symbol.ACL:CustomStringConvertible
 //  Manual conformance needed, because a raw type would inhibit
 //  the synthesized ``Comparable`` conformance. And implementing
 //  this manually is easier than implementing `<`.
-extension Symbol.ACL:LosslessStringConvertible
-{
-    @inlinable public
-    init?(_ description:String)
-    {
-        switch description
-        {
+extension Symbol.ACL: LosslessStringConvertible {
+    @inlinable public init?(_ description: String) {
+        switch description {
         case "private":     self = .private
         case "fileprivate": self = .fileprivate
         case "internal":    self = .internal

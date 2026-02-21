@@ -1,36 +1,30 @@
 import Symbols
 
-extension Symbol
-{
-    @frozen public
-    struct OverrideRelationship:SymbolRelationship, Equatable, Hashable, Sendable
-    {
-        public
-        let source:Symbol.Decl
-        public
-        let target:Symbol.Decl
-        public
-        let origin:Symbol.Decl?
+extension Symbol {
+    @frozen public struct OverrideRelationship: SymbolRelationship,
+        Equatable,
+        Hashable,
+        Sendable {
+        public let source: Symbol.Decl
+        public let target: Symbol.Decl
+        public let origin: Symbol.Decl?
 
-        @inlinable public
-        init(_ source:Symbol.Decl, of target:Symbol.Decl, origin:Symbol.Decl? = nil)
-        {
+        @inlinable public init(
+            _ source: Symbol.Decl,
+            of target: Symbol.Decl,
+            origin: Symbol.Decl? = nil
+        ) {
             self.source = source
             self.target = target
             self.origin = origin
         }
     }
 }
-extension Symbol.OverrideRelationship:SuperformRelationship
-{
-    @inlinable public
-    var kinks:Phylum.Decl.Kinks { [.override] }
+extension Symbol.OverrideRelationship: SuperformRelationship {
+    @inlinable public var kinks: Phylum.Decl.Kinks { [.override] }
 
-    public
-    func validate(source phylum:Phylum.Decl) -> Bool
-    {
-        switch phylum
-        {
+    public func validate(source phylum: Phylum.Decl) -> Bool {
+        switch phylum {
         case .actor:                false
         case .associatedtype:       true
         case .case:                 false
@@ -52,11 +46,8 @@ extension Symbol.OverrideRelationship:SuperformRelationship
         }
     }
 }
-extension Symbol.OverrideRelationship:CustomStringConvertible
-{
-    public
-    var description:String
-    {
+extension Symbol.OverrideRelationship: CustomStringConvertible {
+    public var description: String {
         """
         /\(self.source) OVERRIDES \(self.target) (\(self.origin == nil ? 0 : 1) origin(s))/
         """

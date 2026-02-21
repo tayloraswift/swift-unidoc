@@ -1,10 +1,7 @@
 import URI
 
-extension Unidoc
-{
-    @frozen public
-    enum ServerRoot:String, URI.Path.ComponentConvertible
-    {
+extension Unidoc {
+    @frozen public enum ServerRoot: String, URI.Path.ComponentConvertible {
         case account
         case admin
         case asset
@@ -45,39 +42,27 @@ extension Unidoc
         case sitemaps
     }
 }
-extension Unidoc.ServerRoot
-{
-    @inlinable public
-    var subdomain:Subdomain?
-    {
-        switch self
-        {
+extension Unidoc.ServerRoot {
+    @inlinable public var subdomain: Subdomain? {
+        switch self {
         case .ref:      .api
         case .render:   .api
         default:        nil
         }
     }
 }
-extension Unidoc.ServerRoot
-{
-    @inlinable public static
-    func / (self:consuming Self, next:consuming String) -> URI
-    {
-        var path:URI.Path = self.path
+extension Unidoc.ServerRoot {
+    @inlinable public static func / (self: consuming Self, next: consuming String) -> URI {
+        var path: URI.Path = self.path
         path.append(next)
         return .init(path: path)
     }
 }
-extension Unidoc.ServerRoot:CustomStringConvertible
-{
-    @inlinable public
-    var description:String { "/\(self.rawValue)" }
+extension Unidoc.ServerRoot: CustomStringConvertible {
+    @inlinable public var description: String { "/\(self.rawValue)" }
 }
-extension Unidoc.ServerRoot
-{
-    @inlinable public
-    var path:URI.Path { [.push(self.rawValue)] }
+extension Unidoc.ServerRoot {
+    @inlinable public var path: URI.Path { [.push(self.rawValue)] }
 
-    @inlinable public
-    var uri:URI { .init(path: self.path) }
+    @inlinable public var uri: URI { .init(path: self.path) }
 }

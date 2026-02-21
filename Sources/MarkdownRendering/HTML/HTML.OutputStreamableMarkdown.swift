@@ -1,12 +1,9 @@
 import HTML
 import MarkdownABI
 
-extension HTML
-{
-    public
-    protocol OutputStreamableMarkdown:OutputStreamable
-    {
-        var bytecode:Markdown.Bytecode { get }
+extension HTML {
+    public protocol OutputStreamableMarkdown: OutputStreamable {
+        var bytecode: Markdown.Bytecode { get }
 
         /// Returns the value for an attribute identified by the given reference.
         /// If the witness returns nil, the renderer will omit the attribute.
@@ -17,33 +14,28 @@ extension HTML
         ///
         /// This can be used to influence the behavior of the special syntax
         /// highlight contexts.
-        func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
+        func load(_ reference: Int, for attribute: inout Markdown.Bytecode.Attribute) -> String?
 
         /// Writes arbitrary content to the provided HTML output, identified by
         /// the given reference.
-        func load(_ reference:Int, into html:inout ContentEncoder)
+        func load(_ reference: Int, into html: inout ContentEncoder)
     }
 }
-extension HTML.OutputStreamableMarkdown
-{
+extension HTML.OutputStreamableMarkdown {
     /// Returns nil.
-    @inlinable public
-    func load(_ reference:Int, for attribute:inout Markdown.Bytecode.Attribute) -> String?
-    {
+    @inlinable public func load(
+        _ reference: Int,
+        for attribute: inout Markdown.Bytecode.Attribute
+    ) -> String? {
         nil
     }
     /// Does nothing.
-    @inlinable public
-    func load(_ reference:Int, into html:inout HTML.ContentEncoder)
-    {
+    @inlinable public func load(_ reference: Int, into html: inout HTML.ContentEncoder) {
     }
 }
-extension HTML.OutputStreamableMarkdown
-{
+extension HTML.OutputStreamableMarkdown {
     /// Equivalent to ``render(to:)``, but ignores all errors.
-    @inlinable public static
-    func += (html:inout HTML.ContentEncoder, self:Self)
-    {
+    @inlinable public static func += (html: inout HTML.ContentEncoder, self: Self) {
         do { try self.render(to: &html) } catch { }
     }
 
@@ -54,25 +46,19 @@ extension HTML.OutputStreamableMarkdown
     ///
     /// See ``TextOutputStreamableMarkdown.write(to:) [7FATH]`` for a simpler version of this
     /// function that only renders visible text.
-    public
-    func render(to html:inout HTML.ContentEncoder) throws
-    {
-        var attributes:Markdown.TreeContext.AttributeContext = .init()
-        var stack:[Markdown.TreeContext] = []
+    public func render(to html: inout HTML.ContentEncoder) throws {
+        var attributes: Markdown.TreeContext.AttributeContext = .init()
+        var stack: [Markdown.TreeContext] = []
 
-        defer
-        {
-            for context:Markdown.TreeContext in stack.reversed()
-            {
+        defer {
+            for context: Markdown.TreeContext in stack.reversed() {
                 html.close(context: context)
             }
         }
 
-        var newlines:Int = 0
-        for instruction:Markdown.Instruction in self.bytecode
-        {
-            switch instruction
-            {
+        var newlines: Int = 0
+        for instruction: Markdown.Instruction in self.bytecode {
+            switch instruction {
             case .invalid:
                 throw Markdown.RenderingError.invalidInstruction
 
@@ -82,8 +68,7 @@ extension HTML.OutputStreamableMarkdown
             case .attribute(var attribute, let reference?):
                 attributes.flush()
 
-                if  let value:String = self.load(reference, for: &attribute)
-                {
+                if  let value: String = self.load(reference, for: &attribute) {
                     attributes.list.append(value: value, as: attribute)
                 }
 
@@ -102,8 +87,10 @@ extension HTML.OutputStreamableMarkdown
             case .push(let element):
                 attributes.flush()
 
-                let context:Markdown.TreeContext = .init(from: element,
-                    attributes: &attributes.list)
+                let context: Markdown.TreeContext = .init(
+                    from: element,
+                    attributes: &attributes.list
+                )
 
                 html.emit(newlines: &newlines)
                 html.open(context: context, with: attributes.list)
@@ -114,8 +101,7 @@ extension HTML.OutputStreamableMarkdown
             case .pop:
                 attributes.clear()
 
-                switch stack.popLast()
-                {
+                switch stack.popLast() {
                 case .snippet?:
                     newlines = 0
                     html.close(context: .snippet)
@@ -128,24 +114,18 @@ extension HTML.OutputStreamableMarkdown
                 }
 
             case .utf8(let codeunit):
-                guard case nil = attributes.buffer(utf8: codeunit)
-                else
-                {
+                guard case nil = attributes.buffer(utf8: codeunit) else {
                     continue
                 }
                 //  Not in an attribute context.
-                switch stack.last
-                {
+                switch stack.last {
                 case .transparent?:
                     html.append(escaped: codeunit)
 
                 case .snippet?:
-                    if  codeunit == 0x0A // '\n'
-                    {
+                    if  codeunit == 0x0A /* '\n'*/ {
                         newlines += 1
-                    }
-                    else
-                    {
+                    } else {
                         html.emit(newlines: &newlines)
                         fallthrough
                     }
@@ -155,9 +135,7 @@ extension HTML.OutputStreamableMarkdown
                 }
             }
         }
-        guard stack.isEmpty
-        else
-        {
+        guard stack.isEmpty else {
             throw Markdown.RenderingError.interrupted
         }
     }

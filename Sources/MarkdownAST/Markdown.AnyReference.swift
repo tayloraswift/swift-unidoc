@@ -1,18 +1,15 @@
 import Sources
 import Symbols
 
-extension Markdown
-{
-    @frozen public
-    enum AnyReference
-    {
+extension Markdown {
+    @frozen public enum AnyReference {
         /// A symbolic (ABI) reference to a code object.
-        case symbolic(usr:Symbol.USR)
+        case symbolic(usr: Symbol.USR)
         /// A lexical (API) path reference to a code object. These originate from inline code
         /// spans.
-        case lexical(ucf:SourceString)
+        case lexical(ucf: SourceString)
         /// A URL reference, which may be external or internal.
-        case link(url:SourceURL)
+        case link(url: SourceURL)
         /// A reference to a file, by its file name. These originate from block directive
         /// arguments, such as those in an `@Image`.
         case file(SourceString)
@@ -24,21 +21,17 @@ extension Markdown
         case location(SourceLocation<Int32>)
     }
 }
-extension Markdown.AnyReference
-{
-    @inlinable public
-    static func link(url:__owned Markdown.SourceString,
-        provenance:Markdown.SourceURL.Provenance = .attribute) -> Self
-    {
+extension Markdown.AnyReference {
+    @inlinable public static func link(
+        url: __owned Markdown.SourceString,
+        provenance: Markdown.SourceURL.Provenance = .attribute
+    ) -> Self {
         .link(url: .init(url: url, provenance: provenance))
     }
 }
-extension Markdown.AnyReference
-{
-    @inlinable public
-    init(_ autolink:Markdown.InlineAutolink)
-    {
-        let text:Markdown.SourceString = autolink.text
+extension Markdown.AnyReference {
+    @inlinable public init(_ autolink: Markdown.InlineAutolink) {
+        let text: Markdown.SourceString = autolink.text
         self = autolink.code ? .lexical(ucf: text) : .link(url: text, provenance: .autolink)
     }
 }

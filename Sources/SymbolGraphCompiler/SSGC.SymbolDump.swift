@@ -1,39 +1,29 @@
 import SymbolGraphParts
 import Symbols
 
-extension SSGC
-{
-    @frozen public
-    struct SymbolDump:Sendable
-    {
-        let culture:Symbol.Module
-        let colony:Symbol.Module?
+extension SSGC {
+    @frozen public struct SymbolDump: Sendable {
+        let culture: Symbol.Module
+        let colony: Symbol.Module?
 
-        private(set)
-        var conformances:[Symbol.ConformanceRelationship]
-        private(set)
-        var inheritances:[Symbol.InheritanceRelationship]
+        private(set) var conformances: [Symbol.ConformanceRelationship]
+        private(set) var inheritances: [Symbol.InheritanceRelationship]
 
-        private(set)
-        var requirements:[Symbol.RequirementRelationship]
-        private(set)
-        var memberships:[Symbol.MemberRelationship]
+        private(set) var requirements: [Symbol.RequirementRelationship]
+        private(set) var memberships: [Symbol.MemberRelationship]
 
-        private(set)
-        var witnessings:[Symbol.IntrinsicWitnessRelationship]
-        private(set)
-        var featurings:[Symbol.FeatureRelationship]
-        private(set)
-        var overrides:[Symbol.OverrideRelationship]
-        private(set)
-        var extensions:[Symbol.ExtensionRelationship]
+        private(set) var witnessings: [Symbol.IntrinsicWitnessRelationship]
+        private(set) var featurings: [Symbol.FeatureRelationship]
+        private(set) var overrides: [Symbol.OverrideRelationship]
+        private(set) var extensions: [Symbol.ExtensionRelationship]
 
-        private(set)
-        var vertices:[SymbolGraphPart.Vertex]
+        private(set) var vertices: [SymbolGraphPart.Vertex]
 
-        private
-        init(culture:Symbol.Module, colony:Symbol.Module?, vertices:[SymbolGraphPart.Vertex])
-        {
+        private init(
+            culture: Symbol.Module,
+            colony: Symbol.Module?,
+            vertices: [SymbolGraphPart.Vertex]
+        ) {
             self.culture = culture
             self.colony = colony
 
@@ -52,17 +42,12 @@ extension SSGC
         }
     }
 }
-extension SSGC.SymbolDump
-{
-    private
-    init(from part:borrowing SymbolGraphPart)
-    {
+extension SSGC.SymbolDump {
+    private init(from part: borrowing SymbolGraphPart) {
         self.init(culture: part.culture, colony: part.colony, vertices: part.vertices)
 
-        for relationship:Symbol.AnyRelationship in part.relationships
-        {
-            switch relationship
-            {
+        for relationship: Symbol.AnyRelationship in part.relationships {
+            switch relationship {
             case .conformance(let edge):        self.conformances.append(edge)
             case .inheritance(let edge):        self.inheritances.append(edge)
             case .requirement(let edge):        self.requirements.append(edge)
@@ -87,28 +72,22 @@ extension SSGC.SymbolDump
         self.extensions.sort { ($0.source, $0.target) < ($1.source, $1.target) }
     }
 
-    public
-    init(from part:borrowing SymbolGraphPart, base:borrowing Symbol.FileBase?) throws
-    {
+    public init(from part: borrowing SymbolGraphPart, base: borrowing Symbol.FileBase?) throws {
         self.init(from: part)
 
-        for j:Int in self.vertices.indices
-        {
+        for j: Int in self.vertices.indices {
             {
                 //  Deport foreign doccomments.
-                if  let doccomment:SymbolGraphPart.Vertex.Doccomment = $0.doccomment,
-                        doccomment.culture != self.culture
-                {
+                if  let doccomment: SymbolGraphPart.Vertex.Doccomment = $0.doccomment,
+                        doccomment.culture != self.culture {
                     $0.doccomment = nil
                 }
                 //  Trim file path prefixes.
                 //  As of 6.1, symbolgraph-extract sometimes emits paths from inside the swift
                 //  installation directory.
                 guard
-                let base:Symbol.FileBase = copy base,
-                let rebased:Symbol.File = try? $0.location?.file.rebased(against: base)
-                else
-                {
+                let base: Symbol.FileBase = copy base,
+                let rebased: Symbol.File = try? $0.location?.file.rebased(against: base) else {
                     $0.location = nil
                     return
                 }

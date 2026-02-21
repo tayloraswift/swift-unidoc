@@ -2,11 +2,8 @@ import BSON
 import GitHubAPI
 import UnidocRecords
 
-extension GitHub.User.Profile
-{
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
+extension GitHub.User.Profile {
+    @frozen public enum CodingKey: String, Sendable {
         case login = "U"
         case icon = "P"
         case node = "Q"
@@ -27,11 +24,8 @@ extension GitHub.User.Profile
         case updated = "M"
     }
 }
-extension GitHub.User.Profile:BSONDocumentEncodable, BSONEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension GitHub.User.Profile: BSONDocumentEncodable, BSONEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.login] = self.login
         bson[.icon] = self.icon
         bson[.node] = self.node
@@ -51,11 +45,8 @@ extension GitHub.User.Profile:BSONDocumentEncodable, BSONEncodable
         bson[.updated] = self.updated
     }
 }
-extension GitHub.User.Profile:BSONDocumentDecodable, BSONDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
+extension GitHub.User.Profile: BSONDocumentDecodable, BSONDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
         self.init(
             login: try bson[.login].decode(),
             icon: try bson[.icon].decode(),
@@ -74,6 +65,7 @@ extension GitHub.User.Profile:BSONDocumentDecodable, BSONDecodable
             followers: try bson[.followers].decode(),
             following: try bson[.following].decode(),
             created: try bson[.created].decode(),
-            updated: try bson[.updated].decode())
+            updated: try bson[.updated].decode()
+        )
     }
 }

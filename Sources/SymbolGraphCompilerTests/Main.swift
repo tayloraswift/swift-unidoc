@@ -1,11 +1,7 @@
 import Testing_
 
-@main
-enum Main:TestMain
-{
-    static
-    let all:[any TestBattery.Type] =
-    [
+@main enum Main: TestMain {
+    static let all: [any TestBattery.Type] = [
         Determinism.self,
         DefaultImplementations.self,
         FeatureInheritance.self,

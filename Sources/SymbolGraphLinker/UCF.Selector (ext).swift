@@ -1,22 +1,16 @@
 import FNV1
 import UCF
 
-extension UCF.Selector
-{
-    func ignore(when definitions:[String: Void]) throws -> Bool
-    {
+extension UCF.Selector {
+    func ignore(when definitions: [String: Void]) throws -> Bool {
         guard
-        case .unidoc(let disambiguator)? = self.suffix
-        else
-        {
+        case .unidoc(let disambiguator)? = self.suffix else {
             return false
         }
 
-        for condition:UCF.ConditionFilter in disambiguator.conditions
-        {
+        for condition: UCF.ConditionFilter in disambiguator.conditions {
             if  case .ignore_when = condition.label,
-                definitions.keys.contains(try condition.value())
-            {
+                definitions.keys.contains(try condition.value()) {
                 return true
             }
         }
@@ -24,8 +18,7 @@ extension UCF.Selector
         return false
     }
 
-    func with(hash:FNV24) -> UCF.Selector
-    {
+    func with(hash: FNV24) -> UCF.Selector {
         .init(base: self.base, path: self.path, suffix: .hash(hash))
     }
 }

@@ -1,19 +1,12 @@
-extension Unidoc
-{
-    @frozen public
-    enum AuthorizationHeaderError:Error
-    {
+extension Unidoc {
+    @frozen public enum AuthorizationHeaderError: Error {
         case scheme(Substring)
         case format(Substring)
     }
 }
-extension Unidoc.AuthorizationHeaderError:CustomStringConvertible
-{
-    public
-    var description:String
-    {
-        switch self
-        {
+extension Unidoc.AuthorizationHeaderError: CustomStringConvertible {
+    public var description: String {
+        switch self {
         case .scheme(let scheme):
             "Invalid authorization scheme '\(scheme)', expected 'Unidoc'"
         case .format(let format):

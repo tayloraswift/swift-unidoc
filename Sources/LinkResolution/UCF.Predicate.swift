@@ -2,25 +2,23 @@ import FNV1
 import Symbols
 import UCF
 
-extension UCF
-{
-    struct Predicate
-    {
-        let checkedBool:[(Condition, Bool)]
+extension UCF {
+    struct Predicate {
+        let checkedBool: [(Condition, Bool)]
         //  If we add more types, add them here...
 
-        let signature:SignatureFilter?
-        let legacy:LegacyFilter?
-        let hash:FNV24?
-        let seal:Selector.Seal?
+        let signature: SignatureFilter?
+        let legacy: LegacyFilter?
+        let hash: FNV24?
+        let seal: Selector.Seal?
 
-        private
-        init(checkedBool:[(Condition, Bool)],
-            signature:SignatureFilter?,
-            legacy:LegacyFilter?,
-            hash:FNV24?,
-            seal:Selector.Seal?)
-        {
+        private init(
+            checkedBool: [(Condition, Bool)],
+            signature: SignatureFilter?,
+            legacy: LegacyFilter?,
+            hash: FNV24?,
+            seal: Selector.Seal?
+        ) {
             self.checkedBool = checkedBool
             self.signature = signature
             self.legacy = legacy
@@ -29,17 +27,14 @@ extension UCF
         }
     }
 }
-extension UCF.Predicate
-{
-    init(from selector:UCF.Selector) throws
-    {
-        let conditions:[UCF.ConditionFilter]
-        let signature:UCF.SignatureFilter?
-        let legacy:UCF.LegacyFilter?
-        let hash:FNV24?
+extension UCF.Predicate {
+    init(from selector: UCF.Selector) throws {
+        let conditions: [UCF.ConditionFilter]
+        let signature: UCF.SignatureFilter?
+        let legacy: UCF.LegacyFilter?
+        let hash: FNV24?
 
-        switch selector.suffix
-        {
+        switch selector.suffix {
         case .unidoc(let disambiguator)?:
             conditions = disambiguator.conditions
             signature = disambiguator.signature
@@ -65,14 +60,11 @@ extension UCF.Predicate
             hash = nil
         }
 
-        let checked:
-        (
-            bool:[(UCF.Condition, Bool)],
-            _:Void
-        ) = try conditions.reduce(into: ([], ()))
-        {
-            switch $1.label
-            {
+        let checked: (
+            bool: [(UCF.Condition, Bool)],
+            _: Void
+        ) = try conditions.reduce(into: ([], ())) {
+            switch $1.label {
             case .actor:            $0.bool.append(try $1(default: true))
             case .associatedtype:   $0.bool.append(try $1(default: true))
             case .enum:             $0.bool.append(try $1(default: true))
@@ -99,23 +91,21 @@ extension UCF.Predicate
             }
         }
 
-        self.init(checkedBool: checked.bool,
+        self.init(
+            checkedBool: checked.bool,
             signature: signature,
             legacy: legacy,
             hash: hash,
-            seal: selector.path.seal)
+            seal: selector.path.seal
+        )
     }
 }
-extension UCF.Predicate
-{
-    static func ~= (self:Self, traits:UCF.DisambiguationTraits) -> Bool
-    {
-        if  case nil = self.seal
-        {
+extension UCF.Predicate {
+    static func ~= (self: Self, traits: UCF.DisambiguationTraits) -> Bool {
+        if  case nil = self.seal {
             //  Macros are currently the only kind of declaration that *must* be spelled with
             //  trailing parentheses.
-            switch traits.phylum
-            {
+            switch traits.phylum {
             case .actor:                    break
             case .associatedtype:           break
             case .case:                     break
@@ -132,11 +122,8 @@ extension UCF.Predicate
             case .typealias:                break
             case .var:                      break
             }
-        }
-        else
-        {
-            switch traits.phylum
-            {
+        } else {
+            switch traits.phylum {
             case .actor:                    return false
             case .associatedtype:           return false
             case .case:                     break
@@ -155,42 +142,31 @@ extension UCF.Predicate
             }
         }
 
-        if  let signature:UCF.SignatureFilter = self.signature
-        {
+        if  let signature: UCF.SignatureFilter = self.signature {
             //  If a signature filter is present, the declaration must have an autograph.
             guard
-            let autograph:UCF.Autograph = traits.autograph, signature ~= autograph
-            else
-            {
+            let autograph: UCF.Autograph = traits.autograph, signature ~= autograph else {
                 return false
             }
         }
-        if  let filter:UCF.LegacyFilter = self.legacy
-        {
-            guard filter ~= traits.phylum
-            else
-            {
+        if  let filter: UCF.LegacyFilter = self.legacy {
+            guard filter ~= traits.phylum else {
                 return false
             }
         }
-        if  let hash:FNV24 = self.hash
-        {
-            guard hash == traits.hash
-            else
-            {
+        if  let hash: FNV24 = self.hash {
+            guard hash == traits.hash else {
                 return false
             }
         }
 
-        let kinks:Phylum.Decl.Kinks = traits.kinks
-        let decl:Phylum.Decl = traits.phylum
+        let kinks: Phylum.Decl.Kinks = traits.kinks
+        let decl: Phylum.Decl = traits.phylum
 
-        for (condition, expected):(UCF.Condition, Bool) in self.checkedBool
-        {
-            let given:Bool
+        for (condition, expected): (UCF.Condition, Bool) in self.checkedBool {
+            let given: Bool
 
-            switch (decl, condition)
-            {
+            switch (decl, condition) {
             case (.actor,                   .actor):            given = true
             case (.associatedtype,          .associatedtype):   given = true
             case (.case,                    .case):             given = true
@@ -240,8 +216,7 @@ extension UCF.Predicate
             default:                                            continue
             }
 
-            if  given != expected
-            {
+            if  given != expected {
                 return false
             }
         }

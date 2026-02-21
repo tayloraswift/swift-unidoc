@@ -1,8 +1,5 @@
-extension Unidoc.ClientGuess
-{
-    @frozen public
-    enum Robot:Equatable, Hashable, Sendable
-    {
+extension Unidoc.ClientGuess {
+    @frozen public enum Robot: Equatable, Hashable, Sendable {
         /// A bot that sent no User-Agent header at all.
         case anonymous
 

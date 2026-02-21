@@ -1,16 +1,11 @@
-extension Unidoc.SourceLink
-{
-    enum Icon
-    {
+extension Unidoc.SourceLink {
+    enum Icon {
         case github
     }
 }
-extension Unidoc.SourceLink.Icon:Identifiable
-{
-    var id:String
-    {
-        switch self
-        {
+extension Unidoc.SourceLink.Icon: Identifiable {
+    var id: String {
+        switch self {
         case .github:   "github"
         }
     }

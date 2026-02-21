@@ -1,9 +1,7 @@
 import HTML
 
-extension Unidoc.TagsPage
-{
-    enum Heading
-    {
+extension Unidoc.TagsPage {
+    enum Heading {
         case prereleases
         case releases
         case tags
@@ -11,12 +9,9 @@ extension Unidoc.TagsPage
         case settingsAdmin
     }
 }
-extension Unidoc.TagsPage.Heading:Identifiable
-{
-    var id:String
-    {
-        switch self
-        {
+extension Unidoc.TagsPage.Heading: Identifiable {
+    var id: String {
+        switch self {
         case .prereleases:      "ss:prereleases"
         case .releases:         "ss:releases"
         case .tags:             "ss:tags"
@@ -25,12 +20,9 @@ extension Unidoc.TagsPage.Heading:Identifiable
         }
     }
 }
-extension Unidoc.TagsPage.Heading:HTML.OutputStreamableHeading
-{
-    var display:String
-    {
-        switch self
-        {
+extension Unidoc.TagsPage.Heading: HTML.OutputStreamableHeading {
+    var display: String {
+        switch self {
         case .prereleases:      "Prereleases"
         case .releases:         "Releases"
         case .tags:             "Package tags"

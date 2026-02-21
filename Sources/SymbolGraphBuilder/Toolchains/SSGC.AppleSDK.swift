@@ -1,10 +1,7 @@
 import ArgumentParser
 
-extension SSGC
-{
-    @frozen public
-    enum AppleSDK:CaseIterable, Equatable, Sendable
-    {
+extension SSGC {
+    @frozen public enum AppleSDK: CaseIterable, Equatable, Sendable {
         case driverKit
         case iOS
         case iPhoneSimulator
@@ -17,13 +14,9 @@ extension SSGC
         case watchSimulator
     }
 }
-extension SSGC.AppleSDK:CustomStringConvertible
-{
-    public
-    var description:String
-    {
-        switch self
-        {
+extension SSGC.AppleSDK: CustomStringConvertible {
+    public var description: String {
+        switch self {
         case .driverKit:        "DriverKit"
         case .iOS:              "iOS"
         case .iPhoneSimulator:  "iPhoneSimulator"
@@ -37,13 +30,9 @@ extension SSGC.AppleSDK:CustomStringConvertible
         }
     }
 }
-extension SSGC.AppleSDK:LosslessStringConvertible
-{
-    public
-    init?(_ description:String)
-    {
-        switch description.lowercased()
-        {
+extension SSGC.AppleSDK: LosslessStringConvertible {
+    public init?(_ description: String) {
+        switch description.lowercased() {
         case "driverkit":       self = .driverKit
         case "ios":             self = .iOS
         case "iphonesimulator": self = .iPhoneSimulator
@@ -58,16 +47,11 @@ extension SSGC.AppleSDK:LosslessStringConvertible
         }
     }
 }
-extension SSGC.AppleSDK:ExpressibleByArgument
-{
+extension SSGC.AppleSDK: ExpressibleByArgument {
 }
-extension SSGC.AppleSDK
-{
-    private
-    var stem:String
-    {
-        switch self
-        {
+extension SSGC.AppleSDK {
+    private var stem: String {
+        switch self {
         case .driverKit:        "DriverKit"
         case .iOS:              "iPhoneOS"
         case .iPhoneSimulator:  "iPhoneSimulator"
@@ -81,8 +65,7 @@ extension SSGC.AppleSDK
         }
     }
 
-    var path:String
-    {
+    var path: String {
         """
         /Applications/Xcode.app/Contents/Developer/Platforms/\
         \(self.stem).platform/Developer/SDKs/\(self.stem).sdk

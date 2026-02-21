@@ -1,13 +1,9 @@
 import PieCharts
 import UnidocRecords
 
-extension Unidoc.Stats.Decl.CodingKey:Identifiable
-{
-    public
-    var id:String
-    {
-        switch self
-        {
+extension Unidoc.Stats.Decl.CodingKey: Identifiable {
+    public var id: String {
+        switch self {
         case .functions:            "function"
         case .operators:            "operator"
         case .constructors:         "constructor"
@@ -26,13 +22,9 @@ extension Unidoc.Stats.Decl.CodingKey:Identifiable
         }
     }
 }
-extension Unidoc.Stats.Decl.CodingKey:Pie.ChartKey
-{
-    public
-    var name:String
-    {
-        switch self
-        {
+extension Unidoc.Stats.Decl.CodingKey: Pie.ChartKey {
+    public var name: String {
+        switch self {
         case .functions:            "global functions or variables"
         case .operators:            "operators"
         case .constructors:         "initializers, type members, or enum cases"

@@ -1,14 +1,8 @@
-extension Unidoc
-{
-    @frozen public
-    struct RegistrarAccessMechanisms:Equatable, Sendable
-    {
-        public
-        let githubInstallation:Int32?
+extension Unidoc {
+    @frozen public struct RegistrarAccessMechanisms: Equatable, Sendable {
+        public let githubInstallation: Int32?
 
-        @inlinable public
-        init(githubInstallation:Int32? = nil)
-        {
+        @inlinable public init(githubInstallation: Int32? = nil) {
             self.githubInstallation = githubInstallation
         }
     }

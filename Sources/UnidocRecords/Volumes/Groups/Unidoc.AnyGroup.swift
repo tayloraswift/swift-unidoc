@@ -4,11 +4,8 @@ import Signatures
 import SymbolGraphs
 import Unidoc
 
-extension Unidoc
-{
-    @frozen public
-    enum AnyGroup:Equatable, Sendable
-    {
+extension Unidoc {
+    @frozen public enum AnyGroup: Equatable, Sendable {
         case  conformer(ConformerGroup)
         case `extension`(ExtensionGroup)
         case  intrinsic(IntrinsicGroup)
@@ -16,11 +13,8 @@ extension Unidoc
     }
 }
 
-extension Unidoc.AnyGroup
-{
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.AnyGroup {
+    @frozen public enum CodingKey: String, Sendable {
         /// Always present.
         case id = "_id"
 
@@ -89,13 +83,9 @@ extension Unidoc.AnyGroup
         case realm = "R"
     }
 }
-extension Unidoc.AnyGroup:Identifiable
-{
-    @inlinable public
-    var id:Unidoc.Group
-    {
-        switch self
-        {
+extension Unidoc.AnyGroup: Identifiable {
+    @inlinable public var id: Unidoc.Group {
+        switch self {
         case .conformer(let group):     group.id
         case .extension(let group):     group.id
         case .intrinsic(let group):     group.id
@@ -103,18 +93,14 @@ extension Unidoc.AnyGroup:Identifiable
         }
     }
 }
-extension Unidoc.AnyGroup:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension Unidoc.AnyGroup: BSONDocumentEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.id] = self.id
         //  Don’t exclude the extension’s own zone, in case we ever want it
         //  to appear somewhere outside of that zone.
-        var zones:Unidoc.EditionSet = .init()
+        var zones: Unidoc.EditionSet = .init()
 
-        switch self
-        {
+        switch self {
         case .conformer(let self):
             bson[.layer] = Unidoc.GroupLayer.protocols
 
@@ -171,43 +157,55 @@ extension Unidoc.AnyGroup:BSONDocumentEncodable
         bson[.zones] = zones.ordered.isEmpty ? nil : zones.ordered
     }
 }
-extension Unidoc.AnyGroup:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        let id:ID = try bson[.id].decode()
-        switch id.plane
-        {
+extension Unidoc.AnyGroup: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        let id: ID = try bson[.id].decode()
+        switch id.plane {
         case .conformer?:
-            self = .conformer(.init(id: id,
-                culture: try bson[.culture].decode(),
-                scope: try bson[.scope].decode(),
-                unconditional: try bson[.unconditional]?.decode() ?? [],
-                conditional: try bson[.conditional]?.decode() ?? []))
+            self = .conformer(
+                .init(
+                    id: id,
+                    culture: try bson[.culture].decode(),
+                    scope: try bson[.scope].decode(),
+                    unconditional: try bson[.unconditional]?.decode() ?? [],
+                    conditional: try bson[.conditional]?.decode() ?? []
+                )
+            )
 
         case .extension?:
-            self = .extension(.init(id: id,
-                constraints: try bson[.constraints]?.decode() ?? [],
-                culture: try bson[.culture].decode(),
-                scope: try bson[.scope].decode(),
-                conformances: try bson[.conformances]?.decode() ?? [],
-                features: try bson[.features]?.decode() ?? [],
-                nested: try bson[.nested]?.decode() ?? [],
-                subforms: try bson[.subforms]?.decode() ?? [],
-                overview: try bson[.overview]?.decode(),
-                details: try bson[.details]?.decode()))
+            self = .extension(
+                .init(
+                    id: id,
+                    constraints: try bson[.constraints]?.decode() ?? [],
+                    culture: try bson[.culture].decode(),
+                    scope: try bson[.scope].decode(),
+                    conformances: try bson[.conformances]?.decode() ?? [],
+                    features: try bson[.features]?.decode() ?? [],
+                    nested: try bson[.nested]?.decode() ?? [],
+                    subforms: try bson[.subforms]?.decode() ?? [],
+                    overview: try bson[.overview]?.decode(),
+                    details: try bson[.details]?.decode()
+                )
+            )
 
         case .intrinsic?:
-            self = .intrinsic(.init(id: id,
-                culture: try bson[.culture].decode(),
-                scope: try bson[.scope].decode(),
-                items: try bson[.items]?.decode() ?? []))
+            self = .intrinsic(
+                .init(
+                    id: id,
+                    culture: try bson[.culture].decode(),
+                    scope: try bson[.scope].decode(),
+                    items: try bson[.items]?.decode() ?? []
+                )
+            )
 
         case .curator?, _:
-            self = .curator(.init(id: id,
-                scope: try bson[.scope]?.decode(),
-                items: try bson[.items]?.decode() ?? []))
+            self = .curator(
+                .init(
+                    id: id,
+                    scope: try bson[.scope]?.decode(),
+                    items: try bson[.items]?.decode() ?? []
+                )
+            )
         }
     }
 }

@@ -1,8 +1,5 @@
-extension AWS.S3
-{
-    @frozen public
-    enum StorageClass:String, Hashable, Sendable
-    {
+extension AWS.S3 {
+    @frozen public enum StorageClass: String, Hashable, Sendable {
         /// Deprecated, and actually costs more than ``standard``. There is never a reason
         /// to use this.
         case reducedRedundancy = "REDUCED_REDUNDANCY"
@@ -22,8 +19,6 @@ extension AWS.S3
         case snow = "SNOW"
     }
 }
-extension AWS.S3.StorageClass:CustomStringConvertible
-{
-    @inlinable public
-    var description:String { self.rawValue }
+extension AWS.S3.StorageClass: CustomStringConvertible {
+    @inlinable public var description: String { self.rawValue }
 }

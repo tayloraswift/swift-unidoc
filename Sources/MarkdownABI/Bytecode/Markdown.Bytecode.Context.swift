@@ -1,9 +1,6 @@
-extension Markdown.Bytecode
-{
+extension Markdown.Bytecode {
     /// An instruction that pushes a container element onto the document stack.
-    @frozen public
-    enum Context:UInt8, RawRepresentable, Equatable, Hashable, Sendable
-    {
+    @frozen public enum Context: UInt8, RawRepresentable, Equatable, Hashable, Sendable {
         //  IMPORTANT! The raw values of these cases are part of the ABI!
 
         case transparent = 0x00
@@ -167,13 +164,9 @@ extension Markdown.Bytecode
         case warning
     }
 }
-extension Markdown.Bytecode.Context
-{
-    @inlinable public static
-    func diff(_ type:Markdown.DiffType) -> Self
-    {
-        switch type
-        {
+extension Markdown.Bytecode.Context {
+    @inlinable public static func diff(_ type: Markdown.DiffType) -> Self {
+        switch type {
         case .delete:   .del
         case .insert:   .ins
         case .update:   .mark
@@ -182,11 +175,8 @@ extension Markdown.Bytecode.Context
     /// Returns a heading context, clamping the given heading `level`. If
     /// `level` is less than 1, this function returns ``h1``. If `level`
     /// is greater than 6, this function returns ``h6``.
-    @inlinable public static
-    func h(_ level:Int) -> Self
-    {
-        switch level
-        {
+    @inlinable public static func h(_ level: Int) -> Self {
+        switch level {
         case ...1:      .h1
         case    2:      .h2
         case    3:      .h3

@@ -1,9 +1,7 @@
 import Symbols
 
-extension Unidoc.RenderFormat
-{
-    var availablePlatforms:[Symbol.Triple]
-    {
+extension Unidoc.RenderFormat {
+    var availablePlatforms: [Symbol.Triple] {
         self.preview ? [
             .aarch64_unknown_linux_gnu,
             .x86_64_unknown_linux_gnu,
@@ -15,8 +13,7 @@ extension Unidoc.RenderFormat
         ]
     }
 
-    var availableVersions:[String]
-    {
+    var availableVersions: [String] {
         ["6.2.3"]
     }
 }

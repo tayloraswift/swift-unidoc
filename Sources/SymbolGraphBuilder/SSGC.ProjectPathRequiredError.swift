@@ -1,6 +1,4 @@
-extension SSGC
-{
-    struct ProjectPathRequiredError:Error
-    {
+extension SSGC {
+    struct ProjectPathRequiredError: Error {
     }
 }

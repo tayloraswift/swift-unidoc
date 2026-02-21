@@ -1,102 +1,78 @@
 import JSON
 
-extension GitHub
-{
-    @frozen public
-    struct Repo:Identifiable, Equatable, Sendable
-    {
-        public
-        let id:Int32
+extension GitHub {
+    @frozen public struct Repo: Identifiable, Equatable, Sendable {
+        public let id: Int32
 
-        public
-        let owner:Owner
-        public
-        let name:String
-        public
-        let node:Node
+        public let owner: Owner
+        public let name: String
+        public let node: Node
 
         /// The repo’s license, if GitHub was able to detect it.
-        public
-        var license:License?
+        public var license: License?
         /// The repo’s topic tags.
-        public
-        var topics:[String]
+        public var topics: [String]
         /// The name of the repo’s default branch.
-        public
-        var master:String?
+        public var master: String?
 
         /// The number of subscribers this repo has. Depending on the endpoint, this field
         /// might be missing. For example, it is missing from the webhook repo events.
-        public
-        var watchers:Int?
+        public var watchers: Int?
         /// The number of forks this repo has.
-        public
-        var forks:Int
+        public var forks: Int
         /// The number of stargazers this repo has.
-        public
-        var stars:Int
+        public var stars: Int
         /// The approximate size of the repo, in kilobytes.
-        public
-        var size:Int
+        public var size: Int
 
         /// Indicates if the repo is archived.
-        public
-        var archived:Bool
+        public var archived: Bool
         /// Indicates if the repo is disabled.
-        public
-        var disabled:Bool
+        public var disabled: Bool
         /// Indicates if the repo is a fork.
-        public
-        var fork:Bool
+        public var fork: Bool
 
         /// The repo’s visibility on GitHub.
-        public
-        var visibility:RepoVisibility
+        public var visibility: RepoVisibility
         /// The repo’s dominant language, if GitHub was able to detect one.
-        public
-        var language:String?
+        public var language: String?
         /// The repo’s homepage URL, if set.
-        public
-        var homepage:String?
+        public var homepage: String?
         /// The repo’s description, if set.
-        public
-        var about:String?
+        public var about: String?
 
         /// When the repository was first created.
-        public
-        var created:String
+        public var created: String
         /// When the repository itself (as opposed to its content) was last updated.
         /// This is usually different from ``pushed``.
-        public
-        var updated:String
+        public var updated: String
         /// When the repository content (as opposed to its metadata) was last pushed to.
         /// This is usually different from ``updated``.
-        public
-        var pushed:String
+        public var pushed: String
 
-        @inlinable public
-        init(id:Int32,
-            owner:Owner,
-            name:String,
-            node:Node,
-            license:License? = nil,
-            topics:[String] = [],
-            master:String?,
-            watchers:Int?,
-            forks:Int,
-            stars:Int,
-            size:Int,
-            archived:Bool,
-            disabled:Bool,
-            fork:Bool,
-            visibility:RepoVisibility,
-            language:String? = nil,
-            homepage:String? = nil,
-            about:String? = nil,
-            created:String,
-            updated:String,
-            pushed:String)
-        {
+        @inlinable public init(
+            id: Int32,
+            owner: Owner,
+            name: String,
+            node: Node,
+            license: License? = nil,
+            topics: [String] = [],
+            master: String?,
+            watchers: Int?,
+            forks: Int,
+            stars: Int,
+            size: Int,
+            archived: Bool,
+            disabled: Bool,
+            fork: Bool,
+            visibility: RepoVisibility,
+            language: String? = nil,
+            homepage: String? = nil,
+            about: String? = nil,
+            created: String,
+            updated: String,
+            pushed: String
+        ) {
             self.id = id
             self.owner = owner
             self.name = name
@@ -121,11 +97,8 @@ extension GitHub
         }
     }
 }
-extension GitHub.Repo:JSONObjectDecodable
-{
-    public
-    enum CodingKey:String, Sendable
-    {
+extension GitHub.Repo: JSONObjectDecodable {
+    public enum CodingKey: String, Sendable {
         case id
         case node_id
 
@@ -151,13 +124,12 @@ extension GitHub.Repo:JSONObjectDecodable
         case pushed_at
     }
 
-    public
-    init(json:JSON.ObjectDecoder<CodingKey>) throws
-    {
+    public init(json: JSON.ObjectDecoder<CodingKey>) throws {
         //  Note: GitHub often returns explicit `null` values for fields that are missing.
         //  This means we need to be careful when mapping optional fields, particularly through
         //  the use `as:`.
-        self.init(id: try json[.id].decode(),
+        self.init(
+            id: try json[.id].decode(),
             owner: try json[.owner].decode(),
             name: try json[.name].decode(),
             node: try json[.node_id].decode(),
@@ -177,15 +149,14 @@ extension GitHub.Repo:JSONObjectDecodable
             about: try json[.description]?.decode(),
             created: try json[.created_at].decode(),
             updated: try json[.updated_at].decode(),
-            pushed: try json[.pushed_at].decode())
+            pushed: try json[.pushed_at].decode()
+        )
 
         //  String field normalization.
-        if  case true? = self.homepage?.isEmpty
-        {
+        if  case true? = self.homepage?.isEmpty {
             self.homepage = nil
         }
-        if  case true? = self.about?.isEmpty
-        {
+        if  case true? = self.about?.isEmpty {
             self.about = nil
         }
     }

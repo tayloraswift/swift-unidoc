@@ -1,7 +1,4 @@
-extension AWS
-{
-    @frozen public
-    enum S3
-    {
+extension AWS {
+    @frozen public enum S3 {
     }
 }

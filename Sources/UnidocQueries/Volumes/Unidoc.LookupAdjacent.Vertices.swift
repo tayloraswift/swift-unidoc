@@ -3,21 +3,19 @@ import MongoQL
 import Signatures
 import UnidocRecords
 
-extension Unidoc.LookupAdjacent
-{
+extension Unidoc.LookupAdjacent {
     /// A type that binds a ``Unidoc.AnyVertex`` and knows how to extract its adjacent vertices.
-    struct Vertices
-    {
-        private
-        let layer:Unidoc.GroupLayer?
+    struct Vertices {
+        private let layer: Unidoc.GroupLayer?
 
-        let groups:Mongo.List<Unidoc.AnyGroup, Mongo.AnyKeyPath>
-        let vertex:Mongo.AnyKeyPath
+        let groups: Mongo.List<Unidoc.AnyGroup, Mongo.AnyKeyPath>
+        let vertex: Mongo.AnyKeyPath
 
-        init(layer:Unidoc.GroupLayer?,
-            groups:Mongo.List<Unidoc.AnyGroup, Mongo.AnyKeyPath>,
-            vertex:Mongo.AnyKeyPath)
-        {
+        init(
+            layer: Unidoc.GroupLayer?,
+            groups: Mongo.List<Unidoc.AnyGroup, Mongo.AnyKeyPath>,
+            vertex: Mongo.AnyKeyPath
+        ) {
             self.layer = layer
 
             self.groups = groups
@@ -25,24 +23,18 @@ extension Unidoc.LookupAdjacent
         }
     }
 }
-extension Unidoc.LookupAdjacent.Vertices
-{
-    private
-    var predicate:Unidoc.GroupLayerPredicate { .init(self.layer) }
+extension Unidoc.LookupAdjacent.Vertices {
+    private var predicate: Unidoc.GroupLayerPredicate { .init(self.layer) }
 }
-extension Unidoc.LookupAdjacent.Vertices
-{
-    static func += (list:inout Mongo.SetListEncoder, self:Self)
-    {
+extension Unidoc.LookupAdjacent.Vertices {
+    static func += (list: inout Mongo.SetListEncoder, self: Self) {
         //  Extract scalars adjacent to the list of vertex groups.
-        list
-        {
+        list {
             $0[.reduce] = self.groups.flatMap(self.predicate.adjacent(to:))
         }
 
         //  Extract scalars adjacent to the current vertex.
-        list
-        {
+        list {
             $0[+] = self.vertex / Unidoc.AnyVertex[.culture]
             $0[+] = self.vertex / Unidoc.AnyVertex[.colony]
             $0[+] = self.vertex / Unidoc.AnyVertex[.extendee]
@@ -51,28 +43,23 @@ extension Unidoc.LookupAdjacent.Vertices
             $0[+] = self.vertex / Unidoc.AnyVertex[.file]
         }
 
-        list
-        {
-            let constraints:Mongo.List<GenericConstraint<Unidoc.Scalar>, Mongo.AnyKeyPath> =
-                .init(in: self.vertex / Unidoc.AnyVertex[.signature_generics_constraints])
+        list {
+            let constraints: Mongo.List<GenericConstraint<Unidoc.Scalar>, Mongo.AnyKeyPath> =
+            .init(in: self.vertex / Unidoc.AnyVertex[.signature_generics_constraints])
 
             $0[.map] = constraints.map { $0[.nominal] }
         }
 
-        let arrays:[Unidoc.AnyVertex.CodingKey]
-        defer
-        {
-            for array:Unidoc.AnyVertex.CodingKey in arrays
-            {
-                list
-                {
+        let arrays: [Unidoc.AnyVertex.CodingKey]
+        defer {
+            for array: Unidoc.AnyVertex.CodingKey in arrays {
+                list {
                     $0[.coalesce] = (self.vertex / Unidoc.AnyVertex[array], [] as [Never])
                 }
             }
         }
 
-        switch self.layer
-        {
+        switch self.layer {
         case nil:
             arrays = [.signature_expanded_scalars, .scope, .constituents, .superforms]
 
@@ -82,12 +69,11 @@ extension Unidoc.LookupAdjacent.Vertices
         }
 
         //  Only needed for the default layer.
-        for passage:Unidoc.AnyVertex.CodingKey in [.overview, .details]
-        {
-            list
-            {
-                let outlines:Mongo.List<Unidoc.Outline, Mongo.AnyKeyPath> = .init(
-                    in: self.vertex / Unidoc.AnyVertex[passage] / Unidoc.Passage[.outlines])
+        for passage: Unidoc.AnyVertex.CodingKey in [.overview, .details] {
+            list {
+                let outlines: Mongo.List<Unidoc.Outline, Mongo.AnyKeyPath> = .init(
+                    in: self.vertex / Unidoc.AnyVertex[passage] / Unidoc.Passage[.outlines]
+                )
 
                 $0[.reduce] = outlines.flatMap(\.scalars)
             }

@@ -3,80 +3,61 @@ import LexicalPaths
 import SymbolGraphs
 import Unidoc
 
-extension Unidoc.Stats
-{
-    @frozen public
-    struct Decl:Equatable, Sendable
-    {
+extension Unidoc.Stats {
+    @frozen public struct Decl: Equatable, Sendable {
         /// Typealiases.
-        public
-        var typealiases:Int
+        public var typealiases: Int
         /// Structs and enums.
-        public
-        var structures:Int
+        public var structures: Int
         /// Protocols.
-        public
-        var protocols:Int
+        public var protocols: Int
         /// Classes, excluding actors.
-        public
-        var classes:Int
+        public var classes: Int
         /// Actors.
-        public
-        var actors:Int
+        public var actors: Int
 
         /// Protocol requirements, including associated types.
-        public
-        var requirements:Int
+        public var requirements: Int
         /// Default implementations.
-        public
-        var witnesses:Int
+        public var witnesses: Int
 
         /// Initializers, static/class funcs, static/class subscripts, static/class vars, and
         /// enum cases. Does not include requirements or default implementations.
-        public
-        var constructors:Int
+        public var constructors: Int
         /// Instance subscripts. Does not include requirements or default implementations.
-        public
-        var subscripts:Int
+        public var subscripts: Int
         /// Instance functions named `callAsFunction`. Does not include requirements or default
         /// implementations.
-        public
-        var functors:Int
+        public var functors: Int
         /// Deinitializers, instance funcs and instance vars, unless they are named
         /// `callAsFunction`. Does not include requirements or default implementations.
-        public
-        var methods:Int
+        public var methods: Int
 
         /// Operators.
-        public
-        var operators:Int
+        public var operators: Int
         /// Global funcs and vars.
-        public
-        var functions:Int
+        public var functions: Int
 
-        public
-        var freestandingMacros:Int
-        public
-        var attachedMacros:Int
+        public var freestandingMacros: Int
+        public var attachedMacros: Int
 
-        @inlinable public
-        init(
-            typealiases:Int,
-            structures:Int,
-            protocols:Int,
-            classes:Int,
-            actors:Int,
-            requirements:Int,
-            witnesses:Int,
-            constructors:Int,
-            subscripts:Int,
-            functors:Int,
-            methods:Int,
-            operators:Int,
-            functions:Int,
-            freestandingMacros:Int,
-            attachedMacros:Int)
-        {
+        @inlinable public init(
+            typealiases: Int,
+            structures: Int,
+            protocols: Int,
+            classes: Int,
+            actors: Int,
+            requirements: Int,
+            witnesses: Int,
+            constructors: Int,
+            subscripts: Int,
+            functors: Int,
+            methods: Int,
+            operators: Int,
+            functions: Int,
+            freestandingMacros: Int,
+            attachedMacros: Int
+        ) {
             self.typealiases = typealiases
             self.structures = structures
             self.protocols = protocols
@@ -95,18 +76,13 @@ extension Unidoc.Stats
         }
     }
 }
-extension Unidoc.Stats.Decl
-{
-    @inlinable public static
-    func + (self:consuming Self, other:Self) -> Self
-    {
+extension Unidoc.Stats.Decl {
+    @inlinable public static func + (self: consuming Self, other: Self) -> Self {
         self += other
         return self
     }
 
-    @inlinable public static
-    func += (self:inout Self, other:Self)
-    {
+    @inlinable public static func += (self: inout Self, other: Self) {
         self.typealiases += other.typealiases
         self.structures += other.structures
         self.protocols += other.protocols
@@ -124,11 +100,8 @@ extension Unidoc.Stats.Decl
         self.attachedMacros += other.attachedMacros
     }
 }
-extension Unidoc.Stats.Decl:ExpressibleByDictionaryLiteral
-{
-    @inlinable public
-    init(dictionaryLiteral elements:(CodingKey, Never)...)
-    {
+extension Unidoc.Stats.Decl: ExpressibleByDictionaryLiteral {
+    @inlinable public init(dictionaryLiteral elements: (CodingKey, Never)...) {
         self.init(
             typealiases: 0,
             structures: 0,
@@ -144,16 +117,14 @@ extension Unidoc.Stats.Decl:ExpressibleByDictionaryLiteral
             operators: 0,
             functions: 0,
             freestandingMacros: 0,
-            attachedMacros: 0)
+            attachedMacros: 0
+        )
     }
 }
-extension Unidoc.Stats.Decl:Unidoc.StatsCounters,
+extension Unidoc.Stats.Decl: Unidoc.StatsCounters,
     BSONDocumentEncodable,
-    BSONKeyspaceDecodable
-{
-    @frozen public
-    enum CodingKey:String, CaseIterable, BSON.Keyspace
-    {
+    BSONKeyspaceDecodable {
+    @frozen public enum CodingKey: String, CaseIterable, BSON.Keyspace {
         case typealiases = "T"
         case structures = "V"
         case protocols = "P"
@@ -171,11 +142,8 @@ extension Unidoc.Stats.Decl:Unidoc.StatsCounters,
         case attachedMacros = "Z"
     }
 
-    @inlinable public static
-    subscript(key:CodingKey) -> WritableKeyPath<Self, Int>
-    {
-        switch key
-        {
+    @inlinable public static subscript(key: CodingKey) -> WritableKeyPath<Self, Int> {
+        switch key {
         case .typealiases:          \.typealiases
         case .structures:           \.structures
         case .protocols:            \.protocols

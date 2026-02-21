@@ -1,11 +1,8 @@
 import MarkdownABI
 import MarkdownAST
 
-extension Markdown
-{
-    @frozen public
-    enum KeywordPrefix:String, Equatable, Hashable, Sendable
-    {
+extension Markdown {
+    @frozen public enum KeywordPrefix: String, Equatable, Hashable, Sendable {
         case attention
         case author
         case authors
@@ -34,12 +31,11 @@ extension Markdown
         case warning
     }
 }
-extension Markdown.KeywordPrefix
-{
-    func callAsFunction(_ discussion:__owned [Markdown.BlockElement]) -> Markdown.BlockElement
-    {
-        switch self
-        {
+extension Markdown.KeywordPrefix {
+    func callAsFunction(
+        _ discussion: __owned [Markdown.BlockElement]
+    ) -> Markdown.BlockElement {
+        switch self {
         case .attention:        Markdown.BlockAside.Attention.init(discussion)
         case .author:           Markdown.BlockAside.Author.init(discussion)
         case .authors:          Markdown.BlockAside.Authors.init(discussion)
@@ -69,48 +65,35 @@ extension Markdown.KeywordPrefix
         }
     }
 }
-extension Markdown.KeywordPrefix:Markdown.SemanticPrefix
-{
+extension Markdown.KeywordPrefix: Markdown.SemanticPrefix {
     /// If a keyword pattern uses formatting, the formatting must apply
     /// to the entire pattern.
-    static
-    var radius:Int { 2 }
+    static var radius: Int { 2 }
 
-    init?(from elements:__shared [Markdown.InlineElement])
-    {
-        if  elements.count == 1
-        {
+    init?(from elements: __shared [Markdown.InlineElement]) {
+        if  elements.count == 1 {
             self.init(elements[0].text)
-        }
-        else
-        {
+        } else {
             return nil
         }
     }
 
-    private
-    init?(_ description:String)
-    {
-        var lowercased:String = ""
-            lowercased.reserveCapacity(description.utf8.count)
-        var words:Int = 0
-        for character:Character in description
-        {
-            if      character.isLetter
-            {
+    private init?(_ description: String) {
+        var lowercased: String = ""
+        lowercased.reserveCapacity(description.utf8.count)
+        var words: Int = 0
+        for character: Character in description {
+            if      character.isLetter {
                 lowercased.append(character.lowercased())
             }
             //  Limit to 3 words, because the ``nonmutating`` keyphrase
             //  can be written as 'Non-mutating variant'.
             else if character == " " ||
-                    character == "-",
-                    words < 3
-            {
+                character == "-",
+                words < 3 {
                 words += 1
                 continue
-            }
-            else
-            {
+            } else {
                 return nil
             }
         }
