@@ -1,10 +1,7 @@
 import SemanticVersions
 
-extension Availability
-{
-    @frozen public
-    enum VersionRange:Equatable, Hashable, Sendable
-    {
+extension Availability {
+    @frozen public enum VersionRange: Equatable, Hashable, Sendable {
         case since(NumericVersion?)
     }
 }

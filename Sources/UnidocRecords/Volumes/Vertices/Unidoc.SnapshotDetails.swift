@@ -3,52 +3,41 @@ import SemanticVersions
 import SHA1
 import SymbolGraphs
 
-extension Unidoc
-{
-    @frozen public
-    struct SnapshotDetails:Equatable, Sendable
-    {
+extension Unidoc {
+    @frozen public struct SnapshotDetails: Equatable, Sendable {
         /// The ABI version of the symbol graph this volume was linked from.
-        public
-        var abi:PatchVersion
+        public var abi: PatchVersion
 
         /// The swift tools version from the symbol graph metadata.
-        public
-        var latestManifest:PatchVersion?
-        public
-        var extraManifests:[MinorVersion]
+        public var latestManifest: PatchVersion?
+        public var extraManifests: [MinorVersion]
         /// Platform requirements read from the symbol graph, which in turn got them from a
         /// `Package.swift` manifest.
-        public
-        var requirements:[SymbolGraphMetadata.PlatformRequirement]
+        public var requirements: [SymbolGraphMetadata.PlatformRequirement]
 
         /// TODO: we get this from the Volume Metadata instead.
         /// The git commit hash from the symbol graph metadata.
-        public
-        var commit:SHA1?
+        public var commit: SHA1?
 
         //  TODO: deoptionalize
-        public
-        var symbolsLinkable:Int?
-        public
-        var symbolsLinked:Int?
+        public var symbolsLinkable: Int?
+        public var symbolsLinked: Int?
 
         /// Top-level linker statistics.
-        public
-        var census:Unidoc.Census
+        public var census: Unidoc.Census
 
         //  We don’t currently store linker errors, but if we did, they would go here.
 
-        @inlinable public
-        init(abi:PatchVersion,
-            latestManifest:PatchVersion?,
-            extraManifests:[MinorVersion],
-            requirements:[SymbolGraphMetadata.PlatformRequirement],
-            commit:SHA1?,
-            symbolsLinkable:Int? = nil,
-            symbolsLinked:Int? = nil,
-            census:Unidoc.Census = .init())
-        {
+        @inlinable public init(
+            abi: PatchVersion,
+            latestManifest: PatchVersion?,
+            extraManifests: [MinorVersion],
+            requirements: [SymbolGraphMetadata.PlatformRequirement],
+            commit: SHA1?,
+            symbolsLinkable: Int? = nil,
+            symbolsLinked: Int? = nil,
+            census: Unidoc.Census = .init()
+        ) {
             self.abi = abi
             self.latestManifest = latestManifest
             self.extraManifests = extraManifests
@@ -60,11 +49,8 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.SnapshotDetails
-{
-    public
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.SnapshotDetails {
+    public enum CodingKey: String, Sendable {
         case abi = "B"
         case latestManifest = "S"
         case extraManifests = "E"
@@ -75,11 +61,8 @@ extension Unidoc.SnapshotDetails
         case census = "C"
     }
 }
-extension Unidoc.SnapshotDetails:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension Unidoc.SnapshotDetails: BSONDocumentEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.abi] = self.abi
         bson[.latestManifest] = self.latestManifest
         bson[.extraManifests] = self.extraManifests.isEmpty ? nil : self.extraManifests
@@ -90,18 +73,17 @@ extension Unidoc.SnapshotDetails:BSONDocumentEncodable
         bson[.census] = self.census
     }
 }
-extension Unidoc.SnapshotDetails:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(abi: try bson[.abi].decode(),
+extension Unidoc.SnapshotDetails: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        self.init(
+            abi: try bson[.abi].decode(),
             latestManifest: try bson[.latestManifest]?.decode(),
             extraManifests: try bson[.extraManifests]?.decode() ?? [],
             requirements: try bson[.requirements]?.decode() ?? [],
             commit: try bson[.commit]?.decode(),
             symbolsLinkable: try bson[.symbolsLinkable]?.decode(),
             symbolsLinked: try bson[.symbolsLinked]?.decode(),
-            census: try bson[.census].decode())
+            census: try bson[.census].decode()
+        )
     }
 }

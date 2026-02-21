@@ -1,17 +1,12 @@
-extension Markdown.BlockCodeFragment
-{
-    enum ReferenceError:Error
-    {
-        case snippet(undefined:String?, available:[String])
-        case slice(undefined:String, available:[String])
+extension Markdown.BlockCodeFragment {
+    enum ReferenceError: Error {
+        case snippet(undefined: String?, available: [String])
+        case slice(undefined: String, available: [String])
     }
 }
-extension Markdown.BlockCodeFragment.ReferenceError:CustomStringConvertible
-{
-    var description:String
-    {
-        switch self
-        {
+extension Markdown.BlockCodeFragment.ReferenceError: CustomStringConvertible {
+    var description: String {
+        switch self {
         case .snippet(nil, let available):
             """
             no snippet 'id' or 'path' is defined, available snippets are: \

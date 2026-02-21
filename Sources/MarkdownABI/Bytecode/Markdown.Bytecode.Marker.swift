@@ -1,11 +1,8 @@
-extension Markdown.Bytecode
-{
+extension Markdown.Bytecode {
     /// Markers inhabit the unassigned codepoints of the UTF-8 encoding.
     ///
     /// https://en.wikipedia.org/wiki/UTF-8
-    @frozen public
-    enum Marker:UInt8, Equatable, Hashable, Sendable
-    {
+    @frozen public enum Marker: UInt8, Equatable, Hashable, Sendable {
         /// A byte followed by an element code, arbitrary content, and
         /// eventually a complementary ``pop`` byte. Conceptually this
         /// opens a new markdown context on the stack. Pushes and pops

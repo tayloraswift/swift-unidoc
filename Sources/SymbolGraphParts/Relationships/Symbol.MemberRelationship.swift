@@ -1,36 +1,30 @@
 import Symbols
 
-extension Symbol
-{
-    @frozen public
-    struct MemberRelationship:SymbolRelationship, Equatable, Hashable, Sendable
-    {
-        public
-        let source:Symbol.Decl
-        public
-        let target:Symbol.USR
-        public
-        let origin:Symbol.Decl?
+extension Symbol {
+    @frozen public struct MemberRelationship: SymbolRelationship,
+        Equatable,
+        Hashable,
+        Sendable {
+        public let source: Symbol.Decl
+        public let target: Symbol.USR
+        public let origin: Symbol.Decl?
 
-        @inlinable public
-        init(_ source:Symbol.Decl, in target:Symbol.USR, origin:Symbol.Decl? = nil)
-        {
+        @inlinable public init(
+            _ source: Symbol.Decl,
+            in target: Symbol.USR,
+            origin: Symbol.Decl? = nil
+        ) {
             self.source = source
             self.target = target
             self.origin = origin
         }
     }
 }
-extension Symbol.MemberRelationship:NestingRelationship
-{
-    @inlinable public
-    var kinks:Phylum.Decl.Kinks { [] }
+extension Symbol.MemberRelationship: NestingRelationship {
+    @inlinable public var kinks: Phylum.Decl.Kinks { [] }
 
-    public
-    func validate(source phylum:Phylum.Decl) -> Bool
-    {
-        switch phylum
-        {
+    public func validate(source phylum: Phylum.Decl) -> Bool {
+        switch phylum {
         case .actor:                true
         case .associatedtype:       true
         case .case:                 true
@@ -51,11 +45,8 @@ extension Symbol.MemberRelationship:NestingRelationship
         }
     }
 }
-extension Symbol.MemberRelationship:CustomStringConvertible
-{
-    public
-    var description:String
-    {
+extension Symbol.MemberRelationship: CustomStringConvertible {
+    public var description: String {
         """
         /\(self.source) MEMBER OF \(self.target) (\(self.origin == nil ? 0 : 1) origin(s))/
         """

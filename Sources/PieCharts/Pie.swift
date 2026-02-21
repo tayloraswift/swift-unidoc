@@ -1,4 +1,2 @@
-@frozen public
-enum Pie
-{
+@frozen public enum Pie {
 }

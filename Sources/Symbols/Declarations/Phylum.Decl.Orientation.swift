@@ -1,8 +1,5 @@
-extension Phylum.Decl
-{
-    @frozen public
-    enum Orientation:Equatable, Hashable, Comparable, Sendable
-    {
+extension Phylum.Decl {
+    @frozen public enum Orientation: Equatable, Hashable, Comparable, Sendable {
         /// A declaration with a traditionally lowercased name, like `func foo`,
         /// a name that doesn’t fit into a lettercasing category, like `func +`,
         /// or no name at all, like `subscript(_:)`.

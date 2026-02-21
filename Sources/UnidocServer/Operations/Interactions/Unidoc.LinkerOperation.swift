@@ -5,31 +5,27 @@ import Unidoc
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc
-{
+extension Unidoc {
     /// Queues one or more editions for uplinking. The uplinking process itself is asynchronous.
-    struct LinkerOperation:Sendable
-    {
-        let update:Update
-        let scope:Edition?
-        let back:String?
+    struct LinkerOperation: Sendable {
+        let update: Update
+        let scope: Edition?
+        let back: String?
 
-        init(update:Update, scope:Unidoc.Edition?, back:String? = nil)
-        {
+        init(update: Update, scope: Unidoc.Edition?, back: String? = nil) {
             self.update = update
             self.scope = scope
             self.back = back
         }
     }
 }
-extension Unidoc.LinkerOperation:Unidoc.AdministrativeOperation
-{
-    func load(from server:Unidoc.Server,
-        db:Unidoc.DB,
-        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
-    {
-        switch (self.scope, self.update)
-        {
+extension Unidoc.LinkerOperation: Unidoc.AdministrativeOperation {
+    func load(
+        from server: Unidoc.Server,
+        db: Unidoc.DB,
+        as _: Unidoc.RenderFormat
+    ) async throws -> HTTP.ServerResponse? {
+        switch (self.scope, self.update) {
         case (nil, .action(nil)):
             return nil
 

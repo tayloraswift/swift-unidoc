@@ -2,8 +2,7 @@
 
 import IndexStoreDB
 
-extension IndexStoreDB
-{
+extension IndexStoreDB {
     typealias Symbol_ = Symbol
     typealias SymbolOccurrence_ = SymbolOccurrence
 }

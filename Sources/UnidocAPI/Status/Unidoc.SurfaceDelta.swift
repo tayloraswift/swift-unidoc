@@ -1,8 +1,5 @@
-extension Unidoc
-{
-    @frozen public
-    enum SurfaceDelta:Equatable, Sendable
-    {
+extension Unidoc {
+    @frozen public enum SurfaceDelta: Equatable, Sendable {
         /// The uplink affected a historical version.
         case ignoredHistorical
         /// The uplink affected a private package.

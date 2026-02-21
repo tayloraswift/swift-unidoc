@@ -1,9 +1,7 @@
 import HTML
 
-extension Unidoc.RefsPage
-{
-    enum Heading
-    {
+extension Unidoc.RefsPage {
+    enum Heading {
         case repo
         case tags
         case branches
@@ -16,12 +14,9 @@ extension Unidoc.RefsPage
         case importRefs
     }
 }
-extension Unidoc.RefsPage.Heading:Identifiable
-{
-    var id:String
-    {
-        switch self
-        {
+extension Unidoc.RefsPage.Heading: Identifiable {
+    var id: String {
+        switch self {
         case .repo:                 "ss:repo"
         case .tags:                 "ss:tags"
         case .branches:             "ss:branches"
@@ -35,12 +30,9 @@ extension Unidoc.RefsPage.Heading:Identifiable
         }
     }
 }
-extension Unidoc.RefsPage.Heading:HTML.OutputStreamableHeading
-{
-    var display:String
-    {
-        switch self
-        {
+extension Unidoc.RefsPage.Heading: HTML.OutputStreamableHeading {
+    var display: String {
+        switch self {
         case .repo:                 "Package repository"
         case .tags:                 "Package tags"
         case .branches:             "Package branches"

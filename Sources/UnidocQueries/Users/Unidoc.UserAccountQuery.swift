@@ -3,11 +3,8 @@ import MongoDB
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc
-{
-    @frozen public
-    enum UserAccountQuery:Sendable
-    {
+extension Unidoc {
+    @frozen public enum UserAccountQuery: Sendable {
         /// Returns the user account information for the currently-authenticated user, checking
         /// the session cookie.
         case current(UserSession.Web)
@@ -17,25 +14,16 @@ extension Unidoc
         case another(Account)
     }
 }
-extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
-{
-    public
-    typealias Iteration = Mongo.Single<Output>
+extension Unidoc.UserAccountQuery: Mongo.PipelineQuery {
+    public typealias Iteration = Mongo.Single<Output>
 
-    @inlinable public
-    var collation:Mongo.Collation { .simple }
-    @inlinable public
-    var from:Mongo.Collection? { Unidoc.DB.Users.name }
-    @inlinable public
-    var hint:Mongo.CollectionIndex? { nil }
+    @inlinable public var collation: Mongo.Collation { .simple }
+    @inlinable public var from: Mongo.Collection? { Unidoc.DB.Users.name }
+    @inlinable public var hint: Mongo.CollectionIndex? { nil }
 
-    public
-    func build(pipeline:inout Mongo.PipelineEncoder)
-    {
-        pipeline[stage: .match]
-        {
-            switch self
-            {
+    public func build(pipeline: inout Mongo.PipelineEncoder) {
+        pipeline[stage: .match] {
+            switch self {
             case .current(let session):
                 $0[Unidoc.User[.id]] = session.id
                 $0[Unidoc.User[.cookie]] = session.cookie
@@ -45,14 +33,11 @@ extension Unidoc.UserAccountQuery:Mongo.PipelineQuery
             }
         }
 
-        pipeline[stage: .facet, using: Output.CodingKey.self]
-        {
+        pipeline[stage: .facet, using: Output.CodingKey.self] {
             $0[.user]
-            $0[.organizations]
-            {
+            $0[.organizations] {
                 $0[stage: .unwind] = Unidoc.User[.access]
-                $0[stage: .lookup]
-                {
+                $0[stage: .lookup] {
                     $0[.from] = Unidoc.DB.Users.name
                     $0[.localField] = Unidoc.User[.access]
                     $0[.foreignField] = Unidoc.User[.id]

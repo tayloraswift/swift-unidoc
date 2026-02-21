@@ -1,6 +1,5 @@
 import BSON
 import Symbols
 
-extension Phylum.SwiftFlags:BSONDecodable, BSONEncodable
-{
+extension Phylum.SwiftFlags: BSONDecodable, BSONEncodable {
 }

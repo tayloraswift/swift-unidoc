@@ -1,8 +1,5 @@
-extension Phylum
-{
-    @frozen public
-    enum Decl:Hashable, Equatable, Sendable
-    {
+extension Phylum {
+    @frozen public enum Decl: Hashable, Equatable, Sendable {
         case  actor
         case `associatedtype`
         case `case`
@@ -20,13 +17,9 @@ extension Phylum
         case `var`(Objectivity?)
     }
 }
-extension Phylum.Decl
-{
-    @inlinable public
-    var objectivity:Objectivity?
-    {
-        switch self
-        {
+extension Phylum.Decl {
+    @inlinable public var objectivity: Objectivity? {
+        switch self {
         case .actor:                    nil
         case .associatedtype:           nil
         case .case:                     .static
@@ -45,11 +38,8 @@ extension Phylum.Decl
         }
     }
 
-    @inlinable public
-    var isOverloadable:Bool
-    {
-        switch self
-        {
+    @inlinable public var isOverloadable: Bool {
+        switch self {
         case .actor:            false
         case .associatedtype:   false
         //  No, `case` is not overloadable, even though it is function-like. It would never make
@@ -73,11 +63,8 @@ extension Phylum.Decl
         }
     }
     /// Indicates if the declaration is typelike. This is not the same as ``orientation``!
-    @inlinable public
-    var isTypelike:Bool
-    {
-        switch self
-        {
+    @inlinable public var isTypelike: Bool {
+        switch self {
         case .actor:            true
         case .associatedtype:   true
         case .case:             false
@@ -97,11 +84,8 @@ extension Phylum.Decl
     }
 
     /// The declaration’s orientation. This is not the same as ``isTypelike``!
-    @inlinable public
-    var orientation:Orientation
-    {
-        switch self
-        {
+    @inlinable public var orientation: Orientation {
+        switch self {
         case .actor:                .straight
         case .associatedtype:       .straight
         case .case:                 .gay
@@ -121,13 +105,9 @@ extension Phylum.Decl
         }
     }
 }
-extension Phylum.Decl:RawRepresentable
-{
-    @inlinable public
-    init?(rawValue:UInt8)
-    {
-        switch rawValue
-        {
+extension Phylum.Decl: RawRepresentable {
+    @inlinable public init?(rawValue: UInt8) {
+        switch rawValue {
         case 0x00:  self = .actor
         case 0x10:  self = .associatedtype
         case 0x20:  self = .case
@@ -155,11 +135,8 @@ extension Phylum.Decl:RawRepresentable
         case    _:  return nil
         }
     }
-    @inlinable public
-    var rawValue:UInt8
-    {
-        switch self
-        {
+    @inlinable public var rawValue: UInt8 {
+        switch self {
         case .actor:                0x00
         case .associatedtype:       0x10
         case .case:                 0x20
@@ -187,13 +164,9 @@ extension Phylum.Decl:RawRepresentable
         }
     }
 }
-extension Phylum.Decl
-{
-    @inlinable public
-    var name:String
-    {
-        switch self
-        {
+extension Phylum.Decl {
+    @inlinable public var name: String {
+        switch self {
         case .actor:                "actor"
         case .associatedtype:       "associatedtype"
         case .case:                 "case"

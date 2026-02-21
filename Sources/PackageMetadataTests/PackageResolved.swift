@@ -3,13 +3,9 @@ import PackageMetadata
 import SystemIO
 import Testing
 
-@Suite
-enum PackageResolved
-{
-    @Test
-    static func Local() throws
-    {
-        let json:String = """
+@Suite enum PackageResolved {
+    @Test static func Local() throws {
+        let json: String = """
         {
         "pins" : [
             {
@@ -25,22 +21,23 @@ enum PackageResolved
         "version" : 2
         }
         """
-        let resolutions:SPM.DependencyResolutions = try .init(
-            parsing: json)
-        let expected:[SPM.DependencyPin] = [
-            .init(identity: "swift-json",
+        let resolutions: SPM.DependencyResolutions = try .init(
+            parsing: json
+        )
+        let expected: [SPM.DependencyPin] = [
+            .init(
+                identity: "swift-json",
                 location: .local(root: "/swift/swift-json"),
                 revision: 0x36ef4bf1e6ae38f881ed253d5656839a046456f1,
-                version: .stable(.release(.v(0, 4, 5)))),
+                version: .stable(.release(.v(0, 4, 5)))
+            ),
         ]
 
         #expect(resolutions.format == .v2)
         #expect(resolutions.pins == expected)
     }
-    @Test
-    static func Remote() throws
-    {
-        let json:String = """
+    @Test static func Remote() throws {
+        let json: String = """
         {
         "pins" : [
             {
@@ -65,35 +62,38 @@ enum PackageResolved
         "version" : 2
         }
         """
-        let resolutions:SPM.DependencyResolutions = try .init(
-            parsing: json)
-        let expected:[SPM.DependencyPin] = [
-            .init(identity: "swift-atomics",
+        let resolutions: SPM.DependencyResolutions = try .init(
+            parsing: json
+        )
+        let expected: [SPM.DependencyPin] = [
+            .init(
+                identity: "swift-atomics",
                 location: .remote(
-                    url: "https://github.com/apple/swift-atomics.git"),
+                    url: "https://github.com/apple/swift-atomics.git"
+                ),
                 revision: 0xff3d2212b6b093db7f177d0855adbc4ef9c5f036,
-                version: .stable(.release(.v(1, 0, 3)))),
-            .init(identity: "swift-grammar",
+                version: .stable(.release(.v(1, 0, 3)))
+            ),
+            .init(
+                identity: "swift-grammar",
                 location: .remote(
-                    url: "https://github.com/kelvin13/swift-grammar"),
+                    url: "https://github.com/kelvin13/swift-grammar"
+                ),
                 revision: 0x69613825b2ad1d0538c59d72e548867ce7568cc2,
-                version: .stable(.release(.v(0, 3, 1)))),
+                version: .stable(.release(.v(0, 3, 1)))
+            ),
         ]
 
         #expect(resolutions.format == .v2)
         #expect(resolutions.pins == expected)
     }
-    @Test
-    static func Dogfood() throws
-    {
-        let filepath:FilePath = "Package.resolved"
-        let json:JSON = .init(utf8: try filepath.read()[...])
-        let _:SPM.DependencyResolutions = try json.decode()
+    @Test static func Dogfood() throws {
+        let filepath: FilePath = "Package.resolved"
+        let json: JSON = .init(utf8: try filepath.read()[...])
+        let _: SPM.DependencyResolutions = try json.decode()
     }
-    @Test
-    static func Legacy() throws
-    {
-        let json:String = """
+    @Test static func Legacy() throws {
+        let json: String = """
         {
             "object": {
             "pins": [
@@ -112,15 +112,18 @@ enum PackageResolved
         }
         """
 
-        let resolutions:SPM.DependencyResolutions = try .init(
-            parsing: json)
-        let expected:[SPM.DependencyPin] =
-        [
-            .init(identity: "swift-argument-parser",
+        let resolutions: SPM.DependencyResolutions = try .init(
+            parsing: json
+        )
+        let expected: [SPM.DependencyPin] = [
+            .init(
+                identity: "swift-argument-parser",
                 location: .remote(
-                    url: "https://github.com/apple/swift-argument-parser.git"),
+                    url: "https://github.com/apple/swift-argument-parser.git"
+                ),
                 revision: 0xfee6933f37fde9a5e12a1e4aeaa93fe60116ff2a,
-                version: .stable(.release(.v(1, 2, 2)))),
+                version: .stable(.release(.v(1, 2, 2)))
+            ),
         ]
         #expect(resolutions.format == .v1)
         #expect(resolutions.pins == expected)

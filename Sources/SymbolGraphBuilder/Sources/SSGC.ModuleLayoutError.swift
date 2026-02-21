@@ -1,7 +1,5 @@
-extension SSGC
-{
-    enum ModuleLayoutError:Error
-    {
+extension SSGC {
+    enum ModuleLayoutError: Error {
         case foundMultipleModulemapFiles
     }
 }

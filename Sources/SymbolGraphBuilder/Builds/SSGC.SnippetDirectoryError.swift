@@ -1,7 +1,5 @@
-extension SSGC
-{
-    enum SnippetDirectoryError:Error
-    {
+extension SSGC {
+    enum SnippetDirectoryError: Error {
         case invalid(String)
     }
 }

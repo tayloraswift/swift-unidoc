@@ -1,4 +1,2 @@
-public
-protocol AssertionFailure:CustomStringConvertible
-{
+public protocol AssertionFailure: CustomStringConvertible {
 }

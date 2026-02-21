@@ -1,24 +1,19 @@
 import SourceDiagnostics
 import Sources
 
-extension SSGC
-{
-    enum SupplementError:Error, Equatable, Sendable
-    {
+extension SSGC {
+    enum SupplementError: Error, Equatable, Sendable {
         case multiple
         case untitled
         case untitledTutorial
         case extraBlocksInTutorial
     }
 }
-extension SSGC.SupplementError:Diagnostic
-{
+extension SSGC.SupplementError: Diagnostic {
     typealias Symbolicator = SSGC.Symbolicator
 
-    func emit(summary output:inout DiagnosticOutput<SSGC.Symbolicator>)
-    {
-        switch self
-        {
+    func emit(summary output: inout DiagnosticOutput<SSGC.Symbolicator>) {
+        switch self {
         case .multiple:
             output[.error] = """
             markdown supplement extends a symbol that already has a supplement

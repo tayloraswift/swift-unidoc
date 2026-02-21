@@ -3,12 +3,8 @@ import MarkdownPluginSwift
 import Symbols
 import Testing
 
-@Suite
-struct Blockquotes:MarkdownTestSuite
-{
-    @Test
-    static func Literal() throws
-    {
+@Suite struct Blockquotes: MarkdownTestSuite {
+    @Test static func Literal() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -24,11 +20,10 @@ struct Blockquotes:MarkdownTestSuite
             <p>equality implies substitutability and u r irreplaceable 💝 — barbie</p>\
             </blockquote>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func LiteralColon() throws
-    {
+    @Test static func LiteralColon() throws {
         //  Apostrophe will become a curly quote, due to cmark-gfm smart punctuation.
         try Self.test(
             markdown: """
@@ -44,11 +39,10 @@ struct Blockquotes:MarkdownTestSuite
             <p>Miranda: Don’t be ridiculous, Andrea. Everybody wants this.</p>\
             </blockquote>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Asides() throws
-    {
+    @Test static func Asides() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -86,14 +80,13 @@ struct Blockquotes:MarkdownTestSuite
             <p>Princess barbies never care about sloth politics. To ignore \
             liberal sloths, convert barbie princesses into princess barbies.</p>\
             </aside>
-            """)
+            """
+        )
     }
-    @Test
-    static func AsidesFromSnippetCaptions() throws
-    {
-        let markdownParser:Markdown.Parser<Markdown.SwiftComment> = .init()
-        let swiftParser:Markdown.SwiftLanguage = .swift
-        let swiftSource:String = """
+    @Test static func AsidesFromSnippetCaptions() throws {
+        let markdownParser: Markdown.Parser<Markdown.SwiftComment> = .init()
+        let swiftParser: Markdown.SwiftLanguage = .swift
+        let swiftSource: String = """
         //  > Tip:
         //  Liberal barbies never care about political sloths. To ignore political sloths,
         //  convert sloth politics into liberal barbies.
@@ -102,15 +95,17 @@ struct Blockquotes:MarkdownTestSuite
 
         """
 
-        let snippet:(caption:String, slices:[Markdown.SnippetSlice]) = swiftParser.parse(
-            snippet: [UInt8].init(swiftSource.utf8))
+        let snippet: (caption: String, slices: [Markdown.SnippetSlice]) = swiftParser.parse(
+            snippet: [UInt8].init(swiftSource.utf8)
+        )
 
-        let snippets:[String: Markdown.Snippet] =
-        [
-            "Example": .init(id: 0,
+        let snippets: [String: Markdown.Snippet] = [
+            "Example": .init(
+                id: 0,
                 captionParser: markdownParser,
                 caption: snippet.caption,
-                slices: snippet.slices)
+                slices: snippet.slices
+            )
         ]
 
         try Self.test(
@@ -135,11 +130,10 @@ struct Blockquotes:MarkdownTestSuite
             <span class='xv'>convert</span>(<span class='xv'>sloth</span>, \
             <span class='xv'>type</span>: .<span class='xv'>liberal</span>)\
             </code></pre>
-            """)
+            """
+        )
     }
-    @Test
-    static func Formatting() throws
-    {
+    @Test static func Formatting() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -157,11 +151,10 @@ struct Blockquotes:MarkdownTestSuite
             <p>A barbie princess is not the same thing as a princess barbie.</p>\
             </aside>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Capitalization() throws
-    {
+    @Test static func Capitalization() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -178,11 +171,10 @@ struct Blockquotes:MarkdownTestSuite
             <p>i am an important businessman. A VERY IMPORTANT BUSINESSMAN</p>\
             </aside>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Wordbreaks() throws
-    {
+    @Test static func Wordbreaks() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -216,11 +208,10 @@ struct Blockquotes:MarkdownTestSuite
             <p>Humans on top!</p>\
             </aside>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Standalone() throws
-    {
+    @Test static func Standalone() throws {
         try Self.test(
             markdown: """
             >   Important:
@@ -236,11 +227,10 @@ struct Blockquotes:MarkdownTestSuite
             <p>A barbie princess is not the same thing as a princess barbie.</p>\
             </aside>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Parameters() throws
-    {
+    @Test static func Parameters() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -257,11 +247,10 @@ struct Blockquotes:MarkdownTestSuite
             <p>Discussion about parameters in general.</p>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func ParameterOne() throws
-    {
+    @Test static func ParameterOne() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -281,11 +270,10 @@ struct Blockquotes:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func ParameterMany() throws
-    {
+    @Test static func ParameterMany() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -313,11 +301,10 @@ struct Blockquotes:MarkdownTestSuite
             </section>\
             <p>Details details details</p>\
             <p>Even more details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func ParameterFormatting() throws
-    {
+    @Test static func ParameterFormatting() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -337,6 +324,7 @@ struct Blockquotes:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
 }

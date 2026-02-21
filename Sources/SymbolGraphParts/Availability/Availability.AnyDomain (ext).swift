@@ -1,6 +1,5 @@
 import Availability
 import JSONDecoding
 
-extension Availability.AnyDomain:JSONStringDecodable
-{
+extension Availability.AnyDomain: JSONStringDecodable {
 }

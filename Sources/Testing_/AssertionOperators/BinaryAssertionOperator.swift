@@ -1,6 +1,3 @@
-public
-protocol BinaryAssertionOperator
-{
-    static
-    var symbol:String { get }
+public protocol BinaryAssertionOperator {
+    static var symbol: String { get }
 }

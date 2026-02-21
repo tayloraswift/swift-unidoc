@@ -1,36 +1,25 @@
 import JSON
 
-extension GitHub
-{
-    @frozen public
-    enum RepoVisibility:Equatable, Comparable, Sendable
-    {
+extension GitHub {
+    @frozen public enum RepoVisibility: Equatable, Comparable, Sendable {
         case `private`
         case `internal`
         case `public`
     }
 }
-extension GitHub.RepoVisibility:CustomStringConvertible
-{
-    @inlinable public
-    var description:String
-    {
-        switch self
-        {
+extension GitHub.RepoVisibility: CustomStringConvertible {
+    @inlinable public var description: String {
+        switch self {
         case .private:  "private"
         case .internal: "internal"
         case .public:   "public"
         }
     }
 }
-extension GitHub.RepoVisibility:LosslessStringConvertible
-{
-    @inlinable public
-    init?(_ description:String)
-    {
+extension GitHub.RepoVisibility: LosslessStringConvertible {
+    @inlinable public init?(_ description: String) {
         //  Note: the GraphQL API returns the visibility in all caps, for some reason.
-        switch description
-        {
+        switch description {
         case "PRIVATE":  self = .private
         case "private":  self = .private
 
@@ -44,6 +33,5 @@ extension GitHub.RepoVisibility:LosslessStringConvertible
         }
     }
 }
-extension GitHub.RepoVisibility:JSONStringDecodable
-{
+extension GitHub.RepoVisibility: JSONStringDecodable {
 }

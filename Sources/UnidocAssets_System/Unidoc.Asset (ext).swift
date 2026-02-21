@@ -2,13 +2,9 @@ import Media
 import SystemIO
 import UnidocAssets
 
-extension Unidoc.Asset
-{
-    public
-    var source:[FilePath.Component]
-    {
-        switch self
-        {
+extension Unidoc.Asset {
+    public var source: [FilePath.Component] {
+        switch self {
         case .error404_jpg:     ["icons", "error404.jpg"]
         case .error4xx_jpg:     ["icons", "error4xx.jpg"]
         case .error500_jpg:     ["icons", "error500.jpg"]
@@ -28,11 +24,8 @@ extension Unidoc.Asset
         }
     }
 
-    public
-    var type:MediaType
-    {
-        switch self
-        {
+    public var type: MediaType {
+        switch self {
         case .error404_jpg:     .image(.jpeg)
         case .error4xx_jpg:     .image(.jpeg)
         case .error500_jpg:     .image(.jpeg)

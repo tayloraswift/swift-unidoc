@@ -3,32 +3,25 @@ import Media
 import Symbols
 import URI
 
-extension Unidoc
-{
-    struct BuildRequestPage
-    {
-        let form:BuildForm
-        let action:URI
+extension Unidoc {
+    struct BuildRequestPage {
+        let form: BuildForm
+        let action: URI
 
-        init(form:BuildForm, action:URI)
-        {
+        init(form: BuildForm, action: URI) {
             self.form = form
             self.action = action
         }
     }
 }
-extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
-{
-    var button:String { self.form.action == .cancel ? "Cancel build" : "Build package" }
-    var title:String { self.form.action == .cancel ? "Cancel build?" : "Build package?" }
+extension Unidoc.BuildRequestPage: Unidoc.ConfirmationPage {
+    var button: String { self.form.action == .cancel ? "Cancel build" : "Build package" }
+    var title: String { self.form.action == .cancel ? "Cancel build?" : "Build package?" }
 
-    func form(_ form:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
-    {
-        form[.p]
-        {
-            let package:URI = Unidoc.RefsEndpoint[self.form.symbol.package]
-            switch self.form.action
-            {
+    func form(_ form: inout HTML.ContentEncoder, format: Unidoc.RenderFormat) {
+        form[.p] {
+            let package: URI = Unidoc.RefsEndpoint[self.form.symbol.package]
+            switch self.form.action {
             case .cancel:
                 $0 += "You can cancel the build for "
                 $0[.a] { $0.href = "\(package)" } = "\(self.form.symbol.package)"
@@ -46,22 +39,16 @@ extension Unidoc.BuildRequestPage:Unidoc.ConfirmationPage
             }
         }
 
-        if  case .cancel = self.form.action
-        {
+        if  case .cancel = self.form.action {
             return
         }
 
-        form[.p]
-        {
-            $0[.label]
-            {
+        form[.p] {
+            $0[.label] {
                 $0.class = "checkbox"
                 $0.title = "Build the selected version even if it already has a symbol graph."
-            }
-                content:
-            {
-                $0[.input]
-                {
+            } content: {
+                $0[.input] {
                     $0.type = "checkbox"
                     $0.name = "force"
                     $0.checked = true

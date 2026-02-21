@@ -1,51 +1,42 @@
 import HTML
 import Symbols
 
-extension Unidoc
-{
-    @dynamicMemberLookup
-    struct ExtensionBody
-    {
-        private
-        var lists:Lists
-        private
-        let name:String
+extension Unidoc {
+    @dynamicMemberLookup struct ExtensionBody {
+        private var lists: Lists
+        private let name: String
 
-        private
-        init(lists:Lists, name:String)
-        {
+        private init(lists: Lists, name: String) {
             self.lists = lists
             self.name = name
         }
     }
 }
-extension Unidoc.ExtensionBody
-{
-    typealias Lists =
-    (
-        conformances:Unidoc.SegregatedList,
-        protocols:Unidoc.SegregatedList,
-        types:Unidoc.SegregatedList,
-        typealiases:Unidoc.SegregatedList,
-        membersOnType:Unidoc.SegregatedList,
-        membersOnInstance:Unidoc.SegregatedList,
-        featuresOnType:Unidoc.SegregatedList,
-        featuresOnInstance:Unidoc.SegregatedList,
-        subtypes:Unidoc.SegregatedList,
-        subclasses:Unidoc.SegregatedList,
-        overriddenBy:Unidoc.SegregatedList,
-        restatedBy:Unidoc.SegregatedList,
-        defaultImplementations:Unidoc.SegregatedList
+extension Unidoc.ExtensionBody {
+    typealias Lists = (
+        conformances: Unidoc.SegregatedList,
+        protocols: Unidoc.SegregatedList,
+        types: Unidoc.SegregatedList,
+        typealiases: Unidoc.SegregatedList,
+        membersOnType: Unidoc.SegregatedList,
+        membersOnInstance: Unidoc.SegregatedList,
+        featuresOnType: Unidoc.SegregatedList,
+        featuresOnInstance: Unidoc.SegregatedList,
+        subtypes: Unidoc.SegregatedList,
+        subclasses: Unidoc.SegregatedList,
+        overriddenBy: Unidoc.SegregatedList,
+        restatedBy: Unidoc.SegregatedList,
+        defaultImplementations: Unidoc.SegregatedList
     )
 }
-extension Unidoc.ExtensionBody
-{
-    init(extension group:borrowing Unidoc.ExtensionGroup,
-        decl:Phylum.DeclFlags,
-        name:String,
-        with context:borrowing Unidoc.InternalPageContext)
-    {
-        var lists:Lists
+extension Unidoc.ExtensionBody {
+    init(
+        extension group: borrowing Unidoc.ExtensionGroup,
+        decl: Phylum.DeclFlags,
+        name: String,
+        with context: borrowing Unidoc.InternalPageContext
+    ) {
+        var lists: Lists
 
         lists.conformances = .partition(group.conformances, with: context)
 
@@ -55,29 +46,21 @@ extension Unidoc.ExtensionBody
         lists.membersOnType = []
         lists.membersOnInstance = []
 
-        for id:Unidoc.Scalar in group.nested
-        {
+        for id: Unidoc.Scalar in group.nested {
             //  We should never see anything in an extension group that isn't a declaration.
             guard
-            case .decl(let decl)? = context.card(id)
-            else
-            {
+            case .decl(let decl)? = context.card(id) else {
                 continue
             }
 
-            if  let objectivity:Phylum.Decl.Objectivity = decl.vertex.phylum.objectivity
-            {
-                switch objectivity
-                {
+            if  let objectivity: Phylum.Decl.Objectivity = decl.vertex.phylum.objectivity {
+                switch objectivity {
                 case .instance:         lists.membersOnInstance.append(decl)
                 case .class:            lists.membersOnType.append(decl)
                 case .static:           lists.membersOnType.append(decl)
                 }
-            }
-            else
-            {
-                switch decl.vertex.phylum
-                {
+            } else {
+                switch decl.vertex.phylum {
                 case .associatedtype:   lists.membersOnType.append(decl)
                 case .enum:             lists.types.append(decl)
                 case .struct:           lists.types.append(decl)
@@ -92,12 +75,9 @@ extension Unidoc.ExtensionBody
         lists.featuresOnType = []
         lists.featuresOnInstance = []
 
-        for id:Unidoc.Scalar in group.features
-        {
-            if  case .decl(let decl)? = context.card(id)
-            {
-                switch decl.vertex.phylum.objectivity
-                {
+        for id: Unidoc.Scalar in group.features {
+            if  case .decl(let decl)? = context.card(id) {
+                switch decl.vertex.phylum.objectivity {
                 //  In theory, typealiases can be inherited as features.
                 case nil:           lists.featuresOnType.append(decl)
                 case .static?:      lists.featuresOnType.append(decl)
@@ -107,8 +87,7 @@ extension Unidoc.ExtensionBody
             }
         }
 
-        switch decl.phylum
-        {
+        switch decl.phylum {
         case .protocol:
             lists.subtypes = .partition(group.subforms, with: context)
             lists.subclasses = []
@@ -129,22 +108,17 @@ extension Unidoc.ExtensionBody
             lists.restatedBy = []
             lists.defaultImplementations = []
 
-            if  decl.kinks[is: .required]
-            {
-                for id:Unidoc.Scalar in group.subforms
-                {
-                    if  case .decl(let member)? = context.card(id)
-                    {
+            if  decl.kinks[is: .required] {
+                for id: Unidoc.Scalar in group.subforms {
+                    if  case .decl(let member)? = context.card(id) {
                         member.vertex.kinks[is: .intrinsicWitness]
-                        ? lists.defaultImplementations.append(member)
-                        : lists.restatedBy.append(member)
+                            ? lists.defaultImplementations.append(member)
+                            : lists.restatedBy.append(member)
                     }
                 }
 
                 lists.overriddenBy = []
-            }
-            else
-            {
+            } else {
                 lists.overriddenBy = .partition(group.subforms, with: context)
             }
         }
@@ -153,23 +127,19 @@ extension Unidoc.ExtensionBody
     }
 }
 
-extension Unidoc.ExtensionBody
-{
-    private
-    subscript(
+extension Unidoc.ExtensionBody {
+    private subscript(
         dynamicMember keyPath:
-        KeyPath<Lists, Unidoc.SegregatedList>) -> Unidoc.SegregatedSection?
-    {
-        let list:Unidoc.SegregatedList = self.lists[keyPath: keyPath]
-        if  list.isEmpty
-        {
+        KeyPath<Lists, Unidoc.SegregatedList>
+    ) -> Unidoc.SegregatedSection? {
+        let list: Unidoc.SegregatedList = self.lists[keyPath: keyPath]
+        if  list.isEmpty {
             return nil
         }
 
-        let type:Unidoc.SegregatedType
+        let type: Unidoc.SegregatedType
 
-        switch keyPath
-        {
+        switch keyPath {
         case \.conformances:            type = .conformances
         case \.protocols:               type = .protocols
         case \.types:                   type = .types
@@ -189,11 +159,8 @@ extension Unidoc.ExtensionBody
         return .init(list: list, type: type, in: self.name)
     }
 }
-extension Unidoc.ExtensionBody:HTML.OutputStreamable
-{
-    static
-    func += (section:inout HTML.ContentEncoder, self:Self)
-    {
+extension Unidoc.ExtensionBody: HTML.OutputStreamable {
+    static func += (section: inout HTML.ContentEncoder, self: Self) {
         section ?= self.conformances
         section ?= self.protocols
         section ?= self.types

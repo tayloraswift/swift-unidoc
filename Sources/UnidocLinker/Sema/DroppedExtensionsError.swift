@@ -1,39 +1,29 @@
 import SourceDiagnostics
 import Symbols
 
-struct DroppedExtensionsError:Equatable, Error
-{
-    let affected:AffectedExtensions
-    let count:Int
+struct DroppedExtensionsError: Equatable, Error {
+    let affected: AffectedExtensions
+    let count: Int
 
-    init(affected:AffectedExtensions, count:Int)
-    {
+    init(affected: AffectedExtensions, count: Int) {
         self.affected = affected
         self.count = count
     }
 }
-extension DroppedExtensionsError
-{
-    static
-    func extending(_ namespace:Symbol.Module, count:Int) -> Self
-    {
+extension DroppedExtensionsError {
+    static func extending(_ namespace: Symbol.Module, count: Int) -> Self {
         .init(affected: .namespace(namespace), count: count)
     }
 
-    static
-    func extending(_ decl:Symbol.Decl, count:Int) -> Self
-    {
+    static func extending(_ decl: Symbol.Decl, count: Int) -> Self {
         .init(affected: .decl(decl), count: count)
     }
 }
-extension DroppedExtensionsError:Diagnostic
-{
+extension DroppedExtensionsError: Diagnostic {
     typealias Symbolicator = Unidoc.Symbolicator
 
-    func emit(summary output:inout DiagnosticOutput<Unidoc.Symbolicator>)
-    {
-        switch self.affected
-        {
+    func emit(summary output: inout DiagnosticOutput<Unidoc.Symbolicator>) {
+        switch self.affected {
         case .decl(let decl):
             output[.warning] = """
             dropped \(self.count) extension(s) because the type they extend \

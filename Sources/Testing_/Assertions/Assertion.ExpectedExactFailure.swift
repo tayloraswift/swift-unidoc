@@ -1,29 +1,18 @@
-extension Assertion
-{
-    public
-    struct ExpectedExactFailure<Failure> where Failure:Error & Equatable
-    {
-        public
-        let expected:Failure
+extension Assertion {
+    public struct ExpectedExactFailure<Failure> where Failure: Error & Equatable {
+        public let expected: Failure
 
-        public
-        let caught:(any Error)?
+        public let caught: (any Error)?
 
-        public
-        init(caught:(any Error)?, expected:Failure)
-        {
+        public init(caught: (any Error)?, expected: Failure) {
             self.caught = caught
             self.expected = expected
         }
     }
 }
-extension Assertion.ExpectedExactFailure:AssertionFailure
-{
-    public
-    var description:String
-    {
-        if  let caught:any Error = self.caught
-        {
+extension Assertion.ExpectedExactFailure: AssertionFailure {
+    public var description: String {
+        if  let caught: any Error = self.caught {
             return """
             Expected error with exact value:
             ---------------------
@@ -33,9 +22,7 @@ extension Assertion.ExpectedExactFailure:AssertionFailure
             ---------------------
             \(caught)
             """
-        }
-        else
-        {
+        } else {
             return """
             Expected error with exact value:
             ---------------------

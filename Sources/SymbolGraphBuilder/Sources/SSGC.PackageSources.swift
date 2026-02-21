@@ -14,27 +14,21 @@ import SymbolGraphs
 import Symbols
 import SystemIO
 
-extension SSGC
-{
+extension SSGC {
     /// Stores information about the layout, snippets, and build directory for a package.
-    @_spi(testable) public
-    struct PackageSources
-    {
-        @_spi(testable) public
-        let modules:ModuleGraph
-        let symbols:[FilePath.Directory]
+    @_spi(testable) public struct PackageSources {
+        @_spi(testable) public let modules: ModuleGraph
+        let symbols: [FilePath.Directory]
 
-        private
-        let scratch:PackageBuildDirectory
-        private
-        let root:Symbol.FileBase
+        private let scratch: PackageBuildDirectory
+        private let root: Symbol.FileBase
 
         init(
-            modules:ModuleGraph,
-            symbols:[FilePath.Directory],
-            scratch:PackageBuildDirectory,
-            root:Symbol.FileBase)
-        {
+            modules: ModuleGraph,
+            symbols: [FilePath.Directory],
+            scratch: PackageBuildDirectory,
+            root: Symbol.FileBase
+        ) {
             self.scratch = scratch
             self.symbols = symbols
             self.modules = modules
@@ -42,23 +36,24 @@ extension SSGC
         }
     }
 }
-extension SSGC.PackageSources:SSGC.DocumentationSources
-{
-    var prefix:Symbol.FileBase? { self.root }
+extension SSGC.PackageSources: SSGC.DocumentationSources {
+    var prefix: Symbol.FileBase? { self.root }
 
-    @_spi(testable) public
-    func indexStore(for swift:SSGC.Toolchain) throws -> (any Markdown.SwiftLanguage.IndexStore)?
-    {
+    @_spi(testable) public func indexStore(for swift: SSGC.Toolchain) throws -> (
+        any Markdown.SwiftLanguage.IndexStore
+    )? {
         #if canImport(IndexStoreDB)
 
-        let libIndexStore:IndexStoreLibrary = try swift.libIndexStore()
-        let indexPath:FilePath.Directory = self.scratch.index
-        return try IndexStoreDB.init(storePath: "\(indexPath)/store",
+        let libIndexStore: IndexStoreLibrary = try swift.libIndexStore()
+        let indexPath: FilePath.Directory = self.scratch.index
+        return try IndexStoreDB.init(
+            storePath: "\(indexPath)/store",
             databasePath: "\(indexPath)/db",
             library: libIndexStore,
             waitUntilDoneInitializing: true,
             readonly: false,
-            listenToUnitEvents: true)
+            listenToUnitEvents: true
+        )
 
         #else
 

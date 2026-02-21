@@ -3,31 +3,20 @@ import UnidocUI
 import UnixCalendar
 import UnixTime
 
-extension Unidoc.ServerLog
-{
-    @frozen @usableFromInline
-    struct MessageHeader
-    {
-        @usableFromInline
-        let components:Timestamp.Components
-        @usableFromInline
-        let dynamicAge:DurationFormat
+extension Unidoc.ServerLog {
+    @frozen @usableFromInline struct MessageHeader {
+        @usableFromInline let components: Timestamp.Components
+        @usableFromInline let dynamicAge: DurationFormat
 
-        @inlinable
-        init(components:Timestamp.Components, dynamicAge:DurationFormat)
-        {
+        @inlinable init(components: Timestamp.Components, dynamicAge: DurationFormat) {
             self.components = components
             self.dynamicAge = dynamicAge
         }
     }
 }
-extension Unidoc.ServerLog.MessageHeader:HTML.OutputStreamable
-{
-    @inlinable static
-    func += (div:inout HTML.ContentEncoder, self:Self)
-    {
-        div[.time]
-        {
+extension Unidoc.ServerLog.MessageHeader: HTML.OutputStreamable {
+    @inlinable static func += (div: inout HTML.ContentEncoder, self: Self) {
+        div[.time] {
             $0.datetime = """
             \(self.components.date)T\(self.components.time)Z
             """

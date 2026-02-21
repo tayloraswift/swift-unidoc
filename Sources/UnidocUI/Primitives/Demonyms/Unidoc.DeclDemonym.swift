@@ -1,41 +1,29 @@
 import Symbols
 
-extension Unidoc
-{
-    struct DeclDemonym
-    {
-        let phylum:Phylum.Decl
-        let kinks:Phylum.Decl.Kinks
+extension Unidoc {
+    struct DeclDemonym {
+        let phylum: Phylum.Decl
+        let kinks: Phylum.Decl.Kinks
 
-        init(phylum:Phylum.Decl, kinks:Phylum.Decl.Kinks)
-        {
+        init(phylum: Phylum.Decl, kinks: Phylum.Decl.Kinks) {
             self.phylum = phylum
             self.kinks = kinks
         }
     }
 }
-extension Unidoc.DeclDemonym
-{
-    var modifier:String?
-    {
-        if      self.kinks[is: .open]
-        {
+extension Unidoc.DeclDemonym {
+    var modifier: String? {
+        if      self.kinks[is: .open] {
             "Open"
-        }
-        else if self.kinks[is: .required]
-        {
+        } else if self.kinks[is: .required] {
             "Required"
-        }
-        else
-        {
+        } else {
             nil
         }
     }
 
-    var title:String
-    {
-        switch self.phylum
-        {
+    var title: String {
+        switch self.phylum {
         case .actor:                "Actor"
         case .associatedtype:       "Associated Type"
         case .case:                 "Enumeration Case"
@@ -63,11 +51,9 @@ extension Unidoc.DeclDemonym
         }
     }
 
-    var phrase:String
-    {
-        let phrase:String =
-        switch self.phylum
-        {
+    var phrase: String {
+        let phrase: String =
+        switch self.phylum {
         case .actor:                "an actor"
         case .associatedtype:       "an associated type"
         case .case:                 "an enum case"
@@ -94,16 +80,11 @@ extension Unidoc.DeclDemonym
         case .var(.static):         "a static property"
         }
 
-        if      self.kinks[is: .required]
-        {
+        if      self.kinks[is: .required] {
             return "\(phrase) requirement"
-        }
-        else if self.kinks[is: .intrinsicWitness]
-        {
+        } else if self.kinks[is: .intrinsicWitness] {
             return "\(phrase) default implementation"
-        }
-        else
-        {
+        } else {
             return phrase
         }
     }

@@ -5,87 +5,69 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Unidoc.StatsEndpoint
-{
-    struct ModulePage
-    {
-        let context:Unidoc.InternalPageContext
+extension Unidoc.StatsEndpoint {
+    struct ModulePage {
+        let context: Unidoc.InternalPageContext
 
-        let sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>
+        let sidebar: Unidoc.Sidebar<Unidoc.StatsEndpoint>
 
-        private
-        let vertex:Unidoc.CultureVertex
+        private let vertex: Unidoc.CultureVertex
 
-        init(_ context:Unidoc.InternalPageContext,
-            sidebar:Unidoc.Sidebar<Unidoc.StatsEndpoint>,
-            vertex:Unidoc.CultureVertex)
-        {
+        init(
+            _ context: Unidoc.InternalPageContext,
+            sidebar: Unidoc.Sidebar<Unidoc.StatsEndpoint>,
+            vertex: Unidoc.CultureVertex
+        ) {
             self.context = context
             self.sidebar = sidebar
             self.vertex = vertex
         }
     }
 }
-extension Unidoc.StatsEndpoint.ModulePage
-{
-    private
-    var demonym:Unidoc.ModuleDemonym
-    {
+extension Unidoc.StatsEndpoint.ModulePage {
+    private var demonym: Unidoc.ModuleDemonym {
         .init(
             language: self.vertex.module.language ?? .swift,
-            type: self.vertex.module.type)
+            type: self.vertex.module.type
+        )
     }
 
-    private
-    var name:String { self.vertex.module.name }
+    private var name: String { self.vertex.module.name }
 
-    private
-    var stem:Unidoc.Stem { self.vertex.stem }
+    private var stem: Unidoc.Stem { self.vertex.stem }
 }
-extension Unidoc.StatsEndpoint.ModulePage:Unidoc.RenderablePage
-{
-    var title:String { "\(self.name) · \(self.volume.title) statistics" }
+extension Unidoc.StatsEndpoint.ModulePage: Unidoc.RenderablePage {
+    var title: String { "\(self.name) · \(self.volume.title) statistics" }
 
-    var description:String?
-    {
-        self.volume.symbol.package == .swift ?
-        """
+    var description: String? {
+        self.volume.symbol.package == .swift ? """
         View statistics and coverage data for \(self.name), \
         \(self.demonym.phrase) in the Swift standard library.
-        """ :
-        """
+        """ : """
         View statistics and coverage data for \(self.name), \
         \(self.demonym.phrase) in the \(self.volume.title) package.
         """
     }
 }
-extension Unidoc.StatsEndpoint.ModulePage:Unidoc.StaticPage
-{
-    var location:URI { Unidoc.StatsEndpoint[self.volume, self.vertex.route] }
+extension Unidoc.StatsEndpoint.ModulePage: Unidoc.StaticPage {
+    var location: URI { Unidoc.StatsEndpoint[self.volume, self.vertex.route] }
 }
-extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
-{
-    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
-    {
-        let back:String = "\(Unidoc.DocsEndpoint[self.volume, self.vertex.route])"
+extension Unidoc.StatsEndpoint.ModulePage: Unidoc.VertexPage {
+    func main(_ main: inout HTML.ContentEncoder, format: Unidoc.RenderFormat) {
+        let back: String = "\(Unidoc.DocsEndpoint[self.volume, self.vertex.route])"
 
-        main[.header, { $0.class = "hero" }]
-        {
-            $0[.div, { $0.class = "eyebrows" }]
-            {
+        main[.header, { $0.class = "hero" }] {
+            $0[.div, { $0.class = "eyebrows" }] {
                 $0[.span] { $0.class = "phylum" } = "Module details"
-                $0[.span]
-                {
+                $0[.span] {
                     $0.class = "domain"
                 } = self.context.volume.subdomain(self.vertex.route)
             }
 
             $0[.h1] = "\(self.name) metrics"
 
-            $0[.div, { $0.class = "docc" }]
-            {
-                $0[.p]
-                {
+            $0[.div, { $0.class = "docc" }] {
+                $0[.p] {
                     $0 += "Statistics and coverage details for the "
                     $0[.code] { $0[.a] { $0.href = back } = self.name }
                     $0 += " module."
@@ -95,20 +77,15 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
 
         main[.section] { $0.class = "notice canonical" } = self.context.canonical
 
-        main[.section]
-        {
+        main[.section] {
             $0.class = "details"
-        }
-            content:
-        {
+        } content: {
             $0[.h2] = Unidoc.StatsHeading.documentationCoverage
 
             $0[.h3] = "Declarations"
-            $0[.figure]
-            {
+            $0[.figure] {
                 $0.class = "chart coverage"
-            } = self.vertex.census.unweighted.coverage.chart
-            {
+            } = self.vertex.census.unweighted.coverage.chart {
                 """
                 \($1) percent of the declarations in \(self.name) are \($0.name)
                 """
@@ -131,22 +108,18 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
             $0[.h2] = Unidoc.StatsHeading.interfaceBreakdown
 
             $0[.h3] = "Declarations"
-            $0[.figure]
-            {
+            $0[.figure] {
                 $0.class = "chart decl"
-            } = self.vertex.census.unweighted.decls.chart
-            {
+            } = self.vertex.census.unweighted.decls.chart {
                 """
                 \($1) percent of the declarations in \(self.name) are \($0.name)
                 """
             }
 
             $0[.h3] = "Symbols"
-            $0[.figure]
-            {
+            $0[.figure] {
                 $0.class = "chart decl"
-            } = self.vertex.census.weighted.decls.chart
-            {
+            } = self.vertex.census.weighted.decls.chart {
                 """
                 \($1) percent of the symbols in \(self.name) are \($0.name)
                 """
@@ -155,11 +128,9 @@ extension Unidoc.StatsEndpoint.ModulePage:Unidoc.VertexPage
             $0[.h2] = Unidoc.StatsHeading.interfaceLayers
 
             $0[.h3] = "Declarations"
-            $0[.figure]
-            {
+            $0[.figure] {
                 $0.class = "chart spis"
-            } = self.vertex.census.interfaces.chart
-            {
+            } = self.vertex.census.interfaces.chart {
                 """
                 \($1) percent of the declarations in \(self.name) are \($0.name)
                 """

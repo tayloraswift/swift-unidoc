@@ -1,8 +1,5 @@
-extension Markdown
-{
-    @frozen public
-    enum Instruction:Equatable, Hashable, Sendable
-    {
+extension Markdown {
+    @frozen public enum Instruction: Equatable, Hashable, Sendable {
         case invalid
 
         case attribute(Bytecode.Attribute, Int? = nil)

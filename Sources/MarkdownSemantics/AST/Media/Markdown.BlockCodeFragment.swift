@@ -1,8 +1,7 @@
 import Sources
 import Symbols
 
-extension Markdown
-{
+extension Markdown {
     /// A `BlockCodeFragment` models a code snippet (`@Snippet`) that is embedded in the
     /// documentation.
     ///
@@ -29,18 +28,12 @@ extension Markdown
     /// A `BlockCodeFragment` by itself is just a snippet and slice name. It is supposed to be
     /// broken up into ``BlockCodeLiteral`` elements that contain the actual code via the
     /// snippet inlining process.
-    final
-    class BlockCodeFragment:BlockLeaf
-    {
+    final class BlockCodeFragment: BlockLeaf {
         /// The name of the snippet, with no file extension.
-        private
-        var snippet:String?
-        private(set)
-        var slice:String?
+        private var snippet: String?
+        private(set) var slice: String?
 
-        override
-        init()
-        {
+        override init() {
             self.snippet = nil
             self.slice = nil
 
@@ -48,24 +41,18 @@ extension Markdown
         }
     }
 }
-extension Markdown.BlockCodeFragment:Markdown.BlockDirectiveType
-{
-    enum Option:String, Markdown.BlockDirectiveOption
-    {
+extension Markdown.BlockCodeFragment: Markdown.BlockDirectiveType {
+    enum Option: String, Markdown.BlockDirectiveOption {
         case id
         case path
         case slice
     }
 
-    func configure(option:Option, value:Markdown.SourceString) throws
-    {
-        let value:String = value.string
-        switch option
-        {
+    func configure(option: Option, value: Markdown.SourceString) throws {
+        let value: String = value.string
+        switch option {
         case .slice:
-            guard case nil = self.slice
-            else
-            {
+            guard case nil = self.slice else {
                 throw option.duplicate
             }
 
@@ -91,18 +78,15 @@ extension Markdown.BlockCodeFragment:Markdown.BlockDirectiveType
             //      syntax imposes an additional limitation on package names that is not
             //      legitimized anywhere else.
             guard
-            let i:String.Index = value.firstIndex(of: "/"),
-            let j:String.Index = value.lastIndex(of: "/")
-            else
-            {
+            let i: String.Index = value.firstIndex(of: "/"),
+            let j: String.Index = value.lastIndex(of: "/") else {
                 throw PathError.format(value)
             }
 
             //  OK for the path to contain additional intermediate path components, which
             //  are just as irrelevant as the package name, because snippet names are
             //  unique within a package.
-            switch value[value.index(after: i)...].prefix(while: { $0 != "/" })
-            {
+            switch value[value.index(after: i)...].prefix(while: { $0 != "/" }) {
             case "Snippets":
                 self.snippet = String.init(value[value.index(after: j)...])
 
@@ -112,65 +96,61 @@ extension Markdown.BlockCodeFragment:Markdown.BlockDirectiveType
         }
     }
 }
-extension Markdown.BlockCodeFragment
-{
+extension Markdown.BlockCodeFragment {
     /// We currently always eagarly inline snippet slices, which simplifies the rendering model.
     ///
     /// As long as people are not reusing the same slices in multiple places, this has no
     /// performance drawbacks. No one should be doing that (extensively) anyways, because that
     /// would result in documentation that is hard to browse.
-    func inline(snippets:[String: Markdown.Snippet],
-        into yield:(consuming Markdown.BlockElement) -> ()) throws
-    {
+    func inline(
+        snippets: [String: Markdown.Snippet],
+        into yield: (consuming Markdown.BlockElement) -> ()
+    ) throws {
         guard
-        let snippet:String = self.snippet,
-        let snippet:Markdown.Snippet = snippets[snippet]
-        else
-        {
+        let snippet: String = self.snippet,
+        let snippet: Markdown.Snippet = snippets[snippet] else {
             throw ReferenceError.snippet(
                 undefined: self.snippet,
-                available: snippets.keys.sorted())
+                available: snippets.keys.sorted()
+            )
         }
 
-        if  let slice:String = self.slice
-        {
+        if  let slice: String = self.slice {
             //  If this is the first slice, we should also inline the caption.
-            if  case slice? = snippet.slices.keys.first
-            {
-                for block:Markdown.BlockElement in snippet.caption()
-                {
+            if  case slice? = snippet.slices.keys.first {
+                for block: Markdown.BlockElement in snippet.caption() {
                     yield(block)
                 }
             }
 
-            if  let slice:Markdown.SnippetSlice<Symbol.USR> = snippet.slices[slice]
-            {
-                yield(Markdown.BlockCodeLiteral.init(
-                    utf8: slice.utf8,
-                    code: slice.code,
-                    location: slice.location(in: snippet.id)))
-            }
-            else
-            {
+            if  let slice: Markdown.SnippetSlice<Symbol.USR> = snippet.slices[slice] {
+                yield(
+                    Markdown.BlockCodeLiteral.init(
+                        utf8: slice.utf8,
+                        code: slice.code,
+                        location: slice.location(in: snippet.id)
+                    )
+                )
+            } else {
                 throw ReferenceError.slice(
                     undefined: slice,
-                    available: snippet.slices.keys.elements)
+                    available: snippet.slices.keys.elements
+                )
             }
-        }
-        else
-        {
+        } else {
             //  Snippet captions cannot contain topics, so we can just add them directly to
             //  the ``blocks`` list.
-            for block:Markdown.BlockElement in snippet.caption()
-            {
+            for block: Markdown.BlockElement in snippet.caption() {
                 yield(block)
             }
-            for slice:Markdown.SnippetSlice<Symbol.USR> in snippet.slices.values
-            {
-                yield(Markdown.BlockCodeLiteral.init(
-                    utf8: slice.utf8,
-                    code: slice.code,
-                    location: slice.location(in: snippet.id)))
+            for slice: Markdown.SnippetSlice<Symbol.USR> in snippet.slices.values {
+                yield(
+                    Markdown.BlockCodeLiteral.init(
+                        utf8: slice.utf8,
+                        code: slice.code,
+                        location: slice.location(in: snippet.id)
+                    )
+                )
             }
         }
     }

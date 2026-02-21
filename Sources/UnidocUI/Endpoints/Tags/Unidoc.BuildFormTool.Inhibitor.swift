@@ -1,7 +1,5 @@
-extension Unidoc.BuildFormTool
-{
-    enum Inhibitor
-    {
+extension Unidoc.BuildFormTool {
+    enum Inhibitor {
         case alreadyStarted
         case alreadySubmitted
         case unauthenticated

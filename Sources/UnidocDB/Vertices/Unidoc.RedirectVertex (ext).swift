@@ -1,6 +1,5 @@
 import MongoQL
 import UnidocRecords
 
-extension Unidoc.RedirectVertex:Mongo.MasterCodingModel
-{
+extension Unidoc.RedirectVertex: Mongo.MasterCodingModel {
 }

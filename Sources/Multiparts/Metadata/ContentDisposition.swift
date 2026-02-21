@@ -1,20 +1,13 @@
-@frozen public
-enum ContentDisposition:Equatable, Hashable, Sendable
-{
+@frozen public enum ContentDisposition: Equatable, Hashable, Sendable {
     case inline
-    case attachment (filename:String?)
-    case formData   (filename:String?, name:String)
+    case attachment (filename: String?)
+    case formData   (filename: String?, name: String)
 }
-extension ContentDisposition:CustomStringConvertible
-{
-    @inlinable public static
-    func escape(_ string:some StringProtocol) -> String
-    {
-        var escaped:String = "\""
-        for character:Character in string
-        {
-            switch character
-            {
+extension ContentDisposition: CustomStringConvertible {
+    @inlinable public static func escape(_ string: some StringProtocol) -> String {
+        var escaped: String = "\""
+        for character: Character in string {
+            switch character {
             case "\"":      escaped += "\\\""
             case "\\":      escaped += "\\\\"
             default:        escaped.append(character)
@@ -24,11 +17,8 @@ extension ContentDisposition:CustomStringConvertible
         return escaped
     }
 
-    @inlinable public
-    var description:String
-    {
-        switch self
-        {
+    @inlinable public var description: String {
+        switch self {
         case .inline:
             "inline"
 

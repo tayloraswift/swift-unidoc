@@ -3,21 +3,15 @@ import MongoQL
 import Unidoc
 import UnidocRecords
 
-extension Unidoc.LookupAdjacent
-{
-    enum SpecialGroups
-    {
+extension Unidoc.LookupAdjacent {
+    enum SpecialGroups {
         case `default`(Default)
         case protocols
     }
 }
-extension Unidoc.LookupAdjacent.SpecialGroups
-{
-    static
-    func += (or:inout Mongo.PredicateListEncoder, self:Self)
-    {
-        switch self
-        {
+extension Unidoc.LookupAdjacent.SpecialGroups {
+    static func += (or: inout Mongo.PredicateListEncoder, self: Self) {
+        switch self {
         case .protocols:
             break
 

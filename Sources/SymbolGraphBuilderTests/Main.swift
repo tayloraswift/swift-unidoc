@@ -2,118 +2,118 @@ import BSON
 import HTML
 import MarkdownPluginSwift
 import MarkdownRendering
-@_spi(testable)
-import SymbolGraphBuilder
+@_spi(testable) import SymbolGraphBuilder
 import SymbolGraphs
 import SystemIO
 import Testing_
 
-@main
-enum Main:TestMain, TestBattery
-{
-    static
-    func run(tests:TestGroup) async
-    {
-        if  let tests:TestGroup = tests / "SplashParsing"
-        {
-            if  let tests:TestGroup = tests / "LinuxNightly",
-                let splash:SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
-                    Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
-                    Target: x86_64-unknown-linux-gnu
+@main enum Main: TestMain, TestBattery {
+    static func run(tests: TestGroup) async {
+        if  let tests: TestGroup = tests / "SplashParsing" {
+            if  let tests: TestGroup = tests / "LinuxNightly",
+                let splash: SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
+                        Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
+                        Target: x86_64-unknown-linux-gnu
 
-                    """))
-            {
-                tests.expect(splash.swift ==? .init(version: .v(5, 8, 0),
-                    nightly: .DEVELOPMENT_SNAPSHOT))
+                        """)) {
+                tests.expect(
+                    splash.swift ==? .init(
+                        version: .v(5, 8, 0),
+                        nightly: .DEVELOPMENT_SNAPSHOT
+                    )
+                )
                 tests.expect(splash.triple ==? .x86_64_unknown_linux_gnu)
             }
-            if  let tests:TestGroup = tests / "Linux",
-                let splash:SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
-                    Swift version 5.10 (swift-5.10-RELEASE)
-                    Target: x86_64-unknown-linux-gnu
+            if  let tests: TestGroup = tests / "Linux",
+                let splash: SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
+                        Swift version 5.10 (swift-5.10-RELEASE)
+                        Target: x86_64-unknown-linux-gnu
 
-                    """))
-            {
+                        """)) {
                 tests.expect(splash.swift ==? .init(version: .v(5, 10, 0), nightly: nil))
                 tests.expect(splash.triple ==? .x86_64_unknown_linux_gnu)
             }
-            if  let tests:TestGroup = tests / "Xcode",
-                let splash:SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
-                    swift-driver version: 1.90.11.1 \
-                    Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
-                    Target: arm64-apple-macosx14.0
+            if  let tests: TestGroup = tests / "Xcode",
+                let splash: SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
+                        swift-driver version: 1.90.11.1 \
+                        Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
+                        Target: arm64-apple-macosx14.0
 
-                    """))
-            {
+                        """)) {
                 tests.expect(splash.swift ==? .init(version: .v(5, 10, 0), nightly: nil))
                 tests.expect(splash.triple ==? .arm64_apple_macosx14_0)
             }
         }
 
         guard
-        let workspace:SSGC.Workspace =
-            (tests ! "workspace").do({ try .create(at: ".testing") }),
-        let toolchain:SSGC.Toolchain =
-            (tests ! "toolchain").do({ try .detect(pretty: true) })
-        else
-        {
+        let workspace: SSGC.Workspace =
+        (tests ! "workspace").do({ try .create(at: ".testing") }),
+        let toolchain: SSGC.Toolchain =
+        (tests ! "toolchain").do({ try .detect(pretty: true) }) else {
             return
         }
 
-        if  let tests:TestGroup = tests / "standard-library",
-            let docs:SymbolGraphObject<Void> = (tests.do
-            {
-                try workspace.buildStandardLibrary(with: toolchain)
-            })
-        {
+        if  let tests: TestGroup = tests / "standard-library",
+            let docs: SymbolGraphObject<Void> = (
+                tests.do {
+                    try workspace.buildStandardLibrary(with: toolchain)
+                }
+            ) {
             docs.roundtrip(for: tests)
         }
 
         #if canImport(IndexStoreDB)
 
-        if  let tests:TestGroup = tests / "swift-snippets"
-        {
-            tests.do
-            {
-                let package:SSGC.PackageBuild = .local(
-                    project: "TestPackages" / "swift-snippets")
+        if  let tests: TestGroup = tests / "swift-snippets" {
+            tests.do {
+                let package: SSGC.PackageBuild = .local(
+                    project: "TestPackages" / "swift-snippets"
+                )
 
                 try workspace.cache.create()
 
-                let (_, sources):(_, SSGC.PackageSources) = try package.compileSwiftPM(
-                    with: toolchain)
+                let (_, sources): (_, SSGC.PackageSources) = try package.compileSwiftPM(
+                    with: toolchain
+                )
 
-                let parser:Markdown.SwiftLanguage = .swift(
-                    index: try sources.indexStore(for: toolchain))
+                let parser: Markdown.SwiftLanguage = .swift(
+                    index: try sources.indexStore(for: toolchain)
+                )
 
                 guard
-                let snippet:SSGC.LazyFile = tests.expect(
-                    value: sources.modules.snippets.first(where: { $0.name == "UnitTests" }))
-                else
-                {
+                let snippet: SSGC.LazyFile = tests.expect(
+                    value: sources.modules.snippets.first(where: { $0.name == "UnitTests" })
+                ) else {
                     return
                 }
 
-                let test:SnippetHighlightingTest = .init(parser: parser,
+                let test: SnippetHighlightingTest = .init(
+                    parser: parser,
                     source: snippet,
                     slices: [
                         .init(token: "let", color: .keyword),
                         .init(token: " _ = "),
-                        .init(token: "Int",
+                        .init(
+                            token: "Int",
                             color: .type,
-                            usr: .init("s:Si")),
+                            usr: .init("s:Si")
+                        ),
                         .init(token: "()"),
                     ],
                     [
                         .init(token: "let", color: .keyword),
                         .init(token: " _:"),
-                        .init(token: "String",
+                        .init(
+                            token: "String",
                             color: .type,
-                            usr: .init("s:SS")),
+                            usr: .init("s:SS")
+                        ),
                         .init(token: " = "),
-                        .init(token: "\"",
+                        .init(
+                            token: "\"",
                             color: .literalString,
-                            usr: .init("s:SS19stringInterpolationSSs013DefaultStringB0V_tcfc")),
+                            usr: .init("s:SS19stringInterpolationSSs013DefaultStringB0V_tcfc")
+                        ),
                         .init(token: "\\("),
                         .init(token: "1959", color: .literalNumber),
                         .init(token: ")"),
@@ -123,9 +123,11 @@ enum Main:TestMain, TestBattery
                         .init(token: "let", color: .keyword),
                         .init(token: " _ = "),
                         .init(token: "dictionary", color: .identifier),
-                        .init(token: "[",
+                        .init(
+                            token: "[",
                             color: nil,
-                            usr: .init("s:SDyq_Sgxcip")),
+                            usr: .init("s:SDyq_Sgxcip")
+                        ),
                         .init(token: "\"key\"", color: .literalString),
                         .init(token: "]"),
                     ],
@@ -135,12 +137,15 @@ enum Main:TestMain, TestBattery
                         .init(token: "Key", color: .type),
                         .init(token: " = "),
                         .init(token: "\"key\"", color: .literalString),
-                    ])
+                    ]
+                )
 
                 try test.run(in: tests)
 
-                let docs:SymbolGraphObject<Void> = try workspace.build(package: package,
-                    with: toolchain)
+                let docs: SymbolGraphObject<Void> = try workspace.build(
+                    package: package,
+                    with: toolchain
+                )
 
                 tests.expect(docs.graph.cultures.count >? 0)
                 tests.expect(docs.graph.decls.nodes.count >? 0)
@@ -151,33 +156,35 @@ enum Main:TestMain, TestBattery
 
         #endif
 
-        if  let tests:TestGroup = tests / "Reexportation",
-            let _:SymbolGraphObject<Void> = (tests.do
-            {
-                try workspace.build(
-                    package: .local(project: "TestPackages" / "swift-exportation"),
-                    with: toolchain,
-                    validation: .failOnErrors)
-            })
-        {
+        if  let tests: TestGroup = tests / "Reexportation",
+            let _: SymbolGraphObject<Void> = (
+                tests.do {
+                    try workspace.build(
+                        package: .local(project: "TestPackages" / "swift-exportation"),
+                        with: toolchain,
+                        validation: .failOnErrors
+                    )
+                }
+            ) {
         }
 
         group:
-        if  let tests:TestGroup = tests / "Local",
-            let docs:SymbolGraphObject<Void> = (tests.do
-            {
-                try workspace.build(
-                    package: .local(project: "TestPackages" / "swift-test"),
-                    with: toolchain)
-            })
-        {
+        if  let tests: TestGroup = tests / "Local",
+            let docs: SymbolGraphObject<Void> = (
+                tests.do {
+                    try workspace.build(
+                        package: .local(project: "TestPackages" / "swift-test"),
+                        with: toolchain
+                    )
+                }
+            ) {
             guard
-            let culture:SymbolGraph.Culture = tests.expect(
-                value: docs.graph.cultures.first(where: { $0.module.id == "DocCOptions" })),
-            let range:ClosedRange<Int32> = tests.expect(
-                value: culture.articles)
-            else
-            {
+            let culture: SymbolGraph.Culture = tests.expect(
+                value: docs.graph.cultures.first(where: { $0.module.id == "DocCOptions" })
+            ),
+            let range: ClosedRange<Int32> = tests.expect(
+                value: culture.articles
+            ) else {
                 break group
             }
 
@@ -186,21 +193,18 @@ enum Main:TestMain, TestBattery
             /// globally, because it is specified locally.
             tests.expect(culture.article?.footer ==? nil)
 
-            if  let headline:Markdown.Bytecode = tests.expect(value: culture.headline)
-            {
+            if  let headline: Markdown.Bytecode = tests.expect(value: culture.headline) {
                 tests.expect("\(headline.safe)" ==? """
                     This is a culture root with a custom title.
                     """)
             }
 
-            var a:SymbolGraph.ArticleNode?
-            var b:SymbolGraph.ArticleNode?
+            var a: SymbolGraph.ArticleNode?
+            var b: SymbolGraph.ArticleNode?
 
-            for i:Int32 in range
-            {
-                let node:SymbolGraph.ArticleNode = docs.graph.articles.nodes[i]
-                switch docs.graph.articles.symbols[i]
-                {
+            for i: Int32 in range {
+                let node: SymbolGraph.ArticleNode = docs.graph.articles.nodes[i]
+                switch docs.graph.articles.symbols[i] {
                 case .article("DocCOptions", "A"):  a = node
                 case .article("DocCOptions", "B"):  b = node
                 default:                            continue
@@ -208,10 +212,8 @@ enum Main:TestMain, TestBattery
             }
 
             guard
-            let a:SymbolGraph.ArticleNode = tests.expect(value: a),
-            let b:SymbolGraph.ArticleNode = tests.expect(value: b)
-            else
-            {
+            let a: SymbolGraph.ArticleNode = tests.expect(value: a),
+            let b: SymbolGraph.ArticleNode = tests.expect(value: b) else {
                 break group
             }
 

@@ -3,21 +3,18 @@ import SymbolGraphParts
 import Symbols
 import Testing
 
-@Suite
-struct ExternalExtensions
-{
-    private
-    let symbols:SymbolGraphPart
+@Suite struct ExternalExtensions {
+    private let symbols: SymbolGraphPart
 
-    init() throws
-    {
+    init() throws {
         self.symbols = try .load(part: """
             TestModules/SymbolGraphs/ExternalExtensionsWithConstraints@\
             ExtendableTypesWithConstraints.symbols.json
             """)
     }
 
-    @Test(arguments: [
+    @Test(
+        arguments: [
             (
                 ["Struct"],
                 [
@@ -44,10 +41,12 @@ struct ExternalExtensions
                     .where("Self.T", is: .conformer, to: .Equatable),
                 ]
             ),
-        ] as [([String], [GenericConstraint<Symbol.Decl>])])
-    func Constraints(_ symbol:[String], _ conditions:[GenericConstraint<Symbol.Decl>]) throws
-    {
-        let vertex:SymbolGraphPart.Vertex? = self.symbols.first(named: symbol)
+        ] as [([String], [GenericConstraint<Symbol.Decl>])]
+    ) func Constraints(
+        _ symbol: [String],
+        _ conditions: [GenericConstraint<Symbol.Decl>]
+    ) throws {
+        let vertex: SymbolGraphPart.Vertex? = self.symbols.first(named: symbol)
         #expect(vertex?.extension.conditions == conditions)
     }
 }

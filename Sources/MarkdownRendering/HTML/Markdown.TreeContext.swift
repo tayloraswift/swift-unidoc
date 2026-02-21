@@ -1,10 +1,8 @@
 import HTML
 import MarkdownABI
 
-extension Markdown
-{
-    enum TreeContext
-    {
+extension Markdown {
+    enum TreeContext {
         /// An anchorable context, which generates an HTML container element
         /// with an `a` element inside of it that links to the outer container’s
         /// fragment `id`.
@@ -30,41 +28,35 @@ extension Markdown
         case transparent
     }
 }
-extension Markdown.TreeContext
-{
-    private static
-    func heading(_ type:HTML.ContainerElement, attributes:borrowing AttributeList) -> Self
-    {
+extension Markdown.TreeContext {
+    private static func heading(
+        _ type: HTML.ContainerElement,
+        attributes: borrowing AttributeList
+    ) -> Self {
         attributes.id == nil ? .container(type) : .anchorable(type)
     }
 
-    private static
-    func highlight(_ type:Markdown.SyntaxHighlight, attributes:inout AttributeList) -> Self
-    {
-        let container:HTML.ContainerElement = attributes.href == nil ? .span : .a
+    private static func highlight(
+        _ type: Markdown.SyntaxHighlight,
+        attributes: inout AttributeList
+    ) -> Self {
+        let container: HTML.ContainerElement = attributes.href == nil ? .span : .a
         attributes.append(class: type)
         return .highlight(.init(container: container, type: type))
     }
 
-    private static
-    func section(_ type:Section, attributes:inout AttributeList) -> Self
-    {
+    private static func section(_ type: Section, attributes: inout AttributeList) -> Self {
         attributes.append(class: type)
         return .section(type)
     }
-    private static
-    func signage(_ type:Signage, attributes:inout AttributeList) -> Self
-    {
+    private static func signage(_ type: Signage, attributes: inout AttributeList) -> Self {
         attributes.append(class: type)
         return .signage(type)
     }
 }
-extension Markdown.TreeContext
-{
-    init(from markdown:Markdown.Bytecode.Context, attributes:inout AttributeList)
-    {
-        switch markdown
-        {
+extension Markdown.TreeContext {
+    init(from markdown: Markdown.Bytecode.Context, attributes: inout AttributeList) {
+        switch markdown {
         case .transparent:      self = .transparent
 
         case .a:                self = .container(.a)

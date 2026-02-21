@@ -5,44 +5,33 @@ import MongoDB
 import UnidocRender
 import URI
 
-extension Unidoc
-{
-    struct LoginPage
-    {
-        let client:String
-        let from:URI
+extension Unidoc {
+    struct LoginPage {
+        let client: String
+        let from: URI
 
-        let flow:LoginFlow
+        let flow: LoginFlow
 
-        init(client:String, flow:LoginFlow, from:URI)
-        {
+        init(client: String, flow: LoginFlow, from: URI) {
             self.client = client
             self.flow = flow
             self.from = from
         }
     }
 }
-extension Unidoc.LoginPage:Unidoc.RenderablePage, Unidoc.DynamicPage
-{
-    public
-    var title:String { "Authenticate with GitHub" }
+extension Unidoc.LoginPage: Unidoc.RenderablePage, Unidoc.DynamicPage {
+    public var title: String { "Authenticate with GitHub" }
 }
-extension Unidoc.LoginPage:Unidoc.ApplicationPage
-{
-    public
-    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
-    {
-        main[.header, { $0.class = "hero" }]
-        {
-            $0[.h1] = switch self.flow
-            {
+extension Unidoc.LoginPage: Unidoc.ApplicationPage {
+    public func main(_ main: inout HTML.ContentEncoder, format: Unidoc.RenderFormat) {
+        main[.header, { $0.class = "hero" }] {
+            $0[.h1] = switch self.flow {
             case .sso:  "Verify your identity"
             case .sync: "Verify your organizations"
             }
         }
 
-        switch self.flow
-        {
+        switch self.flow {
         case .sso:
             main[.p] = """
             Swiftinit uses GitHub SSO to verify your identity and grant you access to your \
@@ -55,11 +44,9 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
 
         case .sync:
             main[.p] = "Authenticate again with GitHub to verify your organizations."
-            main[.p, { $0.class = "note" }]
-            {
+            main[.p, { $0.class = "note" }] {
                 $0 += "Some of your organizations may have policies that "
-                $0[.a]
-                {
+                $0[.a] {
                     $0.target = "_blank"
                     $0.href = """
                     https://docs.github.com/en/organizations/\
@@ -76,24 +63,19 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
             """
         }
 
-        main[.form]
-        {
+        main[.form] {
             $0.id = "login"
             $0.method = "get"
             //  This is the same for both OAuth and GitHub Apps.
             $0.action = "https://github.com/login/oauth/authorize"
-        }
-            content:
-        {
-            $0[.input]
-            {
+        } content: {
+            $0[.input] {
                 $0.type = "hidden"
                 $0.name = "client_id"
                 $0.value = self.client
             }
 
-            $0[.input]
-            {
+            $0[.input] {
                 $0.type = "hidden"
                 $0.name = "redirect_uri"
                 $0.value = "\(format.origin)/auth/github?from=\(self.from)&flow=\(self.flow)"
@@ -103,13 +85,11 @@ extension Unidoc.LoginPage:Unidoc.ApplicationPage
             //  even though the GitHub OAuth documentation suggests it should.
             //  https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#loopback-redirect-urls
 
-            if  case .sync = self.flow
-            {
+            if  case .sync = self.flow {
                 $0[.input] { $0.type = "hidden" ; $0.name = "scope" ; $0.value = "read:org" }
             }
 
-            $0[.button]
-            {
+            $0[.button] {
                 $0.class = "region"
                 $0.type = "submit"
             } = "Authenticate with GitHub"

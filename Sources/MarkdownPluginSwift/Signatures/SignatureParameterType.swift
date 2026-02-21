@@ -1,5 +1,4 @@
-enum SignatureParameterType
-{
+enum SignatureParameterType {
     case `func`
     case `subscript`
 }

@@ -1,8 +1,5 @@
-extension SymbolGraph.Outline.Unresolved
-{
-    @frozen public
-    enum LinkType:Equatable, Hashable, Sendable
-    {
+extension SymbolGraph.Outline.Unresolved {
+    @frozen public enum LinkType: Equatable, Hashable, Sendable {
         /// The associated text is an unresolved doclink. The string does **not** include the
         /// `doc:` scheme.
         ///

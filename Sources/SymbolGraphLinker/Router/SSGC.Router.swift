@@ -5,44 +5,35 @@ import LexicalPaths
 import Symbols
 import Unidoc
 
-extension SSGC
-{
+extension SSGC {
     /// A type responsible for detecting URL path collisions between routes in the
     /// same symbol graph.
-    struct Router<Hash, Vertex> where Hash:Hashable
-    {
-        private(set)
-        var paths:[Route: InlineDictionary<Hash, InlineArray<Vertex>>]
+    struct Router<Hash, Vertex> where Hash: Hashable {
+        private(set) var paths: [Route: InlineDictionary<Hash, InlineArray<Vertex>>]
 
-        init()
-        {
+        init() {
             self.paths = [:]
         }
     }
 }
-extension SSGC.Router
-{
-    subscript(namespace:Symbol.Module,
-        path:UnqualifiedPath,
-        phylum:Phylum.Decl) -> InlineDictionary<Hash, InlineArray<Vertex>>
-    {
-        _read
-        {
+extension SSGC.Router {
+    subscript(
+        namespace: Symbol.Module,
+        path: UnqualifiedPath,
+        phylum: Phylum.Decl
+    ) -> InlineDictionary<Hash, InlineArray<Vertex>> {
+        _read {
             yield  self.paths[.decl(namespace, path, phylum), default: [:]]
         }
-        _modify
-        {
+        _modify {
             yield &self.paths[.decl(namespace, path, phylum), default: [:]]
         }
     }
-    subscript(route:SSGC.Route) -> InlineDictionary<Hash, InlineArray<Vertex>>
-    {
-        _read
-        {
+    subscript(route: SSGC.Route) -> InlineDictionary<Hash, InlineArray<Vertex>> {
+        _read {
             yield  self.paths[route, default: [:]]
         }
-        _modify
-        {
+        _modify {
             yield &self.paths[route, default: [:]]
         }
     }

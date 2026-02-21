@@ -1,21 +1,15 @@
-@frozen public
-enum MediaType:Equatable, Hashable, Sendable
-{
-    case application(MediaSubtype, charset:Charset? = nil)
-    case audio      (MediaSubtype, charset:Charset? = nil)
-    case font       (MediaSubtype, charset:Charset? = nil)
-    case image      (MediaSubtype, charset:Charset? = nil)
-    case model      (MediaSubtype, charset:Charset? = nil)
-    case text       (MediaSubtype, charset:Charset? = nil)
-    case video      (MediaSubtype, charset:Charset? = nil)
+@frozen public enum MediaType: Equatable, Hashable, Sendable {
+    case application(MediaSubtype, charset: Charset? = nil)
+    case audio      (MediaSubtype, charset: Charset? = nil)
+    case font       (MediaSubtype, charset: Charset? = nil)
+    case image      (MediaSubtype, charset: Charset? = nil)
+    case model      (MediaSubtype, charset: Charset? = nil)
+    case text       (MediaSubtype, charset: Charset? = nil)
+    case video      (MediaSubtype, charset: Charset? = nil)
 }
-extension MediaType:CustomStringConvertible
-{
-    @inlinable public
-    var description:String
-    {
-        switch self
-        {
+extension MediaType: CustomStringConvertible {
+    @inlinable public var description: String {
+        switch self {
         case .application(let subtype, charset: nil):
             "application/\(subtype)"
 

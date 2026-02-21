@@ -1,20 +1,14 @@
 import MongoQL
 
-extension Unidoc
-{
-    @frozen public
-    enum VertexProjection
-    {
+extension Unidoc {
+    @frozen public enum VertexProjection {
         case all
         case limited
     }
 }
-extension Unidoc.VertexProjection
-{
-    var unset:[Mongo.AnyKeyPath]
-    {
-        switch self
-        {
+extension Unidoc.VertexProjection {
+    var unset: [Mongo.AnyKeyPath] {
+        switch self {
         case .all:
             []
 

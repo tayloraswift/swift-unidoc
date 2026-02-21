@@ -5,44 +5,31 @@ import UnidocDB
 import UnidocQueries
 import UnidocRender
 
-extension Unidoc
-{
-    @frozen public
-    struct HomeEndpoint
-    {
-        public
-        let query:ActivityQuery
-        public
-        var value:ActivityQuery.Output?
+extension Unidoc {
+    @frozen public struct HomeEndpoint {
+        public let query: ActivityQuery
+        public var value: ActivityQuery.Output?
 
-        @inlinable public
-        init(query:ActivityQuery)
-        {
+        @inlinable public init(query: ActivityQuery) {
             self.query = query
             self.value = nil
         }
     }
 }
-extension Unidoc.HomeEndpoint:Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint
-{
-    @inlinable public static
-    var replica:Mongo.ReadPreference { .nearest }
+extension Unidoc.HomeEndpoint: Mongo.PipelineEndpoint, Mongo.SingleOutputEndpoint {
+    @inlinable public static var replica: Mongo.ReadPreference { .nearest }
 }
-extension Unidoc.HomeEndpoint:HTTP.ServerEndpoint
-{
-    public consuming
-    func response(as format:Unidoc.RenderFormat) -> HTTP.ServerResponse
-    {
+extension Unidoc.HomeEndpoint: HTTP.ServerEndpoint {
+    public consuming func response(as format: Unidoc.RenderFormat) -> HTTP.ServerResponse {
         guard
-        let output:Unidoc.ActivityQuery.Output = self.value
-        else
-        {
+        let output: Unidoc.ActivityQuery.Output = self.value else {
             return .error("Query for endpoint '\(Self.self)' returned no outputs!")
         }
 
-        let page:Unidoc.HomePage = .init(
+        let page: Unidoc.HomePage = .init(
             repo: output.repo,
-            docs: output.docs)
+            docs: output.docs
+        )
 
         return .ok(page.resource(format: format))
     }

@@ -2,23 +2,26 @@ import S3
 @_spi(testable) import S3Client
 import Testing
 
-@Suite
-enum Authorization
-{
-    @Test
-    static func V4()
-    {
-        let credentials:AWS.AccessKey = .init(id: "AKIAIOSFODNN7EXAMPLE",
-            secret: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY")
-        let computed:String = credentials.sign(put: "Welcome to Amazon S3.",
+@Suite enum Authorization {
+    @Test static func V4() {
+        let credentials: AWS.AccessKey = .init(
+            id: "AKIAIOSFODNN7EXAMPLE",
+            secret: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+        )
+        let computed: String = credentials.sign(
+            put: "Welcome to Amazon S3.",
             storage: .reducedRedundancy,
             bucket: .init(
                 region: .us_east_1,
-                name: "examplebucket"),
-            date: .init(weekday: .friday,
+                name: "examplebucket"
+            ),
+            date: .init(
+                weekday: .friday,
                 date: .init(year: 2013, month: .may, day: 24),
-                time: .init(hour: 0, minute: 0, second: 0)),
-            path: "/test%24file.text")
+                time: .init(hour: 0, minute: 0, second: 0)
+            ),
+            path: "/test%24file.text"
+        )
 
         #expect(computed == """
             AWS4-HMAC-SHA256 \

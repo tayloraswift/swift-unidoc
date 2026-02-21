@@ -1,30 +1,22 @@
 import URI
 
-extension Unidoc.PackageMetadataSettingsOperation
-{
-    enum Update
-    {
+extension Unidoc.PackageMetadataSettingsOperation {
+    enum Update {
         case general(Unidoc.PackageSettings)
         case media(Unidoc.PackageMedia)
         case build(Unidoc.BuildTemplate)
     }
 }
-extension Unidoc.PackageMetadataSettingsOperation.Update
-{
-    init?(type:Unidoc.PackageMetadataSettings, form:URI.QueryEncodedForm)
-    {
-        let form:[String: String] = form.parameters.reduce(into: [:])
-        {
+extension Unidoc.PackageMetadataSettingsOperation.Update {
+    init?(type: Unidoc.PackageMetadataSettings, form: URI.QueryEncodedForm) {
+        let form: [String: String] = form.parameters.reduce(into: [:]) {
             $0[$1.key] = $1.value
         }
 
-        switch type
-        {
+        switch type {
         case .general:
             guard
-            let settings:Unidoc.PackageSettings = .init(parameters: form)
-            else
-            {
+            let settings: Unidoc.PackageSettings = .init(parameters: form) else {
                 return nil
             }
 
@@ -32,9 +24,7 @@ extension Unidoc.PackageMetadataSettingsOperation.Update
 
         case .media:
             guard
-            let media:Unidoc.PackageMedia = .init(parameters: form)
-            else
-            {
+            let media: Unidoc.PackageMedia = .init(parameters: form) else {
                 return nil
             }
 
@@ -42,9 +32,7 @@ extension Unidoc.PackageMetadataSettingsOperation.Update
 
         case .build:
             guard
-            let template:Unidoc.BuildTemplate = .init(parameters: form)
-            else
-            {
+            let template: Unidoc.BuildTemplate = .init(parameters: form) else {
                 return nil
             }
 
