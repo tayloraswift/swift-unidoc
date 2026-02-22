@@ -10,28 +10,22 @@ import Unidoc
 import UnidocRecords
 import URI
 
-extension Unidoc.PtclEndpoint
-{
-    struct ConformersPage
-    {
-        let sidebar:Unidoc.Sidebar<Unidoc.DocsEndpoint>
+extension Unidoc.PtclEndpoint {
+    struct ConformersPage {
+        let sidebar: Unidoc.Sidebar<Unidoc.DocsEndpoint>
 
-        private
-        let vertex:Unidoc.DeclVertex
-        private
-        let halo:Unidoc.ConformingTypes
+        private let vertex: Unidoc.DeclVertex
+        private let halo: Unidoc.ConformingTypes
 
-        private
-        let culture:Unidoc.LinkReference<Unidoc.CultureVertex>
-        private
-        let colony:Unidoc.LinkReference<Unidoc.CultureVertex>?
-        private
-        let stem:Unidoc.StemComponents
+        private let culture: Unidoc.LinkReference<Unidoc.CultureVertex>
+        private let colony: Unidoc.LinkReference<Unidoc.CultureVertex>?
+        private let stem: Unidoc.StemComponents
 
-        init(vertex:Unidoc.DeclVertex,
-            halo:Unidoc.ConformingTypes,
-            tree:Unidoc.TypeTree?) throws
-        {
+        init(
+            vertex: Unidoc.DeclVertex,
+            halo: Unidoc.ConformingTypes,
+            tree: Unidoc.TypeTree?
+        ) throws {
             self.colony = try vertex.colony.map { try halo.context[culture: $0] }
             self.stem = try .init(vertex.stem)
 
@@ -42,73 +36,61 @@ extension Unidoc.PtclEndpoint
             self.sidebar = .module(
                 volume: self.halo.context.volume,
                 origin: self.culture.vertex.module.id,
-                tree: tree)
+                tree: tree
+            )
         }
     }
 }
-extension Unidoc.PtclEndpoint.ConformersPage
-{
-    private
-    var demonym:Unidoc.DeclDemonym
-    {
+extension Unidoc.PtclEndpoint.ConformersPage {
+    private var demonym: Unidoc.DeclDemonym {
         .init(phylum: self.vertex.phylum, kinks: self.vertex.kinks)
     }
 }
-extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.RenderablePage
-{
-    var title:String
-    {
+extension Unidoc.PtclEndpoint.ConformersPage: Unidoc.RenderablePage {
+    var title: String {
         "\(self.stem.last) (conforming types) · \(self.volume.title) documentation"
     }
 
-    var description:String?
-    {
+    var description: String? {
         """
         The protocol \(self.stem.last) has at least \(self.halo.count) \
         conforming \(self.halo.count == 1 ? "type" : "types") available.
         """
     }
 }
-extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.StaticPage
-{
-    var location:URI { Unidoc.PtclEndpoint[self.volume, self.vertex.route] }
+extension Unidoc.PtclEndpoint.ConformersPage: Unidoc.StaticPage {
+    var location: URI { Unidoc.PtclEndpoint[self.volume, self.vertex.route] }
 }
-extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.VertexPage
-{
-    var context:Unidoc.PeripheralPageContext { self.halo.context }
+extension Unidoc.PtclEndpoint.ConformersPage: Unidoc.VertexPage {
+    var context: Unidoc.PeripheralPageContext { self.halo.context }
 
-    func main(_ main:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
-    {
-        let back:String = "\(Unidoc.DocsEndpoint[self.volume, self.vertex.route])"
-        let name:Substring = self.stem.last
+    func main(_ main: inout HTML.ContentEncoder, format: Unidoc.RenderFormat) {
+        let back: String = "\(Unidoc.DocsEndpoint[self.volume, self.vertex.route])"
+        let name: Substring = self.stem.last
 
-        main[.header, { $0.class = "hero" }]
-        {
-            $0[.div, { $0.class = "eyebrows" }]
-            {
+        main[.header, { $0.class = "hero" }] {
+            $0[.div, { $0.class = "eyebrows" }] {
                 $0[.span] { $0.class = "phylum" } = "Conforming types"
 
-                $0[.span]
-                {
+                $0[.span] {
                     $0.class = "domain"
                 } = self.context.volume | (self.culture, extends: self.colony)
             }
 
-            $0[.nav]
-            {
+            $0[.nav] {
                 $0.class = "breadcrumbs"
-            } = Unidoc.LinkVector.init(self.context,
+            } = Unidoc.LinkVector.init(
+                self.context,
                 display: self.stem.scope,
-                scalars: self.vertex.scope)
+                scalars: self.vertex.scope
+            )
 
             $0[.h1] = name
 
-            $0[.p]
-            {
+            $0[.p] {
                 $0 += "The protocol "
                 $0[.code] { $0[.a] { $0.href = back } = name }
-                switch self.halo.count
-                {
+                switch self.halo.count {
                 case 0:
                     $0 += " has no known conforming types available."
 
@@ -118,12 +100,9 @@ extension Unidoc.PtclEndpoint.ConformersPage:Unidoc.VertexPage
                 case let count:
                     $0 += " has at least \(count) conforming types available"
 
-                    if  self.halo.cultures > 1
-                    {
+                    if  self.halo.cultures > 1 {
                         $0 += " across \(self.halo.cultures) modules."
-                    }
-                    else
-                    {
+                    } else {
                         $0 += "."
                     }
                 }

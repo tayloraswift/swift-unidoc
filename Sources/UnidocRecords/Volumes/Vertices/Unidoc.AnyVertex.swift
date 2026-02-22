@@ -8,11 +8,8 @@ import Symbols
 import Unidoc
 import UnidocAPI
 
-extension Unidoc
-{
-    @frozen public
-    enum AnyVertex:Equatable, Sendable
-    {
+extension Unidoc {
+    @frozen public enum AnyVertex: Equatable, Sendable {
         case article(ArticleVertex)
         case culture(CultureVertex)
         case decl(DeclVertex)
@@ -22,79 +19,53 @@ extension Unidoc
         case landing(LandingVertex)
     }
 }
-extension Unidoc.AnyVertex
-{
-    @inlinable public
-    var article:Unidoc.ArticleVertex?
-    {
-        switch self
-        {
+extension Unidoc.AnyVertex {
+    @inlinable public var article: Unidoc.ArticleVertex? {
+        switch self {
         case .article(let article): article
         case _:                     nil
         }
     }
-    @inlinable public
-    var culture:Unidoc.CultureVertex?
-    {
-        switch self
-        {
+    @inlinable public var culture: Unidoc.CultureVertex? {
+        switch self {
         case .culture(let culture): culture
         case _:                     nil
         }
     }
-    @inlinable public
-    var decl:Unidoc.DeclVertex?
-    {
-        switch self
-        {
+    @inlinable public var decl: Unidoc.DeclVertex? {
+        switch self {
         case .decl(let decl):       decl
         case _:                     nil
         }
     }
-    @inlinable public
-    var file:Unidoc.FileVertex?
-    {
-        switch self
-        {
+    @inlinable public var file: Unidoc.FileVertex? {
+        switch self {
         case .file(let file):       file
         case _:                     nil
         }
     }
-    @inlinable public
-    var product:Unidoc.ProductVertex?
-    {
-        switch self
-        {
+    @inlinable public var product: Unidoc.ProductVertex? {
+        switch self {
         case .product(let product): product
         case _:                     nil
         }
     }
-    @inlinable public
-    var foreign:Unidoc.ForeignVertex?
-    {
-        switch self
-        {
+    @inlinable public var foreign: Unidoc.ForeignVertex? {
+        switch self {
         case .foreign(let foreign): foreign
         case _:                     nil
         }
     }
-    @inlinable public
-    var landing:Unidoc.LandingVertex?
-    {
-        switch self
-        {
+    @inlinable public var landing: Unidoc.LandingVertex? {
+        switch self {
         case .landing(let landing): landing
         case _:                     nil
         }
     }
 }
-extension Unidoc.AnyVertex:Identifiable
-{
-    @inlinable public
-    var id:Unidoc.Scalar
-    {
-        switch self
-        {
+extension Unidoc.AnyVertex: Identifiable {
+    @inlinable public var id: Unidoc.Scalar {
+        switch self {
         case .article(let article): article.id
         case .culture(let culture): culture.id
         case .decl(let decl):       decl.id
@@ -105,13 +76,9 @@ extension Unidoc.AnyVertex:Identifiable
         }
     }
 }
-extension Unidoc.AnyVertex
-{
-    @inlinable public
-    var overview:Unidoc.Passage?
-    {
-        switch self
-        {
+extension Unidoc.AnyVertex {
+    @inlinable public var overview: Unidoc.Passage? {
+        switch self {
         case .article(let article): article.overview
         case .culture(let culture): culture.overview
         case .decl(let decl):       decl.overview
@@ -121,11 +88,8 @@ extension Unidoc.AnyVertex
         case .landing:              nil
         }
     }
-    @inlinable public
-    var details:Unidoc.Passage?
-    {
-        switch self
-        {
+    @inlinable public var details: Unidoc.Passage? {
+        switch self {
         case .article(let article): article.details
         case .culture(let culture): culture.details
         case .decl(let decl):       decl.details
@@ -135,11 +99,8 @@ extension Unidoc.AnyVertex
         case .landing:              nil
         }
     }
-    @inlinable public
-    var shoot:Unidoc.Shoot?
-    {
-        switch self
-        {
+    @inlinable public var shoot: Unidoc.Shoot? {
+        switch self {
         case .article(let article): article.shoot
         case .culture(let culture): culture.shoot
         case .decl(let decl):       decl.shoot
@@ -150,11 +111,8 @@ extension Unidoc.AnyVertex
         }
     }
 }
-extension Unidoc.AnyVertex
-{
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.AnyVertex {
+    @frozen public enum CodingKey: String, Sendable {
         /// Always present.
         case id = "_id"
 
@@ -260,16 +218,12 @@ extension Unidoc.AnyVertex
         case hash = "H"
     }
 }
-extension Unidoc.AnyVertex:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension Unidoc.AnyVertex: BSONDocumentEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.id] = self.id
         bson[.volume] = self.id.edition
 
-        switch self
-        {
+        switch self {
         case .article(let self):
             //  This allows us to correlate article identifiers across different versions.
             //  Articles are so few in number that we can afford to duplicate this.
@@ -292,23 +246,23 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
             bson[.stem] = self.stem
 
             bson[.signature_availability] =
-                self.signature.availability.isEmpty ? nil :
-                self.signature.availability
+            self.signature.availability.isEmpty ? nil :
+            self.signature.availability
 
             bson[.signature_abridged_bytecode] = self.signature.abridged.bytecode
             bson[.signature_expanded_bytecode] = self.signature.expanded.bytecode
 
             bson[.signature_expanded_scalars] =
-                self.signature.expanded.scalars.isEmpty ? nil :
-                self.signature.expanded.scalars
+            self.signature.expanded.scalars.isEmpty ? nil :
+            self.signature.expanded.scalars
 
             bson[.signature_generics_constraints] =
-                self.signature.generics.constraints.isEmpty ? nil :
-                self.signature.generics.constraints
+            self.signature.generics.constraints.isEmpty ? nil :
+            self.signature.generics.constraints
 
             bson[.signature_generics_parameters] =
-                self.signature.generics.parameters.isEmpty ? nil :
-                self.signature.generics.parameters
+            self.signature.generics.parameters.isEmpty ? nil :
+            self.signature.generics.parameters
 
             bson[.signature_spis] = self.signature.spis
 
@@ -374,94 +328,120 @@ extension Unidoc.AnyVertex:BSONDocumentEncodable
         }
     }
 }
-extension Unidoc.AnyVertex:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        let id:Unidoc.Scalar = try bson[.id].decode()
+extension Unidoc.AnyVertex: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        let id: Unidoc.Scalar = try bson[.id].decode()
 
-        switch id.plane
-        {
+        switch id.plane {
         case .module?:
-            self = .culture(.init(id: id,
-                module: try bson[.module].decode(),
-                //  Needed until we can migrate the database.
-                readme: try bson[.readme]?.decode() ?? bson[.file]?.decode(),
-                //  Might be decoding with this key deprojected.
-                census: try bson[.census]?.decode() ?? .init(),
-                headline: try bson[.headline]?.decode(),
-                overview: try bson[.overview]?.decode(),
-                details: try bson[.details]?.decode(),
-                group: try bson[.group]?.decode()))
+            self = .culture(
+                .init(
+                    id: id,
+                    module: try bson[.module].decode(),
+                    //  Needed until we can migrate the database.
+                    readme: try bson[.readme]?.decode() ?? bson[.file]?.decode(),
+                    //  Might be decoding with this key deprojected.
+                    census: try bson[.census]?.decode() ?? .init(),
+                    headline: try bson[.headline]?.decode(),
+                    overview: try bson[.overview]?.decode(),
+                    details: try bson[.details]?.decode(),
+                    group: try bson[.group]?.decode()
+                )
+            )
 
         case .decl?:
-            let culture:Unidoc.Scalar = try bson[.culture].decode()
+            let culture: Unidoc.Scalar = try bson[.culture].decode()
 
-            self = .decl(.init(id: id,
-                flags: try bson[.flags].decode(),
-                signature: .init(
-                    availability: try bson[.signature_availability]?.decode() ?? .init(),
-                    abridged: Signature<Unidoc.Scalar?>.Abridged.init(
-                        bytecode: try bson[.signature_abridged_bytecode].decode()),
-                    expanded: Signature<Unidoc.Scalar?>.Expanded.init(
-                        bytecode: try bson[.signature_expanded_bytecode].decode(),
-                        scalars: try bson[.signature_expanded_scalars]?.decode() ?? []),
-                    generics: Signature<Unidoc.Scalar?>.Generics.init(
-                        constraints: try bson[.signature_generics_constraints]?.decode() ?? [],
-                        parameters: try bson[.signature_generics_parameters]?.decode() ?? []),
-                    spis: try bson[.signature_spis]?.decode()),
-                symbol: try bson[.symbol].decode(),
-                stem: try bson[.stem].decode(),
-                _requirements: try bson[.constituents]?.decode() ?? [],
-                superforms: try bson[.superforms]?.decode() ?? [],
-                namespace: try bson[.colony]?.decode() ?? culture,
-                culture: culture,
-                scope: try bson[.scope]?.decode() ?? [],
-                renamed: try bson[.renamed]?.decode(),
-                readme: try bson[.readme]?.decode(),
-                file: try bson[.file]?.decode(),
-                position: try bson[.position]?.decode(),
-                overview: try bson[.overview]?.decode(),
-                details: try bson[.details]?.decode(),
-                peers: try bson[.peers]?.decode(),
-                group: try bson[.group]?.decode()))
+            self = .decl(
+                .init(
+                    id: id,
+                    flags: try bson[.flags].decode(),
+                    signature: .init(
+                        availability: try bson[.signature_availability]?.decode() ?? .init(),
+                        abridged: Signature<Unidoc.Scalar?>.Abridged.init(
+                            bytecode: try bson[.signature_abridged_bytecode].decode()
+                        ),
+                        expanded: Signature<Unidoc.Scalar?>.Expanded.init(
+                            bytecode: try bson[.signature_expanded_bytecode].decode(),
+                            scalars: try bson[.signature_expanded_scalars]?.decode() ?? []
+                        ),
+                        generics: Signature<Unidoc.Scalar?>.Generics.init(
+                            constraints: try bson[
+                                .signature_generics_constraints
+                            ]?.decode() ?? [],
+                            parameters: try bson[.signature_generics_parameters]?.decode() ?? []
+                        ),
+                        spis: try bson[.signature_spis]?.decode()
+                    ),
+                    symbol: try bson[.symbol].decode(),
+                    stem: try bson[.stem].decode(),
+                    _requirements: try bson[.constituents]?.decode() ?? [],
+                    superforms: try bson[.superforms]?.decode() ?? [],
+                    namespace: try bson[.colony]?.decode() ?? culture,
+                    culture: culture,
+                    scope: try bson[.scope]?.decode() ?? [],
+                    renamed: try bson[.renamed]?.decode(),
+                    readme: try bson[.readme]?.decode(),
+                    file: try bson[.file]?.decode(),
+                    position: try bson[.position]?.decode(),
+                    overview: try bson[.overview]?.decode(),
+                    details: try bson[.details]?.decode(),
+                    peers: try bson[.peers]?.decode(),
+                    group: try bson[.group]?.decode()
+                )
+            )
 
         case .article?:
-            self = .article(.init(id: id,
-                stem: try bson[.stem].decode(),
-                culture: try bson[.culture].decode(),
-                //  Needed until we can migrate the database.
-                readme: try bson[.readme]?.decode() ?? bson[.file]?.decode(),
-                headline: try bson[.headline].decode(),
-                overview: try bson[.overview]?.decode(),
-                details: try bson[.details]?.decode(),
-                group: try bson[.group]?.decode()))
+            self = .article(
+                .init(
+                    id: id,
+                    stem: try bson[.stem].decode(),
+                    culture: try bson[.culture].decode(),
+                    //  Needed until we can migrate the database.
+                    readme: try bson[.readme]?.decode() ?? bson[.file]?.decode(),
+                    headline: try bson[.headline].decode(),
+                    overview: try bson[.overview]?.decode(),
+                    details: try bson[.details]?.decode(),
+                    group: try bson[.group]?.decode()
+                )
+            )
 
         case .file?:
             self = .file(.init(id: id, symbol: try bson[.symbol].decode()))
 
         case .product?:
-            self = .product(.init(id: id,
-                //  Although this field is always present in the database, it may be removed
-                //  through query projection.
-                constituents: try bson[.constituents]?.decode() ?? [],
-                symbol: try bson[.symbol].decode(),
-                type: try bson[.product].decode(),
-                group: try bson[.group]?.decode()))
+            self = .product(
+                .init(
+                    id: id,
+                    //  Although this field is always present in the database, it may be removed
+                    //  through query projection.
+                    constituents: try bson[.constituents]?.decode() ?? [],
+                    symbol: try bson[.symbol].decode(),
+                    type: try bson[.product].decode(),
+                    group: try bson[.group]?.decode()
+                )
+            )
 
         case .foreign?:
-            self = .foreign(.init(id: id,
-                extendee: try bson[.extendee].decode(),
-                scope: try bson[.scope]?.decode() ?? [],
-                flags: try bson[.flags].decode(),
-                stem: try bson[.stem].decode(),
-                hash: try bson[.hash].decode()))
+            self = .foreign(
+                .init(
+                    id: id,
+                    extendee: try bson[.extendee].decode(),
+                    scope: try bson[.scope]?.decode() ?? [],
+                    flags: try bson[.flags].decode(),
+                    stem: try bson[.stem].decode(),
+                    hash: try bson[.hash].decode()
+                )
+            )
 
         case _:
-            self = .landing(.init(id: id,
-                snapshot: try bson[.snapshot].decode(),
-                packages: try bson[.packages]?.decode() ?? []))
+            self = .landing(
+                .init(
+                    id: id,
+                    snapshot: try bson[.snapshot].decode(),
+                    packages: try bson[.packages]?.decode() ?? []
+                )
+            )
         }
     }
 }

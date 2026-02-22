@@ -1,6 +1,5 @@
 import JSONDecoding
 import Symbols
 
-extension Symbol.ACL:JSONStringDecodable
-{
+extension Symbol.ACL: JSONStringDecodable {
 }

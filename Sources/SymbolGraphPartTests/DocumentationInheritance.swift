@@ -2,19 +2,17 @@ import SymbolGraphParts
 import Symbols
 import Testing
 
-@Suite
-struct DocumentationInheritance
-{
-    private
-    let symbols:SymbolGraphPart
+@Suite struct DocumentationInheritance {
+    private let symbols: SymbolGraphPart
 
-    init() throws
-    {
+    init() throws {
         self.symbols = try .load(
-            part: "TestModules/SymbolGraphs/DocumentationInheritance.symbols.json")
+            part: "TestModules/SymbolGraphs/DocumentationInheritance.symbols.json"
+        )
     }
 
-    @Test(arguments: [
+    @Test(
+        arguments: [
             (
                 ["Protocol", "everywhere"],
                 "DocumentationInheritance",
@@ -108,66 +106,88 @@ struct DocumentationInheritance
                 nil,
                 nil
             ),
-        ] as [([String], Symbol.Module?, String?)])
-    func Comments(_ symbol:[String], _ culture:Symbol.Module?, _ comment:String?) throws
-    {
-        let vertex:SymbolGraphPart.Vertex? = self.symbols.first(named: symbol)
+        ] as [([String], Symbol.Module?, String?)]
+    ) func Comments(_ symbol: [String], _ culture: Symbol.Module?, _ comment: String?) throws {
+        let vertex: SymbolGraphPart.Vertex? = self.symbols.first(named: symbol)
         #expect(vertex?.doccomment?.culture == culture)
         #expect(vertex?.doccomment?.text == comment)
     }
 
-    @Test
-    func Origins() throws
-    {
-        let relationships:Set<Symbol.AnyRelationship> = self.symbols.relationships.reduce(
-            into: [])
-        {
-            if  case _? = $1.origin
-            {
+    @Test func Origins() throws {
+        let relationships: Set<Symbol.AnyRelationship> = self.symbols.relationships.reduce(
+            into: []
+        ) {
+            if  case _? = $1.origin {
                 $0.insert($1)
             }
         }
 
-        #expect(relationships == [
-                .intrinsicWitness(.init(
-                    _ : "s24DocumentationInheritance15OtherRefinementPAAE8protocolytvp",
-                    of: "s24DocumentationInheritance8ProtocolP8protocolytvp",
-                    origin: "s24DocumentationInheritance8ProtocolP8protocolytvp")),
+        #expect(
+            relationships == [
+                .intrinsicWitness(
+                    .init(
+                        _: "s24DocumentationInheritance15OtherRefinementPAAE8protocolytvp",
+                        of: "s24DocumentationInheritance8ProtocolP8protocolytvp",
+                        origin: "s24DocumentationInheritance8ProtocolP8protocolytvp"
+                    )
+                ),
 
-                .requirement(.init(
-                    _ : "s24DocumentationInheritance10RefinementP8protocolytvp",
-                    of: "s24DocumentationInheritance10RefinementP",
-                    origin: "s24DocumentationInheritance8ProtocolP8protocolytvp")),
+                .requirement(
+                    .init(
+                        _: "s24DocumentationInheritance10RefinementP8protocolytvp",
+                        of: "s24DocumentationInheritance10RefinementP",
+                        origin: "s24DocumentationInheritance8ProtocolP8protocolytvp"
+                    )
+                ),
 
-                .override(.init(
-                    _ : "s24DocumentationInheritance10RefinementP8protocolytvp",
-                    of: "s24DocumentationInheritance8ProtocolP8protocolytvp",
-                    origin: "s24DocumentationInheritance8ProtocolP8protocolytvp")),
+                .override(
+                    .init(
+                        _: "s24DocumentationInheritance10RefinementP8protocolytvp",
+                        of: "s24DocumentationInheritance8ProtocolP8protocolytvp",
+                        origin: "s24DocumentationInheritance8ProtocolP8protocolytvp"
+                    )
+                ),
 
-                .member(.init(
-                    _ : "s24DocumentationInheritance9ConformerV7nowhereytvp",
-                    in: .scalar("s24DocumentationInheritance9ConformerV"),
-                    origin: "s24DocumentationInheritance10RefinementP7nowhereytvp")),
+                .member(
+                    .init(
+                        _: "s24DocumentationInheritance9ConformerV7nowhereytvp",
+                        in: .scalar("s24DocumentationInheritance9ConformerV"),
+                        origin: "s24DocumentationInheritance10RefinementP7nowhereytvp"
+                    )
+                ),
 
-                .member(.init(
-                    _ : "s24DocumentationInheritance9ConformerV10refinementytvp",
-                    in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
-                    origin: "s24DocumentationInheritance10RefinementP10refinementytvp")),
+                .member(
+                    .init(
+                        _: "s24DocumentationInheritance9ConformerV10refinementytvp",
+                        in: .scalar(.init("s:24DocumentationInheritance9ConformerV")!),
+                        origin: "s24DocumentationInheritance10RefinementP10refinementytvp"
+                    )
+                ),
 
-                .member(.init(
-                    _ : "s24DocumentationInheritance9ConformerV9conformerytvp",
-                    in: .scalar("s24DocumentationInheritance9ConformerV"),
-                    origin: "s24DocumentationInheritance10RefinementP9conformerytvp")),
+                .member(
+                    .init(
+                        _: "s24DocumentationInheritance9ConformerV9conformerytvp",
+                        in: .scalar("s24DocumentationInheritance9ConformerV"),
+                        origin: "s24DocumentationInheritance10RefinementP9conformerytvp"
+                    )
+                ),
 
-                .member(.init(
-                    _ : "s24DocumentationInheritance9ConformerV10everywhereytvp",
-                    in: .scalar("s24DocumentationInheritance9ConformerV"),
-                    origin: "s24DocumentationInheritance10RefinementP10everywhereytvp")),
+                .member(
+                    .init(
+                        _: "s24DocumentationInheritance9ConformerV10everywhereytvp",
+                        in: .scalar("s24DocumentationInheritance9ConformerV"),
+                        origin: "s24DocumentationInheritance10RefinementP10everywhereytvp"
+                    )
+                ),
 
-                .member(.init(
-                    _ : "s24DocumentationInheritance9ConformerV8protocolytvp",
-                    in: .scalar("s24DocumentationInheritance9ConformerV"),
-                    origin: "s24DocumentationInheritance8ProtocolP8protocolytvp")),
-            ])
+                .member(
+                    .init(
+                        _: "s24DocumentationInheritance9ConformerV8protocolytvp",
+                        in: .scalar("s24DocumentationInheritance9ConformerV"),
+                        origin: "s24DocumentationInheritance8ProtocolP8protocolytvp"
+                    )
+                ),
+            ]
+        )
     }
 }

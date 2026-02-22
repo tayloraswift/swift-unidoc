@@ -1,49 +1,44 @@
 import SystemIO
 
-extension Unidoc.InitCommand
-{
-    struct Installation
-    {
-        let docker_compose_yml:FilePath
-        let unidoc_rs_init_js:FilePath
-        let unidoc_rs_conf:FilePath
+extension Unidoc.InitCommand {
+    struct Installation {
+        let docker_compose_yml: FilePath
+        let unidoc_rs_init_js: FilePath
+        let unidoc_rs_conf: FilePath
 
-        let container:String
-        let localhost:Bool
+        let container: String
+        let localhost: Bool
     }
 }
-extension Unidoc.InitCommand.Installation
-{
-    func create() throws
-    {
-        for (file, content):(FilePath, String) in [
-            (
-                self.docker_compose_yml,
-                Self.docker_compose_yml(container: self.container)
-            ),
-            (
-                self.unidoc_rs_conf,
-                Self.unidoc_rs_conf
-            ),
-            (
-                self.unidoc_rs_init_js,
-                Self.unidoc_rs_init_js(host: self.localhost ? "localhost" : "unidoc-mongod")
-            )
-        ]
-        {
-            try file.open(.writeOnly, permissions: (.rw, .r, .r), options: [.create, .truncate])
-            {
+extension Unidoc.InitCommand.Installation {
+    func create() throws {
+        for (file, content): (FilePath, String) in [
+                (
+                    self.docker_compose_yml,
+                    Self.docker_compose_yml(container: self.container)
+                ),
+                (
+                    self.unidoc_rs_conf,
+                    Self.unidoc_rs_conf
+                ),
+                (
+                    self.unidoc_rs_init_js,
+                    Self.unidoc_rs_init_js(host: self.localhost ? "localhost" : "unidoc-mongod")
+                )
+            ] {
+            try file.open(
+                .writeOnly,
+                permissions: (.rw, .r, .r),
+                options: [.create, .truncate]
+            ) {
                 _ = try $0.writeAll(content.utf8)
             }
         }
     }
 }
 
-extension Unidoc.InitCommand.Installation
-{
-    private
-    static func docker_compose_yml(container:String) -> String
-    {
+extension Unidoc.InitCommand.Installation {
+    private static func docker_compose_yml(container: String) -> String {
         """
         services:
             unidoc-mongod:
@@ -74,8 +69,7 @@ extension Unidoc.InitCommand.Installation
         """
     }
 
-    private
-    static let unidoc_rs_conf:String = """
+    private static let unidoc_rs_conf: String = """
     replication:
         replSetName: unidoc-rs
     net:
@@ -85,9 +79,7 @@ extension Unidoc.InitCommand.Installation
 
     """
 
-    private
-    static func unidoc_rs_init_js(host:String) -> String
-    {
+    private static func unidoc_rs_init_js(host: String) -> String {
         """
         db = connect('mongodb://unidoc-mongod:27017/admin');
         db.runCommand({'replSetInitiate': {

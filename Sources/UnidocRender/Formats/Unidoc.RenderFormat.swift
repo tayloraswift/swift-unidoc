@@ -5,41 +5,29 @@ import UnidocRecords
 import UnixCalendar
 import UnixTime
 
-extension Unidoc
-{
-    @frozen public
-    struct RenderFormat
-    {
-        public
-        var access:AccessControl
-        public
-        var assets:Assets
-        public
-        var origin:HTTP.ServerOrigin
-        public
-        var preview:Bool
+extension Unidoc {
+    @frozen public struct RenderFormat {
+        public var access: AccessControl
+        public var assets: Assets
+        public var origin: HTTP.ServerOrigin
+        public var preview: Bool
 
-        public
-        var username:String?
-        public
-        var locale:ISO.Locale
+        public var username: String?
+        public var locale: ISO.Locale
         /// If set, a `data-theme` attribute will be added to the `<body>` element.
-        public
-        var theme:String?
-        public
-        var time:UnixAttosecond
+        public var theme: String?
+        public var time: UnixAttosecond
 
-        @inlinable public
-        init(
-            access:AccessControl,
-            assets:Assets,
-            origin:HTTP.ServerOrigin,
-            preview:Bool,
-            username:String?,
-            locale:ISO.Locale,
-            theme:String?,
-            time:UnixAttosecond)
-        {
+        @inlinable public init(
+            access: AccessControl,
+            assets: Assets,
+            origin: HTTP.ServerOrigin,
+            preview: Bool,
+            username: String?,
+            locale: ISO.Locale,
+            theme: String?,
+            time: UnixAttosecond
+        ) {
             self.access = access
             self.assets = assets
             self.origin = origin
@@ -52,14 +40,10 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.RenderFormat
-{
-    @inlinable public
-    var sitename:String { self.preview ? "preview" : "swiftinit" }
+extension Unidoc.RenderFormat {
+    @inlinable public var sitename: String { self.preview ? "preview" : "swiftinit" }
 
-    @inlinable public
-    var cornice:Unidoc.ApplicationCornice
-    {
+    @inlinable public var cornice: Unidoc.ApplicationCornice {
         .init(sitename: self.sitename, username: self.username)
     }
 }

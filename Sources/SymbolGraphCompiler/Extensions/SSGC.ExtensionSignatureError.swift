@@ -2,20 +2,21 @@ import Signatures
 import SymbolGraphParts
 import Symbols
 
-extension SSGC
-{
-    enum ExtensionSignatureError:Error
-    {
-        case conformance(expected:ExtensionSignature, declared:[GenericConstraint<Symbol.Decl>])
-        case member     (expected:ExtensionSignature, declared:[GenericConstraint<Symbol.Decl>])
+extension SSGC {
+    enum ExtensionSignatureError: Error {
+        case conformance(
+            expected: ExtensionSignature,
+            declared: [GenericConstraint<Symbol.Decl>]
+        )
+        case member     (
+            expected: ExtensionSignature,
+            declared: [GenericConstraint<Symbol.Decl>]
+        )
     }
 }
-extension SSGC.ExtensionSignatureError:CustomStringConvertible
-{
-    var description:String
-    {
-        switch self
-        {
+extension SSGC.ExtensionSignatureError: CustomStringConvertible {
+    var description: String {
+        switch self {
         case .conformance(expected: let expected, declared: let declared):
             """
             Cannot declare an extension (of \(expected.extendee)) containing \

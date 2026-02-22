@@ -2,60 +2,42 @@ import JSON
 import SemanticVersions
 import UnidocAssets
 
-extension Unidoc.RenderFormat
-{
-    @frozen public
-    enum Assets:Sendable
-    {
+extension Unidoc.RenderFormat {
+    @frozen public enum Assets: Sendable {
         case cloudfront
         case local
     }
 }
-extension Unidoc.RenderFormat.Assets
-{
+extension Unidoc.RenderFormat.Assets {
     /// Specifies the version numbers of the static assets, if served from Cloudfront. If
     /// nil, then assets will be loaded from the local server.
     ///
     /// To reduce cache churn, not all assets are versioned. For example, the fonts and
     /// the favicon do not use the version numbers.
-    @inlinable public static
-    var version:MajorVersion { .v(37) }
+    @inlinable public static var version: MajorVersion { .v(37) }
 }
-extension Unidoc.RenderFormat.Assets
-{
-    @inlinable public
-    subscript(asset:Unidoc.Asset) -> String
-    {
-        if  case .cloudfront = self
-        {
+extension Unidoc.RenderFormat.Assets {
+    @inlinable public subscript(asset: Unidoc.Asset) -> String {
+        if  case .cloudfront = self {
             "https://static.swiftinit.org\(asset.path(prepending: Self.version))"
-        }
-        else
-        {
+        } else {
             "\(Unidoc.ServerRoot.asset)/\(asset)"
         }
     }
 
-    @inlinable public
-    func script(volumes:JSON?) -> String
-    {
-        let host:String = self == .local ? "" : "https://static.swiftinit.org"
-        if  let volumes:JSON
-        {
+    @inlinable public func script(volumes: JSON?) -> String {
+        let host: String = self == .local ? "" : "https://static.swiftinit.org"
+        if  let volumes: JSON {
             return "const host = '\(host)'; const volumes = \(volumes);"
-        }
-        else
-        {
+        } else {
             return "const host = '\(host)'; const volumes = [];"
         }
     }
 }
-extension Unidoc.RenderFormat.Assets
-{
+extension Unidoc.RenderFormat.Assets {
     /// Minified from:
     /// https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Literata:ital,wght@0,400;0,700;1,400;1,700&display=swap
-    var fontfaces:String
-    {
+    var fontfaces: String {
         """
         @font-face {
         font-family: 'DM Sans';

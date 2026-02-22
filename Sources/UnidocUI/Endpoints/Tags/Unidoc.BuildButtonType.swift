@@ -1,7 +1,5 @@
-extension Unidoc
-{
-    enum BuildButtonType
-    {
+extension Unidoc {
+    enum BuildButtonType {
         case region
         case inline
     }

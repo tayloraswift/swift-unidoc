@@ -1,56 +1,37 @@
-extension Symbol
-{
+extension Symbol {
     /// A scalar declaration symbol.
-    @frozen public
-    struct Decl:Sendable
-    {
+    @frozen public struct Decl: Sendable {
         /// The symbol’s string value, without an interior colon.
-        public
-        let rawValue:String
+        public let rawValue: String
 
-        @inlinable
-        init(unchecked rawValue:String)
-        {
+        @inlinable init(unchecked rawValue: String) {
             self.rawValue = rawValue
         }
     }
 }
-extension Symbol.Decl
-{
+extension Symbol.Decl {
     /// ``Array``.
-    @inlinable public
-    static var sSa:Self { .init(unchecked: "sSa") }
+    @inlinable public static var sSa: Self { .init(unchecked: "sSa") }
 
     /// ``Dictionary``.
-    @inlinable public
-    static var sSD:Self { .init(unchecked: "sSD") }
+    @inlinable public static var sSD: Self { .init(unchecked: "sSD") }
 
     /// ``Optional``.
-    @inlinable public
-    static var sSq:Self { .init(unchecked: "sSq") }
+    @inlinable public static var sSq: Self { .init(unchecked: "sSq") }
 }
-extension Symbol.Decl:RawRepresentable
-{
-    @inlinable public
-    init?(rawValue:String)
-    {
-        if !rawValue.isEmpty
-        {
+extension Symbol.Decl: RawRepresentable {
+    @inlinable public init?(rawValue: String) {
+        if !rawValue.isEmpty {
             self.rawValue = rawValue
-        }
-        else
-        {
+        } else {
             return nil
         }
     }
 }
-extension Symbol.Decl
-{
+extension Symbol.Decl {
     /// Creates a symbol identifier from the given language prefix and
     /// mangled suffix. This initializer does not validate the suffix.
-    @inlinable public
-    init(_ language:Language, ascii suffix:some StringProtocol)
-    {
+    @inlinable public init(_ language: Language, ascii suffix: some StringProtocol) {
         self.init(unchecked: "\(language)\(suffix)")
     }
     /// Creates a symbol identifier from the given language prefix and
@@ -59,17 +40,12 @@ extension Symbol.Decl
     ///
     /// Valid characters are `_`, `[A-Z]`, `[a-z]`, `[0-9]`, '(', ')', '*', '+', ':', '.', '-',
     /// `@`, `#`, and `$`.
-    @inlinable public
-    init?(_ language:Language, _ suffix:some StringProtocol)
-    {
-        if  suffix.isEmpty
-        {
+    @inlinable public init?(_ language: Language, _ suffix: some StringProtocol) {
+        if  suffix.isEmpty {
             return nil
         }
-        for ascii:UInt8 in suffix.utf8
-        {
-            switch Unicode.Scalar.init(ascii)
-            {
+        for ascii: UInt8 in suffix.utf8 {
+            switch Unicode.Scalar.init(ascii) {
             case "#":           continue
             case "$":           continue
             case "-":           continue
@@ -90,63 +66,44 @@ extension Symbol.Decl
         self.init(language, ascii: suffix)
     }
 
-    @inlinable public
-    var language:Language
-    {
+    @inlinable public var language: Language {
         //  Should not be possible to generate an empty symbol identifier.
         .init(ascii: self.rawValue.utf8.first!)
     }
-    @inlinable public
-    var suffix:Substring
-    {
-        self.rawValue.suffix(from: self.rawValue.utf8.index(
-            after: self.rawValue.startIndex))
+    @inlinable public var suffix: Substring {
+        self.rawValue.suffix(
+            from: self.rawValue.utf8.index(
+                after: self.rawValue.startIndex
+            )
+        )
     }
 }
-extension Symbol.Decl:Equatable
-{
-    @inlinable public
-    static func == (lhs:Self, rhs:Self) -> Bool
-    {
+extension Symbol.Decl: Equatable {
+    @inlinable public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.rawValue.utf8.elementsEqual(rhs.rawValue.utf8)
     }
 }
-extension Symbol.Decl:Hashable
-{
-    @inlinable public
-    func hash(into hasher:inout Hasher)
-    {
-        for byte:UInt8 in self.rawValue.utf8
-        {
+extension Symbol.Decl: Hashable {
+    @inlinable public func hash(into hasher: inout Hasher) {
+        for byte: UInt8 in self.rawValue.utf8 {
             byte.hash(into: &hasher)
         }
     }
 }
-extension Symbol.Decl:Comparable
-{
-    @inlinable public
-    static func < (lhs:Self, rhs:Self) -> Bool
-    {
+extension Symbol.Decl: Comparable {
+    @inlinable public static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.rawValue.utf8.lexicographicallyPrecedes(rhs.rawValue.utf8)
     }
 }
 
-extension Symbol.Decl:CustomStringConvertible
-{
-    @inlinable public
-    var description:String
-    {
+extension Symbol.Decl: CustomStringConvertible {
+    @inlinable public var description: String {
         "\(self.language):\(self.suffix)"
     }
 }
-extension Symbol.Decl:LosslessStringConvertible
-{
-    @inlinable public
-    init?(_ description:__shared String)
-    {
-        guard case .scalar(let scalar)? = Symbol.USR.init(description)
-        else
-        {
+extension Symbol.Decl: LosslessStringConvertible {
+    @inlinable public init?(_ description: __shared String) {
+        guard case .scalar(let scalar)? = Symbol.USR.init(description) else {
             return nil
         }
 
@@ -154,9 +111,6 @@ extension Symbol.Decl:LosslessStringConvertible
     }
 }
 
-@_spi(testable)
-extension Symbol.Decl:ExpressibleByStringLiteral
-{
-    @inlinable public
-    init(stringLiteral:String) { self.init(unchecked: stringLiteral) }
+@_spi(testable) extension Symbol.Decl: ExpressibleByStringLiteral {
+    @inlinable public init(stringLiteral: String) { self.init(unchecked: stringLiteral) }
 }

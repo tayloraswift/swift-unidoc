@@ -6,120 +6,144 @@ import Testing
 import UnidocDB
 import UnidocTesting
 
-@Suite
-struct SymbolGraphs:Unidoc.TestBattery
-{
-    @Test
-    func symbolGraphs() async throws
-    {
+@Suite struct SymbolGraphs: Unidoc.TestBattery {
+    @Test func symbolGraphs() async throws {
         try await self.run(in: "SymbolGraphs")
     }
 
-    func run(with unidoc:Unidoc.DB) async throws
-    {
-        let triple:Symbol.Triple = .x86_64_unknown_linux_gnu
-        let empty:SymbolGraph = .init(modules: [])
+    func run(with unidoc: Unidoc.DB) async throws {
+        let triple: Symbol.Triple = .x86_64_unknown_linux_gnu
+        let empty: SymbolGraph = .init(modules: [])
 
-        var docs:SymbolGraphObject<Void>
+        var docs: SymbolGraphObject<Void>
 
-        do
-        {
+        do {
             docs = .init(
                 metadata: .init(
                     package: .init(scope: "apple", name: .swift),
                     commit: .init(name: "swift-5.8.1-RELEASE"),
                     triple: triple,
                     swift: .init(version: .v(5, 8, 1)),
-                    products: []),
-                graph: empty)
+                    products: []
+                ),
+                graph: empty
+            )
 
-            #expect(try await unidoc.store(docs: docs) == .init(
+            #expect(
+                try await unidoc.store(docs: docs) == .init(
                     edition: .init(package: 0, version: 0),
-                    updated: false),
-                "InsertVersionedSwift")
+                    updated: false
+                ),
+                "InsertVersionedSwift"
+            )
         }
-        do
-        {
+        do {
             docs.metadata.package.scope = "orange"
             docs.metadata.package.name = "swift-not-named-swift"
             docs.metadata.commit = nil
 
-            #expect(try await unidoc.store(docs: docs) == .init(
+            #expect(
+                try await unidoc.store(docs: docs) == .init(
                     edition: .init(package: 1, version: -1),
-                    updated: false),
-                "InsertLocalSwift")
+                    updated: false
+                ),
+                "InsertLocalSwift"
+            )
         }
-        do
-        {
-            docs.metadata.commit = .init(name: "1.2.3",
-                sha1: 0xffffffffffffffffffffffffffffffffffffffff)
+        do {
+            docs.metadata.commit = .init(
+                name: "1.2.3",
+                sha1: 0xffffffffffffffffffffffffffffffffffffffff
+            )
 
-            #expect(try await unidoc.store(docs: docs) == .init(
+            #expect(
+                try await unidoc.store(docs: docs) == .init(
                     edition: .init(package: 1, version: 0),
-                    updated: false),
-                "InsertRelease")
+                    updated: false
+                ),
+                "InsertRelease"
+            )
         }
-        do
-        {
+        do {
 
-            docs.metadata.commit = .init(name: "2.0.0-beta1",
-                sha1: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)
+            docs.metadata.commit = .init(
+                name: "2.0.0-beta1",
+                sha1: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+            )
 
-            #expect(try await unidoc.store(docs: docs) == .init(
+            #expect(
+                try await unidoc.store(docs: docs) == .init(
                     edition: .init(package: 1, version: 1),
-                    updated: false),
-                "InsertPrerelease")
+                    updated: false
+                ),
+                "InsertPrerelease"
+            )
         }
-        do
-        {
+        do {
             docs.metadata.commit = nil
 
-            #expect(try await unidoc.store(docs: docs) == .init(
+            #expect(
+                try await unidoc.store(docs: docs) == .init(
                     edition: .init(package: 1, version: -1),
-                    updated: true),
-                "UpdateLocal")
+                    updated: true
+                ),
+                "UpdateLocal"
+            )
         }
-        do
-        {
-            docs.metadata.commit = .init(name: "2.0.0-beta1",
-                sha1: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee)
+        do {
+            docs.metadata.commit = .init(
+                name: "2.0.0-beta1",
+                sha1: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+            )
 
-            #expect(try await unidoc.store(docs: docs) == .init(
+            #expect(
+                try await unidoc.store(docs: docs) == .init(
                     edition: .init(package: 1, version: 1),
-                    updated: true),
-                "UpdatePrerelease")
+                    updated: true
+                ),
+                "UpdatePrerelease"
+            )
         }
-        do
-        {
-            docs.metadata.commit = .init(name: "1.2.3",
-                sha1: 0xffffffffffffffffffffffffffffffffffffffff)
+        do {
+            docs.metadata.commit = .init(
+                name: "1.2.3",
+                sha1: 0xffffffffffffffffffffffffffffffffffffffff
+            )
 
-            #expect(try await unidoc.store(docs: docs) == .init(
+            #expect(
+                try await unidoc.store(docs: docs) == .init(
                     edition: .init(package: 1, version: 0),
-                    updated: true),
-                "UpdateRelease")
+                    updated: true
+                ),
+                "UpdateRelease"
+            )
         }
-        do
-        {
+        do {
             try await unidoc.alias(
                 existing: docs.metadata.package.id,
-                package: docs.metadata.package.name)
+                package: docs.metadata.package.name
+            )
 
             docs.metadata.package.scope = nil
 
-            #expect(try await unidoc.store(docs: docs) == .init(
+            #expect(
+                try await unidoc.store(docs: docs) == .init(
                     edition: .init(package: 1, version: 0),
-                    updated: true),
-                "UpdateReleaseUnscoped")
+                    updated: true
+                ),
+                "UpdateReleaseUnscoped"
+            )
         }
-        do
-        {
+        do {
             docs.metadata.package.scope = "banana"
 
-            #expect(try await unidoc.store(docs: docs) == .init(
+            #expect(
+                try await unidoc.store(docs: docs) == .init(
                     edition: .init(package: 2, version: 0),
-                    updated: false),
-                "InsertReleaseWithDifferentScope")
+                    updated: false
+                ),
+                "InsertReleaseWithDifferentScope"
+            )
         }
     }
 }

@@ -1,16 +1,14 @@
 import HTML
 import MarkdownABI
 
-extension HTML.ContentEncoder
-{
-    mutating
-    func emit(element:Markdown.Bytecode.Emission,
-        with attributes:Markdown.TreeContext.AttributeList)
-    {
-        let html:HTML.VoidElement
+extension HTML.ContentEncoder {
+    mutating func emit(
+        element: Markdown.Bytecode.Emission,
+        with attributes: Markdown.TreeContext.AttributeList
+    ) {
+        let html: HTML.VoidElement
 
-        switch element
-        {
+        switch element {
         case .br:       html = .br
         case .hr:       html = .hr
         case .img:      html = .img
@@ -30,35 +28,29 @@ extension HTML.ContentEncoder
         self[html, attributes.encode(to:)]
     }
 
-    mutating
-    func emit(newlines:inout Int)
-    {
-        if  newlines == 0
-        {
+    mutating func emit(newlines: inout Int) {
+        if  newlines == 0 {
             return
         }
-        defer
-        {
+        defer {
             newlines = 0
         }
 
         self[.span] { $0.class = "newline" } = String.init(repeating: "\n", count: newlines)
     }
 }
-extension HTML.ContentEncoder
-{
-    private mutating
-    func open(_ element:HTML.ContainerElement,
-        with attributes:Markdown.TreeContext.AttributeList)
-    {
+extension HTML.ContentEncoder {
+    private mutating func open(
+        _ element: HTML.ContainerElement,
+        with attributes: Markdown.TreeContext.AttributeList
+    ) {
         self.open(element) { attributes.encode(to: &$0) }
     }
-    mutating
-    func open(context:Markdown.TreeContext,
-        with attributes:Markdown.TreeContext.AttributeList)
-    {
-        switch context
-        {
+    mutating func open(
+        context: Markdown.TreeContext,
+        with attributes: Markdown.TreeContext.AttributeList
+    ) {
+        switch context {
         case .anchorable(let element):
             self.open(element, with: attributes)
             self.open(.a) { $0.href = attributes.id?.description }
@@ -71,8 +63,7 @@ extension HTML.ContentEncoder
 
         case .section(let section):
             self.open(.section, with: attributes)
-            self[.h2, { $0.id = section.id }]
-            {
+            self[.h2, { $0.id = section.id }] {
                 $0[.a] { $0.href = "#\(section.id)" } = "\(section)"
             }
 
@@ -92,11 +83,8 @@ extension HTML.ContentEncoder
             return
         }
     }
-    mutating
-    func close(context:Markdown.TreeContext)
-    {
-        switch context
-        {
+    mutating func close(context: Markdown.TreeContext) {
+        switch context {
         case .anchorable(let element):
             self.close(.a)
             self.close(element)

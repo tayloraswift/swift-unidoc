@@ -1,11 +1,6 @@
-extension SymbolGraph
-{
-    @frozen public
-    struct BufferError:Error, Equatable, Sendable
-    {
-        @inlinable public
-        init()
-        {
+extension SymbolGraph {
+    @frozen public struct BufferError: Error, Equatable, Sendable {
+        @inlinable public init() {
         }
     }
 }

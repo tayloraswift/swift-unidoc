@@ -1,44 +1,35 @@
 import BSON
 import MongoDB
 
-extension Mongo
-{
-    public
-    protocol PipelineQuery:Sendable
-    {
+extension Mongo {
+    public protocol PipelineQuery: Sendable {
         /// Specifies the iteration mode for the pipeline’s expected output.
         ///
         /// For pipelines that return a single document, use ``Single``.
         ///
         /// For pipelines that return multiple documents, yet do not require cursor iteration,
         /// use ``SingleBatch``.
-        associatedtype Iteration:ReadEffect
+        associatedtype Iteration: ReadEffect
 
         /// Constructs a pipeline by adding stages to the given encoder.
-        func build(pipeline:inout PipelineEncoder)
+        func build(pipeline: inout PipelineEncoder)
 
         /// Specifies the collation to use for the query. This should match any collation
         /// specified in the index ``hint``, if provided.
-        var collation:Collation { get }
+        var collation: Collation { get }
         /// The collection the pipeline draws its input documents from.
-        var from:Collection? { get }
+        var from: Collection? { get }
         /// The index to use.
-        var hint:CollectionIndex? { get }
+        var hint: CollectionIndex? { get }
     }
 }
-extension Mongo.PipelineQuery
-{
-    public
-    typealias Output = Iteration.BatchElement
+extension Mongo.PipelineQuery {
+    public typealias Output = Iteration.BatchElement
 }
-extension Mongo.PipelineQuery
-{
+extension Mongo.PipelineQuery {
     /// TODO: this should not be public.
-    @inlinable package
-    func command(stride:Iteration.Stride?) -> Mongo.Aggregate<Iteration>
-    {
-        .init(self.from, stride: stride, pipeline: self.build(pipeline:))
-        {
+    @inlinable package func command(stride: Iteration.Stride?) -> Mongo.Aggregate<Iteration> {
+        .init(self.from, stride: stride, pipeline: self.build(pipeline:)) {
             $0[.collation] = self.collation
             $0[.hint] = self.hint?.id
         }

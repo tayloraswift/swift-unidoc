@@ -1,7 +1,5 @@
-extension Unidoc.LinkerOperation
-{
-    enum Update
-    {
+extension Unidoc.LinkerOperation {
+    enum Update {
         case action(Unidoc.LinkerAction?)
         case vintage(Bool)
     }

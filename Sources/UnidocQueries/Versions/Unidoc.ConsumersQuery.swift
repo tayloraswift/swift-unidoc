@@ -1,5 +1,3 @@
-extension Unidoc
-{
-    public
-    typealias ConsumersQuery = PackagePageQuery<ConsumersPageSegment>
+extension Unidoc {
+    public typealias ConsumersQuery = PackagePageQuery<ConsumersPageSegment>
 }

@@ -1,6 +1,5 @@
 import BSON
 import Symbols
 
-extension Symbol.File:BSONDecodable, BSONEncodable
-{
+extension Symbol.File: BSONDecodable, BSONEncodable {
 }

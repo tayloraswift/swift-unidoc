@@ -9,92 +9,67 @@ import Symbols
 import UnixCalendar
 import URI
 
-extension Unidoc
-{
-    @dynamicMemberLookup
-    struct Router
-    {
-        let request:ServerRequest
+extension Unidoc {
+    @dynamicMemberLookup struct Router {
+        let request: ServerRequest
 
-        private
-        var stem:ArraySlice<String>
+        private var stem: ArraySlice<String>
 
-        private
-        init(request:ServerRequest, stem:ArraySlice<String>)
-        {
+        private init(request: ServerRequest, stem: ArraySlice<String>) {
             self.request = request
             self.stem = stem
         }
     }
 }
-extension Unidoc.Router
-{
-    init(routing request:Unidoc.ServerRequest)
-    {
-        self.init(request: request,
-            stem: request.uri.path.normalized(lowercase: true)[...])
+extension Unidoc.Router {
+    init(routing request: Unidoc.ServerRequest) {
+        self.init(
+            request: request,
+            stem: request.uri.path.normalized(lowercase: true)[...]
+        )
     }
 
-    private
-    subscript<T>(dynamicMember keyPath:KeyPath<Unidoc.ServerRequest, T>) -> T
-    {
+    private subscript<T>(dynamicMember keyPath: KeyPath<Unidoc.ServerRequest, T>) -> T {
         self.request[keyPath: keyPath]
     }
 }
-extension Unidoc.Router
-{
-    mutating
-    func descend() -> String?
-    {
+extension Unidoc.Router {
+    mutating func descend() -> String? {
         self.stem.popFirst()
     }
 
-    mutating
-    func descend<Component>(into:Component.Type = Component.self) -> Component?
-        where Component:URI.Path.ComponentConvertible
-    {
+    mutating func descend<Component>(into: Component.Type = Component.self) -> Component?
+        where Component: URI.Path.ComponentConvertible {
         guard
-        let next:String = self.descend()
-        else
-        {
+        let next: String = self.descend() else {
             return nil
         }
 
         return .init(next)
     }
 
-    mutating
-    func descendIntoRef() -> Symbol.PackageAtRef?
-    {
+    mutating func descendIntoRef() -> Symbol.PackageAtRef? {
         guard
-        let package:Symbol.Package = self.descend(),
-        let name:String = self.descend()
-        else
-        {
+        let package: Symbol.Package = self.descend(),
+        let name: String = self.descend() else {
             return nil
         }
 
         return .init(package: package, ref: name)
     }
 }
-extension Unidoc.Router
-{
-    private
-    func redirect(root:Unidoc.ServerRoot) -> String?
-    {
-        let subdomain:Unidoc.ServerRoot.Subdomain?
-        switch self.headers.host
-        {
+extension Unidoc.Router {
+    private func redirect(root: Unidoc.ServerRoot) -> String? {
+        let subdomain: Unidoc.ServerRoot.Subdomain?
+        switch self.headers.host {
         case "swiftinit.org"?:
-            switch root.subdomain
-            {
+            switch root.subdomain {
             case nil:           return nil
             case let target?:   subdomain = target
             }
 
         case "api.swiftinit.org"?:
-            switch root.subdomain
-            {
+            switch root.subdomain {
             case .api?:         return nil
             case let target:    subdomain = target
             }
@@ -103,42 +78,30 @@ extension Unidoc.Router
             return nil
         }
 
-        if  let subdomain:Unidoc.ServerRoot.Subdomain
-        {
+        if  let subdomain: Unidoc.ServerRoot.Subdomain {
             return "https://\(subdomain).swiftinit.org\(self.request.uri)"
-        }
-        else
-        {
+        } else {
             return "https://swiftinit.org\(self.request.uri)"
         }
     }
 }
-extension Unidoc.Router
-{
-    mutating
-    func get() -> Unidoc.AnyOperation?
-    {
+extension Unidoc.Router {
+    mutating func get() -> Unidoc.AnyOperation? {
         guard
-        let root:String = self.descend()
-        else
-        {
+        let root: String = self.descend() else {
             return .pipeline(Unidoc.HomeEndpoint.init(query: .init(limit: 16)))
         }
 
         guard
-        let root:Unidoc.ServerRoot = .init(rawValue: root)
-        else
-        {
+        let root: Unidoc.ServerRoot = .init(rawValue: root) else {
             return nil
         }
 
-        if  let redirect:String = self.redirect(root: root)
-        {
+        if  let redirect: String = self.redirect(root: root) {
             return .sync(redirect: .permanent(external: redirect))
         }
 
-        switch root
-        {
+        switch root {
         case .account:      return self.account()
         case .admin:        return self.admin()
         case .asset:        return self.asset()
@@ -176,31 +139,23 @@ extension Unidoc.Router
         }
     }
 
-    mutating
-    func post(body:[UInt8]) -> Unidoc.AnyOperation?
-    {
+    mutating func post(body: [UInt8]) -> Unidoc.AnyOperation? {
         guard
-        let root:Unidoc.ServerRoot = self.descend()
-        else
-        {
+        let root: Unidoc.ServerRoot = self.descend() else {
             return nil
         }
 
-        if  let redirect:String = self.redirect(root: root)
-        {
+        if  let redirect: String = self.redirect(root: root) {
             return .sync(redirect: .permanent(external: redirect))
         }
 
-        switch self.headers.contentType
-        {
+        switch self.headers.contentType {
         case .media(.application(.json, charset: _))?:
             return self.post(root: root, json: .init(utf8: body[...]))
 
         case .media(.application(.x_www_form_urlencoded, charset: _))?:
             guard
-            let form:URI.QueryEncodedForm = try? .parse(parameters: body[...])
-            else
-            {
+            let form: URI.QueryEncodedForm = try? .parse(parameters: body[...]) else {
                 return .sync(error: "Cannot parse URL-encoded form data\n")
             }
 
@@ -208,9 +163,7 @@ extension Unidoc.Router
 
         case .multipart(.form_data(boundary: let boundary?))?:
             guard
-            let form:MultipartForm = try? .init(splitting: body, on: boundary)
-            else
-            {
+            let form: MultipartForm = try? .init(splitting: body, on: boundary) else {
                 return .sync(error: "Cannot parse multipart form data\n")
             }
 
@@ -224,20 +177,17 @@ extension Unidoc.Router
         }
     }
 
-    private mutating
-    func post(root:Unidoc.ServerRoot, json:JSON) -> Unidoc.AnyOperation?
-    {
-        switch root
-        {
+    private mutating func post(root: Unidoc.ServerRoot, json: JSON) -> Unidoc.AnyOperation? {
+        switch root {
         case .hook:     return self.hook(json: json)
         default:        return nil
         }
     }
-    private mutating
-    func post(root:Unidoc.ServerRoot, form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
-    {
-        switch root
-        {
+    private mutating func post(
+        root: Unidoc.ServerRoot,
+        form: URI.QueryEncodedForm
+    ) -> Unidoc.AnyOperation? {
+        switch root {
         case .admin:    return nil
         case .form:     return self.form(form: form)
         case .link:     return self.link(form: form)
@@ -248,32 +198,24 @@ extension Unidoc.Router
         default:        return nil
         }
     }
-    private mutating
-    func post(root:Unidoc.ServerRoot, form:MultipartForm) -> Unidoc.AnyOperation?
-    {
-        switch root
-        {
+    private mutating func post(
+        root: Unidoc.ServerRoot,
+        form: MultipartForm
+    ) -> Unidoc.AnyOperation? {
+        switch root {
         case .admin:    return self.admin(form: form)
         case .form:     return self.form(form: form)
         default:        return nil
         }
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func account() -> Unidoc.AnyOperation
-    {
-        if  let account:String = self.descend(),
-            let account:Unidoc.Account = .init(account)
-        {
+extension Unidoc.Router {
+    private mutating func account() -> Unidoc.AnyOperation {
+        if  let account: String = self.descend(),
+            let account: Unidoc.Account = .init(account) {
             return .unordered(Unidoc.UserAdminOperation.init(account: account))
-        }
-        else
-        {
-            guard case .web(let session?, _) = self.authorization
-            else
-            {
+        } else {
+            guard case .web(let session?, _) = self.authorization else {
                 return .sync(redirect: .temporary("\(Unidoc.ServerRoot.login)"))
             }
 
@@ -281,26 +223,17 @@ extension Unidoc.Router
         }
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func admin() -> Unidoc.AnyOperation?
-    {
-        guard let next:String = self.descend()
-        else
-        {
+extension Unidoc.Router {
+    private mutating func admin() -> Unidoc.AnyOperation? {
+        guard let next: String = self.descend() else {
             return .unordered(Unidoc.LoadDashboardOperation.logger)
         }
 
-        switch next
-        {
+        switch next {
         case Unidoc._RecodePage.name:
-            if  let target:Unidoc._RecodePage.Target = self.descend()
-            {
+            if  let target: Unidoc._RecodePage.Target = self.descend() {
                 return .syncHTML(target)
-            }
-            else
-            {
+            } else {
                 return .syncHTML(Unidoc._RecodePage.init())
             }
 
@@ -315,86 +248,67 @@ extension Unidoc.Router
         }
     }
 
-    private mutating
-    func admin(form:MultipartForm) -> Unidoc.AnyOperation?
-    {
-        guard let action:String = self.descend()
-        else
-        {
+    private mutating func admin(form: MultipartForm) -> Unidoc.AnyOperation? {
+        guard let action: String = self.descend() else {
             return nil
         }
 
         if  action == Unidoc._RecodePage.name,
-            let target:Unidoc._RecodePage.Target = self.descend()
-        {
+            let target: Unidoc._RecodePage.Target = self.descend() {
             return .unordered(Unidoc.SiteConfigOperation.recode(target))
-        }
-        else
-        {
+        } else {
             return nil
         }
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func ref() -> Unidoc.AnyOperation?
-    {
+extension Unidoc.Router {
+    private mutating func ref() -> Unidoc.AnyOperation? {
         guard
-        let symbol:Symbol.PackageAtRef = self.descendIntoRef()
-        else
-        {
+        let symbol: Symbol.PackageAtRef = self.descendIntoRef() else {
             return nil
         }
 
         guard
-        case "state" = self.descend()
-        else
-        {
+        case "state" = self.descend() else {
             return nil
         }
 
-        return .unordered(Unidoc.RefStateOperation.init(
-            authorization: self.authorization,
-            symbol: symbol))
+        return .unordered(
+            Unidoc.RefStateOperation.init(
+                authorization: self.authorization,
+                symbol: symbol
+            )
+        )
     }
 
-    private mutating
-    func ref(form _:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
-    {
+    private mutating func ref(form _: URI.QueryEncodedForm) -> Unidoc.AnyOperation? {
         guard
-        let account:Unidoc.Account = self.authorization.account,
-        let symbol:Symbol.PackageAtRef = self.descendIntoRef()
-        else
-        {
+        let account: Unidoc.Account = self.authorization.account,
+        let symbol: Symbol.PackageAtRef = self.descendIntoRef() else {
             return nil
         }
 
         guard
-        case "build" = self.descend()
-        else
-        {
+        case "build" = self.descend() else {
             return nil
         }
 
-        return .unordered(Unidoc.RefBuildOperation.init(account: account,
-            symbol: symbol,
-            action: .submit))
+        return .unordered(
+            Unidoc.RefBuildOperation.init(
+                account: account,
+                symbol: symbol,
+                action: .submit
+            )
+        )
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func builder() -> Unidoc.AnyOperation?
-    {
-        switch self.descend()
-        {
+extension Unidoc.Router {
+    private mutating func builder() -> Unidoc.AnyOperation? {
+        switch self.descend() {
         case nil:
             guard
-            let request:URI.Query = self.uri.query,
-            let request:Unidoc.BuildRequest<Unidoc.Package> = .init(query: request)
-            else
-            {
+            let request: URI.Query = self.uri.query,
+            let request: Unidoc.BuildRequest<Unidoc.Package> = .init(query: request) else {
                 return nil
             }
 
@@ -402,47 +316,40 @@ extension Unidoc.Router
 
         case "poll"?:
             guard
-            let channel:Symbol.Triple = self.descend()
-            else
-            {
+            let channel: Symbol.Triple = self.descend() else {
                 return nil
             }
 
             guard
-            let account:Unidoc.Account = self.authorization.account
-            else
-            {
+            let account: Unidoc.Account = self.authorization.account else {
                 return .sync(error: "Missing authorization header\n", status: 401)
             }
 
-            return .unordered(Unidoc.BuilderPollOperation.init(
-                builder: account,
-                channel: channel))
+            return .unordered(
+                Unidoc.BuilderPollOperation.init(
+                    builder: account,
+                    channel: channel
+                )
+            )
 
         default:
             return nil
         }
     }
 
-    private mutating
-    func link(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
-    {
-        let uri:URI = .init(path: self.uri.path, query: form.query)
+    private mutating func link(form: URI.QueryEncodedForm) -> Unidoc.AnyOperation? {
+        let uri: URI = .init(path: self.uri.path, query: form.query)
 
         guard
-        let route:Unidoc.LinkerRoute = self.descend(),
-        let form:Unidoc.LinkerForm = .init(from: form)
-        else
-        {
+        let route: Unidoc.LinkerRoute = self.descend(),
+        let form: Unidoc.LinkerForm = .init(from: form) else {
             return nil
         }
 
-        for case ("y", "false") in self.uri.query?.parameters ?? []
-        {
-            let page:Unidoc.ReallyPage
+        for case ("y", "false") in self.uri.query?.parameters ?? [] {
+            let page: Unidoc.ReallyPage
 
-            switch route
-            {
+            switch route {
             case .cancel:   return nil
             case .uplink:   return nil
             case .unlink:   page = .unlink(uri)
@@ -453,10 +360,9 @@ extension Unidoc.Router
             return .syncHTML(page)
         }
 
-        let update:Unidoc.LinkerOperation.Update
+        let update: Unidoc.LinkerOperation.Update
 
-        switch route
-        {
+        switch route {
         case .cancel:   update = .action(nil)
         case .uplink:   update = .action(.uplink)
         case .unlink:   update = .action(.unlink)
@@ -464,129 +370,134 @@ extension Unidoc.Router
         case .vintage:  update = .vintage(true)
         }
 
-        return .unordered(Unidoc.LinkerOperation.init(update: update,
-            scope: form.edition,
-            back: form.back))
+        return .unordered(
+            Unidoc.LinkerOperation.init(
+                update: update,
+                scope: form.edition,
+                back: form.back
+            )
+        )
     }
 
-    private mutating
-    func form(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
-    {
+    private mutating func form(form: URI.QueryEncodedForm) -> Unidoc.AnyOperation? {
         guard
-        let action:Unidoc.PostAction = self.descend()
-        else
-        {
+        let action: Unidoc.PostAction = self.descend() else {
             return nil
         }
 
-        switch action
-        {
+        switch action {
         case .build:
-            if  let account:Unidoc.Account = self.authorization.account,
-                let build:Unidoc.BuildForm = .init(from: form)
-            {
-                return .unordered(Unidoc.RefBuildOperation.init(
-                    account: account,
-                    form: build))
+            if  let account: Unidoc.Account = self.authorization.account,
+                let build: Unidoc.BuildForm = .init(from: form) {
+                return .unordered(
+                    Unidoc.RefBuildOperation.init(
+                        account: account,
+                        form: build
+                    )
+                )
             }
 
         case .package:
             guard
-            let package:Unidoc.Package = self.descend(),
-            let type:Unidoc.PackageMetadataSettings = self.descend(),
-            let update:Unidoc.PackageMetadataSettingsOperation.Update = .init(
+            let package: Unidoc.Package = self.descend(),
+            let type: Unidoc.PackageMetadataSettings = self.descend(),
+            let update: Unidoc.PackageMetadataSettingsOperation.Update = .init(
                 type: type,
-                form: form)
-            else
-            {
+                form: form
+            ) else {
                 return nil
             }
 
-            return .unordered(Unidoc.PackageMetadataSettingsOperation.init(
-                account: self.authorization.account,
-                package: package,
-                update: update))
+            return .unordered(
+                Unidoc.PackageMetadataSettingsOperation.init(
+                    account: self.authorization.account,
+                    package: package,
+                    update: update
+                )
+            )
 
 
         case .packageAlias:
-            let form:[String: String] = form.parameters.reduce(into: [:])
-            {
+            let form: [String: String] = form.parameters.reduce(into: [:]) {
                 $0[$1.key] = $1.value
             }
-            if  let package:String = form["package"],
-                let package:Unidoc.Package = .init(package),
-                let alias:String = form["alias"]
-            {
-                return .unordered(Unidoc.PackageAliasOperation.init(
-                    package: package,
-                    alias: .init(alias)))
+            if  let package: String = form["package"],
+                let package: Unidoc.Package = .init(package),
+                let alias: String = form["alias"] {
+                return .unordered(
+                    Unidoc.PackageAliasOperation.init(
+                        package: package,
+                        alias: .init(alias)
+                    )
+                )
             }
 
         case .packageAlign:
-            let form:[String: String] = form.parameters.reduce(into: [:])
-            {
+            let form: [String: String] = form.parameters.reduce(into: [:]) {
                 $0[$1.key] = $1.value
             }
-            if  let package:String = form["package"],
-                let package:Unidoc.Package = .init(package)
-            {
-                return .update(Unidoc.PackageAlignOperation.init(
-                    package: package,
-                    realm: form["realm"],
-                    force: form["force"] == "true"))
+            if  let package: String = form["package"],
+                let package: Unidoc.Package = .init(package) {
+                return .update(
+                    Unidoc.PackageAlignOperation.init(
+                        package: package,
+                        realm: form["realm"],
+                        force: form["force"] == "true"
+                    )
+                )
             }
 
         case .packageConfig:
-            let form:[String: String] = form.parameters.reduce(into: [:])
-            {
+            let form: [String: String] = form.parameters.reduce(into: [:]) {
                 $0[$1.key] = $1.value
             }
-            if  let package:String = form["package"],
-                let package:Unidoc.Package = .init(package),
-                let update:Unidoc.PackageConfigOperation.Update = .init(parameters: form)
-            {
-                let endpoint:Unidoc.PackageConfigOperation = .init(
+            if  let package: String = form["package"],
+                let package: Unidoc.Package = .init(package),
+                let update: Unidoc.PackageConfigOperation.Update = .init(parameters: form) {
+                let endpoint: Unidoc.PackageConfigOperation = .init(
                     account: self.authorization.account,
                     package: package,
                     update: update,
-                    from: form["from"])
+                    from: form["from"]
+                )
 
                 return .unordered(endpoint)
             }
 
         case .packageIndex:
-            if  let account:Unidoc.Account = self.authorization.account,
-                let subject:Unidoc.PackageIndexOperation.Subject = .init(from: form)
-            {
-                return .unordered(Unidoc.PackageIndexOperation.init(
-                    account: account,
-                    subject: subject))
+            if  let account: Unidoc.Account = self.authorization.account,
+                let subject: Unidoc.PackageIndexOperation.Subject = .init(from: form) {
+                return .unordered(
+                    Unidoc.PackageIndexOperation.init(
+                        account: account,
+                        subject: subject
+                    )
+                )
             }
 
         case .packageRules:
-            let form:[String: String] = form.parameters.reduce(into: [:])
-            {
+            let form: [String: String] = form.parameters.reduce(into: [:]) {
                 $0[$1.key] = $1.value
             }
-            if  let account:Unidoc.Account = self.authorization.account,
-                let package:String = form["package"],
-                let package:Unidoc.Package = .init(package),
-                let rule:Unidoc.UpdatePackageRule = .init(from: form)
-            {
-                return .unordered(Unidoc.UpdatePackageRuleOperation.init(
-                    account: account,
-                    package: package,
-                    rule: rule))
+            if  let account: Unidoc.Account = self.authorization.account,
+                let package: String = form["package"],
+                let package: Unidoc.Package = .init(package),
+                let rule: Unidoc.UpdatePackageRule = .init(from: form) {
+                return .unordered(
+                    Unidoc.UpdatePackageRuleOperation.init(
+                        account: account,
+                        package: package,
+                        rule: rule
+                    )
+                )
             }
 
         case .telescope:
-            let form:[String: String] = form.parameters.reduce(into: [:])
-            {
+            let form: [String: String] = form.parameters.reduce(into: [:]) {
                 $0[$1.key] = $1.value
             }
-            if  let days:String = form["days"],
-                let days:Int64 = .init(days)
-            {
+            if  let days: String = form["days"],
+                let days: Int64 = .init(days) {
                 return .unordered(Unidoc.SiteConfigOperation.telescope(last: .days(days)))
             }
 
@@ -594,12 +505,14 @@ extension Unidoc.Router
             return .unordered(Unidoc.LinkerOperation.init(update: .action(.uplink), scope: nil))
 
         case .userConfig:
-            if  let account:Unidoc.Account = self.authorization.account,
-                let update:Unidoc.UserConfigOperation.Update = .init(from: form)
-            {
-                return .unordered(Unidoc.UserConfigOperation.init(
-                    account: account,
-                    update: update))
+            if  let account: Unidoc.Account = self.authorization.account,
+                let update: Unidoc.UserConfigOperation.Update = .init(from: form) {
+                return .unordered(
+                    Unidoc.UserConfigOperation.init(
+                        account: account,
+                        update: update
+                    )
+                )
             }
 
         case .userSyncPermissions:
@@ -611,73 +524,67 @@ extension Unidoc.Router
 
         return nil
     }
-    private mutating
-    func form(form:MultipartForm) -> Unidoc.AnyOperation?
-    {
+    private mutating func form(form: MultipartForm) -> Unidoc.AnyOperation? {
         guard
-        let action:Unidoc.PostAction = self.descend()
-        else
-        {
+        let action: Unidoc.PostAction = self.descend() else {
             return nil
         }
 
-        switch action
-        {
+        switch action {
         case .robots_txt:
             guard
-            let item:MultipartForm.Item = form.first(where: { $0.header.name == "text" })
-            else
-            {
+            let item: MultipartForm.Item = form.first(
+                where: { $0.header.name == "text" }
+            ) else {
                 return .sync(error: "Cannot parse form data: missing field 'text'\n")
             }
 
-            return .unordered(Unidoc.TextUpdateOperation.init(text: .init(id: .robots_txt,
-                text: .utf8(item.value))))
+            return .unordered(
+                Unidoc.TextUpdateOperation.init(
+                    text: .init(
+                        id: .robots_txt,
+                        text: .utf8(item.value)
+                    )
+                )
+            )
 
         default:
             return nil
         }
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func asset() -> Unidoc.AnyOperation?
-    {
+extension Unidoc.Router {
+    private mutating func asset() -> Unidoc.AnyOperation? {
         guard
-        let asset:Unidoc.Asset = self.descend()
-        else
-        {
+        let asset: Unidoc.Asset = self.descend() else {
             return nil
         }
 
         return .syncLoad(.init(asset, tag: self.headers.etag))
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func auth() -> Unidoc.AnyOperation?
-    {
-        let parameters:AuthParameters = .init(self.uri.query ?? [:])
+extension Unidoc.Router {
+    private mutating func auth() -> Unidoc.AnyOperation? {
+        let parameters: AuthParameters = .init(self.uri.query ?? [:])
 
-        switch self.descend()
-        {
+        switch self.descend() {
         case "github"?:
-            if  let state:String = parameters.state,
-                let code:String = parameters.code,
-                let from:String = parameters.from,
-                let flow:Unidoc.LoginFlow = parameters.flow
-            {
-                return .unordered(Unidoc.AuthOperation.init(state: state,
-                    code: code,
-                    flow: flow,
-                    from: from))
+            if  let state: String = parameters.state,
+                let code: String = parameters.code,
+                let from: String = parameters.from,
+                let flow: Unidoc.LoginFlow = parameters.flow {
+                return .unordered(
+                    Unidoc.AuthOperation.init(
+                        state: state,
+                        code: code,
+                        flow: flow,
+                        from: from
+                    )
+                )
             }
 
         case "register"?:
-            if  let token:String = parameters.token
-            {
+            if  let token: String = parameters.token {
                 return .unordered(Unidoc.UserIndexOperation.init(token: token, flow: .sso))
             }
 
@@ -688,67 +595,68 @@ extension Unidoc.Router
         return nil
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func blog(module:String) -> Unidoc.AnyOperation?
-    {
-        guard let article:String = self.descend()
-        else
-        {
+extension Unidoc.Router {
+    private mutating func blog(module: String) -> Unidoc.AnyOperation? {
+        guard let article: String = self.descend() else {
             return nil
         }
 
-        return .pipeline(Unidoc.BlogEndpoint.init(query: .init(
-            volume: .init(package: "__swiftinit", version: nil),
-            vertex: .init(casefolded: [module, article], hash: nil))))
+        return .pipeline(
+            Unidoc.BlogEndpoint.init(
+                query: .init(
+                    volume: .init(package: "__swiftinit", version: nil),
+                    vertex: .init(casefolded: [module, article], hash: nil)
+                )
+            )
+        )
     }
 
-    private mutating
-    func docs() -> Unidoc.AnyOperation?
-    {
+    private mutating func docs() -> Unidoc.AnyOperation? {
         guard
-        let volume:Unidoc.VolumeSelector = self.descend().map(Unidoc.VolumeSelector.init)
-        else
-        {
+        let volume: Unidoc.VolumeSelector = self.descend().map(
+            Unidoc.VolumeSelector.init
+        ) else {
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
+        let parameters: Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
 
         //  Special sitemap route.
         //  The '-' in the name means it will never collide with a decl.
         if  case nil = volume.version,
-            case ["all-symbols"] = self.stem
-        {
-            return .pipeline(Unidoc.SitemapEndpoint.init(query: .init(
-                package: volume.package)))
-        }
-        else
-        {
-            let vertex:Unidoc.VertexPath = .init(casefolded: self.stem, hash: parameters.hash)
-            return .unordered(Unidoc.DocsOperation.init(query: .init(
-                volume: volume,
-                vertex: vertex)))
+            case ["all-symbols"] = self.stem {
+            return .pipeline(
+                Unidoc.SitemapEndpoint.init(
+                    query: .init(
+                        package: volume.package
+                    )
+                )
+            )
+        } else {
+            let vertex: Unidoc.VertexPath = .init(casefolded: self.stem, hash: parameters.hash)
+            return .unordered(
+                Unidoc.DocsOperation.init(
+                    query: .init(
+                        volume: volume,
+                        vertex: vertex
+                    )
+                )
+            )
         }
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func hook(json:JSON) -> Unidoc.AnyOperation?
-    {
-        switch self.descend()
-        {
+extension Unidoc.Router {
+    private mutating func hook(json: JSON) -> Unidoc.AnyOperation? {
+        switch self.descend() {
         case "github"?:
-            do
-            {
-                return .unordered(try Unidoc.WebhookOperation.init(
-                    json: json,
-                    from: self.request.metadata))
-            }
-            catch let error
-            {
+            do {
+                return .unordered(
+                    try Unidoc.WebhookOperation.init(
+                        json: json,
+                        from: self.request.metadata
+                    )
+                )
+            } catch let error {
                 //  This is considered a server error, so we want to flag it as such for the
                 //  logging system to pick up.
                 return .sync(error: "Rejected webhook event: \(error)", status: 500)
@@ -759,158 +667,140 @@ extension Unidoc.Router
         }
     }
 }
-extension Unidoc.Router
-{
-    private
-    func login() -> Unidoc.AnyOperation
-    {
+extension Unidoc.Router {
+    private func login() -> Unidoc.AnyOperation {
         .unordered(Unidoc.LoginOperation.init(flow: .sso))
     }
-    private
-    func login(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation
-    {
-        if  let path:String = form.parameters.first?.value,
-            let path:URI = .init(path)
-        {
+    private func login(form: URI.QueryEncodedForm) -> Unidoc.AnyOperation {
+        if  let path: String = form.parameters.first?.value,
+            let path: URI = .init(path) {
             return .unordered(Unidoc.LoginOperation.init(flow: .sso, from: path))
-        }
-        else
-        {
+        } else {
             return .sync(error: "Cannot parse login form data: missing return path\n")
         }
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func lunr() -> Unidoc.AnyOperation?
-    {
-        guard let next:String = self.descend()
-        else
-        {
+extension Unidoc.Router {
+    private mutating func lunr() -> Unidoc.AnyOperation? {
+        guard let next: String = self.descend() else {
             return nil
         }
 
-        if  let id:Symbol.Volume = .init(next)
-        {
-            return .pipeline(Unidoc.LunrEndpoint.init(query: .init(tag: self.headers.etag,
-                id: id)))
-        }
-        else if next == "packages.json"
-        {
-            return .pipeline(Unidoc.TextEndpoint.init(query: .init(tag: self.headers.etag,
-                id: .packages_json)))
-        }
-        else
-        {
+        if  let id: Symbol.Volume = .init(next) {
+            return .pipeline(
+                Unidoc.LunrEndpoint.init(
+                    query: .init(
+                        tag: self.headers.etag,
+                        id: id
+                    )
+                )
+            )
+        } else if next == "packages.json" {
+            return .pipeline(
+                Unidoc.TextEndpoint.init(
+                    query: .init(
+                        tag: self.headers.etag,
+                        id: .packages_json
+                    )
+                )
+            )
+        } else {
             return nil
         }
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func plugin(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
-    {
+extension Unidoc.Router {
+    private mutating func plugin(form: URI.QueryEncodedForm) -> Unidoc.AnyOperation? {
         guard
-        let id:String = self.descend(),
-        let form:Unidoc.PluginControlForm = .init(from: form)
-        else
-        {
+        let id: String = self.descend(),
+        let form: Unidoc.PluginControlForm = .init(from: form) else {
             return nil
         }
 
-        return .unordered(Unidoc.PluginOperation.init(
-            plugin: id,
-            action: form.active ? .start : .pause))
+        return .unordered(
+            Unidoc.PluginOperation.init(
+                plugin: id,
+                action: form.active ? .start : .pause
+            )
+        )
     }
 
-    private mutating
-    func plugin() -> Unidoc.AnyOperation?
-    {
-        guard let id:String = self.descend()
-        else
-        {
+    private mutating func plugin() -> Unidoc.AnyOperation? {
+        guard let id: String = self.descend() else {
             return nil
         }
 
         return .unordered(Unidoc.PluginOperation.init(plugin: id, action: .status))
     }
 
-    private mutating
-    func ptcl() -> Unidoc.AnyOperation?
-    {
+    private mutating func ptcl() -> Unidoc.AnyOperation? {
         guard
-        let volume:Unidoc.VolumeSelector = self.descend()
-        else
-        {
+        let volume: Unidoc.VolumeSelector = self.descend() else {
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
+        let parameters: Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
 
-        return .pipeline(Unidoc.PtclEndpoint.init(query: .init(
-            volume: volume,
-            vertex: .init(casefolded: self.stem, hash: parameters.hash),
-            layer: .protocols)))
+        return .pipeline(
+            Unidoc.PtclEndpoint.init(
+                query: .init(
+                    volume: volume,
+                    vertex: .init(casefolded: self.stem, hash: parameters.hash),
+                    layer: .protocols
+                )
+            )
+        )
     }
 
-    private mutating
-    func realm() -> Unidoc.AnyOperation?
-    {
+    private mutating func realm() -> Unidoc.AnyOperation? {
         guard
-        let realm:String = self.descend()
-        else
-        {
+        let realm: String = self.descend() else {
             return nil
         }
 
-        return .pipeline(Unidoc.RealmEndpoint.init(query: .init(realm: realm,
-            user: self.authorization.account)))
+        return .pipeline(
+            Unidoc.RealmEndpoint.init(
+                query: .init(
+                    realm: realm,
+                    user: self.authorization.account
+                )
+            )
+        )
     }
 
-    private mutating
-    func render() -> Unidoc.AnyOperation?
-    {
+    private mutating func render() -> Unidoc.AnyOperation? {
         guard
-        let volume:Unidoc.VolumeSelector = self.descend()
-        else
-        {
+        let volume: Unidoc.VolumeSelector = self.descend() else {
             return nil
         }
 
-        return .unordered(Unidoc.ExportOperation.init(authorization: self.authorization,
-            request: .init(volume: volume, vertex: .init(casefolded: self.stem)),
-            _query: self.uri.query ?? [:]))
+        return .unordered(
+            Unidoc.ExportOperation.init(
+                authorization: self.authorization,
+                request: .init(volume: volume, vertex: .init(casefolded: self.stem)),
+                _query: self.uri.query ?? [:]
+            )
+        )
     }
 }
-extension Unidoc.Router
-{
-    private mutating
-    func really(form:URI.QueryEncodedForm) -> Unidoc.AnyOperation?
-    {
+extension Unidoc.Router {
+    private mutating func really(form: URI.QueryEncodedForm) -> Unidoc.AnyOperation? {
         guard
-        let action:Unidoc.PostAction = self.descend()
-        else
-        {
+        let action: Unidoc.PostAction = self.descend() else {
             return nil
         }
 
-        let uri:URI = .init(path: Unidoc.Post[action].path, query: form.query)
-        var table:[String: String]
-        {
+        let uri: URI = .init(path: Unidoc.Post[action].path, query: form.query)
+        var table: [String: String] {
             form.parameters.reduce(into: [:]) { $0[$1.key] = $1.value }
         }
 
-        let really:Unidoc.ReallyPage?
+        let really: Unidoc.ReallyPage?
 
-        switch action
-        {
+        switch action {
         case .build:
             guard
-            let form:Unidoc.BuildForm = .init(from: form)
-            else
-            {
+            let form: Unidoc.BuildForm = .init(from: form) else {
                 return nil
             }
 
@@ -918,9 +808,7 @@ extension Unidoc.Router
 
         case .packageConfig:
             guard
-            let update:Unidoc.PackageConfigOperation.Update = .init(from: form)
-            else
-            {
+            let update: Unidoc.PackageConfigOperation.Update = .init(from: form) else {
                 return nil
             }
 
@@ -928,9 +816,7 @@ extension Unidoc.Router
 
         case .userConfig:
             guard
-            let update:Unidoc.UserConfigOperation.Update = .init(from: form)
-            else
-            {
+            let update: Unidoc.UserConfigOperation.Update = .init(from: form) else {
                 return nil
             }
 
@@ -941,208 +827,198 @@ extension Unidoc.Router
         }
 
         guard
-        let really:Unidoc.ReallyPage = really
-        else
-        {
+        let really: Unidoc.ReallyPage = really else {
             return nil
         }
 
         return .syncHTML(really)
     }
 }
-extension Unidoc.Router
-{
-    private
-    func robots() -> Unidoc.AnyOperation
-    {
-        .pipeline(Unidoc.TextEndpoint.init(query: .init(tag: self.headers.etag,
-            id: .robots_txt)))
+extension Unidoc.Router {
+    private func robots() -> Unidoc.AnyOperation {
+        .pipeline(
+            Unidoc.TextEndpoint.init(
+                query: .init(
+                    tag: self.headers.etag,
+                    id: .robots_txt
+                )
+            )
+        )
     }
 
-    private mutating
-    func rules() -> Unidoc.AnyOperation?
-    {
-        guard let symbol:Symbol.Package = self.descend()
-        else
-        {
+    private mutating func rules() -> Unidoc.AnyOperation? {
+        guard let symbol: Symbol.Package = self.descend() else {
             return nil
         }
 
-        return .pipeline(Unidoc.RulesEndpoint.init(query: .init(symbol: symbol,
-            as: self.authorization.account)))
+        return .pipeline(
+            Unidoc.RulesEndpoint.init(
+                query: .init(
+                    symbol: symbol,
+                    as: self.authorization.account
+                )
+            )
+        )
     }
 
-    private
-    func sitemap() -> Unidoc.AnyOperation
-    {
+    private func sitemap() -> Unidoc.AnyOperation {
         .unordered(Unidoc.LoadSitemapIndexOperation.init())
     }
 
     /// Deprecated route.
-    private mutating
-    func sitemaps() -> Unidoc.AnyOperation?
-    {
-        guard let next:String = self.descend()
-        else
-        {
+    private mutating func sitemaps() -> Unidoc.AnyOperation? {
+        guard let next: String = self.descend() else {
             return nil
         }
 
         return .sync(redirect: .permanent("""
-            \(Unidoc.ServerRoot.docs)/\(next.prefix { $0 != "." })/all-symbols
-            """))
+                \(Unidoc.ServerRoot.docs)/\(next.prefix { $0 != "." })/all-symbols
+                """))
     }
 
-    private mutating
-    func stats() -> Unidoc.AnyOperation?
-    {
-        guard let volume:Unidoc.VolumeSelector = self.descend()
-        else
-        {
+    private mutating func stats() -> Unidoc.AnyOperation? {
+        guard let volume: Unidoc.VolumeSelector = self.descend() else {
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
-        return .pipeline(Unidoc.StatsEndpoint.init(query: .init(
-                volume: volume,
-                vertex: .init(casefolded: self.stem, hash: parameters.hash))))
+        let parameters: Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
+        return .pipeline(
+            Unidoc.StatsEndpoint.init(
+                query: .init(
+                    volume: volume,
+                    vertex: .init(casefolded: self.stem, hash: parameters.hash)
+                )
+            )
+        )
     }
 
-    private mutating
-    func tags() -> Unidoc.AnyOperation?
-    {
-        guard let symbol:Symbol.Package = self.descend()
-        else
-        {
+    private mutating func tags() -> Unidoc.AnyOperation? {
+        guard let symbol: Symbol.Package = self.descend() else {
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
+        let parameters: Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
 
-        if  let page:Int = parameters.page
-        {
-            return .pipeline(Unidoc.TagsEndpoint.init(query: .init(
-                symbol: symbol,
-                filter: parameters.beta ? .prerelease : .release,
-                limit: 20,
-                page: page,
-                as: self.authorization.account)))
-        }
-        else
-        {
-            return .pipeline(Unidoc.RefsEndpoint.init(query: .init(
-                symbol: symbol,
-                limitTags: 12,
-                limitBranches: 32,
-                limitDependents: 16,
-                as: self.authorization.account)))
+        if  let page: Int = parameters.page {
+            return .pipeline(
+                Unidoc.TagsEndpoint.init(
+                    query: .init(
+                        symbol: symbol,
+                        filter: parameters.beta ? .prerelease : .release,
+                        limit: 20,
+                        page: page,
+                        as: self.authorization.account
+                    )
+                )
+            )
+        } else {
+            return .pipeline(
+                Unidoc.RefsEndpoint.init(
+                    query: .init(
+                        symbol: symbol,
+                        limitTags: 12,
+                        limitBranches: 32,
+                        limitDependents: 16,
+                        as: self.authorization.account
+                    )
+                )
+            )
         }
     }
 
-    private mutating
-    func consumers() -> Unidoc.AnyOperation?
-    {
-        guard let package:Symbol.Package = self.descend()
-        else
-        {
+    private mutating func consumers() -> Unidoc.AnyOperation? {
+        guard let package: Symbol.Package = self.descend() else {
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
-        return .pipeline(Unidoc.ConsumersEndpoint.init(query: .init(
-            symbol: package,
-            limit: 20,
-            page: parameters.page ?? 0,
-            as: self.authorization.account)))
+        let parameters: Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
+        return .pipeline(
+            Unidoc.ConsumersEndpoint.init(
+                query: .init(
+                    symbol: package,
+                    limit: 20,
+                    page: parameters.page ?? 0,
+                    as: self.authorization.account
+                )
+            )
+        )
     }
 
-    private mutating
-    func runs() -> Unidoc.AnyOperation?
-    {
+    private mutating func runs() -> Unidoc.AnyOperation? {
         guard
-        let package:Symbol.Package = self.descend()
-        else
-        {
+        let package: Symbol.Package = self.descend() else {
             return nil
         }
 
-        let parameters:Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
+        let parameters: Unidoc.PipelineParameters = .init(self.uri.query ?? [:])
 
-        return .pipeline(Unidoc.CompleteBuildsEndpoint.init(query: .init(
-            symbol: package,
-            limit: 20,
-            page: parameters.page ?? 0,
-            as: self.authorization.account)))
+        return .pipeline(
+            Unidoc.CompleteBuildsEndpoint.init(
+                query: .init(
+                    symbol: package,
+                    limit: 20,
+                    page: parameters.page ?? 0,
+                    as: self.authorization.account
+                )
+            )
+        )
     }
 
-    private mutating
-    func telescope() -> Unidoc.AnyOperation?
-    {
-        guard let next:String = self.descend()
-        else
-        {
+    private mutating func telescope() -> Unidoc.AnyOperation? {
+        guard let next: String = self.descend() else {
             return nil
         }
 
-        if  let year:Timestamp.Year = .init(next),
-            let endpoint:Unidoc.PackagesCrawledEndpoint = .init(year: year)
-        {
+        if  let year: Timestamp.Year = .init(next),
+            let endpoint: Unidoc.PackagesCrawledEndpoint = .init(year: year) {
             return .pipeline(endpoint)
-        }
-        else if
-            let date:Timestamp.Date = .init(next),
-            let endpoint:Unidoc.PackagesCreatedEndpoint = .init(date: date)
-        {
+        } else if
+            let date: Timestamp.Date = .init(next),
+            let endpoint: Unidoc.PackagesCreatedEndpoint = .init(date: date) {
             return .pipeline(endpoint)
-        }
-        else
-        {
+        } else {
             return nil
         }
     }
 
-    private mutating
-    func user() -> Unidoc.AnyOperation?
-    {
+    private mutating func user() -> Unidoc.AnyOperation? {
         guard
-        let account:String = self.descend(),
-        let account:Unidoc.Account = .init(account)
-        else
-        {
+        let account: String = self.descend(),
+        let account: Unidoc.Account = .init(account) else {
             return nil
         }
 
         return .pipeline(Unidoc.UserPropertyEndpoint.init(query: .init(account: account)))
     }
 
-    private mutating
-    func docsLegacy() -> Unidoc.AnyOperation?
-    {
-        guard let next:String = self.descend()
-        else
-        {
+    private mutating func docsLegacy() -> Unidoc.AnyOperation? {
+        guard let next: String = self.descend() else {
             return nil
         }
 
-        let parameters:LegacyParameters = .init(self.uri.query ?? [:])
+        let parameters: LegacyParameters = .init(self.uri.query ?? [:])
 
-        let query:Unidoc.RedirectBySymbolicHintQuery<Unidoc.VertexPath> = .legacy(head: next,
+        let query: Unidoc.RedirectBySymbolicHintQuery<Unidoc.VertexPath> = .legacy(
+            head: next,
             rest: self.stem,
-            from: parameters.from)
+            from: parameters.from
+        )
 
         //  Always pass empty parameters, as this endpoint always returns a redirect!
-        if  let overload:Symbol.Decl = parameters.overload
-        {
+        if  let overload: Symbol.Decl = parameters.overload {
             return .unordered(
                 Unidoc.RedirectOperation<Unidoc.RedirectBySymbolicHintQuery<Symbol.Decl>>.init(
-                    query: .init(volume: query.volume, lookup: overload)))
-        }
-        else
-        {
+                    query: .init(volume: query.volume, lookup: overload)
+                )
+            )
+        } else {
             return .unordered(
                 Unidoc.RedirectOperation<
-                Unidoc.RedirectBySymbolicHintQuery<Unidoc.VertexPath>>.init(
-                    query: query))
+                    Unidoc.RedirectBySymbolicHintQuery<Unidoc.VertexPath>
+                >.init(
+                    query: query
+                )
+            )
         }
     }
 }

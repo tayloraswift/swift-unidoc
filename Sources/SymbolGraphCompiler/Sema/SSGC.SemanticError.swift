@@ -1,20 +1,13 @@
 import Symbols
 
-extension SSGC
-{
-    public
-    enum SemanticError:Error, Sendable
-    {
-        case cannot(have:Counterparts, as:Phylum.Decl)
+extension SSGC {
+    public enum SemanticError: Error, Sendable {
+        case cannot(have: Counterparts, as: Phylum.Decl)
     }
 }
-extension SSGC.SemanticError:CustomStringConvertible
-{
-    public
-    var description:String
-    {
-        switch self
-        {
+extension SSGC.SemanticError: CustomStringConvertible {
+    public var description: String {
+        switch self {
         case .cannot(have: .requirements, as: let phylum):
             "Scalar of phylum '\(phylum)' cannot have requirements"
 

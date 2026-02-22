@@ -1,13 +1,9 @@
 import PieCharts
 import UnidocRecords
 
-extension Unidoc.Census.Interface:Pie.ChartKey
-{
-    public
-    var id:String
-    {
-        switch self
-        {
+extension Unidoc.Census.Interface: Pie.ChartKey {
+    public var id: String {
+        switch self {
         case .unrestricted:     "none"
         case .underscored:      "underscored"
         case .spi(nil):         "unknown"
@@ -15,11 +11,8 @@ extension Unidoc.Census.Interface:Pie.ChartKey
         }
     }
 
-    public
-    var name:String
-    {
-        switch self
-        {
+    public var name: String {
+        switch self {
         case .unrestricted:     "unrestricted"
         case .underscored:      "underscored"
         case .spi(nil):         "SPI (unknown)"

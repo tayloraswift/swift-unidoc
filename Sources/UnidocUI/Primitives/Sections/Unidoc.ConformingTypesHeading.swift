@@ -1,9 +1,7 @@
-extension Unidoc
-{
-    enum ConformingTypesHeading:BiasedHeading
-    {
-        case citizens(in:Unidoc.Scalar)
-        case available(in:Unidoc.Scalar)
-        case `extension`(in:Unidoc.Scalar)
+extension Unidoc {
+    enum ConformingTypesHeading: BiasedHeading {
+        case citizens(in: Unidoc.Scalar)
+        case available(in: Unidoc.Scalar)
+        case `extension`(in: Unidoc.Scalar)
     }
 }

@@ -4,60 +4,44 @@ import Symbols
 import UnidocRender
 import URI
 
-extension Unidoc.RefsTable.Row
-{
-    struct Graph
-    {
-        private
-        let symbol:Symbol.PackageAtRef
+extension Unidoc.RefsTable.Row {
+    struct Graph {
+        private let symbol: Symbol.PackageAtRef
 
-        private
-        let state:State
-        private
-        let view:Unidoc.Permissions
+        private let state: State
+        private let view: Unidoc.Permissions
 
-        init(symbol:Symbol.PackageAtRef,
-            state:State,
-            view:Unidoc.Permissions)
-        {
+        init(
+            symbol: Symbol.PackageAtRef,
+            state: State,
+            view: Unidoc.Permissions
+        ) {
             self.symbol = symbol
             self.state = state
             self.view = view
         }
     }
 }
-extension Unidoc.RefsTable.Row.Graph
-{
-    private
-    var id:Unidoc.Edition
-    {
-        switch self.state
-        {
+extension Unidoc.RefsTable.Row.Graph {
+    private var id: Unidoc.Edition {
+        switch self.state {
         case .some(let graph):  graph.id
         case .none(let id):     id
         }
     }
 }
-extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
-{
-    static
-    func += (td:inout HTML.ContentEncoder, self:Self)
-    {
-        td[.div]
-        {
-            guard case .some(let graph) = self.state
-            else
-            {
+extension Unidoc.RefsTable.Row.Graph: HTML.OutputStreamable {
+    static func += (td: inout HTML.ContentEncoder, self: Self) {
+        td[.div] {
+            guard case .some(let graph) = self.state else {
                 $0[.span] { $0.title = "No symbol graph has been built for this version." }
                 return
             }
 
-            let size:Int = graph.inlineBytes ?? graph.remoteBytes
+            let size: Int = graph.inlineBytes ?? graph.remoteBytes
 
-            $0[.span]
-            {
-                switch graph.action
-                {
+            $0[.span] {
+                switch graph.action {
                 case nil:
                     $0.class = "graph"
 
@@ -83,8 +67,7 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
 
             $0 += " "
 
-            $0[.span]
-            {
+            $0[.span] {
                 $0.class = "kb"
                 $0.title = "\(size) bytes, \(graph.inlineBytes ?? 0) bytes on disk"
 
@@ -92,49 +75,38 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
         }
 
         //  You need to be logged-in to see the menu.
-        guard self.view.authenticated
-        else
-        {
+        guard self.view.authenticated else {
             return
         }
 
-        td[.div, { $0.class = "menu" }]
-        {
+        td[.div, { $0.class = "menu" }] {
             $0[.button] = "•••"
-            $0[.ul]
-            {
-                if  self.view.editor
-                {
-                    $0[.li]
-                    {
-                        $0[.form]
-                        {
+            $0[.ul] {
+                if  self.view.editor {
+                    $0[.li] {
+                        $0[.form] {
                             $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
                             $0.action = "\(Unidoc.Post[.build, confirm: true])"
                             $0.method = "post"
                         } = Unidoc.BuildFormTool.init(
                             form: .init(symbol: self.symbol, action: .submit),
-                            area: .init(text: nil, type: .inline))
+                            area: .init(text: nil, type: .inline)
+                        )
                     }
                 }
 
                 guard
-                case .some(let graph) = self.state
-                else
-                {
+                case .some(let graph) = self.state else {
                     return
                 }
 
-                let object:Unidoc.GraphPath = .init(edition: graph.id, type: .bson_zz)
+                let object: Unidoc.GraphPath = .init(edition: graph.id, type: .bson_zz)
 
                 //  For now, allow all logged-in users to obtain the download link.
                 //  This only makes sense in production.
-                if  self.view.enforced
-                {
-                    $0[.li]
-                    {
-                        $0[.a]
-                        {
+                if  self.view.enforced {
+                    $0[.li] {
+                        $0[.a] {
                             $0.target = "_blank"
                             $0.rel = .external
                             $0.href = "https://static.swiftinit.org\(object)"
@@ -142,12 +114,9 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                     }
                 }
 
-                if  self.view.admin
-                {
-                    $0[.li]
-                    {
-                        $0[.a]
-                        {
+                if  self.view.admin {
+                    $0[.li] {
+                        $0[.a] {
                             $0.target = "_blank"
                             $0.rel = .external
                             $0.href = """
@@ -157,20 +126,17 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                         } = "Inspect object"
                     }
 
-                    for (label, route):(String, Unidoc.LinkerRoute) in [
-                        ("Uplink", .uplink),
-                        ("Unlink", .unlink),
-                        ("Delete", .delete),
-                        ("Cancel action", .cancel),
-                        ("Mark vintage", .vintage)
-                    ]
-                    {
-                        $0[.li]
-                        {
-                            var action:URI = Unidoc.ServerRoot.link / "\(route)"
+                    for (label, route): (String, Unidoc.LinkerRoute) in [
+                            ("Uplink", .uplink),
+                            ("Unlink", .unlink),
+                            ("Delete", .delete),
+                            ("Cancel action", .cancel),
+                            ("Mark vintage", .vintage)
+                        ] {
+                        $0[.li] {
+                            var action: URI = Unidoc.ServerRoot.link / "\(route)"
 
-                            switch route
-                            {
+                            switch route {
                             case .cancel:   break
                             //  Uplink does not require confirmation.
                             case .uplink:   break
@@ -180,15 +146,17 @@ extension Unidoc.RefsTable.Row.Graph:HTML.OutputStreamable
                             case .vintage:  break
                             }
 
-                            $0[.form]
-                            {
+                            $0[.form] {
                                 $0.enctype = "\(MediaType.application(.x_www_form_urlencoded))"
                                 $0.action = "\(action)"
                                 $0.method = "post"
                             } = Unidoc.LinkerTool.init(
-                                form: .init(edition: graph.id,
-                                    back: "\(Unidoc.RefsEndpoint[self.symbol.package])"),
-                                name: label)
+                                form: .init(
+                                    edition: graph.id,
+                                    back: "\(Unidoc.RefsEndpoint[self.symbol.package])"
+                                ),
+                                name: label
+                            )
                         }
                     }
                 }

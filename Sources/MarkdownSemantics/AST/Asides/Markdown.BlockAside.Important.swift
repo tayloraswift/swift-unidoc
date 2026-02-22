@@ -1,12 +1,8 @@
 import MarkdownABI
 import MarkdownAST
 
-extension Markdown.BlockAside
-{
-    public final
-    class Important:Markdown.BlockAside
-    {
-        public class override
-        var context:Markdown.Bytecode.Context { .important }
+extension Markdown.BlockAside {
+    public final class Important: Markdown.BlockAside {
+        public class override var context: Markdown.Bytecode.Context { .important }
     }
 }

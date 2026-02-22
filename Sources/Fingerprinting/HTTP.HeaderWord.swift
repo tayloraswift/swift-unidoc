@@ -1,10 +1,7 @@
 import HTTP
 
-extension HTTP
-{
-    @usableFromInline
-    protocol HeaderWord
-    {
-        init?(_ word:Substring)
+extension HTTP {
+    @usableFromInline protocol HeaderWord {
+        init?(_ word: Substring)
     }
 }

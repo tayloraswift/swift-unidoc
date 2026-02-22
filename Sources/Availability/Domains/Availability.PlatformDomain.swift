@@ -1,10 +1,7 @@
 import SemanticVersions
 
-extension Availability
-{
-    @frozen public
-    enum PlatformDomain:String, CaseIterable, Equatable, Hashable, Sendable
-    {
+extension Availability {
+    @frozen public enum PlatformDomain: String, CaseIterable, Equatable, Hashable, Sendable {
         case bridgeOS
         case iOS
         case macOS
@@ -22,22 +19,14 @@ extension Availability
         case watchOSApplicationExtension
     }
 }
-extension Availability.PlatformDomain:AvailabilityDomain
-{
-    public
-    typealias Bound = NumericVersion
-    public
-    typealias Deprecation = Availability.AnyRange
-    public
-    typealias Unavailability = Availability.EternalRange
+extension Availability.PlatformDomain: AvailabilityDomain {
+    public typealias Bound = NumericVersion
+    public typealias Deprecation = Availability.AnyRange
+    public typealias Unavailability = Availability.EternalRange
 }
-extension Availability.PlatformDomain:CustomStringConvertible
-{
-    @inlinable public
-    var description:String
-    {
-        switch self
-        {
+extension Availability.PlatformDomain: CustomStringConvertible {
+    @inlinable public var description: String {
+        switch self {
         case .bridgeOS:                         "bridgeOS"
         case .iOS:                              "iOS"
         case .macOS:                            "macOS"

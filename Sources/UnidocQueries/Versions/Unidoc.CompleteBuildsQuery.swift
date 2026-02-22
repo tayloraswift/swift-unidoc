@@ -1,5 +1,3 @@
-extension Unidoc
-{
-    public
-    typealias CompleteBuildsQuery = PackagePageQuery<CompleteBuildsPageSegment>
+extension Unidoc {
+    public typealias CompleteBuildsQuery = PackagePageQuery<CompleteBuildsPageSegment>
 }

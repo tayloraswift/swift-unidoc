@@ -1,8 +1,5 @@
-extension SSGC
-{
-    @frozen public
-    enum StatusUpdate:UInt8, Equatable, Sendable
-    {
+extension SSGC {
+    @frozen public enum StatusUpdate: UInt8, Equatable, Sendable {
         case didCloneRepository = 0
         case didResolveDependencies
 

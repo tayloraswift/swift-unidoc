@@ -1,11 +1,8 @@
 import MarkdownABI
 
-extension Markdown
-{
+extension Markdown {
     /// Not to be confused with ``Markdown.BlockElement``.
-    @frozen public
-    enum InlineElement
-    {
+    @frozen public enum InlineElement {
         case autolink(InlineAutolink)
 
         case container(InlineContainer<Self>)
@@ -20,13 +17,9 @@ extension Markdown
         case text(String)
     }
 }
-extension Markdown.InlineElement:Markdown.TreeElement
-{
-    @inlinable public
-    func emit(into binary:inout Markdown.BinaryEncoder)
-    {
-        switch self
-        {
+extension Markdown.InlineElement: Markdown.TreeElement {
+    @inlinable public func emit(into binary: inout Markdown.BinaryEncoder) {
+        switch self {
         case .autolink(let autolink):
             autolink.element.emit(into: &binary)
 
@@ -53,13 +46,9 @@ extension Markdown.InlineElement:Markdown.TreeElement
         }
     }
 }
-extension Markdown.InlineElement:Markdown.TextElement
-{
-    @inlinable public static
-    func += (text:inout String, self:Self)
-    {
-        switch self
-        {
+extension Markdown.InlineElement: Markdown.TextElement {
+    @inlinable public static func += (text: inout String, self: Self) {
+        switch self {
         case .autolink(let autolink):   text += autolink.text.string
         case .container(let container): text += container
         case .code(let code):           text += code
@@ -71,11 +60,10 @@ extension Markdown.InlineElement:Markdown.TextElement
         }
     }
 
-    @inlinable public mutating
-    func rewrite(by rewrite:(inout Markdown.InlineHyperlink.Target?) throws -> ()) rethrows
-    {
-        switch /* consume */ self
-        {
+    @inlinable public mutating func rewrite(
+        by rewrite: (inout Markdown.InlineHyperlink.Target?) throws -> ()
+    ) rethrows {
+        switch /* consume */ self {
         case .container(var container):
             defer { self = .container(container) }
             try container.rewrite(by: rewrite)
@@ -89,16 +77,13 @@ extension Markdown.InlineElement:Markdown.TextElement
         }
     }
 
-    @inlinable public mutating
-    func outline(by register:(Markdown.AnyReference) throws -> Int?) rethrows
-    {
-        switch /* consume */ self
-        {
+    @inlinable public mutating func outline(
+        by register: (Markdown.AnyReference) throws -> Int?
+    ) rethrows {
+        switch /* consume */ self {
         case .autolink(let autolink):
             guard
-            let reference:Int = try register(.init(autolink))
-            else
-            {
+            let reference: Int = try register(.init(autolink)) else {
                 self = .autolink(autolink)
                 return
             }
@@ -131,14 +116,10 @@ extension Markdown.InlineElement:Markdown.TextElement
         }
     }
 }
-extension Markdown.InlineElement
-{
+extension Markdown.InlineElement {
     /// Returns true if this element can appear as link text.
-    @inlinable internal
-    var anchorable:Bool
-    {
-        switch self
-        {
+    @inlinable internal var anchorable: Bool {
+        switch self {
         case .autolink:                 false
         case .container(let container): container.anchorable
         case .code:                     true

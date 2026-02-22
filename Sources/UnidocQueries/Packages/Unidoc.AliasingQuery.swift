@@ -5,58 +5,44 @@ import Symbols
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc
-{
-    public
-    protocol AliasingQuery<CollectionOrigin, CollectionTarget>:Mongo.PipelineQuery
-        where CollectionOrigin.Element:Mongo.MasterCodingModel<AliasKey>
-    {
-        associatedtype CollectionOrigin:Mongo.CollectionModel
-        associatedtype CollectionTarget:Mongo.CollectionModel
+extension Unidoc {
+    public protocol AliasingQuery<CollectionOrigin, CollectionTarget>: Mongo.PipelineQuery
+        where CollectionOrigin.Element: Mongo.MasterCodingModel<AliasKey> {
+        associatedtype CollectionOrigin: Mongo.CollectionModel
+        associatedtype CollectionTarget: Mongo.CollectionModel
 
         /// The field to store the target document (a `CollectionTarget.Element`) in.
-        static
-        var target:Mongo.AnyKeyPath { get }
+        static var target: Mongo.AnyKeyPath { get }
 
-        var symbol:CollectionOrigin.Element.ID { get }
+        var symbol: CollectionOrigin.Element.ID { get }
 
-        func extend(pipeline:inout Mongo.PipelineEncoder)
+        func extend(pipeline: inout Mongo.PipelineEncoder)
     }
 }
-extension Unidoc.AliasingQuery
-{
-    @inlinable public
-    var collation:Mongo.Collation { .simple }
-    @inlinable public
-    var from:Mongo.Collection? { CollectionOrigin.name }
-    @inlinable public
-    var hint:Mongo.CollectionIndex? { nil }
+extension Unidoc.AliasingQuery {
+    @inlinable public var collation: Mongo.Collation { .simple }
+    @inlinable public var from: Mongo.Collection? { CollectionOrigin.name }
+    @inlinable public var hint: Mongo.CollectionIndex? { nil }
 
-    public
-    func build(pipeline:inout Mongo.PipelineEncoder)
-    {
-        defer
-        {
+    public func build(pipeline: inout Mongo.PipelineEncoder) {
+        defer {
             self.extend(pipeline: &pipeline)
         }
 
-        pipeline[stage: .match]
-        {
+        pipeline[stage: .match] {
             $0[CollectionOrigin.Element[.id]] = self.symbol
         }
 
         pipeline[stage: .limit] = 1
 
-        pipeline[stage: .lookup]
-        {
+        pipeline[stage: .lookup] {
             $0[.from] = CollectionTarget.name
             $0[.localField] = CollectionOrigin.Element[.coordinate]
             $0[.foreignField] = "_id"
             $0[.as] = Self.target
         }
 
-        pipeline[stage: .project]
-        {
+        pipeline[stage: .project] {
             $0[Self.target] = true
         }
 

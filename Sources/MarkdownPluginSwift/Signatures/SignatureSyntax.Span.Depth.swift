@@ -1,8 +1,5 @@
-extension SignatureSyntax.Span
-{
-    @frozen @usableFromInline
-    enum Depth
-    {
+extension SignatureSyntax.Span {
+    @frozen @usableFromInline enum Depth {
         case toplevel
     }
 }

@@ -1,5 +1,4 @@
 import BSON
 
-extension Unidoc.Snapshot.CodingKey:BSONDecodable
-{
+extension Unidoc.Snapshot.CodingKey: BSONDecodable {
 }

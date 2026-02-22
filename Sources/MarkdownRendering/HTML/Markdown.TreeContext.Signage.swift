@@ -1,15 +1,13 @@
 import HTML
 
-extension Markdown.TreeContext
-{
+extension Markdown.TreeContext {
     /// A signage context, which typically renders as an `aside` HTML element.
     /// Most markdown “asides” are signage contexts, but we prefer the term
     /// “signage” in our markdown ABI, because semantic processing is supposed
     /// to leave them where they appear in the source document, like a sign post.
     /// (Semantic processing reorders some asides, like `returns`, to the top of
     /// the document.)
-    enum Signage:String, Equatable, Hashable, Sendable
-    {
+    enum Signage: String, Equatable, Hashable, Sendable {
         case attention
         case author
         case authors
@@ -35,12 +33,9 @@ extension Markdown.TreeContext
         case warning
     }
 }
-extension Markdown.TreeContext.Signage:CustomStringConvertible
-{
-    var description:String
-    {
-        switch self
-        {
+extension Markdown.TreeContext.Signage: CustomStringConvertible {
+    var description: String {
+        switch self {
         case .attention:        "Attention"
         case .author:           "Author"
         case .authors:          "Authors"

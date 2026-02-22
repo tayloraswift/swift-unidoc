@@ -1,50 +1,36 @@
 import HTML
 import UnidocRender
 
-extension HTML.AttributeEncoder
-{
-    var tooltip:Unidoc.TooltipMode?
-    {
+extension HTML.AttributeEncoder {
+    var tooltip: Unidoc.TooltipMode? {
         get { nil }
-        set (value)
-        {
+        set (value) {
             self[data: "tooltip"] = value?.code
         }
     }
 
-    @inlinable
-    var link:Unidoc.LinkTarget?
-    {
+    @inlinable var link: Unidoc.LinkTarget? {
         get { nil }
-        set (value)
-        {
+        set (value) {
             guard
-            let value:Unidoc.LinkTarget
-            else
-            {
+            let value: Unidoc.LinkTarget else {
                 return
             }
 
             self.href = value.url ?? "#"
 
-            if  case .exported = value
-            {
+            if  case .exported = value {
                 self.external(safe: true)
             }
         }
     }
 
-    @inlinable mutating
-    func external(safe:Bool)
-    {
+    @inlinable mutating func external(safe: Bool) {
         self.target = "_blank"
 
-        if  safe
-        {
+        if  safe {
             self.rel = .external
-        }
-        else
-        {
+        } else {
             self[name: .rel] = """
             \(HTML.Attribute.Rel.external) \
             \(HTML.Attribute.Rel.nofollow) \

@@ -1,11 +1,8 @@
 import MarkdownAST
 
-extension Markdown.InlineSpan:ParsableAsInlineMarkup
-{
-    init(from markup:/* borrowing */ any _InlineMarkup, in source:borrowing Markdown.Source)
-    {
-        switch /* copy */ markup
-        {
+extension Markdown.InlineSpan: ParsableAsInlineMarkup {
+    init(from markup:/* borrowing */ any _InlineMarkup, in source: borrowing Markdown.Source) {
+        switch /* copy */ markup {
         case is _LineBreak:
             self = .text("\n")
 

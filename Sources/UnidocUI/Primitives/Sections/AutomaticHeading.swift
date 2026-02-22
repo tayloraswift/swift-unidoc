@@ -1,7 +1,6 @@
 import HTML
 
-enum AutomaticHeading:Equatable, Comparable
-{
+enum AutomaticHeading: Equatable, Comparable {
     case allModules
     case allProducts
     case allProductConstituents
@@ -23,12 +22,9 @@ enum AutomaticHeading:Equatable, Comparable
     case superclasses
     case supertypes
 }
-extension AutomaticHeading:Identifiable
-{
-    var id:String
-    {
-        switch self
-        {
+extension AutomaticHeading: Identifiable {
+    var id: String {
+        switch self {
         case .allModules:               "ss:all-modules"
         case .allProducts:              "ss:all-products"
         case .allProductConstituents:   "ss:all-product-constituents"
@@ -52,12 +48,9 @@ extension AutomaticHeading:Identifiable
         }
     }
 }
-extension AutomaticHeading:CustomStringConvertible
-{
-    var description:String
-    {
-        switch self
-        {
+extension AutomaticHeading: CustomStringConvertible {
+    var description: String {
+        switch self {
         case .allModules:               "Modules"
         case .allProducts:              "Products"
         case .allProductConstituents:   "Product constituents"
@@ -81,6 +74,5 @@ extension AutomaticHeading:CustomStringConvertible
         }
     }
 }
-extension AutomaticHeading:HTML.OutputStreamableHeading
-{
+extension AutomaticHeading: HTML.OutputStreamableHeading {
 }

@@ -5,51 +5,37 @@ import SymbolGraphs
 import Symbols
 import Unidoc
 
-extension Unidoc
-{
-    @frozen public
-    struct VolumeMetadata:Identifiable, Equatable, Sendable
-    {
-        public
-        let id:Unidoc.Edition
+extension Unidoc {
+    @frozen public struct VolumeMetadata: Identifiable, Equatable, Sendable {
+        public let id: Unidoc.Edition
 
-        public
-        var dependencies:[Dependency]
-        public
-        var display:String?
-        public
-        var commit:SymbolGraphMetadata.Commit?
+        public var dependencies: [Dependency]
+        public var display: String?
+        public var commit: SymbolGraphMetadata.Commit?
 
-        public
-        var symbol:Symbol.Volume
-        public
-        var latest:Bool
-        public
-        var realm:Unidoc.Realm?
-        public
-        var patch:PatchVersion?
+        public var symbol: Symbol.Volume
+        public var latest: Bool
+        public var realm: Unidoc.Realm?
+        public var patch: PatchVersion?
 
-        public
-        var products:[Noun]
+        public var products: [Noun]
         /// Contains a tree of the cultures in this volume.
-        public
-        var cultures:[Noun]
+        public var cultures: [Noun]
 
-        public
-        var abi:MinorVersion
+        public var abi: MinorVersion
 
-        @inlinable public
-        init(id:Unidoc.Edition,
-            dependencies:[Dependency] = [],
-            display:String? = nil,
-            commit:SymbolGraphMetadata.Commit? = nil,
-            symbol:Symbol.Volume,
-            latest:Bool,
-            realm:Unidoc.Realm?,
-            patch:PatchVersion? = nil,
-            products:[Noun] = [],
-            cultures:[Noun] = [])
-        {
+        @inlinable public init(
+            id: Unidoc.Edition,
+            dependencies: [Dependency] = [],
+            display: String? = nil,
+            commit: SymbolGraphMetadata.Commit? = nil,
+            symbol: Symbol.Volume,
+            latest: Bool,
+            realm: Unidoc.Realm?,
+            patch: PatchVersion? = nil,
+            products: [Noun] = [],
+            cultures: [Noun] = []
+        ) {
             self.abi = VolumeABI.version
 
             self.id = id
@@ -65,21 +51,16 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.VolumeMetadata
-{
-    @inlinable public
-    var selector:Unidoc.VolumeSelector
-    {
+extension Unidoc.VolumeMetadata {
+    @inlinable public var selector: Unidoc.VolumeSelector {
         .init(
             package: self.symbol.package,
-            version: self.latest ? nil : self.symbol.version[...])
+            version: self.latest ? nil : self.symbol.version[...]
+        )
     }
 }
-extension Unidoc.VolumeMetadata
-{
-    @frozen public
-    enum CodingKey:String, Equatable, Hashable, Sendable
-    {
+extension Unidoc.VolumeMetadata {
+    @frozen public enum CodingKey: String, Equatable, Hashable, Sendable {
         case id = "_id"
 
         case cell = "O"
@@ -128,11 +109,8 @@ extension Unidoc.VolumeMetadata
         case abi = "I"
     }
 }
-extension Unidoc.VolumeMetadata:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension Unidoc.VolumeMetadata: BSONDocumentEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.id] = self.id
         bson[.cell] = self.id.package
 
@@ -161,37 +139,38 @@ extension Unidoc.VolumeMetadata:BSONDocumentEncodable
         bson[.abi] = self.abi
     }
 }
-extension Unidoc.VolumeMetadata:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        let commit:SymbolGraphMetadata.Commit?
-        if  let name:String = try bson[.commit_name]?.decode()
-        {
-            commit = .init(name: name,
+extension Unidoc.VolumeMetadata: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        let commit: SymbolGraphMetadata.Commit?
+        if  let name: String = try bson[.commit_name]?.decode() {
+            commit = .init(
+                name: name,
                 sha1: try bson[.commit_sha1]?.decode(),
-                date: try bson[.commit_date]?.decode())
-        }
-        else
-        {
+                date: try bson[.commit_date]?.decode()
+            )
+        } else {
             commit = nil
         }
 
-        self.init(id: try bson[.id].decode(),
+        self.init(
+            id: try bson[.id].decode(),
             dependencies: try bson[.dependencies]?.decode() ?? [],
             display: try bson[.display]?.decode(),
             commit: commit,
             symbol: .init(
                 package: try bson[.package].decode(),
-                version: try bson[.version].decode()),
+                version: try bson[.version].decode()
+            ),
             latest: try bson[.latest]?.decode() ?? false,
             realm: try bson[.realm]?.decode(),
             patch: try bson[.patch]?.decode(),
             products: try bson[.products]?.decode(
-                as: Unidoc.NounTable.self, with: \.rows) ?? [],
+                as: Unidoc.NounTable.self, with: \.rows
+            ) ?? [],
             cultures: try bson[.cultures]?.decode(
-                as: Unidoc.NounTable.self, with: \.rows) ?? [])
+                as: Unidoc.NounTable.self, with: \.rows
+            ) ?? []
+        )
 
         self.abi = try bson[.abi].decode()
     }

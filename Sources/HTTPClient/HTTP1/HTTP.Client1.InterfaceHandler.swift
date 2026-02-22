@@ -1,71 +1,54 @@
 import NIOCore
 import NIOHTTP1
 
-extension HTTP.Client1
-{
-    final
-    class InterfaceHandler
-    {
-        private
-        var request:EventLoopPromise<Facet>?
-        private
-        var facet:Facet
+extension HTTP.Client1 {
+    final class InterfaceHandler {
+        private var request: EventLoopPromise<Facet>?
+        private var facet: Facet
 
-        init()
-        {
+        init() {
             self.request = nil
             self.facet = .init()
         }
 
-        deinit
-        {
-            if  case _? = self.request
-            {
+        deinit {
+            if  case _? = self.request {
                 fatalError("InterfaceHandler deinitialized with continuation attached!")
             }
         }
     }
 }
-extension HTTP.Client1.InterfaceHandler:ChannelHandler
-{
-    func handlerRemoved(context:ChannelHandlerContext)
-    {
+extension HTTP.Client1.InterfaceHandler: ChannelHandler {
+    func handlerRemoved(context: ChannelHandlerContext) {
         self.request?.fail(HTTP.Client1.UnexpectedDisconnectionError.init())
         self.request = nil
     }
-    func errorCaught(context:ChannelHandlerContext, error:any Error)
-    {
+    func errorCaught(context: ChannelHandlerContext, error: any Error) {
         self.request?.fail(error)
         self.request = nil
     }
 }
-extension HTTP.Client1.InterfaceHandler:ChannelInboundHandler
-{
+extension HTTP.Client1.InterfaceHandler: ChannelInboundHandler {
     typealias InboundIn = HTTPClientResponsePart
 
-    func channelRead(context:ChannelHandlerContext, data:NIOAny)
-    {
-        if  case nil = self.request
-        {
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+        if  case nil = self.request {
             //  Unsolicited response.
             context.channel.close(promise: nil)
             return
         }
 
-        switch self.unwrapInboundIn(data)
-        {
+        switch self.unwrapInboundIn(data) {
         case .head(let head):
             self.facet.head = head
 
-            if  let length:String = head.headers["content-length"].first,
-                let length:Int = .init(length)
-            {
+            if  let length: String = head.headers["content-length"].first,
+                let length: Int = .init(length) {
                 self.facet.body.reserveCapacity(length)
             }
 
         case .body(let buffer):
-            buffer.withUnsafeReadableBytes
-            {
+            buffer.withUnsafeReadableBytes {
                 self.facet.body += $0
             }
 
@@ -76,34 +59,30 @@ extension HTTP.Client1.InterfaceHandler:ChannelInboundHandler
         }
     }
 }
-extension HTTP.Client1.InterfaceHandler:ChannelOutboundHandler
-{
+extension HTTP.Client1.InterfaceHandler: ChannelOutboundHandler {
     typealias OutboundOut = HTTPClientRequestPart
-    typealias OutboundIn =
-    (
-        promise:EventLoopPromise<HTTP.Client1.Facet>,
-        request:HTTP.Client1.Request
+    typealias OutboundIn = (
+        promise: EventLoopPromise<HTTP.Client1.Facet>,
+        request: HTTP.Client1.Request
     )
 
-    func write(context:ChannelHandlerContext, data:NIOAny, promise:EventLoopPromise<Void>?)
-    {
-        let request:HTTP.Client1.Request
+    func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+        let request: HTTP.Client1.Request
 
         (self.request, request) = self.unwrapOutboundIn(data)
 
-        let head:HTTPRequestHead = .init(version: .http1_1,
+        let head: HTTPRequestHead = .init(
+            version: .http1_1,
             method: request.method,
             uri: request.path,
-            headers: request.head)
+            headers: request.head
+        )
 
-        if  let body:ByteBuffer = request.body
-        {
+        if  let body: ByteBuffer = request.body {
             context.write(self.wrapOutboundOut(.head(head)), promise: nil)
             context.write(self.wrapOutboundOut(.body(.byteBuffer(body))), promise: nil)
             context.writeAndFlush(self.wrapOutboundOut(.end(nil)), promise: promise)
-        }
-        else
-        {
+        } else {
             context.writeAndFlush(self.wrapOutboundOut(.head(head)), promise: promise)
         }
     }

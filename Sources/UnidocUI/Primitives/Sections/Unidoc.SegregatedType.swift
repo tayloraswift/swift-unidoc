@@ -1,7 +1,5 @@
-extension Unidoc
-{
-    enum SegregatedType
-    {
+extension Unidoc {
+    enum SegregatedType {
         case conformances
         case defaultImplementations
         case featuresOnType
@@ -19,12 +17,9 @@ extension Unidoc
         case typealiases
     }
 }
-extension Unidoc.SegregatedType:CustomStringConvertible
-{
-    var description:String
-    {
-        switch self
-        {
+extension Unidoc.SegregatedType: CustomStringConvertible {
+    var description: String {
+        switch self {
         case .conformances:             "Conformances"
         case .defaultImplementations:   "Default implementations"
         case .featuresOnType:           "Type features"

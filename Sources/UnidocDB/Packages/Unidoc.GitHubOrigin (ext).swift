@@ -1,5 +1,4 @@
 import MongoQL
 
-extension Unidoc.GitHubOrigin:Mongo.MasterCodingModel
-{
+extension Unidoc.GitHubOrigin: Mongo.MasterCodingModel {
 }

@@ -1,18 +1,14 @@
 import HTTP
 
-extension Unidoc
-{
-    struct PackageMetadataSettingsOperation:Sendable
-    {
-        let account:Account?
-        let package:Package
-        let update:Update
+extension Unidoc {
+    struct PackageMetadataSettingsOperation: Sendable {
+        let account: Account?
+        let package: Package
+        let update: Update
 
-        private
-        var rights:UserRights
+        private var rights: UserRights
 
-        init(account:Account?, package:Package, update:Update)
-        {
+        init(account: Account?, package: Package, update: Update) {
             self.account = account
             self.package = package
             self.update = update
@@ -20,31 +16,28 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackageMetadataSettingsOperation:Unidoc.RestrictedOperation
-{
-    mutating
-    func admit(user:Unidoc.UserRights) -> Bool
-    {
+extension Unidoc.PackageMetadataSettingsOperation: Unidoc.RestrictedOperation {
+    mutating func admit(user: Unidoc.UserRights) -> Bool {
         self.rights = user
         return true
     }
 
-    func load(from server:Unidoc.Server,
-        db:Unidoc.DB,
-        as _:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
-    {
-        if  let rejection:HTTP.ServerResponse = try await db.authorize(
+    func load(
+        from server: Unidoc.Server,
+        db: Unidoc.DB,
+        as _: Unidoc.RenderFormat
+    ) async throws -> HTTP.ServerResponse? {
+        if  let rejection: HTTP.ServerResponse = try await db.authorize(
                 loading: self.package,
                 account: self.account,
-                rights: self.rights)
-        {
+                rights: self.rights
+            ) {
             return rejection
         }
 
-        let metadata:Unidoc.PackageMetadata?
+        let metadata: Unidoc.PackageMetadata?
 
-        switch self.update
-        {
+        switch self.update {
         case .general(let settings):
             metadata = try await db.packages.set(settings: settings, of: self.package)
 
@@ -55,12 +48,9 @@ extension Unidoc.PackageMetadataSettingsOperation:Unidoc.RestrictedOperation
             metadata = try await db.packages.set(build: template, of: self.package)
         }
 
-        if  let metadata:Unidoc.PackageMetadata
-        {
+        if  let metadata: Unidoc.PackageMetadata {
             return .redirect(.seeOther("\(Unidoc.RefsEndpoint[metadata.symbol])"))
-        }
-        else
-        {
+        } else {
             //  Not completely unreachable, due to race conditions.
             return .notFound("No such package!")
         }

@@ -2,10 +2,8 @@
 import Sources
 import Symbols
 
-extension Unidoc.SemanticPriority
-{
-    enum Phylum:Equatable, Comparable
-    {
+extension Unidoc.SemanticPriority {
+    enum Phylum: Equatable, Comparable {
         case `var`
         case `func`
 
@@ -26,12 +24,9 @@ extension Unidoc.SemanticPriority
         case  macro
     }
 }
-extension Unidoc.SemanticPriority.Phylum
-{
-    init(_ phylum:Phylum.Decl, position:SourcePosition? = nil)
-    {
-        switch phylum
-        {
+extension Unidoc.SemanticPriority.Phylum {
+    init(_ phylum: Phylum.Decl, position: SourcePosition? = nil) {
+        switch phylum {
         case    .var(nil):                      self = .var
         case    .func(nil):                     self = .func
         case    .associatedtype:                self = .associatedtype
@@ -54,9 +49,9 @@ extension Unidoc.SemanticPriority.Phylum
 
         case    .protocol:                      self = .protocol
         case    .actor,
-                .class,
-                .enum,
-                .struct:                        self = .type
+            .class,
+            .enum,
+            .struct:                        self = .type
         case    .typealias:                     self = .typealias
 
         case    .macro:                         self = .macro

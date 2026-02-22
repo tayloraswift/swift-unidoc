@@ -1,10 +1,7 @@
 import SemanticVersions
 
-extension Unidoc
-{
-    @frozen public
-    enum Asset:String, CaseIterable, Hashable, Sendable
-    {
+extension Unidoc {
+    @frozen public enum Asset: String, CaseIterable, Hashable, Sendable {
         case error404_jpg       = "error404.jpg"
         case error4xx_jpg       = "error4xx.jpg"
         case error500_jpg       = "error500.jpg"
@@ -34,39 +31,26 @@ extension Unidoc
         case admin_css_map      = "admin.css.map"
     }
 }
-extension Unidoc.Asset:CustomStringConvertible
-{
-    @inlinable public
-    var description:String { self.rawValue }
+extension Unidoc.Asset: CustomStringConvertible {
+    @inlinable public var description: String { self.rawValue }
 }
-extension Unidoc.Asset
-{
-    @inlinable public
-    init?(_ description:String)
-    {
+extension Unidoc.Asset {
+    @inlinable public init?(_ description: String) {
         guard
-        let asset:Self = .init(rawValue: description)
-        else
-        {
+        let asset: Self = .init(rawValue: description) else {
             return nil
         }
 
         self = asset
     }
 }
-extension Unidoc.Asset
-{
-    @inlinable public
-    func path(prepending version:MajorVersion) -> String
-    {
+extension Unidoc.Asset {
+    @inlinable public func path(prepending version: MajorVersion) -> String {
         self.versioned ? "/asset/\(version)/\(self)" : "/asset/\(self)"
     }
 
-    @inlinable public
-    var libre:Bool
-    {
-        switch self
-        {
+    @inlinable public var libre: Bool {
+        switch self {
         case .error404_jpg:     false
         case .error4xx_jpg:     false
         case .error500_jpg:     false
@@ -86,11 +70,8 @@ extension Unidoc.Asset
         }
     }
 
-    @inlinable
-    var versioned:Bool
-    {
-        switch self
-        {
+    @inlinable var versioned: Bool {
+        switch self {
         case .error404_jpg:     false
         case .error4xx_jpg:     false
         case .error500_jpg:     false

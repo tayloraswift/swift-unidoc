@@ -1,12 +1,9 @@
-extension Markdown
-{
+extension Markdown {
     /// Defines the CSS classes associated with each type of supported syntax highlight.
     ///
     /// The two-letter codenames make the Sass sources slightly less readable, but they reduce the
     /// size of a typical rendered page by around 30 percent.
-    @frozen public
-    enum SyntaxHighlight:String, Equatable, Hashable, Sendable
-    {
+    @frozen public enum SyntaxHighlight: String, Equatable, Hashable, Sendable {
         case attribute      = "xa"
         case binding        = "xb"
         case comment        = "xc"
@@ -28,8 +25,6 @@ extension Markdown
         case indent         = "xi"
     }
 }
-extension Markdown.SyntaxHighlight:CustomStringConvertible
-{
-    @inlinable public
-    var description:String { self.rawValue }
+extension Markdown.SyntaxHighlight: CustomStringConvertible {
+    @inlinable public var description: String { self.rawValue }
 }

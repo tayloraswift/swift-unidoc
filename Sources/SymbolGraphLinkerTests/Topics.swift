@@ -1,11 +1,7 @@
 import Testing
 
-@Suite
-struct Topics:MarkdownTestSuite
-{
-    @Test
-    static func OneListImplicitTopic() throws
-    {
+@Suite struct Topics: MarkdownTestSuite {
+    @Test static func OneListImplicitTopic() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -31,11 +27,10 @@ struct Topics:MarkdownTestSuite
             <h2 id='Discussion'><a href='#Discussion'>Discussion</a></h2>\
             <p>Details details details</p>
             """,
-            topics: [3])
+            topics: [3]
+        )
     }
-    @Test
-    static func OneListOneTopicMiddle() throws
-    {
+    @Test static func OneListOneTopicMiddle() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -63,11 +58,10 @@ struct Topics:MarkdownTestSuite
             <h2 id='Discussion'><a href='#Discussion'>Discussion</a></h2>\
             <p>Details details details</p>
             """,
-            topics: [3])
+            topics: [3]
+        )
     }
-    @Test
-    static func OneListOneTopicEnd() throws
-    {
+    @Test static func OneListOneTopicEnd() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -95,11 +89,10 @@ struct Topics:MarkdownTestSuite
             <li><code>doc:GetAnotherTopic</code></li>\
             </ul>
             """,
-            topics: [3])
+            topics: [3]
+        )
     }
-    @Test
-    static func OneListManyTopics() throws
-    {
+    @Test static func OneListManyTopics() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -138,11 +131,10 @@ struct Topics:MarkdownTestSuite
             <li><code>AllTooWell</code></li>\
             </ul>
             """,
-            topics: [3, 2])
+            topics: [3, 2]
+        )
     }
-    @Test
-    static func OneListEmptyTopics() throws
-    {
+    @Test static func OneListEmptyTopics() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -175,11 +167,10 @@ struct Topics:MarkdownTestSuite
             </ul>\
             <h2 id='Lana%20Del%20Rey'><a href='#Lana%20Del%20Rey'>Lana Del Rey</a></h2>
             """,
-            topics: [2])
+            topics: [2]
+        )
     }
-    @Test
-    static func Floating() throws
-    {
+    @Test static func Floating() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -210,11 +201,10 @@ struct Topics:MarkdownTestSuite
             <h3 id='Lana%20Del%20Rey'><a href='#Lana%20Del%20Rey'>Lana Del Rey</a></h3>\
             <p>Just a regular paragraph.</p>
             """,
-            topics: [2])
+            topics: [2]
+        )
     }
-    @Test
-    static func FloatingSeeAlso() throws
-    {
+    @Test static func FloatingSeeAlso() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -239,11 +229,10 @@ struct Topics:MarkdownTestSuite
             <li><code>AllTooWell</code></li>\
             </ul>
             """,
-            topics: [])
+            topics: []
+        )
     }
-    @Test
-    static func ManyLists() throws
-    {
+    @Test static func ManyLists() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -292,11 +281,10 @@ struct Topics:MarkdownTestSuite
             <li><code>AllTooWell</code></li>\
             </ul>
             """,
-            topics: [1, 3, 2])
+            topics: [1, 3, 2]
+        )
     }
-    @Test
-    static func ManyListsDiscussions() throws
-    {
+    @Test static func ManyListsDiscussions() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -360,6 +348,7 @@ struct Topics:MarkdownTestSuite
             <li><code>AllTooWell</code></li>\
             </ul>
             """,
-            topics: [1, 3, 2])
+            topics: [1, 3, 2]
+        )
     }
 }

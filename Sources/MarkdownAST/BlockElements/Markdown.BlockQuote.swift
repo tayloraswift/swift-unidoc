@@ -1,9 +1,6 @@
 import MarkdownABI
 
-extension Markdown
-{
-    public final
-    class BlockQuote:BlockAside
-    {
+extension Markdown {
+    public final class BlockQuote: BlockAside {
     }
 }

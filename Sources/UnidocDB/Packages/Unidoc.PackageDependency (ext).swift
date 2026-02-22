@@ -1,5 +1,4 @@
 import MongoQL
 
-extension Unidoc.PackageDependency:Mongo.MasterCodingModel
-{
+extension Unidoc.PackageDependency: Mongo.MasterCodingModel {
 }

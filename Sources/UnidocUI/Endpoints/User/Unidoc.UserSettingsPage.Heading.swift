@@ -1,21 +1,16 @@
 import HTML
 
-extension Unidoc.UserSettingsPage
-{
-    enum Heading
-    {
+extension Unidoc.UserSettingsPage {
+    enum Heading {
         case profile
         case repositories
         case organizations
         case apiKeys
     }
 }
-extension Unidoc.UserSettingsPage.Heading:Identifiable
-{
-    var id:String
-    {
-        switch self
-        {
+extension Unidoc.UserSettingsPage.Heading: Identifiable {
+    var id: String {
+        switch self {
         case .profile:          "ss:profile"
         case .repositories:     "ss:repositories"
         case .organizations:    "ss:organizations"
@@ -23,12 +18,9 @@ extension Unidoc.UserSettingsPage.Heading:Identifiable
         }
     }
 }
-extension Unidoc.UserSettingsPage.Heading:HTML.OutputStreamableHeading
-{
-    var display:String
-    {
-        switch self
-        {
+extension Unidoc.UserSettingsPage.Heading: HTML.OutputStreamableHeading {
+    var display: String {
+        switch self {
         case .profile:          "GitHub profile"
         case .repositories:     "Repositories"
         case .organizations:    "Organizations"

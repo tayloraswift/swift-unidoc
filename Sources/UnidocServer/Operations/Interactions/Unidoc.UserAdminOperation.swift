@@ -1,8 +1,7 @@
 import HTTP
 import MongoDB
 
-extension Unidoc
-{
+extension Unidoc {
     /// A `UserAdminOperation` is similar to an ordinary ``UserSettingsEndpoint``, except
     /// it allows querying information about a user other than the currently authenticated user.
     ///
@@ -10,23 +9,21 @@ extension Unidoc
     /// it to query other users would be a security hazard**, even if the endpoint itself later
     /// redacts restricted queries, as this would still allow an attacker to observe the
     /// behavior of the query itself.
-    struct UserAdminOperation:Sendable
-    {
-        let account:Unidoc.Account
+    struct UserAdminOperation: Sendable {
+        let account: Unidoc.Account
 
-        init(account:Unidoc.Account)
-        {
+        init(account: Unidoc.Account) {
             self.account = account
         }
     }
 }
-extension Unidoc.UserAdminOperation:Unidoc.AdministrativeOperation
-{
-    func load(from server:Unidoc.Server,
-        db:Unidoc.DB,
-        as format:Unidoc.RenderFormat) async throws -> HTTP.ServerResponse?
-    {
-        var endpoint:Unidoc.UserSettingsEndpoint = .init(query: .another(self.account))
+extension Unidoc.UserAdminOperation: Unidoc.AdministrativeOperation {
+    func load(
+        from server: Unidoc.Server,
+        db: Unidoc.DB,
+        as format: Unidoc.RenderFormat
+    ) async throws -> HTTP.ServerResponse? {
+        var endpoint: Unidoc.UserSettingsEndpoint = .init(query: .another(self.account))
         try await endpoint.pull(from: db)
         return endpoint.response(as: format, admin: true)
     }

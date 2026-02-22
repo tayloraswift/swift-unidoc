@@ -1,6 +1,5 @@
 import MongoQL
 import UnidocRecords
 
-extension Unidoc.EditionMetadata:Mongo.MasterCodingModel
-{
+extension Unidoc.EditionMetadata: Mongo.MasterCodingModel {
 }

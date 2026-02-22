@@ -1,13 +1,9 @@
 import Media
 
-extension HTTP
-{
-    public
-    protocol ServerEndpoint<Format>
-    {
+extension HTTP {
+    public protocol ServerEndpoint<Format> {
         associatedtype Format
 
-        consuming
-        func response(as format:Format) throws -> HTTP.ServerResponse
+        consuming func response(as format: Format) throws -> HTTP.ServerResponse
     }
 }

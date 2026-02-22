@@ -1,7 +1,6 @@
 import Symbols
 
-extension Unidoc
-{
+extension Unidoc {
     /// A stem is a special representation of a vertex’s lexical name within a snapshot.
     /// A stem always begins with a ``Symbol.Module``.
     ///
@@ -46,83 +45,60 @@ extension Unidoc
     /// >   Note:
     ///     If you have a collection of stems that all share a common prefix, it may be even
     ///     more efficient to compare them by ``last`` component only.
-    @frozen public
-    struct Stem:RawRepresentable, Equatable, Hashable, Sendable
-    {
-        public
-        var rawValue:String
+    @frozen public struct Stem: RawRepresentable, Equatable, Hashable, Sendable {
+        public var rawValue: String
 
-        @inlinable public
-        init(rawValue:String = "")
-        {
+        @inlinable public init(rawValue: String = "") {
             self.rawValue = rawValue
         }
     }
 }
-extension Unidoc.Stem
-{
-    public
-    init(path compounds:borrowing ArraySlice<String>)
-    {
+extension Unidoc.Stem {
+    public init(path compounds: borrowing ArraySlice<String>) {
         self.init()
-        for compound:String in copy compounds
-        {
-            if  let dot:String.Index = compound.firstIndex(of: ".")
-            {
-                var last:Substring = compound[compound.index(after: dot)...]
-                if  let i:String.Index = last.index(last.endIndex,
+        for compound: String in copy compounds {
+            if  let dot: String.Index = compound.firstIndex(of: ".") {
+                var last: Substring = compound[compound.index(after: dot)...]
+                if  let i: String.Index = last.index(
+                        last.endIndex,
                         offsetBy: -2,
-                        limitedBy: last.startIndex),
-                    last[i...] == "()"
-                {
+                        limitedBy: last.startIndex
+                    ),
+                    last[i...] == "()" {
                     last = last[..<i]
                 }
 
                 self.append(straight: compound[..<dot])
                 self.append(gay: last)
-            }
-            else
-            {
+            } else {
                 self.append(straight: compound)
             }
         }
     }
 }
-extension Unidoc.Stem:Comparable
-{
-    @inlinable public static
-    func < (lhs:Self, rhs:Self) -> Bool
-    {
+extension Unidoc.Stem: Comparable {
+    @inlinable public static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
 }
-extension Unidoc.Stem:ExpressibleByStringLiteral, ExpressibleByStringInterpolation
-{
-    @inlinable public
-    init(stringLiteral:String)
-    {
+extension Unidoc.Stem: ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
+    @inlinable public init(stringLiteral: String) {
         self.init(rawValue: stringLiteral)
     }
 }
-extension Unidoc.Stem
-{
+extension Unidoc.Stem {
     /// Returns the total number of components in this stem. This is ``depth`` plus one.
     ///
     /// Calling this property is faster than splitting the stem into components and accessing
     /// the array count.
-    @inlinable public
-    var components:Int { self.depth + 1 }
+    @inlinable public var components: Int { self.depth + 1 }
 
     /// Returns the number of *unqualified* path components in this stem. This is one fewer
     /// than the total number of components in this stem. The depth of a module stem is 0, and
     /// the depth of a top-level declaration stem is 1.
-    @inlinable public
-    var depth:Int
-    {
-        self.rawValue.reduce(into: 0)
-        {
-            if  $1.isWhitespace
-            {
+    @inlinable public var depth: Int {
+        self.rawValue.reduce(into: 0) {
+            if  $1.isWhitespace {
                 $0 += 1
             }
         }
@@ -133,15 +109,10 @@ extension Unidoc.Stem
     ///
     /// Calling this property is faster than splitting the stem into components and accessing
     /// the first array element.
-    @inlinable public
-    var first:Substring
-    {
-        if  let separator:String.Index = self.rawValue.firstIndex(where: \.isWhitespace)
-        {
+    @inlinable public var first: Substring {
+        if  let separator: String.Index = self.rawValue.firstIndex(where: \.isWhitespace) {
             self.rawValue[..<separator]
-        }
-        else
-        {
+        } else {
             self.rawValue[...]
         }
     }
@@ -150,71 +121,51 @@ extension Unidoc.Stem
     ///
     /// Calling this property is faster than splitting the stem into components and accessing
     /// the last array element.
-    @inlinable public
-    var last:Substring
-    {
-        if  let separator:String.Index = self.rawValue.lastIndex(where: \.isWhitespace)
-        {
+    @inlinable public var last: Substring {
+        if  let separator: String.Index = self.rawValue.lastIndex(where: \.isWhitespace) {
             self.rawValue[self.rawValue.index(after: separator)...]
-        }
-        else
-        {
+        } else {
             self.rawValue[...]
         }
     }
     /// Returns the unqualified name of this stem, if it contains more than one component,
     /// formatted with the dot character (`.`) as the path separator. If the stem contains
     /// only one component, this property returns that component unchanged.
-    @inlinable public
-    var name:Substring
-    {
-        if  let separator:String.Index = self.rawValue.firstIndex(where: \.isWhitespace)
-        {
+    @inlinable public var name: Substring {
+        if  let separator: String.Index = self.rawValue.firstIndex(where: \.isWhitespace) {
             Self.format(self.rawValue[self.rawValue.index(after: separator)...])[...]
-        }
-        else
-        {
+        } else {
             self.rawValue[...]
         }
     }
 
-    @inlinable public
-    func relative(to node:Self) -> (name:Substring, depth:Int)
-    {
-        var depth:Int = 1
+    @inlinable public func relative(to node: Self) -> (name: Substring, depth: Int) {
+        var depth: Int = 1
 
         guard
-        var i:String.Index = self.rawValue.firstIndex(where: \.isWhitespace),
-        var n:String.Index = node.rawValue.firstIndex(where: \.isWhitespace),
-        self.rawValue[..<i] == node.rawValue[..<n]
-        else
-        {
+        var i: String.Index = self.rawValue.firstIndex(where: \.isWhitespace),
+        var n: String.Index = node.rawValue.firstIndex(where: \.isWhitespace),
+        self.rawValue[..<i] == node.rawValue[..<n] else {
             return (self.name, depth)
         }
 
         i = self.rawValue.index(after: i)
         n = node.rawValue.index(after: n)
 
-        while let j:String.Index = self.rawValue[i...].firstIndex(where: \.isWhitespace)
-        {
-            let counterpart:Substring = node.rawValue[n...].prefix { !$0.isWhitespace }
-            if  counterpart != self.rawValue[i ..< j]
-            {
+        while let j: String.Index = self.rawValue[i...].firstIndex(where: \.isWhitespace) {
+            let counterpart: Substring = node.rawValue[n...].prefix { !$0.isWhitespace }
+            if  counterpart != self.rawValue[i ..< j] {
                 break
             }
 
-            defer
-            {
+            defer {
                 depth += 1
                 i = self.rawValue.index(after: j)
             }
 
-            if  counterpart.endIndex < node.rawValue.endIndex
-            {
+            if  counterpart.endIndex < node.rawValue.endIndex {
                 n = node.rawValue.index(after: counterpart.endIndex)
-            }
-            else
-            {
+            } else {
                 break
             }
         }
@@ -222,52 +173,44 @@ extension Unidoc.Stem
         return (Self.format(self.rawValue[i...])[...], depth)
     }
 
-    @inlinable public
-    func split() -> (namespace:Substring, scope:[Substring], last:Substring)?
-    {
-        if  let i:String.Index = self.rawValue.firstIndex(where: \.isWhitespace),
-            let j:String.Index = self.rawValue.lastIndex(where: \.isWhitespace)
-        {
-            let namespace:Substring = self.rawValue[..<i]
-            let scope:[Substring]
+    @inlinable public func split() -> (
+        namespace: Substring,
+        scope: [Substring],
+        last: Substring
+    )? {
+        if  let i: String.Index = self.rawValue.firstIndex(where: \.isWhitespace),
+            let j: String.Index = self.rawValue.lastIndex(where: \.isWhitespace) {
+            let namespace: Substring = self.rawValue[..<i]
+            let scope: [Substring]
 
-            if  i < j
-            {
+            if  i < j {
                 scope = self.rawValue[self.rawValue.index(after: i) ..< j].split(
-                    whereSeparator: \.isWhitespace)
-            }
-            else
-            {
+                    whereSeparator: \.isWhitespace
+                )
+            } else {
                 scope = []
             }
 
-            let last:Substring = self.rawValue[self.rawValue.index(after: j)...]
+            let last: Substring = self.rawValue[self.rawValue.index(after: j)...]
 
             return (namespace, scope, last)
-        }
-        else
-        {
+        } else {
             return nil
         }
     }
 }
-extension Unidoc.Stem:CustomStringConvertible
-{
-    @inlinable public
-    var description:String { Self.format(self.rawValue) }
+extension Unidoc.Stem: CustomStringConvertible {
+    @inlinable public var description: String { Self.format(self.rawValue) }
 }
-extension Unidoc.Stem
-{
-    @inlinable internal static
-    func format(_ string:some StringProtocol, separator:UInt8 = 0x2E) -> String
-    {
-        .init(unsafeUninitializedCapacity: string.utf8.count)
-        {
-            var i:Int = $0.startIndex
-            for codeunit:UInt8 in string.utf8
-            {
-                switch codeunit
-                {
+extension Unidoc.Stem {
+    @inlinable internal static func format(
+        _ string: some StringProtocol,
+        separator: UInt8 = 0x2E
+    ) -> String {
+        .init(unsafeUninitializedCapacity: string.utf8.count) {
+            var i: Int = $0.startIndex
+            for codeunit: UInt8 in string.utf8 {
+                switch codeunit {
                 case 0x09, 0x20:    $0[i] = 0x2E // '.'
                 case let codeunit:  $0[i] = codeunit
                 }
@@ -278,20 +221,14 @@ extension Unidoc.Stem
         }
     }
 }
-extension Unidoc.Stem
-{
-    @inlinable public mutating
-    func append(straight component:some StringProtocol)
-    {
-        if !self.rawValue.isEmpty
-        {
+extension Unidoc.Stem {
+    @inlinable public mutating func append(straight component: some StringProtocol) {
+        if !self.rawValue.isEmpty {
             self.rawValue.append(" ")
         }
         self.rawValue += component
     }
-    @inlinable public mutating
-    func append(gay component:some StringProtocol)
-    {
+    @inlinable public mutating func append(gay component: some StringProtocol) {
         self.rawValue.append("\t")
         self.rawValue += component
     }

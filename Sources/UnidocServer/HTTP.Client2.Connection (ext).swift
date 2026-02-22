@@ -5,15 +5,14 @@ import JSON
 import NIOCore
 import NIOHPACK
 
-extension HTTP.Client2.Connection
-{
-    @inlinable public
-    func get<Response>(_:Response.Type = Response.self,
-        from path:String,
-        as agent:String = "Unidoc") async throws -> Response
-        where Response:JSONDecodable
-    {
-        let request:HPACKHeaders = [
+extension HTTP.Client2.Connection {
+    @inlinable public func get<Response>(
+        _: Response.Type = Response.self,
+        from path: String,
+        as agent: String = "Unidoc"
+    ) async throws -> Response
+        where Response: JSONDecodable {
+        let request: HPACKHeaders = [
             ":method": "GET",
             ":scheme": "https",
             ":authority": self.remote,
@@ -23,12 +22,11 @@ extension HTTP.Client2.Connection
             "accept": "*/*",
         ]
 
-        let response:HTTP.Client2.Facet = try await self.fetch(request)
+        let response: HTTP.Client2.Facet = try await self.fetch(request)
 
-        switch response.status
-        {
+        switch response.status {
         case 200?:
-            let json:JSON = .init(utf8: try response.content())
+            let json: JSON = .init(utf8: try response.content())
             return try json.decode()
 
         case let code:
@@ -36,13 +34,13 @@ extension HTTP.Client2.Connection
         }
     }
 
-    @inlinable public
-    func get<Response>(_:Response.Type = Response.self,
-        from path:String,
-        as agent:String = "Unidoc") async throws -> Response
-        where Response:BSONDocumentDecodable
-    {
-        let request:HPACKHeaders = [
+    @inlinable public func get<Response>(
+        _: Response.Type = Response.self,
+        from path: String,
+        as agent: String = "Unidoc"
+    ) async throws -> Response
+        where Response: BSONDocumentDecodable {
+        let request: HPACKHeaders = [
             ":method": "GET",
             ":scheme": "https",
             ":authority": self.remote,
@@ -52,12 +50,11 @@ extension HTTP.Client2.Connection
             "accept": "*/*",
         ]
 
-        let response:HTTP.Client2.Facet = try await self.fetch(request)
+        let response: HTTP.Client2.Facet = try await self.fetch(request)
 
-        switch response.status
-        {
+        switch response.status {
         case 200?:
-            let bson:BSON.Document = .init(bytes: try response.content())
+            let bson: BSON.Document = .init(bytes: try response.content())
             return try .init(bson: bson)
 
         case let code:

@@ -6,49 +6,37 @@ import UnidocAPI
 import UnidocRecords
 import UnixTime
 
-extension Unidoc
-{
-    @frozen public
-    struct PendingBuild:Identifiable, Sendable
-    {
-        public
-        let id:Edition
+extension Unidoc {
+    @frozen public struct PendingBuild: Identifiable, Sendable {
+        public let id: Edition
         /// This is used to identify the build when it completes.
-        public
-        let run:UnixMillisecond
+        public let run: UnixMillisecond
 
         /// Build priority. Lower values are higher priority.
-        public
-        let priority:Int32
-        public
-        let enqueued:UnixMillisecond?
-        public
-        let launched:UnixMillisecond?
+        public let priority: Int32
+        public let enqueued: UnixMillisecond?
+        public let launched: UnixMillisecond?
 
-        public
-        let assignee:Account?
-        public
-        var stage:BuildStage?
+        public let assignee: Account?
+        public var stage: BuildStage?
 
-        public 
-        let host:Symbol.Triple
+        public let host: Symbol.Triple
 
         /// Used for display purposes only.
-        public
-        let name:Symbol.PackageAtRef
+        public let name: Symbol.PackageAtRef
 
 
-        @inlinable public
-        init(id:Edition,
-            run:UnixMillisecond,
-            priority:Int32,
-            enqueued:UnixMillisecond?,
-            launched:UnixMillisecond?,
-            assignee:Account?,
-            stage:BuildStage?,
-            host:Symbol.Triple,
-            name:Symbol.PackageAtRef)
-        {
+        @inlinable public init(
+            id: Edition,
+            run: UnixMillisecond,
+            priority: Int32,
+            enqueued: UnixMillisecond?,
+            launched: UnixMillisecond?,
+            assignee: Account?,
+            stage: BuildStage?,
+            host: Symbol.Triple,
+            name: Symbol.PackageAtRef
+        ) {
             self.id = id
             self.run = run
             self.priority = priority
@@ -61,11 +49,8 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PendingBuild:Mongo.MasterCodingModel
-{
-    @frozen public
-    enum CodingKey:String, Sendable, BSONDecodable
-    {
+extension Unidoc.PendingBuild: Mongo.MasterCodingModel {
+    @frozen public enum CodingKey: String, Sendable, BSONDecodable {
         case id = "_id"
         case run = "T"
         case priority = "P"
@@ -79,11 +64,8 @@ extension Unidoc.PendingBuild:Mongo.MasterCodingModel
         case package = "p"
     }
 }
-extension Unidoc.PendingBuild:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension Unidoc.PendingBuild: BSONDocumentEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.id] = self.id
         bson[.run] = self.run
         bson[.priority] = self.priority
@@ -97,12 +79,10 @@ extension Unidoc.PendingBuild:BSONDocumentEncodable
         bson[.package] = self.id.package
     }
 }
-extension Unidoc.PendingBuild:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(id: try bson[.id].decode(),
+extension Unidoc.PendingBuild: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        self.init(
+            id: try bson[.id].decode(),
             run: try bson[.run].decode(),
             priority: try bson[.priority].decode(),
             enqueued: try bson[.enqueued]?.decode(),
@@ -111,6 +91,7 @@ extension Unidoc.PendingBuild:BSONDocumentDecodable
             stage: try bson[.stage]?.decode(),
             //  Single-use compatibility shim, remove after one deployment cycle!
             host: try bson[.host]?.decode() ?? .x86_64_unknown_linux_gnu,
-            name: try bson[.name].decode())
+            name: try bson[.name].decode()
+        )
     }
 }

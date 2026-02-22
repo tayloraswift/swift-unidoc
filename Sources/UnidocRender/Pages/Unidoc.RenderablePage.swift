@@ -2,86 +2,74 @@ import HTML
 import HTTP
 import Media
 
-extension Unidoc
-{
-    public
-    protocol RenderablePage
-    {
+extension Unidoc {
+    public protocol RenderablePage {
         /// A short description of the page, suitable for use as a `<meta>` description.
-        var description:String? { get }
-        var title:String { get }
+        var description: String? { get }
+        var title: String { get }
 
-        func head(augmenting head:inout HTML.ContentEncoder, format:RenderFormat)
-        func body(_          body:inout HTML.ContentEncoder, format:RenderFormat)
+        func head(augmenting head: inout HTML.ContentEncoder, format: RenderFormat)
+        func body(_          body: inout HTML.ContentEncoder, format: RenderFormat)
 
-        func resource(format:RenderFormat) -> HTTP.Resource
+        func resource(format: RenderFormat) -> HTTP.Resource
     }
 }
-extension Unidoc.RenderablePage
-{
-    @inlinable public
-    var description:String? { nil }
+extension Unidoc.RenderablePage {
+    @inlinable public var description: String? { nil }
 
-    @inlinable public
-    func head(augmenting _:inout HTML.ContentEncoder, format:Unidoc.RenderFormat)
-    {
+    @inlinable public func head(
+        augmenting _: inout HTML.ContentEncoder,
+        format: Unidoc.RenderFormat
+    ) {
     }
 }
-extension Unidoc.RenderablePage
-{
+extension Unidoc.RenderablePage {
     func rendered(
-        canonical:String? = nil,
-        location:String? = nil,
-        format:Unidoc.RenderFormat) -> HTML
-    {
-        .document
-        {
-            self.render(to: &$0,
+        canonical: String? = nil,
+        location: String? = nil,
+        format: Unidoc.RenderFormat
+    ) -> HTML {
+        .document {
+            self.render(
+                to: &$0,
                 canonical: canonical,
                 location: location,
-                format: format)
+                format: format
+            )
         }
     }
 
-    private
-    func render(to html:inout HTML.ContentEncoder,
-        canonical:String?,
-        location:String?,
-        format:Unidoc.RenderFormat)
-    {
-        html[.html, { $0.lang = "en" ; $0[data: "theme"] = format.theme }]
-        {
-            $0[.head]
-            {
-                let favicon:String = "\(format.assets[.favicon_png])"
+    private func render(
+        to html: inout HTML.ContentEncoder,
+        canonical: String?,
+        location: String?,
+        format: Unidoc.RenderFormat
+    ) {
+        html[.html, { $0.lang = "en" ; $0[data: "theme"] = format.theme }] {
+            $0[.head] {
+                let favicon: String = "\(format.assets[.favicon_png])"
 
                 $0[.title] = self.title
                 $0[.meta] { $0.charset = "UTF-8" }
-                $0[.meta]
-                {
+                $0[.meta] {
                     $0.name = "viewport"
                     $0.content = "width=device-width, initial-scale=1"
                 }
-                $0[.link]
-                {
+                $0[.link] {
                     $0.href = favicon
                     $0.type = "\(MediaType.image(.png))"
                     $0.rel = .icon
                 }
-                $0[.link]
-                {
+                $0[.link] {
                     $0.href = "\(format.assets[.main_css])"
                     $0.rel = .stylesheet
                 }
-                if  let canonical:String = canonical ?? location
-                {
-                    $0[.link]
-                    {
+                if  let canonical: String = canonical ?? location {
+                    $0[.link] {
                         $0.href = "https://swiftinit.org\(canonical)"
                         $0.rel = .canonical
                     }
-                    $0[.meta]
-                    {
+                    $0[.meta] {
                         $0.property = .og_url
                         $0.content = "https://swiftinit.org\(canonical)"
                     }
@@ -91,8 +79,7 @@ extension Unidoc.RenderablePage
                 //  size of a typical page.
                 $0[unsafe: .style] = format.assets.fontfaces
 
-                if  let location:String
-                {
+                if  let location: String {
                     $0[unsafe: .script] = """
                     history.replaceState(null, "", "\(location)" + window.location.hash);
                     """
@@ -100,18 +87,14 @@ extension Unidoc.RenderablePage
 
                 $0[.script] { $0.src = "\(format.assets[.main_js])" ; $0.defer = true }
 
-                if  let description:String = self.description
-                {
+                if  let description: String = self.description {
                     //  It is regrettable that we need to duplicate the description text here,
                     //  particularly because we do not compress dynamic content. However, it is
                     //  necessary for Onebox to render link previews correctly.
                     $0[.meta] { $0.name = "description" ; $0.content  = description }
                     $0[.meta] { $0.property = .og_description ; $0.content = description }
-                }
-                else
-                {
-                    $0[.meta]
-                    {
+                } else {
+                    $0[.meta] {
                         $0.property = .og_description
                         $0.content = "No overview available"
                     }

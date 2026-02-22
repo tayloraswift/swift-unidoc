@@ -1,14 +1,11 @@
 import JSON
 
-extension Unidoc.EditionStateReport
-{
+extension Unidoc.EditionStateReport {
     /// A description of the current state of the documentation for a package version.
     /// This is computed from the other fields in the ``EditionStateReport`` and is not stored
     /// directly in the database. Some clients, such as CI systems, may find these descriptions
     /// more understandable than the raw state.
-    @frozen public
-    enum Phase:String, Equatable, Sendable
-    {
+    @frozen public enum Phase: String, Equatable, Sendable {
         /// The default state. The documentation is in this state initially, after a build has
         /// been cancelled without any actively-linked documentation already existing, or after
         /// documentation has been deleted. The documentation is also in this state during the
@@ -63,6 +60,5 @@ extension Unidoc.EditionStateReport
         case FAILED_UNKNOWN
     }
 }
-extension Unidoc.EditionStateReport.Phase:JSONEncodable, JSONDecodable
-{
+extension Unidoc.EditionStateReport.Phase: JSONEncodable, JSONDecodable {
 }

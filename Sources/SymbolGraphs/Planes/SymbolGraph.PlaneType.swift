@@ -1,8 +1,5 @@
-extension SymbolGraph
-{
-    public
-    protocol PlaneType
-    {
-        static var plane:Plane { get }
+extension SymbolGraph {
+    public protocol PlaneType {
+        static var plane: Plane { get }
     }
 }

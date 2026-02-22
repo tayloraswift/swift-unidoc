@@ -2,20 +2,13 @@ import Sources
 import SymbolGraphParts
 import Symbols
 
-extension SSGC.Extension
-{
-    @frozen public
-    struct Block:Equatable
-    {
-        public
-        let location:SourceLocation<Symbol.File>?
-        public
-        let comment:SSGC.DocumentationComment?
+extension SSGC.Extension {
+    @frozen public struct Block: Equatable {
+        public let location: SourceLocation<Symbol.File>?
+        public let comment: SSGC.DocumentationComment?
 
-        init?(location:SourceLocation<Symbol.File>?, comment:SSGC.DocumentationComment?)
-        {
-            if  case (nil, nil) = (location, comment)
-            {
+        init?(location: SourceLocation<Symbol.File>?, comment: SSGC.DocumentationComment?) {
+            if  case (nil, nil) = (location, comment) {
                 return nil
             }
 

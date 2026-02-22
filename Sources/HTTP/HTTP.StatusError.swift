@@ -1,37 +1,24 @@
-extension HTTP
-{
+extension HTTP {
     /// A general error type carrying a response status code.
-    @frozen public
-    struct StatusError:Equatable, Error
-    {
+    @frozen public struct StatusError: Equatable, Error {
         /// The response status code, if it could be parsed, nil otherwise.
-        public
-        let code:UInt?
-        public
-        let message:String
+        public let code: UInt?
+        public let message: String
 
-        @inlinable public
-        init(code:UInt?, message:String = "")
-        {
+        @inlinable public init(code: UInt?, message: String = "") {
             self.code = code
             self.message = message
         }
     }
 }
-extension HTTP.StatusError:CustomStringConvertible
-{
-    public
-    var description:String
-    {
+extension HTTP.StatusError: CustomStringConvertible {
+    public var description: String {
         guard
-        let code:UInt = self.code
-        else
-        {
+        let code: UInt = self.code else {
             return "(None) Unknown '\(self.message)'"
         }
 
-        let phrase:String = switch code
-        {
+        let phrase: String = switch code {
         case 100:   "Continue"
         case 101:   "Switching Protocols"
         case 102:   "Processing"

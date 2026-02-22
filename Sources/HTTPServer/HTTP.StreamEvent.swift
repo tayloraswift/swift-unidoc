@@ -1,7 +1,5 @@
-extension HTTP
-{
-    enum StreamEvent:Sendable
-    {
+extension HTTP {
+    enum StreamEvent: Sendable {
         case inbound(Stream)
         case quiesce
     }

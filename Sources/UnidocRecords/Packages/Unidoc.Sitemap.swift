@@ -5,34 +5,27 @@ import Symbols
 import Unidoc
 import UnixTime
 
-extension Unidoc
-{
+extension Unidoc {
     /// A sitemap is a list of all the pages in a volume. We generally only persist one sitemap
     /// per package.
     ///
     /// >   Note:
     ///     Per [sitemaps.org](https://sitemaps.org), the correct spelling is *Sitemap*,
     ///     not *SiteMap*.
-    @frozen public
-    struct Sitemap:Identifiable, Equatable, Sendable
-    {
-        public
-        let id:Unidoc.Package
-        public
-        let elements:Elements
+    @frozen public struct Sitemap: Identifiable, Equatable, Sendable {
+        public let id: Unidoc.Package
+        public let elements: Elements
 
         /// See ``CodingKey.modified``.
-        public
-        var modified:UnixMillisecond?
-        public
-        let hash:MD5
+        public var modified: UnixMillisecond?
+        public let hash: MD5
 
-        @inlinable internal
-        init(id:Unidoc.Package,
-            elements:Elements,
-            modified:UnixMillisecond?,
-            hash:MD5)
-        {
+        @inlinable internal init(
+            id: Unidoc.Package,
+            elements: Elements,
+            modified: UnixMillisecond?,
+            hash: MD5
+        ) {
             self.id = id
             self.elements = elements
             self.modified = modified
@@ -40,22 +33,18 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.Sitemap
-{
-    @inlinable public
-    init(id:Unidoc.Package, elements:Elements)
-    {
-        self.init(id: id,
+extension Unidoc.Sitemap {
+    @inlinable public init(id: Unidoc.Package, elements: Elements) {
+        self.init(
+            id: id,
             elements: elements,
             modified: nil,
-            hash: .init(hashing: elements.bytes))
+            hash: .init(hashing: elements.bytes)
+        )
     }
 }
-extension Unidoc.Sitemap
-{
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.Sitemap {
+    @frozen public enum CodingKey: String, Sendable {
         case id = "_id"
         case elements = "L"
         /// When this sitemap was last modified. This field only appears if the sitemap has
@@ -64,25 +53,21 @@ extension Unidoc.Sitemap
         case hash = "H"
     }
 }
-extension Unidoc.Sitemap:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension Unidoc.Sitemap: BSONDocumentEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.id] = self.id
         bson[.elements] = self.elements
         bson[.modified] = self.modified
         bson[.hash] = self.hash
     }
 }
-extension Unidoc.Sitemap:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(id: try bson[.id].decode(),
+extension Unidoc.Sitemap: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        self.init(
+            id: try bson[.id].decode(),
             elements: try bson[.elements].decode(),
             modified: try bson[.modified]?.decode(),
-            hash: try bson[.hash].decode())
+            hash: try bson[.hash].decode()
+        )
     }
 }

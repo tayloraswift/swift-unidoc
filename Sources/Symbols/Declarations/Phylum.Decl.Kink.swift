@@ -1,10 +1,7 @@
-extension Phylum.Decl
-{
+extension Phylum.Decl {
     /// Kinks represent ways that a declaration interacts with other declarations. Kinks are
     /// stored in a ``Kinks`` option set.
-    @frozen public
-    enum Kink:UInt8, Equatable, Hashable, Sendable
-    {
+    @frozen public enum Kink: UInt8, Equatable, Hashable, Sendable {
         /// Can be overridden from outside its original module.
         case open                   = 0b0000_0001
         /// Overrides a superclass member, or a supertype requirement.

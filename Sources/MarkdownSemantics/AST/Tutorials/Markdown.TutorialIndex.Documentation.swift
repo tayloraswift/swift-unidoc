@@ -1,9 +1,5 @@
-extension Markdown.TutorialIndex
-{
-    final
-    class Documentation:ExternalLinks
-    {
-        class override
-        var titleDefault:String? { "Further reading" }
+extension Markdown.TutorialIndex {
+    final class Documentation: ExternalLinks {
+        class override var titleDefault: String? { "Further reading" }
     }
 }

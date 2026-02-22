@@ -2,18 +2,15 @@ import SymbolGraphParts
 import Symbols
 import Testing
 
-@Suite
-struct Phyla
-{
-    private
-    let symbols:SymbolGraphPart
+@Suite struct Phyla {
+    private let symbols: SymbolGraphPart
 
-    init() throws
-    {
+    init() throws {
         self.symbols = try .load(part: "TestModules/SymbolGraphs/Phyla.symbols.json")
     }
 
-    @Test(arguments: [
+    @Test(
+        arguments: [
             (["Actor"],                         .actor),
             (["Class"],                         .class),
             (["Enum"],                          .enum),
@@ -46,15 +43,13 @@ struct Phyla
             (["Struct", "?/(_:)"],              .operator),
             (["Struct", "<-(_:_:)"],            .operator),
             (["Struct", "/?(_:)"],              .operator),
-        ] as [([String], Phylum.Decl)])
-    func Decls(_ symbol:[String], phylum:Phylum.Decl) throws
-    {
-        let vertex:SymbolGraphPart.Vertex? = self.symbols.first(named: symbol)
+        ] as [([String], Phylum.Decl)]
+    ) func Decls(_ symbol: [String], phylum: Phylum.Decl) throws {
+        let vertex: SymbolGraphPart.Vertex? = self.symbols.first(named: symbol)
         #expect(vertex?.phylum == .decl(phylum))
     }
 
-    func Deinit() throws
-    {
+    func Deinit() throws {
         #expect(nil == self.symbols.vertices.first { $0.phylum == .decl(.deinitializer) })
     }
 }
