@@ -1,12 +1,7 @@
-extension Availability
-{
-    @frozen public
-    enum UniversalDomain
-    {
+extension Availability {
+    @frozen public enum UniversalDomain {
     }
 }
-extension Availability.UniversalDomain:AvailabilityDomain
-{
-    public
-    typealias Deprecation = Availability.EternalRange
+extension Availability.UniversalDomain: AvailabilityDomain {
+    public typealias Deprecation = Availability.EternalRange
 }

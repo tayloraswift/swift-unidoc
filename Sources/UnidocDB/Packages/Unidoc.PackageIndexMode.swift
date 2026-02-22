@@ -1,8 +1,5 @@
-extension Unidoc
-{
-    @frozen public
-    enum PackageIndexMode
-    {
+extension Unidoc {
+    @frozen public enum PackageIndexMode {
         case automatic
         case manual
     }

@@ -2,11 +2,8 @@ import Availability
 import JSONDecoding
 import SemanticVersions
 
-extension Availability:JSONDecodable
-{
-    private
-    enum CodingKey:String, Sendable
-    {
+extension Availability: JSONDecodable {
+    private enum CodingKey: String, Sendable {
         case domain
 
         case deprecated
@@ -20,19 +17,15 @@ extension Availability:JSONDecodable
         case renamed
     }
 
-    public
-    init(json:JSON.Node) throws
-    {
+    public init(json: JSON.Node) throws {
         self.init()
 
-        for json:JSON.ObjectDecoder<CodingKey> in
-            try [JSON.ObjectDecoder<CodingKey>].init(json: json)
-        {
-            let message:String? = try json[.message]?.decode()
-            let renamed:String? = try json[.renamed]?.decode()
+        for json: JSON.ObjectDecoder<CodingKey> in
+            try [JSON.ObjectDecoder<CodingKey>].init(json: json) {
+            let message: String? = try json[.message]?.decode()
+            let renamed: String? = try json[.renamed]?.decode()
 
-            switch try json[.domain].decode(to: Availability.AnyDomain.self)
-            {
+            switch try json[.domain].decode(to: Availability.AnyDomain.self) {
             case .agnostic(let domain):
                 //  The compiler will allow you to omit a version number from
                 //  agnostic availabilities, but this makes it meaningless, so
@@ -42,37 +35,42 @@ extension Availability:JSONDecodable
                     introduced: try json[.introduced]?.decode(),
                     obsoleted: try json[.obsoleted]?.decode(),
                     renamed: renamed,
-                    message: message)
+                    message: message
+                )
 
             case .platform(let domain):
-                let deprecated:Availability.AnyRange? =
-                    try json[.isUnconditionallyDeprecated]?.decode(
-                        as: Bool.self)
-                    {
-                        $0 ? .unconditionally : nil
-                    } ?? json[.deprecated]?.decode(as: Availability.VersionRange.self,
-                        with: Availability.AnyRange.init(_:))
+                let deprecated: Availability.AnyRange? =
+                try json[.isUnconditionallyDeprecated]?.decode(
+                    as: Bool.self
+                ) {
+                    $0 ? .unconditionally : nil
+                } ?? json[.deprecated]?.decode(
+                    as: Availability.VersionRange.self,
+                    with: Availability.AnyRange.init(_:)
+                )
                 self.platforms[domain] = .init(
                     unavailable: try json[.isUnconditionallyUnavailable]?.decode(
-                        as: Bool.self)
-                    {
+                        as: Bool.self
+                    ) {
                         $0 ? .unconditionally : nil
                     },
                     deprecated: deprecated,
                     introduced: try json[.introduced]?.decode(),
                     obsoleted: try json[.obsoleted]?.decode(),
                     renamed: renamed,
-                    message: message)
+                    message: message
+                )
 
             case .universal:
                 self.universal = .init(
                     deprecated: try json[.isUnconditionallyDeprecated]?.decode(
-                        as: Bool.self)
-                    {
+                        as: Bool.self
+                    ) {
                         $0 ? .unconditionally : nil
                     },
                     renamed: renamed,
-                    message: message)
+                    message: message
+                )
             }
         }
     }

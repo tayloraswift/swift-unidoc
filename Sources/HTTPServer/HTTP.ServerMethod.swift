@@ -1,8 +1,5 @@
-extension HTTP
-{
-    @frozen public
-    enum ServerMethod:Sendable
-    {
+extension HTTP {
+    @frozen public enum ServerMethod: Sendable {
         case delete
         case get
         case head

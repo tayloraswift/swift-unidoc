@@ -1,11 +1,7 @@
 import Testing
 
-@Suite
-struct Parameters:MarkdownTestSuite
-{
-    @Test
-    static func None() throws
-    {
+@Suite struct Parameters: MarkdownTestSuite {
+    @Test static func None() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -16,11 +12,10 @@ struct Parameters:MarkdownTestSuite
             <p>Overview overview overview</p>\
 
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Empty() throws
-    {
+    @Test static func Empty() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -32,11 +27,10 @@ struct Parameters:MarkdownTestSuite
             <p>Overview overview overview</p>\
 
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func One() throws
-    {
+    @Test static func One() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -56,11 +50,10 @@ struct Parameters:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Many() throws
-    {
+    @Test static func Many() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -86,11 +79,10 @@ struct Parameters:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Formatting() throws
-    {
+    @Test static func Formatting() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -111,11 +103,10 @@ struct Parameters:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func LineContinuations() throws
-    {
+    @Test static func LineContinuations() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -136,11 +127,10 @@ struct Parameters:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Indentation() throws
-    {
+    @Test static func Indentation() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -171,11 +161,10 @@ struct Parameters:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Discussion() throws
-    {
+    @Test static func Discussion() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -201,11 +190,10 @@ struct Parameters:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func MultipleLists() throws
-    {
+    @Test static func MultipleLists() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -235,11 +223,10 @@ struct Parameters:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
-    @Test
-    static func Collation() throws
-    {
+    @Test static func Collation() throws {
         try Self.test(
             markdown: """
             Overview overview overview
@@ -266,6 +253,7 @@ struct Parameters:MarkdownTestSuite
             </dl>\
             </section>\
             <p>Details details details</p>
-            """)
+            """
+        )
     }
 }

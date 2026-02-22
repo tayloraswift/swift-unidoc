@@ -1,36 +1,24 @@
 import BSON
 import MongoDB
 
-extension Unidoc.DB
-{
-    @frozen public
-    struct RepoFeed
-    {
-        public
-        let database:Mongo.Database
-        public
-        let session:Mongo.Session
+extension Unidoc.DB {
+    @frozen public struct RepoFeed {
+        public let database: Mongo.Database
+        public let session: Mongo.Session
 
-        @inlinable
-        init(database:Mongo.Database, session:Mongo.Session)
-        {
+        @inlinable init(database: Mongo.Database, session: Mongo.Session) {
             self.database = database
             self.session = session
         }
     }
 }
-extension Unidoc.DB.RepoFeed:Mongo.CollectionModel
-{
-    public
-    typealias Element = Activity
+extension Unidoc.DB.RepoFeed: Mongo.CollectionModel {
+    public typealias Element = Activity
 
-    @inlinable public static
-    var name:Mongo.Collection { "RepoFeed" }
+    @inlinable public static var name: Mongo.Collection { "RepoFeed" }
 
-    @inlinable public static
-    var indexes:[Mongo.CollectionIndex] { [] }
+    @inlinable public static var indexes: [Mongo.CollectionIndex] { [] }
 
     /// 1 MB ought to be enough for anybody.
-    @inlinable public
-    var capacity:(bytes:Int, count:Int?) { (1 << 20, 16) }
+    @inlinable public var capacity: (bytes: Int, count: Int?) { (1 << 20, 16) }
 }

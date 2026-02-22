@@ -11,48 +11,32 @@ import SymbolGraphs
 import Symbols
 import UCF
 
-extension SSGC
-{
+extension SSGC {
     /// A type that can outline autolinks from markdown documentation and
     /// statically-resolve some of the autolinks with caching.
-    @_spi(testable) public
-    struct Outliner:~Copyable
-    {
-        private(set)
-        var resolver:OutlineResolver
-        private
-        var cache:Cache
+    @_spi(testable) public struct Outliner: ~Copyable {
+        private(set) var resolver: OutlineResolver
+        private var cache: Cache
 
-        init(resolver:consuming OutlineResolver)
-        {
+        init(resolver: consuming OutlineResolver) {
             self.resolver = resolver
             self.cache = .init()
         }
     }
 }
-extension SSGC.Outliner
-{
-    consuming
-    func move() -> SSGC.Linker.Tables { self.resolver.tables }
+extension SSGC.Outliner {
+    consuming func move() -> SSGC.Linker.Tables { self.resolver.tables }
 }
 
-extension SSGC.Outliner
-{
-    @_spi(testable)
-    public mutating
-    func outlines() -> [SymbolGraph.Outline]
-    {
+extension SSGC.Outliner {
+    @_spi(testable) public mutating func outlines() -> [SymbolGraph.Outline] {
         self.cache.clear()
     }
 
-    @_spi(testable)
-    public mutating
-    func outline(reference:Markdown.AnyReference) -> Int?
-    {
-        let name:Markdown.SourceString
+    @_spi(testable) public mutating func outline(reference: Markdown.AnyReference) -> Int? {
+        let name: Markdown.SourceString
 
-        switch reference
-        {
+        switch reference {
         case .symbolic(usr: let usr):
             return self.outline(symbol: usr)
 
@@ -60,8 +44,7 @@ extension SSGC.Outliner
             return self.outline(ucf: expression)
 
         case .link(url: let url):
-            switch url.scheme
-            {
+            switch url.scheme {
             case nil, "doc"?:
                 return self.outline(doc: url.suffix, as: url.provenance)
 
@@ -75,40 +58,36 @@ extension SSGC.Outliner
         case .filePath(let link):
             //  Right now we don’t have a better way to handle file paths.
             guard
-            let i:String.Index = link.string.lastIndex(of: "/")
-            else
-            {
+            let i: String.Index = link.string.lastIndex(of: "/") else {
                 name = link
                 break
             }
 
             name = .init(
                 source: link.source,
-                string: String.init(link.string[link.string.index(after: i)...]))
+                string: String.init(link.string[link.string.index(after: i)...])
+            )
 
         case .location(let location):
             //  This is almost a no-op, except we can optimize away duplicated locations.
             return self.cache.add(outline: .location(location))
         }
 
-        if  let resource:SSGC.Resource = self.resolver.locate(resource: name.string)
-        {
+        if  let resource: SSGC.Resource = self.resolver.locate(resource: name.string) {
             //  Historical note: we used to encode this as a vertex outline.
             return self.cache.add(
-                outline: .location(.init(position: .zero, file: resource.id)))
+                outline: .location(.init(position: .zero, file: resource.id))
+            )
         }
 
         self.resolver.diagnostics[name.source] = SSGC.ResourceError.fileNotFound(name.string)
         return nil
     }
 
-    private mutating
-    func outline(url:Markdown.SourceURL, scheme:String) -> Int?
-    {
-        let translated:SymbolGraph.Outline?
+    private mutating func outline(url: Markdown.SourceURL, scheme: String) -> Int? {
+        let translated: SymbolGraph.Outline?
 
-        switch scheme
-        {
+        switch scheme {
         case "http":    translated = self.resolver.translate(url: url)
         case "https":   translated = self.resolver.translate(url: url)
         default:        translated = nil
@@ -116,50 +95,41 @@ extension SSGC.Outliner
 
         //  TODO: log translations?
 
-        return self.cache.add(outline: translated ?? .url("\(scheme):\(url.suffix)",
-            location: url.suffix.source.start))
+        return self.cache.add(
+            outline: translated ?? .url(
+                "\(scheme):\(url.suffix)",
+                location: url.suffix.source.start
+            )
+        )
     }
 
-    private mutating
-    func outline(ucf link:Markdown.SourceString) -> Int?
-    {
-        self.cache(link.string)
-        {
-            if  let codelink:UCF.Selector = .init(link.string)
-            {
+    private mutating func outline(ucf link: Markdown.SourceString) -> Int? {
+        self.cache(link.string) {
+            if  let codelink: UCF.Selector = .init(link.string) {
                 return self.resolver.outline(codelink, at: link.source)
-            }
-            else
-            {
+            } else {
                 self.resolver.diagnostics[link.source] = SSGC.AutolinkParsingError.init(link)
                 return nil
             }
         }
     }
-    private mutating
-    func outline(doc link:Markdown.SourceString,
-        as provenance:Markdown.SourceURL.Provenance) -> Int?
-    {
-        self.cache(link.string)
-        {
-            if  let doclink:Doclink = .init(doc: link.string[...])
-            {
+    private mutating func outline(
+        doc link: Markdown.SourceString,
+        as provenance: Markdown.SourceURL.Provenance
+    ) -> Int? {
+        self.cache(link.string) {
+            if  let doclink: Doclink = .init(doc: link.string[...]) {
                 return self.resolver.outline(doclink, at: link.source, as: provenance)
-            }
-            else
-            {
+            } else {
                 self.resolver.diagnostics[link.source] = SSGC.AutolinkParsingError.init(link)
                 return nil
             }
         }
     }
 
-    private mutating
-    func outline(symbol usr:Symbol.USR) -> Int?
-    {
-        let symbol:Symbol.Decl
-        switch usr
-        {
+    private mutating func outline(symbol usr: Symbol.USR) -> Int? {
+        let symbol: Symbol.Decl
+        switch usr {
         case .scalar(let scalar):   symbol = scalar
         case .vector(let vector):   symbol = vector.feature
         case .block:                return nil
@@ -168,92 +138,75 @@ extension SSGC.Outliner
         return self.cache.add(outline: .symbol(self.resolver.tables.intern(symbol)))
     }
 }
-extension SSGC.Outliner
-{
-    mutating
-    func follow(rename renamed:String,
-        of redirect:UnqualifiedPath,
-        at location:SourceLocation<Int32>?) -> Int32?
-    {
+extension SSGC.Outliner {
+    mutating func follow(
+        rename renamed: String,
+        of redirect: UnqualifiedPath,
+        at location: SourceLocation<Int32>?
+    ) -> Int32? {
         self.resolver.resolve(rename: renamed, of: redirect, at: location)
     }
 
-    mutating
-    func link(
-        body:Markdown.SemanticDocument,
-        file:Int32?) -> (SymbolGraph.Article, [[Int32]])
-    {
-        let overview:Markdown.Bytecode
+    mutating func link(
+        body: Markdown.SemanticDocument,
+        file: Int32?
+    ) -> (SymbolGraph.Article, [[Int32]]) {
+        let overview: Markdown.Bytecode
 
-        if  let paragraph:Markdown.BlockParagraph = body.overview
-        {
-            overview = .init
-            {
+        if  let paragraph: Markdown.BlockParagraph = body.overview {
+            overview = .init {
                 paragraph.outline { self.outline(reference: $0) }
                 paragraph.emit(into: &$0)
             }
-        }
-        else
-        {
+        } else {
             overview = []
         }
 
-        let fold:Int = self.cache.fold
+        let fold: Int = self.cache.fold
 
-        let details:Markdown.Bytecode = .init
-        {
-            (binary:inout Markdown.BinaryEncoder) in
+        let details: Markdown.Bytecode = .init {
+            (binary: inout Markdown.BinaryEncoder) in
 
             body.details.traverse { $0.outline { self.outline(reference: $0) } }
             body.details.emit(into: &binary)
         }
 
-        let footer:SymbolGraph.Article.Footer?
+        let footer: SymbolGraph.Article.Footer?
 
-        if  body.containsSeeAlso
-        {
+        if  body.containsSeeAlso {
             footer = .omit
-        }
-        else if case false? = body.metadata.options.automaticSeeAlso?.value
-        {
+        } else if case false? = body.metadata.options.automaticSeeAlso?.value {
             footer = .omit
-        }
-        else
-        {
+        } else {
             footer = nil
         }
 
-        let article:SymbolGraph.Article = .init(
+        let article: SymbolGraph.Article = .init(
             outlines: self.cache.clear(),
             overview: overview,
             details: details,
             fold: fold,
             file: file,
-            footer: footer)
+            footer: footer
+        )
 
-        var topics:[[Int32]] = []
-            topics.reserveCapacity(body.topics.count)
+        var topics: [[Int32]] = []
+        topics.reserveCapacity(body.topics.count)
 
-        for topic:Markdown.BlockTopic in body.topics
-        {
-            let topic:[Int32] = topic.items.reduce(into: [])
-            {
+        for topic: Markdown.BlockTopic in body.topics {
+            let topic: [Int32] = topic.items.reduce(into: []) {
                 guard
-                case .outlined(let reference) = $1
-                else
-                {
+                case .outlined(let reference) = $1 else {
                     return
                 }
-                switch article.outlines[reference]
-                {
+                switch article.outlines[reference] {
                 case .vertex(let id, text: _):          $0.append(id)
                 case .vector(let id, self: _, text: _): $0.append(id)
                 default:                                return
                 }
             }
             //  Single-item topics are worthless as curator groups.
-            if  topic.count > 1
-            {
+            if  topic.count > 1 {
                 topics.append(topic)
             }
         }
@@ -261,13 +214,9 @@ extension SSGC.Outliner
         return (article, topics)
     }
 
-    mutating
-    func link(blocks:[Markdown.BlockElement], file:Int32) -> SymbolGraph.Article
-    {
-        let rendered:Markdown.Bytecode = .init
-        {
-            for block:Markdown.BlockElement in blocks
-            {
+    mutating func link(blocks: [Markdown.BlockElement], file: Int32) -> SymbolGraph.Article {
+        let rendered: Markdown.Bytecode = .init {
+            for block: Markdown.BlockElement in blocks {
                 block.traverse { $0.outline { self.outline(reference: $0) } }
                 block.emit(into: &$0)
             }
@@ -278,6 +227,7 @@ extension SSGC.Outliner
             overview: rendered,
             details: [],
             fold: nil,
-            file: file)
+            file: file
+        )
     }
 }

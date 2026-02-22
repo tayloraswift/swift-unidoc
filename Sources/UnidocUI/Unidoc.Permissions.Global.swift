@@ -1,7 +1,5 @@
-extension Unidoc.Permissions
-{
-    enum Global
-    {
+extension Unidoc.Permissions {
+    enum Global {
         /// Authenticated.
         case authenticated(Unidoc.User.Level)
         /// Not authenticated, running in local development mode.

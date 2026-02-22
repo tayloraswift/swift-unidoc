@@ -1,30 +1,21 @@
 import MarkdownAST
 
-extension Markdown
-{
-    @frozen public
-    struct SemanticDocument
-    {
-        public
-        var metadata:SemanticMetadata
-        public
-        var overview:BlockParagraph?
-        public
-        var details:SemanticSections
-        public
-        var topics:[Markdown.BlockTopic]
+extension Markdown {
+    @frozen public struct SemanticDocument {
+        public var metadata: SemanticMetadata
+        public var overview: BlockParagraph?
+        public var details: SemanticSections
+        public var topics: [Markdown.BlockTopic]
         /// If true, then an automatic “See also” section will not be generated.
-        public
-        var containsSeeAlso:Bool
+        public var containsSeeAlso: Bool
 
-        @inlinable public
-        init(
-            metadata:SemanticMetadata,
-            overview:BlockParagraph?,
-            details:SemanticSections,
-            topics:[Markdown.BlockTopic],
-            containsSeeAlso:Bool)
-        {
+        @inlinable public init(
+            metadata: SemanticMetadata,
+            overview: BlockParagraph?,
+            details: SemanticSections,
+            topics: [Markdown.BlockTopic],
+            containsSeeAlso: Bool
+        ) {
             self.metadata = metadata
             self.overview = overview
             self.details = details
@@ -33,8 +24,7 @@ extension Markdown
         }
     }
 }
-extension Markdown.SemanticDocument
-{
+extension Markdown.SemanticDocument {
     /// Merges the given documentation into this documentation.
     ///
     /// If this documentation has no Parameters, Returns, or Throws sections,
@@ -45,23 +35,17 @@ extension Markdown.SemanticDocument
     /// If the new documentation has an Overview section, then this function adds
     /// it to this documentation Details section as a regular body paragraph, even
     /// if this documentation lacks an Overview section of its own.
-    public mutating
-    func merge(appending body:Self)
-    {
-        if  let first:Markdown.BlockParagraph = body.overview
-        {
+    public mutating func merge(appending body: Self) {
+        if  let first: Markdown.BlockParagraph = body.overview {
             self.details.article.append(first)
         }
-        if  case nil = self.details.parameters
-        {
+        if  case nil = self.details.parameters {
             self.details.parameters = body.details.parameters
         }
-        if  case nil = self.details.returns
-        {
+        if  case nil = self.details.returns {
             self.details.returns = body.details.returns
         }
-        if  case nil = self.details.throws
-        {
+        if  case nil = self.details.throws {
             self.details.throws = body.details.throws
         }
 
@@ -70,9 +54,9 @@ extension Markdown.SemanticDocument
     }
 
     @_documentation(metadata: "see: merge(appending:)")
-    public consuming
-    func merged(appending body:Markdown.SemanticDocument) -> Markdown.SemanticDocument
-    {
+    public consuming func merged(
+        appending body: Markdown.SemanticDocument
+    ) -> Markdown.SemanticDocument {
         self.merge(appending: body)
         return self
     }

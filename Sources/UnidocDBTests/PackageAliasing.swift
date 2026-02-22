@@ -5,30 +5,25 @@ import UnidocDB
 import UnidocRecords
 import UnidocTesting
 
-@Suite
-struct PackageAliasing:Unidoc.TestBattery
-{
-    @Test
-    func packages() async throws
-    {
+@Suite struct PackageAliasing: Unidoc.TestBattery {
+    @Test func packages() async throws {
         try await self.run(in: "Packages")
     }
 
-    func run(with unidoc:Unidoc.DB) async throws
-    {
-        for expected:(symbol:Symbol.Package, id:Unidoc.Package, new:Bool) in [
-            ("a", 0, true),
-            ("b", 1, true),
-            ("a", 0, false),
-            ("b", 1, false),
-            ("c", 2, true),
-            ("c", 2, false),
-            ("a", 0, false),
-            ("b", 1, false),
-        ]
-        {
-            let (package, new):(Unidoc.PackageMetadata, Bool) = try await unidoc.index(
-                package: expected.symbol)
+    func run(with unidoc: Unidoc.DB) async throws {
+        for expected: (symbol: Symbol.Package, id: Unidoc.Package, new: Bool) in [
+                ("a", 0, true),
+                ("b", 1, true),
+                ("a", 0, false),
+                ("b", 1, false),
+                ("c", 2, true),
+                ("c", 2, false),
+                ("a", 0, false),
+                ("b", 1, false),
+            ] {
+            let (package, new): (Unidoc.PackageMetadata, Bool) = try await unidoc.index(
+                package: expected.symbol
+            )
 
             #expect(package.id == expected.id)
             #expect(new == expected.new)
@@ -45,17 +40,17 @@ struct PackageAliasing:Unidoc.TestBattery
 
         for (queried, (symbol, id)):
             (Symbol.Package, (Symbol.Package, Unidoc.Package)) in [
-            ("a", ("a", 0)),
-            ("b", ("b", 1)),
-            ("c", ("c", 2)),
-            ("aa", ("a", 0)),
-            ("bb", ("b", 1)),
-            ("cc", ("c", 2)),
-            ("ccc", ("c", 2)),
-        ]
-        {
-            let (package, new):(Unidoc.PackageMetadata, Bool) = try await unidoc.index(
-                package: queried)
+                ("a", ("a", 0)),
+                ("b", ("b", 1)),
+                ("c", ("c", 2)),
+                ("aa", ("a", 0)),
+                ("bb", ("b", 1)),
+                ("cc", ("c", 2)),
+                ("ccc", ("c", 2)),
+            ] {
+            let (package, new): (Unidoc.PackageMetadata, Bool) = try await unidoc.index(
+                package: queried
+            )
 
             #expect(package.symbol == symbol)
             #expect(package.id == id)

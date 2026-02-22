@@ -1,21 +1,14 @@
 import Symbols
 
-extension SymbolGraphPart
-{
-    public
-    enum IdentificationError:Error, Equatable, Sendable
-    {
+extension SymbolGraphPart {
+    public enum IdentificationError: Error, Equatable, Sendable {
         case filename(String)
-        case culture(ID, expected:Symbol.Module)
+        case culture(ID, expected: Symbol.Module)
     }
 }
-extension SymbolGraphPart.IdentificationError:CustomStringConvertible
-{
-    public
-    var description:String
-    {
-        switch self
-        {
+extension SymbolGraphPart.IdentificationError: CustomStringConvertible {
+    public var description: String {
+        switch self {
         case .filename(let filename):
             "Invalid filename: \(filename)."
 

@@ -3,53 +3,38 @@ import SemanticVersions
 import Symbols
 import UnidocDB
 
-extension Unidoc
-{
-    struct BuildTemplateTool
-    {
-        let availablePlatforms:[Symbol.Triple]
-        let availableVersions:[String]
-        let form:BuildTemplate
-        let view:Permissions
+extension Unidoc {
+    struct BuildTemplateTool {
+        let availablePlatforms: [Symbol.Triple]
+        let availableVersions: [String]
+        let form: BuildTemplate
+        let view: Permissions
     }
 }
-extension Unidoc.BuildTemplateTool:HTML.OutputStreamable
-{
-    static
-    func += (form:inout HTML.ContentEncoder, self:Self)
-    {
-        form[.dl]
-        {
+extension Unidoc.BuildTemplateTool: HTML.OutputStreamable {
+    static func += (form: inout HTML.ContentEncoder, self: Self) {
+        form[.dl] {
             $0[.dt] = "Platform preference"
-            $0[.dd]
-            {
-                $0[.select]
-                {
+            $0[.dd] {
+                $0[.select] {
                     $0.name = Unidoc.BuildTemplate.Parameter.platform
                     $0.required = true
                     $0.disabled = !self.view.editor
-                }
-                    content:
-                {
-                    if  let triple:Symbol.Triple = self.form.platform
-                    {
-                        $0[.option]
-                        {
+                } content: {
+                    if  let triple: Symbol.Triple = self.form.platform {
+                        $0[.option] {
                             $0.selected = true
                             $0.value = "\(triple)"
                         } = "\(triple)"
                     }
 
-                    $0[.option]
-                    {
+                    $0[.option] {
                         $0.selected = self.form.platform == nil
                         $0.value = ""
                     } = "Default"
 
-                    for option:Symbol.Triple in self.availablePlatforms
-                    {
-                        if  case option? = self.form.platform
-                        {
+                    for option: Symbol.Triple in self.availablePlatforms {
+                        if  case option? = self.form.platform {
                             continue
                         }
 
@@ -59,36 +44,26 @@ extension Unidoc.BuildTemplateTool:HTML.OutputStreamable
             }
 
             $0[.dt] = "Swift compiler"
-            $0[.dd]
-            {
-                $0[.select]
-                {
+            $0[.dd] {
+                $0[.select] {
                     $0.name = Unidoc.BuildTemplate.Parameter.toolchain
                     $0.required = true
                     $0.disabled = !self.view.editor
-                }
-                    content:
-                {
-                    let current:String?
-                    if  let toolchain:PatchVersion = self.form.toolchain
-                    {
+                } content: {
+                    let current: String?
+                    if  let toolchain: PatchVersion = self.form.toolchain {
                         current = "\(toolchain)"
                         $0[.option] { $0.selected = true ; $0.value = current } = current
-                    }
-                    else
-                    {
+                    } else {
                         current = nil
                     }
 
-                    $0[.option]
-                    {
+                    $0[.option] {
                         $0.selected = self.form.toolchain == nil ; $0.value = ""
                     } = "Default"
 
-                    for option:String in self.availableVersions
-                    {
-                        if  case option? = current
-                        {
+                    for option: String in self.availableVersions {
+                        if  case option? = current {
                             continue
                         }
 
@@ -98,18 +73,14 @@ extension Unidoc.BuildTemplateTool:HTML.OutputStreamable
             }
         }
 
-        form[.button]
-        {
+        form[.button] {
             $0.class = "region"
             $0.type = "submit"
 
-            if !self.view.authenticated
-            {
+            if !self.view.authenticated {
                 $0.disabled = true
                 $0.title = "You are not logged in!"
-            }
-            else if !self.view.editor
-            {
+            } else if !self.view.editor {
                 $0.disabled = true
                 $0.title = "You are not an editor for this package!"
             }

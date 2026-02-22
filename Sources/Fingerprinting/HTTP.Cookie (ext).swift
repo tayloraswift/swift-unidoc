@@ -1,5 +1,4 @@
 import HTTP
 
-extension HTTP.Cookie:HTTP.HeaderWord
-{
+extension HTTP.Cookie: HTTP.HeaderWord {
 }

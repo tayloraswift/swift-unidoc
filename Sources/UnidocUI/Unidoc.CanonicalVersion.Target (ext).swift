@@ -1,9 +1,6 @@
-extension Unidoc.CanonicalVersion.Target
-{
-    var indefiniteArticle:String
-    {
-        switch self
-        {
+extension Unidoc.CanonicalVersion.Target {
+    var indefiniteArticle: String {
+        switch self {
         case .article:          "An"
         case .culture:          "A"
         case .decl:             "A"
@@ -12,10 +9,8 @@ extension Unidoc.CanonicalVersion.Target
         case .landing:          "A"
         }
     }
-    var demonym:String
-    {
-        switch self
-        {
+    var demonym: String {
+        switch self {
         case .article:          "article"
         case .culture:          "module"
         case .decl:             "symbol"
@@ -24,10 +19,8 @@ extension Unidoc.CanonicalVersion.Target
         case .landing:          "package"
         }
     }
-    var identity:String
-    {
-        switch self
-        {
+    var identity: String {
+        switch self {
         case .article:          "name"
         case .culture:          "name"
         case .decl:             "signature"

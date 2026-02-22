@@ -2,55 +2,41 @@ import BSON
 import GitHubAPI
 import UnixTime
 
-extension Unidoc
-{
+extension Unidoc {
     /// This type is largely the same as ``GitHub.Repo``, but with common fields extracted.
-    @frozen public
-    struct GitHubOrigin:Equatable, Sendable
-    {
-        public
-        let id:Int32
-        public
-        let owner:String
-        public
-        let name:String
+    @frozen public struct GitHubOrigin: Equatable, Sendable {
+        public let id: Int32
+        public let owner: String
+        public let name: String
         /// TODO: deoptionalize
-        public
-        let node:GitHub.Node?
+        public let node: GitHub.Node?
 
         /// When the repository content (as opposed to its metadata) was last pushed to.
         /// This is usually different from ``PackageRepo.updated``.
-        public
-        var pushed:UnixMillisecond
+        public var pushed: UnixMillisecond
 
-        public
-        var homepage:String?
-        public
-        var about:String?
+        public var homepage: String?
+        public var about: String?
 
-        public
-        var size:Int
+        public var size: Int
 
-        public
-        var archived:Bool
-        public
-        var disabled:Bool
-        public
-        var fork:Bool
+        public var archived: Bool
+        public var disabled: Bool
+        public var fork: Bool
 
-        @inlinable public
-        init(id:Int32,
-            owner:String,
-            name:String,
-            node:GitHub.Node?,
-            pushed:UnixMillisecond,
-            homepage:String?,
-            about:String?,
-            size:Int,
-            archived:Bool,
-            disabled:Bool,
-            fork:Bool)
-        {
+        @inlinable public init(
+            id: Int32,
+            owner: String,
+            name: String,
+            node: GitHub.Node?,
+            pushed: UnixMillisecond,
+            homepage: String?,
+            about: String?,
+            size: Int,
+            archived: Bool,
+            disabled: Bool,
+            fork: Bool
+        ) {
             self.id = id
             self.pushed = pushed
             self.owner = owner
@@ -65,25 +51,17 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.GitHubOrigin
-{
-    @inlinable public
-    func https(token:GitHub.InstallationAccessToken) -> String
-    {
+extension Unidoc.GitHubOrigin {
+    @inlinable public func https(token: GitHub.InstallationAccessToken) -> String {
         "https://x-access-token:\(token)@github.com/\(self.owner)/\(self.name)"
     }
 
-    @inlinable public
-    var https:String
-    {
+    @inlinable public var https: String {
         "https://github.com/\(self.owner)/\(self.name)"
     }
 }
-extension Unidoc.GitHubOrigin
-{
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.GitHubOrigin {
+    @frozen public enum CodingKey: String, Sendable {
         case id = "I"
         case pushed = "P"
         case owner = "O"
@@ -106,11 +84,8 @@ extension Unidoc.GitHubOrigin
         case installation = "L"
     }
 }
-extension Unidoc.GitHubOrigin:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension Unidoc.GitHubOrigin: BSONDocumentEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.id] = self.id
         bson[.pushed] = self.pushed
         bson[.owner] = self.owner
@@ -127,12 +102,10 @@ extension Unidoc.GitHubOrigin:BSONDocumentEncodable
         bson[.fork] = self.fork
     }
 }
-extension Unidoc.GitHubOrigin:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(id: try bson[.id].decode(),
+extension Unidoc.GitHubOrigin: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        self.init(
+            id: try bson[.id].decode(),
             owner: try bson[.owner].decode(),
             name: try bson[.name].decode(),
             node: try bson[.node]?.decode(),
@@ -142,6 +115,7 @@ extension Unidoc.GitHubOrigin:BSONDocumentDecodable
             size: try bson[.size].decode(),
             archived: try bson[.archived].decode(),
             disabled: try bson[.disabled].decode(),
-            fork: try bson[.fork].decode())
+            fork: try bson[.fork].decode()
+        )
     }
 }

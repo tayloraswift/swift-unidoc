@@ -1,19 +1,14 @@
-extension Unidoc.DenseList
-{
-    struct Iterator
-    {
-        private
-        let context:Unidoc.PeripheralPageContext
-        private
-        var cards:(Cards<Unidoc.Scalar>, Cards<Unidoc.ConformingType>)
+extension Unidoc.DenseList {
+    struct Iterator {
+        private let context: Unidoc.PeripheralPageContext
+        private var cards: (Cards<Unidoc.Scalar>, Cards<Unidoc.ConformingType>)
 
         init(
-            context:Unidoc.PeripheralPageContext,
-            members:([Unidoc.Scalar], [Unidoc.ConformingType]))
-        {
+            context: Unidoc.PeripheralPageContext,
+            members: ([Unidoc.Scalar], [Unidoc.ConformingType])
+        ) {
             self.context = context
-            self.cards =
-            (
+            self.cards = (
                 .init(base: members.0.makeIterator()),
                 .init(base: members.1.makeIterator())
             )
@@ -22,13 +17,9 @@ extension Unidoc.DenseList
         }
     }
 }
-extension Unidoc.DenseList.Iterator:IteratorProtocol
-{
-    mutating
-    func next() -> Unidoc.DenseList.Card?
-    {
-        switch (self.cards.0.next, self.cards.1.next)
-        {
+extension Unidoc.DenseList.Iterator: IteratorProtocol {
+    mutating func next() -> Unidoc.DenseList.Card? {
+        switch (self.cards.0.next, self.cards.1.next) {
         case (let a?, let b?):
             a.path <= b.path
                 ? self.cards.0.pull(with: self.context)

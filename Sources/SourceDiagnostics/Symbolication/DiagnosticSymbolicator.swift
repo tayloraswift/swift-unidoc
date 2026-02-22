@@ -1,65 +1,45 @@
 import Sources
 import Symbols
 
-public
-protocol DiagnosticSymbolicator<Address>
-{
+public protocol DiagnosticSymbolicator<Address> {
     associatedtype Address
 
-    subscript(article address:Address) -> Symbol.Article? { get }
-    subscript(decl address:Address) -> Symbol.Decl? { get }
-    subscript(file address:Address) -> Symbol.File? { get }
+    subscript(article address: Address) -> Symbol.Article? { get }
+    subscript(decl address: Address) -> Symbol.Decl? { get }
+    subscript(file address: Address) -> Symbol.File? { get }
 
-    var demangler:Demangler? { get }
-    var base:Symbol.FileBase? { get }
+    var demangler: Demangler? { get }
+    var base: Symbol.FileBase? { get }
 }
-extension DiagnosticSymbolicator
-{
+extension DiagnosticSymbolicator {
     /// Returns the demangled signature of the scalar symbol referenced by the given
     /// scalar. The scalar must refer to a declaration and not an article.
-    @inlinable public
-    subscript(address:Address) -> String
-    {
-        if  let symbol:Symbol.Article = self[article: address]
-        {
+    @inlinable public subscript(address: Address) -> String {
+        if  let symbol: Symbol.Article = self[article: address] {
             "'\(symbol.rawValue)'"
-        }
-        else if
-            let symbol:Symbol.Decl = self[decl: address]
-        {
+        } else if
+            let symbol: Symbol.Decl = self[decl: address] {
             self.demangle(symbol)
-        }
-        else
-        {
+        } else {
             "<unavailable>"
         }
     }
 
-    @inlinable public
-    func demangle(_ symbol:Symbol.Decl) -> String
-    {
-        if  let demangled:String = self.demangler?.demangle(symbol)
-        {
+    @inlinable public func demangle(_ symbol: Symbol.Decl) -> String {
+        if  let demangled: String = self.demangler?.demangle(symbol) {
             return demangled
-        }
-        else
-        {
+        } else {
             print("warning: demangling not supported on this platform!")
             return symbol.rawValue
         }
     }
 
     /// Returns the absolute path of the file referenced by the given file scalar.
-    @inlinable public
-    func path(of scalar:Address) -> String?
-    {
-        if  let base:Symbol.FileBase = self.base,
-            let file:Symbol.File = self[file: scalar]
-        {
+    @inlinable public func path(of scalar: Address) -> String? {
+        if  let base: Symbol.FileBase = self.base,
+            let file: Symbol.File = self[file: scalar] {
             "\(base.path)/\(file)"
-        }
-        else
-        {
+        } else {
             nil
         }
     }

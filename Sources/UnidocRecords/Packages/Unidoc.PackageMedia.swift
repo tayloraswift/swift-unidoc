@@ -1,34 +1,25 @@
 import BSON
 
-extension Unidoc
-{
+extension Unidoc {
     /// Custom origins for package media. Unlike most URL fields in this code base, these URLs
     /// should contain a scheme. This allows us to use `file://` URLs for local development.
-    @frozen public
-    struct PackageMedia:Equatable, Sendable
-    {
-        public
-        var prefix:String?
+    @frozen public struct PackageMedia: Equatable, Sendable {
+        public var prefix: String?
 
-        public
-        var gif:String?
-        public
-        var jpg:String?
-        public
-        var png:String?
-        public
-        var svg:String?
-        public
-        var webp:String?
+        public var gif: String?
+        public var jpg: String?
+        public var png: String?
+        public var svg: String?
+        public var webp: String?
 
-        @inlinable public
-        init(prefix:String? = nil,
-            gif:String? = nil,
-            jpg:String? = nil,
-            png:String? = nil,
-            svg:String? = nil,
-            webp:String? = nil)
-        {
+        @inlinable public init(
+            prefix: String? = nil,
+            gif: String? = nil,
+            jpg: String? = nil,
+            png: String? = nil,
+            svg: String? = nil,
+            webp: String? = nil
+        ) {
             self.prefix = prefix
             self.gif = gif
             self.jpg = jpg
@@ -38,11 +29,8 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.PackageMedia
-{
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.PackageMedia {
+    @frozen public enum CodingKey: String, Sendable {
         case prefix = "D"
 
         case gif
@@ -52,11 +40,8 @@ extension Unidoc.PackageMedia
         case webp
     }
 }
-extension Unidoc.PackageMedia:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension Unidoc.PackageMedia: BSONDocumentEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.prefix] = self.prefix
 
         bson[.gif] = self.gif
@@ -66,16 +51,15 @@ extension Unidoc.PackageMedia:BSONDocumentEncodable
         bson[.webp] = self.webp
     }
 }
-extension Unidoc.PackageMedia:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(prefix: try bson[.prefix]?.decode(),
+extension Unidoc.PackageMedia: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        self.init(
+            prefix: try bson[.prefix]?.decode(),
             gif: try bson[.gif]?.decode(),
             jpg: try bson[.jpg]?.decode(),
             png: try bson[.png]?.decode(),
             svg: try bson[.svg]?.decode(),
-            webp: try bson[.webp]?.decode())
+            webp: try bson[.webp]?.decode()
+        )
     }
 }

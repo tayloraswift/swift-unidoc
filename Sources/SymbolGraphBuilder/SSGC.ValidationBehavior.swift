@@ -1,10 +1,7 @@
 import ArgumentParser
 
-extension SSGC
-{
-    @frozen public
-    enum ValidationBehavior:CaseIterable
-    {
+extension SSGC {
+    @frozen public enum ValidationBehavior: CaseIterable {
         /// Documentation warnings will be promoted to errors, and will fail the build.
         case warningsAsErrors
         /// Documentation errors will fail the build, but warnings will not.
@@ -15,13 +12,9 @@ extension SSGC
         case demoteErrors
     }
 }
-extension SSGC.ValidationBehavior:CustomStringConvertible
-{
-    public
-    var description:String
-    {
-        switch self
-        {
+extension SSGC.ValidationBehavior: CustomStringConvertible {
+    public var description: String {
+        switch self {
         case .warningsAsErrors: "warnings-as-errors"
         case .failOnErrors:     "fail-on-errors"
         case .ignoreErrors:     "ignore-errors"
@@ -29,13 +22,9 @@ extension SSGC.ValidationBehavior:CustomStringConvertible
         }
     }
 }
-extension SSGC.ValidationBehavior:LosslessStringConvertible
-{
-    public
-    init?(_ description:String)
-    {
-        switch description
-        {
+extension SSGC.ValidationBehavior: LosslessStringConvertible {
+    public init?(_ description: String) {
+        switch description {
         case "warnings-as-errors":  self = .warningsAsErrors
         case "fail-on-errors":      self = .failOnErrors
         case "ignore-errors":       self = .ignoreErrors
@@ -44,6 +33,5 @@ extension SSGC.ValidationBehavior:LosslessStringConvertible
         }
     }
 }
-extension SSGC.ValidationBehavior:ExpressibleByArgument
-{
+extension SSGC.ValidationBehavior: ExpressibleByArgument {
 }

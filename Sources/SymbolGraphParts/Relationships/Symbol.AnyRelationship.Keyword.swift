@@ -2,10 +2,8 @@ import JSONDecoding
 import JSONEncoding
 import Symbols
 
-extension Symbol.AnyRelationship
-{
-    enum Keyword:String, Equatable, Hashable, JSONDecodable, JSONEncodable, Sendable
-    {
+extension Symbol.AnyRelationship {
+    enum Keyword: String, Equatable, Hashable, JSONDecodable, JSONEncodable, Sendable {
         case conformance            = "conformsTo"
         case intrinsicWitness       = "defaultImplementationOf"
         case `extension`            = "extensionTo"

@@ -7,40 +7,37 @@ import SourceDiagnostics
 import Symbols
 import Testing
 
-@_spi(testable)
-import SymbolGraphLinker
+@_spi(testable) import SymbolGraphLinker
 
-protocol MarkdownTestSuite
-{
+protocol MarkdownTestSuite {
 }
-extension MarkdownTestSuite
-{
+extension MarkdownTestSuite {
     static func test(
-        snippets:[String: Markdown.Snippet] = [:],
-        markdown:Markdown.Source,
-        expected:String,
-        topics:[Int] = []) throws
-    {
-        let markdownParser:Markdown.Parser<Markdown.SwiftComment> = .init()
-        var ignore:Diagnostics<SSGC.Symbolicator> = .init()
+        snippets: [String: Markdown.Snippet] = [:],
+        markdown: Markdown.Source,
+        expected: String,
+        topics: [Int] = []
+    ) throws {
+        let markdownParser: Markdown.Parser<Markdown.SwiftComment> = .init()
+        var ignore: Diagnostics<SSGC.Symbolicator> = .init()
 
-        let documentation:Markdown.SemanticDocument = markdown.parse(
+        let documentation: Markdown.SemanticDocument = markdown.parse(
             markdownParser: markdownParser,
             snippetsTable: snippets,
-            diagnostics: &ignore)
+            diagnostics: &ignore
+        )
 
-        let overview:MarkdownBinary? = documentation.overview.map
-        {
+        let overview: MarkdownBinary? = documentation.overview.map {
             .init(bytecode: .init(with: $0.emit(into:)))
         }
-        let details:MarkdownBinary = .init(bytecode: .init
-        {
-            (encoder:inout Markdown.BinaryEncoder)in
+        let details: MarkdownBinary = .init(
+            bytecode: .init {
+                (encoder: inout Markdown.BinaryEncoder)in
 
-            documentation.details.emit(into: &encoder)
-        })
-        let html:HTML = try .init
-        {
+                documentation.details.emit(into: &encoder)
+            }
+        )
+        let html: HTML = try .init {
             try overview?.render(to: &$0)
 
             $0.append(escaped: 0x0A) // '\n'

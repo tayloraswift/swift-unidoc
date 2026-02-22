@@ -2,62 +2,47 @@ import MD5
 import MongoDB
 import UnidocRecords
 
-extension Unidoc.DB
-{
-    @frozen public
-    struct EditionDependencies
-    {
-        public
-        let database:Mongo.Database
-        public
-        let session:Mongo.Session
+extension Unidoc.DB {
+    @frozen public struct EditionDependencies {
+        public let database: Mongo.Database
+        public let session: Mongo.Session
 
-        @inlinable
-        init(database:Mongo.Database, session:Mongo.Session)
-        {
+        @inlinable init(database: Mongo.Database, session: Mongo.Session) {
             self.database = database
             self.session = session
         }
     }
 }
-extension Unidoc.DB.EditionDependencies
-{
-    public
-    static let indexSourceChangedABI:Mongo.CollectionIndex = .init("SourceChangedABI",
-        collation: .simple)
-    {
+extension Unidoc.DB.EditionDependencies {
+    public static let indexSourceChangedABI: Mongo.CollectionIndex = .init(
+        "SourceChangedABI",
+        collation: .simple
+    ) {
         $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.source]] = (+)
-    }
-        where:
-    {
+    } where: {
         $0[Element[.targetChanged]] = true
     }
 
-    public
-    static let indexSource:Mongo.CollectionIndex = .init("Source",
-        collation: .simple)
-    {
+    public static let indexSource: Mongo.CollectionIndex = .init(
+        "Source",
+        collation: .simple
+    ) {
         $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.source]] = (+)
     }
 
-    public
-    static let indexTarget:Mongo.CollectionIndex = .init("Target",
-        collation: .simple)
-    {
+    public static let indexTarget: Mongo.CollectionIndex = .init(
+        "Target",
+        collation: .simple
+    ) {
         $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.target]] = (+)
     }
 }
-extension Unidoc.DB.EditionDependencies:Mongo.CollectionModel
-{
-    public
-    typealias Element = Unidoc.EditionDependency
+extension Unidoc.DB.EditionDependencies: Mongo.CollectionModel {
+    public typealias Element = Unidoc.EditionDependency
 
-    @inlinable public
-    static var name:Mongo.Collection { "EditionDependencies" }
+    @inlinable public static var name: Mongo.Collection { "EditionDependencies" }
 
-    @inlinable public
-    static var indexes:[Mongo.CollectionIndex]
-    {
+    @inlinable public static var indexes: [Mongo.CollectionIndex] {
         [
             Self.indexSourceChangedABI,
             Self.indexSource,
@@ -65,83 +50,72 @@ extension Unidoc.DB.EditionDependencies:Mongo.CollectionModel
         ]
     }
 }
-extension Unidoc.DB.EditionDependencies
-{
-    public
-    func dirty(limit:Int) async throws -> [Unidoc.EditionDependency]
-    {
+extension Unidoc.DB.EditionDependencies {
+    public func dirty(limit: Int) async throws -> [Unidoc.EditionDependency] {
         try await session.run(
-            command: Mongo.Find<Mongo.SingleBatch<Element>>.init(Self.name, limit: limit)
-            {
+            command: Mongo.Find<Mongo.SingleBatch<Element>>.init(Self.name, limit: limit) {
                 $0[.filter] { $0[Element[.targetChanged]] = true }
                 $0[.hint] = Self.indexSourceChangedABI.id
             },
-            against: self.database)
+            against: self.database
+        )
     }
 
-    func create(dependent:Unidoc.Edition,
-        from boundaries:[Unidoc.Mesh.Boundary]) async throws
-    {
-        let dependencies:[Unidoc.EditionDependency] = boundaries.reduce(into: [])
-        {
-            if  let edition:Unidoc.Edition = $1.target.pin?.edition
-            {
+    func create(
+        dependent: Unidoc.Edition,
+        from boundaries: [Unidoc.Mesh.Boundary]
+    ) async throws {
+        let dependencies: [Unidoc.EditionDependency] = boundaries.reduce(into: []) {
+            if  let edition: Unidoc.Edition = $1.target.pin?.edition {
                 $0.append(.init(source: dependent, target: edition, targetABI: $1.targetABI))
             }
         }
 
-        if  dependencies.isEmpty
-        {
+        if  dependencies.isEmpty {
             return
         }
 
-        let response:Mongo.InsertResponse = try await session.run(
+        let response: Mongo.InsertResponse = try await session.run(
             command: Mongo.Insert.init(Self.name, encoding: dependencies),
-            against: self.database)
+            against: self.database
+        )
 
-        let _:Mongo.Insertions = try response.insertions()
+        let _: Mongo.Insertions = try response.insertions()
     }
 
-    func clear(dependent:Unidoc.Edition) async throws
-    {
-        let response:Mongo.DeleteResponse = try await session.run(
-            command: Mongo.Delete<Mongo.Many>.init(Self.name)
-            {
-                $0
-                {
+    func clear(dependent: Unidoc.Edition) async throws {
+        let response: Mongo.DeleteResponse = try await session.run(
+            command: Mongo.Delete<Mongo.Many>.init(Self.name) {
+                $0 {
                     $0[.limit] = .unlimited
                     $0[.hint] = Self.indexSource.id
-                    $0[.q]
-                    {
+                    $0[.q] {
                         $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.source]] = dependent
                     }
                 }
             },
-            against: self.database)
+            against: self.database
+        )
 
-        let _:Mongo.Deletions = try response.deletions()
+        let _: Mongo.Deletions = try response.deletions()
     }
 
     /// Selects all edges whose target matches `dependency` and marks them as dirty if their
     /// ``Unidoc.EditionDependency/targetABI`` does not match `dependencyABI`.
     @discardableResult
-    func update(dependencyABI:MD5,
-        dependency:Unidoc.Edition) async throws -> Int
-    {
-        try await self.updateMany
-        {
-            $0
-            {
+    func update(
+        dependencyABI: MD5,
+        dependency: Unidoc.Edition
+    ) async throws -> Int {
+        try await self.updateMany {
+            $0 {
                 $0[.multi] = true
-                $0[.q]
-                {
+                $0[.q] {
                     $0[Element[.id] / Unidoc.Edge<Unidoc.Edition>[.target]] = dependency
                     $0[Element[.targetABI]] { $0[.ne] = dependencyABI }
                 }
-                $0[.u]
-                {
-                    $0[.set]
-                    {
+                $0[.u] {
+                    $0[.set] {
                         $0[Element[.targetABI]] = dependencyABI
                         $0[Element[.targetChanged]] = true
                     }

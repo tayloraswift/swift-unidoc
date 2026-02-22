@@ -1,6 +1,5 @@
 import MarkdownAST
 
-protocol ParsableAsInlineMarkup
-{
-    init(from markup:borrowing any _InlineMarkup, in source:borrowing Markdown.Source)
+protocol ParsableAsInlineMarkup {
+    init(from markup: borrowing any _InlineMarkup, in source: borrowing Markdown.Source)
 }

@@ -1,6 +1,5 @@
 import JSON
 import Unidoc
 
-extension Unidoc.Edition:JSONDecodable, JSONEncodable
-{
+extension Unidoc.Edition: JSONDecodable, JSONEncodable {
 }

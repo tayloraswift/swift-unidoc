@@ -1,7 +1,5 @@
-extension Unidoc
-{
-    enum BuildCoordinatorAssertionError:Error
-    {
+extension Unidoc {
+    enum BuildCoordinatorAssertionError: Error {
         case invalidChangeStreamElement
         case missingClusterTime
         case droppedNotification

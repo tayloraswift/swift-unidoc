@@ -1,21 +1,16 @@
 import SourceDiagnostics
 import Sources
 
-extension SSGC
-{
-    enum ArticleError:Equatable, Error, Sendable
-    {
-        case duplicated(name:String)
+extension SSGC {
+    enum ArticleError: Equatable, Error, Sendable {
+        case duplicated(name: String)
     }
 }
-extension SSGC.ArticleError:Diagnostic
-{
+extension SSGC.ArticleError: Diagnostic {
     typealias Symbolicator = SSGC.Symbolicator
 
-    func emit(summary output:inout DiagnosticOutput<SSGC.Symbolicator>)
-    {
-        switch self
-        {
+    func emit(summary output: inout DiagnosticOutput<SSGC.Symbolicator>) {
+        switch self {
         case .duplicated(name: let name):
             output[.error] = """
             markdown article cannot have the same mangled name ('\(name)') as another \
@@ -24,7 +19,6 @@ extension SSGC.ArticleError:Diagnostic
         }
     }
 
-    func emit(details output:inout DiagnosticOutput<SSGC.Symbolicator>)
-    {
+    func emit(details output: inout DiagnosticOutput<SSGC.Symbolicator>) {
     }
 }

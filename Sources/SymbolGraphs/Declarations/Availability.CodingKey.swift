@@ -1,31 +1,21 @@
 import Availability
 import BSON
 
-extension Availability
-{
+extension Availability {
     /// Represents an ``Availability.AnyDomain`` in the BSON ABI. This has a
     /// single-character raw value, for storage efficiency, and is not intended
     /// to be human-readable.
-    @frozen public
-    struct CodingKey:BSON.Keyspace
-    {
-        public
-        let domain:AnyDomain
+    @frozen public struct CodingKey: BSON.Keyspace {
+        public let domain: AnyDomain
 
-        @inlinable public
-        init(_ domain:AnyDomain)
-        {
+        @inlinable public init(_ domain: AnyDomain) {
             self.domain = domain
         }
     }
 }
-extension Availability.CodingKey:RawRepresentable
-{
-    @inlinable public
-    init?(rawValue:String)
-    {
-        switch rawValue
-        {
+extension Availability.CodingKey: RawRepresentable {
+    @inlinable public init?(rawValue: String) {
+        switch rawValue {
         case "s":   self.init(.agnostic(.swift))
         case "p":   self.init(.agnostic(.swiftPM))
         case "b":   self.init(.platform(.bridgeOS))
@@ -46,11 +36,8 @@ extension Availability.CodingKey:RawRepresentable
         default:    return nil
         }
     }
-    @inlinable public
-    var rawValue:String
-    {
-        switch self.domain
-        {
+    @inlinable public var rawValue: String {
+        switch self.domain {
         case .agnostic(.swift):                             "s"
         case .agnostic(.swiftPM):                           "p"
         case .platform(.bridgeOS):                          "b"

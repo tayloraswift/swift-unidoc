@@ -1,17 +1,11 @@
 import MongoQL
 import UnidocRecords
 
-extension Unidoc.VolumeMetadata
-{
-    @frozen public
-    struct NameFields:Mongo.ProjectionEncodable
-    {
-        @inlinable public
-        init() {}
+extension Unidoc.VolumeMetadata {
+    @frozen public struct NameFields: Mongo.ProjectionEncodable {
+        @inlinable public init() {}
 
-        @inlinable public
-        func encode(to projection:inout Mongo.ProjectionEncoder<CodingKey>)
-        {
+        @inlinable public func encode(to projection: inout Mongo.ProjectionEncoder<CodingKey>) {
             projection[.id] = true
             projection[.package] = true
             projection[.version] = true

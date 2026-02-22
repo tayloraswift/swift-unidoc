@@ -1,5 +1,4 @@
-enum TerminalColor
-{
+enum TerminalColor {
     case black
     case red
     case green
@@ -11,12 +10,9 @@ enum TerminalColor
 
     case rgb(UInt8, UInt8, UInt8)
 }
-extension TerminalColor:CustomStringConvertible
-{
-    var description:String
-    {
-        switch self
-        {
+extension TerminalColor: CustomStringConvertible {
+    var description: String {
+        switch self {
         case .black:    "90"
         case .red:      "91"
         case .green:    "92"

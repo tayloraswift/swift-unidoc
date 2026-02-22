@@ -5,46 +5,32 @@ import Symbols
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc.VersionsQuery
-{
-    @frozen public
-    struct Output:Sendable
-    {
-        public
-        var package:Unidoc.PackageMetadata
-        public
-        var dependents:[Unidoc.PackageDependent]
-        public
-        var versions:[Unidoc.VersionState]
-        public
-        var branches:[Unidoc.VersionState]
-        public
-        var aliases:[Symbol.Package]
-        public
-        var pendingBuilds:[Unidoc.PendingBuild]
-        public
-        var recentBuilds:[Unidoc.CompleteBuild]
-        public
-        var realm:Unidoc.RealmMetadata?
+extension Unidoc.VersionsQuery {
+    @frozen public struct Output: Sendable {
+        public var package: Unidoc.PackageMetadata
+        public var dependents: [Unidoc.PackageDependent]
+        public var versions: [Unidoc.VersionState]
+        public var branches: [Unidoc.VersionState]
+        public var aliases: [Symbol.Package]
+        public var pendingBuilds: [Unidoc.PendingBuild]
+        public var recentBuilds: [Unidoc.CompleteBuild]
+        public var realm: Unidoc.RealmMetadata?
 
-        public
-        var ticket:Unidoc.CrawlingTicket<Unidoc.Package>?
-        public
-        var user:Unidoc.User?
+        public var ticket: Unidoc.CrawlingTicket<Unidoc.Package>?
+        public var user: Unidoc.User?
 
-        @inlinable public
-        init(
-            package:Unidoc.PackageMetadata,
-            dependents:[Unidoc.PackageDependent],
-            versions:[Unidoc.VersionState],
-            branches:[Unidoc.VersionState],
-            aliases:[Symbol.Package],
-            pendingBuilds:[Unidoc.PendingBuild],
-            recentBuilds:[Unidoc.CompleteBuild],
-            realm:Unidoc.RealmMetadata?,
-            ticket:Unidoc.CrawlingTicket<Unidoc.Package>?,
-            user:Unidoc.User?)
-        {
+        @inlinable public init(
+            package: Unidoc.PackageMetadata,
+            dependents: [Unidoc.PackageDependent],
+            versions: [Unidoc.VersionState],
+            branches: [Unidoc.VersionState],
+            aliases: [Symbol.Package],
+            pendingBuilds: [Unidoc.PendingBuild],
+            recentBuilds: [Unidoc.CompleteBuild],
+            realm: Unidoc.RealmMetadata?,
+            ticket: Unidoc.CrawlingTicket<Unidoc.Package>?,
+            user: Unidoc.User?
+        ) {
             self.package = package
             self.dependents = dependents
             self.versions = versions
@@ -58,11 +44,8 @@ extension Unidoc.VersionsQuery
         }
     }
 }
-extension Unidoc.VersionsQuery.Output:Mongo.MasterCodingModel
-{
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.VersionsQuery.Output: Mongo.MasterCodingModel {
+    @frozen public enum CodingKey: String, Sendable {
         case versions
         case dependents
         case branches
@@ -75,12 +58,10 @@ extension Unidoc.VersionsQuery.Output:Mongo.MasterCodingModel
         case user
     }
 }
-extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(package: try bson[.package].decode(),
+extension Unidoc.VersionsQuery.Output: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        self.init(
+            package: try bson[.package].decode(),
             dependents: try bson[.dependents].decode(),
             versions: try bson[.versions].decode(),
             branches: try bson[.branches].decode(),
@@ -89,6 +70,7 @@ extension Unidoc.VersionsQuery.Output:BSONDocumentDecodable
             recentBuilds: try bson[.recentBuilds]?.decode() ?? [],
             realm: try bson[.realm]?.decode(),
             ticket: try bson[.ticket]?.decode(),
-            user: try bson[.user]?.decode())
+            user: try bson[.user]?.decode()
+        )
     }
 }

@@ -6,64 +6,43 @@ import Glibc
 import Darwin
 #endif
 
-public
-struct Demangler:Sendable
-{
-    private
-    typealias Function = @convention(c)
-    (
-        _ name:UnsafePointer<UInt8>?,
-        _ count:Int,
-        _ output:UnsafeMutablePointer<UInt8>?,
-        _ capacity:UnsafeMutablePointer<Int>?,
-        _ flags:UInt32
+public struct Demangler: Sendable {
+    private typealias Function = @convention(c) (
+        _ name: UnsafePointer<UInt8>?,
+        _ count: Int,
+        _ output: UnsafeMutablePointer<UInt8>?,
+        _ capacity: UnsafeMutablePointer<Int>?,
+        _ flags: UInt32
     ) -> UnsafeMutablePointer<Int8>?
 
-    private
-    let function:Function
+    private let function: Function
 
-    private
-    init(_ function:Function)
-    {
+    private init(_ function: Function) {
         self.function = function
     }
 }
-extension Demangler
-{
-    public
-    func demangle(_ symbol:Symbol.Decl) -> String?
-    {
+extension Demangler {
+    public func demangle(_ symbol: Symbol.Decl) -> String? {
         // '$s'
-        let prefixed:String = "$\(symbol.rawValue)" // not the description!
-        if  let string:UnsafeMutablePointer<Int8> =
-                self.function(prefixed, prefixed.utf8.count, nil, nil, 0)
-        {
-            defer
-            {
+        let prefixed: String = "$\(symbol.rawValue)" // not the description!
+        if  let string: UnsafeMutablePointer<Int8> =
+            self.function(prefixed, prefixed.utf8.count, nil, nil, 0) {
+            defer {
                 string.deallocate()
             }
             return String.init(cString: string)
-        }
-        else
-        {
+        } else {
             return nil
         }
     }
 }
-extension Demangler
-{
-    public
-    init?()
-    {
+extension Demangler {
+    public init?() {
         #if canImport(Glibc) || canImport(Darwin)
-        guard let swift:UnsafeMutableRawPointer = dlopen(nil, RTLD_NOW)
-        else
-        {
+        guard let swift: UnsafeMutableRawPointer = dlopen(nil, RTLD_NOW) else {
             return nil
         }
-        guard let symbol:UnsafeMutableRawPointer = dlsym(swift, "swift_demangle")
-        else
-        {
+        guard let symbol: UnsafeMutableRawPointer = dlsym(swift, "swift_demangle") else {
             return nil
         }
         self.init(unsafeBitCast(symbol, to: Function.self))

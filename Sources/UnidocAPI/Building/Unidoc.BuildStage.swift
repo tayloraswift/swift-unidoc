@@ -1,10 +1,7 @@
 import JSON
 
-extension Unidoc
-{
-    @frozen public
-    enum BuildStage:Int32, Equatable, Sendable
-    {
+extension Unidoc {
+    @frozen public enum BuildStage: Int32, Equatable, Sendable {
         /// The server is waiting for the builder to acknowledge the build request.
         case initializing = 0
         /// The server is cloning the package's git repository.
@@ -15,6 +12,5 @@ extension Unidoc
         case compilingCode = 3
     }
 }
-extension Unidoc.BuildStage:JSONDecodable, JSONEncodable
-{
+extension Unidoc.BuildStage: JSONDecodable, JSONEncodable {
 }

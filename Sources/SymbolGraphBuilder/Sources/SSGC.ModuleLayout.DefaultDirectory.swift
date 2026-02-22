@@ -1,22 +1,17 @@
 import SymbolGraphs
 import SystemIO
 
-extension SSGC.ModuleLayout
-{
-    enum DefaultDirectory:Equatable, Hashable
-    {
+extension SSGC.ModuleLayout {
+    enum DefaultDirectory: Equatable, Hashable {
         case plugins
         case snippets
         case sources
         case tests
     }
 }
-extension SSGC.ModuleLayout.DefaultDirectory
-{
-    init?(for type:SymbolGraph.ModuleType)
-    {
-        switch type
-        {
+extension SSGC.ModuleLayout.DefaultDirectory {
+    init?(for type: SymbolGraph.ModuleType) {
+        switch type {
         case .binary:       return nil
         case .executable:   self = .sources
         case .regular:      self = .sources
@@ -29,12 +24,9 @@ extension SSGC.ModuleLayout.DefaultDirectory
         }
     }
 }
-extension SSGC.ModuleLayout.DefaultDirectory
-{
-    var name:FilePath.Component
-    {
-        switch self
-        {
+extension SSGC.ModuleLayout.DefaultDirectory {
+    var name: FilePath.Component {
+        switch self {
         case .plugins:  "Plugins"
         case .snippets: "Snippets"
         case .sources:  "Sources"

@@ -18,48 +18,49 @@
 /// and is resumed when the next call to `next()` on the `Iterator` is made, or when `finish()`/`fail(_:)` is called
 /// from another Task. As `finish()` and `fail(_:)` induce a terminal state, there is no more need for a back pressure management.
 /// Those functions do not suspend and will finish all the pending iterations.
-public final class AsyncThrowingChannel<Element: Sendable, Failure: Error>: AsyncSequence, Sendable {
-  public typealias Element = Element
-  public typealias AsyncIterator = Iterator
+public final class AsyncThrowingChannel<Element: Sendable, Failure: Error>: AsyncSequence,
+    Sendable {
+    public typealias Element = Element
+    public typealias AsyncIterator = Iterator
 
-  let storage: ChannelStorage<Element, Failure>
-
-  public init() {
-    self.storage = ChannelStorage()
-  }
-
-  /// Sends an element to an awaiting iteration. This function will resume when the next call to `next()` is made
-  /// or when a call to `finish()` or `fail` is made from another task.
-  /// If the channel is already finished then this returns immediately.
-  /// If the task is cancelled, this function will resume without sending the element.
-  /// Other sending operations from other tasks will remain active.
-  public func send(_ element: Element) async {
-    await self.storage.send(element: element)
-  }
-
-  /// Sends an error to all awaiting iterations.
-  /// All subsequent calls to `next(_:)` will resume immediately.
-  public func fail(_ error: Error) where Failure == Error {
-    self.storage.finish(error: error)
-  }
-
-  /// Immediately resumes all the suspended operations.
-  /// All subsequent calls to `next(_:)` will resume immediately.
-  public func finish() {
-    self.storage.finish()
-  }
-
-  public func makeAsyncIterator() -> Iterator {
-    Iterator(storage: self.storage)
-  }
-
-  public struct Iterator: AsyncIteratorProtocol {
     let storage: ChannelStorage<Element, Failure>
 
-    public mutating func next() async throws -> Element? {
-      try await self.storage.next()
+    public init() {
+        self.storage = ChannelStorage()
     }
-  }
+
+    /// Sends an element to an awaiting iteration. This function will resume when the next call to `next()` is made
+    /// or when a call to `finish()` or `fail` is made from another task.
+    /// If the channel is already finished then this returns immediately.
+    /// If the task is cancelled, this function will resume without sending the element.
+    /// Other sending operations from other tasks will remain active.
+    public func send(_ element: Element) async {
+        await self.storage.send(element: element)
+    }
+
+    /// Sends an error to all awaiting iterations.
+    /// All subsequent calls to `next(_:)` will resume immediately.
+    public func fail(_ error: Error) where Failure == Error {
+        self.storage.finish(error: error)
+    }
+
+    /// Immediately resumes all the suspended operations.
+    /// All subsequent calls to `next(_:)` will resume immediately.
+    public func finish() {
+        self.storage.finish()
+    }
+
+    public func makeAsyncIterator() -> Iterator {
+        Iterator(storage: self.storage)
+    }
+
+    public struct Iterator: AsyncIteratorProtocol {
+        let storage: ChannelStorage<Element, Failure>
+
+        public mutating func next() async throws -> Element? {
+            try await self.storage.next()
+        }
+    }
 }
 
 @available(*, unavailable)

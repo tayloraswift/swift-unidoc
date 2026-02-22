@@ -1,26 +1,20 @@
 import SymbolGraphs
 import Symbols
 
-extension Unidoc
-{
-    struct ModuleDemonym
-    {
-        let language:Phylum.Language
-        let type:SymbolGraph.ModuleType
+extension Unidoc {
+    struct ModuleDemonym {
+        let language: Phylum.Language
+        let type: SymbolGraph.ModuleType
 
-        init(language:Phylum.Language, type:SymbolGraph.ModuleType)
-        {
+        init(language: Phylum.Language, type: SymbolGraph.ModuleType) {
             self.language = language
             self.type = type
         }
     }
 }
-extension Unidoc.ModuleDemonym
-{
-    var title:String
-    {
-        switch (self.language, self.type)
-        {
+extension Unidoc.ModuleDemonym {
+    var title: String {
+        switch (self.language, self.type) {
         case (_, .binary):      "Binary Module"
         case (_, .executable):  "Executable"
         case (.c, .regular):    "Library Module (C)"
@@ -35,10 +29,8 @@ extension Unidoc.ModuleDemonym
         }
     }
 
-    var phrase:String
-    {
-        switch (self.language, self.type)
-        {
+    var phrase: String {
+        switch (self.language, self.type) {
         case (_, .binary):      "a binary module"
         case (_, .executable):  "an executable target"
         case (.c, .regular):    "a C module"

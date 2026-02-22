@@ -1,12 +1,9 @@
 import MarkdownABI
 import SwiftIDEUtils
 
-extension Markdown.Bytecode.Context
-{
-    init?(classification:SyntaxClassification)
-    {
-        switch classification
-        {
+extension Markdown.Bytecode.Context {
+    init?(classification: SyntaxClassification) {
+        switch classification {
         case .none:                 return nil
         case .editorPlaceholder:    return nil
         case .argumentLabel:        self = .identifier

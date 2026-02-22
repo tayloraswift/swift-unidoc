@@ -1,32 +1,23 @@
 import BSON
 import MongoDB
 
-extension Mongo
-{
-    public
-    protocol UpdateQuery<Target>:Sendable
-    {
+extension Mongo {
+    public protocol UpdateQuery<Target>: Sendable {
         /// The collection the update query operates on.
-        associatedtype Target:CollectionModel
-        associatedtype Effect:WriteEffect
+        associatedtype Target: CollectionModel
+        associatedtype Effect: WriteEffect
 
         /// Constructs an update query by adding statements to the given encoder.
-        func build(updates:inout UpdateListEncoder<Effect>)
+        func build(updates: inout UpdateListEncoder<Effect>)
 
-        var ordered:Bool { get }
+        var ordered: Bool { get }
     }
 }
-extension Mongo.UpdateQuery
-{
-    @inlinable
-    var command:Mongo.Update<Effect, Target.Element.ID>
-    {
-        .init(Target.name)
-        {
+extension Mongo.UpdateQuery {
+    @inlinable var command: Mongo.Update<Effect, Target.Element.ID> {
+        .init(Target.name) {
             $0[.ordered] = self.ordered
-        }
-            updates:
-        {
+        } updates: {
             self.build(updates: &$0)
         }
     }

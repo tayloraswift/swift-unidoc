@@ -1,58 +1,44 @@
 import SwiftIDEUtils
 import Symbols
 
-extension SyntaxClassificationCursor
-{
-    struct SpanIterator
-    {
-        private
-        var links:[Int: Markdown.SwiftLanguage.IndexMarker]
-        private
-        var spans:Array<SyntaxClassifiedRange>.Iterator
+extension SyntaxClassificationCursor {
+    struct SpanIterator {
+        private var links: [Int: Markdown.SwiftLanguage.IndexMarker]
+        private var spans: Array<SyntaxClassifiedRange>.Iterator
 
-        init(_ spans:consuming SyntaxClassifications,
-            links:[Int: Markdown.SwiftLanguage.IndexMarker] = [:])
-        {
+        init(
+            _ spans: consuming SyntaxClassifications,
+            links: [Int: Markdown.SwiftLanguage.IndexMarker] = [:]
+        ) {
             self.links = links
             self.spans = spans.makeIterator()
         }
     }
 }
-extension SyntaxClassificationCursor.SpanIterator:CustomDebugStringConvertible
-{
-    var debugDescription:String
-    {
+extension SyntaxClassificationCursor.SpanIterator: CustomDebugStringConvertible {
+    var debugDescription: String {
         self.links
-            .sorted
-        {
-            $0.key < $1.key
-        }
-            .map
-        {
-            "[\($0.key)]: \($0.value)"
-        }
+            .sorted {
+                $0.key < $1.key
+            }
+            .map {
+                "[\($0.key)]: \($0.value)"
+            }
             .joined(separator: "\n")
     }
 }
-extension SyntaxClassificationCursor.SpanIterator
-{
-    mutating
-    func next() -> SyntaxClassificationCursor.Span?
-    {
+extension SyntaxClassificationCursor.SpanIterator {
+    mutating func next() -> SyntaxClassificationCursor.Span? {
         guard
-        var highlight:SyntaxClassifiedRange = self.spans.next()
-        else
-        {
+        var highlight: SyntaxClassifiedRange = self.spans.next() else {
             return nil
         }
 
-        let marker:Markdown.SwiftLanguage.IndexMarker? = self.links[highlight.offset]
+        let marker: Markdown.SwiftLanguage.IndexMarker? = self.links[highlight.offset]
 
-        if  let marker:Markdown.SwiftLanguage.IndexMarker,
-            let phylum:Phylum.Decl = marker.phylum
-        {
-            switch phylum
-            {
+        if  let marker: Markdown.SwiftLanguage.IndexMarker,
+            let phylum: Phylum.Decl = marker.phylum {
+            switch phylum {
             case .actor:            highlight.kind = .type
             case .associatedtype:   highlight.kind = .type
             case .class:            highlight.kind = .type
@@ -66,8 +52,10 @@ extension SyntaxClassificationCursor.SpanIterator
             }
         }
 
-        return .init(color: .init(classification: highlight.kind),
+        return .init(
+            color: .init(classification: highlight.kind),
             usr: marker?.symbol,
-            end: highlight.endOffset)
+            end: highlight.endOffset
+        )
     }
 }

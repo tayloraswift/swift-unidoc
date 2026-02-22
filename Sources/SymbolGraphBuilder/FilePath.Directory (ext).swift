@@ -1,7 +1,5 @@
 import SystemIO
 
-extension FilePath.Directory
-{
+extension FilePath.Directory {
     func absolute() -> Self { .init(path: self.path.absolute()) }
 }
-

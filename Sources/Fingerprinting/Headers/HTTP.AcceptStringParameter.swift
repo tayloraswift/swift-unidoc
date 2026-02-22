@@ -1,76 +1,53 @@
 import HTTP
 
-extension HTTP
-{
-    @frozen @usableFromInline
-    struct AcceptStringParameter
-    {
-        @usableFromInline
-        let key:Substring
-        @usableFromInline
-        var q:Double?
-        @usableFromInline
-        var v:Substring?
+extension HTTP {
+    @frozen @usableFromInline struct AcceptStringParameter {
+        @usableFromInline let key: Substring
+        @usableFromInline var q: Double?
+        @usableFromInline var v: Substring?
 
-        @inlinable
-        init(key:Substring, q:Double? = nil, v:Substring? = nil)
-        {
+        @inlinable init(key: Substring, q: Double? = nil, v: Substring? = nil) {
             self.key = key
             self.q = q
             self.v = v
         }
     }
 }
-extension HTTP.AcceptStringParameter:HTTP.HeaderWord
-{
-    @inlinable
-    init(_ string:Substring)
-    {
-        var semicolon:String.Index?
+extension HTTP.AcceptStringParameter: HTTP.HeaderWord {
+    @inlinable init(_ string: Substring) {
+        var semicolon: String.Index?
 
-        if  let i:String.Index = string.firstIndex(of: ";")
-        {
+        if  let i: String.Index = string.firstIndex(of: ";") {
             self.init(key: string[..<i])
             semicolon = i
-        }
-        else
-        {
+        } else {
             self.init(key: string)
         }
 
-        while let current:String.Index = semicolon
-        {
-            let start:String.Index = string.index(after: current)
+        while let current: String.Index = semicolon {
+            let start: String.Index = string.index(after: current)
 
             semicolon = string[start...].firstIndex(of: ";")
 
-            let pair:Substring
+            let pair: Substring
 
-            if  let semicolon:String.Index
-            {
+            if  let semicolon: String.Index {
                 pair = string[start ..< semicolon]
-            }
-            else
-            {
+            } else {
                 pair = string[start...]
             }
 
             guard
-            let equals:String.Index = pair.firstIndex(of: "=")
-            else
-            {
+            let equals: String.Index = pair.firstIndex(of: "=") else {
                 continue
             }
 
-            let value:Substring = pair[pair.index(after: equals)...]
+            let value: Substring = pair[pair.index(after: equals)...]
 
-            switch pair[..<equals]
-            {
+            switch pair[..<equals] {
             case "q":
                 guard
-                let value:Double = .init(value)
-                else
-                {
+                let value: Double = .init(value) else {
                     continue
                 }
 

@@ -1,8 +1,5 @@
-extension AWS
-{
-    @frozen public
-    enum Region:String, Hashable, Sendable
-    {
+extension AWS {
+    @frozen public enum Region: String, Hashable, Sendable {
         case us_east_1 = "us-east-1"
         case us_east_2 = "us-east-2"
         case us_west_1 = "us-west-1"
@@ -41,18 +38,12 @@ extension AWS
         case af_south_1 = "af-south-1"
     }
 }
-extension AWS.Region
-{
-    @inlinable public
-    var utf8:String.UTF8View { self.rawValue.utf8 }
+extension AWS.Region {
+    @inlinable public var utf8: String.UTF8View { self.rawValue.utf8 }
 }
-extension AWS.Region:CustomStringConvertible
-{
-    @inlinable public
-    var description:String { self.rawValue }
+extension AWS.Region: CustomStringConvertible {
+    @inlinable public var description: String { self.rawValue }
 }
-extension AWS.Region:LosslessStringConvertible
-{
-    @inlinable public
-    init?(_ description:String) { self.init(rawValue: description) }
+extension AWS.Region: LosslessStringConvertible {
+    @inlinable public init?(_ description: String) { self.init(rawValue: description) }
 }

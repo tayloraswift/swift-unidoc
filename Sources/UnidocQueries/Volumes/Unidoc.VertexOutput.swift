@@ -3,52 +3,38 @@ import MongoQL
 import UnidocDB
 import UnidocRecords
 
-extension Unidoc
-{
-    @frozen public
-    struct VertexOutput:Sendable
-    {
-        public
-        let matches:[AnyVertex]
+extension Unidoc {
+    @frozen public struct VertexOutput: Sendable {
+        public let matches: [AnyVertex]
 
-        public
-        let principalVolume:VolumeMetadata
-        public
-        let principalVertex:AnyVertex?
-        public
-        let principalGroups:[AnyGroup]
+        public let principalVolume: VolumeMetadata
+        public let principalVertex: AnyVertex?
+        public let principalGroups: [AnyGroup]
 
-        public
-        let canonicalVolume:VolumeMetadata?
-        public
-        let canonicalVertex:AnyVertex?
+        public let canonicalVolume: VolumeMetadata?
+        public let canonicalVertex: AnyVertex?
 
-        public
-        let adjacentPackages:[PackageMetadata]
-        public
-        let adjacentVertices:[AnyVertex]
-        public
-        let adjacentVolumes:[VolumeMetadata]
+        public let adjacentPackages: [PackageMetadata]
+        public let adjacentVertices: [AnyVertex]
+        public let adjacentVolumes: [VolumeMetadata]
 
 
-        public
-        let coverage:SearchbotCell?
-        public
-        let tree:TypeTree?
+        public let coverage: SearchbotCell?
+        public let tree: TypeTree?
 
-        @inlinable public
-        init(matches:[AnyVertex],
-            principalVolume:VolumeMetadata,
-            principalVertex:AnyVertex?,
-            principalGroups:[AnyGroup],
-            canonicalVolume:VolumeMetadata?,
-            canonicalVertex:AnyVertex?,
-            adjacentPackages:[PackageMetadata],
-            adjacentVertices:[AnyVertex],
-            adjacentVolumes:[VolumeMetadata],
-            coverage:SearchbotCell?,
-            tree:TypeTree?)
-        {
+        @inlinable public init(
+            matches: [AnyVertex],
+            principalVolume: VolumeMetadata,
+            principalVertex: AnyVertex?,
+            principalGroups: [AnyGroup],
+            canonicalVolume: VolumeMetadata?,
+            canonicalVertex: AnyVertex?,
+            adjacentPackages: [PackageMetadata],
+            adjacentVertices: [AnyVertex],
+            adjacentVolumes: [VolumeMetadata],
+            coverage: SearchbotCell?,
+            tree: TypeTree?
+        ) {
             self.matches = matches
 
             self.principalVolume = principalVolume
@@ -67,11 +53,8 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.VertexOutput:Mongo.MasterCodingModel
-{
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.VertexOutput: Mongo.MasterCodingModel {
+    @frozen public enum CodingKey: String, Sendable {
         case matches
 
         case principalVolume
@@ -89,12 +72,10 @@ extension Unidoc.VertexOutput:Mongo.MasterCodingModel
         case tree
     }
 }
-extension Unidoc.VertexOutput:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(matches: try bson[.matches].decode(),
+extension Unidoc.VertexOutput: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        self.init(
+            matches: try bson[.matches].decode(),
             principalVolume: try bson[.principalVolume].decode(),
             principalVertex: try bson[.principalVertex]?.decode(),
             principalGroups: try bson[.principalGroups]?.decode() ?? [],
@@ -104,6 +85,7 @@ extension Unidoc.VertexOutput:BSONDocumentDecodable
             adjacentVertices: try bson[.adjacentVertices].decode(),
             adjacentVolumes: try bson[.adjacentVolumes].decode(),
             coverage: try bson[.coverage]?.decode(),
-            tree: try bson[.tree]?.decode())
+            tree: try bson[.tree]?.decode()
+        )
     }
 }

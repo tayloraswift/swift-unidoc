@@ -1,38 +1,27 @@
 import MarkdownABI
 import MarkdownSemantics
 
-extension Markdown.BlockCodeReference
-{
+extension Markdown.BlockCodeReference {
     func inline(
-        code:SSGC.ResourceText,
-        base:SSGC.ResourceText?,
-        with swift:Markdown.SwiftLanguage?)
-    {
+        code: SSGC.ResourceText,
+        base: SSGC.ResourceText?,
+        with swift: Markdown.SwiftLanguage?
+    ) {
         if  case "swift"? = self.language,
-            let swift:Markdown.SwiftLanguage
-        {
+            let swift: Markdown.SwiftLanguage {
             self.code = swift.parse(code: code.whole, diff: code.diff(from: base))
-        }
-        else if
-            let base:SSGC.ResourceText
-        {
-            self.code = .init
-            {
-                for (range, color):(Range<Int>, Markdown.DiffType?) in code.diff(from: base)
-                {
-                    if  let color:Markdown.DiffType
-                    {
+        } else if
+            let base: SSGC.ResourceText {
+            self.code = .init {
+                for (range, color): (Range<Int>, Markdown.DiffType?) in code.diff(from: base) {
+                    if  let color: Markdown.DiffType {
                         $0[.diff(color)] { $0 += code.whole[range] }
-                    }
-                    else
-                    {
+                    } else {
                         $0 += code.whole[range]
                     }
                 }
             }
-        }
-        else
-        {
+        } else {
             self.code = .init(bytes: code.whole)
         }
     }

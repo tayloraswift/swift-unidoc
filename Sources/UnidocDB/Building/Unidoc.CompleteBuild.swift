@@ -5,40 +5,30 @@ import UnidocAPI
 import UnidocRecords
 import UnixTime
 
-extension Unidoc
-{
-    @frozen public
-    struct CompleteBuild:Identifiable, Sendable
-    {
-        public
-        let id:BuildIdentifier
+extension Unidoc {
+    @frozen public struct CompleteBuild: Identifiable, Sendable {
+        public let id: BuildIdentifier
 
-        public
-        let launched:UnixMillisecond
-        public
-        let finished:UnixMillisecond
+        public let launched: UnixMillisecond
+        public let finished: UnixMillisecond
 
-        public
-        let failure:BuildFailure?
+        public let failure: BuildFailure?
 
         /// Used for display purposes only.
-        public
-        let name:Symbol.PackageAtRef
+        public let name: Symbol.PackageAtRef
 
-        public
-        var logs:[BuildLogType]
-        public
-        var logsAreSecret:Bool
+        public var logs: [BuildLogType]
+        public var logsAreSecret: Bool
 
-        @inlinable public
-        init(id:BuildIdentifier,
-            launched:UnixMillisecond,
-            finished:UnixMillisecond,
-            failure:BuildFailure?,
-            name:Symbol.PackageAtRef,
-            logs:[BuildLogType] = [],
-            logsAreSecret:Bool = false)
-        {
+        @inlinable public init(
+            id: BuildIdentifier,
+            launched: UnixMillisecond,
+            finished: UnixMillisecond,
+            failure: BuildFailure?,
+            name: Symbol.PackageAtRef,
+            logs: [BuildLogType] = [],
+            logsAreSecret: Bool = false
+        ) {
             self.id = id
             self.launched = launched
             self.finished = finished
@@ -49,11 +39,8 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.CompleteBuild:Mongo.MasterCodingModel
-{
-    @frozen public
-    enum CodingKey:String, Sendable, BSONDecodable
-    {
+extension Unidoc.CompleteBuild: Mongo.MasterCodingModel {
+    @frozen public enum CodingKey: String, Sendable, BSONDecodable {
         case id = "_id"
         case launched = "L"
         case finished = "F"
@@ -65,11 +52,8 @@ extension Unidoc.CompleteBuild:Mongo.MasterCodingModel
         case package = "p"
     }
 }
-extension Unidoc.CompleteBuild:BSONDocumentEncodable
-{
-    public
-    func encode(to bson:inout BSON.DocumentEncoder<CodingKey>)
-    {
+extension Unidoc.CompleteBuild: BSONDocumentEncodable {
+    public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.id] = self.id
         bson[.launched] = self.launched
         bson[.finished] = self.finished
@@ -81,17 +65,16 @@ extension Unidoc.CompleteBuild:BSONDocumentEncodable
         bson[.package] = self.id.edition.package
     }
 }
-extension Unidoc.CompleteBuild:BSONDocumentDecodable
-{
-    @inlinable public
-    init(bson:BSON.DocumentDecoder<CodingKey>) throws
-    {
-        self.init(id: try bson[.id].decode(),
+extension Unidoc.CompleteBuild: BSONDocumentDecodable {
+    @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
+        self.init(
+            id: try bson[.id].decode(),
             launched: try bson[.launched].decode(),
             finished: try bson[.finished].decode(),
             failure: try bson[.failure]?.decode(),
             name: try bson[.name].decode(),
             logs: try bson[.logs]?.decode() ?? [],
-            logsAreSecret: try bson[.logsAreSecret]?.decode() ?? false)
+            logsAreSecret: try bson[.logsAreSecret]?.decode() ?? false
+        )
     }
 }

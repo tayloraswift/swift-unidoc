@@ -1,6 +1,5 @@
 import BSON
 import Sources
 
-extension SourcePosition:BSONDecodable, BSONEncodable
-{
+extension SourcePosition: BSONDecodable, BSONEncodable {
 }

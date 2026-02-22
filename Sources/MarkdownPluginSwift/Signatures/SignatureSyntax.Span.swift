@@ -1,11 +1,8 @@
 import MarkdownABI
 
-extension SignatureSyntax
-{
-    @frozen @usableFromInline internal
-    enum Span
-    {
+extension SignatureSyntax {
+    @frozen @usableFromInline internal enum Span {
         case text(Range<Int>, Markdown.Bytecode.Context? = nil, Depth? = nil)
-        case wbr(indent:Bool)
+        case wbr(indent: Bool)
     }
 }

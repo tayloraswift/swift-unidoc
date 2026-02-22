@@ -1,36 +1,30 @@
 import Symbols
 
-extension Symbol
-{
-    @frozen public
-    struct IntrinsicWitnessRelationship:SymbolRelationship, Equatable, Hashable, Sendable
-    {
-        public
-        let source:Symbol.Decl
-        public
-        let target:Symbol.Decl
-        public
-        let origin:Symbol.Decl?
+extension Symbol {
+    @frozen public struct IntrinsicWitnessRelationship: SymbolRelationship,
+        Equatable,
+        Hashable,
+        Sendable {
+        public let source: Symbol.Decl
+        public let target: Symbol.Decl
+        public let origin: Symbol.Decl?
 
-        @inlinable public
-        init(_ source:Symbol.Decl, of target:Symbol.Decl, origin:Symbol.Decl? = nil)
-        {
+        @inlinable public init(
+            _ source: Symbol.Decl,
+            of target: Symbol.Decl,
+            origin: Symbol.Decl? = nil
+        ) {
             self.source = source
             self.target = target
             self.origin = origin
         }
     }
 }
-extension Symbol.IntrinsicWitnessRelationship:SuperformRelationship
-{
-    @inlinable public
-    var kinks:Phylum.Decl.Kinks { [.intrinsicWitness] }
+extension Symbol.IntrinsicWitnessRelationship: SuperformRelationship {
+    @inlinable public var kinks: Phylum.Decl.Kinks { [.intrinsicWitness] }
 
-    public
-    func validate(source phylum:Phylum.Decl) -> Bool
-    {
-        switch phylum
-        {
+    public func validate(source phylum: Phylum.Decl) -> Bool {
+        switch phylum {
         case .actor:                false
         case .associatedtype:       false
         case .case:                 false
@@ -51,11 +45,8 @@ extension Symbol.IntrinsicWitnessRelationship:SuperformRelationship
         }
     }
 }
-extension Symbol.IntrinsicWitnessRelationship:CustomStringConvertible
-{
-    public
-    var description:String
-    {
+extension Symbol.IntrinsicWitnessRelationship: CustomStringConvertible {
+    public var description: String {
         """
         /\(self.source) IMPLEMENTS \(self.target) (\(self.origin == nil ? 0 : 1) origin(s))/
         """

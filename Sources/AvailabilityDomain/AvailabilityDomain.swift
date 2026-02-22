@@ -1,6 +1,4 @@
-public
-protocol AvailabilityDomain
-{
+public protocol AvailabilityDomain {
     /// The representation of this domain’s general version bound,
     /// used for the `introduced` and `obsoleted` bounds.
     associatedtype Bound = Never

@@ -1,10 +1,7 @@
 import JSON
 
-extension Unidoc
-{
-    @frozen public
-    enum BuildFailure:Int32, Error, Equatable, Sendable
-    {
+extension Unidoc {
+    @frozen public enum BuildFailure: Int32, Error, Equatable, Sendable {
         case killed = 0
 
         case noValidVersion = 1
@@ -20,6 +17,5 @@ extension Unidoc
         case failedForUnknownReason = 256
     }
 }
-extension Unidoc.BuildFailure:JSONDecodable, JSONEncodable
-{
+extension Unidoc.BuildFailure: JSONDecodable, JSONEncodable {
 }

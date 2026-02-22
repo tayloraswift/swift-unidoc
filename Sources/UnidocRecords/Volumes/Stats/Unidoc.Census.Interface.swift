@@ -1,22 +1,15 @@
 import BSON
 
-extension Unidoc.Census
-{
-    @frozen public
-    enum Interface:Equatable, Hashable, Sendable
-    {
+extension Unidoc.Census {
+    @frozen public enum Interface: Equatable, Hashable, Sendable {
         case unrestricted
         case underscored
         case spi(String?)
     }
 }
-extension Unidoc.Census.Interface:Comparable
-{
-    @inlinable public static
-    func < (a:Self, b:Self) -> Bool
-    {
-        switch (a, b)
-        {
+extension Unidoc.Census.Interface: Comparable {
+    @inlinable public static func < (a: Self, b: Self) -> Bool {
+        switch (a, b) {
         case (.unrestricted, .unrestricted):    return false
         case (.unrestricted, _):                return true
         case (_, .unrestricted):                return false
@@ -33,13 +26,9 @@ extension Unidoc.Census.Interface:Comparable
         }
     }
 }
-extension Unidoc.Census.Interface:RawRepresentable
-{
-    @inlinable public
-    init?(rawValue:String)
-    {
-        switch rawValue
-        {
+extension Unidoc.Census.Interface: RawRepresentable {
+    @inlinable public init?(rawValue: String) {
+        switch rawValue {
         case "":                self = .unrestricted
         case "__underscored__": self = .underscored
         case "__unknown__":     self = .spi(nil)
@@ -47,11 +36,8 @@ extension Unidoc.Census.Interface:RawRepresentable
         }
     }
 
-    @inlinable public
-    var rawValue:String
-    {
-        switch self
-        {
+    @inlinable public var rawValue: String {
+        switch self {
         case .spi(let name?):   name
         case .spi(nil):         "__unknown__"
         case .underscored:      "__underscored__"
@@ -59,6 +45,5 @@ extension Unidoc.Census.Interface:RawRepresentable
         }
     }
 }
-extension Unidoc.Census.Interface:BSON.Keyspace
-{
+extension Unidoc.Census.Interface: BSON.Keyspace {
 }

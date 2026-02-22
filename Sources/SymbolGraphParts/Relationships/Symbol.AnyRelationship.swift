@@ -1,11 +1,8 @@
 import JSONDecoding
 import Symbols
 
-extension Symbol
-{
-    @frozen public
-    enum AnyRelationship:Equatable, Hashable, Sendable
-    {
+extension Symbol {
+    @frozen public enum AnyRelationship: Equatable, Hashable, Sendable {
         case conformance            (ConformanceRelationship)
         case intrinsicWitness       (IntrinsicWitnessRelationship)
         case `extension`            (ExtensionRelationship)
@@ -16,13 +13,9 @@ extension Symbol
         case requirement            (RequirementRelationship)
     }
 }
-extension Symbol.AnyRelationship:CustomStringConvertible
-{
-    public
-    var description:String
-    {
-        switch self
-        {
+extension Symbol.AnyRelationship: CustomStringConvertible {
+    public var description: String {
+        switch self {
         case .conformance       (let self): self.description
         case .intrinsicWitness  (let self): self.description
         case .extension         (let self): self.description
@@ -34,13 +27,9 @@ extension Symbol.AnyRelationship:CustomStringConvertible
         }
     }
 }
-extension Symbol.AnyRelationship
-{
-    @inlinable public
-    var existential:any SymbolRelationship
-    {
-        switch self
-        {
+extension Symbol.AnyRelationship {
+    @inlinable public var existential: any SymbolRelationship {
+        switch self {
         case .conformance       (let self): self
         case .intrinsicWitness  (let self): self
         case .extension         (let self): self
@@ -52,14 +41,10 @@ extension Symbol.AnyRelationship
         }
     }
 
-    @inlinable public
-    var origin:Symbol.Decl? { self.existential.origin }
+    @inlinable public var origin: Symbol.Decl? { self.existential.origin }
 }
-extension Symbol.AnyRelationship:JSONObjectDecodable
-{
-    public
-    enum CodingKey:String, Sendable
-    {
+extension Symbol.AnyRelationship: JSONObjectDecodable {
+    public enum CodingKey: String, Sendable {
         case conditions = "swiftConstraints"
         case source
         case target
@@ -67,32 +52,40 @@ extension Symbol.AnyRelationship:JSONObjectDecodable
         case type = "kind"
     }
 
-    public
-    init(json:JSON.ObjectDecoder<CodingKey>) throws
-    {
-        let origin:Symbol.Decl? = try json[.origin]?.decode(as: SourceOrigin.self,
-            with: \.resolution)
+    public init(json: JSON.ObjectDecoder<CodingKey>) throws {
+        let origin: Symbol.Decl? = try json[.origin]?.decode(
+            as: SourceOrigin.self,
+            with: \.resolution
+        )
 
-        switch try json[.type].decode(to: Keyword.self)
-        {
+        switch try json[.type].decode(to: Keyword.self) {
         case .conformance:
-            self = .conformance(.init(
-                of: try json[.source].decode(),
-                to: try json[.target].decode(),
-                where: try json[.conditions]?.decode(),
-                origin: origin))
+            self = .conformance(
+                .init(
+                    of: try json[.source].decode(),
+                    to: try json[.target].decode(),
+                    where: try json[.conditions]?.decode(),
+                    origin: origin
+                )
+            )
 
         case .intrinsicWitness:
-            self = .intrinsicWitness(.init(
-                _ : try json[.source].decode(),
-                of: try json[.target].decode(),
-                origin: origin))
+            self = .intrinsicWitness(
+                .init(
+                    _: try json[.source].decode(),
+                    of: try json[.target].decode(),
+                    origin: origin
+                )
+            )
             try json[.conditions]?.decode(to: Never.self)
 
         case .extension:
-            self = .extension(.init(
-                _ : try json[.source].decode(),
-                of: try json[.target].decode()))
+            self = .extension(
+                .init(
+                    _: try json[.source].decode(),
+                    of: try json[.target].decode()
+                )
+            )
             //  We cannot enforce the non-existence of `origin` here, because
             //  Foundation actually has extension blocks with source origins!
             //  An example of such a block is `s:e:s:SS5IndexV10FoundationEyABSicfc`,
@@ -104,18 +97,20 @@ extension Symbol.AnyRelationship:JSONObjectDecodable
             try json[.conditions]?.decode(to: Never.self)
 
         case .inheritance:
-            self = .inheritance(.init(
-                by: try json[.source].decode(),
-                of: try json[.target].decode(),
-                origin: origin))
+            self = .inheritance(
+                .init(
+                    by: try json[.source].decode(),
+                    of: try json[.target].decode(),
+                    origin: origin
+                )
+            )
             try json[.conditions]?.decode(to: Never.self)
 
         case .membership:
-            let source:Symbol.USR = try json[.source].decode()
-            let target:Symbol.USR = try json[.target].decode()
+            let source: Symbol.USR = try json[.source].decode()
+            let target: Symbol.USR = try json[.target].decode()
 
-            switch source
-            {
+            switch source {
             case .vector(let id):   self = .feature(.init(id, in: target, origin: origin))
             case .scalar(let id):   self = .member(.init(id, in: target, origin: origin))
             case .block(let id):    throw Symbol.MembershipError.invalid(member: id)
@@ -124,25 +119,34 @@ extension Symbol.AnyRelationship:JSONObjectDecodable
             try json[.conditions]?.decode(to: Never.self)
 
         case .optionalRequirement:
-            self = .requirement(.init(
-                _ : try json[.source].decode(),
-                of: try json[.target].decode(),
-                origin: origin,
-                optional: true))
+            self = .requirement(
+                .init(
+                    _: try json[.source].decode(),
+                    of: try json[.target].decode(),
+                    origin: origin,
+                    optional: true
+                )
+            )
             try json[.conditions]?.decode(to: Never.self)
 
         case .override:
-            self = .override(.init(
-                _ : try json[.source].decode(),
-                of: try json[.target].decode(),
-                origin: origin))
+            self = .override(
+                .init(
+                    _: try json[.source].decode(),
+                    of: try json[.target].decode(),
+                    origin: origin
+                )
+            )
             try json[.conditions]?.decode(to: Never.self)
 
         case .requirement:
-            self = .requirement(.init(
-                _ : try json[.source].decode(),
-                of: try json[.target].decode(),
-                origin: origin))
+            self = .requirement(
+                .init(
+                    _: try json[.source].decode(),
+                    of: try json[.target].decode(),
+                    origin: origin
+                )
+            )
             try json[.conditions]?.decode(to: Never.self)
         }
     }

@@ -1,25 +1,21 @@
 import JSON
 import Symbols
 
-extension Unidoc
-{
+extension Unidoc {
     /// An `EditionStateReport` summarizes what you would see on a package’s `/tags` page, in a
     /// more machine-readable format.
-    @frozen public
-    struct EditionStateReport:Sendable
-    {
-        public
-        let id:Edition
-        public
-        let volume:Symbol.Volume?
-        public
-        let build:BuildStatus?
-        public
-        let graph:Graph?
+    @frozen public struct EditionStateReport: Sendable {
+        public let id: Edition
+        public let volume: Symbol.Volume?
+        public let build: BuildStatus?
+        public let graph: Graph?
 
-        @inlinable public
-        init(id:Edition, volume:Symbol.Volume?, build:BuildStatus?, graph:Graph?)
-        {
+        @inlinable public init(
+            id: Edition,
+            volume: Symbol.Volume?,
+            build: BuildStatus?,
+            graph: Graph?
+        ) {
             self.id = id
             self.volume = volume
             self.build = build
@@ -27,28 +23,20 @@ extension Unidoc
         }
     }
 }
-extension Unidoc.EditionStateReport
-{
-    public
-    var phase:Phase
-    {
-        if  let graph:Graph = self.graph,
-            case nil = graph.action
-        {
+extension Unidoc.EditionStateReport {
+    public var phase: Phase {
+        if  let graph: Graph = self.graph,
+            case nil = graph.action {
             return .ACTIVE
         }
 
         guard
-        let build:Unidoc.BuildStatus = self.build
-        else
-        {
+        let build: Unidoc.BuildStatus = self.build else {
             return .DEFAULT
         }
 
-        if  let failure:Unidoc.BuildFailure = build.failure
-        {
-            switch failure
-            {
+        if  let failure: Unidoc.BuildFailure = build.failure {
+            switch failure {
             case .noValidVersion:                       return .SKIPPED
             case .failedToCloneRepository:              return .FAILED_CLONE_REPOSITORY
             case .failedToReadManifest:                 return .FAILED_READ_MANIFEST
@@ -61,29 +49,21 @@ extension Unidoc.EditionStateReport
             case .failedForUnknownReason:               return .FAILED_UNKNOWN
             case .killed:                               return .FAILED_UNKNOWN
             }
-        }
-        else if
-            let stage:Unidoc.BuildStage = build.pending
-        {
-            switch stage
-            {
+        } else if
+            let stage: Unidoc.BuildStage = build.pending {
+            switch stage {
             case .initializing:                         return .MATCHING
             case .cloningRepository:                    return .ASSIGNED_CLONING_REPOSITORY
             case .resolvingDependencies:                return .ASSIGNED_BUILDING
             case .compilingCode:                        return .ASSIGNED_BUILDING
             }
-        }
-        else
-        {
+        } else {
             return self.id == build.request ? .QUEUED : .QUEUED_DIFFERENT_VERSION
         }
     }
 }
-extension Unidoc.EditionStateReport
-{
-    @frozen public
-    enum CodingKey:String, Sendable
-    {
+extension Unidoc.EditionStateReport {
+    @frozen public enum CodingKey: String, Sendable {
         case id
         case volume
         case build
@@ -91,11 +71,8 @@ extension Unidoc.EditionStateReport
         case phase
     }
 }
-extension Unidoc.EditionStateReport:JSONObjectEncodable
-{
-    public
-    func encode(to json:inout JSON.ObjectEncoder<CodingKey>)
-    {
+extension Unidoc.EditionStateReport: JSONObjectEncodable {
+    public func encode(to json: inout JSON.ObjectEncoder<CodingKey>) {
         json[.id] = self.id.version
         json[.volume] = self.volume
         json[.build] = self.build
@@ -103,14 +80,13 @@ extension Unidoc.EditionStateReport:JSONObjectEncodable
         json[.phase] = self.phase
     }
 }
-extension Unidoc.EditionStateReport:JSONObjectDecodable
-{
-    public
-    init(json:JSON.ObjectDecoder<CodingKey>) throws
-    {
-        self.init(id: try json[.id].decode(),
+extension Unidoc.EditionStateReport: JSONObjectDecodable {
+    public init(json: JSON.ObjectDecoder<CodingKey>) throws {
+        self.init(
+            id: try json[.id].decode(),
             volume: try json[.volume]?.decode(),
             build: try json[.build]?.decode(),
-            graph: try json[.graph]?.decode())
+            graph: try json[.graph]?.decode()
+        )
     }
 }

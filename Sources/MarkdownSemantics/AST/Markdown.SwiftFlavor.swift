@@ -1,30 +1,22 @@
 import MarkdownAST
 
-extension Markdown
-{
-    @frozen public
-    enum SwiftFlavor
-    {
+extension Markdown {
+    @frozen public enum SwiftFlavor {
     }
 }
-extension Markdown.SwiftFlavor:Markdown.ParsingFlavor
-{
+extension Markdown.SwiftFlavor: Markdown.ParsingFlavor {
     /// Gives anchors to all level 2 and 3 headings.
-    public static
-    func process(toplevel block:Markdown.BlockElement)
-    {
+    public static func process(toplevel block: Markdown.BlockElement) {
         if  case let block as Markdown.BlockHeading = block,
-            case 2 ... 4 = block.level
-        {
+            case 2 ... 4 = block.level {
             block.anchor()
         }
     }
 
-    public static
-    subscript(instantiating directive:String) -> (any Markdown.BlockDirectiveType)?
-    {
-        switch directive
-        {
+    public static subscript(instantiating directive: String) -> (
+        any Markdown.BlockDirectiveType
+    )? {
+        switch directive {
         case "Article":                 Markdown.TutorialArticle.init()
         case "AutomaticSeeAlso":        Markdown.BlockOption.init(key: \.automaticSeeAlso)
         case "AutomaticTitleHeading":   Markdown.BlockOption.init(key: \.automaticTitleHeading)
@@ -68,56 +60,47 @@ extension Markdown.SwiftFlavor:Markdown.ParsingFlavor
         }
     }
 }
-extension Markdown.SwiftFlavor
-{
+extension Markdown.SwiftFlavor {
     /// Detects and breaks apart magical aside blocks.
     @available(*, unavailable)
-    static
-    func rewrite(
-        child block:consuming Markdown.BlockElement,
-        into blocks:inout [Markdown.BlockElement])
-    {
-        switch block
-        {
+    static func rewrite(
+        child block: consuming Markdown.BlockElement,
+        into blocks: inout [Markdown.BlockElement]
+    ) {
+        switch block {
         case let list as Markdown.BlockListUnordered:
-            var terms:[Markdown.BlockTerm] = []
-            var items:[Markdown.BlockItem] = []
-            for item:Markdown.BlockItem in list.elements
-            {
-                if  let term:Markdown.TermPrefix = .extract(from: &item.elements)
-                {
-                    terms.append(.init(elements: item.elements,
-                        name: term.name,
-                        code: term.style == .code))
-                }
-                else if
-                    let aside:Markdown.KeywordPrefix = .extract(from: &item.elements)
-                {
+            var terms: [Markdown.BlockTerm] = []
+            var items: [Markdown.BlockItem] = []
+            for item: Markdown.BlockItem in list.elements {
+                if  let term: Markdown.TermPrefix = .extract(from: &item.elements) {
+                    terms.append(
+                        .init(
+                            elements: item.elements,
+                            name: term.name,
+                            code: term.style == .code
+                        )
+                    )
+                } else if
+                    let aside: Markdown.KeywordPrefix = .extract(from: &item.elements) {
                     blocks.append(aside(item.elements))
-                }
-                else
-                {
+                } else {
                     items.append(item)
                 }
             }
-            if !terms.isEmpty
-            {
+            if !terms.isEmpty {
                 blocks.append(Markdown.BlockTerms.init(terms))
             }
-            if !items.isEmpty
-            {
+            if !items.isEmpty {
                 list.elements = items
                 blocks.append(list)
             }
 
         case let quote as Markdown.BlockQuote:
-            if  let aside:Markdown.KeywordPrefix = .extract(
-                    from: &quote.elements)
-            {
+            if  let aside: Markdown.KeywordPrefix = .extract(
+                    from: &quote.elements
+                ) {
                 blocks.append(aside(quote.elements))
-            }
-            else
-            {
+            } else {
                 blocks.append(quote)
             }
 
