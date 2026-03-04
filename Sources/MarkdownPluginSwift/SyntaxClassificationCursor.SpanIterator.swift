@@ -34,7 +34,9 @@ extension SyntaxClassificationCursor.SpanIterator {
             return nil
         }
 
-        let marker: Markdown.SwiftLanguage.IndexMarker? = self.links[highlight.offset]
+        let marker: Markdown.SwiftLanguage.IndexMarker? = self.links[
+            highlight.range.lowerBound.utf8Offset
+        ]
 
         if  let marker: Markdown.SwiftLanguage.IndexMarker,
             let phylum: Phylum.Decl = marker.phylum {
@@ -55,7 +57,7 @@ extension SyntaxClassificationCursor.SpanIterator {
         return .init(
             color: .init(classification: highlight.kind),
             usr: marker?.symbol,
-            end: highlight.endOffset
+            end: highlight.range.upperBound.utf8Offset
         )
     }
 }
