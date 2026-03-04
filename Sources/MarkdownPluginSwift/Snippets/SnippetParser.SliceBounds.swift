@@ -53,6 +53,9 @@ extension SnippetParser.SliceBounds {
                             break trimming
                         }
                     }
+
+                    // if we get here we are at the end of the file/slice
+                    break trimming
                 }
             }
 
