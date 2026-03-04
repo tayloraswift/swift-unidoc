@@ -370,6 +370,32 @@ import Testing
             """
         )
     }
+    @Test static func EmptyWhitespaceOnly() {
+        Self.test(
+            snippet: """
+
+
+
+            """,
+            caption: ""
+        )
+    }
+    @Test static func EmptyCaptionOnly() {
+        Self.test(
+            snippet: """
+            //  This snippet file contains only a caption comment.
+            //  Because all text is consumed by the caption, the remaining
+            //  slice contains only trailing newlines.
+
+            """,
+            caption: """
+            This snippet file contains only a caption comment.
+            Because all text is consumed by the caption, the remaining
+            slice contains only trailing newlines.
+
+            """
+        )
+    }
 }
 extension Snippets {
     private static func test(
