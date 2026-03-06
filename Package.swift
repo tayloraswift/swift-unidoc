@@ -123,12 +123,7 @@ let package: Package = .init(
             )
         ),
 
-        // .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(
-        //     from: "1.5.0")),
-        .package(
-            url: "https://github.com/apple/swift-argument-parser",
-            .upToNextMinor(from: "1.5.1")
-        ),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.7.0"),
         .package(
             url: "https://github.com/apple/swift-atomics", .upToNextMinor(
                 from: "1.2.0"
