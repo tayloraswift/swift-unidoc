@@ -87,14 +87,39 @@ extension Unidoc.Router {
 }
 extension Unidoc.Router {
     mutating func get() -> Unidoc.AnyOperation? {
+        let allowed: Bool
+        if case .majorSearchEngine(_, verified: true)? = self.privilege {
+            allowed = true
+        } else if case _? = self.authorization.account {
+            allowed = true
+        } else {
+            allowed = false
+        }
+
         guard
         let root: String = self.descend() else {
-            return .pipeline(Unidoc.HomeEndpoint.init(query: .init(limit: 16)))
+            if  allowed {
+                return .pipeline(Unidoc.HomeEndpoint.init(query: .init(limit: 16)))
+            } else {
+                return .sync(redirect: .login)
+            }
         }
 
         guard
         let root: Unidoc.ServerRoot = .init(rawValue: root) else {
             return nil
+        }
+
+        // protect all sub-routes, except the login flow and static assets
+        if !allowed {
+            switch root {
+            case .login: break
+            case .auth: break
+            case .asset: break
+            case .render: break
+            case .robots_txt: break
+            default: return .sync(redirect: .login)
+            }
         }
 
         if  let redirect: String = self.redirect(root: root) {
@@ -143,6 +168,16 @@ extension Unidoc.Router {
         guard
         let root: Unidoc.ServerRoot = self.descend() else {
             return nil
+        }
+
+        if case nil = self.authorization.account {
+            // allow authentication flow and automated GitHub webhooks
+            switch root {
+            case .login: break
+            case .auth: break
+            case .hook: break
+            default: return .sync(error: "Authentication required\n", status: 401)
+            }
         }
 
         if  let redirect: String = self.redirect(root: root) {
