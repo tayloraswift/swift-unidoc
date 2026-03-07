@@ -34,8 +34,13 @@ extension Unidoc.LoginPage: Unidoc.ApplicationPage {
         switch self.flow {
         case .sso:
             main[.p] = """
-            Swiftinit uses GitHub SSO to verify your identity and grant you access to your \
-            packages and their documentation.
+            To ensure the availability of the service, Swiftinit requires you to authenticate \
+            with your GitHub account before performing queries against the database.
+            """
+
+            main[.p] = """
+            If you own packages on GitHub, this will also enable you to manage their \
+            documentation and appearance on the site.
             """
 
             main[.p] = """
