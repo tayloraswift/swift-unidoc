@@ -86,11 +86,13 @@ extension Unidoc.Router {
     }
 }
 extension Unidoc.Router {
-    mutating func get() -> Unidoc.AnyOperation? {
+    mutating func get(preview: Bool) -> Unidoc.AnyOperation? {
         let allowed: Bool
-        if case .majorSearchEngine(_, verified: true)? = self.privilege {
+        if  preview {
             allowed = true
         } else if case _? = self.authorization.account {
+            allowed = true
+        } else if case .majorSearchEngine(_, verified: true)? = self.privilege {
             allowed = true
         } else {
             allowed = false
@@ -164,13 +166,13 @@ extension Unidoc.Router {
         }
     }
 
-    mutating func post(body: [UInt8]) -> Unidoc.AnyOperation? {
+    mutating func post(preview: Bool, body: [UInt8]) -> Unidoc.AnyOperation? {
         guard
         let root: Unidoc.ServerRoot = self.descend() else {
             return nil
         }
 
-        if case nil = self.authorization.account {
+        if !preview, case nil = self.authorization.account {
             // allow authentication flow and automated GitHub webhooks
             switch root {
             case .login: break
