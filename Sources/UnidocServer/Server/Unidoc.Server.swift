@@ -296,7 +296,7 @@ extension Unidoc.Server {
         var router: Unidoc.Router = .init(routing: request)
 
         guard
-        let route: Unidoc.AnyOperation = router.get() else {
+        let route: Unidoc.AnyOperation = router.get(preview: self.options.preview) else {
             return .resource("Malformed request\n", status: 400)
         }
 
@@ -310,7 +310,10 @@ extension Unidoc.Server {
         var router: Unidoc.Router = .init(routing: request)
 
         guard
-        let operation: Unidoc.AnyOperation = router.post(body: body) else {
+        let operation: Unidoc.AnyOperation = router.post(
+            preview: self.options.preview,
+            body: body
+        ) else {
             return .resource("Malformed request\n", status: 400)
         }
 
