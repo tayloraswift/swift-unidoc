@@ -74,7 +74,8 @@ let package: Package = .init(
         .library(name: "UnidocUI", targets: ["UnidocUI"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/tayloraswift/dollup", from: "0.8.2"),
+        .package(url: "https://github.com/ordo-one/dollup", from: "1.0.1"),
+
         .package(url: "https://github.com/tayloraswift/swift-bson", from: "1.0.0"),
         .package(url: "https://github.com/tayloraswift/swift-dom", from: "1.2.1"),
         .package(
