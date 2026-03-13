@@ -1,6 +1,0 @@
---rules braces,redundantSelf,duplicateImports,linebreakAtEndOfFile,redundantReturn,sortImports
---swiftversion 5.10
---allman true
---self insert
-
---exclude Sources/_AsyncChannel
