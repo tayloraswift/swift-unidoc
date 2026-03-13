@@ -118,6 +118,7 @@ extension Unidoc.Router {
             case .login: break
             case .auth: break
             case .asset: break
+            case .lunr: break
             case .render: break
             case .robots_txt: break
             default: return .sync(redirect: .login)
