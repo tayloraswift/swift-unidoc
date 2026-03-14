@@ -23,7 +23,7 @@ extension Unidoc.ServerErrorPage: Unidoc.ApplicationPage {
             $0[.p] {
                 $0 += "If the issue persists, please "
                 $0[.a] {
-                    $0.href = "https://github.com/tayloraswift/swift-unidoc/issues"
+                    $0.href = "https://github.com/rarestype/unidoc/issues"
                 } = "file an issue"
                 $0 += " on GitHub."
             }

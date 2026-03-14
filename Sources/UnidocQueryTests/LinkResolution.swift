@@ -49,7 +49,7 @@ import UnidocTesting
 
                     "LinkAnchors.LinkAnchors": [
                         //  This is a known bug:
-                        //  https://github.com/tayloraswift/swift-unidoc/issues/196
+                        //  https://github.com/rarestype/unidoc/issues/196
 
                         "LinkAnchors",
                         //"LinkAnchors#Using the LinkAnchors enum",
