@@ -2,9 +2,9 @@
 
 <strong><em><code>unidoc</code></em></strong>
 
-[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Test.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Test.yml)
-[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Docs.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Docs.yml)
-[![ci build status](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Deploy.yml/badge.svg)](https://github.com/tayloraswift/swift-unidoc/actions/workflows/Deploy.yml)
+[![ci build status](https://github.com/rarestype/unidoc/actions/workflows/Test.yml/badge.svg)](https://github.com/rarestype/unidoc/actions/workflows/Test.yml)
+[![ci build status](https://github.com/rarestype/unidoc/actions/workflows/Docs.yml/badge.svg)](https://github.com/rarestype/unidoc/actions/workflows/Docs.yml)
+[![ci build status](https://github.com/rarestype/unidoc/actions/workflows/Deploy.yml/badge.svg)](https://github.com/rarestype/unidoc/actions/workflows/Deploy.yml)
 
 </div>
 
@@ -21,17 +21,17 @@ Unidoc powers the [Swiftinit](https://swiftinit.org) open source package index!
 
 ## Requirements
 
-Unidoc supports Linux and macOS. Unidoc requires Swift 6.0.
+Unidoc supports Linux and macOS. Unidoc requires Swift 6.2.
 
 We provide prebuilt binaries for the following platforms:
 
 | Platform | Architecture | Download |
 | -------- | ------------ | -------- |
-| macOS 15 | arm64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.3/macOS-ARM64/unidoc.tar.gz) |
-| Ubuntu 24.04 | arm64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.3/Ubuntu-24.04-ARM64/unidoc.tar.gz) |
-| Ubuntu 24.04 | x86_64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.3/Ubuntu-24.04-X64/unidoc.tar.gz) |
-| Ubuntu 22.04 | arm64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.3/Ubuntu-22.04-ARM64/unidoc.tar.gz) |
-| Ubuntu 22.04 | x86_64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.3/Ubuntu-22.04-X64/unidoc.tar.gz) |
+| macOS 15 | arm64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/macOS-ARM64/unidoc.tar.gz) |
+| Ubuntu 24.04 | arm64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/Ubuntu-24.04-ARM64/unidoc.tar.gz) |
+| Ubuntu 24.04 | x86_64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/Ubuntu-24.04-X64/unidoc.tar.gz) |
+| Ubuntu 22.04 | arm64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/Ubuntu-22.04-ARM64/unidoc.tar.gz) |
+| Ubuntu 22.04 | x86_64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/Ubuntu-22.04-X64/unidoc.tar.gz) |
 
 Follow our [quickstart guide](https://swiftinit.org/docs/swift-unidoc/guides/quickstart) to learn how to set up a local Unidoc server.
 
@@ -54,7 +54,7 @@ The Unidoc documentation compiler can be run in CI mode to validate documentatio
 
 The Unidoc compiler can diagnose *all* broken symbol links, including references to symbols in package dependencies and the standard library.
 
-We provide the [swift-unidoc-action](https://github.com/tayloraswift/swift-unidoc-action) for GitHub Actions.
+We provide the [swift-unidoc-action](https://github.com/rarestype/unidoc-action) for GitHub Actions.
 
 ```yaml
 -   name: Validate documentation
