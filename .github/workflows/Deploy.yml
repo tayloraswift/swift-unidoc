@@ -13,17 +13,17 @@ jobs:
         runs-on: macos-26
         name: macOS
         steps:
-            -   name: Setup AWS CLI
-                uses: aws-actions/configure-aws-credentials@v1
+            -   name: 💝 Setup AWS CLI 💝
+                uses: aws-actions/configure-aws-credentials@v6
                 with:
                     aws-secret-access-key: ${{ secrets.AWS_S3_ACCESS_SECRET }}
                     aws-access-key-id: ${{ vars.AWS_S3_ACCESS_KEY }}
                     aws-region: us-east-1
 
-            -   name: Checkout repository
-                uses: actions/checkout@v3
+            -   name: 💝 Checkout repository 💝
+                uses: actions/checkout@v6
 
-            -   name: Build products
+            -   name: 💝 Build products 💝
                 env:
                     UNIDOC_ENABLE_INDEXSTORE: "1"
                 run: |
@@ -31,7 +31,7 @@ jobs:
                     swift build -c release --product unidoc
                     Scripts/Package .build unidoc
 
-            -   name: Upload products
+            -   name: 💝 Upload products 💝
                 env:
                     UNIDOC_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
                     UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
@@ -59,17 +59,17 @@ jobs:
         runs-on: ubuntu-24.04
         name: "${{ matrix.os.display }} (${{ matrix.arch.id }})"
         steps:
-            -   name: Setup AWS CLI
-                uses: aws-actions/configure-aws-credentials@v1
+            -   name: 💝 Setup AWS CLI 💝
+                uses: aws-actions/configure-aws-credentials@v6
                 with:
                     aws-secret-access-key: ${{ secrets.AWS_S3_ACCESS_SECRET }}
                     aws-access-key-id: ${{ vars.AWS_S3_ACCESS_KEY }}
                     aws-region: us-east-1
 
-            -   name: Checkout repository
-                uses: actions/checkout@v3
+            -   name: 💝 Checkout repository 💝
+                uses: actions/checkout@v6
 
-            -   name: Build Unidoc
+            -   name: 💝 Build Unidoc 💝
                 run: |
                     Scripts/Linux/Build ${{ matrix.arch.id }} \
                         --os ${{ matrix.os.codename }} \
@@ -77,10 +77,10 @@ jobs:
                     Scripts/Package .build.${{ matrix.arch.id }} \
                         unidoc
 
-            -   name: Upload products
+            -   name: 💝 Upload products 💝
                 env:
-                    UNIDOC_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
-                    UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
+                    DEPLOY_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
+                    DEPLOY_VERSION: ${{ github.head_ref || github.ref_name }}
 
                 run: Scripts/Deploy unidoc.tar.gz
 
@@ -98,17 +98,17 @@ jobs:
         runs-on: ubuntu-24.04
         name: "${{ matrix.os.display }} (${{ matrix.arch.id }})"
         steps:
-            -   name: Setup AWS CLI
-                uses: aws-actions/configure-aws-credentials@v1
+            -   name: 💝 Setup AWS CLI 💝
+                uses: aws-actions/configure-aws-credentials@v6
                 with:
                     aws-secret-access-key: ${{ secrets.AWS_S3_ACCESS_SECRET }}
                     aws-access-key-id: ${{ vars.AWS_S3_ACCESS_KEY }}
                     aws-region: us-east-1
 
-            -   name: Checkout repository
-                uses: actions/checkout@v3
+            -   name: 💝 Checkout repository 💝
+                uses: actions/checkout@v6
 
-            -   name: Build products
+            -   name: 💝 Build products 💝
                 run: |
                     Scripts/Linux/Build ${{ matrix.arch.id }} \
                         --os ${{ matrix.os.codename }}
@@ -116,9 +116,9 @@ jobs:
                         unidoc-linkerd \
                         unidocd
 
-            -   name: Upload products
+            -   name: 💝 Upload products 💝
                 env:
-                    UNIDOC_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
-                    UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
+                    DEPLOY_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
+                    DEPLOY_VERSION: ${{ github.head_ref || github.ref_name }}
 
                 run: Scripts/Deploy unidoc-linkerd.tar.gz unidocd.tar.gz

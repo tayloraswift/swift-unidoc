@@ -8,24 +8,47 @@ on:
         branches: [ master ]
 
 jobs:
+    changes:
+        runs-on: ubuntu-latest
+        name: Assess changes
+        steps:
+            -   name: 💖 Checkout repository 💖
+                uses: actions/checkout@v6
+
+            -   name: 💖 Decide checks 💖
+                uses: tj-actions/changed-files@v47
+                id: changes
+                with:
+                    files_ignore: |
+                        README.md
+                        LICENSE
+                        NOTICE
+                        .mailmap
+                        .gitignore
+                        .github/FUNDING.yml
+        outputs:
+            code_changed: ${{ steps.changes.outputs.any_changed }}
+
     linux-server:
         runs-on: ubuntu-24.04
         name: Linux (server)
+        needs: changes
+        if: ${{ needs.changes.outputs.code_changed == 'true' }}
         steps:
-            -   name: Checkout repository
-                uses: actions/checkout@v3
+            -   name: 💖 Checkout repository 💖
+                uses: actions/checkout@v6
 
-            -   name: Set up mock deployments
+            -   name: 💖 Set up mock deployments 💖
                 run: |
                     docker compose -f Guides/docs.docc/local/docker-compose.yml up -d
 
-            -   name: Initialize replica set
+            -   name: 💖 Initialize replica set 💖
                 run: |
                     timeout 60s bash -c \
                     'until docker exec -t unidoc-mongod-container \
                     /bin/mongosh --file /unidoc-rs-init-containerized.js; do sleep 1; done'
 
-            -   name: Run pipeline
+            -   name: 💖 Run pipeline 💖
                 run: |
                     docker run -t --rm \
                         --network=unidoc-test \
@@ -34,31 +57,33 @@ jobs:
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
                         -e SWIFT_INSTALLATION=/usr \
-                        swift:6.2-noble \
+                        swift:6.2.4-noble \
                         /bin/bash Scripts/Linux/TestAll
 
     linux:
         runs-on: ubuntu-24.04
         name: Linux
+        needs: changes
+        if: ${{ needs.changes.outputs.code_changed == 'true' }}
         env:
             UNIDOC_ENABLE_INDEXSTORE: "1"
 
         steps:
-            -   name: Install Swift
-                uses: tayloraswift/swift-install-action@master
+            -   name: 💖 Install Swift 💖
+                uses: rarestype/swift-install-action@master
                 with:
                     swift-prefix: "swift-6.2.4-release/ubuntu2404/swift-6.2.4-RELEASE"
                     swift-id: "swift-6.2.4-RELEASE-ubuntu24.04"
 
-            -   name: Checkout repository
-                uses: actions/checkout@v3
+            -   name: 💖 Checkout repository 💖
+                uses: actions/checkout@v6
 
-            -   name: Check format
+            -   name: 💖 Check format 💖
                 run: |
                     swift package dollup --allow-writing-to-package-directory
                     git diff --exit-code
 
-            -   name: Build release
+            -   name: 💖 Build release 💖
                 run: |
                     swift --version
                     swift build -c release \
@@ -70,10 +95,10 @@ jobs:
                     mv .build/release/ssgc $HOME/bin
                     echo "$HOME/bin" >> $GITHUB_PATH
 
-            -   name: Build packages
+            -   name: 💖 Build packages 💖
                 run: Scripts/Linux/GeneratePackageSymbolGraphs
 
-            -   name: Validate packages
+            -   name: 💖 Validate packages 💖
                 run: |
                     swift test -c release \
                         --no-parallel \
@@ -84,22 +109,24 @@ jobs:
     macos:
         runs-on: macos-26
         name: macOS
+        needs: changes
+        if: ${{ needs.changes.outputs.code_changed == 'true' }}
         env:
             UNIDOC_ENABLE_INDEXSTORE: "1"
 
         steps:
-            -   name: Checkout repository
-                uses: actions/checkout@v3
+            -   name: 💖 Checkout repository 💖
+                uses: actions/checkout@v6
 
-            -   name: Select Xcode 26.3
+            -   name: 💖 Select Xcode 26.3 💖
                 run: sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
 
-            -   name: Check format
+            -   name: 💖 Check format 💖
                 run: |
                     swift package dollup --allow-writing-to-package-directory
                     git diff --exit-code
 
-            -   name: Build release
+            -   name: 💖 Build release 💖
                 run: |
                     swift --version
                     swift build -c release \
@@ -109,10 +136,10 @@ jobs:
                     mv .build/release/ssgc $HOME/bin
                     echo "$HOME/bin" >> $GITHUB_PATH
 
-            -   name: Build packages
+            -   name: 💖 Build packages 💖
                 run: Scripts/macOS/GeneratePackageSymbolGraphs
 
-            -   name: Validate packages
+            -   name: 💖 Validate packages 💖
                 run: |
                     swift test -c release \
                         --no-parallel \

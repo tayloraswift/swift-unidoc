@@ -21,7 +21,7 @@ import Testing
     }
 
     @Test func swift_nio() throws {
-        //  https://github.com/tayloraswift/swift-unidoc/issues/211
+        //  https://github.com/rarestype/unidoc/issues/211
         #if !os(macOS)
 
         let object: SymbolGraphObject<Void> = try .load(
