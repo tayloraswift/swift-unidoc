@@ -13,22 +13,14 @@ public final class Tests: @unchecked Sendable {
     public let filter: TestFilter
 
     init(useTerminalColors: Bool = true) throws {
-        self.passed = .create(0)
-        self.failed = .create(0)
+        self.passed = .init(0)
+        self.failed = .init(0)
 
-        self.passedAssertions = .create(0)
-        self.failedAssertions = .create(0)
+        self.passedAssertions = .init(0)
+        self.failedAssertions = .init(0)
 
         self.usesTerminalColors = useTerminalColors
         self.filter = try .init(arguments: CommandLine.arguments.dropFirst())
-    }
-
-    deinit {
-        self.passed.destroy()
-        self.failed.destroy()
-
-        self.passedAssertions.destroy()
-        self.failedAssertions.destroy()
     }
 }
 extension Tests {
