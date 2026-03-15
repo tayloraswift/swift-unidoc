@@ -33,8 +33,8 @@ jobs:
 
             -   name: 💝 Upload products 💝
                 env:
-                    UNIDOC_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
-                    UNIDOC_VERSION: ${{ github.head_ref || github.ref_name }}
+                    DEPLOY_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
+                    DEPLOY_VERSION: ${{ github.head_ref || github.ref_name }}
 
                 run: Scripts/Deploy unidoc.tar.gz
 
