@@ -1,12 +1,12 @@
-import Atomics
+import Synchronization
 
 //  Unchecked Sendable because ``Regex`` is apparently not ``Sendable``.
 public final class Tests: @unchecked Sendable {
-    public let passed: UnsafeAtomic<Int>
-    public let failed: UnsafeAtomic<Int>
+    public let passed: Atomic<Int>
+    public let failed: Atomic<Int>
 
-    public let passedAssertions: UnsafeAtomic<Int>
-    public let failedAssertions: UnsafeAtomic<Int>
+    public let passedAssertions: Atomic<Int>
+    public let failedAssertions: Atomic<Int>
 
     public let usesTerminalColors: Bool
 
