@@ -21,9 +21,9 @@ public final class TestGroup {
         _ = self.context.tests.passedAssertions.add(self.passed, ordering: .relaxed)
         _ = self.context.tests.failedAssertions.add(self.failed.count, ordering: .relaxed)
 
-        self.failed.isEmpty ?
-        _ = self.context.tests.passed.add(1, ordering: .relaxed) :
-        _ = self.context.tests.failed.add(1, ordering: .relaxed)
+        _ = self.failed.isEmpty ?
+        self.context.tests.passed.add(1, ordering: .relaxed) :
+        self.context.tests.failed.add(1, ordering: .relaxed)
 
         print(self.description)
     }
