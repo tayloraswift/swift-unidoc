@@ -789,10 +789,6 @@ default:
 }
 
 for target: PackageDescription.Target in package.targets {
-    if  target.name == "_AsyncChannel" {
-        continue
-    }
-
     {
         var settings: [PackageDescription.SwiftSetting] = $0 ?? []
 
