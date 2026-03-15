@@ -18,18 +18,12 @@ public final class TestGroup {
             return
         }
 
-        self.context.tests.passedAssertions.wrappingIncrement(
-            by: self.passed,
-            ordering: .relaxed
-        )
-        self.context.tests.failedAssertions.wrappingIncrement(
-            by: self.failed.count,
-            ordering: .relaxed
-        )
+        _ = self.context.tests.passedAssertions.add(self.passed, ordering: .relaxed)
+        _ = self.context.tests.failedAssertions.add(self.failed.count, ordering: .relaxed)
 
-        self.failed.isEmpty ?
-        self.context.tests.passed.wrappingIncrement(ordering: .relaxed) :
-        self.context.tests.failed.wrappingIncrement(ordering: .relaxed)
+        _ = self.failed.isEmpty ?
+        self.context.tests.passed.add(1, ordering: .relaxed) :
+        self.context.tests.failed.add(1, ordering: .relaxed)
 
         print(self.description)
     }

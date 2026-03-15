@@ -40,7 +40,7 @@ Follow our [quickstart guide](https://swiftinit.org/docs/swift-unidoc/guides/qui
 
 ### ✏️ Powerful symbol links
 
-Unidoc supports the [UCF](https://github.com/tayloraswift/swift-ucf) symbol link syntax — a superset of the DocC symbol link syntax — which supports [multi-component paths, cross-module references, and type signature disambiguation](https://swiftinit.org/docs/swift-ucf/help/codelinks).
+Unidoc supports the [UCF](https://github.com/rarestype/ucf) symbol link syntax — a superset of the DocC symbol link syntax — which supports [multi-component paths, cross-module references, and type signature disambiguation](https://swiftinit.org/docs/ucf/help/codelinks).
 
 | Syntax | Renders as |
 | ------ | ---------- |

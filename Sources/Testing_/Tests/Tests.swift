@@ -1,34 +1,26 @@
-import Atomics
+import Synchronization
 
 //  Unchecked Sendable because ``Regex`` is apparently not ``Sendable``.
 public final class Tests: @unchecked Sendable {
-    public let passed: UnsafeAtomic<Int>
-    public let failed: UnsafeAtomic<Int>
+    public let passed: Atomic<Int>
+    public let failed: Atomic<Int>
 
-    public let passedAssertions: UnsafeAtomic<Int>
-    public let failedAssertions: UnsafeAtomic<Int>
+    public let passedAssertions: Atomic<Int>
+    public let failedAssertions: Atomic<Int>
 
     public let usesTerminalColors: Bool
 
     public let filter: TestFilter
 
     init(useTerminalColors: Bool = true) throws {
-        self.passed = .create(0)
-        self.failed = .create(0)
+        self.passed = .init(0)
+        self.failed = .init(0)
 
-        self.passedAssertions = .create(0)
-        self.failedAssertions = .create(0)
+        self.passedAssertions = .init(0)
+        self.failedAssertions = .init(0)
 
         self.usesTerminalColors = useTerminalColors
         self.filter = try .init(arguments: CommandLine.arguments.dropFirst())
-    }
-
-    deinit {
-        self.passed.destroy()
-        self.failed.destroy()
-
-        self.passedAssertions.destroy()
-        self.failedAssertions.destroy()
     }
 }
 extension Tests {

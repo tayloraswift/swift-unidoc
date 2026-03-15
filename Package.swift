@@ -20,10 +20,6 @@ let package: Package = .init(
         .library(name: "GitHubAPI", targets: ["GitHubAPI"]),
         .library(name: "GitHubClient", targets: ["GitHubClient"]),
 
-        .library(name: "HTTP", targets: ["HTTP"]),
-        .library(name: "HTTPClient", targets: ["HTTPClient"]),
-        .library(name: "HTTPServer", targets: ["HTTPServer"]),
-
         .library(name: "InlineArray", targets: ["InlineArray"]),
 
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
@@ -35,10 +31,6 @@ let package: Package = .init(
         .library(name: "MarkdownParsing", targets: ["MarkdownParsing"]),
         .library(name: "MarkdownRendering", targets: ["MarkdownRendering"]),
         .library(name: "MarkdownSemantics", targets: ["MarkdownSemantics"]),
-
-        .library(name: "Media", targets: ["Media"]),
-
-        .library(name: "Multiparts", targets: ["Multiparts"]),
 
         .library(name: "PieCharts", targets: ["PieCharts"]),
         .library(name: "PackageGraphs", targets: ["PackageGraphs"]),
@@ -76,83 +68,26 @@ let package: Package = .init(
     dependencies: [
         .package(url: "https://github.com/ordo-one/dollup", from: "1.0.1"),
 
+        .package(url: "https://github.com/rarestype/swift-ip", from: "0.3.4"),
+        .package(url: "https://github.com/rarestype/servit", from: "0.1.1"),
+        .package(url: "https://github.com/rarestype/ucf", from: "0.2.1"),
+
         .package(url: "https://github.com/tayloraswift/swift-bson", from: "1.0.0"),
         .package(url: "https://github.com/tayloraswift/swift-dom", from: "1.2.1"),
-        .package(
-            url: "https://github.com/tayloraswift/swift-grammar", .upToNextMinor(
-                from: "0.5.0"
-            )
-        ),
-        .package(
-            url: "https://github.com/tayloraswift/swift-hash", .upToNextMinor(
-                from: "0.7.1"
-            )
-        ),
-        .package(
-            url: "https://github.com/tayloraswift/swift-ip", .upToNextMinor(
-                from: "0.3.3"
-            )
-        ),
-        .package(
-            url: "https://github.com/tayloraswift/swift-io", .upToNextMinor(
-                from: "0.1.0"
-            )
-        ),
-        .package(
-            url: "https://github.com/tayloraswift/swift-json", .upToNextMinor(
-                from: "1.1.2"
-            )
-        ),
-        .package(
-            url: "https://github.com/tayloraswift/swift-mongodb", .upToNextMinor(
-                from: "0.29.3"
-            )
-        ),
-        .package(
-            url: "https://github.com/tayloraswift/swift-png", .upToNextMinor(
-                from: "4.4.9"
-            )
-        ),
-        .package(
-            url: "https://github.com/tayloraswift/swift-ucf", .upToNextMinor(
-                from: "0.2.0"
-            )
-        ),
-        .package(
-            url: "https://github.com/tayloraswift/swift-unixtime", .upToNextMinor(
-                from: "0.2.0"
-            )
-        ),
+        .package(url: "https://github.com/tayloraswift/swift-grammar", from: "0.5.0"),
+        .package(url: "https://github.com/tayloraswift/swift-hash", from: "0.7.1"),
+        .package(url: "https://github.com/tayloraswift/swift-io", from: "0.1.0"),
+        .package(url: "https://github.com/tayloraswift/swift-json", from: "2.3.1"),
+        .package(url: "https://github.com/tayloraswift/swift-mongodb", from: "0.29.3"),
+        .package(url: "https://github.com/tayloraswift/swift-png", from: "4.4.9"),
+        .package(url: "https://github.com/tayloraswift/swift-unixtime", from: "0.2.0"),
 
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.7.0"),
-        .package(
-            url: "https://github.com/apple/swift-atomics", .upToNextMinor(
-                from: "1.2.0"
-            )
-        ),
-        .package(
-            url: "https://github.com/apple/swift-collections", .upToNextMinor(
-                from: "1.1.1"
-            )
-        ),
-
+        .package(url: "https://github.com/apple/swift-collections", from: "1.4.0"),
         .package(url: "https://github.com/apple/swift-nio", from: "2.79.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.27.0"),
-
-        .package(
-            url: "https://github.com/apple/swift-nio-http2", .upToNextMinor(
-                from: "1.33.0"
-            )
-        ),
-        .package(
-            url: "https://github.com/apple/swift-markdown", .upToNextMinor(
-                from: "0.4.0"
-            )
-        ),
-        .package(
-            url: "https://github.com/swiftlang/swift-syntax",
-            from: "602.0.0"
-        ),
+        .package(url: "https://github.com/apple/swift-markdown", from: "0.7.3"),
+        .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
     ],
     targets: [
         .executableTarget(
@@ -192,14 +127,6 @@ let package: Package = .init(
             ]
         ),
 
-
-        .target(
-            name: "_AsyncChannel",
-            dependencies: [
-                .product(name: "OrderedCollections", package: "swift-collections"),
-            ]
-        ),
-
         .target(
             name: "_GitVersion",
             cSettings: [
@@ -220,7 +147,7 @@ let package: Package = .init(
         .target(
             name: "Fingerprinting",
             dependencies: [
-                .target(name: "HTTP"),
+                .product(name: "HTTP", package: "servit"),
                 .product(name: "ISO", package: "swift-unixtime"),
             ]
         ),
@@ -229,8 +156,7 @@ let package: Package = .init(
             name: "GitHubClient",
             dependencies: [
                 .target(name: "GitHubAPI"),
-                .target(name: "HTTPClient"),
-
+                .product(name: "HTTPClient", package: "servit"),
                 .product(name: "Base64", package: "swift-hash"),
             ]
         ),
@@ -240,49 +166,6 @@ let package: Package = .init(
             dependencies: [
                 .target(name: "SHA1_JSON"),
                 .product(name: "UnixTime", package: "swift-unixtime"),
-            ]
-        ),
-
-        .target(
-            name: "HTTP",
-            dependencies: [
-                .target(name: "Media"),
-                .product(name: "ISO", package: "swift-unixtime"),
-                .product(name: "MD5", package: "swift-hash"),
-                .product(name: "NIOCore", package: "swift-nio"),
-            ]
-        ),
-
-        .target(
-            name: "HTTPClient",
-            dependencies: [
-                .target(name: "HTTP"),
-                .target(name: "Media"),
-                .product(name: "MD5", package: "swift-hash"),
-                .product(name: "HTML", package: "swift-dom"),
-                .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "NIOHTTP2", package: "swift-nio-http2"),
-                .product(name: "NIOSSL", package: "swift-nio-ssl"),
-                .product(name: "TraceableErrors", package: "swift-grammar"),
-            ]
-        ),
-
-        .target(
-            name: "HTTPServer",
-            dependencies: [
-                .target(name: "_AsyncChannel"),
-                .target(name: "HTTP"),
-
-                .product(name: "Firewalls", package: "swift-ip"),
-                .product(name: "IP", package: "swift-ip"),
-                .product(name: "IP_NIOCore", package: "swift-ip"),
-                .product(name: "HTML", package: "swift-dom"),
-                .product(name: "Atomics", package: "swift-atomics"),
-                .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "NIOHTTP2", package: "swift-nio-http2"),
-                .product(name: "NIOSSL", package: "swift-nio-ssl"),
-                .product(name: "TraceableErrors", package: "swift-grammar"),
-                .product(name: "URI", package: "swift-ucf"),
             ]
         ),
 
@@ -301,7 +184,7 @@ let package: Package = .init(
                 .target(name: "Symbols"),
                 //  This dependency is present for (questionable?) performance reasons.
                 .target(name: "Unidoc"),
-                .product(name: "UCF", package: "swift-ucf"),
+                .product(name: "UCF", package: "ucf"),
             ]
         ),
 
@@ -328,7 +211,7 @@ let package: Package = .init(
             dependencies: [
                 .target(name: "MarkdownABI"),
                 .product(name: "HTML", package: "swift-dom"),
-                .product(name: "URI", package: "swift-ucf"),
+                .product(name: "URI", package: "ucf"),
             ]
         ),
 
@@ -364,24 +247,14 @@ let package: Package = .init(
                 .target(name: "Snippets"),
                 .target(name: "SourceDiagnostics"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
-                .product(name: "UCF", package: "swift-ucf"),
+                .product(name: "UCF", package: "ucf"),
             ]
         ),
-
-        .target(name: "Media"),
 
         .target(
             name: "_MongoDB",
             dependencies: [
                 .product(name: "MongoDB", package: "swift-mongodb"),
-            ]
-        ),
-
-        .target(
-            name: "Multiparts",
-            dependencies: [
-                .target(name: "Media"),
-                .product(name: "Grammar", package: "swift-grammar"),
             ]
         ),
 
@@ -418,9 +291,9 @@ let package: Package = .init(
         .target(
             name: "S3Client",
             dependencies: [
-                .target(name: "HTTPClient"),
-                .target(name: "Media"),
                 .target(name: "S3"),
+                .product(name: "HTTPClient", package: "servit"),
+                .product(name: "Media", package: "servit"),
                 .product(name: "UnixCalendar", package: "swift-unixtime"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
@@ -474,7 +347,7 @@ let package: Package = .init(
             name: "Symbols",
             dependencies: [
                 .target(name: "Sources"),
-                .product(name: "FNV1", package: "swift-ucf"),
+                .product(name: "FNV1", package: "ucf"),
             ]
         ),
 
@@ -515,7 +388,7 @@ let package: Package = .init(
                 .target(name: "Symbols"),
                 .target(name: "SourceDiagnostics"),
                 .product(name: "SHA1", package: "swift-hash"),
-                .product(name: "URI", package: "swift-ucf"),
+                .product(name: "URI", package: "ucf"),
             ]
         ),
 
@@ -563,12 +436,7 @@ let package: Package = .init(
 
         .target(name: "TopologicalSorting"),
 
-        .target(
-            name: "Testing_",
-            dependencies: [
-                .product(name: "Atomics", package: "swift-atomics"),
-            ]
-        ),
+        .target(name: "Testing_"),
 
         .target(name: "Unidoc"),
 
@@ -579,7 +447,7 @@ let package: Package = .init(
                 .target(name: "SHA1_JSON"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
-                .product(name: "URI", package: "swift-ucf"),
+                .product(name: "URI", package: "ucf"),
             ]
         ),
 
@@ -594,8 +462,8 @@ let package: Package = .init(
         .target(
             name: "UnidocAssets_System",
             dependencies: [
-                .target(name: "Media"),
                 .target(name: "UnidocAssets"),
+                .product(name: "Media", package: "servit"),
                 .product(name: "SystemIO", package: "swift-io"),
             ]
         ),
@@ -612,7 +480,7 @@ let package: Package = .init(
         .target(
             name: "UnidocClient",
             dependencies: [
-                .target(name: "HTTPClient"),
+                .product(name: "HTTPClient", package: "servit"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "UnidocRecords_LZ77"),
                 .target(name: "UnidocRecords"),
@@ -677,7 +545,7 @@ let package: Package = .init(
                 .target(name: "GitHubAPI"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocAPI"),
-                .product(name: "FNV1", package: "swift-ucf"),
+                .product(name: "FNV1", package: "ucf"),
                 .product(name: "MD5", package: "swift-hash"),
             ]
         ),
@@ -685,12 +553,12 @@ let package: Package = .init(
         .target(
             name: "UnidocRender",
             dependencies: [
-                .target(name: "HTTP"),
                 .target(name: "MarkdownDisplay"),
                 .target(name: "MarkdownRendering"),
-                .target(name: "Media"),
                 .target(name: "UnidocAssets"),
                 .target(name: "UnidocRecords"),
+                .product(name: "HTTP", package: "servit"),
+                .product(name: "Media", package: "servit"),
                 .product(name: "UnixCalendar", package: "swift-unixtime"),
                 .product(name: "HTML", package: "swift-dom"),
             ]
@@ -700,10 +568,6 @@ let package: Package = .init(
             name: "UnidocServer",
             dependencies: [
                 .target(name: "GitHubClient"),
-                .target(name: "HTTPClient"),
-                .target(name: "HTTPServer"),
-                .target(name: "Media"),
-                .target(name: "Multiparts"),
                 .target(name: "S3Client"),
                 .target(name: "Sitemaps"),
                 .target(name: "UnidocAssets"),
@@ -714,6 +578,10 @@ let package: Package = .init(
                 .target(name: "UnidocQueries"),
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocUI"),
+                .product(name: "HTTPClient", package: "servit"),
+                .product(name: "HTTPServer", package: "servit"),
+                .product(name: "Media", package: "servit"),
+                .product(name: "Multiparts", package: "servit"),
             ]
         ),
 
@@ -741,7 +609,7 @@ let package: Package = .init(
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocAPI"),
                 .target(name: "UnidocQueries"),
-                .product(name: "URI", package: "swift-ucf"),
+                .product(name: "URI", package: "ucf"),
                 .product(name: "UnixTime", package: "swift-unixtime"),
             ]
         ),
@@ -921,10 +789,6 @@ default:
 }
 
 for target: PackageDescription.Target in package.targets {
-    if  target.name == "_AsyncChannel" {
-        continue
-    }
-
     {
         var settings: [PackageDescription.SwiftSetting] = $0 ?? []
 
