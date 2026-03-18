@@ -91,3 +91,10 @@ jobs:
                         --generate-notes
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    deploy:
+        name: Deploy
+        needs: release
+        uses: ./.github/workflows/Deploy.yml
+        secrets: inherit
+        with:
+            version: ${{ needs.release.outputs.version }}
