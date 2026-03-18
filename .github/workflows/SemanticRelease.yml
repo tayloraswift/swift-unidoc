@@ -20,6 +20,8 @@ jobs:
         env:
             # toggle to 'false' to only push the tag and skip creating the GitHub Release
             CREATE_RELEASE: 'true'
+        outputs:
+            version: ${{ steps.increment.outputs.version }}
         steps:
             -   name: ⚡ Checkout repository ⚡
                 uses: actions/checkout@v6
