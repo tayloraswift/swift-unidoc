@@ -1,6 +1,6 @@
 #  ❣❣❣  DO NOT EDIT  ❣  THIS FILE IS AUTOMATICALLY SYNCED  ❣  DO NOT EDIT  ❣❣❣
 
-name: semantic release
+name: Semantic release
 
 on:
     pull_request:

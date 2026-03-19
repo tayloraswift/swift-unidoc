@@ -1,6 +1,6 @@
 #  ❣❣❣  DO NOT EDIT  ❣  THIS FILE IS AUTOMATICALLY SYNCED  ❣  DO NOT EDIT  ❣❣❣
 
-name: semantic pr title
+name: Semantic PR title
 
 on:
     pull_request:
