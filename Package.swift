@@ -68,24 +68,23 @@ let package: Package = .init(
     dependencies: [
         .package(url: "https://github.com/ordo-one/dollup", from: "1.0.1"),
 
-        .package(url: "https://github.com/rarestype/swift-ip", from: "0.3.4"),
-        .package(url: "https://github.com/rarestype/servit", from: "0.1.1"),
+        .package(url: "https://github.com/rarestype/gram", from: "1.0.0"),
+        .package(url: "https://github.com/rarestype/h", from: "1.0.1"),
+        .package(url: "https://github.com/rarestype/swift-bson", from: "2.0.2"),
+        .package(url: "https://github.com/rarestype/swift-ip", from: "0.3.6"),
+        .package(url: "https://github.com/rarestype/swift-json", from: "2.3.2"),
+        .package(url: "https://github.com/rarestype/swift-mongodb", from: "1.0.0"),
+        .package(url: "https://github.com/rarestype/servit", from: "1.0.0"),
+        .package(url: "https://github.com/rarestype/u", from: "1.1.0"),
         .package(url: "https://github.com/rarestype/ucf", from: "0.2.1"),
 
-        .package(url: "https://github.com/tayloraswift/swift-bson", from: "1.0.0"),
         .package(url: "https://github.com/tayloraswift/swift-dom", from: "1.2.1"),
-        .package(url: "https://github.com/tayloraswift/swift-grammar", from: "0.5.0"),
-        .package(url: "https://github.com/tayloraswift/swift-hash", from: "0.7.1"),
         .package(url: "https://github.com/tayloraswift/swift-io", from: "0.1.0"),
-        .package(url: "https://github.com/tayloraswift/swift-json", from: "2.3.1"),
-        .package(url: "https://github.com/tayloraswift/swift-mongodb", from: "0.29.3"),
-        .package(url: "https://github.com/tayloraswift/swift-png", from: "4.4.9"),
-        .package(url: "https://github.com/tayloraswift/swift-unixtime", from: "0.2.0"),
+        .package(url: "https://github.com/tayloraswift/swift-png", from: "4.5.0"),
 
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.7.0"),
         .package(url: "https://github.com/apple/swift-collections", from: "1.4.0"),
-        .package(url: "https://github.com/apple/swift-nio", from: "2.79.0"),
-        .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.27.0"),
+        .package(url: "https://github.com/apple/swift-nio", from: "2.96.0"),
         .package(url: "https://github.com/apple/swift-markdown", from: "0.7.3"),
         .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
     ],
@@ -123,7 +122,7 @@ let package: Package = .init(
             dependencies: [
                 .target(name: "UnidocClient"),
                 .product(name: "System_ArgumentParser", package: "swift-io"),
-                .product(name: "UnixCalendar", package: "swift-unixtime"),
+                .product(name: "UnixCalendar", package: "u"),
             ]
         ),
 
@@ -148,7 +147,7 @@ let package: Package = .init(
             name: "Fingerprinting",
             dependencies: [
                 .product(name: "HTTP", package: "servit"),
-                .product(name: "ISO", package: "swift-unixtime"),
+                .product(name: "ISO", package: "u"),
             ]
         ),
 
@@ -157,7 +156,7 @@ let package: Package = .init(
             dependencies: [
                 .target(name: "GitHubAPI"),
                 .product(name: "HTTPClient", package: "servit"),
-                .product(name: "Base64", package: "swift-hash"),
+                .product(name: "Base64", package: "h"),
             ]
         ),
 
@@ -165,7 +164,7 @@ let package: Package = .init(
             name: "GitHubAPI",
             dependencies: [
                 .target(name: "SHA1_JSON"),
-                .product(name: "UnixTime", package: "swift-unixtime"),
+                .product(name: "UnixTime", package: "u"),
             ]
         ),
 
@@ -294,10 +293,10 @@ let package: Package = .init(
                 .target(name: "S3"),
                 .product(name: "HTTPClient", package: "servit"),
                 .product(name: "Media", package: "servit"),
-                .product(name: "UnixCalendar", package: "swift-unixtime"),
+                .product(name: "UnixCalendar", package: "u"),
                 .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
-                .product(name: "SHA2", package: "swift-hash"),
+                .product(name: "SHA2", package: "h"),
             ]
         ),
 
@@ -315,7 +314,7 @@ let package: Package = .init(
             name: "SHA1_JSON",
             dependencies: [
                 .product(name: "JSON", package: "swift-json"),
-                .product(name: "SHA1", package: "swift-hash"),
+                .product(name: "SHA1", package: "h"),
             ]
         ),
 
@@ -369,7 +368,7 @@ let package: Package = .init(
             dependencies: [
                 .target(name: "LinkResolution"),
                 .target(name: "SymbolGraphParts"),
-                .product(name: "TraceableErrors", package: "swift-grammar"),
+                .product(name: "TraceableErrors", package: "gram"),
             ]
         ),
 
@@ -387,7 +386,7 @@ let package: Package = .init(
                 .target(name: "SymbolGraphs"),
                 .target(name: "Symbols"),
                 .target(name: "SourceDiagnostics"),
-                .product(name: "SHA1", package: "swift-hash"),
+                .product(name: "SHA1", package: "h"),
                 .product(name: "URI", package: "ucf"),
             ]
         ),
@@ -419,7 +418,7 @@ let package: Package = .init(
                 .target(name: "Symbols"),
 
                 .product(name: "BSON", package: "swift-bson"),
-                .product(name: "SHA1", package: "swift-hash"),
+                .product(name: "SHA1", package: "h"),
             ],
             exclude: [
                 "README.md",
@@ -495,7 +494,7 @@ let package: Package = .init(
                 .target(name: "UnidocLinking"),
                 .target(name: "UnidocRecords"),
                 .product(name: "IP", package: "swift-ip"),
-                .product(name: "UnixCalendar", package: "swift-unixtime"),
+                .product(name: "UnixCalendar", package: "u"),
             ]
         ),
 
@@ -546,7 +545,7 @@ let package: Package = .init(
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocAPI"),
                 .product(name: "FNV1", package: "ucf"),
-                .product(name: "MD5", package: "swift-hash"),
+                .product(name: "MD5", package: "h"),
             ]
         ),
 
@@ -559,7 +558,7 @@ let package: Package = .init(
                 .target(name: "UnidocRecords"),
                 .product(name: "HTTP", package: "servit"),
                 .product(name: "Media", package: "servit"),
-                .product(name: "UnixCalendar", package: "swift-unixtime"),
+                .product(name: "UnixCalendar", package: "u"),
                 .product(name: "HTML", package: "swift-dom"),
             ]
         ),
@@ -610,7 +609,7 @@ let package: Package = .init(
                 .target(name: "UnidocAPI"),
                 .target(name: "UnidocQueries"),
                 .product(name: "URI", package: "ucf"),
-                .product(name: "UnixTime", package: "swift-unixtime"),
+                .product(name: "UnixTime", package: "u"),
             ]
         ),
 
