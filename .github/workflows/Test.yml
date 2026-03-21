@@ -1,5 +1,5 @@
 # This workflow builds the project for production, with IndexStoreDB integration enabled.
-name: test
+name: Test
 
 on:
     push:

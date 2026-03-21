@@ -1,7 +1,10 @@
+# Do not rename me to `Documentation.yml`!
+# That is a special name that will get overwritten by rarestbot!!!
+
 # This workflow builds the project under the “starter” configuration, namely, what you would get
 # if you ran `swift build` without any arguments. We use this to verify that we can generate the
 # documentation for Unidoc itself.
-name: documentation
+name: Documentation
 
 on:
     push:
