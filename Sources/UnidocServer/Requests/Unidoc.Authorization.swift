@@ -13,7 +13,7 @@ extension Unidoc {
     }
 }
 extension Unidoc.Authorization {
-    private static func web(cookie lines: [String]) -> Self {
+    static func web(cookie lines: [String]) -> Self {
         var loginSession: Unidoc.UserSession.Web? = nil
         var loginState: String? = nil
 
@@ -30,7 +30,7 @@ extension Unidoc.Authorization {
         return .web(loginSession, login: loginState)
     }
 
-    private static func api(authorization header: String) -> Self {
+    static func api(authorization header: String) -> Self {
         guard
         let space: String.Index = header.firstIndex(of: " ") else {
             return .invalid(.scheme(header[...]))
@@ -50,23 +50,6 @@ extension Unidoc.Authorization {
         }
 
         return .api(session)
-    }
-}
-extension Unidoc.Authorization {
-    static func from(_ headers: HTTPHeaders) -> Self {
-        if  let authorization: String = headers["authorization"].last {
-            .api(authorization: authorization)
-        } else {
-            .web(cookie: headers["cookie"])
-        }
-    }
-
-    static func from(_ headers: HPACKHeaders) -> Self {
-        if  let authorization: String = headers["authorization"].last {
-            .api(authorization: authorization)
-        } else {
-            .web(cookie: headers["cookie"])
-        }
     }
 }
 extension Unidoc.Authorization {

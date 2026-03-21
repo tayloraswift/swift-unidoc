@@ -318,6 +318,9 @@ extension SSGC.Toolchain {
                     a different module name than we detected from the package manifest.
                     """)
             }
+        } catch {
+            // this empty block needed to dodge swift 6.3 compiler crash
+            throw error
         }
     }
 }

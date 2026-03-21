@@ -71,16 +71,16 @@ let package: Package = .init(
         .package(url: "https://github.com/rarestype/gram", from: "1.0.0"),
         .package(url: "https://github.com/rarestype/h", from: "1.0.1"),
         .package(url: "https://github.com/rarestype/swift-bson", from: "2.0.2"),
+        .package(url: "https://github.com/rarestype/swift-dom", from: "1.2.2"),
         .package(url: "https://github.com/rarestype/swift-ip", from: "0.3.6"),
+        .package(url: "https://github.com/rarestype/swift-io", from: "1.0.0"),
         .package(url: "https://github.com/rarestype/swift-json", from: "2.3.2"),
         .package(url: "https://github.com/rarestype/swift-mongodb", from: "1.0.0"),
-        .package(url: "https://github.com/rarestype/servit", from: "1.0.0"),
+        .package(url: "https://github.com/rarestype/servit", from: "1.1.0"),
         .package(url: "https://github.com/rarestype/u", from: "1.1.0"),
         .package(url: "https://github.com/rarestype/ucf", from: "0.2.1"),
 
-        .package(url: "https://github.com/tayloraswift/swift-dom", from: "1.2.1"),
-        .package(url: "https://github.com/tayloraswift/swift-io", from: "0.1.0"),
-        .package(url: "https://github.com/tayloraswift/swift-png", from: "4.5.0"),
+        .package(url: "https://github.com/tayloraswift/swift-png", from: "4.5.1"),
 
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.7.0"),
         .package(url: "https://github.com/apple/swift-collections", from: "1.4.0"),
@@ -579,6 +579,7 @@ let package: Package = .init(
                 .target(name: "UnidocUI"),
                 .product(name: "HTTPClient", package: "servit"),
                 .product(name: "HTTPServer", package: "servit"),
+                .product(name: "HTTPServerRequests", package: "servit"),
                 .product(name: "Media", package: "servit"),
                 .product(name: "Multiparts", package: "servit"),
             ]

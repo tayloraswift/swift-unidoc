@@ -2,6 +2,7 @@ import Atomics
 import GitHubAPI
 import HTTP
 import HTTPServer
+import HTTPServerRequests
 import ISO
 import MD5
 import MongoDB
