@@ -1,23 +1,23 @@
 <div align="center">
 
-<strong><em><code>unidoc</code></em></strong>
+🩷 &nbsp; **unidoc** &nbsp; 🩷
+
+a scalable multi-package documentation engine for the swift language
+
+[swiftinit home](https://swiftinit.org/) ·
+[get started locally](https://swiftinit.org/docs/swift-unidoc/guides/quickstart)
+
+</div>
+
+
+Unidoc can be thought of as a multi-target analogue to Apple’s local DocC compiler. It is designed for long-lived, centralized documentation indices that store, link, and serve multiple versions of documentation for many Swift packages at once.
+
+Unidoc powers the [Swiftinit](https://swiftinit.org) open source package index!
+
 
 [![ci build status](https://github.com/rarestype/unidoc/actions/workflows/Test.yml/badge.svg)](https://github.com/rarestype/unidoc/actions/workflows/Test.yml)
 [![ci build status](https://github.com/rarestype/unidoc/actions/workflows/Docs.yml/badge.svg)](https://github.com/rarestype/unidoc/actions/workflows/Docs.yml)
 [![ci build status](https://github.com/rarestype/unidoc/actions/workflows/Deploy.yml/badge.svg)](https://github.com/rarestype/unidoc/actions/workflows/Deploy.yml)
-
-</div>
-
-**Unidoc** is a scalable documentation engine for the Swift language. Unidoc can be thought of as a multi-target analogue to Apple’s local DocC compiler. It is designed for long-lived, centralized documentation indices that store, link, and serve multiple versions of documentation for many Swift packages at once.
-
-Unidoc powers the [Swiftinit](https://swiftinit.org) open source package index!
-
-<div align="center">
-
-[swiftinit home](https://swiftinit.org/) · [get started locally](https://swiftinit.org/docs/swift-unidoc/guides/quickstart)
-
-</div>
-
 
 ## Requirements
 
