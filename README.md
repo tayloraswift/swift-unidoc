@@ -75,7 +75,7 @@ See [swiftonserver.com](https://swiftonserver.com/realtime-mongodb-updates-with-
 
 Unidoc servers are designed to store versioned documentation indefinitely. To achieve this, Unidoc uses a stable binary symbol graph format that can be up to two orders of magnitude smaller than an equivalent DocC archive.
 
-Here’s a comparison for the (in)famous [SwiftSyntax](https://github.com/apple/swift-syntax) package, at version 508.0.1:
+Here’s a comparison for the (in)famous [SwiftSyntax](https://github.com/swiftlang/swift-syntax) package, at version 508.0.1:
 
 | Archive | Size | File count |
 | --- | --- | --- |
