@@ -22,9 +22,9 @@ Unidoc supports Linux and macOS. Unidoc requires Swift 6.2.
 <!-- DO NOT EDIT BELOW! AUTOSYNC CONTENT [STATUS TABLE] -->
 | Platform | Status |
 | -------- | ------|
-| ??? | [![Status](https://raw.githubusercontent.com/rarestype/unidoc/refs/badges/ci/Test/Linux/status.svg)](https://github.com/rarestype/unidoc/actions/workflows/Test.yml) |
-| ??? | [![Status](https://raw.githubusercontent.com/rarestype/unidoc/refs/badges/ci/Test/Linux-server/status.svg)](https://github.com/rarestype/unidoc/actions/workflows/Test.yml) |
-| ??? | [![Status](https://raw.githubusercontent.com/rarestype/unidoc/refs/badges/ci/Test/macOS/status.svg)](https://github.com/rarestype/unidoc/actions/workflows/Test.yml) |
+| 🐧 Linux (server) | [![Status](https://raw.githubusercontent.com/rarestype/unidoc/refs/badges/ci/Tests/Linux-server/status.svg)](https://github.com/rarestype/unidoc/actions/workflows/Tests.yml) |
+| 🐧 Linux | [![Status](https://raw.githubusercontent.com/rarestype/unidoc/refs/badges/ci/Tests/Linux/status.svg)](https://github.com/rarestype/unidoc/actions/workflows/Tests.yml) |
+| 🍏 Darwin | [![Status](https://raw.githubusercontent.com/rarestype/unidoc/refs/badges/ci/Tests/macOS/status.svg)](https://github.com/rarestype/unidoc/actions/workflows/Tests.yml) |
 <!-- DO NOT EDIT ABOVE! AUTOSYNC CONTENT [STATUS TABLE] -->
 
 Follow our [quickstart guide](https://swiftinit.org/docs/swift-unidoc/guides/quickstart) to learn how to set up a local Unidoc server.
