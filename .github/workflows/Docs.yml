@@ -13,9 +13,32 @@ on:
         branches: [ master ]
 
 jobs:
+    changes:
+        runs-on: ubuntu-latest
+        name: Assess changes
+        steps:
+            -   name: 🤍 Checkout repository 🤍
+                uses: actions/checkout@v6
+
+            -   name: 🤍 Decide checks 🤍
+                uses: tj-actions/changed-files@v47
+                id: changes
+                with:
+                    files_ignore: |
+                        README.md
+                        LICENSE
+                        NOTICE
+                        .mailmap
+                        .gitignore
+                        .github/FUNDING.yml
+        outputs:
+            code_changed: ${{ steps.changes.outputs.any_changed }}
+
     Linux:
         runs-on: ubuntu-24.04
         name: Ubuntu 24.04
+        needs: changes
+        if: ${{ needs.changes.outputs.code_changed == 'true' }}
         env:
             UNIDOC_ENABLE_INDEXSTORE: "0"
         steps:
@@ -43,9 +66,10 @@ jobs:
 
     macOS:
         runs-on: macos-26
+        needs: changes
+        if: ${{ needs.changes.outputs.code_changed == 'true' }}
         env:
             UNIDOC_ENABLE_INDEXSTORE: "0"
-
         steps:
             -   name: 🤍 Install Unidoc 🤍
                 uses: rarestype/unidoc-action@master
