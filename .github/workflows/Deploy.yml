@@ -9,9 +9,8 @@ on:
             -   '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-    macos:
+    macOS:
         runs-on: macos-26
-        name: macOS
         steps:
             -   name: 💝 Setup AWS CLI 💝
                 uses: aws-actions/configure-aws-credentials@v6
@@ -38,7 +37,7 @@ jobs:
 
                 run: Scripts/Deploy unidoc.tar.gz
 
-    linux:
+    Linux:
         strategy:
             matrix:
                 os:
@@ -84,7 +83,7 @@ jobs:
 
                 run: Scripts/Deploy unidoc.tar.gz
 
-    linux_server:
+    Linux-server:
         strategy:
             matrix:
                 os:

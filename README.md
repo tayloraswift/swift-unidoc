@@ -15,23 +15,12 @@ Unidoc can be thought of as a multi-target analogue to Apple’s local DocC comp
 Unidoc powers the [Swiftinit](https://swiftinit.org) open source package index!
 
 
-[![ci build status](https://github.com/rarestype/unidoc/actions/workflows/Test.yml/badge.svg)](https://github.com/rarestype/unidoc/actions/workflows/Test.yml)
-[![ci build status](https://github.com/rarestype/unidoc/actions/workflows/Docs.yml/badge.svg)](https://github.com/rarestype/unidoc/actions/workflows/Docs.yml)
-[![ci build status](https://github.com/rarestype/unidoc/actions/workflows/Deploy.yml/badge.svg)](https://github.com/rarestype/unidoc/actions/workflows/Deploy.yml)
-
 ## Requirements
 
 Unidoc supports Linux and macOS. Unidoc requires Swift 6.2.
 
-We provide prebuilt binaries for the following platforms:
-
-| Platform | Architecture | Download |
-| -------- | ------------ | -------- |
-| macOS 15 | arm64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/macOS-ARM64/unidoc.tar.gz) |
-| Ubuntu 24.04 | arm64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/Ubuntu-24.04-ARM64/unidoc.tar.gz) |
-| Ubuntu 24.04 | x86_64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/Ubuntu-24.04-X64/unidoc.tar.gz) |
-| Ubuntu 22.04 | arm64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/Ubuntu-22.04-ARM64/unidoc.tar.gz) |
-| Ubuntu 22.04 | x86_64 | [tar.gz](https://download.rarestype.com/unidoc/0.22.4/Ubuntu-22.04-X64/unidoc.tar.gz) |
+<!-- DO NOT EDIT BELOW! AUTOSYNC CONTENT [STATUS TABLE] -->
+<!-- DO NOT EDIT ABOVE! AUTOSYNC CONTENT [STATUS TABLE] -->
 
 Follow our [quickstart guide](https://swiftinit.org/docs/swift-unidoc/guides/quickstart) to learn how to set up a local Unidoc server.
 

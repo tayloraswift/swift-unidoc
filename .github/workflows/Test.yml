@@ -1,6 +1,8 @@
 # This workflow builds the project for production, with IndexStoreDB integration enabled.
 name: Test
 
+permissions:
+    contents: write
 on:
     push:
         branches: [ master ]
@@ -29,7 +31,7 @@ jobs:
         outputs:
             code_changed: ${{ steps.changes.outputs.any_changed }}
 
-    linux-server:
+    Linux-server:
         runs-on: ubuntu-24.04
         name: Linux (server)
         needs: changes
@@ -60,7 +62,13 @@ jobs:
                         swift:6.2.4-noble \
                         /bin/bash Scripts/Linux/TestAll
 
-    linux:
+            -   name: 💖 Update badge 💖
+                uses: rarestype/rarestbadge@v1
+                if: always()
+                with:
+                    title: Linux
+
+    Linux:
         runs-on: ubuntu-24.04
         name: Linux
         needs: changes
@@ -106,9 +114,12 @@ jobs:
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
 
-    macos:
+            -   name: 💖 Update badge 💖
+                uses: rarestype/rarestbadge@v1
+                if: always()
+
+    macOS:
         runs-on: macos-26
-        name: macOS
         needs: changes
         if: ${{ needs.changes.outputs.code_changed == 'true' }}
         env:
@@ -144,3 +155,7 @@ jobs:
                     swift test -c release \
                         --no-parallel \
                         --filter SymbolGraphValidationTests
+
+            -   name: 💖 Update badge 💖
+                uses: rarestype/rarestbadge@v1
+                if: always()

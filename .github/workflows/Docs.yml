@@ -13,7 +13,7 @@ on:
         branches: [ master ]
 
 jobs:
-    linux:
+    Linux:
         runs-on: ubuntu-24.04
         name: Ubuntu 24.04
         env:
@@ -41,9 +41,8 @@ jobs:
                         --project-path . \
                         --swift-toolchain $SWIFT_INSTALLATION
 
-    macos:
+    macOS:
         runs-on: macos-26
-        name: macOS
         env:
             UNIDOC_ENABLE_INDEXSTORE: "0"
 
