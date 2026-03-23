@@ -50,12 +50,12 @@ import Testing
             }
             },
             {
-            "identity" : "swift-grammar",
+            "identity" : "gram",
             "kind" : "remoteSourceControl",
-            "location" : "https://github.com/kelvin13/swift-grammar",
+            "location" : "https://github.com/rarestype/gram",
             "state" : {
                 "revision" : "69613825b2ad1d0538c59d72e548867ce7568cc2",
-                "version" : "0.3.1"
+                "version" : "1.0.0"
             }
             }
         ],
@@ -75,12 +75,12 @@ import Testing
                 version: .stable(.release(.v(1, 0, 3)))
             ),
             .init(
-                identity: "swift-grammar",
+                identity: "gram",
                 location: .remote(
-                    url: "https://github.com/kelvin13/swift-grammar"
+                    url: "https://github.com/rarestype/gram"
                 ),
                 revision: 0x69613825b2ad1d0538c59d72e548867ce7568cc2,
-                version: .stable(.release(.v(0, 3, 1)))
+                version: .stable(.release(.v(1, 0, 0)))
             ),
         ]
 
