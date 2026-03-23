@@ -1,4 +1,4 @@
-name: Package
+name: Deploy
 
 on:
     workflow_dispatch:
@@ -41,10 +41,6 @@ jobs:
         strategy:
             matrix:
                 os:
-                    -   codename: jammy
-                        version: Ubuntu-22.04
-                        display: Ubuntu 22.04
-
                     -   codename: noble
                         version: Ubuntu-24.04
                         display: Ubuntu 24.04
