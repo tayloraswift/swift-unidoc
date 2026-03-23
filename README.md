@@ -20,6 +20,8 @@ Unidoc powers the [Swiftinit](https://swiftinit.org) open source package index!
 Unidoc supports Linux and macOS. Unidoc requires Swift 6.2.
 
 <!-- DO NOT EDIT BELOW! AUTOSYNC CONTENT [STATUS TABLE] -->
+| Platform | Build |
+| -------- | ------|
 <!-- DO NOT EDIT ABOVE! AUTOSYNC CONTENT [STATUS TABLE] -->
 
 Follow our [quickstart guide](https://swiftinit.org/docs/swift-unidoc/guides/quickstart) to learn how to set up a local Unidoc server.
