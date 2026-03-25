@@ -15,5 +15,7 @@ extension GitHub.PersonalAccessToken: ExpressibleByStringLiteral {
 extension GitHub.PersonalAccessToken: CustomStringConvertible {
     @inlinable public var description: String { self.rawValue }
 }
-extension GitHub.PersonalAccessToken: JSONEncodable, JSONDecodable {
+extension GitHub.PersonalAccessToken: LosslessStringConvertible {
+    @inlinable public init(_ string: String) { self.init(rawValue: string) }
 }
+extension GitHub.PersonalAccessToken: JSONEncodable, JSONDecodable {}
