@@ -2,6 +2,17 @@ name: Deploy
 
 on:
     workflow_dispatch:
+        inputs:
+            version:
+                description: 'The version to deploy'
+                required: true
+                type: string
+    workflow_call:
+        inputs:
+            version:
+                description: 'The version to deploy'
+                required: true
+                type: string
     #   We build semver tags, and the master branch.
     push:
         branches: [ master ]
@@ -11,6 +22,8 @@ on:
 jobs:
     macOS:
         runs-on: macos-26
+        env:
+            DEPLOY_VERSION: ${{ inputs.version || github.ref_name }}
         steps:
             -   name: 💝 Setup AWS CLI 💝
                 uses: aws-actions/configure-aws-credentials@v6
@@ -31,11 +44,9 @@ jobs:
                     Scripts/Package .build unidoc
 
             -   name: 💝 Upload products 💝
+                run: Scripts/Deploy unidoc.tar.gz
                 env:
                     DEPLOY_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
-                    DEPLOY_VERSION: ${{ github.head_ref || github.ref_name }}
-
-                run: Scripts/Deploy unidoc.tar.gz
 
     Linux:
         strategy:
@@ -53,6 +64,8 @@ jobs:
 
         runs-on: ubuntu-24.04
         name: "${{ matrix.os.display }} (${{ matrix.arch.id }})"
+        env:
+            DEPLOY_VERSION: ${{ inputs.version || github.ref_name }}
         steps:
             -   name: 💝 Setup AWS CLI 💝
                 uses: aws-actions/configure-aws-credentials@v6
@@ -73,11 +86,9 @@ jobs:
                         unidoc
 
             -   name: 💝 Upload products 💝
+                run: Scripts/Deploy unidoc.tar.gz
                 env:
                     DEPLOY_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
-                    DEPLOY_VERSION: ${{ github.head_ref || github.ref_name }}
-
-                run: Scripts/Deploy unidoc.tar.gz
 
     Linux-server:
         strategy:
@@ -92,6 +103,8 @@ jobs:
 
         runs-on: ubuntu-24.04
         name: "${{ matrix.os.display }} (${{ matrix.arch.id }})"
+        env:
+            DEPLOY_VERSION: ${{ inputs.version || github.ref_name }}
         steps:
             -   name: 💝 Setup AWS CLI 💝
                 uses: aws-actions/configure-aws-credentials@v6
@@ -112,8 +125,6 @@ jobs:
                         unidocd
 
             -   name: 💝 Upload products 💝
+                run: Scripts/Deploy unidoc-linkerd.tar.gz unidocd.tar.gz
                 env:
                     DEPLOY_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
-                    DEPLOY_VERSION: ${{ github.head_ref || github.ref_name }}
-
-                run: Scripts/Deploy unidoc-linkerd.tar.gz unidocd.tar.gz
