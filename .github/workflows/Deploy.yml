@@ -1,5 +1,7 @@
 name: Deploy
 
+permissions:
+    contents: write
 on:
     workflow_dispatch:
         inputs:
@@ -13,17 +15,12 @@ on:
                 description: 'The version to deploy'
                 required: true
                 type: string
-    #   We build semver tags, and the master branch.
-    push:
-        branches: [ master ]
-        tags:
-            -   '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
     macOS:
         runs-on: macos-26
         env:
-            DEPLOY_VERSION: ${{ inputs.version || github.ref_name }}
+            DEPLOY_VERSION: ${{ inputs.version }}
         steps:
             -   name: 💝 Setup AWS CLI 💝
                 uses: aws-actions/configure-aws-credentials@v6
@@ -46,26 +43,19 @@ jobs:
             -   name: 💝 Upload products 💝
                 run: Scripts/Deploy unidoc.tar.gz
                 env:
-                    DEPLOY_PLATFORM: "${{ runner.os }}-${{ runner.arch }}"
+                    DEPLOY_PLATFORM: "${{ github.job }}"
 
     Linux:
         strategy:
             matrix:
-                os:
-                    -   codename: noble
-                        version: Ubuntu-24.04
-                        display: Ubuntu 24.04
                 arch:
                     -   id: aarch64
-                        name: ARM64
-
                     -   id: x86_64
-                        name: X64
 
-        runs-on: ubuntu-24.04
-        name: "${{ matrix.os.display }} (${{ matrix.arch.id }})"
+        runs-on: ubuntu-latest
+        name: "Ubuntu 24.04 (${{ matrix.arch.id }})"
         env:
-            DEPLOY_VERSION: ${{ inputs.version || github.ref_name }}
+            DEPLOY_VERSION: ${{ inputs.version }}
         steps:
             -   name: 💝 Setup AWS CLI 💝
                 uses: aws-actions/configure-aws-credentials@v6
@@ -80,7 +70,7 @@ jobs:
             -   name: 💝 Build Unidoc 💝
                 run: |
                     Scripts/Linux/Build ${{ matrix.arch.id }} \
-                        --os ${{ matrix.os.codename }} \
+                        --os noble \
                         --no-jemalloc
                     Scripts/Package .build.${{ matrix.arch.id }} \
                         unidoc
@@ -88,23 +78,22 @@ jobs:
             -   name: 💝 Upload products 💝
                 run: Scripts/Deploy unidoc.tar.gz
                 env:
-                    DEPLOY_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
+                    DEPLOY_PLATFORM: "${{ github.job }}-${{ matrix.arch.id }}"
 
+            -   name: 💝 Update badge 💝
+                uses: rarestype/rarestbadge@v1
+                if: always()
+                with:
+                    badge: Release/${{ github.job }}-${{ matrix.arch.id }}
+                    title: Release
+
+
+    # the difference between this and regular Linux is it uses libjemalloc
     Linux-server:
-        strategy:
-            matrix:
-                os:
-                    -   codename: noble
-                        version: Ubuntu-24.04
-                        display: Ubuntu 24.04
-                arch:
-                    -   id: aarch64
-                        name: ARM64
-
-        runs-on: ubuntu-24.04
-        name: "${{ matrix.os.display }} (${{ matrix.arch.id }})"
+        runs-on: ubuntu-latest
+        name: "Ubuntu 24.04 (server)"
         env:
-            DEPLOY_VERSION: ${{ inputs.version || github.ref_name }}
+            DEPLOY_VERSION: ${{ inputs.version }}
         steps:
             -   name: 💝 Setup AWS CLI 💝
                 uses: aws-actions/configure-aws-credentials@v6
@@ -118,13 +107,19 @@ jobs:
 
             -   name: 💝 Build products 💝
                 run: |
-                    Scripts/Linux/Build ${{ matrix.arch.id }} \
-                        --os ${{ matrix.os.codename }}
-                    Scripts/Package .build.${{ matrix.arch.id }} \
+                    Scripts/Linux/Build aarch64 --os noble
+                    Scripts/Package .build.aarch64 \
                         unidoc-linkerd \
                         unidocd
 
             -   name: 💝 Upload products 💝
                 run: Scripts/Deploy unidoc-linkerd.tar.gz unidocd.tar.gz
                 env:
-                    DEPLOY_PLATFORM: "${{ matrix.os.version }}-${{ matrix.arch.name }}"
+                    DEPLOY_PLATFORM: "Linux-aarch64"
+
+            -   name: 💝 Update badge 💝
+                uses: rarestype/rarestbadge@v1
+                if: always()
+                with:
+                    badge: Release/${{ github.job }}
+                    title: Release

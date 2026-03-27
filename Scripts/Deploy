@@ -3,8 +3,10 @@
 set -euo pipefail
 
 while [[ $# -gt 0 ]]; do
-    aws s3 cp "$1" "s3://rarestype/public/unidoc/$DEPLOY_VERSION/$DEPLOY_PLATFORM/$1" \
-        --content-encoding gzip \
-        --content-type application/gzip
+    for version in "$DEPLOY_VERSION" "latest"; do
+        aws s3 cp "$1" "s3://rarestype/public/unidoc/${version}/${DEPLOY_PLATFORM}/${1}" \
+            --content-encoding gzip \
+            --content-type application/gzip
+    done
     shift
 done
