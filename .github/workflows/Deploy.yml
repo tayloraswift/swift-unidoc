@@ -45,6 +45,13 @@ jobs:
                 env:
                     DEPLOY_PLATFORM: "${{ github.job }}"
 
+            -   name: 💝 Update badge 💝
+                uses: rarestype/rarestbadge@v1
+                if: always()
+                with:
+                    badge: SemanticRelease/${{ github.job }}
+                    title: Release
+
     Linux:
         strategy:
             matrix:
@@ -84,7 +91,7 @@ jobs:
                 uses: rarestype/rarestbadge@v1
                 if: always()
                 with:
-                    badge: Release/${{ github.job }}-${{ matrix.arch.id }}
+                    badge: SemanticRelease/${{ github.job }}-${{ matrix.arch.id }}
                     title: Release
 
 
@@ -121,5 +128,5 @@ jobs:
                 uses: rarestype/rarestbadge@v1
                 if: always()
                 with:
-                    badge: Release/${{ github.job }}
+                    badge: SemanticRelease/${{ github.job }}
                     title: Release
