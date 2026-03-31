@@ -12,9 +12,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-UNIDOC_ENABLE_INDEXSTORE=1 swift build \
+UNIDOC_ENABLE_INDEXSTORE=1 "${SWIFT_INSTALLATION}/bin/swift" build \
     --configuration release \
     --static-swift-stdlib \
-    -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-    -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block \
+    -Xcxx "-I${SWIFT_INSTALLATION}/lib/swift" \
+    -Xcxx "-I${SWIFT_INSTALLATION}/lib/swift/Block" \
     $LINKER_FLAGS
