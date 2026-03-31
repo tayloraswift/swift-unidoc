@@ -1,4 +1,4 @@
-FROM tayloraswift/swift-cross-aarch64:6.2.4-noble
+FROM tayloraswift/swiftcross:6.3-noble
 
 # Only bash supports multiline strings
 SHELL ["/bin/bash", "-c"]
