@@ -38,7 +38,7 @@ extension SSGC {
 extension SSGC.Toolchain {
     public static func detect(
         appleSDK: SSGC.AppleSDK? = nil,
-        paths: Paths = .init(swiftPM: nil, usr: nil),
+        paths: Paths = .init(swiftPM: nil, usr: try? Environment["SWIFT_INSTALLATION"]),
         recoverFromAppleBugs: Bool = true,
         pretty: Bool = false
     ) throws -> Self {
@@ -276,7 +276,7 @@ extension SSGC.Toolchain {
             arguments.append("-fmodule-map-file=\(moduleMap)")
         }
 
-        let environment: SystemProcess.Environment = .inherit {
+        let environment: SystemProcess.EnvironmentSpecification = .inherit {
             $0["SWIFT_BACKTRACE"] = "enable=no"
         }
         let extractor: SystemProcess = try .init(
