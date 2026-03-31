@@ -22,6 +22,8 @@ extension Main: AsyncParsableCommand {
     func run() async throws {
         if  self.version {
             print(Unidoc.version)
+        } else {
+            print(Self.helpMessage)
         }
     }
 }
