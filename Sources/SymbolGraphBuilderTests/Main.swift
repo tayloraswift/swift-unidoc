@@ -118,7 +118,7 @@ import Testing_
                         .init(
                             token: "\"",
                             color: .literalString,
-                            usr: .init("s:SS19stringInterpolationSSs013DefaultStringB0V_tcfc")
+                            usr: .init("s:s26DefaultStringInterpolationV13appendLiteralyySSF")
                         ),
                         .init(token: "\\("),
                         .init(token: "1959", color: .literalNumber),
