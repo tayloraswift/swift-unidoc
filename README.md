@@ -58,10 +58,10 @@ We provide the [swift-unidoc-action](https://github.com/rarestype/unidoc-action)
 ```yaml
 -   name: Validate documentation
     run: |
-        unidoc compile \
-            --swift-toolchain $SWIFT_INSTALLATION \
+        unidoc build \
             --ci fail-on-errors \
-            --project-path .
+            --project-path . \
+            --swift-toolchain $SWIFT_INSTALLATION
 ```
 
 ### ✂ Rich code snippets
