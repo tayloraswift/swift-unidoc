@@ -110,7 +110,7 @@ import Testing
             $0.insert($1.package.name)
         }
 
-        #expect(dependencies == [])
+        #expect(dependencies == ["swift-lmdb"])
 
         #expect(object.graph.cultures.count > 0)
         #expect(object.graph.decls.nodes.count > 0)
