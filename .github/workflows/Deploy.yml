@@ -105,7 +105,7 @@ jobs:
 
     # the difference between this and regular Linux is it uses libjemalloc
     Linux-server:
-        runs-on: ubuntu-latest-arm
+        runs-on: ubuntu-24.04-arm
         name: "Ubuntu 24.04 (server)"
         env:
             DEPLOY_VERSION: ${{ inputs.version }}
