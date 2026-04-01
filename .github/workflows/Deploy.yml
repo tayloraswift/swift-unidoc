@@ -32,6 +32,9 @@ jobs:
             -   name: 💝 Checkout repository 💝
                 uses: actions/checkout@v6
 
+            -   name: 💖 Select Xcode 26.4 💖
+                run: sudo xcode-select -s /Applications/Xcode_26.4.app/Contents/Developer
+
             -   name: 💝 Build products 💝
                 env:
                     UNIDOC_ENABLE_INDEXSTORE: "1"
@@ -77,6 +80,12 @@ jobs:
             -   name: 💝 Checkout repository 💝
                 uses: actions/checkout@v6
 
+            -   name: 💖 Install Swift 💖
+                uses: rarestype/swift-install-action@v1
+                with:
+                    swift-prefix: "swift-6.3-release/ubuntu2404/swift-6.3-RELEASE"
+                    swift-id: "swift-6.3-RELEASE-ubuntu24.04"
+
             -   name: 💝 Build Unidoc 💝
                 run: |
                     Scripts/Linux/Build --no-jemalloc
@@ -111,6 +120,12 @@ jobs:
 
             -   name: 💝 Checkout repository 💝
                 uses: actions/checkout@v6
+
+            -   name: 💖 Install Swift 💖
+                uses: rarestype/swift-install-action@v1
+                with:
+                    swift-prefix: "swift-6.3-release/ubuntu2404/swift-6.3-RELEASE"
+                    swift-id: "swift-6.3-RELEASE-ubuntu24.04"
 
             -   name: 💝 Install jemalloc 💝
                 run: sudo apt install libjemalloc-dev

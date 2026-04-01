@@ -77,14 +77,14 @@ jobs:
             UNIDOC_ENABLE_INDEXSTORE: "1"
 
         steps:
+            -   name: 💖 Checkout repository 💖
+                uses: actions/checkout@v6
+
             -   name: 💖 Install Swift 💖
                 uses: rarestype/swift-install-action@v1
                 with:
                     swift-prefix: "swift-6.3-release/ubuntu2404/swift-6.3-RELEASE"
                     swift-id: "swift-6.3-RELEASE-ubuntu24.04"
-
-            -   name: 💖 Checkout repository 💖
-                uses: actions/checkout@v6
 
             -   name: 💖 Check format 💖
                 run: |
