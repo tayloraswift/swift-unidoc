@@ -60,6 +60,11 @@ Please note that this will start a Docker container that runs continuously in th
 }
 
 
+>   Note:
+>   The easiest way to clean up a temporary local deployment is to run `docker compose down` in the deployment directory (`~/unidoc` in this example).
+>   But, if you would like to do it manually, you can also remove the container with `docker container rm unidoc-mongod-container`, and its network with `docker network rm unidoc-test`.
+
+
 ## 3. Running `unidoc preview`
 
 The `unidoc preview` tool is a simple web server that links and serves documentation for local Swift packages. Run it directly from the host like this:

@@ -20,5 +20,5 @@ swift test -c release \
     --disable-testable-imports
 
 for f in .build/release/*Tests; do
-  $f
+    "$f"
 done

@@ -2,32 +2,28 @@ import JSONDecoding
 import JSONParsing
 import Symbols
 
-@frozen public struct SymbolGraphPart: Equatable, Sendable {
+@frozen public struct SymbolGraphPart: Identifiable, Equatable, Sendable {
+    public let id: ID
     public let metadata: Metadata
-    public let culture: Symbol.Module
-    public let colony: Symbol.Module?
 
     public var relationships: [Symbol.AnyRelationship]
     public var vertices: [Vertex]
 
     private init(
+        id: ID,
         metadata: Metadata,
-        culture: Symbol.Module,
-        colony: Symbol.Module?,
         relationships: [Symbol.AnyRelationship],
         vertices: [Vertex]
     ) {
         self.metadata = metadata
-        self.culture = culture
-        self.colony = colony
+        self.id = id
         self.relationships = relationships
         self.vertices = vertices
     }
 }
-extension SymbolGraphPart: Identifiable {
-    @inlinable public var id: ID {
-        .init(culture: self.culture, colony: self.colony)
-    }
+extension SymbolGraphPart {
+    @inlinable public var culture: Symbol.Module { self.id.culture }
+    @inlinable public var colony: Symbol.Module? { self.id.colony }
 }
 extension SymbolGraphPart {
     public init(json: JSON, id: ID) throws {
@@ -37,29 +33,19 @@ extension SymbolGraphPart {
     private init(json: JSON.Object, id: ID) throws {
         enum CodingKey: String, Sendable {
             case metadata
-
-            case module
-            enum Module: String {
-                case name
-            }
-
             case vertices = "symbols"
             case relationships
         }
 
+        // in 6.3, `module.name` became useless. so now we always use the filename as the
+        // singular source of truth about what module symbols actually belong to.
+
         let json: JSON.ObjectDecoder<CodingKey> = try .init(indexing: json)
         self.init(
+            id: id,
             metadata: try json[.metadata].decode(),
-            culture: try json[.module].decode(using: CodingKey.Module.self) {
-                try $0[.name].decode()
-            },
-            colony: id.colony,
             relationships: try json[.relationships].decode(),
             vertices: try json[.vertices].decode()
         )
-
-        if  self.culture != id.culture {
-            throw IdentificationError.culture(id, expected: self.culture)
-        }
     }
 }

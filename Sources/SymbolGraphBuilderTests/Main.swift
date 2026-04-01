@@ -11,11 +11,15 @@ import Testing_
     static func run(tests: TestGroup) async {
         if  let tests: TestGroup = tests / "SplashParsing" {
             if  let tests: TestGroup = tests / "LinuxNightly",
-                let splash: SSGC.Toolchain.Splash = tests.expect(value: try? .init(parsing: """
+                let splash: SSGC.Toolchain.Splash = tests.expect(
+                    value: try? .init(
+                        parsing: """
                         Swift version 5.8-dev (LLVM 07d14852a049e40, Swift 613b3223d9ec5f6)
                         Target: x86_64-unknown-linux-gnu
 
-                        """)) {
+                        """
+                    )
+                ) {
                 tests.expect(
                     splash.swift ==? .init(
                         version: .v(5, 8, 0),
@@ -46,10 +50,12 @@ import Testing_
         }
 
         guard
-        let workspace: SSGC.Workspace =
-        (tests ! "workspace").do({ try .create(at: ".testing") }),
-        let toolchain: SSGC.Toolchain =
-        (tests ! "toolchain").do({ try .detect(pretty: true) }) else {
+        let workspace: SSGC.Workspace = (tests ! "workspace").do(
+            { try .create(at: ".testing") }
+        ),
+        let toolchain: SSGC.Toolchain = (tests ! "toolchain").do(
+            { try .detect(pretty: true) }
+        ) else {
             return
         }
 
@@ -112,12 +118,16 @@ import Testing_
                         .init(
                             token: "\"",
                             color: .literalString,
-                            usr: .init("s:SS19stringInterpolationSSs013DefaultStringB0V_tcfc")
+                            usr: .init("s:s26DefaultStringInterpolationV13appendLiteralyySSF")
                         ),
                         .init(token: "\\("),
                         .init(token: "1959", color: .literalNumber),
                         .init(token: ")"),
-                        .init(token: "\"", color: .literalString)
+                        .init(
+                            token: "\"",
+                            color: .literalString,
+                            usr: .init("s:s26DefaultStringInterpolationV13appendLiteralyySSF")
+                        )
                     ],
                     [
                         .init(token: "let", color: .keyword),

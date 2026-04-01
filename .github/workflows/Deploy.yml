@@ -57,9 +57,12 @@ jobs:
             matrix:
                 arch:
                     -   id: aarch64
-                    -   id: x86_64
+                        runner: ubuntu-24.04-arm
 
-        runs-on: ubuntu-latest
+                    -   id: x86_64
+                        runner: ubuntu-24.04
+
+        runs-on: ${{ matrix.arch.runner }}
         name: "Ubuntu 24.04 (${{ matrix.arch.id }})"
         env:
             DEPLOY_VERSION: ${{ inputs.version }}
@@ -76,11 +79,8 @@ jobs:
 
             -   name: 💝 Build Unidoc 💝
                 run: |
-                    Scripts/Linux/Build ${{ matrix.arch.id }} \
-                        --os noble \
-                        --no-jemalloc
-                    Scripts/Package .build.${{ matrix.arch.id }} \
-                        unidoc
+                    Scripts/Linux/Build --no-jemalloc
+                    Scripts/Package .build unidoc
 
             -   name: 💝 Upload products 💝
                 run: Scripts/Deploy unidoc.tar.gz
@@ -97,7 +97,7 @@ jobs:
 
     # the difference between this and regular Linux is it uses libjemalloc
     Linux-server:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-latest-arm
         name: "Ubuntu 24.04 (server)"
         env:
             DEPLOY_VERSION: ${{ inputs.version }}
@@ -112,12 +112,13 @@ jobs:
             -   name: 💝 Checkout repository 💝
                 uses: actions/checkout@v6
 
+            -   name: 💝 Install jemalloc 💝
+                run: sudo apt install libjemalloc-dev
+
             -   name: 💝 Build products 💝
                 run: |
-                    Scripts/Linux/Build aarch64 --os noble
-                    Scripts/Package .build.aarch64 \
-                        unidoc-linkerd \
-                        unidocd
+                    Scripts/Linux/Build
+                    Scripts/Package .build unidoc-linkerd unidocd
 
             -   name: 💝 Upload products 💝
                 run: Scripts/Deploy unidoc-linkerd.tar.gz unidocd.tar.gz

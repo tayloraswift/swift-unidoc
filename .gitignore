@@ -1,18 +1,19 @@
-.build
-.build.*
-.mongod/*
-.ssgc
-.testing
-.unidoc
+/.build
+/.build.*
+/.mongod/*
+/.ssgc
+/.testing
+/.unidoc
 
 /.vscode/launch.json
 /.vscode/settings.json
 
 /*.tar.gz
+/*.bson
 /unidoc
+/local
 /swiftpm
 
-/Aarch64
 /Assets/certificates/*.pem
 /Assets/secrets/
 /Assets/icons/*.jpg
@@ -20,10 +21,12 @@
 /TestModules/Determinism/*.json
 /TestModules/SymbolGraphs/*.json
 /TestModules/*.json
+/TestModules/.build
+
+/TestPackages/*/.build
+/TestPackages/*/.build.*
 /TestPackages/*.bson
+
 /TypeScript/node_modules
 
 /Package.resolved
-
-*.profdata
-*.profraw

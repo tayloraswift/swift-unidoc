@@ -22,8 +22,8 @@ extension Markdown.SwiftLanguage.Highlighter: Markdown.CodeHighlighter {
             let parsed: SourceFileSyntax = Parser.parse(source: $0)
             for span: SyntaxClassifiedRange in parsed.classifications {
                 let text: UnsafeBufferPointer<UInt8> = .init(
-                    start: base + span.offset,
-                    count: span.length
+                    start: base + span.range.lowerBound.utf8Offset,
+                    count: span.range.length.utf8Length
                 )
 
                 binary[highlight: .init(classification: span.kind)] = text

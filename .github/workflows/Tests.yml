@@ -59,7 +59,7 @@ jobs:
                         -v $PWD:/swift/swift-unidoc \
                         -w /swift/swift-unidoc \
                         -e SWIFT_INSTALLATION=/usr \
-                        swift:6.2.4-noble \
+                        swift:6.3-noble \
                         /bin/bash Scripts/Linux/TestAll
 
             -   name: 💖 Update badge 💖
@@ -95,7 +95,7 @@ jobs:
                 run: |
                     swift --version
                     swift build -c release \
-                        --product ssgc \
+                        --build-tests \
                         --explicit-target-dependency-import-check=warn \
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
                         -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
@@ -109,10 +109,9 @@ jobs:
             -   name: 💖 Validate packages 💖
                 run: |
                     swift test -c release \
+                        --skip-build \
                         --no-parallel \
-                        --filter SymbolGraphValidationTests \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
+                        --filter SymbolGraphValidationTests
 
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1
@@ -141,7 +140,7 @@ jobs:
                 run: |
                     swift --version
                     swift build -c release \
-                        --product ssgc \
+                        --build-tests \
                         --explicit-target-dependency-import-check=warn
                     mkdir $HOME/bin
                     mv .build/release/ssgc $HOME/bin
@@ -153,6 +152,7 @@ jobs:
             -   name: 💖 Validate packages 💖
                 run: |
                     swift test -c release \
+                        --skip-build \
                         --no-parallel \
                         --filter SymbolGraphValidationTests
 
