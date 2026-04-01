@@ -45,7 +45,7 @@ jobs:
             -   name: 🤍 Install Swift 🤍
                 uses: rarestype/swift-install-action@v1
                 with:
-                    swift-release: "6.3-RELEASE"
+                    swift-release: 6.3-RELEASE
 
             #   This installs an older version of Unidoc, not the one we are testing.
             #   We use `--static-swift-stdlib` so it doesn’t matter if the Unidoc binary was

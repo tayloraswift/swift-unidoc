@@ -83,7 +83,7 @@ jobs:
             -   name: 💖 Install Swift 💖
                 uses: rarestype/swift-install-action@v1
                 with:
-                    swift-release: "6.3-RELEASE"
+                    swift-release: 6.3-RELEASE
 
             -   name: 💝 Build Unidoc 💝
                 run: |
@@ -123,7 +123,7 @@ jobs:
             -   name: 💖 Install Swift 💖
                 uses: rarestype/swift-install-action@v1
                 with:
-                    swift-release: "6.3-RELEASE"
+                    swift-release: 6.3-RELEASE
 
             -   name: 💝 Install jemalloc 💝
                 run: sudo apt install libjemalloc-dev
