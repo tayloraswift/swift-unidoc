@@ -1,6 +1,7 @@
 import JSON
 import SemanticVersions
 import SHA1
+import SHA1_JSON
 
 extension SPM {
     @frozen public struct DependencyState: Equatable, Hashable, Sendable {

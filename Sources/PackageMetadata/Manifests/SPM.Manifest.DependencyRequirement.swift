@@ -1,10 +1,10 @@
-import SHA1
 import SymbolGraphs
 
 extension SPM.Manifest {
     @frozen public enum DependencyRequirement: Hashable, Equatable, Sendable {
-        case refname    (String)
-        case revision   (SHA1)
+        /// Due to a SwiftPM quirk, this is not always a SHA-1 hash, it can also point to a tag
+        case revision   (String)
+        case branch     (String)
         case stable     (SymbolGraphMetadata.DependencyRequirement)
     }
 }
