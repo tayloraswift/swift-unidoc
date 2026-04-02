@@ -194,7 +194,7 @@ import Testing
                         location: .remote(
                             url: "https://github.com/tayloraswift/swift-json"
                         ),
-                        requirement: .refname("master")
+                        requirement: .branch("master")
                     )
                 ),
 
@@ -219,9 +219,7 @@ import Testing
                         location: .remote(
                             url: "https://github.com/tayloraswift/swift-hash"
                         ),
-                        requirement: .revision(
-                            0x36ef4bf1e6ae38f881ed253d5656839a046456f1
-                        )
+                        requirement: .revision("36ef4bf1e6ae38f881ed253d5656839a046456f1")
                     )
                 ),
 

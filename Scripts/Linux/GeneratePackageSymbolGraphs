@@ -19,7 +19,7 @@ ssgc slave https://github.com/apple/swift-async-dns-resolver.git 0.1.2 \
     -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-async-dns-resolver.bson
 
-ssgc slave https://github.com/swiftlang/swift-syntax.git 600.0.1 \
+ssgc slave https://github.com/swiftlang/swift-syntax.git 603.0.0 \
     -u $SWIFT_INSTALLATION \
     -o TestPackages/swift-syntax.bson
 

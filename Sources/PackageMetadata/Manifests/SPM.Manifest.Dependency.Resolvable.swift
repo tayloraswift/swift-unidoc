@@ -1,8 +1,6 @@
 import JSON
 import PackageGraphs
 import SemanticVersions
-import SHA1
-import SHA1_JSON
 import Symbols
 
 extension SPM.Manifest.Dependency {
@@ -58,7 +56,7 @@ extension SPM.Manifest.Dependency.Resolvable: JSONObjectDecodable {
             let json: JSON.FieldDecoder<CodingKey.Requirement> = try $0.single()
             switch json.key {
             case .branch:
-                return .refname(
+                return .branch(
                     try json.decode(
                         as: JSON.SingleElementRepresentation<String>.self,
                         with: \.value
@@ -100,7 +98,7 @@ extension SPM.Manifest.Dependency.Resolvable: JSONObjectDecodable {
             case .revision:
                 return .revision(
                     try json.decode(
-                        as: JSON.SingleElementRepresentation<SHA1>.self,
+                        as: JSON.SingleElementRepresentation<String>.self,
                         with: \.value
                     )
                 )
