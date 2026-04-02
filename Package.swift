@@ -17,9 +17,6 @@ let package: Package = .init(
         .library(name: "Availability", targets: ["Availability"]),
         .library(name: "AvailabilityDomain", targets: ["AvailabilityDomain"]),
 
-        .library(name: "GitHubAPI", targets: ["GitHubAPI"]),
-        .library(name: "GitHubClient", targets: ["GitHubClient"]),
-
         .library(name: "InlineArray", targets: ["InlineArray"]),
 
         .library(name: "InlineDictionary", targets: ["InlineDictionary"]),
@@ -72,6 +69,7 @@ let package: Package = .init(
         .package(url: "https://github.com/rarestype/h", from: "1.0.1"),
         .package(url: "https://github.com/rarestype/swift-bson", from: "2.0.2"),
         .package(url: "https://github.com/rarestype/swift-dom", from: "1.2.2"),
+        .package(url: "https://github.com/rarestype/swift-github", from: "1.0.0"),
         .package(url: "https://github.com/rarestype/swift-ip", from: "0.3.6"),
         .package(url: "https://github.com/rarestype/swift-io", from: "1.1.0"),
         .package(url: "https://github.com/rarestype/swift-json", from: "2.3.2"),
@@ -148,23 +146,6 @@ let package: Package = .init(
             dependencies: [
                 .product(name: "HTTP", package: "servit"),
                 .product(name: "ISO", package: "u"),
-            ]
-        ),
-
-        .target(
-            name: "GitHubClient",
-            dependencies: [
-                .target(name: "GitHubAPI"),
-                .product(name: "HTTPClient", package: "servit"),
-                .product(name: "Base64", package: "h"),
-            ]
-        ),
-
-        .target(
-            name: "GitHubAPI",
-            dependencies: [
-                .target(name: "SHA1_JSON"),
-                .product(name: "UnixTime", package: "u"),
             ]
         ),
 
@@ -275,9 +256,9 @@ let package: Package = .init(
         .target(
             name: "PackageMetadata",
             dependencies: [
-                .target(name: "SHA1_JSON"),
                 .target(name: "PackageGraphs"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
+                .product(name: "SHA1_JSON", package: "swift-github"),
             ]
         ),
 
@@ -307,14 +288,6 @@ let package: Package = .init(
             dependencies: [
                 .target(name: "Availability"),
                 .target(name: "MarkdownABI")
-            ]
-        ),
-
-        .target(
-            name: "SHA1_JSON",
-            dependencies: [
-                .product(name: "JSON", package: "swift-json"),
-                .product(name: "SHA1", package: "h"),
             ]
         ),
 
@@ -443,9 +416,9 @@ let package: Package = .init(
             name: "UnidocAPI",
             dependencies: [
                 .target(name: "SemanticVersions"),
-                .target(name: "SHA1_JSON"),
                 .target(name: "Symbols"),
                 .target(name: "Unidoc"),
+                .product(name: "SHA1_JSON", package: "swift-github"),
                 .product(name: "URI", package: "ucf"),
             ]
         ),
@@ -541,9 +514,9 @@ let package: Package = .init(
         .target(
             name: "UnidocRecords",
             dependencies: [
-                .target(name: "GitHubAPI"),
                 .target(name: "SymbolGraphs"),
                 .target(name: "UnidocAPI"),
+                .product(name: "GitHubAPI", package: "swift-github"),
                 .product(name: "FNV1", package: "ucf"),
                 .product(name: "MD5", package: "h"),
             ]
@@ -566,7 +539,6 @@ let package: Package = .init(
         .target(
             name: "UnidocServer",
             dependencies: [
-                .target(name: "GitHubClient"),
                 .target(name: "S3Client"),
                 .target(name: "Sitemaps"),
                 .target(name: "UnidocAssets"),
@@ -577,6 +549,7 @@ let package: Package = .init(
                 .target(name: "UnidocQueries"),
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocUI"),
+                .product(name: "GitHubClient", package: "swift-github"),
                 .product(name: "HTTPClient", package: "servit"),
                 .product(name: "HTTPServer", package: "servit"),
                 .product(name: "HTTPServerRequests", package: "servit"),
@@ -604,11 +577,11 @@ let package: Package = .init(
         .target(
             name: "UnidocUI",
             dependencies: [
-                .target(name: "GitHubAPI"),
                 .target(name: "PieCharts"),
                 .target(name: "UnidocRender"),
                 .target(name: "UnidocAPI"),
                 .target(name: "UnidocQueries"),
+                .product(name: "GitHubAPI", package: "swift-github"),
                 .product(name: "URI", package: "ucf"),
                 .product(name: "UnixTime", package: "u"),
             ]
@@ -732,9 +705,9 @@ let package: Package = .init(
             name: "UnidocDBTests",
             dependencies: [
                 .target(name: "UnidocTesting"),
-                .target(name: "GitHubClient"),
                 .target(name: "SymbolGraphBuilder"),
                 .target(name: "SymbolGraphTesting"),
+                .product(name: "GitHubClient", package: "swift-github"),
             ]
         ),
 
