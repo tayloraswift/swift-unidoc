@@ -71,7 +71,7 @@ let package: Package = .init(
         .package(url: "https://github.com/rarestype/swift-dom", from: "1.2.2"),
         .package(url: "https://github.com/rarestype/swift-github", from: "1.0.0"),
         .package(url: "https://github.com/rarestype/swift-ip", from: "0.3.6"),
-        .package(url: "https://github.com/rarestype/swift-io", from: "1.1.0"),
+        .package(url: "https://github.com/rarestype/swift-io", from: "1.2.0"),
         .package(url: "https://github.com/rarestype/swift-json", from: "2.3.2"),
         .package(url: "https://github.com/rarestype/swift-mongodb", from: "1.0.0"),
         .package(url: "https://github.com/rarestype/servit", from: "1.1.0"),
@@ -84,7 +84,7 @@ let package: Package = .init(
         .package(url: "https://github.com/apple/swift-collections", from: "1.4.0"),
         .package(url: "https://github.com/apple/swift-nio", from: "2.96.0"),
         .package(url: "https://github.com/apple/swift-markdown", from: "0.7.3"),
-        .package(url: "https://github.com/swiftlang/swift-syntax", from: "602.0.0"),
+        .package(url: "https://github.com/swiftlang/swift-syntax", from: "603.0.0"),
     ],
     targets: [
         .executableTarget(
