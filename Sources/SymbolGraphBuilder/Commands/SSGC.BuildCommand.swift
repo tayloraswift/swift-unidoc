@@ -25,8 +25,7 @@ extension SSGC {
             """
         ) var cleanArtifacts: Bool = false
 
-        public init() {
-        }
+        public init() {}
     }
 }
 extension SSGC.BuildCommand: AsyncParsableCommand {
@@ -46,7 +45,7 @@ extension SSGC.BuildCommand: AsyncParsableCommand {
             permissions: (.rw, .r, .r),
             options: [.create, .truncate]
         ) {
-            try self.launch( logger: .init(validation: validation, file: $0))
+            try self.launch(logger: .init(validation: validation, file: $0))
         }
     }
 

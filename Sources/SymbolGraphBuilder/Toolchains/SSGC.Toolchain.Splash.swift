@@ -77,12 +77,12 @@ extension SSGC.Toolchain.Splash {
     public init(running command: String) throws {
         let (readable, writable): (FileDescriptor, FileDescriptor) = try FileDescriptor.pipe()
 
-        defer {
-            try? writable.close()
-            try? readable.close()
+        defer { try? readable.close() }
+        do {
+            // Close the parent’s write end of the pipe so EOF can be reached
+            defer { try? writable.close() }
+            try SystemProcess.init(command: command, "--version", stdout: writable)()
         }
-
-        try SystemProcess.init(command: command, "--version", stdout: writable)()
         try self.init(parsing: try readable.read(buffering: 1024))
     }
 }

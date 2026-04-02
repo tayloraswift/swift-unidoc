@@ -102,7 +102,10 @@ extension SSGC.Toolchain {
                     stdout: $0
                 )
                 try dump()
-                return try $0.readAll()
+                /// the subprocess moves the file position, so if we don’t reset, we’ll get an
+                /// empty string as output
+                try $0.seek(offset: 0, from: .start)
+                return try $0.read(buffering: 0x8000)
             }
 
             json = .init(utf8: utf8[...])
