@@ -166,7 +166,7 @@ extension SPM.Manifest: JSONObjectDecodable {
             dependencies: try json[.dependencies].decode(),
             products: try json[.products].decode(),
             targets: try json[.targets].decode(),
-            traits: try json[.traits].decode(),
+            traits: try json[.traits]?.decode() ?? [],
             format: try json[.format].decode(as: JSON.ObjectDecoder<CodingKey.Format>.self) {
                 try $0[.version].decode(
                     as: JSON.StringRepresentation<PatchVersion>.self,
