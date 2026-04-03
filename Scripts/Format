@@ -1,0 +1,23 @@
+#!/bin/bash
+set -euo pipefail
+
+swift package dollup --allow-writing-to-package-directory
+
+dollup_matches=( ".build/artifacts/dollup/DollupBinary/dollup.artifactbundle"/*/dollup )
+# this assumes we only ever ship one binary per bundle, which we always will
+dollup="${dollup_matches[0]}"
+
+if [[ ! -f "$dollup" ]]; then
+    echo "could not locate reusable dollup binary"
+    exit 1
+fi
+
+for package in TestPackages/*; do
+    if [[ -f "${package}/Package.swift" ]]; then
+        echo "Formatting local package '${package}'"
+
+        "$dollup" "$package"
+    fi
+done
+
+git diff --exit-code

@@ -11,9 +11,8 @@ print("Hi Barbie!")
 print("Hi Ken!")
 
 //  snippet.F1
-func f()
-{
-    let _:String = """
+func f() {
+    let _: String = """
     This is an expression embedded inside a code block
     """ //  snippet.NOT_A_VALID_SLICE_BECAUSE_IT_IS_NOT_AT_THE_BEGINNING_OF_THE_LINE
 
@@ -23,14 +22,14 @@ func f()
 
     //  snippet.show
 
-    let _:String = """
+    let _: String = """
     This is another expression embedded inside a code block
     """
 
     //  snippet.end
 
     //  snippet.F2
-    let _:String = """
+    let _: String = """
     This is a third expression embedded inside a code block. It is part of an indented snippet
     slice.
     """

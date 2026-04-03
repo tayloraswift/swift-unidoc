@@ -86,9 +86,7 @@ jobs:
                     swift-release: 6.3-RELEASE
 
             -   name: 💖 Check format 💖
-                run: |
-                    swift package dollup --allow-writing-to-package-directory
-                    git diff --exit-code
+                run: Scripts/Format
 
             -   name: 💖 Build release 💖
                 run: |
@@ -131,9 +129,7 @@ jobs:
                 run: sudo xcode-select -s /Applications/Xcode_26.4.app/Contents/Developer
 
             -   name: 💖 Check format 💖
-                run: |
-                    swift package dollup --allow-writing-to-package-directory
-                    git diff --exit-code
+                run: Scripts/Format
 
             -   name: 💖 Build release 💖
                 run: |

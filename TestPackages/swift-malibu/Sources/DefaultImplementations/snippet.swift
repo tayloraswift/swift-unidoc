@@ -1,25 +1,15 @@
-public
-protocol ProtocolA
-{
+public protocol ProtocolA {
     func f()
 }
 
-public
-protocol ProtocolB:ProtocolA
-{
+public protocol ProtocolB: ProtocolA {
 }
-extension ProtocolB
-{
-    public
-    func f()
-    {
+extension ProtocolB {
+    public func f() {
     }
 }
 
-public
-enum Enum
-{
+public enum Enum {
 }
-extension Enum:ProtocolB
-{
+extension Enum: ProtocolB {
 }
