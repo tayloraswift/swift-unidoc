@@ -1,9 +1,9 @@
-#if canImport(IndexStoreDB)
+// #if canImport(IndexStoreDB)
 
 import MarkdownABI
 import Symbols
 
-extension Main.SnippetHighlightingTest {
+extension SnippetHighlightingTest {
     struct ExpectedFragment: Equatable {
         let token: String
         let color: Markdown.Bytecode.Context?
@@ -21,4 +21,4 @@ extension Main.SnippetHighlightingTest {
     }
 }
 
-#endif
+// #endif
