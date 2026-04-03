@@ -25,8 +25,17 @@ extension SSGC.PackageGraph.TraitExplorer {
 
     mutating func walk(
         package: SPM.Manifest,
-        traits: Set<SymbolGraphMetadata.Trait>
+        traits: Set<SymbolGraphMetadata.Trait>,
+        depth: Int = 0
     ) {
+        guard depth < 256 else {
+            fatalError(
+                """
+                exceeded maximum recursion depth for package trait resolution, \
+                are there cycles in the dependency graph?
+                """
+            )
+        }
         for dependency: SPM.Manifest.Dependency in package.dependencies {
             /// these are the traits in the dependency that can be blamed on the current package
             /// (other packages in the build tree might enable extra traits in this dependency)
@@ -47,7 +56,7 @@ extension SSGC.PackageGraph.TraitExplorer {
             next.densify(traits: &blameable)
 
             self.traits[dependency.id, default: []].formUnion(blameable)
-            self.walk(package: next, traits: blameable)
+            self.walk(package: next, traits: blameable, depth: depth + 1)
         }
     }
 }
