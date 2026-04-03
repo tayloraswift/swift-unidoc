@@ -31,7 +31,8 @@ extension SSGC.ModuleIndex {
         let subject: Symbol.Module = try #require(inputs.last, "No subject module!")
 
         /// this directory doesn’t actually exist, it is merely a placeholder
-        let base: Symbol.FileBase = "/__mock/unidoc/TestModules"
+        let root: FilePath.Directory = try #require(.current()) / "TestModules"
+        let base: Symbol.FileBase = .init(root.path.string)
 
         var symbolCache: SSGC.SymbolCache = .init(symbols: symbols)
         var typeChecker: SSGC.TypeChecker = .init()
