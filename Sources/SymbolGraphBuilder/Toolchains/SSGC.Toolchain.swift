@@ -106,7 +106,8 @@ extension SSGC.Toolchain {
                     command: self.paths.swiftCommand,
                     "package", "dump-package",
                     "--package-path", "\(package)",
-                    stdout: $0
+                    stdout: $0,
+                    with: .inherit(adding: Self.environmentForDocumentation(environment:))
                 )
                 try dump()
                 /// the subprocess moves the file position, so if we don’t reset, we’ll get an
