@@ -7,14 +7,15 @@ extension DigraphExplorer<TargetNode>.Nodes {
     /// by the given product.
     func included(
         by product: SPM.Manifest.Product,
-        on platform: SymbolGraphMetadata.Platform
+        on platform: SymbolGraphMetadata.Platform,
+        traits: Set<SymbolGraphMetadata.Trait>,
     ) throws -> Set<String> {
         var explorer: DigraphExplorer<TargetNode> = .init(nodes: self)
         for name: String in product.targets {
             try explorer.explore(node: name)
         }
         let included: [String: TargetNode] = try explorer.conquer {
-            for dependency: String in $1.dependencies.targets(on: platform) {
+            for dependency: String in $1.dependencies.targets(on: platform, traits: traits) {
                 try $0.explore(node: dependency)
             }
         }
@@ -26,7 +27,8 @@ extension DigraphExplorer<TargetNode>.Nodes {
     /// depend only on targets that appear before them in the list.
     func included(
         by products: [SPM.Manifest.Product],
-        on platform: SymbolGraphMetadata.Platform
+        on platform: SymbolGraphMetadata.Platform,
+        traits: Set<SymbolGraphMetadata.Trait>,
     ) throws -> [TargetNode] {
         var explorer: DigraphExplorer<TargetNode> = .init(nodes: self)
 
@@ -39,7 +41,7 @@ extension DigraphExplorer<TargetNode>.Nodes {
         var directedEdges: [(String, String)] = []
         let included: [String: TargetNode] = try explorer.conquer {
             // need to sort dependency set to make topological sort deterministic
-            for name: String in $1.dependencies.targets(on: platform).sorted() {
+            for name: String in $1.dependencies.targets(on: platform, traits: traits).sorted() {
                 directedEdges.append((name, $1.name))
                 try $0.explore(node: name)
             }

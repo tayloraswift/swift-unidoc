@@ -11,8 +11,14 @@ extension SPM.Manifest {
 extension SPM.Manifest.Dependency: Identifiable {
     @inlinable public var id: Symbol.Package {
         switch self {
-        case .filesystem(let dependency): dependency.identity
-        case .resolvable(let dependency): dependency.identity
+        case .filesystem(let self): self.identity
+        case .resolvable(let self): self.identity
+        }
+    }
+    @inlinable public var traits: [Trait] {
+        switch self {
+        case .filesystem(let self): self.traits
+        case .resolvable(let self): self.traits
         }
     }
 }

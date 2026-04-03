@@ -20,18 +20,21 @@ extension TargetNode {
 }
 extension TargetNode.Dependencies {
     @inlinable public func products(
-        on platform: SymbolGraphMetadata.Platform
+        on platform: SymbolGraphMetadata.Platform,
+        traits: Set<SymbolGraphMetadata.Trait>,
     ) -> TargetNode.DependencyView<Symbol.Product> {
-        .init(platform: platform, base: self.products)
+        .init(platform: platform, traits: traits, base: self.products)
     }
     @inlinable public func targets(
-        on platform: SymbolGraphMetadata.Platform
+        on platform: SymbolGraphMetadata.Platform,
+        traits: Set<SymbolGraphMetadata.Trait>,
     ) -> TargetNode.DependencyView<String> {
-        .init(platform: platform, base: self.targets)
+        .init(platform: platform, traits: traits, base: self.targets)
     }
     @inlinable public func nominal(
-        on platform: SymbolGraphMetadata.Platform
+        on platform: SymbolGraphMetadata.Platform,
+        traits: Set<SymbolGraphMetadata.Trait>,
     ) -> TargetNode.DependencyView<String> {
-        .init(platform: platform, base: self.nominal)
+        .init(platform: platform, traits: traits, base: self.nominal)
     }
 }

@@ -45,8 +45,17 @@ done
     -n swift \
     -o TestPackages/swift.bson
 
-for PACKAGE in swift-test swift-malibu swift-snippets swift-exportation cross-module-articles
-do
+packages=(
+    swift-exportation
+    swift-malibu
+    swift-package-traits
+    swift-package-traits-consumer
+    swift-snippets
+    swift-test
+    cross-module-articles
+)
+
+for PACKAGE in "${packages[@]}"; do
     .build/release/ssgc build -u $SWIFT_INSTALLATION \
         -p TestPackages/$PACKAGE \
         -o TestPackages/$PACKAGE.bson

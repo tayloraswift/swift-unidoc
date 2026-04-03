@@ -38,12 +38,13 @@ extension DigraphExplorer<TargetNode>.Nodes {
     /// by the given target. This function is aware of platform conditionals.
     public func included(
         by target: TargetNode,
-        on platform: SymbolGraphMetadata.Platform
+        on platform: SymbolGraphMetadata.Platform,
+        traits: Set<SymbolGraphMetadata.Trait>,
     ) throws -> Set<String> {
         var explorer: DigraphExplorer<TargetNode> = .init(nodes: self)
         explorer.explore(node: target)
         let included: [String: TargetNode] = try explorer.conquer {
-            for dependency: String in $1.dependencies.targets(on: platform) {
+            for dependency: String in $1.dependencies.targets(on: platform, traits: traits) {
                 try $0.explore(node: dependency)
             }
         }

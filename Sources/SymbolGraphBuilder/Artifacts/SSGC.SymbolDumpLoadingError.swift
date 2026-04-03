@@ -14,7 +14,7 @@ extension SSGC {
 }
 extension SSGC.SymbolDumpLoadingError: Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.path == rhs.path && lhs.underlying == rhs.underlying
+        lhs.path == rhs.path && lhs.underlying ~= rhs.underlying
     }
 }
 extension SSGC.SymbolDumpLoadingError: TraceableError {

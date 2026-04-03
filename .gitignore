@@ -25,6 +25,7 @@
 
 /TestPackages/*/.build
 /TestPackages/*/.build.*
+/TestPackages/*/Package.resolved
 /TestPackages/*.bson
 
 /TypeScript/node_modules

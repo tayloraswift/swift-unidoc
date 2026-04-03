@@ -17,6 +17,7 @@ extension SPM {
         public var dependencies: [Dependency]
         public var products: OrderedDictionary<String, Product>
         public var targets: OrderedDictionary<String, TargetNode>
+        public let traits: OrderedDictionary<SymbolGraphMetadata.Trait, Trait>
         /// The `swift-tools-version` format of this manifest.
         public var format: PatchVersion
 
@@ -27,7 +28,8 @@ extension SPM {
             dependencies: [Dependency] = [],
             products: OrderedDictionary<String, Product>,
             targets: OrderedDictionary<String, TargetNode>,
-            format: PatchVersion
+            traits: OrderedDictionary<SymbolGraphMetadata.Trait, Trait>,
+            format: PatchVersion,
         ) {
             self.name = name
             self.root = root
@@ -35,6 +37,7 @@ extension SPM {
             self.dependencies = dependencies
             self.products = products
             self.targets = targets
+            self.traits = traits
             self.format = format
         }
     }
@@ -47,7 +50,8 @@ extension SPM.Manifest {
         dependencies: [Dependency] = [],
         products: [Product] = [],
         targets: [TargetNode] = [],
-        format: PatchVersion
+        traits: [Trait] = [],
+        format: PatchVersion,
     ) {
         self.name = name
         self.root = root
@@ -55,6 +59,7 @@ extension SPM.Manifest {
         self.dependencies = dependencies
         self.products = products.reduce(into: [:]) { $0[$1.name] = $1 }
         self.targets = targets.reduce(into: [:]) { $0[$1.name] = $1 }
+        self.traits = traits.reduce(into: [:]) { $0[$1.id] = $1 }
         self.format = format
     }
 }
@@ -74,7 +79,7 @@ extension SPM.Manifest {
                         $0.targets.append(.init(id: nominal.id, platforms: nominal.platforms))
                     } else if
                         let package: Symbol.Package = packageContainingProduct[nominal.id] {
-                        let id: Symbol.Product = .init(name: nominal.id, package: package)
+                        let id: Symbol.Product = package / nominal.id
                         $0.products.append(.init(id: id, platforms: nominal.platforms))
                     } else {
                         throw TargetNode.DependencyError.undefinedNominal(nominal.id)
@@ -84,6 +89,26 @@ extension SPM.Manifest {
                 $0.nominal = []
 
             } (&self.targets.values[i].dependencies)
+        }
+    }
+
+    /// A helper to perform BFS on package traits.
+    public func densify(traits visited: inout Set<SymbolGraphMetadata.Trait>) {
+        var queue: [SymbolGraphMetadata.Trait] = [_].init(visited)
+        /// pointer to simulate O(1) dequeue
+        var head: Int = queue.startIndex
+        while head < queue.endIndex {
+            let current: SymbolGraphMetadata.Trait = queue[head]
+            head += 1
+
+            if  let neighbors: [SymbolGraphMetadata.Trait] = self.traits[current]?.implied {
+                for neighbor: SymbolGraphMetadata.Trait in neighbors {
+                    // if we haven’t seen this neighbor yet, add it to our set and queue
+                    if case (inserted: true, _) = visited.insert(neighbor) {
+                        queue.append(neighbor)
+                    }
+                }
+            }
         }
     }
 }
@@ -108,6 +133,7 @@ extension SPM.Manifest: JSONObjectDecodable {
         }
 
         case targets
+        case traits
 
         case format = "toolsVersion"
         enum Format: String, Sendable {
@@ -140,6 +166,7 @@ extension SPM.Manifest: JSONObjectDecodable {
             dependencies: try json[.dependencies].decode(),
             products: try json[.products].decode(),
             targets: try json[.targets].decode(),
+            traits: try json[.traits].decode(),
             format: try json[.format].decode(as: JSON.ObjectDecoder<CodingKey.Format>.self) {
                 try $0[.version].decode(
                     as: JSON.StringRepresentation<PatchVersion>.self,

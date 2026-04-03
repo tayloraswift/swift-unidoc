@@ -209,7 +209,7 @@ extension SSGC.ModuleLayout {
                 //  It’s not worth warning about these.
                 break
 
-            case "s", "S":
+            case "inc", "s", "S":
                 //  These sometimes show up in C modules. We ignore them.
                 break
 
