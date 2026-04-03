@@ -23,14 +23,15 @@ extension SSGC.ModuleIndex {
         }
 
         try typeChecker.add(symbols: symbols)
-        return try typeChecker.load(in: "Swift")
+        return try typeChecker.load(in: module)
     }
 
     static func load(inputs: [Symbol.Module]) throws -> Self {
         let symbols: SSGC.SymbolDumps = try .collect(from: "TestModules/SymbolGraphs")
         let subject: Symbol.Module = try #require(inputs.last, "No subject module!")
 
-        let base: Symbol.FileBase = "/swift/unidoc/TestModules"
+        /// this directory doesn’t actually exist, it is merely a placeholder
+        let base: Symbol.FileBase = "/__mock/unidoc/TestModules"
 
         var symbolCache: SSGC.SymbolCache = .init(symbols: symbols)
         var typeChecker: SSGC.TypeChecker = .init()
@@ -54,7 +55,7 @@ extension SSGC.ModuleIndex {
     func testSourceLocations(in test: String = #function) throws {
         for (_, decls): (_, [SSGC.Decl]) in self.declarations {
             for decl: SSGC.Decl in decls {
-                #expect(true == decl.location?.file.path.starts(with: "Snippets/"))
+                #expect(true == decl.location?.file.path.starts(with: "Snippets/"), "\(test)")
             }
         }
     }
