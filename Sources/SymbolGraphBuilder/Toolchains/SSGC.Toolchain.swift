@@ -80,6 +80,13 @@ extension SSGC.Toolchain {
 }
 
 extension SSGC.Toolchain {
+    private static func environmentForDocumentation(
+        environment: inout SystemProcess.EnvironmentEncoder
+    ) {
+        environment["DOCUMENTATION_BUILD"] = "true"
+    }
+}
+extension SSGC.Toolchain {
     func manifest(
         package: FilePath.Directory,
         json file: FilePath,
@@ -131,7 +138,8 @@ extension SSGC.Toolchain {
         try SystemProcess.init(
             command: self.paths.swiftCommand,
             arguments: arguments,
-            echo: true
+            echo: true,
+            with: .inherit(adding: Self.environmentForDocumentation(environment:))
         )()
 
         do {
@@ -177,9 +185,7 @@ extension SSGC.Toolchain {
             command: self.paths.swiftCommand,
             arguments: arguments,
             echo: true,
-            with: .inherit {
-                $0["DOCUMENTATION_BUILD"] = "true"
-            }
+            with: .inherit(adding: Self.environmentForDocumentation(environment:))
         )()
     }
 }

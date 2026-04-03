@@ -25,7 +25,7 @@ extension TargetNode.DependencyConditions: JSONObjectDecodable {
     init(json: JSON.ObjectDecoder<CodingKey>) throws {
         self.init(
             platforms: try json[.platformNames].decode(),
-            traits: try json[.traits].decode(),
+            traits: try json[.traits]?.decode() ?? [],
         )
     }
 }
