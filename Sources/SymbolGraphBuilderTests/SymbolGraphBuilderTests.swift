@@ -78,6 +78,14 @@ import Testing
     }
 
     @Test func SnippetHighlighting() throws {
+        #if !canImport(IndexStoreDB)
+        // closure literal to suppress “will never be executed” warning
+        if ({ true }()) {
+            print("note: skipping snippet highlighting tests due to missing IndexStoreDB")
+            return
+        }
+        #endif
+
         let package: SSGC.PackageBuild = .local(
             project: "TestPackages" / "swift-snippets"
         )
@@ -96,8 +104,7 @@ import Testing
             sources.modules.snippets.first { $0.name == "UnitTests" }
         )
 
-        let test: SnippetHighlightingTest = .init(
-            parser: parser,
+        try parser.test(
             source: snippet,
             slices: [
                 .init(token: "let", color: .keyword),
@@ -111,7 +118,7 @@ import Testing
             ],
             [
                 .init(token: "let", color: .keyword),
-                .init(token: " _:"),
+                .init(token: " _: "),
                 .init(
                     token: "String",
                     color: .type,
@@ -146,14 +153,13 @@ import Testing
             ],
             [
                 .init(token: "let", color: .keyword),
-                .init(token: " _:"),
+                .init(token: " _: "),
                 .init(token: "Key", color: .type),
                 .init(token: " = "),
                 .init(token: "\"key\"", color: .literalString),
             ]
         )
 
-        try test.run()
         let docs: SymbolGraphObject<Void> = try workspace.build(
             package: package,
             with: toolchain
