@@ -1,6 +1,3 @@
-public
-struct CustomType
-{
-    public
-    init() {}
+public struct CustomType {
+    public init() {}
 }

@@ -80,6 +80,13 @@ extension SSGC.Toolchain {
 }
 
 extension SSGC.Toolchain {
+    private static func environmentForDocumentation(
+        environment: inout SystemProcess.EnvironmentEncoder
+    ) {
+        environment["DOCUMENTATION_BUILD"] = "true"
+    }
+}
+extension SSGC.Toolchain {
     func manifest(
         package: FilePath.Directory,
         json file: FilePath,
@@ -99,7 +106,8 @@ extension SSGC.Toolchain {
                     command: self.paths.swiftCommand,
                     "package", "dump-package",
                     "--package-path", "\(package)",
-                    stdout: $0
+                    stdout: $0,
+                    with: .inherit(adding: Self.environmentForDocumentation(environment:))
                 )
                 try dump()
                 /// the subprocess moves the file position, so if we don’t reset, we’ll get an
@@ -119,6 +127,7 @@ extension SSGC.Toolchain {
     func resolve(package: FilePath.Directory) throws -> [SPM.DependencyPin] {
         var arguments: [String] = [
             "package",
+            "--enable-all-traits",
             "update",
             "--package-path", "\(package)"
         ]
@@ -130,7 +139,8 @@ extension SSGC.Toolchain {
         try SystemProcess.init(
             command: self.paths.swiftCommand,
             arguments: arguments,
-            echo: true
+            echo: true,
+            with: .inherit(adding: Self.environmentForDocumentation(environment:))
         )()
 
         do {
@@ -150,6 +160,7 @@ extension SSGC.Toolchain {
     ) throws {
         var arguments: [String] = [
             "build",
+            "--enable-all-traits",
             "--configuration", "\(scratch.configuration)",
             "--package-path", "\(package)",
             "--scratch-path", "\(scratch.location)",
@@ -174,7 +185,8 @@ extension SSGC.Toolchain {
         try SystemProcess.init(
             command: self.paths.swiftCommand,
             arguments: arguments,
-            echo: true
+            echo: true,
+            with: .inherit(adding: Self.environmentForDocumentation(environment:))
         )()
     }
 }

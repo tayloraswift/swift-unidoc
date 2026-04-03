@@ -17,8 +17,6 @@
 /// Link to a member: ``LinkAnchors.a``
 ///
 /// ## Contributing
-public
-enum LinkAnchors
-{
+public enum LinkAnchors {
     case a
 }

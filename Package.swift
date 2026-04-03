@@ -647,7 +647,7 @@ let package: Package = .init(
             ]
         ),
 
-        .executableTarget(
+        .testTarget(
             name: "SymbolGraphBuilderTests",
             dependencies: [
                 .target(name: "SymbolGraphBuilder"),

@@ -22,7 +22,7 @@ extension TargetNode.Dependencies: JSONDecodable {
                     self.nominal.append(
                         try json.decode(as: JSON.Array.self) {
                             try $0.shape.expect(count: 2)
-                            return .init(id: try $0[0].decode(), try $0[1].decode())
+                            return .init(id: try $0[0].decode(), when: try $0[1].decode())
                         }
                     )
 
@@ -30,7 +30,7 @@ extension TargetNode.Dependencies: JSONDecodable {
                     self.targets.append(
                         try json.decode(as: JSON.Array.self) {
                             try $0.shape.expect(count: 2)
-                            return .init(id: try $0[0].decode(), try $0[1].decode())
+                            return .init(id: try $0[0].decode(), when: try $0[1].decode())
                         }
                     )
 
@@ -42,7 +42,7 @@ extension TargetNode.Dependencies: JSONDecodable {
                                 name: try $0[0].decode(),
                                 package: try $0[1].decode()
                             )
-                            return .init(id: id, try $0[3].decode())
+                            return .init(id: id, when: try $0[3].decode())
                         }
                     )
                 }
@@ -52,7 +52,11 @@ extension TargetNode.Dependencies: JSONDecodable {
 }
 
 private extension TargetNode.Dependency {
-    init(id: ID, _ platforms: TargetNode.DependencyPlatforms?) {
-        self.init(id: id, platforms: platforms?.names ?? [])
+    init(id: ID, when conditions: TargetNode.DependencyConditions?) {
+        self.init(
+            id: id,
+            platforms: conditions?.platforms ?? [],
+            traits: conditions?.traits ?? []
+        )
     }
 }

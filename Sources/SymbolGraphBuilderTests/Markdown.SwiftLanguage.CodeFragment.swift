@@ -1,10 +1,8 @@
-#if canImport(IndexStoreDB)
-
 import MarkdownABI
 import Symbols
 
-extension Main.SnippetHighlightingTest {
-    struct ExpectedFragment: Equatable {
+extension Markdown.SwiftLanguage {
+    struct CodeFragment: Equatable {
         let token: String
         let color: Markdown.Bytecode.Context?
         let usr: Symbol.USR?
@@ -20,5 +18,12 @@ extension Main.SnippetHighlightingTest {
         }
     }
 }
-
-#endif
+extension Markdown.SwiftLanguage.CodeFragment: CustomStringConvertible {
+    var description: String {
+        """
+        ['\(self.token)'\
+        \(self.color.map { ", \($0.highlight)" } ?? "")\
+        \(self.usr.map { "\($0)" } ?? "")]
+        """
+    }
+}

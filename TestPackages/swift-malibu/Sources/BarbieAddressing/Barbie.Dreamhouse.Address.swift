@@ -1,10 +1,7 @@
 import BarbieCore
 import BarbieHousing
 
-extension Barbie.Dreamhouse
-{
-    public
-    enum Address
-    {
+extension Barbie.Dreamhouse {
+    public enum Address {
     }
 }
