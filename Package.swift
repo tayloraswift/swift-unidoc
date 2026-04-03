@@ -407,8 +407,6 @@ let package: Package = .init(
             ]
         ),
 
-        .target(name: "Testing_"),
-
         .target(name: "Unidoc"),
 
         .target(
@@ -651,15 +649,13 @@ let package: Package = .init(
             name: "SymbolGraphBuilderTests",
             dependencies: [
                 .target(name: "SymbolGraphBuilder"),
-                .target(name: "Testing_"),
             ]
         ),
 
-        .executableTarget(
+        .testTarget(
             name: "SymbolGraphCompilerTests",
             dependencies: [
                 .target(name: "SymbolGraphBuilder"),
-                .target(name: "Testing_"),
             ]
         ),
 

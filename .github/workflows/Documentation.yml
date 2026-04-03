@@ -1,11 +1,10 @@
-# Do not rename me to `Documentation.yml`!
-# That is a special name that will get overwritten by rarestbot!!!
-
-# This workflow builds the project under the “starter” configuration, namely, what you would get
-# if you ran `swift build` without any arguments. We use this to verify that we can generate the
-# documentation for Unidoc itself.
+# This workflow validates the package’s documentation. Because documentation building involves
+# compiling the package, this also checks that the package itself compiles successfully on each
+# supported platform.
 name: Documentation
 
+permissions:
+    contents: write
 on:
     push:
         branches: [ master ]
@@ -19,6 +18,9 @@ jobs:
         steps:
             -   name: 🤍 Checkout repository 🤍
                 uses: actions/checkout@v6
+                with:
+                    # need to fetch the preceding commit
+                    fetch-depth: 2
 
             -   name: 🤍 Decide checks 🤍
                 uses: tj-actions/changed-files@v47
@@ -31,6 +33,10 @@ jobs:
                         .mailmap
                         .gitignore
                         .github/FUNDING.yml
+                        .github/workflows/Deploy.yml
+                        .github/workflows/Security.yml
+                        .github/workflows/SemanticRelease.yml
+                        .github/workflows/SemanticTitle.yml
         outputs:
             code_changed: ${{ steps.changes.outputs.any_changed }}
 
@@ -39,39 +45,37 @@ jobs:
         name: Ubuntu 24.04
         needs: changes
         if: ${{ needs.changes.outputs.code_changed == 'true' }}
-        env:
-            UNIDOC_ENABLE_INDEXSTORE: "0"
         steps:
             -   name: 🤍 Install Swift 🤍
                 uses: rarestype/swift-install-action@v1
                 with:
                     swift-release: 6.3-RELEASE
 
-            #   This installs an older version of Unidoc, not the one we are testing.
-            #   We use `--static-swift-stdlib` so it doesn’t matter if the Unidoc binary was
-            #   built with a different version of Swift.
             -   name: 🤍 Install Unidoc 🤍
-                uses: rarestype/unidoc-action@master
+                uses: rarestype/unidoc-action@v1
 
+            #   This clobbers everything in the current directory!
             -   name: 🤍 Checkout repository 🤍
                 uses: actions/checkout@v6
 
-            -   name: 🤍 Build documentation 🤍
+            -   name: 🤍 Validate documentation 🤍
                 run: |
                     unidoc build \
-                        --ci fail-on-errors \
-                        --project-path . \
-                        --swift-toolchain $SWIFT_INSTALLATION
+                    --ci fail-on-errors \
+                    --project-path . \
+                    --swift-toolchain $SWIFT_INSTALLATION
+
+            -   name: 🤍 Update badge 🤍
+                uses: rarestype/rarestbadge@v1
+                if: always()
 
     macOS:
         runs-on: macos-26
         needs: changes
         if: ${{ needs.changes.outputs.code_changed == 'true' }}
-        env:
-            UNIDOC_ENABLE_INDEXSTORE: "0"
         steps:
             -   name: 🤍 Install Unidoc 🤍
-                uses: rarestype/unidoc-action@master
+                uses: rarestype/unidoc-action@v1
 
             -   name: 🤍 Checkout repository 🤍
                 uses: actions/checkout@v6
@@ -79,8 +83,12 @@ jobs:
             -   name: 🤍 Select Xcode 26.4 🤍
                 run: sudo xcode-select -s /Applications/Xcode_26.4.app/Contents/Developer
 
-            -   name: 🤍 Build documentation 🤍
+            -   name: 🤍 Validate documentation 🤍
                 run: |
                     unidoc build \
-                        --ci fail-on-errors \
-                        --project-path .
+                    --ci fail-on-errors \
+                    --project-path .
+
+            -   name: 🤍 Update badge 🤍
+                uses: rarestype/rarestbadge@v1
+                if: always()
