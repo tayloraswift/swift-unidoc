@@ -1,6 +1,4 @@
-import JSONDecoding
-import JSONEncoding
+import JSON
 import SymbolGraphs
 
-extension SymbolGraphMetadata.Platform: JSONStringDecodable, JSONStringEncodable {
-}
+extension SymbolGraphMetadata.Platform: JSONStringDecodable, JSONStringEncodable {}

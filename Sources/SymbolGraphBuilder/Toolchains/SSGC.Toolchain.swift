@@ -119,6 +119,7 @@ extension SSGC.Toolchain {
     func resolve(package: FilePath.Directory) throws -> [SPM.DependencyPin] {
         var arguments: [String] = [
             "package",
+            "--enable-all-traits",
             "update",
             "--package-path", "\(package)"
         ]
@@ -150,6 +151,7 @@ extension SSGC.Toolchain {
     ) throws {
         var arguments: [String] = [
             "build",
+            "--enable-all-traits",
             "--configuration", "\(scratch.configuration)",
             "--package-path", "\(package)",
             "--scratch-path", "\(scratch.location)",

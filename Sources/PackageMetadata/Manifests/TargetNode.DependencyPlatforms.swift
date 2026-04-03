@@ -4,19 +4,28 @@ import SymbolGraphs
 
 extension TargetNode {
     /// A helper type for decoding an array of dependencies.
-    struct DependencyPlatforms {
-        let names: [SymbolGraphMetadata.Platform]
+    struct DependencyConditions {
+        let platforms: [SymbolGraphMetadata.Platform]
+        let traits: [SymbolGraphMetadata.Trait]
 
-        private init(names: [SymbolGraphMetadata.Platform]) {
-            self.names = names
+        private init(
+            platforms: [SymbolGraphMetadata.Platform],
+            traits: [SymbolGraphMetadata.Trait]
+        ) {
+            self.platforms = platforms
+            self.traits = traits
         }
     }
 }
-extension TargetNode.DependencyPlatforms: JSONObjectDecodable {
+extension TargetNode.DependencyConditions: JSONObjectDecodable {
     enum CodingKey: String, Sendable {
-        case names = "platformNames"
+        case platformNames
+        case traits
     }
     init(json: JSON.ObjectDecoder<CodingKey>) throws {
-        self.init(names: try json[.names].decode())
+        self.init(
+            platforms: try json[.platformNames].decode(),
+            traits: try json[.traits].decode(),
+        )
     }
 }
