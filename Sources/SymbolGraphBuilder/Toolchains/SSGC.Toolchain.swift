@@ -176,7 +176,10 @@ extension SSGC.Toolchain {
         try SystemProcess.init(
             command: self.paths.swiftCommand,
             arguments: arguments,
-            echo: true
+            echo: true,
+            with: .inherit {
+                $0["DOCUMENTATION_BUILD"] = "true"
+            }
         )()
     }
 }
