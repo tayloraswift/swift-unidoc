@@ -14,7 +14,7 @@ extension SSGC.TypeChecker {
 }
 extension SSGC.TypeChecker.CultureError: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.culture == rhs.culture && lhs.underlying == rhs.underlying
+        lhs.culture == rhs.culture && lhs.underlying ~= rhs.underlying
     }
 }
 extension SSGC.TypeChecker.CultureError: TraceableError {

@@ -22,7 +22,7 @@ extension SSGC.VertexError {
 }
 extension SSGC.VertexError: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.symbol == rhs.symbol && lhs.underlying == rhs.underlying
+        lhs.symbol == rhs.symbol && lhs.underlying ~= rhs.underlying
     }
 }
 extension SSGC.VertexError: TraceableError {
