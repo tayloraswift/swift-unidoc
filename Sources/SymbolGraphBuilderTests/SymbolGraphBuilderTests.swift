@@ -10,7 +10,7 @@ import Testing
     private let toolchain: SSGC.Toolchain
 
     init() throws {
-        self.workspace = try .create(at: ".testing")
+        self.workspace = try .create(at: ".build.testing")
         self.toolchain = try .detect(pretty: true)
 
         print(

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 export UNIDOC_ENABLE_INDEXSTORE=1
 
@@ -16,13 +16,12 @@ swift test -c release \
     --no-parallel \
     --skip SymbolGraphValidationTests \
     --skip SymbolGraphBuilderTests \
+    --skip SymbolGraphCompilerTests \
     --disable-testable-imports
 
-SWT_SWIFT_ERROR_BACKTRACING_ENABLED=0 \
-swift test -c release \
-    --skip-build \
-    --filter SymbolGraphBuilderTests
-
-for f in .build/release/*Tests; do
-    "$f"
+for suites in SymbolGraphBuilderTests SymbolGraphCompilerTests; do
+    SWT_SWIFT_ERROR_BACKTRACING_ENABLED=0 swift test -c release \
+        --skip-build \
+        --no-parallel \
+        --filter "$suites"
 done

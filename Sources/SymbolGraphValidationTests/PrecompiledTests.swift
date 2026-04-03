@@ -5,10 +5,10 @@ import Symbols
 import SystemIO
 import Testing
 
-@Suite struct Precompiled {
-    private var directory: FilePath.Directory { "TestPackages" }
+@Suite struct PrecompiledTests {
+    private static var directory: FilePath.Directory { "TestPackages" }
 
-    @Test func swift_atomics() throws {
+    @Test static func swift_atomics() throws {
         let object: SymbolGraphObject<Void> = try .load(
             package: "swift-atomics",
             in: self.directory
@@ -20,7 +20,7 @@ import Testing
         try object.roundtrip()
     }
 
-    @Test func swift_nio() throws {
+    @Test static func swift_nio() throws {
         //  https://github.com/rarestype/unidoc/issues/211
         #if !os(macOS)
 
@@ -45,7 +45,7 @@ import Testing
         #endif
     }
 
-    @Test func swift_nio_ssl() throws {
+    @Test static func swift_nio_ssl() throws {
         let object: SymbolGraphObject<Void> = try .load(
             package: "swift-nio-ssl",
             in: self.directory
@@ -65,7 +65,7 @@ import Testing
 
     //  The swift-async-dns-resolver repo includes a git submodule, so we should be able
     //  to handle that.
-    @Test func swift_async_dns_resolver() throws {
+    @Test static func swift_async_dns_resolver() throws {
         let object: SymbolGraphObject<Void> = try .load(
             package: "swift-async-dns-resolver",
             in: self.directory
@@ -85,7 +85,7 @@ import Testing
 
     //  SwiftSyntax is a morbidly obese package. If we can handle SwiftSyntax,
     //  we can handle anything!
-    @Test func swift_syntax() throws {
+    @Test static func swift_syntax() throws {
         let object: SymbolGraphObject<Void> = try .load(
             package: "swift-syntax",
             in: self.directory
@@ -100,7 +100,7 @@ import Testing
         try object.roundtrip()
     }
 
-    @Test func indexstore_db() throws {
+    @Test static func indexstore_db() throws {
         let object: SymbolGraphObject<Void> = try .load(
             package: "indexstore-db",
             in: self.directory
@@ -118,7 +118,7 @@ import Testing
         try object.roundtrip()
     }
 
-    @Test func swift_book() throws {
+    @Test static func swift_book() throws {
         let object: SymbolGraphObject<Void> = try .load(
             package: "swift-book",
             in: self.directory
