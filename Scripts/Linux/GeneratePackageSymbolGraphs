@@ -25,9 +25,7 @@ ssgc slave https://github.com/swiftlang/swift-syntax.git 603.0.0 \
 
 ssgc slave https://github.com/swiftlang/indexstore-db.git swift-6.3-RELEASE \
     -u $SWIFT_INSTALLATION \
-    -o TestPackages/indexstore-db.bson \
-    --Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-    --Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
+    -o TestPackages/indexstore-db.bson
 
 ssgc slave https://github.com/swiftlang/swift-book.git swift-5.10-fcs \
     -u $SWIFT_INSTALLATION \
