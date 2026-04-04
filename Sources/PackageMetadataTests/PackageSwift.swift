@@ -1,6 +1,7 @@
 import JSON
 import PackageGraphs
 import PackageMetadata
+import Symbols
 import SystemIO
 import Testing
 
@@ -396,12 +397,8 @@ import Testing
             name: "SymbolResolution",
             dependencies: .init(
                 products: [
-                    .init(id: .init(name: "JSONDecoding", package: "json")),
-
-                    .init(
-                        id: .init(name: "JSONEncoding", package: "json"),
-                        platforms: [.linux]
-                    ),
+                    .init(id: "json" / "JSONDecoding"),
+                    .init(id: "json" / "JSONEncoding", platforms: [.linux]),
                 ],
                 targets: [
                     .init(id: "Symbols"),

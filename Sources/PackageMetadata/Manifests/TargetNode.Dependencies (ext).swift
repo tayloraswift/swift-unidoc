@@ -38,10 +38,7 @@ extension TargetNode.Dependencies: JSONDecodable {
                     self.products.append(
                         try json.decode(as: JSON.Array.self) {
                             try $0.shape.expect(count: 4)
-                            let id: Symbol.Product = .init(
-                                name: try $0[0].decode(),
-                                package: try $0[1].decode()
-                            )
+                            let id: Symbol.Product = try $0[1].decode() / $0[0].decode()
                             return .init(id: id, when: try $0[3].decode())
                         }
                     )

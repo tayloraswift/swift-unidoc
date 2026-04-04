@@ -5,8 +5,9 @@ import Symbols
 extension PackageNode {
     public init(
         from manifest: borrowing SPM.Manifest,
-        on platform: borrowing SymbolGraphMetadata.Platform,
         as id: Symbol.Package,
+        on platform: borrowing SymbolGraphMetadata.Platform,
+        traits: borrowing Set<SymbolGraphMetadata.Trait>,
         filter: borrowing (SymbolGraph.ProductType) throws -> Bool = { _ in true }
     ) throws {
         let products: [SPM.Manifest.Product] = try manifest.products.values.filter {
@@ -17,7 +18,8 @@ extension PackageNode {
         )
         let modulesInOrder: [TargetNode] = try modules.included(
             by: products,
-            on: platform
+            on: platform,
+            traits: traits
         )
 
         self.init(
@@ -25,12 +27,18 @@ extension PackageNode {
             dependencies: manifest.dependencies,
             snippets: manifest.snippets ?? "Snippets",
             products: try products.map {
-                let constituents: Set<String> = try modules.included(by: $0, on: platform)
+                let constituents: Set<String> = try modules.included(
+                    by: $0,
+                    on: platform,
+                    traits: traits
+                )
 
                 var (modules, dependencies): ([Int], Set<Symbol.Product>) = ([], [])
                 for (index, constituent): (Int, TargetNode) in modulesInOrder.enumerated()
                     where constituents.contains(constituent.name) {
-                    dependencies.formUnion(constituent.dependencies.products(on: platform))
+                    dependencies.formUnion(
+                        constituent.dependencies.products(on: platform, traits: traits)
+                    )
                     modules.append(index)
                 }
                 return .init(
@@ -40,12 +48,17 @@ extension PackageNode {
                 )
             },
             modules: try modulesInOrder.map {
-                let constituents: Set<String> = try modules.included(by: $0, on: platform)
-
+                let constituents: Set<String> = try modules.included(
+                    by: $0,
+                    on: platform,
+                    traits: traits
+                )
                 var (modules, dependencies): ([Int], Set<Symbol.Product>) = ([], [])
                 for (index, constituent): (Int, TargetNode) in modulesInOrder.enumerated()
                     where constituents.contains(constituent.name) {
-                    dependencies.formUnion(constituent.dependencies.products(on: platform))
+                    dependencies.formUnion(
+                        constituent.dependencies.products(on: platform, traits: traits)
+                    )
                     //  don’t include the target’s own index
                     if  constituent.name != $0.name {
                         modules.append(index)

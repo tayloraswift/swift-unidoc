@@ -24,7 +24,7 @@ extension GitHub.User.Profile {
         case updated = "M"
     }
 }
-extension GitHub.User.Profile: BSONDocumentEncodable, BSONEncodable {
+extension GitHub.User.Profile: @retroactive BSONDocumentEncodable, @retroactive BSONEncodable {
     public func encode(to bson: inout BSON.DocumentEncoder<CodingKey>) {
         bson[.login] = self.login
         bson[.icon] = self.icon
@@ -45,7 +45,7 @@ extension GitHub.User.Profile: BSONDocumentEncodable, BSONEncodable {
         bson[.updated] = self.updated
     }
 }
-extension GitHub.User.Profile: BSONDocumentDecodable, BSONDecodable {
+extension GitHub.User.Profile: @retroactive BSONDocumentDecodable, @retroactive BSONDecodable {
     @inlinable public init(bson: BSON.DocumentDecoder<CodingKey>) throws {
         self.init(
             login: try bson[.login].decode(),

@@ -50,6 +50,13 @@ extension Symbol.Package: ExpressibleByStringLiteral, ExpressibleByStringInterpo
     }
 }
 extension Symbol.Package {
+    @inlinable public static func / <T>(
+        self: Self,
+        name: String
+    ) -> T where T: Symbol.PackageNamespaced {
+        .init(package: self, name: name)
+    }
+
     @inlinable public static func | (a: Symbol.PackageScope, b: Self) -> Self {
         .init(identifier: "\(a).\(b)")
     }

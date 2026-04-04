@@ -146,7 +146,7 @@ extension SSGC.ModuleGraph {
                 constituents[module.id] = module.layout.dependencies.modules.map { modules[$0] }
             }
             for product: SymbolGraph.Product in dependency.products {
-                let id: Symbol.Product = .init(name: product.name, package: dependency.id)
+                let id: Symbol.Product = dependency.id / product.name
                 constituentsFromHomePackage[id] = product.cultures.map { modules[$0] }
             }
         }
@@ -165,7 +165,7 @@ extension SSGC.ModuleGraph {
             constituents[module.id] = module.layout.dependencies.modules.map { modules[$0] }
         }
         for product: SymbolGraph.Product in sink.products {
-            let id: Symbol.Product = .init(name: product.name, package: sink.id)
+            let id: Symbol.Product = sink.id / product.name
             constituentsFromHomePackage[id] = product.cultures.map { modules[$0] }
         }
 

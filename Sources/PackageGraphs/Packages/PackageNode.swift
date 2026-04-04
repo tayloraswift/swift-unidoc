@@ -42,7 +42,7 @@ extension PackageNode {
     ) {
         let nodes: DigraphExplorer<ProductNode>.Nodes = try dependencies.reduce(into: .init()) {
             for product: SymbolGraph.Product in $1.products {
-                let id: Symbol.Product = .init(name: product.name, package: $1.id)
+                let id: Symbol.Product = $1.id / product.name
                 try $0.index(.init(id: id, predecessors: product.dependencies))
             }
         }

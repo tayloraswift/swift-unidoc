@@ -48,7 +48,7 @@ extension Diagnostics {
             self.unsymbolicated.append(
                 .literal(
                     value,
-                    context: subject.map(DiagnosticContext.around(_:))
+                    context: subject.map { .around($0) }
                 )
             )
         }
@@ -90,7 +90,7 @@ extension Diagnostics {
             self.unsymbolicated.append(
                 .symbolic(
                     value,
-                    context: subject.map(DiagnosticContext.around(_:))
+                    context: subject.map { .around($0) }
                 )
             )
         }

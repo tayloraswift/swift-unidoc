@@ -7,15 +7,18 @@ extension SPM.Manifest.Dependency {
     @frozen public struct Resolvable: Equatable, Sendable {
         public let identity: Symbol.Package
         public let location: SPM.DependencyLocation
+        public let traits: [Trait]
         public let requirement: SPM.Manifest.DependencyRequirement
 
         @inlinable public init(
             identity: Symbol.Package,
             location: SPM.DependencyLocation,
-            requirement: SPM.Manifest.DependencyRequirement
+            traits: [Trait] = [],
+            requirement: SPM.Manifest.DependencyRequirement,
         ) {
             self.identity = identity
             self.location = location
+            self.traits = traits
             self.requirement = requirement
         }
     }
@@ -33,6 +36,8 @@ extension SPM.Manifest.Dependency.Resolvable: JSONObjectDecodable {
                 case urlString
             }
         }
+
+        case traits
 
         case requirement
         enum Requirement: String, Sendable {
@@ -136,6 +141,7 @@ extension SPM.Manifest.Dependency.Resolvable: JSONObjectDecodable {
         self.init(
             identity: try json[.identity].decode(),
             location: location,
+            traits: try json[.traits]?.decode() ?? [],
             requirement: requirement
         )
     }
