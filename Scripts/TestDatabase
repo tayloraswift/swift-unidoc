@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+swift test -c release \
+    --skip-build \
+    --no-parallel \
+    --filter tag:database \
+    --disable-testable-imports

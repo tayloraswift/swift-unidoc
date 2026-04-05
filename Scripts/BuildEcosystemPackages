@@ -1,33 +1,38 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 swift --version
+if ! command -v ssgc > /dev/null; then
+    echo 'no ssgc command found, aborting'
+    echo 'hint: run script with PATH="${PATH:+${PATH}:}.build/release"'
+    exit 1
+fi
 
 ssgc slave https://github.com/apple/swift-atomics.git 1.2.0 \
-    -u $SWIFT_INSTALLATION \
+    -u "$SWIFT_INSTALLATION" \
     -o TestPackages/swift-atomics.bson
 
 ssgc slave https://github.com/apple/swift-nio.git 2.94.0 \
-    -u $SWIFT_INSTALLATION \
+    -u "$SWIFT_INSTALLATION" \
     -o TestPackages/swift-nio.bson
 
 ssgc slave https://github.com/apple/swift-nio-ssl.git 2.36.0 \
-    -u $SWIFT_INSTALLATION \
+    -u "$SWIFT_INSTALLATION" \
     -o TestPackages/swift-nio-ssl.bson
 
 ssgc slave https://github.com/apple/swift-async-dns-resolver.git 0.1.2 \
-    -u $SWIFT_INSTALLATION \
+    -u "$SWIFT_INSTALLATION" \
     -o TestPackages/swift-async-dns-resolver.bson
 
 ssgc slave https://github.com/swiftlang/swift-syntax.git 603.0.0 \
-    -u $SWIFT_INSTALLATION \
+    -u "$SWIFT_INSTALLATION" \
     -o TestPackages/swift-syntax.bson
 
 ssgc slave https://github.com/swiftlang/indexstore-db.git swift-6.3-RELEASE \
-    -u $SWIFT_INSTALLATION \
+    -u "$SWIFT_INSTALLATION" \
     -o TestPackages/indexstore-db.bson
 
 ssgc slave https://github.com/swiftlang/swift-book.git swift-5.10-fcs \
-    -u $SWIFT_INSTALLATION \
+    -u "$SWIFT_INSTALLATION" \
     -b book \
     -o TestPackages/swift-book.bson

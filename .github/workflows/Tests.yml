@@ -72,10 +72,7 @@ jobs:
                         -w /swift/unidoc \
                         -e SWIFT_INSTALLATION=/usr \
                         swift:6.3-noble \
-                        /bin/bash "swift test -c release \
-                            --skip-build \
-                            --no-parallel \
-                            --filter tag:database"
+                        /bin/bash Scripts/TestDatabase
 
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1
@@ -103,17 +100,19 @@ jobs:
             -   name: 💖 Check format 💖
                 run: Scripts/Format
 
-            -   name: 💖 Build release 💖
+            -   name: 💖 Build 💖
                 run: |
                     swift --version
                     swift build -c release \
                         --build-tests \
                         --explicit-target-dependency-import-check=warn
-                    mkdir "${HOME}/bin"
-                    mv .build/release/ssgc "${HOME}/bin"
-                    echo "${HOME}/bin" >> "$GITHUB_PATH"
 
-            -   name: 💖 Smoke Test 💖
+            -   name: 💖 Build test packages 💖
+                run: |
+                    PATH="${PATH:+${PATH}:}.build/release" \
+                    Scripts/BuildLocalTestPackages
+
+            -   name: 💖 Smoke test 💖
                 run: |
                     swift test -c release \
                         --skip-build \
@@ -123,15 +122,13 @@ jobs:
                 env:
                     SWT_SWIFT_ERROR_BACKTRACING_ENABLED: 0
 
-            -   name: 💖 Build packages 💖
-                run: Scripts/Linux/GeneratePackageSymbolGraphs
-
-            -   name: 💖 Validate packages 💖
+            -   name: 💖 Build ecosystem packages 💖
                 run: |
-                    swift test -c release \
-                        --skip-build \
-                        --no-parallel \
-                        --filter SymbolGraphValidationTests
+                    PATH="${PATH:+${PATH}:}.build/release" \
+                    Scripts/BuildEcosystemPackages
+
+            -   name: 💖 Validate ecosystem packages 💖
+                run: Scripts/TestEcosystem
 
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1
@@ -154,25 +151,20 @@ jobs:
             -   name: 💖 Check format 💖
                 run: Scripts/Format
 
-            -   name: 💖 Build release 💖
+            -   name: 💖 Build 💖
                 run: |
                     swift --version
                     swift build -c release \
                         --build-tests \
                         --explicit-target-dependency-import-check=warn
-                    mkdir "${HOME}/bin"
-                    mv .build/release/ssgc "${HOME}/bin"
-                    echo "${HOME}/bin" >> "$GITHUB_PATH"
 
-            -   name: 💖 Build packages 💖
-                run: Scripts/macOS/GeneratePackageSymbolGraphs
-
-            -   name: 💖 Validate packages 💖
+            -   name: 💖 Build ecosystem packages 💖
                 run: |
-                    swift test -c release \
-                        --skip-build \
-                        --no-parallel \
-                        --filter SymbolGraphValidationTests
+                    PATH="${PATH:+${PATH}:}.build/release" \
+                    Scripts/BuildEcosystemPackages
+
+            -   name: 💖 Validate ecosystem packages 💖
+                run: Scripts/TestEcosystem
 
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1
