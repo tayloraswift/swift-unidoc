@@ -75,6 +75,11 @@ jobs:
                         swift:6.3-noble \
                         /bin/bash Scripts/TestDatabase
 
+            -   name: 💖 Build for deployment (dry run) 💖
+                # only run on pull request
+                if: github.event_name == 'pull_request'
+                run: Scripts/Build --no-jemalloc
+
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1
                 if: always()

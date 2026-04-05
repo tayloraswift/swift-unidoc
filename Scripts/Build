@@ -12,7 +12,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-UNIDOC_ENABLE_INDEXSTORE=1 "${SWIFT_INSTALLATION}/bin/swift" build \
-    --configuration release \
-    --static-swift-stdlib \
-    $LINKER_FLAGS
+for product in unidoc unidoc-linkerd unidocd; do
+    UNIDOC_ENABLE_INDEXSTORE=1 "${SWIFT_INSTALLATION}/bin/swift" build \
+        --product "$product" \
+        --configuration release \
+        --static-swift-stdlib \
+        $LINKER_FLAGS
+done
