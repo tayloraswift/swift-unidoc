@@ -32,10 +32,10 @@ jobs:
             code_changed: ${{ steps.changes.outputs.any_changed }}
 
     Linux-server:
-        runs-on: ubuntu-24.04
+        runs-on: ubuntu-24.04-arm
         name: Linux (server)
         needs: changes
-        if: ${{ needs.changes.outputs.code_changed == 'true' }}
+        if: needs.changes.outputs.code_changed == 'true'
         steps:
             -   name: 💖 Checkout repository 💖
                 uses: actions/checkout@v6
@@ -75,22 +75,37 @@ jobs:
                         swift:6.3-noble \
                         /bin/bash Scripts/TestDatabase
 
-            -   name: 💖 Build for deployment (dry run) 💖
-                # only run on pull request
-                if: github.event_name == 'pull_request'
-                run: Scripts/Build --no-jemalloc
-
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1
                 if: always()
                 with:
                     title: Linux
 
+    Linux-deploy:
+        runs-on: ubuntu-24.04-arm
+        name: Linux
+        needs: changes
+        if: needs.changes.outputs.code_changed == 'true' && github.event_name == 'pull_request'
+        env:
+            UNIDOC_ENABLE_INDEXSTORE: "1"
+
+        steps:
+            -   name: 💖 Checkout repository 💖
+                uses: actions/checkout@v6
+
+            -   name: 💖 Install Swift 💖
+                uses: rarestype/swift-install-action@v1
+                with:
+                    swift-release: 6.3-RELEASE
+
+            -   name: 💖 Build for deployment (dry run) 💖
+                run: Scripts/Build --no-jemalloc
+
     Linux:
         runs-on: ubuntu-24.04
         name: Linux
         needs: changes
-        if: ${{ needs.changes.outputs.code_changed == 'true' }}
+        if: needs.changes.outputs.code_changed == 'true'
         env:
             UNIDOC_ENABLE_INDEXSTORE: "1"
 
@@ -136,7 +151,7 @@ jobs:
     macOS:
         runs-on: macos-26
         needs: changes
-        if: ${{ needs.changes.outputs.code_changed == 'true' }}
+        if: needs.changes.outputs.code_changed == 'true'
         env:
             UNIDOC_ENABLE_INDEXSTORE: "1"
 
