@@ -1,8 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+# it feels almost comically absurd, but `--skip tag:<tag>` is simply broken on Swift 6.3, and
+# has been broken for at least three flagship Swift releases...
 swift test -c release \
     --skip-build \
     --no-parallel \
     --skip SymbolGraphValidationTests \
-    --skip tag:database
+    --skip UnidocDBTests \
+    --skip UnidocQueryTests
