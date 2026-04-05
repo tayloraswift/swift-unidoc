@@ -61,7 +61,7 @@ We provide the [swift-unidoc-action](https://github.com/rarestype/unidoc-action)
         unidoc build \
             --ci fail-on-errors \
             --project-path . \
-            --swift-toolchain $SWIFT_INSTALLATION
+            --swift-toolchain "$SWIFT_INSTALLATION"
 ```
 
 ### ✂ Rich code snippets
