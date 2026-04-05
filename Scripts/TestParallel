@@ -3,9 +3,9 @@ set -euo pipefail
 
 # it feels almost comically absurd, but `--skip tag:<tag>` is simply broken on Swift 6.3, and
 # has been broken for at least three flagship Swift releases...
+SWT_SWIFT_ERROR_BACKTRACING_ENABLED=0\
 swift test -c release \
     --skip-build \
-    --no-parallel \
     --skip SymbolGraphValidationTests \
     --skip UnidocDBTests \
     --skip UnidocQueryTests

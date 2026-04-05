@@ -113,14 +113,7 @@ jobs:
                     Scripts/BuildLocalTestPackages
 
             -   name: 💖 Smoke test 💖
-                run: |
-                    swift test -c release \
-                        --skip-build \
-                        --no-parallel \
-                        --skip SymbolGraphValidationTests \
-                        --skip tag:database
-                env:
-                    SWT_SWIFT_ERROR_BACKTRACING_ENABLED: 0
+                run: Scripts/TestParallel
 
             -   name: 💖 Build ecosystem packages 💖
                 run: |
