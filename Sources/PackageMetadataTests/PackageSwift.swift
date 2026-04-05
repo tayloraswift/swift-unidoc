@@ -412,7 +412,9 @@ import Testing
         let filepath: FilePath = "TestModules/Package.swift.json"
         let manifest: SPM.Manifest = try .init(parsing: try filepath.read())
 
+        let root: FilePath.Directory = try #require(.current()) / "TestModules"
+
         #expect(manifest.name == "unidoc-testmodules")
-        #expect(manifest.root == "/swift/unidoc/TestModules")
+        #expect(manifest.root.path == "\(root)")
     }
 }

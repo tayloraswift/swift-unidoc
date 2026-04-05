@@ -71,6 +71,7 @@ jobs:
                         -v $PWD:/swift/unidoc \
                         -w /swift/unidoc \
                         -e SWIFT_INSTALLATION=/usr \
+                        -e LD_LIBRARY_PATH=/usr/lib/swift/linux \
                         swift:6.3-noble \
                         /bin/bash Scripts/TestDatabase
 
