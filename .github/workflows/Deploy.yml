@@ -87,7 +87,7 @@ jobs:
 
             -   name: 💝 Build Unidoc 💝
                 run: |
-                    Scripts/Linux/Build --no-jemalloc
+                    Scripts/Build --no-jemalloc
                     Scripts/Package .build unidoc
 
             -   name: 💝 Upload products 💝
@@ -130,7 +130,7 @@ jobs:
 
             -   name: 💝 Build products 💝
                 run: |
-                    Scripts/Linux/Build
+                    Scripts/Build
                     Scripts/Package .build unidoc-linkerd unidocd
 
             -   name: 💝 Upload products 💝
