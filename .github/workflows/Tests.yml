@@ -60,8 +60,7 @@ jobs:
                     swift --version
                     swift build -c release \
                         --build-tests \
-                        --explicit-target-dependency-import-check=warn \
-                        --static-swift-stdlib
+                        --explicit-target-dependency-import-check=warn
 
             -   name: 💖 Run pipeline 💖
                 run: |
