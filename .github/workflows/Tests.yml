@@ -50,17 +50,30 @@ jobs:
                     'until docker exec -t unidoc-mongod-container \
                     /bin/mongosh --file /unidoc-rs-init-containerized.js; do sleep 1; done'
 
+            -   name: 💖 Install Swift 💖
+                uses: rarestype/swift-install-action@v1
+                with:
+                    swift-release: 6.3-RELEASE
+
+            -   name: 💖 Build release 💖
+                run: |
+                    swift --version
+                    swift build -c release \
+                        --build-tests \
+                        --explicit-target-dependency-import-check=warn
+
             -   name: 💖 Run pipeline 💖
                 run: |
                     docker run -t --rm \
                         --network=unidoc-test \
                         --name swift-environment \
                         --user root \
-                        -v $PWD:/swift/swift-unidoc \
-                        -w /swift/swift-unidoc \
+                        -v $PWD:/swift/unidoc \
+                        -w /swift/unidoc \
                         -e SWIFT_INSTALLATION=/usr \
+                        -e LD_LIBRARY_PATH=/usr/lib/swift/linux \
                         swift:6.3-noble \
-                        /bin/bash Scripts/Linux/TestAll
+                        /bin/bash Scripts/TestDatabase
 
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1
@@ -88,27 +101,28 @@ jobs:
             -   name: 💖 Check format 💖
                 run: Scripts/Format
 
-            -   name: 💖 Build release 💖
+            -   name: 💖 Build 💖
                 run: |
                     swift --version
                     swift build -c release \
                         --build-tests \
-                        --explicit-target-dependency-import-check=warn \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
-                    mkdir $HOME/bin
-                    mv .build/release/ssgc $HOME/bin
-                    echo "$HOME/bin" >> $GITHUB_PATH
+                        --explicit-target-dependency-import-check=warn
 
-            -   name: 💖 Build packages 💖
-                run: Scripts/Linux/GeneratePackageSymbolGraphs
-
-            -   name: 💖 Validate packages 💖
+            -   name: 💖 Build test packages 💖
                 run: |
-                    swift test -c release \
-                        --skip-build \
-                        --no-parallel \
-                        --filter SymbolGraphValidationTests
+                    PATH="${PATH:+${PATH}:}.build/release" \
+                    Scripts/BuildLocalTestPackages
+
+            -   name: 💖 Smoke test 💖
+                run: Scripts/TestParallel
+
+            -   name: 💖 Build ecosystem packages 💖
+                run: |
+                    PATH="${PATH:+${PATH}:}.build/release" \
+                    Scripts/BuildEcosystemPackages
+
+            -   name: 💖 Validate ecosystem packages 💖
+                run: Scripts/TestEcosystem
 
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1
@@ -131,25 +145,20 @@ jobs:
             -   name: 💖 Check format 💖
                 run: Scripts/Format
 
-            -   name: 💖 Build release 💖
+            -   name: 💖 Build 💖
                 run: |
                     swift --version
                     swift build -c release \
                         --build-tests \
                         --explicit-target-dependency-import-check=warn
-                    mkdir $HOME/bin
-                    mv .build/release/ssgc $HOME/bin
-                    echo "$HOME/bin" >> $GITHUB_PATH
 
-            -   name: 💖 Build packages 💖
-                run: Scripts/macOS/GeneratePackageSymbolGraphs
-
-            -   name: 💖 Validate packages 💖
+            -   name: 💖 Build ecosystem packages 💖
                 run: |
-                    swift test -c release \
-                        --skip-build \
-                        --no-parallel \
-                        --filter SymbolGraphValidationTests
+                    PATH="${PATH:+${PATH}:}.build/release" \
+                    Scripts/BuildEcosystemPackages
+
+            -   name: 💖 Validate ecosystem packages 💖
+                run: Scripts/TestEcosystem
 
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1

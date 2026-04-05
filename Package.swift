@@ -69,7 +69,7 @@ let package: Package = .init(
         .package(url: "https://github.com/rarestype/h", from: "1.0.1"),
         .package(url: "https://github.com/rarestype/swift-bson", from: "2.0.2"),
         .package(url: "https://github.com/rarestype/swift-dom", from: "1.2.3"),
-        .package(url: "https://github.com/rarestype/swift-github", from: "1.0.0"),
+        .package(url: "https://github.com/rarestype/swift-github", from: "2.0.0"),
         .package(url: "https://github.com/rarestype/swift-ip", from: "0.3.6"),
         .package(url: "https://github.com/rarestype/swift-io", from: "1.2.0"),
         .package(url: "https://github.com/rarestype/swift-json", from: "2.3.2"),

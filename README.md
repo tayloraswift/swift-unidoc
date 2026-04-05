@@ -5,7 +5,7 @@
 a scalable multi-package documentation engine for the swift language
 
 [swiftinit home](https://swiftinit.org/) ·
-[get started locally](https://swiftinit.org/docs/swift-unidoc/guides/quickstart)
+[get started locally](https://swiftinit.org/docs/unidoc/guides/quickstart)
 
 </div>
 
@@ -32,7 +32,7 @@ Unidoc supports Linux and macOS. Unidoc requires Swift 6.2.
 | 💝 Linux (x86_64) | [![Status](https://raw.githubusercontent.com/rarestype/unidoc/refs/badges/ci/SemanticRelease/Linux-x86_64/status.svg)](https://github.com/rarestype/unidoc/actions/workflows/SemanticRelease.yml) |
 <!-- DO NOT EDIT ABOVE! AUTOSYNC CONTENT [STATUS TABLE] -->
 
-Follow our [quickstart guide](https://swiftinit.org/docs/swift-unidoc/guides/quickstart) to learn how to set up a local Unidoc server.
+Follow our [quickstart guide](https://swiftinit.org/docs/unidoc/guides/quickstart) to learn how to set up a local Unidoc server.
 
 
 ## Features
@@ -61,7 +61,7 @@ We provide the [swift-unidoc-action](https://github.com/rarestype/unidoc-action)
         unidoc build \
             --ci fail-on-errors \
             --project-path . \
-            --swift-toolchain $SWIFT_INSTALLATION
+            --swift-toolchain "$SWIFT_INSTALLATION"
 ```
 
 ### ✂ Rich code snippets

@@ -2,8 +2,8 @@ import MongoDB
 import Testing
 @_spi(testable) import UnidocDB
 
-extension LinkResolution {
-    struct TestCase {
+extension LinkResolutionTests {
+    struct Case {
         let name: String
         let path: [String]
 
@@ -32,7 +32,7 @@ extension LinkResolution {
         }
     }
 }
-extension LinkResolution.TestCase {
+extension LinkResolutionTests.Case {
     func run(in db: Unidoc.DB) async throws {
         let query: Unidoc.VertexQuery<Unidoc.LookupAdjacent> = .init(
             volume: .init("swift-test"),

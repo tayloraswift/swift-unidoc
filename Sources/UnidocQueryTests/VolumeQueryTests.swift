@@ -9,12 +9,13 @@ import Unidoc
 import UnidocQueries
 import UnidocRecords
 
-@Suite struct VolumeQueries: Unidoc.TestBattery {
-    @Test func volumeQueries() async throws {
-        try await self.run(in: "VolumeQueries")
+@Suite(.tags(.database)) struct VolumeQueryTests {
+    @Test static func VolumeQueries() async throws {
+        let database: Mongo.Database = "VolumeQueries"
+        try await database.withTemporaryUnidocDatabase(self.VolumeQueries(_:))
     }
 
-    func run(with db: Unidoc.DB) async throws {
+    private static func VolumeQueries(_ db: Unidoc.DB) async throws {
         let directory: FilePath.Directory = "TestPackages"
         let package: Symbol.Package = "swift-version-controlled"
 

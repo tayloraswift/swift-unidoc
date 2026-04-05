@@ -9,12 +9,13 @@ import Unidoc
 import UnidocQueries
 import UnidocRecords
 
-@Suite struct SymbolQueries: Unidoc.TestBattery {
-    @Test func symbolQueries() async throws {
-        try await self.run(in: "SymbolQueries")
+@Suite(.tags(.database)) struct SymbolQueryTests {
+    @Test static func SymbolQueries() async throws {
+        let database: Mongo.Database = "SymbolQueries"
+        try await database.withTemporaryUnidocDatabase(self.SymbolQueries(_:))
     }
 
-    func run(with db: Unidoc.DB) async throws {
+    private static func SymbolQueries(_ db: Unidoc.DB) async throws {
         let directory: FilePath.Directory = "TestPackages"
         //  Use pre-built symbol graphs for speed.
         let example: SymbolGraphObject<Void> = try .load(package: "swift-malibu", in: directory)
@@ -375,7 +376,7 @@ import UnidocRecords
         )
     }
 
-    private func test(
+    private static func test(
         _ name: String,
         running query: Unidoc.VertexQuery<Unidoc.LookupAdjacent>,
         expect members: [String],
