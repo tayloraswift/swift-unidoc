@@ -413,6 +413,6 @@ import Testing
         let manifest: SPM.Manifest = try .init(parsing: try filepath.read())
 
         #expect(manifest.name == "swift-unidoc-testmodules")
-        #expect(manifest.root == "/swift/swift-unidoc/TestModules")
+        #expect(manifest.root == "/swift/unidoc/TestModules")
     }
 }
