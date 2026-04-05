@@ -1,4 +1,4 @@
-extension SymbolQueries {
+extension SymbolQueryTests {
     enum Filter: Hashable {
         case extensions
         case intrinsics

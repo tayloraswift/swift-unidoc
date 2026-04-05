@@ -15,6 +15,4 @@ done
 UNIDOC_ENABLE_INDEXSTORE=1 "${SWIFT_INSTALLATION}/bin/swift" build \
     --configuration release \
     --static-swift-stdlib \
-    -Xcxx "-I${SWIFT_INSTALLATION}/lib/swift" \
-    -Xcxx "-I${SWIFT_INSTALLATION}/lib/swift/Block" \
     $LINKER_FLAGS

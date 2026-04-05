@@ -50,17 +50,32 @@ jobs:
                     'until docker exec -t unidoc-mongod-container \
                     /bin/mongosh --file /unidoc-rs-init-containerized.js; do sleep 1; done'
 
+            -   name: 💖 Install Swift 💖
+                uses: rarestype/swift-install-action@v1
+                with:
+                    swift-release: 6.3-RELEASE
+
+            -   name: 💖 Build release 💖
+                run: |
+                    swift --version
+                    swift build -c release \
+                        --build-tests \
+                        --explicit-target-dependency-import-check=warn
+
             -   name: 💖 Run pipeline 💖
                 run: |
                     docker run -t --rm \
                         --network=unidoc-test \
                         --name swift-environment \
                         --user root \
-                        -v $PWD:/swift/swift-unidoc \
-                        -w /swift/swift-unidoc \
+                        -v $PWD:/swift/unidoc \
+                        -w /swift/unidoc \
                         -e SWIFT_INSTALLATION=/usr \
                         swift:6.3-noble \
-                        /bin/bash Scripts/Linux/TestAll
+                        /bin/bash "swift test -c release \
+                            --skip-build \
+                            --no-parallel \
+                            --filter tag:database"
 
             -   name: 💖 Update badge 💖
                 uses: rarestype/rarestbadge@v1
@@ -93,12 +108,20 @@ jobs:
                     swift --version
                     swift build -c release \
                         --build-tests \
-                        --explicit-target-dependency-import-check=warn \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift \
-                        -Xcxx -I$SWIFT_INSTALLATION/lib/swift/Block
-                    mkdir $HOME/bin
-                    mv .build/release/ssgc $HOME/bin
-                    echo "$HOME/bin" >> $GITHUB_PATH
+                        --explicit-target-dependency-import-check=warn
+                    mkdir "${HOME}/bin"
+                    mv .build/release/ssgc "${HOME}/bin"
+                    echo "${HOME}/bin" >> "$GITHUB_PATH"
+
+            -   name: 💖 Smoke Test 💖
+                run: |
+                    swift test -c release \
+                        --skip-build \
+                        --no-parallel \
+                        --skip SymbolGraphValidationTests \
+                        --skip tag:database
+                env:
+                    SWT_SWIFT_ERROR_BACKTRACING_ENABLED: 0
 
             -   name: 💖 Build packages 💖
                 run: Scripts/Linux/GeneratePackageSymbolGraphs
@@ -137,9 +160,9 @@ jobs:
                     swift build -c release \
                         --build-tests \
                         --explicit-target-dependency-import-check=warn
-                    mkdir $HOME/bin
-                    mv .build/release/ssgc $HOME/bin
-                    echo "$HOME/bin" >> $GITHUB_PATH
+                    mkdir "${HOME}/bin"
+                    mv .build/release/ssgc "${HOME}/bin"
+                    echo "${HOME}/bin" >> "$GITHUB_PATH"
 
             -   name: 💖 Build packages 💖
                 run: Scripts/macOS/GeneratePackageSymbolGraphs

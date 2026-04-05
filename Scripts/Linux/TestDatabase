@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+
+export UNIDOC_ENABLE_INDEXSTORE=1
+
+swift --version
+swift build -c release --build-tests \
+    --explicit-target-dependency-import-check=warn
+
+Scripts/Linux/GenerateTestSymbolGraphs
+
+swift test -c release \
+    --skip-build \
+    --no-parallel \
+    --filter tag:database \
+    --disable-testable-imports
