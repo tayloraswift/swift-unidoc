@@ -7,12 +7,13 @@ import Testing
 import UnidocQueries
 import UnidocTesting
 
-@Suite struct PackageQueries: Unidoc.TestBattery {
-    @Test func packageQueries() async throws {
-        try await self.run(in: "PackageQueries")
+@Suite(.tags(.database)) struct PackageQueryTests {
+    @Test static func PackageQueries() async throws {
+        let database: Mongo.Database = "PackageQueries"
+        try await database.withTemporaryUnidocDatabase(self.PackageQueries(_:))
     }
 
-    func run(with db: Unidoc.DB) async throws {
+    private static func PackageQueries(_ db: Unidoc.DB) async throws {
         let empty: SymbolGraph = .init(modules: [])
         var docs: SymbolGraphObject<Void>
 
