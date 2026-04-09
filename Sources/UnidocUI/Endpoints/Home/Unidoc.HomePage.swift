@@ -140,6 +140,33 @@ extension Unidoc.HomePage: Unidoc.RenderablePage {
                         }
                     }
                 }
+
+                if !format.preview {
+                    $0[.div, { $0.class = "sponsors" }] {
+                        $0[.header] = """
+                        Brought to you with the generous support of
+                        """
+
+                        $0[.ul] {
+                            $0[.li] {
+                                $0[.a] {
+                                    $0.href = "https://ordo.one"
+                                } = "Ordo One"
+                            }
+                            $0[.li] {
+                                $0[.a] {
+                                    $0.href = "https://wendy.sh/"
+                                } = "Wendy Labs"
+                            }
+                        }
+
+                        $0[.footer] {
+                            $0[.a] {
+                                $0.href = "mailto:swiftinit@rarestype.com"
+                            } = "Interested in sponsoring? Get in touch"
+                        }
+                    }
+                }
             }
         }
     }
