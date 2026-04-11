@@ -77,6 +77,7 @@ jobs:
         needs: release
         uses: ./.github/workflows/Deploy.yml
         secrets: inherit
+        if: needs.release.outputs.type != 'none'
         with:
             version: ${{ needs.release.outputs.version }}
     publish:
